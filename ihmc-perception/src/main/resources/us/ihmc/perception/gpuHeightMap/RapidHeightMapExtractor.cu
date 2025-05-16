@@ -13,7 +13,7 @@ extern "C"
 #define DEPTH_FY 8
 #define GLOBAL_CENTER_INDEX 9
 #define ROBOT_COLLISION_RADIUS 10
-#define GRID_OFFSET_X 11
+#define HALF_LOCAL_WIDTH_IM_METERS 11
 #define HEIGHT_FILTER_ALPHA 12
 #define LOCAL_CELLS_PER_AXIS 13
 #define GLOBAL_CELLS_PER_AXIS 14
@@ -24,19 +24,18 @@ extern "C"
 #define MAX_HEIGHT_DIFFERENCE 19
 #define SEARCH_WINDOW_HEIGHT 20
 #define SEARCH_WINDOW_WIDTH 21
-#define CROPPED_WINDOW_CENTER_INDEX 22
-#define MIN_CLAMP_HEIGHT 23
-#define MAX_CLAMP_HEIGHT 24
-#define HEIGHT_OFFSET 25
-#define STEPPING_COSINE_THRESHOLD 26
-#define STEPPING_CONTACT_THRESHOLD 27
-#define CONTACT_WINDOW_SIZE 28
-#define SPATIAL_ALPHA 29
-#define SEARCH_SKIP_SIZE 30
-#define VERTICAL_SEARCH_SIZE 31
-#define VERTICAL_SEARCH_RESOLUTION 32
-#define FAST_SEARCH_SIZE 33
-#define GROUND_HEIGHT 34
+#define MIN_CLAMP_HEIGHT 22
+#define MAX_CLAMP_HEIGHT 23
+#define HEIGHT_OFFSET 24
+#define STEPPING_COSINE_THRESHOLD 25
+#define STEPPING_CONTACT_THRESHOLD 26
+#define CONTACT_WINDOW_SIZE 27
+#define SPATIAL_ALPHA 28
+#define SEARCH_SKIP_SIZE 29
+#define VERTICAL_SEARCH_SIZE 30
+#define VERTICAL_SEARCH_RESOLUTION 31
+#define FAST_SEARCH_SIZE 32
+#define GROUND_HEIGHT 33
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -197,7 +196,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
                                             params[CELL_SIZE],
                                             params[LOCAL_CENTER_INDEX]);
 
-    cellCenterInZUp.x = xyCoords.x + params[GRID_OFFSET_X];
+    cellCenterInZUp.x = xyCoords.x + params[HALF_LOCAL_WIDTH_IM_METERS];
     cellCenterInZUp.y = xyCoords.y;
 
     float halfCellWidth = params[CELL_SIZE] / 2.0f;
@@ -306,12 +305,12 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
 }
 
 extern "C"
-__global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
-                                     unsigned short* newMap, size_t pitchNew,
-                                     float currentCenterX, float currentCenterY,
-                                     float previousCenterX, float previousCenterY,
-                                     int mapSize, int defaultValue,
-                                     float *params, float *worldToZUpFrameTf)
+__global__ void translateHeightMapKernel(unsigned short* oldMap, size_t pitchOld,
+                                         unsigned short* newMap, size_t pitchNew,
+                                         float currentCenterX, float currentCenterY,
+                                         float previousCenterX, float previousCenterY,
+                                         int mapSize, int defaultValue,
+                                         float cellSizeInMeters)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;  // column
     int y = blockIdx.y * blockDim.y + threadIdx.y;  // row
@@ -322,8 +321,8 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
     float dx = currentCenterX - previousCenterX;
     float dy = currentCenterY - previousCenterY;
 
-    int shiftX = round(dx / params[CELL_SIZE]);
-    int shiftY = round(dy / params[CELL_SIZE]);
+    int shiftX = round(dx / cellSizeInMeters);
+    int shiftY = round(dy / cellSizeInMeters);
 
     int srcX = x + shiftX;
     int srcY = y + shiftY;

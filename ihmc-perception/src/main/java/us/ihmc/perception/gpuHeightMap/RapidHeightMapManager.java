@@ -40,6 +40,7 @@ public class RapidHeightMapManager
    private final Point3D sensorOrigin = new Point3D();
    private final FramePose3D cameraPose = new FramePose3D();
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
+   public int sequenceNumber = 0;
 
    private final Notification resetHeightMapRequested = new Notification();
    private final Notification lowerHeightMapBackdropRequested = new Notification();
@@ -107,7 +108,7 @@ public class RapidHeightMapManager
                                                          heightMapPublisher,
                                                          cameraPose,
                                                          acquisitionTime,
-                                                         rapidHeightMapExtractor.getSequenceNumber(),
+                                                         sequenceNumber++,
                                                          hostCroppedHeightMap.rows(),
                                                          hostCroppedHeightMap.cols(),
                                                          (float) heightMapParameters.getHeightScaleFactor());
@@ -163,18 +164,17 @@ public class RapidHeightMapManager
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+
+      // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
+      sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
+
       sensorOrigin.set(sensorToWorld.getTranslation());
-
-
-
-
-
       cameraPose.setToZero(cameraZUpFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Perform update, this actually creates the height map
-      rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
-      GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getCroppedHeightMap();
+      rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
+      GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getHeightMap();
 
       // Perform a flying points filter as a post-processing step on the height map
       if (heightMapParameters.getFlyingPointsFilter())

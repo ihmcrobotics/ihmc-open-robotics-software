@@ -27,22 +27,20 @@ public class RapidHeightMapExtractorCUDA
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
 
-   private final int mode; // 0 -> Ouster, 1 -> Realsense
    private final HeightMapParameters heightMapParameters;
+   private final CUstream_st stream;
+   private final CUDAProgram heightMapProgram;
+   private final dim3 blockSize;
+   private final int mode; // 0 -> Ouster, 1 -> Realsense
 
    private final GpuMat localHeightMapImage;
    private final GpuMat globalHeightMapImage;
-   private final GpuMat oldGlobalHeightMapImage;
-   private final GpuMat terrainCostImage;
-   private final GpuMat contactMapImage;
-   private final GpuMat croppedHeightMapImage;
+   private final GpuMat previousGlobalHeightMapImage;
    private final GpuMat emptyGlobalHeightMapImage;
-   private final CUDAProgram heightMapCUDAProgram;
 
-   private final CUstream_st stream;
    private final CUDAKernel updateKernel;
+   private final CUDAKernel translateKernel;
    private final CUDAKernel registerKernel;
-   private final CUDAKernel shiftHeightMap;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
@@ -54,34 +52,21 @@ public class RapidHeightMapExtractorCUDA
    private final FloatPointer groundToSensorTransformDevicePointer;
    private final FloatPointer sensorToGroundTransformHostPointer;
    private final FloatPointer sensorToGroundTransformDevicePointer;
-   private final FloatPointer worldToGroundTransformHostPointer;
-   private final FloatPointer worldToGroundTransformDevicePointer;
+   private final FloatPointer zUpCameraToWorldAlignedGroundHostPointer;
+   private final FloatPointer ZUpCameraToWorldAlignedGroundDevicePointer;
+
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
-   public int sequenceNumber = 0;
-   private float gridOffsetX;
-   private int centerIndex;
-   private int cellsPerAxisLocal;
-   private int globalCenterIndex;
-   private int croppedCenterIndex;
-   private int cellsPerAxisCropped;
-   private int globalCellsPerAxis;
-   private dim3 blockSize;
-   private dim3 updateKernelGridDim;
-   private dim3 registerKernelGridDim;
-   private dim3 croppingKernelGridDim;
-   private dim3 planOffsetKernelGridDim;
-   private int resetOffset;
 
-   private final RigidBodyTransform currentGroundToWorldTransform = new RigidBodyTransform();
-   private final RigidBodyTransform previousGroundToWorldTransform = new RigidBodyTransform();
-   private final RigidBodyTransform previousToCurrentSensorTransform = new RigidBodyTransform();
+   private int centerIndexLocal;
+   private int cellsPerAxisLocal;
+   private int centerIndexGlobal;
+   private int cellsPerAxisGlobal;
 
    private final Point3D previousSensorOrigin = new Point3D();
    private int previousCellX;
    private int previousCellY;
-   private int currentCellX;
-   private int currentCellY;
+   private int resetOffset;
 
    public RapidHeightMapExtractorCUDA(int mode, HeightMapParameters heightMapParameters)
    {
@@ -95,33 +80,30 @@ public class RapidHeightMapExtractorCUDA
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
-      recomputeDerivedParameters();
+      computeDerivedParameters();
+      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       try
       {
-         heightMapCUDAProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
+         heightMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
 
-         updateKernel = heightMapCUDAProgram.loadKernel("heightMapUpdateKernel");
-         registerKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
-         shiftHeightMap = heightMapCUDAProgram.loadKernel("shiftGlobalMapKernel");
-         planOffsetKernel = heightMapCUDAProgram.loadKernel("planOffsetKernel");
-         emptyRegisterKernel = heightMapCUDAProgram.loadKernel("heightMapRegistrationKernel");
+         updateKernel = heightMapProgram.loadKernel("heightMapUpdateKernel");
+         translateKernel = heightMapProgram.loadKernel("translateHeightMapKernel");
+         registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
+         planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
+         emptyRegisterKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
 
          updateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         translateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
-         shiftHeightMap.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          // Initialize matrices and images
          localHeightMapImage = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
-         globalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
-         oldGlobalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
-         terrainCostImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-         contactMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
-         croppedHeightMapImage = new GpuMat(cellsPerAxisCropped, cellsPerAxisCropped, opencv_core.CV_16UC1);
-
-         emptyGlobalHeightMapImage = new GpuMat(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
+         globalHeightMapImage = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         previousGlobalHeightMapImage = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         emptyGlobalHeightMapImage = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
          // Initialize transformation pointers
          groundToSensorTransformHostPointer = new FloatPointer(16);
@@ -130,10 +112,10 @@ public class RapidHeightMapExtractorCUDA
          sensorToGroundTransformHostPointer = new FloatPointer(16);
          sensorToGroundTransformDevicePointer = new FloatPointer();
 
-         worldToGroundTransformHostPointer = new FloatPointer(16);
-         worldToGroundTransformDevicePointer = new FloatPointer();
+         zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
+         ZUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(37);
+         parametersHostPointer = new FloatPointer(34);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -142,18 +124,13 @@ public class RapidHeightMapExtractorCUDA
       }
    }
 
-   private void recomputeDerivedParameters()
+   private void computeDerivedParameters()
    {
-      centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      cellsPerAxisLocal = 2 * centerIndex + 1;
+      centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      cellsPerAxisLocal = 2 * centerIndexLocal + 1;
 
-      globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      globalCellsPerAxis = 2 * globalCenterIndex + 1;
-
-      croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
-
-      gridOffsetX = (float) heightMapParameters.getLocalWidthInMeters() / 2.0f;
+      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
    }
 
    public void reset(double footHeight)
@@ -168,145 +145,133 @@ public class RapidHeightMapExtractorCUDA
 
       localHeightMapImage.setTo(new Scalar(resetOffset));
       globalHeightMapImage.setTo(new Scalar(resetOffset));
-      oldGlobalHeightMapImage.setTo(new Scalar(resetOffset));
+      previousGlobalHeightMapImage.setTo(new Scalar(resetOffset));
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
-
-      sequenceNumber = 0;
    }
 
    public void update(GpuMat latestDepthImageGPU,
                       CameraIntrinsics cameraIntrinsics,
-                      RigidBodyTransformReadOnly sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
-                      RigidBodyTransform groundToWorldTransform,
+                      RigidBodyTransformReadOnly groundToWorldTransform,
                       Point3D sensorOrigin,
                       double footHeight)
    {
       int error;
 
-      // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
-      sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
-      groundToWorldTransform.getTranslation().setZ(0.0);
-
       // Compute the inverse transforms for later use
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
       groundToSensorTransform.invert();
 
-      // 1. zUpCameraFrame → world
-      RigidBodyTransform zUpCameraToWorld = new RigidBodyTransform(groundToWorldTransform);
-
       RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
-      groundToWorldNoRotation.getRotation().setIdentity(); // keep only translation
+      // Remove rotation from transformation
+      groundToWorldNoRotation.getRotation().setIdentity();
 
-      RigidBodyTransform worldToWorldAlignedGround = new RigidBodyTransform(groundToWorldNoRotation);
-      worldToWorldAlignedGround.invert(); // invert translation-only transform
+      RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
+      // Invert translation-only transform
+      worldToGroundNoRotation.invert();
 
-      // 3. Final transform: zUpCameraFrame → worldAlignedGround
-      RigidBodyTransform zUpCameraToWorldAlignedGround = new RigidBodyTransform(worldToWorldAlignedGround);
-      zUpCameraToWorldAlignedGround.multiply(zUpCameraToWorld);
+      // This transformation only has rotation
+      RigidBodyTransform groundToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
+      groundToWorldAlignedGround.multiply(groundToWorldTransform);
 
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
-
-      //Extract the transform arrays for memory transfer
-      groundToSensorTransform.get(groundToSensorTransformArray);
-      sensorToGroundTransform.get(sensorToGroundTransformArray);
-      zUpCameraToWorldAlignedGround.get(worldToGroundTransformArray);
-
-      //Transfer the transform arrays to the host memory
-      groundToSensorTransformHostPointer.put(groundToSensorTransformArray);
-      sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
-      worldToGroundTransformHostPointer.put(worldToGroundTransformArray);
-
-      // Allocate memory on the GPU for each of the transforms and images
-      // This step involves allocating CUDA memory asynchronously, and it's important to check for allocation errors
-      CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
-      CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
-      CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-
-      // Copy the data from host memory to device memory asynchronously
-      // This ensures the device has the latest data available for kernel processing
-      CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
-      CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
-      CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
-      //Execute the CUDA kernels with the provided stream
-      //Each kernel performs a specific task related to the height map update, registration, and cropping
-      int updateKernelGridSizeXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int registerKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      int croppingKernelGridSizeXY = (cellsPerAxisCropped + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-
-      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
-      updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
-      registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
-      croppingKernelGridDim = new dim3(croppingKernelGridSizeXY, croppingKernelGridSizeXY, 1);
-
-      // Run the update kernel
-      updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
-      updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
-      updateKernel.withPointer(parametersDevicePointer);
-      updateKernel.withPointer(sensorToGroundTransformDevicePointer);
-      updateKernel.withPointer(groundToSensorTransformDevicePointer);
-      updateKernel.withInt(cellsPerAxisLocal);
-
-      updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
-
-      // Set the previous-to-current to the previous, inverts it, then transforms it to the current
-      // This gives the transform from the previous to the current transform of the sensor
-      previousToCurrentSensorTransform.set(previousGroundToWorldTransform);
-      previousToCurrentSensorTransform.invert();
-      previousToCurrentSensorTransform.multiply(currentGroundToWorldTransform);
-
-      if (currentCellX != previousCellX || currentCellY != previousCellY)
+      // --------- Run the update kernel ---------
       {
-         previousCellX = (int) Math.round(previousSensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-         previousCellY = (int) Math.round(previousSensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
-         globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
+         sensorToGroundTransform.get(sensorToGroundTransformArray);
+         sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
+         CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
+         CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
 
-         shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
-         shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-         shiftHeightMap.withFloat(sensorOrigin.getX32()).withFloat(sensorOrigin.getY32());
-         shiftHeightMap.withFloat(previousSensorOrigin.getX32()).withFloat(previousSensorOrigin.getY32());
-         shiftHeightMap.withInt(globalCellsPerAxis);
-         shiftHeightMap.withInt(resetOffset);
-         shiftHeightMap.withPointer(parametersDevicePointer);
-         shiftHeightMap.withPointer(worldToGroundTransformDevicePointer);
+         groundToSensorTransform.get(groundToSensorTransformArray);
+         groundToSensorTransformHostPointer.put(groundToSensorTransformArray);
+         CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
+         CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
 
-         shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
+         int updateKernelGridSizeXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
+
+         updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
+         updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
+         updateKernel.withPointer(parametersDevicePointer);
+         updateKernel.withPointer(sensorToGroundTransformDevicePointer);
+         updateKernel.withPointer(groundToSensorTransformDevicePointer);
+         updateKernel.withInt(cellsPerAxisLocal);
+
+         updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
+
+         cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
+         cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
+         updateKernelGridDim.close();
          error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
-
-         previousSensorOrigin.set(sensorOrigin);
       }
 
-      currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-      currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+      // ---------- Run the translate kernel ---------
+      {
+         int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
 
-      // Run the registration kernel
-      registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
-      registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-      registerKernel.withPointer(worldToGroundTransformDevicePointer);
-      registerKernel.withPointer(parametersDevicePointer);
+         // This means we have moved more then 2cm. So each cell should shift to one of its neighboring cells
+         if (currentCellX != previousCellX || currentCellY != previousCellY)
+         {
+            // We will be updating the global height map with the applied translation of the data
+            globalHeightMapImage.copyTo(previousGlobalHeightMapImage);
 
-      registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+            int translateKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+            dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
 
-      // Always update the current
-      currentGroundToWorldTransform.set(groundToWorldTransform);
-      globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
+            translateKernel.withPointer(previousGlobalHeightMapImage.data()).withLong(previousGlobalHeightMapImage.step());
+            translateKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+            translateKernel.withFloat(sensorOrigin.getX32()).withFloat(sensorOrigin.getY32());
+            translateKernel.withFloat(previousSensorOrigin.getX32()).withFloat(previousSensorOrigin.getY32());
+            translateKernel.withInt(cellsPerAxisGlobal);
+            translateKernel.withInt(resetOffset);
+            translateKernel.withFloat((float) heightMapParameters.getCellSizeInMeters());
 
-      globalHeightMapImage.copyTo(croppedHeightMapImage);
+            translateKernel.run(stream, translateKernelGridDim, blockSize, 0);
+
+            translateKernelGridDim.close();
+            error = cudaStreamSynchronize(stream);
+            CUDATools.checkCUDAError(error);
+
+            previousCellX = currentCellX;
+            previousCellY = currentCellY;
+            previousSensorOrigin.set(sensorOrigin);
+         }
+      }
+
+      // ---------- Run the registration kernel ----------
+      {
+         groundToWorldAlignedGround.get(worldToGroundTransformArray);
+         zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
+         CUDATools.mallocAsync(ZUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
+         CUDATools.memcpyAsync(ZUpCameraToWorldAlignedGroundDevicePointer,
+                               zUpCameraToWorldAlignedGroundHostPointer,
+                               worldToGroundTransformArray.length,
+                               stream);
+
+         int registerKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
+
+         registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
+         registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+         registerKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         registerKernel.withPointer(parametersDevicePointer);
+
+         registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
+
+         cudaFreeAsync(ZUpCameraToWorldAlignedGroundDevicePointer, stream);
+         registerKernelGridDim.close();
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
+      }
 
       // All that memory we allocated on the GPU, need to free that up now
-      cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
-      cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
-      cudaFreeAsync(worldToGroundTransformDevicePointer, stream);
       cudaFreeAsync(parametersDevicePointer, stream);
    }
 
@@ -318,23 +283,22 @@ public class RapidHeightMapExtractorCUDA
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
       parametersHostPointer.put(parametersArray);
 
-      CUDATools.mallocAsync(worldToGroundTransformDevicePointer, worldToGroundTransformArray.length, stream);
+      CUDATools.mallocAsync(ZUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
       CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      CUDATools.memcpyAsync(worldToGroundTransformDevicePointer, worldToGroundTransformHostPointer, worldToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(ZUpCameraToWorldAlignedGroundDevicePointer, zUpCameraToWorldAlignedGroundHostPointer, worldToGroundTransformArray.length, stream);
       CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
-      blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
-      int registerKernelGridSizeXY = (globalCellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      planOffsetKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
-      registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
+      int registerKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      dim3 planOffsetKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
+      dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
       // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
@@ -342,7 +306,7 @@ public class RapidHeightMapExtractorCUDA
       emptyRegisterKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       emptyRegisterKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
       emptyRegisterKernel.withPointer(parametersDevicePointer);
-      emptyRegisterKernel.withPointer(worldToGroundTransformDevicePointer);
+      emptyRegisterKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
       emptyRegisterKernel.withPointer(sensorToGroundTransformDevicePointer);
 
       emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
@@ -360,7 +324,8 @@ public class RapidHeightMapExtractorCUDA
       CUDATools.checkCUDAError(error);
 
       // All that memory we allocated on the GPU, need to free that up now
-      cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
+      planOffsetKernelGridDim.close();
+      registerKernelGridDim.close();
       cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
       cudaFreeAsync(parametersDevicePointer, stream);
    }
@@ -368,7 +333,7 @@ public class RapidHeightMapExtractorCUDA
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)
    {
       return new float[] {(float) parameters.getCellSizeInMeters(),
-                          (float) centerIndex,
+                          (float) centerIndexLocal,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
                           (float) mode,
@@ -376,12 +341,12 @@ public class RapidHeightMapExtractorCUDA
                           (float) cameraIntrinsics.getCy(),
                           (float) cameraIntrinsics.getFx(),
                           (float) cameraIntrinsics.getFy(),
-                          (float) globalCenterIndex,
+                          (float) centerIndexGlobal,
                           (float) parameters.getRobotCollisionCylinderRadius(),
-                          gridOffsetX,
+                          (float) heightMapParameters.getLocalWidthInMeters() / 2,
                           (float) parameters.getHeightFilterAlpha(),
                           (float) cellsPerAxisLocal,
-                          (float) globalCellsPerAxis,
+                          (float) cellsPerAxisGlobal,
                           (float) parameters.getHeightScaleFactor(),
                           (float) parameters.getMinHeightRegistration(),
                           (float) parameters.getMaxHeightRegistration(),
@@ -389,7 +354,6 @@ public class RapidHeightMapExtractorCUDA
                           (float) parameters.getMaxHeightDifference(),
                           (float) parameters.getSearchWindowHeight(),
                           (float) parameters.getSearchWindowWidth(),
-                          (float) croppedCenterIndex,
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getHeightOffset(),
@@ -406,31 +370,23 @@ public class RapidHeightMapExtractorCUDA
 
    public void destroy()
    {
-      heightMapCUDAProgram.close();
+      heightMapProgram.close();
       updateKernel.close();
       registerKernel.close();
       planOffsetKernel.close();
 
-      emptyGlobalHeightMapImage.close();
-      if (planOffsetKernelGridDim != null)
-         planOffsetKernelGridDim.close();
-
       // Clean up each resource
       deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer);
       deallocateFloatPointer(sensorToGroundTransformHostPointer, sensorToGroundTransformDevicePointer);
-      deallocateFloatPointer(worldToGroundTransformHostPointer, worldToGroundTransformDevicePointer);
+      deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, ZUpCameraToWorldAlignedGroundDevicePointer);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer);
 
       blockSize.close();
-      updateKernelGridDim.close();
-      registerKernelGridDim.close();
-      croppingKernelGridDim.close();
 
       localHeightMapImage.close();
       globalHeightMapImage.close();
-      terrainCostImage.close();
-      contactMapImage.close();
-      croppedHeightMapImage.close();
+      previousGlobalHeightMapImage.close();
+      emptyGlobalHeightMapImage.close();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
@@ -452,13 +408,8 @@ public class RapidHeightMapExtractorCUDA
       }
    }
 
-   public int getSequenceNumber()
+   public GpuMat getHeightMap()
    {
-      return sequenceNumber;
-   }
-
-   public GpuMat getCroppedHeightMap()
-   {
-      return croppedHeightMapImage.clone();
+      return globalHeightMapImage.clone();
    }
 }
