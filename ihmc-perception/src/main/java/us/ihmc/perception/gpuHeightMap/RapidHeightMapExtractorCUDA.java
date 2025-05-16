@@ -190,19 +190,33 @@ public class RapidHeightMapExtractorCUDA
                       CameraIntrinsics cameraIntrinsics,
                       RigidBodyTransformReadOnly sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
-                      RigidBodyTransformReadOnly groundToWorldTransform,
+                      RigidBodyTransform groundToWorldTransform,
                       double footHeight)
    {
       int error;
 
       // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
       sensorToGroundTransform.getTranslation().setZ(sensorToWorldTransform.getTranslationZ());
+      groundToWorldTransform.getTranslation().setZ(0.0);
 
       // Compute the inverse transforms for later use
       RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
       groundToSensorTransform.invert();
-      RigidBodyTransform worldToGroundTransform = new RigidBodyTransform(groundToWorldTransform);
-      worldToGroundTransform.invert();
+//      RigidBodyTransform worldToGroundTransform = new RigidBodyTransform(groundToWorldTransform);
+//      worldToGroundTransform.invert();
+
+      // 1. zUpCameraFrame → world
+      RigidBodyTransform zUpCameraToWorld = new RigidBodyTransform(groundToWorldTransform);
+
+      RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
+      groundToWorldNoRotation.getRotation().setIdentity(); // keep only translation
+
+      RigidBodyTransform worldToWorldAlignedGround = new RigidBodyTransform(groundToWorldNoRotation);
+      worldToWorldAlignedGround.invert(); // invert translation-only transform
+
+      // 3. Final transform: zUpCameraFrame → worldAlignedGround
+      RigidBodyTransform zUpCameraToWorldAlignedGround = new RigidBodyTransform(worldToWorldAlignedGround);
+      zUpCameraToWorldAlignedGround.multiply(zUpCameraToWorld);
 
       // Populate parameter buffers with the necessary values
       float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
@@ -211,7 +225,7 @@ public class RapidHeightMapExtractorCUDA
       //Extract the transform arrays for memory transfer
       groundToSensorTransform.get(groundToSensorTransformArray);
       sensorToGroundTransform.get(sensorToGroundTransformArray);
-      worldToGroundTransform.get(worldToGroundTransformArray);
+      zUpCameraToWorldAlignedGround.get(worldToGroundTransformArray);
 
       //Transfer the transform arrays to the host memory
       groundToSensorTransformHostPointer.put(groundToSensorTransformArray);
@@ -273,31 +287,32 @@ public class RapidHeightMapExtractorCUDA
 
       double rotationAngle = Math.abs(axisAngle.getAngle());
 
-      if (translationMagnitude > TRANSLATION_THRESHOLD || rotationAngle > ROTATION_THRESHOLD)
-      {
-         previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
-         previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
-         CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
-         CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
-
-         shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
-         shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-         shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
-         shiftHeightMap.withInt(globalCellsPerAxis);
-         shiftHeightMap.withPointer(parametersDevicePointer);
-
-         shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
-         error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
-
-         // Set the previous to the current
-         previousGroundToWorldTransform.set(groundToWorldTransform);
-         LogTools.info("Transforming global map");
-      }
+//      if (translationMagnitude > TRANSLATION_THRESHOLD || rotationAngle > ROTATION_THRESHOLD)
+//      {
+//         previousToCurrentSensorTransform.get(previousToCurrentSensorTransformArray);
+//         previousToCurrentSensorHostPointer.put(previousToCurrentSensorTransformArray);
+//         CUDATools.mallocAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorTransformArray.length, stream);
+//         CUDATools.memcpyAsync(previousToCurrentSensorDevicePointer, previousToCurrentSensorHostPointer, previousToCurrentSensorTransformArray.length, stream);
+//
+//         shiftHeightMap.withPointer(oldGlobalHeightMapImage.data()).withLong(oldGlobalHeightMapImage.step());
+//         shiftHeightMap.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+//         shiftHeightMap.withPointer(previousToCurrentSensorDevicePointer);
+//         shiftHeightMap.withInt(globalCellsPerAxis);
+//         shiftHeightMap.withPointer(parametersDevicePointer);
+//
+//         shiftHeightMap.run(stream, registerKernelGridDim, blockSize, 0);
+//         error = cudaStreamSynchronize(stream);
+//         CUDATools.checkCUDAError(error);
+//
+//         // Set the previous to the current
+//         previousGroundToWorldTransform.set(groundToWorldTransform);
+//         LogTools.info("Transforming global map");
+//      }
 
       // Run the registration kernel
       registerKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
       registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+      registerKernel.withPointer(worldToGroundTransformDevicePointer);
       registerKernel.withPointer(parametersDevicePointer);
 
       registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
