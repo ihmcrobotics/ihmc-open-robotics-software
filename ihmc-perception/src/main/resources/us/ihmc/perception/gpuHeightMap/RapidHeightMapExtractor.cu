@@ -332,7 +332,8 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
                                      unsigned short* newMap, size_t pitchNew,
                                      float currentCenterX, float currentCenterY,
                                      float previousCenterX, float previousCenterY,
-                                     int mapSize, float *params, float *worldToZUpFrameTf)
+                                     int mapSize, int defaultValue,
+                                     float *params, float *worldToZUpFrameTf)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;  // column
     int y = blockIdx.y * blockDim.y + threadIdx.y;  // row
@@ -358,7 +359,7 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
     else
     {
         unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
-        newRow[y] = 0;
+        newRow[y] = defaultValue;
     }
 }
 
@@ -391,7 +392,6 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 
     cellCenterInZUp.x = xyCoords.x;
     cellCenterInZUp.y = xyCoords.y;
-
 
     // Transform cell center from current Z-up to previous Z-up
     float3 cellCenterInGroundNoRotation = transformPoint3D32_2(
