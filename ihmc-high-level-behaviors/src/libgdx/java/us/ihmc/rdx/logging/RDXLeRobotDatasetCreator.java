@@ -145,6 +145,10 @@ public class RDXLeRobotDatasetCreator
          {
             dataset.regenerateAndRewriteMetadata();
          }
+         if (ImGui.button(labels.get("Write Parquet Data")))
+         {
+            dataset.writeParquetData();
+         }
       }
       else
       {
