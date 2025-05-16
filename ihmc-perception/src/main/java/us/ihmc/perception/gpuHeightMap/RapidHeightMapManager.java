@@ -148,17 +148,6 @@ public class RapidHeightMapManager
          }
       }
 
-      // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
-      // If we have that parameter set to true, we update the heights of the height map to account for that drift
-      if (heightMapParameters.getDriftOffsetFilter())
-      {
-         float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
-         if (!Float.isNaN(driftOffsetInZ))
-         {
-            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ, depthIntrinsicsCopy, computeFootHeight());
-         }
-      }
-
       // -------- Update the Height Map with the latest depth image from the sensor --------------
       // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
@@ -171,6 +160,17 @@ public class RapidHeightMapManager
       sensorOrigin.set(sensorToWorld.getTranslation());
       cameraPose.setToZero(cameraZUpFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
+      // If we have that parameter set to true, we update the heights of the height map to account for that drift
+      if (heightMapParameters.getDriftOffsetFilter())
+      {
+         float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
+         if (!Float.isNaN(driftOffsetInZ))
+         {
+            rapidHeightMapExtractor.updateHeightOffset(groundToWorld, driftOffsetInZ, depthIntrinsicsCopy, computeFootHeight());
+         }
+      }
 
       // Perform update, this actually creates the height map
       rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
