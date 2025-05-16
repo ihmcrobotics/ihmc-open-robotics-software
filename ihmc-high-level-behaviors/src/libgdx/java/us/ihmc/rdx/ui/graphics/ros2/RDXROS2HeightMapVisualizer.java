@@ -201,7 +201,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                      (float) heightMapParameters.getHeightOffset(),
                                      zUpToWorldTransform.getTranslation().getX32(),
                                      zUpToWorldTransform.getTranslation().getY32(),
-                                     (float) zUpToWorldTransform.getRotation().getYaw(),
                                      heightMapImage.rows() / 2,
                                      (float) heightMapParameters.getCellSizeInMeters(),
                                      pixelScalingFactor);

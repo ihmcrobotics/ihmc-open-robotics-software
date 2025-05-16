@@ -383,6 +383,7 @@ __global__ void shiftGlobalMapKernel(unsigned short* oldMap, size_t pitchOld,
 extern "C"
 __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
                                             unsigned short *globalMap, size_t pitchGlobal,
+                                            float *zUpCameraToWorldAlignedGround,
                                             float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -398,17 +399,39 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 
     int2 localIndex = make_int2(xIndex, yIndex);
 
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
+
+    // Compute grid cell center in Z-Up frame
+    float2 xyCoords = indices_to_coordinate(localIndex,
+                                            make_float2(1.0f, 0.0f),
+                                            params[CELL_SIZE],
+                                            params[LOCAL_CENTER_INDEX]);
+
+    cellCenterInZUp.x = xyCoords.x;
+    cellCenterInZUp.y = xyCoords.y;
+
+
+    // Transform cell center from current Z-up to previous Z-up
+    float3 cellCenterInGroundNoRotation = transformPoint3D32_2(
+        cellCenterInZUp,
+        make_float3(zUpCameraToWorldAlignedGround[0], zUpCameraToWorldAlignedGround[1], zUpCameraToWorldAlignedGround[2]),
+        make_float3(zUpCameraToWorldAlignedGround[4], zUpCameraToWorldAlignedGround[5], zUpCameraToWorldAlignedGround[6]),
+        make_float3(zUpCameraToWorldAlignedGround[8], zUpCameraToWorldAlignedGround[9], zUpCameraToWorldAlignedGround[10]),
+        make_float3(zUpCameraToWorldAlignedGround[3], zUpCameraToWorldAlignedGround[7], zUpCameraToWorldAlignedGround[11]));
+
+
+    int2 newCellIndex = coordinate_to_indices(
+        make_float2(cellCenterInGroundNoRotation.x, cellCenterInGroundNoRotation.y),
+        make_float2(0.0f, 0.0f),
+        params[CELL_SIZE],
+        params[GLOBAL_CENTER_INDEX]);
+
     int2 globalIndex = make_int2(0, 0);
-    globalIndex.x = localIndex.x - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
-    globalIndex.y = localIndex.y - params[LOCAL_CENTER_INDEX] + params[GLOBAL_CENTER_INDEX];
-
-    // The center of the local grid is shifted forward in X
-    globalIndex.x = globalIndex.x + static_cast<int>(localCellsPerAxis / 2);
-
+    globalIndex.x = newCellIndex.x;
+    globalIndex.y = newCellIndex.y;
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
-
 
     unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
 
@@ -416,7 +439,6 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
         return;
 
     unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
-
     *globalHeight = *localHeight;
 }
 
