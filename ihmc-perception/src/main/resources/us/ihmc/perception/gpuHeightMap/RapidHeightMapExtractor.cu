@@ -165,28 +165,6 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
     return finalHeight;
 }
 
-extern "C" __global__ void preprocessImageKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, int rows, int cols)
-{
-    // Thread indices for output image
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x; // Output dimension x (new cols)
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y; // Output dimension y (new rows)
-
-    // Ensure within bounds of the output image (1280 rows and 720 columns)
-    if (xIndex >= rows || yIndex >= cols)
-    {
-        return;
-    }
-
-    unsigned short *inRow = (unsigned short *)((char *)in + (yIndex * pitchIn));
-    unsigned short depthValue = *(inRow + xIndex);
-
-    int outRow = xIndex; // Flipping and rotation (yIndex becomes the new row)
-    int outCol = cols - 1 - yIndex;
-
-    unsigned short *outRowPtr = (unsigned short *)((char *)out + (outRow * pitchOut));
-    *(outRowPtr + outCol) = depthValue;
-}
-
 // Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
 // Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
 // Perform projection (spherical or perspective) to map the grid cell to image indices.

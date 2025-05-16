@@ -58,8 +58,6 @@ public class RapidHeightMapExtractorCUDA
    private final FloatPointer worldToGroundTransformDevicePointer;
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
-   private final FilteredRapidHeightMapExtractor filteredRapidHeightMapExtractor;
-   private final FilteredVerticalSurfacesExtractor verticalSurfacesExtractor;
    public int sequenceNumber = 0;
    private float gridOffsetX;
    private int centerIndex;
@@ -98,10 +96,6 @@ public class RapidHeightMapExtractorCUDA
       URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
 
       recomputeDerivedParameters();
-
-      // Need to initialize this after the parameters have been computed to get the right size
-      filteredRapidHeightMapExtractor = new FilteredRapidHeightMapExtractor(stream, globalCellsPerAxis, globalCellsPerAxis, 6);
-      verticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, globalCellsPerAxis, globalCellsPerAxis);
 
       try
       {
@@ -177,7 +171,6 @@ public class RapidHeightMapExtractorCUDA
       oldGlobalHeightMapImage.setTo(new Scalar(resetOffset));
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
 
-      filteredRapidHeightMapExtractor.reset();
       sequenceNumber = 0;
    }
 
@@ -308,16 +301,6 @@ public class RapidHeightMapExtractorCUDA
       currentGroundToWorldTransform.set(groundToWorldTransform);
       globalHeightMapImage.copyTo(oldGlobalHeightMapImage);
 
-      //      if (heightMapParameters.getEnableAlphaFilter())
-      //      {
-      //         filteredRapidHeightMapExtractor.update(globalHeightMapImage, resetOffset);
-      //      }
-
-      //            if (heightMapParameters.getEnableVerticalFilter())
-      //            {
-      //               verticalSurfacesExtractor.update(globalHeightMapImage);
-      //            }
-
       globalHeightMapImage.copyTo(croppedHeightMapImage);
 
       // All that memory we allocated on the GPU, need to free that up now
@@ -365,9 +348,6 @@ public class RapidHeightMapExtractorCUDA
       emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
-
-      // We reset the filtered height map for the drift to take affect, otherwise it gets overridden.
-      filteredRapidHeightMapExtractor.reset();
 
       // Run the plan offset kernel
       planOffsetKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
@@ -451,9 +431,6 @@ public class RapidHeightMapExtractorCUDA
       terrainCostImage.close();
       contactMapImage.close();
       croppedHeightMapImage.close();
-
-      filteredRapidHeightMapExtractor.destroy();
-      verticalSurfacesExtractor.destroy();
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
