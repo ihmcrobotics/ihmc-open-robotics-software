@@ -173,7 +173,7 @@ public class RapidHeightMapManager
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Perform update, this actually creates the height map
-      rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, computeFootHeight());
+      rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
       GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getCroppedHeightMap();
 
       // Perform a flying points filter as a post-processing step on the height map
