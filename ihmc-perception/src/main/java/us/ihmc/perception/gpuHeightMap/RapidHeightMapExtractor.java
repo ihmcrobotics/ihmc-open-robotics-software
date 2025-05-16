@@ -22,7 +22,7 @@ import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class RapidHeightMapExtractorCUDA
+public class RapidHeightMapExtractor
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
@@ -68,7 +68,7 @@ public class RapidHeightMapExtractorCUDA
    private int previousCellY;
    private int resetOffset;
 
-   public RapidHeightMapExtractorCUDA(int mode, HeightMapParameters heightMapParameters)
+   public RapidHeightMapExtractor(int mode, HeightMapParameters heightMapParameters)
    {
       this.mode = mode;
       this.heightMapParameters = heightMapParameters;

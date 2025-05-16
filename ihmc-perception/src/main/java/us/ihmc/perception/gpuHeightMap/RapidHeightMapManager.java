@@ -30,12 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used in a remote process, or locally as well.
+ * This class takes care of managing the {@link RapidHeightMapExtractor}. This class can be used in a remote process, or locally as well.
  */
 public class RapidHeightMapManager
 {
    private final HeightMapParameters heightMapParameters;
-   private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
+   private final RapidHeightMapExtractor rapidHeightMapExtractor;
 
    private final Point3D sensorOrigin = new Point3D();
    private final FramePose3D cameraPose = new FramePose3D();
@@ -72,7 +72,7 @@ public class RapidHeightMapManager
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       int cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
       deviceCroppedHeightMap = new GpuMat(cellsPerAxisCropped, cellsPerAxisCropped, opencv_core.CV_16UC1);
-      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(1, heightMapParameters);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(1, heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
