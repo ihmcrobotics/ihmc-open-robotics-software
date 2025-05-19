@@ -4,4 +4,4 @@ set -e
 # Print commands as they are run.
 set -o xtrace
 
-docker build --tag ihmcrobotics/lerobot-pycharm:0.1 .
+docker build --tag ihmcrobotics/lerobot:0.1 .
