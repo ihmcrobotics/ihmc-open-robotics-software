@@ -30,7 +30,7 @@ import java.time.Instant;
 public class RapidHeightMapThread extends RepeatingTaskThread
 {
    private final DepthImageBodyCollisionFilter bodyCollisionFilter;
-   private final DepthImageFlyingPointsFilter flyingPointsfilter;
+   private final DepthImageFlyingPointsFilter flyingPointsFilter;
    private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
@@ -66,7 +66,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.D455_DEPTH_FILTERED_IMAGE);
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
-      flyingPointsfilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
+      flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
       heightMapManager = new RapidHeightMapManager(ros2Node,
                                                    syncedRobotModel.getFullRobotModel(),
                                                    syncedRobotModel.getRobotModel().getSimpleRobotName(),
@@ -96,7 +96,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          if (heightMapParameters.getFlyingPointsFilter())
          {
             GpuMat depthImageNoFlyingPoints = new GpuMat(filteredDepthImage.size(), filteredDepthImage.type());
-            flyingPointsfilter.applyFilter(filteredDepthImage, depthImageNoFlyingPoints, depthIntrinsicsCopy);
+            flyingPointsFilter.applyFilter(filteredDepthImage, depthImageNoFlyingPoints, depthIntrinsicsCopy);
             depthImageNoFlyingPoints.copyTo(filteredDepthImage);
 
             BytePointer bytePointer = cudaCompressionTools.compressDepth(depthImageNoFlyingPoints);
@@ -140,8 +140,9 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       super.kill();
       interrupt();
 
+      cudaCompressionTools.destroy();
       bodyCollisionFilter.close();
-      flyingPointsfilter.destroy();
+      flyingPointsFilter.destroy();
       heightMapManager.destroy();
    }
 }

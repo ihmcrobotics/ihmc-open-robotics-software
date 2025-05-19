@@ -1,14 +1,5 @@
 #include "MathUtils.cuh"
 
-__device__ float3 cross3(const float3 &a, const float3 &b)
-{
-    return make_float3(
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x
-    );
-}
-
 __device__ float3 computeRay(int u, int v, float depth, float fx, float fy, float cx, float cy)
 {
     float x = (u - cx) * depth / fx;

@@ -22,7 +22,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
-import us.ihmc.graphicsDescription.image.DepthImage;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -105,7 +104,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
    // When running in simulation only, these fields allow running the Continuous Hiking Process locally
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
-   private ROS2StoredPropertySetGroup clientStoredPropertySets;
    private boolean runSubscriberOnly = false;
    private ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private boolean publishAndSubscribe;

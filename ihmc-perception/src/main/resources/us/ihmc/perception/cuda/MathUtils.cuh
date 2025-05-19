@@ -46,6 +46,15 @@ __device__ float3 normalize(float3 v)
     return make_float3(v.x / norm, v.y / norm, v.z / norm);
 }
 
+__device__ float3 cross3(const float3 &a, const float3 &b)
+{
+    return make_float3(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    );
+}
+
 /**
  * Returns a 9 element array that is the inverse of a 9 element argument. The data is expected to be row major,
  * or [row1, row2, row3];
