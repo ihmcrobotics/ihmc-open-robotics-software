@@ -169,7 +169,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
-      HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+      HeightMapParameters heightMapParameters = new HeightMapParameters("GPU"); // GPUForFST if want to use footstep streaming optimization
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -207,7 +207,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                       ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets,
                                       StoredPropertySetROS2TopicPair topicName)
    {
-      LogTools.info("{%s} Save File", storedPropertySetParameters.findSaveFileDirectory().toString());
       storedPropertySetPanel.create(storedPropertySetParameters, false);
       remotePropertySets.registerRemotePropertySet(storedPropertySetParameters, topicName);
       this.addChild(storedPropertySetPanel);

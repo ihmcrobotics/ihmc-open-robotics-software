@@ -194,7 +194,7 @@ public class RDXQuickATManager extends RDXPanel
                   FramePose3D soleFrame = new FramePose3D(selectedNode.getNodeFrame(), soleFrameTransform);
                   soleFrame.changeFrame(ReferenceFrame.getWorldFrame());
                   footstepPlacer.createNewFootstep(RobotSide.getSideFromString(footstepNode.get("side").asText()));
-                  footstepPlacer.setFootstepPose(soleFrame);
+                  footstepPlacer.setFootstepBeingPlacedPose(soleFrame);
                   footstepPlacer.forcePlaceFootstep();
                });
                footstepPlacer.exitPlacement();

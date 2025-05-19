@@ -29,7 +29,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegionsList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -45,7 +44,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -99,8 +97,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
    private final YoBoolean isWalking = new YoBoolean("isWalking", registry);
 
-   private final YoBoolean requestDisableCoPFeedbackControl = new YoBoolean("requestDisableCoPFeedbackControl", registry);
-
    private final int numberOfFootstepsToVisualize = 4;
    @SuppressWarnings("unchecked")
    private final YoEnum<RobotSide>[] upcomingFoostepSide = new YoEnum[numberOfFootstepsToVisualize];
@@ -127,8 +123,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
    private final List<Listener<?>> footstepConsumptionListenerList = new ArrayList<>();
-   private final YoBoolean usingQFP = new YoBoolean("usingQFP", registry);
-   private final YoBoolean isWalkingInPlace = new YoBoolean("isWalkingInPlace", registry);
+   private final YoBoolean updateFootstepReferenceContinuously = new YoBoolean("updateFootstepReferenceContinuously", registry);
+   private final YoBoolean requestDisableCoPFeedbackControl = new YoBoolean("requestDisableCoPFeedbackControl", registry);
 
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
@@ -173,12 +169,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
-
-      YoVariableChangedListener requestDisableCoPFeedbackListener = change -> requestDisableCoPFeedbackControl.set(usingQFP.getBooleanValue() && !isWalkingInPlace.getBooleanValue() && !isWalkingPaused.getBooleanValue() && isWalking.getBooleanValue());
-      usingQFP.addListener(requestDisableCoPFeedbackListener);
-      isWalkingInPlace.addListener(requestDisableCoPFeedbackListener);
-      isWalkingPaused.addListener(requestDisableCoPFeedbackListener);
-      isWalking.addListener(requestDisableCoPFeedbackListener);
 
       parentRegistry.addChild(registry);
    }
@@ -296,10 +286,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       if (command.getNumberOfFootsteps() > 0)
       {
-         usingQFP.set(command.getFootstep(0).getCsgMode() == ContinuousStepGeneratorMode.QFP);
-         isWalkingInPlace.set(command.getFootstep(0).walkingInPlace);
+         updateFootstepReferenceContinuously.set(command.getFootstep(0).getUpdateFootstepReferenceContinuously());
+         requestDisableCoPFeedbackControl.set(command.getFootstep(0).getDisableCoPFeedbackControl());
 
-         if (usingQFP.getBooleanValue() &&
+         if (updateFootstepReferenceContinuously.getBooleanValue() &&
+             requestDisableCoPFeedbackControl.getBooleanValue() &&
              footstepStatus.getRobotSide() == command.getFootstep(0).getRobotSide().toByte() &&
              footstepStatus.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
             command.removeFootstep(0);
@@ -339,11 +330,11 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       checkForPause();
 
+      updateVisualization();
+
       if (hasUpcomingFootsteps())
          for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
             footstepConsumptionListenerList.get(i).doListenerAction();
-
-      updateVisualization();
    }
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
@@ -816,9 +807,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       return footstep;
    }
 
-   public YoBoolean getUsingQFP()
+   public YoBoolean getUpdateFootstepReferenceContinuously()
    {
-      return usingQFP;
+      return updateFootstepReferenceContinuously;
    }
 
    public YoBoolean getRequestDisableCopFeedbackControl()

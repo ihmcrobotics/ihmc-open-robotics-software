@@ -4,10 +4,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.StandAloneRealsenseProcess;
-import us.ihmc.perception.gpuHeightMap.SnappingTerrainExtractor;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -27,7 +27,7 @@ public class ContinuousHikingProcess
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
    private final StandAloneRealsenseProcess standAloneRealsenseProcess;
 
-   private final SnappingTerrainExtractor snappingTerrainExtractor;
+   private final SnappingTerrainManager snappingTerrainManager;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
    {
@@ -46,7 +46,7 @@ public class ContinuousHikingProcess
 
       activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
       environmentHandler = new EnvironmentHandler();
-      snappingTerrainExtractor = new SnappingTerrainExtractor(activeMappingParameterToolBox.getHeightMapParameters());
+      snappingTerrainManager = new SnappingTerrainManager(ros2Node, activeMappingParameterToolBox.getHeightMapParameters());
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
                                                                   ros2Helper,
                                                                   syncedRobot,
@@ -76,11 +76,9 @@ public class ContinuousHikingProcess
       if (standAloneRealsenseProcess.getLatestHeightMapData() != null)
       {
          environmentHandler.setHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());
-         snappingTerrainExtractor.update(environmentHandler.getHeightMapData());
+         snappingTerrainManager.updateAndPublish(standAloneRealsenseProcess.getLatestHeightMapData());
+         environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
       }
-
-      if (snappingTerrainExtractor.getTerrainMapData() != null)
-         environmentHandler.setTerrainMapData(snappingTerrainExtractor.getTerrainMapData());
 
       continuousPlannerSchedulingTask.setLatestEnvironmentHandler(environmentHandler);
    }
@@ -88,7 +86,7 @@ public class ContinuousHikingProcess
    public void destroy()
    {
       continuousPlannerSchedulingTask.destroy();
-      snappingTerrainExtractor.close();
+      snappingTerrainManager.close();
       standAloneRealsenseProcess.destroy();
    }
 }

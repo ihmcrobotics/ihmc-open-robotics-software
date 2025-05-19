@@ -36,8 +36,8 @@ import perception_msgs.msg.dds.LidarScanParametersMessage;
 import perception_msgs.msg.dds.ObjectDetectorResultPacket;
 import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import std_msgs.msg.dds.Bool;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -1135,7 +1135,7 @@ public class MessageTools
       message.getPrivilegedJointAngles().add(jointAngles);
    }
 
-   public static void packInitialJointAngles(KinematicsToolboxInitialConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
+   public static void packInitialJointAngles(KinematicsStreamingToolboxInitialConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
    {
       if (jointHashCodes.length != jointAngles.length)
          throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");

@@ -46,6 +46,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-data-logger:0.32.0")
+//   api("us.ihmc:ihmc-humanoid-robotics:source")
 
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")

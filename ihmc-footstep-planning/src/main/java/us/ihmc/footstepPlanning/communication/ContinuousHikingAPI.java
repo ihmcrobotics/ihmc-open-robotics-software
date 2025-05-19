@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import std_msgs.msg.dds.Float32;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
@@ -31,6 +32,9 @@ public class ContinuousHikingAPI
    public static final ROS2Topic<PoseListMessage> START_AND_GOAL_FOOTSTEPS = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("start_and_goal");
    public static final ROS2Topic<PoseListMessage> MONTE_CARLO_TREE_NODES = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("monte_carlo_tree_nodes");
    public static final ROS2Topic<FootstepDataListMessage> MONTE_CARLO_FOOTSTEP_PLAN = IHMC_ROOT.withModule(moduleName).withType(FootstepDataListMessage.class).withSuffix("monte_carlo_footstep_plan");
+
+   // Message for Terrain Environment
+   public static final ROS2Topic<TerrainMapMessage> TERRAIN_MAP = IHMC_ROOT.withModule(moduleName).withType(TerrainMapMessage.class).withSuffix("terrain_map");
 
    // Parameters that get synced between the remote process and the user
    public static final StoredPropertySetROS2TopicPair CONTINUOUS_HIKING_PARAMETERS
