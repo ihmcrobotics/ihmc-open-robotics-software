@@ -399,12 +399,13 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 
     unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
 
+    // This performs an alpha filter on the incoming data
     float alpha = params[HEIGHT_FILTER_ALPHA];
-
     float localHeightF = static_cast<float>(*localHeight);
     float globalHeightF = static_cast<float>(*globalHeight);
     float filtered = alpha * localHeightF + (1.0f - alpha) * globalHeightF;
 
+    // If we have no real data, we don't apply an alpha filter, just take the new real data
     if (globalHeightF == resetOffset)
         *globalHeight = *localHeight;
     else
