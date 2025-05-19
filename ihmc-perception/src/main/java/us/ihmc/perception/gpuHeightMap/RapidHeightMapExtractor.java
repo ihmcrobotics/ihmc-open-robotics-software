@@ -320,7 +320,6 @@ public class RapidHeightMapExtractor
          emptyRegisterKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
          emptyRegisterKernel.withFloat(resetOffset);
 
-
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
          registerKernelGridDim.close();
