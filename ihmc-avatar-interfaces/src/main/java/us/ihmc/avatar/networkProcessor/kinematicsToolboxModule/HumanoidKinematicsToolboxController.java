@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -10,14 +9,19 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
@@ -25,12 +29,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -54,11 +58,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
 import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
@@ -67,6 +69,9 @@ import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands
 public class HumanoidKinematicsToolboxController extends KinematicsToolboxController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final Vector3D zeroVector = new Vector3D();
+   private static final double FOOT_COEFFICIENT_OF_FRICTION = 0.8;
+   private static final double HAND_COEFFICIENT_OF_FRICTION = 0.4;
 
    /**
     * This is the model of the robot that is constantly updated to represent the most recent solution
@@ -94,11 +99,23 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
    /**
-    * Updated during the initialization phase with {@link MultiContactBalanceStatus}, this list
-    * contains all the necessary information about rigid-bodies currently used for support and for
-    * controlling them.
+    * Updated during the initialization phase with {@link CapturabilityBasedStatus}, this set of two
+    * {@link YoBoolean}s is used to know which hand is currently used for support in the walking controller.
     */
-   private final RecyclingArrayList<ContactingRigidBody> contactingRigidBodies = new RecyclingArrayList<>(ContactingRigidBody::new);
+   private final SideDependentList<YoBoolean> isHandInSupport = new SideDependentList<>();
+   /**
+    * Updated during the initialization phase, this is where the poses of the hands are stored so they
+    * can be held in place during the optimization process if they are load-bearing.
+    */
+   private final SideDependentList<YoFramePoint3D> initialHandPositions = new SideDependentList<>();
+   /**
+    * Hand contact point positions, expressed in body frame, as indicated in CapturabilityBasedStatus.
+    */
+   private final SideDependentList<FramePoint3D> handContactPointInBodyFrame = new SideDependentList<>(new FramePoint3D(), new FramePoint3D());
+   /**
+    * Whether either of the hands is load-bearing, as indicated in CapturabilityBasedStatus.
+    */
+   private final YoBoolean isUpperBodyLoadBearing = new YoBoolean("isUpperBodyLoadBearing", registry);
    /**
     * Desired center of mass position to hold in place during the optimization process.
     * <p>
@@ -114,14 +131,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    // TODO Add API to set this offset. It was only set from the SCS2 visualizer.
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
-
-   /**
-    * Indicates whether the rigid-bodies currently in contact as reported per:
-    * {@link CapturabilityBasedStatus} or {@link MultiContactBalanceStatus} should be held in place for
-    * this run. It is {@code true} by default but can be disabled using the message
-    * {@link HumanoidKinematicsToolboxConfigurationMessage}.
-    */
-   private final YoBoolean holdSupportRigidBodies = new YoBoolean("holdSupportRigidBodies", registry);
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run. It
     * is {@code true} by default but can be disabled using the message
@@ -157,15 +166,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final YoBoolean enableJointLimitReduction = new YoBoolean("enableJointLimitReduction", registry);
 
-   /**
-    * Reference to the most recent data received from the controller relative to the balance control.
-    * It is used for identifying which rigid-body is used for support and thus which rigid-body should
-    * be held in place.
-    */
-   private final ConcurrentCopier<MultiContactBalanceStatus> concurrentMultiContactBalanceStatusCopier = new ConcurrentCopier<>(MultiContactBalanceStatus::new);
-   private boolean hasMultiContactBalanceStatus = false;
-   private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
    private final ExecutionTimer executionTimer = new ExecutionTimer("ikTotal", registry);
+
+   private final StabilityMarginRegionCalculator multiContactRegionCalculator;
+   private final WholeBodyContactState wholeBodyContactState;
+   private final StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
+   private final FramePoint3D tempContactPoint = new FramePoint3D();
+   private final FrameVector3D tempContactNormal = new FrameVector3D();
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -220,6 +227,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
 
+      multiContactRegionCalculator = StabilityMarginRegionCalculator.createForCoPStabilityMargin("", desiredFullRobotModel.getTotalMass(), desiredReferenceFrames.getCenterOfMassFrame(), desiredReferenceFrames.getMidFeetZUpFrame(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
+      wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
+
+      stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
+                                                                            multiContactRegionCalculator,
+                                                                            desiredFullRobotModel,
+                                                                            isUpperBodyLoadBearing,
+                                                                            getCenterOfMassSafeMargin(),
+                                                                            registry);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          if (desiredFullRobotModel.getHand(robotSide) != null)
@@ -233,6 +251,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
+         isHandInSupport.put(robotSide, new YoBoolean("is" + side + "HandInSupport", registry));
+         initialHandPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandInitial", worldFrame, registry));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -350,9 +370,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       if (initialRobotConfigurationMap != null)
       {
-         if (hasMultiContactBalanceStatus)
-            throw new UnsupportedOperationException("Initial robot configuration is not supported with multi-contact context.");
-
          computeSupportZUpTransform(desiredFullRobotModel, initialTransform); // The robot is at the current initial configuration.
 
          // Force the privileged configuration to be the initial configuration
@@ -390,7 +407,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateCoMPositionToHold();
 
       // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
-      holdSupportRigidBodies.set(true);
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
@@ -414,8 +430,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (hasCapturabilityBasedStatus)
          capturabilityBasedStatusInternal.set(capturabilityBasedStatus);
 
-      contactingRigidBodies.clear();
-
       if (hasCapturabilityBasedStatus)
       {
          processCapturabilityBasedStatus(capturabilityBasedStatus);
@@ -423,7 +437,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       else
       {
          for (RobotSide robotSide : RobotSide.values)
+         {
             isFootInSupport.get(robotSide).set(true);
+            isHandInSupport.get(robotSide).set(false);
+         }
+         isUpperBodyLoadBearing.set(false);
       }
    }
 
@@ -478,6 +496,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
+         stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -499,16 +518,29 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          }
       }
 
-      MultiContactBalanceStatus multiContactBalanceStatus = concurrentMultiContactBalanceStatusCopier.getCopyForReading();
-      hasMultiContactBalanceStatus = multiContactBalanceStatus != null;
-      if (hasMultiContactBalanceStatus)
-      {
-         multiContactBalanceStatusInternal.set(multiContactBalanceStatus);
-         processMultiContactBalanceStatus(multiContactBalanceStatusInternal);
-      }
-
       super.updateInternal();
-      updateContactInfo();
+      if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
+      {
+         // update actuation limits based on current configuration
+         wholeBodyContactState.updateActuationConstraintVector();
+         wholeBodyContactState.updateActuationConstraintMatrix();
+         multiContactRegionCalculator.updateContactState(wholeBodyContactState);
+         multiContactRegionCalculator.performUpdateForNextVertex();
+
+         if (multiContactRegionCalculator.hasSolvedWholeRegion())
+         {
+            activeContactPointPositions.clear();
+            getSolution().getSupportRegion().clear();
+
+            for (int i = 0; i < multiContactRegionCalculator.getNumberOfVertices(); i++)
+            {
+               activeContactPointPositions.add().set(multiContactRegionCalculator.getOptimizedVertex(i));
+               getSolution().getSupportRegion().add().set(multiContactRegionCalculator.getOptimizedVertex(i));
+            }
+
+            updateSupportPolygonConstraint(activeContactPointPositions);
+         }
+      }
 
       executionTimer.stopMeasurement();
    }
@@ -518,6 +550,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       // Overriding the default implementation to reduce the number of times the reference frames are updated.
       desiredReferenceFrames.updateFrames();
+      centerOfMass.setMatchingFrame(desiredReferenceFrames.getCenterOfMassFrame(), 0.0, 0.0, 0.0);
    }
 
    /**
@@ -572,8 +605,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    }
 
    /**
-    * Creates and sets up the feedback control commands for holding the support foot/feet in place. If
-    * {@link #holdSupportRigidBodies} is {@code false}, this methods returns {@code null}.
+    * Creates and sets up the feedback control commands for holding the support foot/feet in place.
     * <p>
     * Also note that if a user command has been received for a support foot, the command for this foot
     * is not created.
@@ -582,68 +614,40 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * @param bufferToPack the buffer used to store the commands for holding the support foot/feet in
     *                     place.
     */
-   private void addHoldSupportFootCommands(FeedbackControlCommandBuffer bufferToPack)
+   private void addHoldSupportEndEffectorCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      if (!holdSupportRigidBodies.getBooleanValue())
-         return;
-
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (!isFootInSupport.get(robotSide).getBooleanValue())
-            continue;
-
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
 
          // Do not hold the foot position if the user is already controlling it.
-         if (isUserControllingRigidBody(foot))
-            continue;
+         if (isFootInSupport.get(robotSide).getBooleanValue() && !isUserControllingRigidBody(foot))
+         {
+            SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
+            feedbackControlCommand.set(rootBody, foot);
+            feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
+            feedbackControlCommand.resetControlFrame();
+            feedbackControlCommand.resetControlBaseFrame();
+            feedbackControlCommand.setGains(getDefaultSpatialGains());
+            feedbackControlCommand.setSelectionMatrixToIdentity();
+            feedbackControlCommand.setWeightForSolver(supportRigidBodyWeight.getValue());
+            feedbackControlCommand.setInverseKinematics(initialFootPoses.get(robotSide), KinematicsToolboxHelper.zeroVector6D);
+         }
 
-         SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
-         feedbackControlCommand.set(rootBody, foot);
-         feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(foot));
-         feedbackControlCommand.resetControlFrame();
-         feedbackControlCommand.resetControlBaseFrame();
-         feedbackControlCommand.setGains(getDefaultSpatialGains());
-         feedbackControlCommand.setSelectionMatrixToIdentity();
-         feedbackControlCommand.setWeightForSolver(supportRigidBodyWeight.getValue());
-         feedbackControlCommand.setInverseKinematics(initialFootPoses.get(robotSide), KinematicsToolboxHelper.zeroVector6D);
-      }
-   }
+         RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
 
-   /**
-    * Creates and sets up the feedback control commands for holding the active contact points in place.
-    *
-    * @param bufferToPack
-    */
-   private void addHoldSupportRigidBodyCommands(FeedbackControlCommandBuffer bufferToPack)
-   {
-      if (!holdSupportRigidBodies.getBooleanValue())
-         return;
-
-      if (contactingRigidBodies.isEmpty())
-         return;
-
-      Set<RigidBodyBasics> controlledBodies = new HashSet<>();
-
-      for (int i = 0; i < contactingRigidBodies.size(); i++)
-      {
-         ContactingRigidBody contactingRigidBody = contactingRigidBodies.get(i);
-
-         // Do not hold the rigid-body position if the user is already controlling it.
-         if (isUserControllingRigidBody(contactingRigidBody.rigidBody))
-            continue;
-         if (!controlledBodies.add(contactingRigidBody.rigidBody))
-            continue;
-
-         SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
-         feedbackControlCommand.set(rootBody, contactingRigidBody.rigidBody);
-         feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(contactingRigidBody.rigidBody));
-         feedbackControlCommand.setControlFrameFixedInEndEffector(contactingRigidBody.contactPointInBodyFixedFrame);
-         feedbackControlCommand.resetControlBaseFrame();
-         feedbackControlCommand.setGains(getDefaultSpatialGains());
-         feedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForLinearControl();
-         feedbackControlCommand.setWeightForSolver(supportRigidBodyWeight.getValue());
-         feedbackControlCommand.setInverseKinematics(contactingRigidBody.initialPosition, KinematicsToolboxHelper.zeroVector3D);
+         if (isHandInSupport.get(robotSide).getBooleanValue() && !isUserControllingRigidBodyPosition(hand))
+         {
+            PointFeedbackControlCommand feedbackControlCommand = bufferToPack.addPointFeedbackControlCommand();
+            feedbackControlCommand.set(rootBody, hand);
+            feedbackControlCommand.setPrimaryBase(getEndEffectorPrimaryBase(hand));
+            feedbackControlCommand.setBodyFixedPointToControl(handContactPointInBodyFrame.get(robotSide));
+            feedbackControlCommand.resetControlBaseFrame();
+            feedbackControlCommand.setGains(getDefaultSpatialGains().getPositionGains());
+            feedbackControlCommand.setSelectionMatrixToIdentity();
+            feedbackControlCommand.setWeightForSolver(supportRigidBodyWeight.getValue());
+            feedbackControlCommand.setInverseKinematics(initialHandPositions.get(robotSide), KinematicsToolboxHelper.zeroVector3D);
+         }
       }
    }
 
@@ -711,50 +715,70 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private void processCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
    {
       for (RobotSide robotside : RobotSide.values)
-         isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
-
-      if (!isUserProvidingSupportPolygon())
       {
-         Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
-         Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
-         activeContactPointPositions.clear();
-         for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
-            activeContactPointPositions.add().setIncludingFrame(worldFrame, leftFootSupportPolygon2d.get(i));
-         for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
-            activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i));
+         isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
+         isHandInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportHand(capturabilityBasedStatus, robotside, desiredFullRobotModel, handContactPointInBodyFrame.get(robotside)));
 
-         updateSupportPolygonConstraint(activeContactPointPositions);
+         if (isHandInSupport.get(robotside).getBooleanValue())
+            initialHandPositions.get(robotside).setMatchingFrame(handContactPointInBodyFrame.get(robotside));
+      }
+
+      isUpperBodyLoadBearing.set(isHandInSupport.get(RobotSide.LEFT).getValue() || isHandInSupport.get(RobotSide.RIGHT).getValue());
+
+      if (isUserProvidingSupportPolygon())
+         return;
+
+      if (isUpperBodyLoadBearing.getValue())
+      { // CoM constraint polygon is computed through {@link CenterOfMassStabilityMarginRegionCalculator}
+         initializeWholeBodyContactState();
+      }
+
+      // CoM constraint polygon is the convex hull of the feet contact points. Even when upper body is load-bearing, initialize to this.
+      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
+      for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
+         activeContactPointPositions.add().setIncludingFrame(worldFrame, leftFootSupportPolygon2d.get(i));
+      for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
+         activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i));
+
+      updateSupportPolygonConstraint(activeContactPointPositions);
+   }
+
+   private void initializeWholeBodyContactState()
+   {
+      multiContactRegionCalculator.clear();
+      wholeBodyContactState.clear();
+
+      // add feet contacts
+      if (isFootInSupport.get(RobotSide.LEFT).getValue())
+         packFootContactPoints(RobotSide.LEFT, capturabilityBasedStatusInternal.getLeftFootSupportPolygon3d());
+      if (isFootInSupport.get(RobotSide.RIGHT).getValue())
+         packFootContactPoints(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightFootSupportPolygon3d());
+
+      // add hand contact points
+      if (isHandInSupport.get(RobotSide.LEFT).getValue())
+         packHandContactPoint(RobotSide.LEFT, capturabilityBasedStatusInternal.getLeftHandContactNormal());
+      if (isHandInSupport.get(RobotSide.RIGHT).getValue())
+         packHandContactPoint(RobotSide.RIGHT, capturabilityBasedStatusInternal.getRightHandContactNormal());
+
+      wholeBodyContactState.update();
+      multiContactRegionCalculator.updateContactState(wholeBodyContactState, true);
+   }
+
+   private void packFootContactPoints(RobotSide robotSide, List<Point3D> contactPoints)
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         tempContactPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactPoints.get(i));
+         tempContactNormal.setIncludingFrame(desiredFullRobotModel.getSoleFrame(robotSide), Axis3D.Z);
+         wholeBodyContactState.addContactPoint(desiredFullRobotModel.getFoot(robotSide), tempContactPoint, tempContactNormal, FOOT_COEFFICIENT_OF_FRICTION);
       }
    }
 
-   /**
-    * Sets the current supporting rigid bodies and sets the support region either from the contact points
-    * or by solving for the multi-contact support region.
-    * <p>
-    * If requested, the supporting rigid bodies are held stationary, see {@link #addHoldSupportRigidBodyCommands}
-    */
-   private void processMultiContactBalanceStatus(MultiContactBalanceStatus multiContactBalanceStatus)
+   private void packHandContactPoint(RobotSide robotSide, Vector3DBasics contactNormalInWorld)
    {
-      for (RobotSide robotside : RobotSide.values)
-         isFootInSupport.get(robotside).set(false);
-
-      /* Update supporting rigid bodies */
-      contactingRigidBodies.clear();
-      Object<Point3D> supportPolygon = multiContactBalanceStatus.getContactPointsInWorld();
-      Integer supportRigidBodyIds = multiContactBalanceStatus.getSupportRigidBodyIds();
-
-      if (multiContactBalanceStatus.getContactPointsInWorld().size() < 3)
-      {
-         shrunkSupportPolygon.clear();
-         shrunkSupportPolygonVertices.clear();
-         return;
-      }
-
-      for (int i = 0; i < supportPolygon.size(); i++)
-      {
-         ContactingRigidBody contactingRigidBody = contactingRigidBodies.add();
-         contactingRigidBody.initialize(rigidBodyHashCodeMap.get(supportRigidBodyIds.get(i)), worldFrame, supportPolygon.get(i));
-      }
+      tempContactNormal.setIncludingFrame(ReferenceFrame.getWorldFrame(), contactNormalInWorld);
+      wholeBodyContactState.addContactPoint(desiredFullRobotModel.getHand(robotSide), handContactPointInBodyFrame.get(robotSide), tempContactNormal, HAND_COEFFICIENT_OF_FRICTION);
    }
 
    @Override
@@ -779,12 +803,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       concurrentCapturabilityBasedStatusCopier.commit();
    }
 
-   public void updateMultiContactBalanceStatus(MultiContactBalanceStatus newStatus)
-   {
-      concurrentMultiContactBalanceStatusCopier.getCopyForWriting().set(newStatus);
-      concurrentMultiContactBalanceStatusCopier.commit();
-   }
-
    @Override
    protected RigidBodyBasics getEndEffectorPrimaryBase(RigidBodyBasics endEffector)
    {
@@ -794,9 +812,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    protected void getAdditionalFeedbackControlCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      addHoldSupportFootCommands(bufferToPack);
-      addHoldSupportRigidBodyCommands(bufferToPack);
+      addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
+      stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
    }
 
    @Override
@@ -818,24 +836,5 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return desiredReferenceFrames;
-   }
-
-   private static class ContactingRigidBody
-   {
-      private RigidBodyBasics rigidBody;
-      private final FramePoint3D contactPointInBodyFixedFrame = new FramePoint3D();
-      private final FramePoint3D initialPosition = new FramePoint3D();
-
-      public ContactingRigidBody()
-      {
-      }
-
-      public void initialize(RigidBodyBasics rigidBody, ReferenceFrame positionFrame, Point3DReadOnly position)
-      {
-         this.rigidBody = rigidBody;
-         initialPosition.setIncludingFrame(positionFrame, position);
-         contactPointInBodyFixedFrame.setIncludingFrame(initialPosition);
-         contactPointInBodyFixedFrame.changeFrame(rigidBody.getBodyFixedFrame());
-      }
    }
 }
