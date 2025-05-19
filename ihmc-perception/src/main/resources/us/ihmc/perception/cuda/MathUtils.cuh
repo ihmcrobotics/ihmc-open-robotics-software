@@ -36,19 +36,23 @@ __device__ float length2D(float2 vec)
     return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
-__device__ float3 normalize(const float3& vec)
+__device__ float3 normalize(float3 v)
 {
-    float magnitude = sqrtf(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+    float norm = sqrtf(dot(v, v));
 
-    // Prevent division by zero
-    if (magnitude > 0.0f)
-    {
-        return make_float3(vec.x / magnitude, vec.y / magnitude, vec.z / magnitude);
-    }
-    else
-    {
-        return make_float3(0.0f, 0.0f, 0.0f);
-    }
+    if (norm < 1e-6f)
+        return make_float3(0, 0, 0);
+
+    return make_float3(v.x / norm, v.y / norm, v.z / norm);
+}
+
+__device__ float3 cross3(const float3 &a, const float3 &b)
+{
+    return make_float3(
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x
+    );
 }
 
 /**

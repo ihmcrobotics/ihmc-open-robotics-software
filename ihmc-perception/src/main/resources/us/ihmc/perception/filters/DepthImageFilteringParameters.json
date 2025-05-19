@@ -1,0 +1,8 @@
+{
+  "title": "DepthImageFilteringParameters",
+  "window size in pixels ": 10,
+  "Angle threshold in radians": 0.006,
+  "Normal angle Threshold": 0.1,
+  "RANSAC iterations": 12,
+  "Minimum Depth values required in window": 3
+}
