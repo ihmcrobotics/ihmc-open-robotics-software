@@ -344,7 +344,7 @@ extern "C"
 __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
                                             unsigned short *globalMap, size_t pitchGlobal,
                                             float *zUpCameraToWorldAlignedGround,
-                                            float *params)
+                                            float *params, float resetOffset)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
@@ -398,7 +398,17 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
         return;
 
     unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
-    *globalHeight = *localHeight;
+
+    float alpha = params[HEIGHT_FILTER_ALPHA];
+
+    float localHeightF = static_cast<float>(*localHeight);
+    float globalHeightF = static_cast<float>(*globalHeight);
+    float filtered = alpha * localHeightF + (1.0f - alpha) * globalHeightF;
+
+    if (globalHeightF == resetOffset)
+        *globalHeight = *localHeight;
+    else
+        *globalHeight = static_cast<unsigned short>(filtered + 0.5f);
 }
 
 extern "C"

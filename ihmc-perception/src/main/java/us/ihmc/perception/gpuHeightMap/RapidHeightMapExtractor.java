@@ -262,6 +262,7 @@ public class RapidHeightMapExtractor
          registerKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
          registerKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
+         registerKernel.withFloat(resetOffset);
 
          registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
@@ -317,6 +318,8 @@ public class RapidHeightMapExtractor
          emptyRegisterKernel.withPointer(emptyGlobalHeightMapImage.data()).withLong(emptyGlobalHeightMapImage.step());
          emptyRegisterKernel.withPointer(parametersDevicePointer);
          emptyRegisterKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         emptyRegisterKernel.withFloat(resetOffset);
+
 
          emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
 

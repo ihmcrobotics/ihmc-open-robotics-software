@@ -168,7 +168,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
-      HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
