@@ -336,6 +336,10 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE_SRT = D455_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
    public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE_SRT = D455_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
 
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_FILTERED_IMAGE = BEST_EFFORT.withModule(D455_NAME)
+                                                                                      .withTypeName(ImageMessage.class)
+                                                                                      .withSuffix("depth_filtered");
+
    // ZED
    private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_LEFT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_left");

@@ -13,10 +13,6 @@ int8 TRAJECTORY_TYPE_CUSTOM=2
 
 int8 TRAJECTORY_TYPE_WAYPOINTS=3
 
-int8 CSG_MODE_STANDARD=0
-
-int8 CSG_MODE_QFP=1
-
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
@@ -43,9 +39,6 @@ geometry_msgs/Point[] predicted_contact_points_2d
 
 # This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
 int8 trajectory_type
-
-# This contains information about what footstep generation approach should be used by the ContinuousStepGenerator.
-int8 csg_mode
 
 # Contains information on how high the robot should swing its foot.
 # This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
@@ -111,9 +104,11 @@ controller_msgs/StepConstraintsListMessage step_constraints
 # If the controller should check and fail if the step is not reachable
 bool should_check_for_reachability
 
-# If the desired footstep is for walking in place with zero forward or lateral velocity. This logic is only utilized
-# if csg_mode is set to QFP
-# Field default value True
-bool walking_in_place
+# If the swing trajectory should be continuously updated everytime a new touchdown position is received by the controller
+bool update_footstep_reference_continuously
+
+# If CoP feedback control should be disabled. This is desirable when using a stepping-based balance control strategy,
+# rather than an ankle-based balance control strategy, which is used by default
+bool disable_cop_feedback_control
 
 

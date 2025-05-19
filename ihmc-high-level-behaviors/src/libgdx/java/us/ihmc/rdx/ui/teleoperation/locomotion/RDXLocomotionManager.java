@@ -165,7 +165,8 @@ public class RDXLocomotionManager
       interactableFootstepPlan.create(baseUI,
                                       communicationHelper,
                                       syncedRobot,
-                                      locomotionParameters, footstepPlannerParametersToUse,
+                                      locomotionParameters,
+                                      footstepPlannerParametersToUse,
                                       swingFootPlannerParameters);
       baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
@@ -528,11 +529,17 @@ public class RDXLocomotionManager
    {
       footstepPlanning.setHeightMapData(heightMapData);
       interactableFootstepPlan.setHeightMapMessage(heightMapData);
+      manualFootstepPlacement.setHeightMapData(heightMapData);
    }
 
    public LocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
+   }
+
+   public DefaultFootstepPlannerParametersBasics getFootstepPlanningParameters()
+   {
+      return footstepPlannerParametersToUse;
    }
 
    public RDXInteractableFootstepPlan getInteractableFootstepPlan()

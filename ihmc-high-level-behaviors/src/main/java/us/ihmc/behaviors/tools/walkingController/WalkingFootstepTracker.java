@@ -106,6 +106,7 @@ public class WalkingFootstepTracker
       int size = footstepDataListMessage.getFootstepDataList().size();
       int priorNumerator = completedIndex;
       int priorDenominator = footsteps.size();
+
       long[] ids = new long[size];
 
       synchronized (this)
@@ -156,6 +157,11 @@ public class WalkingFootstepTracker
    public int getNumberOfIncompleteFootsteps()
    {
       return totalIncompleteFootsteps;
+   }
+
+   public ArrayList<FootstepDataMessage> getFootsteps()
+   {
+      return footsteps;
    }
 
    public void reset()

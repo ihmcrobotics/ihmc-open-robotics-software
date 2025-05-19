@@ -1,6 +1,5 @@
 package us.ihmc.motionRetargeting;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum VRTrackedSegmentType

@@ -56,6 +56,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
+   private boolean activeAdjustment = false;
 
    public RDXInteractableFootstepPlan(ControllerStatusTracker controllerStatusTracker)
    {
@@ -249,8 +250,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void clear()
    {
       stepChecker.clear();
-      footsteps.clear();
-      selectedFootstep = null;
+      if (!activeAdjustment)
+      {
+         footsteps.clear();
+         selectedFootstep = null;
+      }
    }
 
    public void walkFromSteps()
@@ -262,7 +266,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       }
       // TODO figure out some better logic here. For example, when footstep planning from the current pose, or using the control ring, this is probably pretty
       // TODO dangerous. However when manually placing footsteps, this is great.
-      messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      messageList.getQueueingProperties().setExecutionMode(activeAdjustment ? ExecutionMode.OVERRIDE.toByte() : ExecutionMode.QUEUE.toByte());
       messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       messageList.setOffsetFootstepsHeightWithExecutionError(true);
       messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
@@ -346,5 +350,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void destroy()
    {
       swingPlanningModule.destroy();
+   }
+
+   public void setActiveAdjustment(boolean activeAdjustment)
+   {
+      this.activeAdjustment = activeAdjustment;
    }
 }

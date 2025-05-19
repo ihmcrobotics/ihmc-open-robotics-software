@@ -355,7 +355,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          computeSupportZUpTransform(desiredFullRobotModel, initialTransform); // The robot is at the current initial configuration.
 
-         initializePrivilegedConfiguration(); // The robot is now at the privileged configuration.
+         // Force the privileged configuration to be the initial configuration
+         initializePrivilegedConfiguration();
          rootJoint.getJointPose().setToZero();
          desiredFullRobotModel.updateFrames();
          computeSupportZUpTransform(desiredFullRobotModel, desiredTransform); // The robot is at the privileged configuration.

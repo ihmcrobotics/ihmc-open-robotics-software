@@ -8,6 +8,7 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -40,9 +41,10 @@ public class StandAloneRealsenseProcess
                                      ROS2Helper ros2Helper,
                                      ROS2SyncedRobotModel syncedRobot,
                                      RobotCollisionModel robotCollisionModel,
-                                     HeightMapParameters heightMapParameters)
+                                     HeightMapParameters heightMapParameters,
+                                     DepthImageFilteringParameters depthImageFilteringParameters)
    {
-      this(ros2Node, ros2Helper, syncedRobot, robotCollisionModel, heightMapParameters, null);
+      this(ros2Node, ros2Helper, syncedRobot, robotCollisionModel, heightMapParameters, depthImageFilteringParameters, null);
    }
 
    public StandAloneRealsenseProcess(ROS2Node ros2Node,
@@ -50,6 +52,7 @@ public class StandAloneRealsenseProcess
                                      ROS2SyncedRobotModel syncedRobot,
                                      RobotCollisionModel robotCollisionModel,
                                      HeightMapParameters heightMapParameters,
+                                     DepthImageFilteringParameters depthImageFilteringParameters,
                                      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor)
    {
 
@@ -86,7 +89,8 @@ public class StandAloneRealsenseProcess
                                                       d455Sensor,
                                                       RealSenseImageSensor.DEPTH_IMAGE_KEY,
                                                       controllerFootstepQueueMonitor,
-                                                      heightMapParameters);
+                                                      heightMapParameters,
+                                                      depthImageFilteringParameters);
       rapidHeightMapThread.startRepeating();
    }
 

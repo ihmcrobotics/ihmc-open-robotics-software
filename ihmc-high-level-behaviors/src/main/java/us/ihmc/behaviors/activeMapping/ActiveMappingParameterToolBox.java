@@ -7,6 +7,7 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
@@ -18,6 +19,7 @@ public class ActiveMappingParameterToolBox
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final HeightMapParameters heightMapParameters;
    private final ROS2StoredPropertySetGroup ros2StoredPropertySetGroup;
+   private final DepthImageFilteringParameters depthImageFilteringParameters;
 
    public ActiveMappingParameterToolBox(ROS2Node ros2Node, DRCRobotModel robotModel, String taskPurpose)
    {
@@ -28,6 +30,7 @@ public class ActiveMappingParameterToolBox
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters(taskPurpose);
       swingPlannerParameters = robotModel.getSwingPlannerParameters(taskPurpose);
       heightMapParameters = new HeightMapParameters();
+      depthImageFilteringParameters = new DepthImageFilteringParameters();
 
       // Add Parameters to be synced between the UI and this process
       ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
@@ -35,6 +38,7 @@ public class ActiveMappingParameterToolBox
       ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
       ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.SWING_PLANNING_PARAMETERS, swingPlannerParameters);
       ros2StoredPropertySetGroup.registerStoredPropertySet(PerceptionComms.HEIGHT_MAP_PARAMETERS, heightMapParameters);
+      ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.DEPTH_IMAGE_FILTERING_PARAMETERS, depthImageFilteringParameters);
    }
 
    public void update()
@@ -65,5 +69,10 @@ public class ActiveMappingParameterToolBox
    public HeightMapParameters getHeightMapParameters()
    {
       return heightMapParameters;
+   }
+
+   public DepthImageFilteringParameters getDepthImageFilteringParameters()
+   {
+      return depthImageFilteringParameters;
    }
 }
