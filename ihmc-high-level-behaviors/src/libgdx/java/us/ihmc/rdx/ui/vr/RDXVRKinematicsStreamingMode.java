@@ -86,7 +86,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 public class RDXVRKinematicsStreamingMode
 {
    public static final boolean ENABLE_ARM_CONTROL_DURING_STEPPING = false;
-   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVERS = false;
+   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVERS = true;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -343,18 +343,18 @@ public class RDXVRKinematicsStreamingMode
          retargetMotion(toolboxInputMessage);
 
          if (toolboxCommunicationEnabled.get())
-            toolboxInputMessage.setStreamToController(false);
+            toolboxInputMessage.setStreamToController(controlRobotEnabled.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 
-         if (toolboxInputStreamRateLimiter.run(streamPeriod) && !pausedForWalking)
+         if (!pausedForWalking)
          {
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
             outputFrequencyPlot.recordEvent();
          }
 
-         boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.2f && gripButtonsValue.get(RobotSide.RIGHT) > 0.2f;
+         boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.8f && gripButtonsValue.get(RobotSide.RIGHT) > 0.8f;
          footstepStreaming.processVRInput(isStepping);
       }
    }
