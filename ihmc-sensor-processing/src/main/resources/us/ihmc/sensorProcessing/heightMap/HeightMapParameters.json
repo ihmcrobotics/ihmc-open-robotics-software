@@ -3,31 +3,31 @@
   "Drift offset filter": true,
   "Flying points filter": true,
   "Enable alpha filter": true,
-  "Enable vertical filter": false,
+  "Enable vertical filter": true,
   "Search window height": {
-    "value": 20,
-    "lowerBound": 10,
-    "upperBound": 400
+    "value": 500,
+    "lowerBound": 100,
+    "upperBound": 800
   },
   "Search window width": {
-    "value": 10,
-    "lowerBound": 10,
-    "upperBound": 400
+    "value": 480,
+    "lowerBound": 100,
+    "upperBound": 800
   },
   "Search skip size": {
     "value": 4,
-    "lowerBound": 0,
+    "lowerBound": 1,
     "upperBound": 16
   },
   "Min height registration": {
-    "value": -1.0,
-    "lowerBound": -5.0,
-    "upperBound": 5.0
+    "value": -1.5,
+    "lowerBound": -10.0,
+    "upperBound": 1.0
   },
   "Max height registration": {
-    "value": 1.0,
-    "lowerBound": -5.0,
-    "upperBound": 5.0
+    "value": 5.0,
+    "lowerBound": -1.0,
+    "upperBound": 10.0
   },
   "Min height difference": {
     "value": -0.05,
@@ -35,17 +35,17 @@
     "upperBound": 0.05
   },
   "Max height difference": {
-    "value": 0.1,
+    "value": 1.0,
     "lowerBound": 0.01,
     "upperBound": 0.4
   },
   "Height filter alpha": {
-    "value": 0.65,
-    "lowerBound": 0.2,
-    "upperBound": 0.85
+    "value": 0.5,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
   },
   "Spatial alpha": {
-    "value": 0.65,
+    "value": 0.5,
     "lowerBound": 0.0,
     "upperBound": 1.0
   },
@@ -55,12 +55,12 @@
     "upperBound": 10.0
   },
   "Min Clamp Height": {
-    "value": -3.2768,
+    "value": -6.5536,
     "lowerBound": -8.0,
     "upperBound": 8.0
   },
   "Max Clamp Height": {
-    "value": 3.2768,
+    "value": 6.5536,
     "lowerBound": -8.0,
     "upperBound": 8.0
   },
@@ -70,7 +70,7 @@
     "upperBound": 0.06
   },
   "Local width in meters": {
-    "value": 4.0,
+    "value": 2.0,
     "lowerBound": 1.0,
     "upperBound": 4.5
   },
@@ -80,13 +80,13 @@
     "upperBound": 8.0
   },
   "Internal global width in meters": {
-    "value": 30.0,
+    "value": 4.0,
     "lowerBound": 20.0,
     "upperBound": 40.0
   },
   "Robot collision cylinder radius": {
-    "value": 0.5,
-    "lowerBound": 0.1,
+    "value": 0.05,
+    "lowerBound": 0.0,
     "upperBound": 0.8
   },
   "Height scale factor": {
@@ -105,7 +105,7 @@
     "upperBound": 64
   },
   "Stepping cosine threshold": {
-    "value": 0.8,
+    "value": 0.99,
     "lowerBound": 0.0,
     "upperBound": 1.0
   },
@@ -115,49 +115,69 @@
     "upperBound": 100
   },
   "Vertical search size": {
-    "value": 20,
+    "value": 80,
     "lowerBound": 10,
     "upperBound": 100
   },
   "Vertical search resolution": {
-    "value": 0.1,
+    "value": 0.01,
     "lowerBound": 0.01,
     "upperBound": 0.5
   },
-  "Grid resolution XY": [
-    0.03,
-    "Resolution of the height map grid"
-  ],
-  "Grid size XY": [
-    5.0,
-    "Length of the side of the square height map grid"
-  ],
-  "Max Z": [
-    0.6,
-    "Max z relative to robot mid foot z. Points above this threshold are ignored."
-  ],
-  "Nominal standard deviation": [
-    0.017992,
-    "When calibrated on flat ground, this is the average standard deviation observed for a grid cell."
-  ],
-  "Max points per cell": 20,
-  "Mahalanobis scale": [
-    2.0,
-    "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value."
-  ],
-  "Variance added when translating": [
-    0.1,
-    "This is the variance added to all past measurements when a cell is translated"
-  ],
-  "Sensor variance when standing": [
-    0.01,
-    "This is the measurement variance when the robot is standing"
-  ],
-  "Sensor variance when moving": [
-    0.1,
-    "This is the measurement variance when the robot is moving"
-  ],
+  "Grid resolution XY": {
+    "value": 0.03,
+    "lowerBound": 0.01,
+    "upperBound": 0.1,
+    "description": "Resolution of the height map grid"
+  },
+  "Grid size XY": {
+    "value": 5.0,
+    "lowerBound": 1.0,
+    "upperBound": 10.0,
+    "description": "Length of the side of the square height map grid"
+  },
+  "Max Z": {
+    "value": 0.6,
+    "lowerBound": 0.1,
+    "upperBound": 1.0,
+    "description": "Max z relative to robot mid foot z. Points above this threshold are ignored."
+  },
+  "Nominal standard deviation": {
+    "value": 0.017992,
+    "lowerBound": 0.01,
+    "upperBound": 0.1,
+    "description": "When calibrated on flat ground, this is the average standard deviation observed for a grid cell."
+  },
+  "Max points per cell": {
+    "value": 20,
+    "lowerBound": 10,
+    "upperBound": 30
+  },
+  "Mahalanobis scale": {
+    "value": 2.0,
+    "lowerBound": 1.0,
+    "upperBound": 3.0,
+    "description": "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value."
+  },
+  "Variance added when translating": {
+    "value": 0.1,
+    "lowerBound": 0.01,
+    "upperBound": 0.2,
+    "description": "This is the variance added to all past measurements when a cell is translated"
+  },
+  "Sensor variance when standing": {
+    "value": 0.01,
+    "lowerBound": 0.001,
+    "upperBound": 0.1,
+    "description": "This is the measurement variance when the robot is standing"
+  },
+  "Sensor variance when moving": {
+    "value": 0.1,
+    "lowerBound": 0.01,
+    "upperBound": 0.2,
+    "description": "This is the measurement variance when the robot is moving"
+  },
   "Estimate height with kalman filter": true,
   "Denoiser enabled": false,
-  "Statistics logging enabled": false
+  "Statistics logging enabled": true
 }
