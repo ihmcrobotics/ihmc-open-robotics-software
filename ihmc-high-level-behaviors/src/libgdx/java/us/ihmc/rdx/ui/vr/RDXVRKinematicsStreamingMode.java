@@ -86,7 +86,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 public class RDXVRKinematicsStreamingMode
 {
    public static final boolean ENABLE_ARM_CONTROL_DURING_STEPPING = false;
-   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVERS = true;
+   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVERS = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
