@@ -733,6 +733,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          initializeWholeBodyContactState();
       }
 
+      activeContactPointPositions.clear();
+
       // CoM constraint polygon is the convex hull of the feet contact points. Even when upper body is load-bearing, initialize to this.
       Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
       Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
