@@ -447,9 +447,9 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 }
 
 extern "C"
-__global__ void terrainHeightMapKernel(unsigned short *globalMap, size_t pitchGlobal,
-                                       unsigned short *terrainMap, size_t pitchTerrain,
-                                       int centerIndexTerrain, float *params)
+__global__ void terrainCroppingHeightMapKernel(unsigned short *globalMap, size_t pitchGlobal,
+                                               unsigned short *terrainMap, size_t pitchTerrain,
+                                               int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
