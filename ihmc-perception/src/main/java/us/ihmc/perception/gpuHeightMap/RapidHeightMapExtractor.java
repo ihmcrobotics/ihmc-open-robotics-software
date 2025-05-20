@@ -121,7 +121,7 @@ public class RapidHeightMapExtractor
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          ZUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(33);
+         parametersHostPointer = new FloatPointer(27);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -218,7 +218,6 @@ public class RapidHeightMapExtractor
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
          updateKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
          updateKernel.withFloat(resetOffset);
-         updateKernel.withInt(cellsPerAxisLocal);
 
          updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
 
@@ -249,7 +248,7 @@ public class RapidHeightMapExtractor
             translateKernel.withPointer(previousGlobalHeightMapImage.data()).withLong(previousGlobalHeightMapImage.step());
             translateKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
             translateKernel.withInt(shiftX).withInt(shiftY);
-            translateKernel.withInt(cellsPerAxisGlobal);
+            translateKernel.withPointer(parametersDevicePointer);
             translateKernel.withInt(resetOffset);
 
             translateKernel.run(stream, translateKernelGridDim, blockSize, 0);
@@ -404,14 +403,8 @@ public class RapidHeightMapExtractor
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getHeightOffset(),
-                          (float) parameters.getSteppingCosineThreshold(),
-                          (float) parameters.getSteppingContactThreshold(),
-                          (float) parameters.getContactWindowSize(),
                           (float) parameters.getSpatialAlpha(),
                           (float) parameters.getSearchSkipSize(),
-                          (float) parameters.getVerticalSearchSize(),
-                          (float) parameters.getVerticalSearchResolution(),
-                          (float) parameters.getFastSearchSize(),
                           (float) groundHeightGuess};
    }
 

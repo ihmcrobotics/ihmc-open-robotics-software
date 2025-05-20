@@ -26,15 +26,9 @@ extern "C"
 #define MIN_CLAMP_HEIGHT 21
 #define MAX_CLAMP_HEIGHT 22
 #define HEIGHT_OFFSET 23
-#define STEPPING_COSINE_THRESHOLD 24
-#define STEPPING_CONTACT_THRESHOLD 25
-#define CONTACT_WINDOW_SIZE 26
-#define SPATIAL_ALPHA 27
-#define SEARCH_SKIP_SIZE 28
-#define VERTICAL_SEARCH_SIZE 29
-#define VERTICAL_SEARCH_RESOLUTION 30
-#define FAST_SEARCH_SIZE 31
-#define GROUND_HEIGHT 32
+#define SPATIAL_ALPHA 24
+#define SEARCH_SKIP_SIZE 25
+#define GROUND_HEIGHT 26
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -203,7 +197,7 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
 // Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
 // Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
 // Perform projection (spherical or perspective) to map the grid cell to image indices.
-// Iterate over a search window in the depth image to find points within the cell bounds.
+// Iterate over a search window in the depth image to find points within the cell.
 // Back-project these points to the 3D space and transform them back to the Z-Up frame.
 // Compute the average height for points within the grid cell while filtering outliers.
 extern "C"
@@ -211,7 +205,8 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                                       unsigned short *localMap, size_t pitchLocal,
                                       unsigned short *globalMap, size_t pitchGlobal,
                                       float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf,
-                                      float *zUpCameraToWorldAlignedGround, float resetOffset, int bounds)
+                                      float *zUpCameraToWorldAlignedGround,
+                                      float resetOffset)
 {
     // Thread indices
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -222,7 +217,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
 
     // Bounds check
-    if (xIndex >= bounds || yIndex >= bounds)
+    if (xIndex >= params[LOCAL_CELLS_PER_AXIS] || yIndex >= params[LOCAL_CELLS_PER_AXIS])
         return;
 
     // Initialize variables
@@ -365,19 +360,20 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 extern "C"
 __global__ void translateHeightMapKernel(unsigned short* oldMap, size_t pitchOld,
                                          unsigned short* newMap, size_t pitchNew,
-                                         int shiftX, int shiftY,
-                                         int mapSize, int defaultValue)
+                                         int shiftX, int shiftY, float *params, int defaultValue)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (x >= mapSize || y >= mapSize)
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (x >= globalCellsPerAxis || y >= globalCellsPerAxis)
         return;
 
     int srcX = x + shiftX;
     int srcY = y + shiftY;
 
-    if (srcX >= 0 && srcX < mapSize && srcY >= 0 && srcY < mapSize)
+    if (srcX >= 0 && srcX < globalCellsPerAxis && srcY >= 0 && srcY < globalCellsPerAxis)
     {
         unsigned short* oldRow = (unsigned short*)((char*)oldMap + srcX * pitchOld);
         unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
