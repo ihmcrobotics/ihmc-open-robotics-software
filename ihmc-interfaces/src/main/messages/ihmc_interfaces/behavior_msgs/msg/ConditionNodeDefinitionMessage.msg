@@ -51,5 +51,8 @@ string object_frame_name
 # Name of the frame the distance is expressed in
 string reference_frame_name
 
-# The minimum distance between the object and the reference frame
+# The maximum distance between the object and the reference frame
 float64 distance_to_object
+
+# The maximum time that is spent in evaluating the condition
+float64 evaluation_time

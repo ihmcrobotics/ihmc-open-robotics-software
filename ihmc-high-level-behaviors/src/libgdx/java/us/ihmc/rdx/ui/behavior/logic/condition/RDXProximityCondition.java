@@ -18,12 +18,14 @@ public class RDXProximityCondition
 
    private final CRDTBidirectionalDouble distance;
    private final CRDTBidirectionalDouble maxDistance;
+   private final CRDTBidirectionalDouble maxEvaluationTime;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameComboBox;
    private final ImDoubleWrapper maxDistanceWidget;
    private final ImDoubleWrapper distanceWidget;
+   private final ImDoubleWrapper maxEvaluationTimeWidget;
 
    public RDXProximityCondition(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -32,6 +34,7 @@ public class RDXProximityCondition
 
       distance =  state.getProximityCheck().getCurrentDistance();
       maxDistance = definition.getProximityCheck().getCRDTMaxDistanceToObject();
+      maxEvaluationTime = definition.getProximityCheck().getCRDTMaxEvaluationTime();
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object Name",
                                                                 referenceFrameLibrary,
@@ -47,6 +50,9 @@ public class RDXProximityCondition
       distanceWidget = new ImDoubleWrapper(distance::getValue,
                                            distance::setValue,
                                            imDouble -> ImGuiTools.volatileInputDouble(labels.get("Distance"), imDouble));
+      maxEvaluationTimeWidget = new ImDoubleWrapper(maxEvaluationTime::getValue,
+                                                    maxEvaluationTime::setValue,
+                                           imDouble -> ImGuiTools.volatileInputDouble(labels.get("Max Evaluation Time"), imDouble));
    }
 
    public void renderImGuiWidgetsInternal()
@@ -70,5 +76,6 @@ public class RDXProximityCondition
 
          ImGui.endCombo();
       }
+      maxEvaluationTimeWidget.renderImGuiWidget();
    }
 }

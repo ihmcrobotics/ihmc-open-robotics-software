@@ -25,11 +25,13 @@ public class ProximityConditionDefinition
    private final CRDTBidirectionalString objectFrameName;
    private final CRDTBidirectionalString referenceFrameName;
    private final CRDTBidirectionalDouble maxDistanceToObject;
+   private final CRDTBidirectionalDouble maxEvaluationTime;
 
+   private DistanceType onDiskType;
    private String onDiskObjectFrameName;
    private String onDiskReferenceFrameName;
    private double onDiskDistanceToObject;
-   private DistanceType onDiskType;
+   private double onDiskMaxEvaluationTime;
 
    public ProximityConditionDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
@@ -37,6 +39,7 @@ public class ProximityConditionDefinition
       objectFrameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
       referenceFrameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
       maxDistanceToObject = new CRDTBidirectionalDouble(latestTimestampModifiable, 1.0);
+      maxEvaluationTime = new CRDTBidirectionalDouble(latestTimestampModifiable, 5.0);
    }
 
    public void saveToFile(ObjectNode jsonNode)
@@ -45,6 +48,7 @@ public class ProximityConditionDefinition
       jsonNode.put("referenceFrameName", referenceFrameName.getValue());
       jsonNode.put("maxDistanceToObject", maxDistanceToObject.getValue());
       jsonNode.put("distanceType", type.getValue().toString());
+      jsonNode.put("maxEvaluationTime", maxEvaluationTime.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -53,14 +57,16 @@ public class ProximityConditionDefinition
       referenceFrameName.setValue(jsonNode.get("referenceFrameName").textValue());
       maxDistanceToObject.setValue(jsonNode.get("maxDistanceToObject").asDouble());
       type.setValue(DistanceType.valueOf(jsonNode.get("distanceType").textValue()));
+      maxEvaluationTime.setValue(jsonNode.get("maxEvaluationTime").asDouble());
    }
 
    public void setOnDiskFields()
    {
+      onDiskType = type.getValue();
       onDiskObjectFrameName = objectFrameName.getValue();
       onDiskReferenceFrameName = referenceFrameName.getValue();
       onDiskDistanceToObject = maxDistanceToObject.getValue();
-      onDiskType = type.getValue();
+      onDiskMaxEvaluationTime = maxEvaluationTime.getValue();
    }
 
    public void undoAllNontopologicalChanges()
@@ -69,6 +75,7 @@ public class ProximityConditionDefinition
       objectFrameName.setValue(onDiskObjectFrameName);
       referenceFrameName.setValue(onDiskReferenceFrameName);
       maxDistanceToObject.setValue(onDiskDistanceToObject);
+      maxEvaluationTime.setValue(onDiskMaxEvaluationTime);
    }
 
    public boolean hasChanges()
@@ -79,6 +86,7 @@ public class ProximityConditionDefinition
       unchanged &= objectFrameName.getValue().equals(onDiskObjectFrameName);
       unchanged &= referenceFrameName.getValue().equals(onDiskReferenceFrameName);
       unchanged &= maxDistanceToObject.getValue() == (onDiskDistanceToObject);
+      unchanged &= maxEvaluationTime.getValue() == (onDiskMaxEvaluationTime);
 
       return !unchanged;
    }
@@ -89,6 +97,7 @@ public class ProximityConditionDefinition
       message.setObjectFrameName(objectFrameName.toMessage());
       message.setReferenceFrameName(referenceFrameName.toMessage());
       message.setDistanceToObject(maxDistanceToObject.toMessage());
+      message.setEvaluationTime(maxEvaluationTime.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
@@ -97,6 +106,7 @@ public class ProximityConditionDefinition
       objectFrameName.fromMessage(message.getObjectFrameNameAsString());
       referenceFrameName.fromMessage(message.getReferenceFrameNameAsString());
       maxDistanceToObject.fromMessage(message.getDistanceToObject());
+      maxEvaluationTime.fromMessage(message.getEvaluationTime());
    }
 
    public void setObjectFrameName(String objectFrameName)
@@ -112,6 +122,11 @@ public class ProximityConditionDefinition
    public void setMaxDistanceToObject(double distance)
    {
       this.maxDistanceToObject.setValue(distance);
+   }
+
+   public void setMaxEvaluationTime(double time)
+   {
+      this.maxEvaluationTime.setValue(time);
    }
 
    public String getObjectFrameName()
@@ -142,6 +157,11 @@ public class ProximityConditionDefinition
    public CRDTBidirectionalDouble getCRDTMaxDistanceToObject()
    {
       return maxDistanceToObject;
+   }
+
+   public CRDTBidirectionalDouble getCRDTMaxEvaluationTime()
+   {
+      return maxEvaluationTime;
    }
 
    public CRDTBidirectionalEnumField<DistanceType> getType()
