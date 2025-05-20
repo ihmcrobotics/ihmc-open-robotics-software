@@ -8,7 +8,9 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.logic.condition.RDXCounterCondition;
 import us.ihmc.rdx.ui.behavior.logic.condition.RDXLLMCondition;
+import us.ihmc.rdx.ui.behavior.logic.condition.RDXProximityCondition;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionNodeDefinition>
@@ -17,13 +19,15 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
 
    private final RDXCounterCondition counter;
    private final RDXLLMCondition llm;
+   private final RDXProximityCondition proximityCheck;
 
-   public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 
       counter = new RDXCounterCondition(state);
       llm = new RDXLLMCondition(state);
+      proximityCheck = new RDXProximityCondition(state, referenceFrameLibrary);
    }
 
    @Override
@@ -48,6 +52,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
       {
          case COUNTER -> counter.renderImGuiWidgetsInternal();
          case LLM -> llm.renderImGuiWidgetsInternal();
+         case PROXIMITY -> proximityCheck.renderImGuiWidgetsInternal();
       }
    }
 

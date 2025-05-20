@@ -13,6 +13,7 @@ module behavior_msgs
       /**
        * COUNTER TYPE
        * LLM TYPE
+       * PROXIMITY TYPE
        */
       @TypeCode(type="behavior_msgs::msg::dds_::ConditionNodeStateMessage_")
       struct ConditionNodeStateMessage
@@ -33,6 +34,10 @@ module behavior_msgs
          * A request to reset the LLM's context now
          */
         boolean request_reset_context;
+        /**
+         * The current distance of the object from the reference frame
+         */
+        double current_distance;
       };
     };
   };

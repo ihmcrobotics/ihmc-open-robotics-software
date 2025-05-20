@@ -9,17 +9,22 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * COUNTER TYPE
        * LLM TYPE
+       * PROXIMITY TYPE
        */
 public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefinitionMessage> implements Settable<ConditionNodeDefinitionMessage>, EpsilonComparable<ConditionNodeDefinitionMessage>
 {
    public static final byte COUNTER_TYPE = (byte) 0;
    public static final byte LLM_TYPE = (byte) 1;
+   public static final byte PROXIMITY_TYPE = (byte) 2;
+   public static final byte XYZ_TYPE = (byte) 0;
+   public static final byte XY_TYPE = (byte) 1;
+   public static final byte Z_TYPE = (byte) 2;
    /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.LeafNodeDefinitionMessage definition_;
    /**
-            * The type of condtion as defined above
+            * The type of condition as defined above
             */
    public byte type_;
    /**
@@ -54,6 +59,22 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             * A regular expression, where if it matches, the execution failed
             */
    public java.lang.StringBuilder response_matcher_;
+   /**
+            * The type of distance condition as defined above
+            */
+   public byte distance_type_;
+   /**
+            * Name of the object frame
+            */
+   public java.lang.StringBuilder object_frame_name_;
+   /**
+            * Name of the frame the distance is expressed in
+            */
+   public java.lang.StringBuilder reference_frame_name_;
+   /**
+            * The minimum distance between the object and the reference frame
+            */
+   public double distance_to_object_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -61,6 +82,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       system_ = new java.lang.StringBuilder(10000);
       prompt_ = new java.lang.StringBuilder(10000);
       response_matcher_ = new java.lang.StringBuilder(10000);
+      object_frame_name_ = new java.lang.StringBuilder(255);
+      reference_frame_name_ = new java.lang.StringBuilder(255);
    }
 
    public ConditionNodeDefinitionMessage(ConditionNodeDefinitionMessage other)
@@ -93,6 +116,16 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       response_matcher_.setLength(0);
       response_matcher_.append(other.response_matcher_);
 
+      distance_type_ = other.distance_type_;
+
+      object_frame_name_.setLength(0);
+      object_frame_name_.append(other.object_frame_name_);
+
+      reference_frame_name_.setLength(0);
+      reference_frame_name_.append(other.reference_frame_name_);
+
+      distance_to_object_ = other.distance_to_object_;
+
    }
 
 
@@ -105,14 +138,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    }
 
    /**
-            * The type of condtion as defined above
+            * The type of condition as defined above
             */
    public void setType(byte type)
    {
       type_ = type;
    }
    /**
-            * The type of condtion as defined above
+            * The type of condition as defined above
             */
    public byte getType()
    {
@@ -266,6 +299,84 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       return response_matcher_;
    }
 
+   /**
+            * The type of distance condition as defined above
+            */
+   public void setDistanceType(byte distance_type)
+   {
+      distance_type_ = distance_type;
+   }
+   /**
+            * The type of distance condition as defined above
+            */
+   public byte getDistanceType()
+   {
+      return distance_type_;
+   }
+
+   /**
+            * Name of the object frame
+            */
+   public void setObjectFrameName(java.lang.String object_frame_name)
+   {
+      object_frame_name_.setLength(0);
+      object_frame_name_.append(object_frame_name);
+   }
+
+   /**
+            * Name of the object frame
+            */
+   public java.lang.String getObjectFrameNameAsString()
+   {
+      return getObjectFrameName().toString();
+   }
+   /**
+            * Name of the object frame
+            */
+   public java.lang.StringBuilder getObjectFrameName()
+   {
+      return object_frame_name_;
+   }
+
+   /**
+            * Name of the frame the distance is expressed in
+            */
+   public void setReferenceFrameName(java.lang.String reference_frame_name)
+   {
+      reference_frame_name_.setLength(0);
+      reference_frame_name_.append(reference_frame_name);
+   }
+
+   /**
+            * Name of the frame the distance is expressed in
+            */
+   public java.lang.String getReferenceFrameNameAsString()
+   {
+      return getReferenceFrameName().toString();
+   }
+   /**
+            * Name of the frame the distance is expressed in
+            */
+   public java.lang.StringBuilder getReferenceFrameName()
+   {
+      return reference_frame_name_;
+   }
+
+   /**
+            * The minimum distance between the object and the reference frame
+            */
+   public void setDistanceToObject(double distance_to_object)
+   {
+      distance_to_object_ = distance_to_object;
+   }
+   /**
+            * The minimum distance between the object and the reference frame
+            */
+   public double getDistanceToObject()
+   {
+      return distance_to_object_;
+   }
+
 
    public static Supplier<ConditionNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -303,6 +414,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.response_matcher_, other.response_matcher_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_type_, other.distance_type_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_frame_name_, other.object_frame_name_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.reference_frame_name_, other.reference_frame_name_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_object_, other.distance_to_object_, epsilon)) return false;
+
 
       return true;
    }
@@ -335,6 +454,14 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.equals(this.response_matcher_, otherMyClass.response_matcher_)) return false;
 
+      if(this.distance_type_ != otherMyClass.distance_type_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.object_frame_name_, otherMyClass.object_frame_name_)) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.reference_frame_name_, otherMyClass.reference_frame_name_)) return false;
+
+      if(this.distance_to_object_ != otherMyClass.distance_to_object_) return false;
+
 
       return true;
    }
@@ -364,7 +491,15 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("prompt=");
       builder.append(this.prompt_);      builder.append(", ");
       builder.append("response_matcher=");
-      builder.append(this.response_matcher_);
+      builder.append(this.response_matcher_);      builder.append(", ");
+      builder.append("distance_type=");
+      builder.append(this.distance_type_);      builder.append(", ");
+      builder.append("object_frame_name=");
+      builder.append(this.object_frame_name_);      builder.append(", ");
+      builder.append("reference_frame_name=");
+      builder.append(this.reference_frame_name_);      builder.append(", ");
+      builder.append("distance_to_object=");
+      builder.append(this.distance_to_object_);
       builder.append("}");
       return builder.toString();
    }
