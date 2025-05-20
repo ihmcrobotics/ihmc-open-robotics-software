@@ -20,7 +20,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 
    public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
-   public static final BooleanStoredPropertyKey enableAlphaFilter = keys.addBooleanKey("Enable alpha filter");
    public static final BooleanStoredPropertyKey enableVerticalFilter = keys.addBooleanKey("Enable vertical filter");
    public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
    public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
@@ -36,8 +35,8 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey maxClampHeight = keys.addDoubleKey("Max Clamp Height");
    public static final DoubleStoredPropertyKey cellSizeInMeters = keys.addDoubleKey("Cell size in meters");
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
-   public static final DoubleStoredPropertyKey croppedWidthInMeters = keys.addDoubleKey("Cropped width in meters");
-   public static final DoubleStoredPropertyKey internalGlobalWidthInMeters = keys.addDoubleKey("Internal global width in meters");
+   public static final DoubleStoredPropertyKey terrainWidthInMeters = keys.addDoubleKey("Terrain width in meters");
+   public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
    public static final DoubleStoredPropertyKey robotCollisionCylinderRadius = keys.addDoubleKey("Robot collision cylinder radius");
    public static final DoubleStoredPropertyKey heightScaleFactor = keys.addDoubleKey("Height scale factor");
    public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");

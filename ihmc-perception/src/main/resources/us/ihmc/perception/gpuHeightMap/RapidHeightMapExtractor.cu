@@ -164,13 +164,55 @@ __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float heigh
     return finalHeight;
 }
 
+__device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraToWorldAlignedGround, float* params)
+{
+    // The Z value doesn't matter since we are staying in Z-Up frames
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, 0.0f);
+
+
+    // Compute grid cell center in Z-Up frame
+    float2 xyCoords = indices_to_coordinate(localIndex,
+                                            make_float2(params[HALF_LOCAL_WIDTH_IM_METERS], 0.0f),
+                                            params[CELL_SIZE],
+                                            params[LOCAL_CENTER_INDEX]);
+
+    cellCenterInZUp.x = xyCoords.x;
+    cellCenterInZUp.y = xyCoords.y;
+
+    // Transform cell center from previous Z-up to current Z-up
+    float3 cellCenterInGroundNoRotation = transformPoint3D32_2(
+        cellCenterInZUp,
+        make_float3(zUpCameraToWorldAlignedGround[0], zUpCameraToWorldAlignedGround[1], zUpCameraToWorldAlignedGround[2]),
+        make_float3(zUpCameraToWorldAlignedGround[4], zUpCameraToWorldAlignedGround[5], zUpCameraToWorldAlignedGround[6]),
+        make_float3(zUpCameraToWorldAlignedGround[8], zUpCameraToWorldAlignedGround[9], zUpCameraToWorldAlignedGround[10]),
+        make_float3(zUpCameraToWorldAlignedGround[3], zUpCameraToWorldAlignedGround[7], zUpCameraToWorldAlignedGround[11]));
+
+
+    int2 newCellIndex = coordinate_to_indices(
+        make_float2(cellCenterInGroundNoRotation.x, cellCenterInGroundNoRotation.y),
+        make_float2(0.0f, 0.0f),
+        params[CELL_SIZE],
+        params[GLOBAL_CENTER_INDEX]);
+
+    int2 globalIndex = make_int2(0, 0);
+    globalIndex.x = newCellIndex.x;
+    globalIndex.y = newCellIndex.y;
+
+    return globalIndex;
+}
+
 // Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
 // Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
 // Perform projection (spherical or perspective) to map the grid cell to image indices.
 // Iterate over a search window in the depth image to find points within the cell bounds.
 // Back-project these points to the 3D space and transform them back to the Z-Up frame.
 // Compute the average height for points within the grid cell while filtering outliers.
-extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitchIn, unsigned short *out, size_t pitchOut, float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf, int bounds)
+extern "C"
+__global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDepth,
+                                      unsigned short *localMap, size_t pitchLocal,
+                                      unsigned short *globalMap, size_t pitchGlobal,
+                                      float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf,
+                                      float *zUpCameraToWorldAlignedGround, float resetOffset, int bounds)
 {
     // Thread indices
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -188,7 +230,22 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     float currentAverageHeight = 0.0f;
     float averageHeightZ = 0.0f;
     int count = 0;
-    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
+    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT]);
+
+    int2 globalIndex = getGlobalIndexFromLocalIndex(make_int2(xIndex, yIndex), zUpCameraToWorldAlignedGround, params);
+
+    if (globalIndex.x >= 0 && globalIndex.x < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS])
+        && globalIndex.y >= 0 && globalIndex.y < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]))
+    {
+        unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+
+        if (*globalHeight != resetOffset)
+        {
+             float unScaledHeight = static_cast<float>(*globalHeight) / params[HEIGHT_SCALING_FACTOR];
+             float heightInMeters = unScaledHeight - params[HEIGHT_OFFSET];
+             cellCenterInZUp.z = heightInMeters;
+        }
+    }
 
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),
@@ -244,7 +301,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
             if (yawIdx >= 0 && yawIdx < depthWidth && pitchIdx >= 0 && pitchIdx < depthHeight)
             {
                 // Read depth value using pitched memory
-                unsigned short *inRow = (unsigned short *)((char *)in + (pitchIdx * pitchIn));
+                unsigned short *inRow = (unsigned short *)((char *)depthImage + (pitchIdx * pitchDepth));
                 unsigned short depthValue = *(inRow + yawIdx);
 
                 // Convert depth value to meters (if necessary)
@@ -300,7 +357,7 @@ extern "C" __global__ void heightMapUpdateKernel(unsigned short *in, size_t pitc
     // Scale to the appropriate range
     float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
 
-    unsigned short *outRow = (unsigned short *)((char *)out + (xIndex * pitchOut));
+    unsigned short *outRow = (unsigned short *)((char *)localMap + (xIndex * pitchLocal));
     *(outRow + yIndex) = (unsigned short)(heightValue);
 }
 
@@ -359,35 +416,7 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 
     int2 localIndex = make_int2(xIndex, yIndex);
 
-    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT] + 0.5f);
-
-    // Compute grid cell center in Z-Up frame
-    float2 xyCoords = indices_to_coordinate(localIndex,
-                                            make_float2(1.0f, 0.0f),
-                                            params[CELL_SIZE],
-                                            params[LOCAL_CENTER_INDEX]);
-
-    cellCenterInZUp.x = xyCoords.x;
-    cellCenterInZUp.y = xyCoords.y;
-
-    // Transform cell center from current Z-up to previous Z-up
-    float3 cellCenterInGroundNoRotation = transformPoint3D32_2(
-        cellCenterInZUp,
-        make_float3(zUpCameraToWorldAlignedGround[0], zUpCameraToWorldAlignedGround[1], zUpCameraToWorldAlignedGround[2]),
-        make_float3(zUpCameraToWorldAlignedGround[4], zUpCameraToWorldAlignedGround[5], zUpCameraToWorldAlignedGround[6]),
-        make_float3(zUpCameraToWorldAlignedGround[8], zUpCameraToWorldAlignedGround[9], zUpCameraToWorldAlignedGround[10]),
-        make_float3(zUpCameraToWorldAlignedGround[3], zUpCameraToWorldAlignedGround[7], zUpCameraToWorldAlignedGround[11]));
-
-
-    int2 newCellIndex = coordinate_to_indices(
-        make_float2(cellCenterInGroundNoRotation.x, cellCenterInGroundNoRotation.y),
-        make_float2(0.0f, 0.0f),
-        params[CELL_SIZE],
-        params[GLOBAL_CENTER_INDEX]);
-
-    int2 globalIndex = make_int2(0, 0);
-    globalIndex.x = newCellIndex.x;
-    globalIndex.y = newCellIndex.y;
+    int2 globalIndex = getGlobalIndexFromLocalIndex(localIndex, zUpCameraToWorldAlignedGround, params);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
@@ -407,14 +436,42 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
 
     // If we have no real data, we don't apply an alpha filter, just take the new real data
     if (globalHeightF == resetOffset)
+    {
         *globalHeight = *localHeight;
+    }
     else
+    {
+        // Add 0.5 to round to the nearest unsigned short, any decimal gets removed. e.g. 3.6 -> 4.1 = 4
         *globalHeight = static_cast<unsigned short>(filtered + 0.5f);
+    }
 }
 
 extern "C"
-__global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMatrixToModify,
-                                 unsigned short * matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
+__global__ void terrainCroppingHeightMapKernel(unsigned short *globalMap, size_t pitchGlobal,
+                                               unsigned short *terrainMap, size_t pitchTerrain,
+                                               int centerIndexTerrain, float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int terrainCellsPerAxis = 2 * centerIndexTerrain + 1;
+    if (xIndex >= terrainCellsPerAxis || yIndex >= terrainCellsPerAxis)
+        return;
+
+    // Compute coordinates in the global map
+    int globalX = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + xIndex;
+    int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
+
+    // Access pitched memory properly
+    unsigned short *globalRow = (unsigned short *)((char *)globalMap + globalX * pitchGlobal);
+    unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
+
+    terrainRow[yIndex] = globalRow[globalY];
+}
+
+extern "C"
+__global__ void planOffsetKernel(unsigned short *matrixToModify, size_t pitchMatrixToModify,
+                                 unsigned short *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
                                  float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
                                  float resetOffset)
 {

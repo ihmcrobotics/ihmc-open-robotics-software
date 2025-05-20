@@ -18,11 +18,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setEnableAlphaFilter(boolean enableAlphaFilter)
-   {
-      set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);
-   }
-
    default void setEnableVerticalFilter(boolean enableVerticalFilter)
    {
       set(HeightMapParameters.enableVerticalFilter, enableVerticalFilter);
@@ -98,14 +93,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setCroppedWidthInMeters(double croppedWidthInMeters)
+   default void setTerrainWidthInMeters(double terrainWidthInMeters)
    {
-      set(HeightMapParameters.croppedWidthInMeters, croppedWidthInMeters);
+      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
    }
 
-   default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
+   default void setGlobalWidthInMeters(double globalWidthInMeters)
    {
-      set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
+      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
    default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
