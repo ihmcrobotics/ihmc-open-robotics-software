@@ -1,5 +1,5 @@
 {
-  "title": "Height Map Parameters",
+  "title": "HeightMapParametersForFST",
   "Drift offset filter": true,
   "Flying points filter": true,
   "Enable vertical filter": true,
