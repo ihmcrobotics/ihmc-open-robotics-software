@@ -164,6 +164,23 @@ public class RapidHeightMapExtractor
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
+      RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
+      // Remove rotation from transformation
+      groundToWorldNoRotation.getRotation().setIdentity();
+
+      RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
+      // Invert translation-only transform
+      worldToGroundNoRotation.invert();
+
+      // This transformation only has rotation
+      RigidBodyTransform groundToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
+      groundToWorldAlignedGround.multiply(groundToWorldTransform);
+
+      groundToWorldAlignedGround.get(worldToGroundTransformArray);
+      zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
+      CUDATools.mallocAsync(ZUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(ZUpCameraToWorldAlignedGroundDevicePointer, zUpCameraToWorldAlignedGroundHostPointer, worldToGroundTransformArray.length, stream);
+
       // --------- Run the update kernel ---------
       {
          // Compute the inverse transforms for later use
@@ -185,9 +202,12 @@ public class RapidHeightMapExtractor
 
          updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
          updateKernel.withPointer(localHeightMapImage.data()).withLong(localHeightMapImage.step());
+         updateKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
          updateKernel.withPointer(parametersDevicePointer);
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
+         updateKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         updateKernel.withFloat(resetOffset);
          updateKernel.withInt(cellsPerAxisLocal);
 
          updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
@@ -235,26 +255,6 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the registration kernel ----------
       {
-         RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
-         // Remove rotation from transformation
-         groundToWorldNoRotation.getRotation().setIdentity();
-
-         RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
-         // Invert translation-only transform
-         worldToGroundNoRotation.invert();
-
-         // This transformation only has rotation
-         RigidBodyTransform groundToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
-         groundToWorldAlignedGround.multiply(groundToWorldTransform);
-
-         groundToWorldAlignedGround.get(worldToGroundTransformArray);
-         zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
-         CUDATools.mallocAsync(ZUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
-         CUDATools.memcpyAsync(ZUpCameraToWorldAlignedGroundDevicePointer,
-                               zUpCameraToWorldAlignedGroundHostPointer,
-                               worldToGroundTransformArray.length,
-                               stream);
-
          int registerKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
@@ -266,7 +266,6 @@ public class RapidHeightMapExtractor
 
          registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
-         cudaFreeAsync(ZUpCameraToWorldAlignedGroundDevicePointer, stream);
          registerKernelGridDim.close();
          error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
@@ -274,6 +273,7 @@ public class RapidHeightMapExtractor
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
+      cudaFreeAsync(ZUpCameraToWorldAlignedGroundDevicePointer, stream);
    }
 
    public void updateHeightOffset(RigidBodyTransform groundToWorldTransform, float z, CameraIntrinsics cameraIntrinsics, double footHeight)
