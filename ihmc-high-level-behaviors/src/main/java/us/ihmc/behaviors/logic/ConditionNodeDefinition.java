@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.logic.condition.CounterConditionDefinition;
 import us.ihmc.behaviors.logic.condition.LLMConditionDefinition;
+import us.ihmc.behaviors.logic.condition.ProximityConditionDefinition;
 import us.ihmc.behaviors.sequence.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -21,7 +22,8 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public enum Type
    {
       COUNTER,
-      LLM;
+      LLM,
+      PROXIMITY;
 
       public static final Type[] values = values();
    }
@@ -30,6 +32,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
 
    private final CounterConditionDefinition counter;
    private final LLMConditionDefinition llm;
+   private final ProximityConditionDefinition proximityCheck;
 
    private Type onDiskType;
 
@@ -42,6 +45,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       // TODO: Do we create them all or only as needed?
       counter = new CounterConditionDefinition(this);
       llm = new LLMConditionDefinition(this);
+      proximityCheck = new ProximityConditionDefinition(this);
    }
 
    @Override
@@ -55,6 +59,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       {
          case COUNTER -> counter.saveToFile(jsonNode);
          case LLM -> llm.saveToFile(jsonNode);
+         case PROXIMITY -> proximityCheck.saveToFile(jsonNode);
       }
    }
 
@@ -69,6 +74,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       {
          case COUNTER -> counter.loadFromFile(jsonNode);
          case LLM -> llm.loadFromFile(jsonNode);
+         case PROXIMITY -> proximityCheck.loadFromFile(jsonNode);
       }
    }
 
@@ -83,6 +89,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       {
          case COUNTER -> counter.setOnDiskFields();
          case LLM -> llm.setOnDiskFields();
+         case PROXIMITY -> proximityCheck.setOnDiskFields();
       }
    }
 
@@ -99,6 +106,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
          {
             case COUNTER -> counter.undoAllNontopologicalChanges();
             case LLM -> llm.undoAllNontopologicalChanges();
+            case PROXIMITY -> proximityCheck.undoAllNontopologicalChanges();
          }
       }
    }
@@ -114,6 +122,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       {
          case COUNTER -> unchanged &= !counter.hasChanges();
          case LLM -> unchanged &= !llm.hasChanges();
+         case PROXIMITY -> unchanged &= !proximityCheck.hasChanges();
       }
 
       return !unchanged;
@@ -129,6 +138,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       {
          case COUNTER -> counter.toMessage(message);
          case LLM -> llm.toMessage(message);
+         case PROXIMITY -> proximityCheck.toMessage(message);
       }
    }
 
@@ -142,6 +152,7 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
       {
          case COUNTER -> counter.fromMessage(message);
          case LLM -> llm.fromMessage(message);
+         case PROXIMITY -> proximityCheck.fromMessage(message);
       }
    }
 
@@ -158,5 +169,10 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
    public LLMConditionDefinition getLLM()
    {
       return llm;
+   }
+
+   public ProximityConditionDefinition getProximityCheck()
+   {
+      return proximityCheck;
    }
 }

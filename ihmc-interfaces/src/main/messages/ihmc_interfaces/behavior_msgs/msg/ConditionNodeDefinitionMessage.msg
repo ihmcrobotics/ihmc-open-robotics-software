@@ -3,8 +3,9 @@ behavior_msgs/LeafNodeDefinitionMessage definition
 
 byte COUNTER_TYPE = 0
 byte LLM_TYPE = 1
+byte PROXIMITY_TYPE = 2
 
-# The type of condtion as defined above
+# The type of condition as defined above
 byte type
 
 # COUNTER TYPE
@@ -34,3 +35,21 @@ string<=10000 prompt
 
 # A regular expression, where if it matches, the execution failed
 string<=10000 response_matcher
+
+# PROXIMITY TYPE
+
+byte XYZ_TYPE = 0
+byte XY_TYPE = 1
+byte Z_TYPE = 2
+
+# The type of distance condition as defined above
+byte distance_type
+
+# Name of the object frame
+string object_frame_name
+
+# Name of the frame the distance is expressed in
+string reference_frame_name
+
+# The minimum distance between the object and the reference frame
+float64 distance_to_object

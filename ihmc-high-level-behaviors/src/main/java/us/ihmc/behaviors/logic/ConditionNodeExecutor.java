@@ -2,6 +2,7 @@ package us.ihmc.behaviors.logic;
 
 import us.ihmc.behaviors.logic.condition.CounterConditionExecutor;
 import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
+import us.ihmc.behaviors.logic.condition.ProximityConditionExecutor;
 import us.ihmc.behaviors.sequence.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -10,14 +11,16 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, ConditionNodeDefinition>
 {
    private final CounterConditionExecutor counter;
-   private final LLMConditionExecutor llm;
+   private LLMConditionExecutor llm;
+   private final ProximityConditionExecutor proximityCheck;
 
    public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
 
       counter = new CounterConditionExecutor(state);
-      llm = new LLMConditionExecutor(state, referenceFrameLibrary);
+//      llm = new LLMConditionExecutor(state, referenceFrameLibrary);
+      proximityCheck = new ProximityConditionExecutor(state, referenceFrameLibrary);
    }
 
    @Override
@@ -27,7 +30,8 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
 
       switch (definition.getType().getValue())
       {
-         case LLM -> llm.update();
+//         case LLM -> llm.update();
+         case PROXIMITY -> proximityCheck.update();
       }
    }
 
@@ -37,14 +41,15 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
       switch (definition.getType().getValue())
       {
          case COUNTER -> counter.updateCurrentlyExecuting();
-         case LLM -> llm.updateCurrentlyExecuting();
+//         case LLM -> llm.updateCurrentlyExecuting();
+         case PROXIMITY -> proximityCheck.updateCurrentlyExecuting();
       }
    }
 
    @Override
    public void destroy()
    {
-      llm.destroy();
+//      llm.destroy();
    }
 
    public CounterConditionExecutor getCounter()
@@ -55,5 +60,10 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    public LLMConditionExecutor getLLM()
    {
       return llm;
+   }
+
+   public ProximityConditionExecutor getProximityCheck()
+   {
+      return proximityCheck;
    }
 }
