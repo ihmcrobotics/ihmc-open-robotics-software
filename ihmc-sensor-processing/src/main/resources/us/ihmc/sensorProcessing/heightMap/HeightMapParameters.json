@@ -2,7 +2,6 @@
   "title" : "HeightMapParameters",
   "Drift offset filter" : true,
   "Flying points filter" : true,
-  "Enable alpha filter" : true,
   "Enable vertical filter" : true,
   "Search window height" : {
     "value" : 450,
@@ -74,12 +73,12 @@
     "lowerBound" : 1.0,
     "upperBound" : 4.5
   },
-  "Cropped width in meters" : {
+  "Terrain width in meters" : {
     "value" : 4.0,
     "lowerBound" : 2.0,
     "upperBound" : 8.0
   },
-  "Internal global width in meters" : {
+  "Global width in meters" : {
     "value" : 4.0,
     "lowerBound" : 20.0,
     "upperBound" : 40.0

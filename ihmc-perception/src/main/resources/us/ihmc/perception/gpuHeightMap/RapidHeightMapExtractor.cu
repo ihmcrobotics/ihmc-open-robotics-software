@@ -243,9 +243,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
         {
              float unScaledHeight = static_cast<float>(*globalHeight) / params[HEIGHT_SCALING_FACTOR];
              float heightInMeters = unScaledHeight - params[HEIGHT_OFFSET];
-
              cellCenterInZUp.z = heightInMeters;
-
         }
     }
 
@@ -446,12 +444,34 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMap, size_t pit
         // Add 0.5 to round to the nearest unsigned short, any decimal gets removed. e.g. 3.6 -> 4.1 = 4
         *globalHeight = static_cast<unsigned short>(filtered + 0.5f);
     }
-
 }
 
 extern "C"
-__global__ void planOffsetKernel(unsigned short * matrixToModify, size_t pitchMatrixToModify,
-                                 unsigned short * matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
+__global__ void terrainHeightMapKernel(unsigned short *globalMap, size_t pitchGlobal,
+                                       unsigned short *terrainMap, size_t pitchTerrain,
+                                       int centerIndexTerrain, float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int terrainCellsPerAxis = 2 * centerIndexTerrain + 1;
+    if (xIndex >= terrainCellsPerAxis || yIndex >= terrainCellsPerAxis)
+        return;
+
+    // Compute coordinates in the global map
+    int globalX = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + xIndex;
+    int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
+
+    // Access pitched memory properly
+    unsigned short *globalRow = (unsigned short *)((char *)globalMap + globalX * pitchGlobal);
+    unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
+
+    terrainRow[yIndex] = globalRow[globalY];
+}
+
+extern "C"
+__global__ void planOffsetKernel(unsigned short *matrixToModify, size_t pitchMatrixToModify,
+                                 unsigned short *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
                                  float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
                                  float resetOffset)
 {

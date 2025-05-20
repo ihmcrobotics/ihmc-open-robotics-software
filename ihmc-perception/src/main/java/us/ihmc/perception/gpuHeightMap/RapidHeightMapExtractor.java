@@ -36,11 +36,13 @@ public class RapidHeightMapExtractor
    private final GpuMat localHeightMapImage;
    private final GpuMat globalHeightMapImage;
    private final GpuMat previousGlobalHeightMapImage;
+   private final GpuMat terrainHeightMapImage;
    private final GpuMat emptyGlobalHeightMapImage;
 
    private final CUDAKernel updateKernel;
    private final CUDAKernel translateKernel;
    private final CUDAKernel registerKernel;
+   private final CUDAKernel terrainKernel;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
@@ -61,7 +63,9 @@ public class RapidHeightMapExtractor
    private int centerIndexLocal;
    private int cellsPerAxisLocal;
    private int centerIndexGlobal;
+   private int centerIndexTerrain;
    private int cellsPerAxisGlobal;
+   private int cellsPerAxisTerrain;
 
    private final Point3D previousSensorOrigin = new Point3D();
    private int previousCellX;
@@ -90,12 +94,14 @@ public class RapidHeightMapExtractor
          updateKernel = heightMapProgram.loadKernel("heightMapUpdateKernel");
          translateKernel = heightMapProgram.loadKernel("translateHeightMapKernel");
          registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
+         terrainKernel = heightMapProgram.loadKernel("terrainHeightMapKernel");
          planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
 
          updateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          translateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         terrainKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
@@ -103,6 +109,7 @@ public class RapidHeightMapExtractor
          localHeightMapImage = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          globalHeightMapImage = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
          previousGlobalHeightMapImage = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         terrainHeightMapImage = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
          emptyGlobalHeightMapImage = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
          // Initialize transformation pointers
@@ -129,8 +136,11 @@ public class RapidHeightMapExtractor
       centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisLocal = 2 * centerIndexLocal + 1;
 
-      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
+
+      centerIndexTerrain = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      cellsPerAxisTerrain = 2 * centerIndexTerrain + 1;
    }
 
    public void reset(double footHeight)
@@ -146,6 +156,7 @@ public class RapidHeightMapExtractor
       localHeightMapImage.setTo(new Scalar(resetOffset));
       globalHeightMapImage.setTo(new Scalar(resetOffset));
       previousGlobalHeightMapImage.setTo(new Scalar(resetOffset));
+      terrainHeightMapImage.setTo(new Scalar(resetOffset));
       emptyGlobalHeightMapImage.setTo(new Scalar(resetOffset));
    }
 
@@ -267,6 +278,23 @@ public class RapidHeightMapExtractor
          registerKernel.run(stream, registerKernelGridDim, blockSize, 0);
 
          registerKernelGridDim.close();
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
+      }
+
+      // ---------- Run the Terrain cropping kernel ----------
+      {
+         int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
+
+         terrainKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
+         terrainKernel.withPointer(terrainHeightMapImage.data()).withLong(terrainHeightMapImage.step());
+         terrainKernel.withInt(centerIndexTerrain);
+         terrainKernel.withPointer(parametersDevicePointer);
+
+         terrainKernel.run(stream, terrainKernelGridDim, blockSize, 0);
+
+         terrainKernelGridDim.close();
          error = cudaStreamSynchronize(stream);
          CUDATools.checkCUDAError(error);
       }
@@ -423,5 +451,10 @@ public class RapidHeightMapExtractor
    public GpuMat getHeightMap()
    {
       return globalHeightMapImage.clone();
+   }
+
+   public GpuMat getTerrainHeightMap()
+   {
+      return terrainHeightMapImage.clone();
    }
 }

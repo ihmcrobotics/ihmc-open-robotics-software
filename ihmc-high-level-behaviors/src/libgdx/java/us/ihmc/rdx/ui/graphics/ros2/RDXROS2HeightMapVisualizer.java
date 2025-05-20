@@ -61,7 +61,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       this.heightMapParameters = heightMapParameters;
 
-      int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
 
       terrainMapData = new TerrainMapData(cellsPerAxisCropped,
@@ -125,7 +125,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (latestHeightMapData == null)
                                               {
                                                  latestHeightMapData = new HeightMapData(heightMapParameters.getCellSizeInMeters(),
-                                                                                         heightMapParameters.getInternalGlobalWidthInMeters(),
+                                                                                         heightMapParameters.getGlobalWidthInMeters(),
                                                                                          imageMessage.getPosition().getX(),
                                                                                          imageMessage.getPosition().getY());
                                               }
@@ -133,7 +133,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               PerceptionMessageTools.convertToHeightMapData(heightMapImage,
                                                                                             latestHeightMapData,
                                                                                             imageMessage.getPosition(),
-                                                                                            (float) heightMapParameters.getInternalGlobalWidthInMeters(),
+                                                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
                                                                                             (float) heightMapParameters.getCellSizeInMeters(),
                                                                                             heightMapParameters);
                                            });
