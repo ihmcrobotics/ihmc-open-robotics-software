@@ -15,6 +15,7 @@ public class ProximityConditionExecutor
 
    private final CRDTBidirectionalDouble distance;
    private final CRDTBidirectionalDouble maxDistanceToObject;
+   private double conditionStartTime = -1.0;
 
    public ProximityConditionExecutor(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -53,8 +54,32 @@ public class ProximityConditionExecutor
 
    public void updateCurrentlyExecuting()
    {
-      state.setEvaluatingConditionValue(true);
-      state.setConditionValue(distance.getValue() >= 0 && distance.getValue() < maxDistanceToObject.getValue());
+      if (!state.isEvaluatingCondition())
+      {
+         conditionStartTime = System.nanoTime();
+         state.setEvaluatingConditionValue(true);
+      }
+
+      boolean conditionValue = distance.getValue() >= 0 && distance.getValue() < maxDistanceToObject.getValue();
+      state.setConditionValue(conditionValue);
+
+      if (!conditionValue)
+      {
+         if (getTimeElapsedInCondition() > definition.getProximityCheck().getCRDTMaxEvaluationTime().getValue())
+         {
+            state.setFailed(true);
+            state.setEvaluatingConditionValue(false);
+         }
+      }
+
       state.setIsExecuting(false); // Completes immediately
+   }
+
+   private double getTimeElapsedInCondition()
+   {
+      if (conditionStartTime < 0.0)
+         return 0.0;
+      else
+         return (System.nanoTime() - conditionStartTime) * 1.0e-9;
    }
 }

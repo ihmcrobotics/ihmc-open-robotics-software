@@ -88,9 +88,13 @@ module behavior_msgs
          */
         string reference_frame_name;
         /**
-         * The minimum distance between the object and the reference frame
+         * The maximum distance between the object and the reference frame
          */
         double distance_to_object;
+        /**
+         * The maximum time that is spent in evaluating the condition
+         */
+        double evaluation_time;
       };
     };
   };

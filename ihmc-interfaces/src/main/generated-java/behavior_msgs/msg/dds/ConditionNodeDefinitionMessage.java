@@ -72,9 +72,13 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             */
    public java.lang.StringBuilder reference_frame_name_;
    /**
-            * The minimum distance between the object and the reference frame
+            * The maximum distance between the object and the reference frame
             */
    public double distance_to_object_;
+   /**
+            * The maximum time that is spent in evaluating the condition
+            */
+   public double evaluation_time_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -125,6 +129,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       reference_frame_name_.append(other.reference_frame_name_);
 
       distance_to_object_ = other.distance_to_object_;
+
+      evaluation_time_ = other.evaluation_time_;
 
    }
 
@@ -363,18 +369,33 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
    }
 
    /**
-            * The minimum distance between the object and the reference frame
+            * The maximum distance between the object and the reference frame
             */
    public void setDistanceToObject(double distance_to_object)
    {
       distance_to_object_ = distance_to_object;
    }
    /**
-            * The minimum distance between the object and the reference frame
+            * The maximum distance between the object and the reference frame
             */
    public double getDistanceToObject()
    {
       return distance_to_object_;
+   }
+
+   /**
+            * The maximum time that is spent in evaluating the condition
+            */
+   public void setEvaluationTime(double evaluation_time)
+   {
+      evaluation_time_ = evaluation_time;
+   }
+   /**
+            * The maximum time that is spent in evaluating the condition
+            */
+   public double getEvaluationTime()
+   {
+      return evaluation_time_;
    }
 
 
@@ -422,6 +443,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_object_, other.distance_to_object_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.evaluation_time_, other.evaluation_time_, epsilon)) return false;
+
 
       return true;
    }
@@ -462,6 +485,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.distance_to_object_ != otherMyClass.distance_to_object_) return false;
 
+      if(this.evaluation_time_ != otherMyClass.evaluation_time_) return false;
+
 
       return true;
    }
@@ -499,7 +524,9 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("reference_frame_name=");
       builder.append(this.reference_frame_name_);      builder.append(", ");
       builder.append("distance_to_object=");
-      builder.append(this.distance_to_object_);
+      builder.append(this.distance_to_object_);      builder.append(", ");
+      builder.append("evaluation_time=");
+      builder.append(this.evaluation_time_);
       builder.append("}");
       return builder.toString();
    }
