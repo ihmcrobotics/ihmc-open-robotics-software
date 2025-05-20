@@ -365,22 +365,14 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 extern "C"
 __global__ void translateHeightMapKernel(unsigned short* oldMap, size_t pitchOld,
                                          unsigned short* newMap, size_t pitchNew,
-                                         float currentCenterX, float currentCenterY,
-                                         float previousCenterX, float previousCenterY,
-                                         int mapSize, int defaultValue,
-                                         float cellSizeInMeters)
+                                         int shiftX, int shiftY,
+                                         int mapSize, int defaultValue)
 {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;  // column
-    int y = blockIdx.y * blockDim.y + threadIdx.y;  // row
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (x >= mapSize || y >= mapSize)
         return;
-
-    float dx = currentCenterX - previousCenterX;
-    float dy = currentCenterY - previousCenterY;
-
-    int shiftX = round(dx / cellSizeInMeters);
-    int shiftY = round(dy / cellSizeInMeters);
 
     int srcX = x + shiftX;
     int srcY = y + shiftY;

@@ -67,7 +67,6 @@ public class RapidHeightMapExtractor
    private int cellsPerAxisGlobal;
    private int cellsPerAxisTerrain;
 
-   private final Point3D previousSensorOrigin = new Point3D();
    private int previousCellX;
    private int previousCellY;
    private int resetOffset;
@@ -244,13 +243,14 @@ public class RapidHeightMapExtractor
             int translateKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
 
+            int shiftX = currentCellX - previousCellX;
+            int shiftY = currentCellY - previousCellY;
+
             translateKernel.withPointer(previousGlobalHeightMapImage.data()).withLong(previousGlobalHeightMapImage.step());
             translateKernel.withPointer(globalHeightMapImage.data()).withLong(globalHeightMapImage.step());
-            translateKernel.withFloat(sensorOrigin.getX32()).withFloat(sensorOrigin.getY32());
-            translateKernel.withFloat(previousSensorOrigin.getX32()).withFloat(previousSensorOrigin.getY32());
+            translateKernel.withInt(shiftX).withInt(shiftY);
             translateKernel.withInt(cellsPerAxisGlobal);
             translateKernel.withInt(resetOffset);
-            translateKernel.withFloat((float) heightMapParameters.getCellSizeInMeters());
 
             translateKernel.run(stream, translateKernelGridDim, blockSize, 0);
 
@@ -260,7 +260,6 @@ public class RapidHeightMapExtractor
 
             previousCellX = currentCellX;
             previousCellY = currentCellY;
-            previousSensorOrigin.set(sensorOrigin);
          }
       }
 
