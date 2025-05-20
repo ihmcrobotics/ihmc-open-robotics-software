@@ -122,7 +122,7 @@ public class RapidHeightMapExtractor
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          ZUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(34);
+         parametersHostPointer = new FloatPointer(33);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -391,7 +391,6 @@ public class RapidHeightMapExtractor
                           (float) cameraIntrinsics.getFx(),
                           (float) cameraIntrinsics.getFy(),
                           (float) centerIndexGlobal,
-                          (float) parameters.getRobotCollisionCylinderRadius(),
                           (float) heightMapParameters.getLocalWidthInMeters() / 2,
                           (float) parameters.getHeightFilterAlpha(),
                           (float) cellsPerAxisLocal,

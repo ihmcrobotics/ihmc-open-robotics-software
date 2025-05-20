@@ -105,11 +105,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(globalWidthInMeters);
    }
 
-   default double getRobotCollisionCylinderRadius()
-   {
-      return get(robotCollisionCylinderRadius);
-   }
-
    default double getHeightScaleFactor()
    {
       return get(heightScaleFactor);

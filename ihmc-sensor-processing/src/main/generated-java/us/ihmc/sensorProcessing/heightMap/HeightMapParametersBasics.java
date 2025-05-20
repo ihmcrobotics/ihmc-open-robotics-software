@@ -103,11 +103,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
-   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
-   {
-      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
-   }
-
    default void setHeightScaleFactor(double heightScaleFactor)
    {
       set(HeightMapParameters.heightScaleFactor, heightScaleFactor);

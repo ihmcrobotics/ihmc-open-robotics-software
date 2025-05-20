@@ -1,8 +1,7 @@
 {
-  "title": "GPU Height Map Parameters",
+  "title": "Height Map Parameters",
   "Drift offset filter": true,
   "Flying points filter": true,
-  "Enable alpha filter": true,
   "Enable vertical filter": true,
   "Search window height": {
     "value": 400,
@@ -79,20 +78,10 @@
     "lowerBound": 2.0,
     "upperBound": 8.0
   },
-  "Cropped width in meters": {
+  "Global width in meters": {
     "value": 2.0,
-    "lowerBound": 2.0,
-    "upperBound": 8.0
-  },
-  "Internal global width in meters": {
-    "value": 30.0,
     "lowerBound": 20.0,
     "upperBound": 40.0
-  },
-  "Robot collision cylinder radius": {
-    "value": 0.05,
-    "lowerBound": 0.0,
-    "upperBound": 0.8
   },
   "Height scale factor": {
     "value": 10000.0,

@@ -12,30 +12,29 @@ extern "C"
 #define DEPTH_FX 7
 #define DEPTH_FY 8
 #define GLOBAL_CENTER_INDEX 9
-#define ROBOT_COLLISION_RADIUS 10
-#define HALF_LOCAL_WIDTH_IM_METERS 11
-#define HEIGHT_FILTER_ALPHA 12
-#define LOCAL_CELLS_PER_AXIS 13
-#define GLOBAL_CELLS_PER_AXIS 14
-#define HEIGHT_SCALING_FACTOR 15
-#define MIN_HEIGHT_REGISTRATION 16
-#define MAX_HEIGHT_REGISTRATION 17
-#define MIN_HEIGHT_DIFFERENCE 18
-#define MAX_HEIGHT_DIFFERENCE 19
-#define SEARCH_WINDOW_HEIGHT 20
-#define SEARCH_WINDOW_WIDTH 21
-#define MIN_CLAMP_HEIGHT 22
-#define MAX_CLAMP_HEIGHT 23
-#define HEIGHT_OFFSET 24
-#define STEPPING_COSINE_THRESHOLD 25
-#define STEPPING_CONTACT_THRESHOLD 26
-#define CONTACT_WINDOW_SIZE 27
-#define SPATIAL_ALPHA 28
-#define SEARCH_SKIP_SIZE 29
-#define VERTICAL_SEARCH_SIZE 30
-#define VERTICAL_SEARCH_RESOLUTION 31
-#define FAST_SEARCH_SIZE 32
-#define GROUND_HEIGHT 33
+#define HALF_LOCAL_WIDTH_IM_METERS 10
+#define HEIGHT_FILTER_ALPHA 11
+#define LOCAL_CELLS_PER_AXIS 12
+#define GLOBAL_CELLS_PER_AXIS 13
+#define HEIGHT_SCALING_FACTOR 14
+#define MIN_HEIGHT_REGISTRATION 15
+#define MAX_HEIGHT_REGISTRATION 16
+#define MIN_HEIGHT_DIFFERENCE 17
+#define MAX_HEIGHT_DIFFERENCE 18
+#define SEARCH_WINDOW_HEIGHT 19
+#define SEARCH_WINDOW_WIDTH 20
+#define MIN_CLAMP_HEIGHT 21
+#define MAX_CLAMP_HEIGHT 22
+#define HEIGHT_OFFSET 23
+#define STEPPING_COSINE_THRESHOLD 24
+#define STEPPING_CONTACT_THRESHOLD 25
+#define CONTACT_WINDOW_SIZE 26
+#define SPATIAL_ALPHA 27
+#define SEARCH_SKIP_SIZE 28
+#define VERTICAL_SEARCH_SIZE 29
+#define VERTICAL_SEARCH_RESOLUTION 30
+#define FAST_SEARCH_SIZE 31
+#define GROUND_HEIGHT 32
 
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
@@ -300,16 +299,18 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
             // Bounds check
             if (yawIdx >= 0 && yawIdx < depthWidth && pitchIdx >= 0 && pitchIdx < depthHeight)
             {
-                // Read depth value using pitched memory
                 unsigned short *inRow = (unsigned short *)((char *)depthImage + (pitchIdx * pitchDepth));
                 unsigned short depthValue = *(inRow + yawIdx);
 
-                // Convert depth value to meters (if necessary)
                 float depth = static_cast<float>(depthValue) / 1000.0f; // Scaling depth to meters
+
+                // This is roughly the minimum depth of the realsense with a little buffer
+                // We reject this value cause it doesn't make any sense
+                if (depth < 0.5f)
+                    continue;
 
                 // Back-project depth to 3D point
                 float3 queryPointInSensor;
-
                 queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
 
                 // Transform back to Z-Up frame

@@ -83,11 +83,6 @@
     "lowerBound" : 20.0,
     "upperBound" : 40.0
   },
-  "Robot collision cylinder radius" : {
-    "value" : 0.05,
-    "lowerBound" : 0.0,
-    "upperBound" : 0.8
-  },
   "Height scale factor" : {
     "value" : 10000.0,
     "lowerBound" : 1000.0,
