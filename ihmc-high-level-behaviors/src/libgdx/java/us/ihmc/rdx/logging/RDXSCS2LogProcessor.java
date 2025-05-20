@@ -10,6 +10,8 @@ import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImString;
 import org.apache.commons.lang.WordUtils;
 import us.ihmc.avatar.logProcessor.SCS2LogProcessor;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -17,6 +19,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.IHMCCommonPaths;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -212,7 +215,10 @@ public class RDXSCS2LogProcessor
                      SCS2LogProcessor logProcessor = logProcessors.get(logDirectory);
 
                      ImGui.tableNextColumn();
-                     ImGui.text(logDirectory.getFileName().toString());
+                     if (ImGuiTools.textWithUnderlineOnHover(logDirectory.getFileName().toString()) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                     {
+                        ExceptionTools.handle(() -> Desktop.getDesktop().open(logDirectory.toFile()), DefaultExceptionHandler.PRINT_MESSAGE);
+                     }
 
                      ImGui.tableNextColumn();
                      if (logProcessor.isLogValid())
