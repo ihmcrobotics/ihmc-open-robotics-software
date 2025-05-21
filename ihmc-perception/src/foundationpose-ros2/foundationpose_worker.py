@@ -7,21 +7,7 @@ sys.path.append(os.path.join(base_dir, 'FoundationPose'))
 sys.path.append(os.path.join(base_dir, 'FoundationPose', 'nvdiffrast'))
 
 
-import rclpy
-from rclpy.node import Node
 from estimater import *
-import cv2
-import numpy as np
-import trimesh
-from sensor_msgs.msg import Image, CameraInfo
-from geometry_msgs.msg import Pose, PoseStamped
-from cv_bridge import CvBridge
-import argparse
-import os
-from scipy.spatial.transform import Rotation as R
-from ultralytics import SAM
-from cam_2_base_transform import *
-import glob
 
 
 class FoundationPoseWorker:
@@ -44,7 +30,7 @@ class FoundationPoseWorker:
 
     def update(self, rgb, depth):
         if not self.initialized:
-            self.foundation_pose.register(K=self.camera_k, rgb=self.initial_rgb, depth=self.initial_depth, ob_mask=self.initial_mask, ob_id=object_id)
+            self.foundation_pose.register(K=self.camera_k, rgb=self.initial_rgb, depth=self.initial_depth, ob_mask=self.initial_mask, ob_id=self.object_id)
             self.initialized = True
 
         return self.foundation_pose.track_one(rgb=rgb, depth=depth, K=camera_k, iteration=2)

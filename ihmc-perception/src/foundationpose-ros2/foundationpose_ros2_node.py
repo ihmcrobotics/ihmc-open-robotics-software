@@ -87,14 +87,16 @@ class FoundationPoseROS2Node(Node):
             height, width = color.shape[:2]
             mask = cv2.resize(mask, (width, height))
 
-        workers[request.object_id] = FoundationPoseWorker(
+        self.workers[request.object_id] = FoundationPoseWorker(
             mesh=mesh,
             rgb=color,
             depth=depth,
+            mask=mask,
             camera_k=self.camera_k,
             object_id=request.object_id,
             glctx=self.glctx
         )
+
 
     def process(self):
         print("Starting process thread...")
@@ -111,6 +113,7 @@ class FoundationPoseROS2Node(Node):
                 self.new_depth_available.clear()
         except KeyboardInterrupt:
             print("Process finishing...")
+
 
 def main():
     # initialize ROS
