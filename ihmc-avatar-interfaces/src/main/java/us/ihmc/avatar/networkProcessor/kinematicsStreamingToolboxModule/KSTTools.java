@@ -452,6 +452,8 @@ public class KSTTools
       if (isCenterOfMassOutputEnabled.getValue())
          streamingMessageFactory.computeCenterOfMassStreamingMessage();
 
+      streamingMessageFactory.getOutput().setHasCenterOfMassTrajectoryMessage(isCenterOfMassOutputEnabled.getValue());
+
       currentMessageId.increment();
       return streamingMessageFactory.getOutput();
    }
