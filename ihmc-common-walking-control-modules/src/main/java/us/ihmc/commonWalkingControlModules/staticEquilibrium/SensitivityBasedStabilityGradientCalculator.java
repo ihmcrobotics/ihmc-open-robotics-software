@@ -111,9 +111,10 @@ public class SensitivityBasedStabilityGradientCalculator
    public SensitivityBasedStabilityGradientCalculator(FullHumanoidRobotModel fullRobotModel,
                                                       WholeBodyContactState wholeBodyContactState,
                                                       StabilityMarginRegionCalculator stabilityMarginRegionCalculator,
+                                                      CentroidalMomentumCalculator centroidalMomentumCalculator,
                                                       YoRegistry parentRegistry)
    {
-      this.nullspaceCalculator = new ContactNullspaceCalculator(fullRobotModel, wholeBodyContactState, registry);
+      this.nullspaceCalculator = new ContactNullspaceCalculator(fullRobotModel, wholeBodyContactState, centroidalMomentumCalculator, registry);
       this.stabilityMarginRegionCalculator = stabilityMarginRegionCalculator;
       this.postureConstraintVariationCalculator = new PostureConstraintMatrixVariationCalculator(fullRobotModel,
                                                                                                  wholeBodyContactState,
@@ -121,11 +122,11 @@ public class SensitivityBasedStabilityGradientCalculator
                                                                                                  integrationDT,
                                                                                                  registry);
       robotMass = fullRobotModel.getTotalMass();
+      this.centroidalMomentumCalculator = centroidalMomentumCalculator;
 
       JointBasics[] controlledJoints = computeJointsToOptimizeFor(fullRobotModel);
       OneDoFJointBasics[] controllableOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
       MultiBodySystemBasics multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
-      centroidalMomentumCalculator = new CentroidalMomentumCalculator(multiBodySystemInput, ReferenceFrame.getWorldFrame());
 
       yoStabilityMarginGradient = new YoDouble[Twist.SIZE + controllableOneDoFJoints.length];
       for (int i = 0; i < yoStabilityMarginGradient.length; i++)
@@ -182,7 +183,6 @@ public class SensitivityBasedStabilityGradientCalculator
 
       CommonOps_DDRM.mult(nullspaceCalculator.getNullspace(), computedSensitivity, stabilityBoundaryGradient);
 
-      centroidalMomentumCalculator.reset();
       DMatrixRMaj centroidalMomentumMatrix = centroidalMomentumCalculator.getCentroidalMomentumMatrix();
       centroidalMomentumMatrixXY.reshape(XY_DIMENSIONS, centroidalMomentumMatrix.getNumCols());
       MatrixTools.setMatrixBlock(centroidalMomentumMatrixXY, 0, 0, centroidalMomentumMatrix, 3, 0, XY_DIMENSIONS, centroidalMomentumMatrix.getNumCols(), 1.0 / robotMass);
