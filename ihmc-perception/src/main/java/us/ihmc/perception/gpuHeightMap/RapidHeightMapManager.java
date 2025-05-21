@@ -63,7 +63,7 @@ public class RapidHeightMapManager
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
 
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(1, heightMapParameters);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);

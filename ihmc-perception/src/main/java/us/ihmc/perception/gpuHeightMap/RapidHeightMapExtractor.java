@@ -26,12 +26,12 @@ public class RapidHeightMapExtractor
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    static final int BLOCK_SIZE_XY = 32;
+   private static final int MODE = 1; // 0 -> Ouster, 1 -> Realsense
 
    private final HeightMapParameters heightMapParameters;
    private final CUstream_st stream;
    private final CUDAProgram heightMapProgram;
    private final dim3 blockSize;
-   private final int mode; // 0 -> Ouster, 1 -> Realsense
 
    // These are the mats required to extract the depth data
    private final GpuMat localHeightMap;
@@ -77,11 +77,9 @@ public class RapidHeightMapExtractor
    private int previousCellY;
    private int resetOffset;
 
-   public RapidHeightMapExtractor(int mode, HeightMapParameters heightMapParameters)
+   public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
-      this.mode = mode;
       this.heightMapParameters = heightMapParameters;
-
       stream = CUDAStreamManager.getStream();
 
       // Load header and main file
@@ -387,7 +385,7 @@ public class RapidHeightMapExtractor
                           (float) centerIndexLocal,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
-                          (float) mode,
+                          (float) MODE,
                           (float) cameraIntrinsics.getCx(),
                           (float) cameraIntrinsics.getCy(),
                           (float) cameraIntrinsics.getFx(),
