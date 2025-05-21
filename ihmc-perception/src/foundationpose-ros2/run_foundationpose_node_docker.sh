@@ -17,6 +17,7 @@ docker run -it \
   --network=host \
   --ipc=host \
   --runtime=nvidia \
+  --privileged \
   --gpus all \
   --env DISPLAY=$DISPLAY \
   --env QT_X11_NO_MITSHM=1 \
@@ -26,4 +27,4 @@ docker run -it \
   --volume /dev:/dev \
   --mount type=bind,source=.,target=/root/foundationpose-ros2 \
   foundationpose-ros2:0.0.1 \
-  bash -c "source /opt/ros/humble/setup.bash && python3 foundationpose_ros_multi.py"
+  bash -c "source /root/ihmc_ros2_ws/install/setup.bash && python3 foundationpose_ros.py"
