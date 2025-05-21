@@ -217,8 +217,11 @@ public class RapidHeightMapExtractor
          dim3 updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
 
          updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
-         updateKernel.withPointer(localHeightMap.data()).withLong(localHeightMap.step());
          updateKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
+         updateKernel.withPointer(localHeightMap.data()).withLong(localHeightMap.step());
+         updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+         updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
+         updateKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          updateKernel.withPointer(parametersDevicePointer);
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
