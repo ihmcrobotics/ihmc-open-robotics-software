@@ -341,6 +341,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     }
 
     float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
+    float scaledVariance = currentVariance * params[HEIGHT_SCALING_FACTOR] * params[HEIGHT_SCALING_FACTOR];
 
     if (count == 0)
         meanZ = -params[HEIGHT_OFFSET];
@@ -357,7 +358,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     unsigned short *meanHeight = (unsigned short *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
     *meanHeight = heightValue;
     unsigned short *variance = (unsigned short *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
-    *variance = currentVariance;
+    *variance = scaledVariance;
     unsigned short *numberOfSamples = (unsigned short *)((char *)localSampleCountMap + xIndex * pitchLocalSampleCount) + yIndex;
     *numberOfSamples = count;
 }
@@ -450,13 +451,6 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
     }
     else
     {
-        if (xIndex == 150 && yIndex == 150)
-        {
-            printf("Local variance: %f\n", localVarianceF);
-            printf("Global Mean: %f\n", globalMeanF);
-            printf("Global Variance: %f\n", globalVarianceF);
-        }
-
         float kalmanGain = globalVarianceF / (globalVarianceF + localVarianceF);
         float updatedMean = globalMeanF + kalmanGain * (localMeanF - globalMeanF);
         float updatedVariance = (1.0f - kalmanGain) * globalVarianceF;
