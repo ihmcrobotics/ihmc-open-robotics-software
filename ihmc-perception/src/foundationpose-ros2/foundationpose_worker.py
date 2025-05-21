@@ -24,7 +24,7 @@ from cam_2_base_transform import *
 import glob
 
 
-class FoundationPoseWorker
+class FoundationPoseWorker:
     def __init__(self, mesh, rgb, depth, mask, camera_k, object_id=None, glctx=None):
         self.foundation_pose = FoundationPose(
             model_pts=mesh.vertices,
