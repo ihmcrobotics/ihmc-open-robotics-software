@@ -1,6 +1,8 @@
 package us.ihmc.rdx.perception;
 
 import geometry_msgs.msg.dds.PoseStamped;
+import imgui.ImGui;
+import perception_msgs.msg.dds.FoundationPoseRequest;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.thread.RepeatingTaskThread;
@@ -36,17 +38,18 @@ class RDXFoundationPoseDemo
 {
    private static final String OBJECT_NAME = "bottle";
    private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<Image> COLOR_TOPIC = RELIABLE_TOPIC.withModule("camera/camera/color/image_raw").withType(Image.class);
-   private static final ROS2Topic<Image> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("camera/camera/aligned_depth_to_color/image_raw").withType(Image.class);
-   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = RELIABLE_TOPIC.withModule("camera/camera/color/camera_info").withType(CameraInfo.class);
-   private static final ROS2Topic<Image> MASK_TOPIC = RELIABLE_TOPIC.withModule("yolo/mask").withType(Image.class);
+   private static final ROS2Topic<Image> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/color/image_raw").withType(Image.class);
+   private static final ROS2Topic<Image> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/aligned_depth_to_color/image_raw").withType(Image.class);
+   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/color/camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
    private static final ROS2Topic<PoseStamped> POSE_TOPIC = new ROS2Topic<>().withModule("pose").withType(PoseStamped.class);
 
    private final ROS2Node ros2Node;
    private final ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
    private final ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
-   private final ROS2Publisher<Image> maskPublisher;
-   private final Image maskMessage;
+   private final ROS2Publisher<FoundationPoseRequest> requestPublisher;
+   private final FoundationPoseRequest requestMessage;
+   private boolean requestSent;
 
    private final ImageSensor zed;
    private final ImageSensorPublishThread imagePublishThread;
@@ -68,8 +71,9 @@ class RDXFoundationPoseDemo
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
       robotClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
-      maskPublisher = ros2Node.createPublisher(MASK_TOPIC);
-      maskMessage = new Image();
+      requestPublisher = ros2Node.createPublisher(REQUEST_TOPIC);
+      requestMessage = new FoundationPoseRequest();
+      requestSent = false;
 
       ros2Node.createSubscription2(POSE_TOPIC, this::receivePose);
 
@@ -84,7 +88,7 @@ class RDXFoundationPoseDemo
 
       yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
       yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      yoloThread.addDetectionConsumerCallback(this::publishMask);
+      yoloThread.addDetectionConsumerCallback(this::publishRequest);
 
       zedImageConsumerThread = new RepeatingTaskThread("ZEDImageConsumer", this::consumeZEDImage);
 
@@ -105,6 +109,7 @@ class RDXFoundationPoseDemo
 
             baseUI.getImGuiPanelManager().addPanel(yoloSettings.getPanel());
             baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSettings::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel("Options", this::renderOptions);
             baseUI.getPrimaryScene().addRenderableProvider(yoloSettings);
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
             baseUI.getPrimaryScene().addRenderableProvider(zedPoseGizmo);
@@ -112,12 +117,17 @@ class RDXFoundationPoseDemo
 
             zedPoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
 
-
             zed.setSensorFrame(zedPoseGizmo.getGizmoFrame());
             zed.run(true);
             imagePublishThread.startRepeating();
             yoloThread.startRepeating();
             zedImageConsumerThread.startRepeating();
+         }
+
+         private void renderOptions()
+         {
+            if (ImGui.button("Send request"))
+               requestSent = false;
          }
 
          @Override
@@ -167,8 +177,11 @@ class RDXFoundationPoseDemo
       catch (InterruptedException ignored) {}
    }
 
-   private void publishMask(List<InstantDetection> yoloDetections)
+   private void publishRequest(List<InstantDetection> yoloDetections)
    {
+      if (requestSent)
+         return;
+
       for (InstantDetection detection : yoloDetections)
       {
          if (!detection.getDetectedObjectClass().equals(OBJECT_NAME))
@@ -176,8 +189,15 @@ class RDXFoundationPoseDemo
 
          if (detection instanceof YOLOv8InstantDetection yoloDetection)
          {
-            PerceptionMessageTools.packImageMessage(yoloDetection.getObjectMask(), "odom", maskMessage);
-            maskPublisher.publish(maskMessage);
+            System.out.println("Sending request");
+
+            requestMessage.setMeshFile("mustard0.obj");
+            PerceptionMessageTools.packImageMessage(yoloDetection.getColorImage(), "odom", requestMessage.getColor());
+            PerceptionMessageTools.packImageMessage(yoloDetection.getDepthImage(), "odom", requestMessage.getDepth());
+            PerceptionMessageTools.packImageMessage(yoloDetection.getObjectMask(), "odom", requestMessage.getObjectMask());
+            requestPublisher.publish(requestMessage);
+
+            requestSent = true;
          }
       }
    }

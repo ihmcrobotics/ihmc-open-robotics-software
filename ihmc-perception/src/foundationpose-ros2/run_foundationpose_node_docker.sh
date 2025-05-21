@@ -12,6 +12,8 @@ random_id=$(uuidgen | cut -c-8)
 
 xhost +local:root
 
+sleep 30 && echo chmoding now && sudo chmod 777 -R /dev/shm &
+
 docker run -it \
   --name "foundationpose-build-$random_id" \
   --network=host \
@@ -27,4 +29,4 @@ docker run -it \
   --volume /dev:/dev \
   --mount type=bind,source=.,target=/root/foundationpose-ros2 \
   foundationpose-ros2:0.0.1 \
-  bash -c "source /root/ihmc_ros2_ws/install/setup.bash && python3 foundationpose_ros.py"
+  bash -c "source /root/ihmc_ros2_ws/install/setup.bash && python3 foundationpose_ros2_node.py"
