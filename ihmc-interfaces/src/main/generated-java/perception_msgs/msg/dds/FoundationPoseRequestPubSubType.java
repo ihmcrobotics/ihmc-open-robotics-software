@@ -15,7 +15,7 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c38eb7867ae9868703c4d7e7b6133a88e4b85b7d7eee5a907439a193adbaf8d4";
+   		return "c1aec5df519d0c13304b8dd23cf1efe47befd4f2992ceb95d60ac890c8387aa9";
    }
    
    @Override
@@ -53,6 +53,7 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += sensor_msgs.msg.dds.ImagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += sensor_msgs.msg.dds.ImagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -72,6 +73,8 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectId().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getMeshFile().length() + 1;
 
       current_alignment += sensor_msgs.msg.dds.ImagePubSubType.getCdrSerializedSize(data.getColor(), current_alignment);
@@ -86,6 +89,10 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(perception_msgs.msg.dds.FoundationPoseRequest data, us.ihmc.idl.CDR cdr)
    {
+      if(data.getObjectId().length() <= 255)
+      cdr.write_type_d(data.getObjectId());else
+          throw new RuntimeException("object_id field exceeds the maximum length: %d > %d".formatted(data.getObjectId().length(), 255));
+
       if(data.getMeshFile().length() <= 255)
       cdr.write_type_d(data.getMeshFile());else
           throw new RuntimeException("mesh_file field exceeds the maximum length: %d > %d".formatted(data.getMeshFile().length(), 255));
@@ -97,6 +104,7 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(perception_msgs.msg.dds.FoundationPoseRequest data, us.ihmc.idl.CDR cdr)
    {
+      cdr.read_type_d(data.getObjectId());	
       cdr.read_type_d(data.getMeshFile());	
       sensor_msgs.msg.dds.ImagePubSubType.read(data.getColor(), cdr);	
       sensor_msgs.msg.dds.ImagePubSubType.read(data.getDepth(), cdr);	
@@ -107,6 +115,7 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(perception_msgs.msg.dds.FoundationPoseRequest data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_d("object_id", data.getObjectId());
       ser.write_type_d("mesh_file", data.getMeshFile());
       ser.write_type_a("color", new sensor_msgs.msg.dds.ImagePubSubType(), data.getColor());
 
@@ -119,6 +128,7 @@ public class FoundationPoseRequestPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.FoundationPoseRequest data)
    {
+      ser.read_type_d("object_id", data.getObjectId());
       ser.read_type_d("mesh_file", data.getMeshFile());
       ser.read_type_a("color", new sensor_msgs.msg.dds.ImagePubSubType(), data.getColor());
 

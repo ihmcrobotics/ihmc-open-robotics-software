@@ -1,8 +1,9 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "/ihmc/yolo/annotated_image###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/yolo/annotated_image" : false,
+    "/ihmc/yolo/annotated_image###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/yolo/annotated_image" : true,
     "3D View" : true,
+    "Options" : true,
     "YOLO Settings" : true
   }
 }
