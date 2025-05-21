@@ -52,7 +52,8 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o 
 
 # 5. Install IHMC ROS2 interfaces
 WORKDIR /root/ihmc_ros2_ws
-RUN git clone https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /opt/ihmc-open-robotics-software && \
+# TODO: Remove branch before merging to develop
+RUN git clone -b feature/foundation-pose-integration https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /opt/ihmc-open-robotics-software && \
     mkdir src && \
     cp -r /opt/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces ./src/ihmc_interfaces && \
     rm -rf /opt/ihmc-open-robotics-software && \
