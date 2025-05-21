@@ -39,8 +39,10 @@ public class RapidHeightMapExtractor
    private final GpuMat localSampleCountMap;
 
    // These are the mats required to keep a global map
-   private final GpuMat globalHeightMap;
-   private final GpuMat previousGlobalHeightMap;
+   private final GpuMat globalMeanMap;
+   private final GpuMat globalVarianceMap;
+   private final GpuMat previousGlobalMeanMap;
+   private final GpuMat previousGlobalVarianceMap;
    private final GpuMat terrainCroppedHeightMap;
    private final GpuMat emptyGlobalHeightMap;
 
@@ -112,8 +114,10 @@ public class RapidHeightMapExtractor
          localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
 
-         globalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
-         previousGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
          terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
          emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
@@ -158,7 +162,7 @@ public class RapidHeightMapExtractor
       resetOffset = (int) ((footHeight + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
       resetOffset -= loweredValue;
 
-      globalHeightMap.setTo(new Scalar(resetOffset));
+      globalMeanMap.setTo(new Scalar(resetOffset));
       emptyGlobalHeightMap.setTo(new Scalar(resetOffset));
    }
 
@@ -215,7 +219,7 @@ public class RapidHeightMapExtractor
          dim3 updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
 
          updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
-         updateKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
+         updateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          updateKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
@@ -242,7 +246,8 @@ public class RapidHeightMapExtractor
          if (currentCellX != previousCellX || currentCellY != previousCellY)
          {
             // We will be updating the global height map with the applied translation of the data
-            globalHeightMap.copyTo(previousGlobalHeightMap);
+            globalMeanMap.copyTo(previousGlobalMeanMap);
+            globalVarianceMap.copyTo(previousGlobalVarianceMap);
 
             int translateKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
@@ -250,8 +255,10 @@ public class RapidHeightMapExtractor
             int shiftX = currentCellX - previousCellX;
             int shiftY = currentCellY - previousCellY;
 
-            translateKernel.withPointer(previousGlobalHeightMap.data()).withLong(previousGlobalHeightMap.step());
-            translateKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
+            translateKernel.withPointer(previousGlobalMeanMap.data()).withLong(previousGlobalMeanMap.step());
+            translateKernel.withPointer(previousGlobalVarianceMap.data()).withLong(previousGlobalVarianceMap.step());
+            translateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+            translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
             translateKernel.withInt(shiftX).withInt(shiftY);
             translateKernel.withPointer(parametersDevicePointer);
             translateKernel.withInt(resetOffset);
@@ -274,7 +281,8 @@ public class RapidHeightMapExtractor
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          registerKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
-         registerKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
+         registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+         registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
          registerKernel.withFloat(resetOffset);
@@ -290,7 +298,7 @@ public class RapidHeightMapExtractor
          int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
 
-         terrainCroppingKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
+         terrainCroppingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          terrainCroppingKernel.withPointer(terrainCroppedHeightMap.data()).withLong(terrainCroppedHeightMap.step());
          terrainCroppingKernel.withInt(centerIndexTerrain);
          terrainCroppingKernel.withPointer(parametersDevicePointer);
@@ -365,9 +373,9 @@ public class RapidHeightMapExtractor
          dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
 
          // Run the plan offset kernel
-         planOffsetKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
+         planOffsetKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          planOffsetKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         planOffsetKernel.withFloat(z).withInt(globalHeightMap.rows()).withInt(globalHeightMap.cols());
+         planOffsetKernel.withFloat(z).withInt(globalMeanMap.rows()).withInt(globalMeanMap.cols());
          planOffsetKernel.withFloat(resetOffset);
 
          planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
@@ -431,8 +439,10 @@ public class RapidHeightMapExtractor
       localVarianceMap.close();
       localSampleCountMap.close();
 
-      globalHeightMap.close();
-      previousGlobalHeightMap.close();
+      globalMeanMap.close();
+      globalVarianceMap.close();
+      previousGlobalMeanMap.close();
+      previousGlobalVarianceMap.close();
       terrainCroppedHeightMap.close();
       emptyGlobalHeightMap.close();
 
@@ -464,7 +474,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return globalHeightMap.clone();
+      return globalMeanMap.clone();
    }
 
    public GpuMat getTerrainHeightMap()

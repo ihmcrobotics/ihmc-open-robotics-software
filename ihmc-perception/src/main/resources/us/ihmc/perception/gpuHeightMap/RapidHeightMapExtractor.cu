@@ -363,8 +363,10 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 }
 
 extern "C"
-__global__ void translateHeightMapKernel(unsigned short* oldMap, size_t pitchOld,
-                                         unsigned short* newMap, size_t pitchNew,
+__global__ void translateHeightMapKernel(unsigned short *oldHeightMapMean, size_t pitchOldHeightMapMean,
+                                         unsigned short *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
+                                         unsigned short *newMeanMap, size_t pitchNewMean,
+                                         unsigned short *newVarianceMap, size_t pitchNewVariance,
                                          int shiftX, int shiftY, float *params, int defaultValue)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -380,14 +382,22 @@ __global__ void translateHeightMapKernel(unsigned short* oldMap, size_t pitchOld
 
     if (srcX >= 0 && srcX < globalCellsPerAxis && srcY >= 0 && srcY < globalCellsPerAxis)
     {
-        unsigned short* oldRow = (unsigned short*)((char*)oldMap + srcX * pitchOld);
-        unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
-        newRow[y] = oldRow[srcY];
+        unsigned short* oldMeanRow = (unsigned short*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
+        unsigned short* oldVarianceRow = (unsigned short *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
+
+        unsigned short* newMeanRow = (unsigned short*)((char*)newMeanMap + x * pitchNewMean);
+        unsigned short* newVarianceRow = (unsigned short*)((char*)newVarianceMap + x * pitchNewVariance);
+
+        newMeanRow[y] = oldMeanRow[srcY];
+        newVarianceRow[y] = oldVarianceRow[srcY];
     }
     else
     {
-        unsigned short* newRow = (unsigned short*)((char*)newMap + x * pitchNew);
-        newRow[y] = defaultValue;
+        unsigned short* newMeanRow = (unsigned short*)((char*)newMeanMap + x * pitchNewMean);
+        unsigned short* newVarianceRow = (unsigned short*)((char*)newVarianceMap + x * pitchNewVariance);
+
+        newMeanRow[y] = defaultValue;
+        newVarianceRow[y] = defaultValue;
     }
 }
 
@@ -395,7 +405,8 @@ extern "C"
 __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t pitchLocalMean,
                                             unsigned short *localVarianceMap, size_t pitchLocalVariance,
                                             unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
-                                            unsigned short *globalHeightMap, size_t pitchGlobal,
+                                            unsigned short *globalMeanMap, size_t pitchGlobalMean,
+                                            unsigned short *globalVarianceMap, size_t pitchGlobalVariance,
                                             float *zUpCameraToWorldAlignedGround,
                                             float *params, float resetOffset)
 {
@@ -417,28 +428,41 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
-    unsigned short *localHeight = (unsigned short *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
+    unsigned short *localMean = (unsigned short *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
+    unsigned short *localVariance = (unsigned short *)((char *)localVarianceMap + localIndex.x * pitchLocalVariance) + localIndex.y;
 
-    if (*localHeight == 0)
+    if (*localMean == 0)
         return;
 
-    unsigned short *globalHeight = (unsigned short *)((char *)globalHeightMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+    unsigned short *globalMean = (unsigned short *)((char *)globalMeanMap + globalIndex.x * pitchGlobalMean) + globalIndex.y;
+    unsigned short *globalVariance = (unsigned short *)((char *)globalVarianceMap + globalIndex.x * pitchGlobalVariance) + globalIndex.y;
 
-    // This performs an alpha filter on the incoming data
-    float alpha = params[HEIGHT_FILTER_ALPHA];
-    float localHeightF = static_cast<float>(*localHeight);
-    float globalHeightF = static_cast<float>(*globalHeight);
-    float filtered = alpha * localHeightF + (1.0f - alpha) * globalHeightF;
+    float localMeanF = static_cast<float>(*localMean);
+    float localVarianceF = static_cast<float>(*localVariance);
+    float globalMeanF = static_cast<float>(*globalMean);
+    float globalVarianceF = static_cast<float>(*globalVariance);
 
     // If we have no real data, we don't apply an alpha filter, just take the new real data
-    if (globalHeightF == resetOffset)
+    if (globalMeanF == resetOffset || globalVarianceF <= 0.0f)
     {
-        *globalHeight = *localHeight;
+        *globalMean = *localMean;
+        *globalVariance = *localVariance;
     }
     else
     {
-        // Add 0.5 to round to the nearest unsigned short, any decimal gets removed. e.g. 3.6 -> 4.1 = 4
-        *globalHeight = static_cast<unsigned short>(filtered + 0.5f);
+        if (xIndex == 150 && yIndex == 150)
+        {
+            printf("Local variance: %f\n", localVarianceF);
+            printf("Global Mean: %f\n", globalMeanF);
+            printf("Global Variance: %f\n", globalVarianceF);
+        }
+
+        float kalmanGain = globalVarianceF / (globalVarianceF + localVarianceF);
+        float updatedMean = globalMeanF + kalmanGain * (localMeanF - globalMeanF);
+        float updatedVariance = (1.0f - kalmanGain) * globalVarianceF;
+
+        *globalMean = updatedMean;
+        *globalVariance = updatedVariance;
     }
 }
 
