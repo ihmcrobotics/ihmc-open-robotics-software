@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Run this if you want to rebuild all the layers
-# docker build --no-cache -t foundationpose-ros2:0.0.1 . 
+# docker build --no-cache -t foundationpose-ros2:0.0.1 .
 
 # Run this if you want to rebuild all the layers with log output
 # docker build --no-cache --progress=plain . -t foundationpose-ros2:0.0.3 . 2>&1 | tee docker_build.log
