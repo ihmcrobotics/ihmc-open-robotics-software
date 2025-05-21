@@ -1,0 +1,36 @@
+#ifndef __perception_msgs__msg__FoundationPoseRequest__idl__
+#define __perception_msgs__msg__FoundationPoseRequest__idl__
+
+#include "sensor_msgs/msg/./Image_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::FoundationPoseRequest_")
+      struct FoundationPoseRequest
+      {
+        /**
+         * Name of the mesh file for the object
+         */
+        string mesh_file;
+        /**
+         * Color image containing the object
+         */
+        sensor_msgs::msg::dds::Image color;
+        /**
+         * Depth image containing the object
+         */
+        sensor_msgs::msg::dds::Image depth;
+        /**
+         * Mask of the object in the image
+         */
+        sensor_msgs::msg::dds::Image object_mask;
+      };
+    };
+  };
+};
+
+#endif
