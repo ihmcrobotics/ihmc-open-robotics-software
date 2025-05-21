@@ -29,6 +29,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -39,6 +40,7 @@ public class RDXVRModeManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
+   private RDXVRManager vrManager;
    private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
    private RDXVRFootstepPlacement footstepPlacer;
    @Nullable
@@ -90,6 +92,8 @@ public class RDXVRModeManager
                       boolean createKinematicsStreamingToolboxModule,
                       KinematicsStreamingToolboxParameters kstParameters)
    {
+      vrManager = baseUI.getVRManager();
+
       Collection<RDXPanel> baseUIPanels =  RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), controllerHelper.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
       for (RDXPanel panel : baseUIPanels)
@@ -186,6 +190,8 @@ public class RDXVRModeManager
 
    public void update()
    {
+      vrManager.getTeleporter().setEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
+
       if (kinematicsStreamingMode != null)
       {
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
