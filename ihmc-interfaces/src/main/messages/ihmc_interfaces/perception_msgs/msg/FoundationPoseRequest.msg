@@ -1,3 +1,6 @@
+# ID that will be assigned to the object
+string object_id
+
 # Name of the mesh file for the object
 string mesh_file
 

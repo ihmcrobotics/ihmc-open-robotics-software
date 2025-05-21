@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class FoundationPoseRequest extends Packet<FoundationPoseRequest> implements Settable<FoundationPoseRequest>, EpsilonComparable<FoundationPoseRequest>
 {
    /**
+            * ID that will be assigned to the object
+            */
+   public java.lang.StringBuilder object_id_;
+   /**
             * Name of the mesh file for the object
             */
    public java.lang.StringBuilder mesh_file_;
@@ -27,6 +31,7 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
 
    public FoundationPoseRequest()
    {
+      object_id_ = new java.lang.StringBuilder(255);
       mesh_file_ = new java.lang.StringBuilder(255);
       color_ = new sensor_msgs.msg.dds.Image();
       depth_ = new sensor_msgs.msg.dds.Image();
@@ -41,12 +46,39 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
 
    public void set(FoundationPoseRequest other)
    {
+      object_id_.setLength(0);
+      object_id_.append(other.object_id_);
+
       mesh_file_.setLength(0);
       mesh_file_.append(other.mesh_file_);
 
       sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.color_, color_);
       sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.depth_, depth_);
       sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.object_mask_, object_mask_);
+   }
+
+   /**
+            * ID that will be assigned to the object
+            */
+   public void setObjectId(java.lang.String object_id)
+   {
+      object_id_.setLength(0);
+      object_id_.append(object_id);
+   }
+
+   /**
+            * ID that will be assigned to the object
+            */
+   public java.lang.String getObjectIdAsString()
+   {
+      return getObjectId().toString();
+   }
+   /**
+            * ID that will be assigned to the object
+            */
+   public java.lang.StringBuilder getObjectId()
+   {
+      return object_id_;
    }
 
    /**
@@ -118,6 +150,8 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_id_, other.object_id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.mesh_file_, other.mesh_file_, epsilon)) return false;
 
       if (!this.color_.epsilonEquals(other.color_, epsilon)) return false;
@@ -136,6 +170,8 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
 
       FoundationPoseRequest otherMyClass = (FoundationPoseRequest) other;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.object_id_, otherMyClass.object_id_)) return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.mesh_file_, otherMyClass.mesh_file_)) return false;
 
       if (!this.color_.equals(otherMyClass.color_)) return false;
@@ -151,6 +187,8 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("FoundationPoseRequest {");
+      builder.append("object_id=");
+      builder.append(this.object_id_);      builder.append(", ");
       builder.append("mesh_file=");
       builder.append(this.mesh_file_);      builder.append(", ");
       builder.append("color=");
