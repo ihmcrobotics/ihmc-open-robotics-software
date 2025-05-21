@@ -16,6 +16,7 @@ import numpy as np
 import threading
 from sensor_msgs.msg import Image, CameraInfo
 from perception_msgs.msg import FoundationPoseRequest
+from foundationpose_worker import FoundationPoseWorker
 
 COLOR_TOPIC = '/foundation_pose/camera/color/image_raw'
 DEPTH_TOPIC = '/foundation_pose/camera/aligned_depth_to_color/image_raw'
@@ -80,7 +81,7 @@ class FoundationPoseROS2Node(Node):
         mesh = self.meshes[request.mesh_file]
         color = self.bridge.imgmsg_to_cv2(request.color, "rgb8")
         depth = self.bridge.imgmsg_to_cv2(request.depth, "32FC1") / 1e3
-        mask = self.bridge.imgmsg_to_cv2(request.mask, "8UC1")
+        mask = self.bridge.imgmsg_to_cv2(request.object_mask, "8UC1")
 
         if mask.shape[:2] != color.shape[:2]:
             height, width = color.shape[:2]
@@ -91,7 +92,7 @@ class FoundationPoseROS2Node(Node):
             rgb=color,
             depth=depth,
             camera_k=self.camera_k,
-            object_id=request.object_id
+            object_id=request.object_id,
             glctx=self.glctx
         )
 
