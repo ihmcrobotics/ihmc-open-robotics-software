@@ -34,7 +34,6 @@ public class RapidHeightMapExtractor
    private final dim3 blockSize;
 
    // These are the mats required to extract the depth data
-   private final GpuMat localHeightMap;
    private final GpuMat localMeanMap;
    private final GpuMat localVarianceMap;
    private final GpuMat localSampleCountMap;
@@ -109,7 +108,6 @@ public class RapidHeightMapExtractor
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          // Initialize matrices and images
-         localHeightMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
@@ -218,7 +216,6 @@ public class RapidHeightMapExtractor
 
          updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
          updateKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
-         updateKernel.withPointer(localHeightMap.data()).withLong(localHeightMap.step());
          updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          updateKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
@@ -274,7 +271,9 @@ public class RapidHeightMapExtractor
          int registerKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
-         registerKernel.withPointer(localHeightMap.data()).withLong(localHeightMap.step());
+         registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+         registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
+         registerKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          registerKernel.withPointer(globalHeightMap.data()).withLong(globalHeightMap.step());
          registerKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
@@ -348,7 +347,7 @@ public class RapidHeightMapExtractor
          // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
          emptyGlobalHeightMap.setTo(new Scalar(resetOffset));
 
-         emptyRegisterKernel.withPointer(localHeightMap.data()).withLong(localHeightMap.step());
+         emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
          emptyRegisterKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
@@ -428,7 +427,6 @@ public class RapidHeightMapExtractor
 
       blockSize.close();
 
-      localHeightMap.close();
       localMeanMap.close();
       localVarianceMap.close();
       localSampleCountMap.close();

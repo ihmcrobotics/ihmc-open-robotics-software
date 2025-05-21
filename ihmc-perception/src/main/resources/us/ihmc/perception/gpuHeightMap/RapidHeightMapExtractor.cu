@@ -203,7 +203,6 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
 extern "C"
 __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDepth,
                                       unsigned short *previousGlobalHeightMap, size_t pitchGlobal,
-                                      unsigned short *localHeightMap, size_t pitchLocalHeight,
                                       unsigned short *localMeanMap, size_t pitchLocalMean,
                                       unsigned short *localVarianceMap, size_t pitchLocalVariance,
                                       unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
@@ -279,9 +278,9 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
         projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
     }
 
-    float currentAverageHeight = 0.0f;
-    float averageHeightZ = 0.0f;
     int count = 0;
+    float meanZ = 0.0f;
+    float m2 = 0.0f;
 
     // Search within the window in the depth image
     for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
@@ -325,39 +324,42 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                     // Remove outliers and compute average height
                     if (count > 1)
                     {
-                        currentAverageHeight = averageHeightZ / static_cast<float>(count);
-                        if (fabsf(queryPointInZUp.z - currentAverageHeight) > 0.1f)
+                        if (fabsf(queryPointInZUp.z - meanZ) > 0.1f)
                             continue; // Skip if the height deviates significantly
                     }
 
                     count++;
-                    averageHeightZ += queryPointInZUp.z;
+
+                    // Update mean and variance using Welford's algorithm
+                    float delta = queryPointInZUp.z - meanZ;
+                    meanZ += delta / count;
+                    float delta2 = queryPointInZUp.z - meanZ;
+                    m2 += delta * delta2;
                 }
             }
         }
     }
 
-    // Finalize average height
-    if (count > 0)
-    {
-        averageHeightZ /= static_cast<float>(count); // Compute average height
-    }
-    else
-    {
-        averageHeightZ = -params[HEIGHT_OFFSET]; // Set to the negative height offset if no valid points
-    }
+    float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
+
+    if (count == 0)
+        meanZ = -params[HEIGHT_OFFSET];
 
     // Clamp height to the specified range
-    averageHeightZ = fminf(fmaxf(averageHeightZ, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
+    meanZ = fminf(fmaxf(meanZ, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
 
     // Apply height offset
-    averageHeightZ += params[HEIGHT_OFFSET];
+    meanZ += params[HEIGHT_OFFSET];
 
     // Scale to the appropriate range
-    float heightValue = (averageHeightZ * params[HEIGHT_SCALING_FACTOR]);
+    float heightValue = (meanZ * params[HEIGHT_SCALING_FACTOR]);
 
-    unsigned short *outRow = (unsigned short *)((char *)localHeightMap + (xIndex * pitchLocalHeight));
-    *(outRow + yIndex) = (unsigned short)(heightValue);
+    unsigned short *meanHeight = (unsigned short *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
+    *meanHeight = heightValue;
+    unsigned short *variance = (unsigned short *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
+    *variance = currentVariance;
+    unsigned short *numberOfSamples = (unsigned short *)((char *)localSampleCountMap + xIndex * pitchLocalSampleCount) + yIndex;
+    *numberOfSamples = count;
 }
 
 extern "C"
@@ -390,7 +392,9 @@ __global__ void translateHeightMapKernel(unsigned short* oldMap, size_t pitchOld
 }
 
 extern "C"
-__global__ void heightMapRegistrationKernel(unsigned short *localHeightMap, size_t pitchLocalHeight,
+__global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t pitchLocalMean,
+                                            unsigned short *localVarianceMap, size_t pitchLocalVariance,
+                                            unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
                                             unsigned short *globalHeightMap, size_t pitchGlobal,
                                             float *zUpCameraToWorldAlignedGround,
                                             float *params, float resetOffset)
@@ -413,7 +417,7 @@ __global__ void heightMapRegistrationKernel(unsigned short *localHeightMap, size
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
-    unsigned short *localHeight = (unsigned short *)((char *)localHeightMap + localIndex.x * pitchLocalHeight) + localIndex.y;
+    unsigned short *localHeight = (unsigned short *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
 
     if (*localHeight == 0)
         return;
