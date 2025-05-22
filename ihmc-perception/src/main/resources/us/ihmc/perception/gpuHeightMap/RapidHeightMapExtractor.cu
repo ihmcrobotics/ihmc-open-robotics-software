@@ -207,6 +207,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                                       unsigned short *previousGlobalHeightMap, size_t pitchGlobal,
                                       unsigned short *localMeanMap, size_t pitchLocalMean,
                                       unsigned short *localVarianceMap, size_t pitchLocalVariance,
+                                      unsigned short *localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                       unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
                                       float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf,
                                       float *zUpCameraToWorldAlignedGround,
@@ -287,7 +288,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     int count = 0;
     float meanZ = 0.0f;
     float m2 = 0.0f;
-    float motionVariance = 0.0f;
+    float motionVarianceF = 0.0f;
 
     // Search within the window in the depth image
     for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
@@ -351,24 +352,9 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     float scaledVariance = currentVariance * params[HEIGHT_SCALING_FACTOR] * params[HEIGHT_SCALING_FACTOR];
 
     // Motion variance
-    motionVariance += distance * params[VARIANCE_PER_METER];
-    motionVariance += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
-    motionVariance += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
-
-    if (xIndex == 20 && yIndex == 40)
-    {
-        printf("ScaledVariance: %f\n", scaledVariance);
-        printf("MotionVAriance %f\n", motionVariance);
-    }
-
-    scaledVariance += motionVariance;
-    scaledVariance = fminf(scaledVariance, USHRT_MAX);
-
-    if (xIndex == 20 && yIndex == 40)
-    {
-        printf("AFTER ScaledVariance: %f\n", scaledVariance);
-        printf("AFTER MotionVAriance %f\n", motionVariance);
-    }
+    motionVarianceF += distance * params[VARIANCE_PER_METER];
+    motionVarianceF += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
+    motionVarianceF += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
 
     if (count == 0)
         meanZ = -params[HEIGHT_OFFSET];
@@ -386,6 +372,8 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     *meanHeight = heightValue;
     unsigned short *variance = (unsigned short *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
     *variance = scaledVariance;
+    unsigned short *motionVariance = (unsigned short *)((char *)localMotionVarianceMap + xIndex * pitchLocalMotionVariance) + yIndex;
+    *motionVariance = motionVarianceF;
     unsigned short *numberOfSamples = (unsigned short *)((char *)localSampleCountMap + xIndex * pitchLocalSampleCount) + yIndex;
     *numberOfSamples = count;
 }
@@ -436,6 +424,7 @@ __global__ void translateHeightMapKernel(unsigned short *oldHeightMapMean, size_
 extern "C"
 __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t pitchLocalMean,
                                             unsigned short *localVarianceMap, size_t pitchLocalVariance,
+                                            unsigned short *localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                             unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
                                             unsigned short *globalMeanMap, size_t pitchGlobalMean,
                                             unsigned short *globalVarianceMap, size_t pitchGlobalVariance,
@@ -462,6 +451,7 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
 
     unsigned short *localMean = (unsigned short *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
     unsigned short *localVariance = (unsigned short *)((char *)localVarianceMap + localIndex.x * pitchLocalVariance) + localIndex.y;
+    unsigned short *localMotionVariance = (unsigned short *)((char *)localMotionVarianceMap + localIndex.x * pitchLocalMotionVariance) + localIndex.y;
 
     if (*localMean == 0)
         return;
@@ -471,6 +461,7 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
 
     float localMeanF = static_cast<float>(*localMean);
     float localVarianceF = static_cast<float>(*localVariance);
+    float localMotionVarianceF = static_cast<float>(*localMotionVariance);
     float globalMeanF = static_cast<float>(*globalMean);
     float globalVarianceF = static_cast<float>(*globalVariance);
 
@@ -486,8 +477,8 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
         float predictedMean = globalMeanF;
         float predictedVariance = globalVarianceF + params[KALMAN_FILTER_PREDICTION_NOISE];
 
-        float kalmanGain = predictedVariance / (predictedVariance + localVarianceF);
-        float updatedMean = globalMeanF + kalmanGain * (localMeanF - globalMeanF);
+        float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
+        float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
 
         *globalMean = updatedMean;

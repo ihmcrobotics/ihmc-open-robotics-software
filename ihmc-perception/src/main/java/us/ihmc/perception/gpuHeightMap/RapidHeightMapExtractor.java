@@ -39,6 +39,7 @@ public class RapidHeightMapExtractor
    // These are the mats required to extract the depth data
    private final GpuMat localMeanMap;
    private final GpuMat localVarianceMap;
+   private final GpuMat localMotionVarianceMap;
    private final GpuMat localSampleCountMap;
 
    // These are the mats required to keep a global map
@@ -116,6 +117,7 @@ public class RapidHeightMapExtractor
          // Initialize matrices and images
          localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
+         localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
          localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
 
          globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
@@ -239,6 +241,7 @@ public class RapidHeightMapExtractor
          updateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
+         updateKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          updateKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          updateKernel.withPointer(parametersDevicePointer);
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
@@ -298,6 +301,7 @@ public class RapidHeightMapExtractor
 
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
+         registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          registerKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
@@ -461,6 +465,7 @@ public class RapidHeightMapExtractor
 
       localMeanMap.close();
       localVarianceMap.close();
+      localMotionVarianceMap.close();
       localSampleCountMap.close();
 
       globalMeanMap.close();
