@@ -32,7 +32,8 @@ public class LeRobotDataset
 
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
-   long totalFrames = 0L;
+   private long totalFrames = 0L;
+   private boolean usePerfectTimestamps = true;
 
    public LeRobotDataset(Path directory)
    {
@@ -113,7 +114,7 @@ public class LeRobotDataset
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue);
+      episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue, usePerfectTimestamps);
       episodes.add(episode);
    }
 
@@ -290,5 +291,15 @@ public class LeRobotDataset
    public long getTotalFrames()
    {
       return totalFrames;
+   }
+
+   public void setUsePerfectTimestamps(boolean usePerfectTimestamps)
+   {
+      this.usePerfectTimestamps = usePerfectTimestamps;
+   }
+
+   public boolean getUsePerfectTimestamps()
+   {
+      return usePerfectTimestamps;
    }
 }

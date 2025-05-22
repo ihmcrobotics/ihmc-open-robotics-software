@@ -7,6 +7,7 @@ import com.jerolba.carpet.FieldMatchingStrategy;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -37,8 +38,10 @@ public class LeRobotDatasetEpisode
    private SCS2LogSessionWithVideo session;
    private Runnable writeMetaJson;
    private Consumer<Runnable> frameProcessingQueue;
+   private boolean usePerfectTimestamps;
    private long startVideoTimestamp;
    private long lastVideoTimestamp;
+   private double episodeFrameTimestampMicros;
    private SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders;
    private LeRobotDatasetDataWriter dataWriter;
    private LeRobotDatasetEpisodeStatistics statistics;
@@ -65,11 +68,12 @@ public class LeRobotDatasetEpisode
       episodeName = "episode_%06d".formatted(episodeIndex);
    }
 
-   public void startGeneratingEpisode(SCS2LogSessionWithVideo session, Runnable writeMetaJson, Consumer<Runnable> frameProcessingQueue)
+   public void startGeneratingEpisode(SCS2LogSessionWithVideo session, Runnable writeMetaJson, Consumer<Runnable> frameProcessingQueue, boolean usePerfectTimestamps)
    {
       this.session = session;
       this.writeMetaJson = writeMetaJson;
       this.frameProcessingQueue = frameProcessingQueue;
+      this.usePerfectTimestamps = usePerfectTimestamps;
 
       records.clear();
 
@@ -94,6 +98,7 @@ public class LeRobotDatasetEpisode
       length = 0L;
       startVideoTimestamp = -1;
       lastVideoTimestamp = -1;
+      episodeFrameTimestampMicros = -Math.round(UnitConversions.hertzToSeconds(fps));
 
       frameProcessingQueue.accept(this::processFrame);
    }
@@ -133,17 +138,30 @@ public class LeRobotDatasetEpisode
 
          lastVideoTimestamp = currentVideoTimestamp;
 
-         long videoTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-//         LogTools.info("Current timestamp: %.3f  Writing frame %.3f Frequency %.3f"
+         if (usePerfectTimestamps)
+         {
+            int round = Math.round(fps); // lerobot rounds fps to integer
+            double seconds = UnitConversions.hertzToSeconds(round);
+            double micros = seconds * 1000000.0;
+            episodeFrameTimestampMicros += micros; // important: acrue using double precision
+         }
+         else
+         {
+            episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
+         }
+
+         long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
+
+//         LogTools.info("Current timestamp: %.3f  Writing frame %d Frequency %.3f"
 //                             .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
-//                                        Conversions.microsecondsToSeconds(videoTimestampMicros),
+//                                        roundedTimestamp,
 //                                        frequency));
          for (RobotSide side : RobotSide.values)
          {
-            ffmpegRecorders.get(side).writeFrame(videoTimestampMicros, statistics);
+            ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics);
          }
 
-         records.add(dataWriter.addFrame(videoTimestampMicros, length, statistics, session.getLogDataReader().getCurrentLogPosition()));
+         records.add(dataWriter.addFrame(roundedTimestamp, length, statistics, session.getLogDataReader().getCurrentLogPosition()));
 
          ++length;
       }

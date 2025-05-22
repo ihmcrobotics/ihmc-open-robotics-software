@@ -113,6 +113,14 @@ public class RDXLeRobotDatasetCreator
             ExceptionTools.handle(() -> Desktop.getDesktop().open(dataset.getDirectory().toFile()), DefaultExceptionHandler.PRINT_MESSAGE);
 
          ImGui.text("Total frames: %d".formatted(dataset.getTotalFrames()));
+         if (logSession.getFirstZEDScrubber() != null)
+         {
+            ImGui.text("ZED SVO fps: %.3f".formatted(logSession.getFirstZEDScrubber().getFps()));
+            if (ImGui.checkbox(labels.get("Record perfect timestamps"), dataset.getUsePerfectTimestamps()))
+            {
+               dataset.setUsePerfectTimestamps(!dataset.getUsePerfectTimestamps());
+            }
+         }
 
          ImGui.separator();
          ImGui.text("Tasks:");
