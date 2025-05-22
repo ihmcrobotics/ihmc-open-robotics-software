@@ -15,7 +15,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f2d306e9d3917b724d122e86c3431e40b70f51de6dce7ce97e66014f1bb6b535";
+   		return "e7ddc1cef36a99f3a48f6706fbfbec74f4f26297ccbff60179edcb5ef5af157b";
    }
    
    @Override
@@ -63,6 +63,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -90,6 +91,8 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       {
           current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getAvailableBehaviors().get(i0).length() + 1;
       }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBehaviorInProgress().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCompletedBehavior().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFailedBehavior().length() + 1;
@@ -111,6 +114,10 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getAvailableBehaviors());else
           throw new RuntimeException("available_behaviors field exceeds the maximum length: %d > %d".formatted(data.getAvailableBehaviors().size(), 200));
 
+      if(data.getBehaviorInProgress().length() <= 255)
+      cdr.write_type_d(data.getBehaviorInProgress());else
+          throw new RuntimeException("behavior_in_progress field exceeds the maximum length: %d > %d".formatted(data.getBehaviorInProgress().length(), 255));
+
       if(data.getCompletedBehavior().length() <= 255)
       cdr.write_type_d(data.getCompletedBehavior());else
           throw new RuntimeException("completed_behavior field exceeds the maximum length: %d > %d".formatted(data.getCompletedBehavior().length(), 255));
@@ -127,6 +134,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.read(data.getRobotMidFeetUnderPelvisPoseInWorld(), cdr);	
       cdr.read_type_e(data.getObjects());	
       cdr.read_type_e(data.getAvailableBehaviors());	
+      cdr.read_type_d(data.getBehaviorInProgress());	
       cdr.read_type_d(data.getCompletedBehavior());	
       cdr.read_type_d(data.getFailedBehavior());	
       behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.read(data.getFailure(), cdr);	
@@ -140,6 +148,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.write_type_e("objects", data.getObjects());
       ser.write_type_e("available_behaviors", data.getAvailableBehaviors());
+      ser.write_type_d("behavior_in_progress", data.getBehaviorInProgress());
       ser.write_type_d("completed_behavior", data.getCompletedBehavior());
       ser.write_type_d("failed_behavior", data.getFailedBehavior());
       ser.write_type_a("failure", new behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType(), data.getFailure());
@@ -153,6 +162,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.read_type_e("objects", data.getObjects());
       ser.read_type_e("available_behaviors", data.getAvailableBehaviors());
+      ser.read_type_d("behavior_in_progress", data.getBehaviorInProgress());
       ser.read_type_d("completed_behavior", data.getCompletedBehavior());
       ser.read_type_d("failed_behavior", data.getFailedBehavior());
       ser.read_type_a("failure", new behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType(), data.getFailure());

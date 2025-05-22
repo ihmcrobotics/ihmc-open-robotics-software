@@ -7,10 +7,36 @@ module behavior_msgs
   {
     module dds
     {
+      /**
+       * SPATIAL RELATION TYPE
+       */
+      const octet DEFAULT =
+      0;
+
+      const octet FRONT =
+      1;
+
+      const octet BEHIND =
+      2;
+
+      const octet LEFT =
+      3;
+
+      const octet RIGHT =
+      4;
+
 
       @TypeCode(type="behavior_msgs::msg::dds_::AI2RNavigationMessage_")
       struct AI2RNavigationMessage
       {
+        /**
+         * The type of spatial relation with the secondary reference object as defined above
+         */
+        octet spatial_relation;
+        /**
+         * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+         */
+        string secondary_reference_frame_name;
         /**
          * Goto action - Reference frame for the action
          */

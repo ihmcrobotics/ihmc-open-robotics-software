@@ -15,7 +15,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1012faf962742db3e1a0ad5a2a5330e57c090f0eea02325fcaa6f85a1ba60d16";
+   		return "2dedcb0be4210c321a0e50e4407b9a14d04b78fb03c733b05f7a72326d24aa56";
    }
    
    @Override
@@ -52,6 +52,9 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -68,6 +71,11 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getSecondaryReferenceFrameName().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReferenceFrameName().length() + 1;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -79,6 +87,12 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_9(data.getSpatialRelation());
+
+      if(data.getSecondaryReferenceFrameName().length() <= 255)
+      cdr.write_type_d(data.getSecondaryReferenceFrameName());else
+          throw new RuntimeException("secondary_reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getSecondaryReferenceFrameName().length(), 255));
+
       if(data.getReferenceFrameName().length() <= 255)
       cdr.write_type_d(data.getReferenceFrameName());else
           throw new RuntimeException("reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getReferenceFrameName().length(), 255));
@@ -89,6 +103,9 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSpatialRelation(cdr.read_type_9());
+      	
+      cdr.read_type_d(data.getSecondaryReferenceFrameName());	
       cdr.read_type_d(data.getReferenceFrameName());	
       data.setDistanceToFrame(cdr.read_type_6());
       	
@@ -98,6 +115,8 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_9("spatial_relation", data.getSpatialRelation());
+      ser.write_type_d("secondary_reference_frame_name", data.getSecondaryReferenceFrameName());
       ser.write_type_d("reference_frame_name", data.getReferenceFrameName());
       ser.write_type_6("distance_to_frame", data.getDistanceToFrame());
    }
@@ -105,6 +124,8 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RNavigationMessage data)
    {
+      data.setSpatialRelation(ser.read_type_9("spatial_relation"));
+      ser.read_type_d("secondary_reference_frame_name", data.getSecondaryReferenceFrameName());
       ser.read_type_d("reference_frame_name", data.getReferenceFrameName());
       data.setDistanceToFrame(ser.read_type_6("distance_to_frame"));
    }

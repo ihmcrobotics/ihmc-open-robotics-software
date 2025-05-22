@@ -1,8 +1,6 @@
 package us.ihmc.behaviors.ai2r;
 
 import behavior_msgs.msg.dds.AI2RActionFailureMessage;
-import behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage;
-import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
@@ -17,13 +15,10 @@ import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -41,14 +36,17 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final ROS2ControllerHelper ros2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
-   private final Throttler statusThrottler = new Throttler().setFrequency(1.0);
+   private final Throttler statusThrottler = new Throttler().setFrequency(30.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
+
    private CRDTStatusFootstepList plannedSteps;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
    private boolean navigationFailureForObstacle = false;
    private boolean actionFailureMissingFrame = false;
    private String navigationFailureObstacleName;
+   private final AI2RSkillEditor skillEditor = new AI2RSkillEditor();
+
 
    public AI2RNodeExecutor(long id,
                            CRDTInfo crdtInfo,
@@ -62,6 +60,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       this.ros2 = ros2;
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
+      resetStatusMessage();
 
       ros2.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {
@@ -78,54 +77,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                break;
             }
          }
-         LogTools.warn(commandedBehaviorIndex);
 
          // Generic adaptable skills
-         // GoTo behavior - Navigation
-         if (behaviorToExecuteName.contains("GOTO") && message.getAdaptingBehavior())
-         {
-            AI2RNavigationMessage navigationMessage = message.getNavigation();
-            // Set goals for GoTo behavior
-            String referenceFrame = navigationMessage.getReferenceFrameName().toString();
-            double distanceToReferenceFrame = navigationMessage.getDistanceToFrame();
-
-            for (var leaf : state.getActionSequence().getOrderedLeaves())
-            {
-               if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
-               {
-                  gotoActionState.getDefinition().setParentFrameName(referenceFrame);
-
-                  FramePoint3D goalStancePoint = new FramePoint3D(gotoActionState.getParentFrame());
-                  LogTools.info(gotoActionState.getParentFrame().getName());
-                  goalStancePoint.addX(distanceToReferenceFrame);
-                  goalStancePoint.changeFrame(ReferenceFrame.getWorldFrame());
-
-                  FramePoint3D goalFocalPoint = new FramePoint3D(gotoActionState.getParentFrame());
-                  goalFocalPoint.changeFrame(ReferenceFrame.getWorldFrame());
-
-                  gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
-                  gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
-                  break;
-               }
-            }
-         }
-         // Object pick and place
-         else if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
-         {
-            AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
-            for (var leaf : state.getActionSequence().getOrderedLeaves())
-            {
-               if (leaf.getLeafIndex() > commandedBehaviorIndex &&
-                   leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
-                   leaf instanceof HandPoseActionState handPoseActionState)
-               {
-                  handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
-                  RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
-                  handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
-                  break;
-               }
-            }
-         }
+         skillEditor.adaptSkills(behaviorToExecuteName, state, message, commandedBehaviorIndex);
 
          // Trigger commanded behavior
          if (commandedBehaviorIndex >= 0)
@@ -140,15 +94,24 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             actionFailureMissingFrame = false;
             state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
             state.getActionSequence().setAutomaticExecution(true);
-            statusMessage.setCompletedBehavior("-");
-            statusMessage.getFailure().setActionName("-");
-            statusMessage.getFailure().setCollisionName("-");
-            statusMessage.getFailure().setMissingFrame(false);
-            statusMessage.getFailure().getPositionError().set(new Point3D());
-            statusMessage.getFailure().getOrientationError().set(new Quaternion());
+
+            resetStatusMessage();
             LogTools.warn("Automatic execution");
+            statusMessage.setBehaviorInProgress(behaviorToExecuteName);
          }
       });
+   }
+
+   private void resetStatusMessage()
+   {
+      statusMessage.setBehaviorInProgress("-");
+      statusMessage.setCompletedBehavior("-");
+      statusMessage.getFailure().setActionName("-");
+      statusMessage.getFailure().setActionType("-");
+      statusMessage.getFailure().setCollisionName("-");
+      statusMessage.getFailure().setMissingFrame(false);
+      statusMessage.getFailure().getPositionError().set(new Point3D());
+      statusMessage.getFailure().getOrientationError().set(new Quaternion());
    }
 
    @Override
@@ -163,7 +126,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          setSceneInfo();
          setAvailableBehaviors();
          setFailedBehaviors();
-         LogTools.info("Status: failed {}, missing frame {}, collision with {}", statusMessage.getFailure().getActionName(), actionFailureMissingFrame, navigationFailureObstacleName);
          ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
 
@@ -233,10 +195,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                         {
                            failureMessage.setCollisionName(navigationFailureObstacleName);
                         }
-                        if (actionFailureMissingFrame)
-                        {
-                           failureMessage.setMissingFrame(actionFailureMissingFrame);
-                        }
+                        failureMessage.setMissingFrame(actionFailureMissingFrame);
                      }
                      else
                      {
@@ -301,7 +260,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                      plannedSteps = gotoActionState.getPreviewFootsteps();
                   if (stepsLeft > 0 && plannedSteps.getSize() >= stepsLeft + 1)
                   {
-                     Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - stepsLeft + 1).getTranslation();
+                     Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - (stepsLeft + 1)).getTranslation();
                      for (var object : statusMessage.getObjects())
                      {
                         Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
@@ -340,6 +299,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             // ! WARNING !
             // Assuming checkpoints are only used at the beginning and end of a behaviors
             statusMessage.setCompletedBehavior(state.getCheckPoints().get(i - 1).getDefinition().getName());
+            statusMessage.setBehaviorInProgress("-");
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
             state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
