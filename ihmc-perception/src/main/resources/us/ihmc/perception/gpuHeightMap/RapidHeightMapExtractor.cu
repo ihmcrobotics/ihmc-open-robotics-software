@@ -27,9 +27,11 @@ extern "C"
 #define HEIGHT_OFFSET 22
 #define KALMAN_FILTER_PREDICTION_NOISE 23
 #define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 24
-#define SEARCH_SKIP_SIZE 25
-#define GROUND_HEIGHT 26
-
+#define VARIANCE_PER_METER 25
+#define VARIANCE_PER_TRANSLATION_SPEED 26
+#define VARIANCE_PER_ROTATION_SPEED 27
+#define SEARCH_SKIP_SIZE 28
+#define GROUND_HEIGHT 29
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
 
@@ -208,6 +210,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                                       unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
                                       float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf,
                                       float *zUpCameraToWorldAlignedGround,
+                                      float linearMotionMagnitude, float angularMotionMagnitude,
                                       float resetOffset)
 {
     // Thread indices
@@ -278,9 +281,13 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
         projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
     }
 
+    // Distance from camera origin
+    float distance = length(cellCenterInSensor);
+
     int count = 0;
     float meanZ = 0.0f;
     float m2 = 0.0f;
+    float motionVariance = 0.0f;
 
     // Search within the window in the depth image
     for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
@@ -342,6 +349,26 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 
     float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
     float scaledVariance = currentVariance * params[HEIGHT_SCALING_FACTOR] * params[HEIGHT_SCALING_FACTOR];
+
+    // Motion variance
+    motionVariance += distance * params[VARIANCE_PER_METER];
+    motionVariance += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
+    motionVariance += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
+
+    if (xIndex == 20 && yIndex == 40)
+    {
+        printf("ScaledVariance: %f\n", scaledVariance);
+        printf("MotionVAriance %f\n", motionVariance);
+    }
+
+    scaledVariance += motionVariance;
+    scaledVariance = fminf(scaledVariance, USHRT_MAX);
+
+    if (xIndex == 20 && yIndex == 40)
+    {
+        printf("AFTER ScaledVariance: %f\n", scaledVariance);
+        printf("AFTER MotionVAriance %f\n", motionVariance);
+    }
 
     if (count == 0)
         meanZ = -params[HEIGHT_OFFSET];

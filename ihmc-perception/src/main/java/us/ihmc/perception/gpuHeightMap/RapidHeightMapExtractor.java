@@ -7,9 +7,12 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
@@ -74,6 +77,7 @@ public class RapidHeightMapExtractor
    private int cellsPerAxisGlobal;
    private int cellsPerAxisTerrain;
 
+   private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
    private int previousCellX;
    private int previousCellY;
    private int resetOffset;
@@ -168,6 +172,7 @@ public class RapidHeightMapExtractor
 
    public void update(GpuMat latestDepthImageGPU,
                       CameraIntrinsics cameraIntrinsics,
+                      RigidBodyTransform sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
                       Point3D sensorOrigin,
@@ -201,6 +206,18 @@ public class RapidHeightMapExtractor
 
       // --------- Run the update kernel ---------
       {
+         // Compute "speed" of the camera
+         RigidBodyTransform previousToCurrentSensorOrigin = new RigidBodyTransform(previousSensorToWorld);
+         previousToCurrentSensorOrigin.invert();
+         previousToCurrentSensorOrigin.multiply(sensorToWorldTransform);
+
+         Vector3DBasics translation = previousToCurrentSensorOrigin.getTranslation();
+         double linearMotionMagnitude = translation.norm();
+
+         RotationMatrixBasics rotation = previousToCurrentSensorOrigin.getRotation();
+         AxisAngle axisAngle = new AxisAngle(rotation);
+         double angularMotionMagnitude = Math.abs(axisAngle.getAngle());
+
          // Compute the inverse transforms for later use
          RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
          groundToSensorTransform.invert();
@@ -227,6 +244,7 @@ public class RapidHeightMapExtractor
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
          updateKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         updateKernel.withFloat((float) linearMotionMagnitude).withFloat((float) angularMotionMagnitude);
          updateKernel.withFloat(resetOffset);
 
          updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
@@ -314,6 +332,9 @@ public class RapidHeightMapExtractor
       cudaFreeAsync(ZUpCameraToWorldAlignedGroundDevicePointer, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      // Save sensorOrigin as previous for next update
+      previousSensorToWorld.set(sensorToWorldTransform);
    }
 
    public void updateHeightOffset(RigidBodyTransform groundToWorldTransform, float z, CameraIntrinsics cameraIntrinsics, double footHeight)
@@ -416,6 +437,9 @@ public class RapidHeightMapExtractor
                           (float) parameters.getHeightOffset(),
                           (float) parameters.getKalmanFilterPredictionNoise(),
                           (float) parameters.getAdditionalTranslationalVarianceAdded(),
+                          (float) parameters.getVariancePerMeter(),
+                          (float) parameters.getVariancePerTranslationSpeed(),
+                          (float) parameters.getVariancePerRotationSpeed(),
                           (float) parameters.getSearchSkipSize(),
                           (float) groundHeightGuess};
    }

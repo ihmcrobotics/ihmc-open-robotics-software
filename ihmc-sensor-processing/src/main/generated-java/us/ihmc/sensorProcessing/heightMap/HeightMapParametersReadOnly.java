@@ -70,6 +70,21 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(additionalTranslationalVarianceAdded);
    }
 
+   default double getVariancePerMeter()
+   {
+      return get(variancePerMeter);
+   }
+
+   default double getVariancePerTranslationSpeed()
+   {
+      return get(variancePerTranslationSpeed);
+   }
+
+   default double getVariancePerRotationSpeed()
+   {
+      return get(variancePerRotationSpeed);
+   }
+
    default double getHeightOffset()
    {
       return get(heightOffset);

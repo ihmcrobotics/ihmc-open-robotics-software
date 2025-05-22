@@ -37,6 +37,12 @@ __device__ float length2D(float2 vec)
     return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
+// Euclidean distance
+__device__ float length(float3 v)
+{
+    return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
 __device__ float3 normalize(float3 v)
 {
     float norm = sqrtf(dot(v, v));

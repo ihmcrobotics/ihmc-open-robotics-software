@@ -163,7 +163,7 @@ public class RapidHeightMapManager
       }
 
       // Perform update, this actually creates the height map
-      rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
+      rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
    }
 
    public HeightMapData getLatestHeightMapData()

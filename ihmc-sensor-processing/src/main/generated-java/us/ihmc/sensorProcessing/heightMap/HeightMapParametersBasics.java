@@ -68,6 +68,21 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.additionalTranslationalVarianceAdded, additionalTranslationalVarianceAdded);
    }
 
+   default void setVariancePerMeter(double variancePerMeter)
+   {
+      set(HeightMapParameters.variancePerMeter, variancePerMeter);
+   }
+
+   default void setVariancePerTranslationSpeed(double variancePerTranslationSpeed)
+   {
+      set(HeightMapParameters.variancePerTranslationSpeed, variancePerTranslationSpeed);
+   }
+
+   default void setVariancePerRotationSpeed(double variancePerRotationSpeed)
+   {
+      set(HeightMapParameters.variancePerRotationSpeed, variancePerRotationSpeed);
+   }
+
    default void setHeightOffset(double heightOffset)
    {
       set(HeightMapParameters.heightOffset, heightOffset);
