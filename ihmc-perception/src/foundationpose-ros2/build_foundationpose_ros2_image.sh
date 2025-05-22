@@ -9,7 +9,6 @@
 # Run this if you don't want to rebuild all the layers
 docker build -t foundationpose-ros2:0.0.1 .
 
-
 random_id=$(uuidgen | cut -c-8)
 
 # Build centerpose with GPUs

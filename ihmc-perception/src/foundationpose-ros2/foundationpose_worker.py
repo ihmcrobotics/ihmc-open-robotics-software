@@ -6,7 +6,7 @@ base_dir = os.path.dirname(os.path.abspath(__file__))  # Just get the current sc
 sys.path.append(os.path.join(base_dir, 'FoundationPose'))
 sys.path.append(os.path.join(base_dir, 'FoundationPose', 'nvdiffrast'))
 
-
+import trimesh
 from estimater import *
 
 
@@ -27,6 +27,10 @@ class FoundationPoseWorker:
         self.object_id = object_id
         self.initialized = False
 
+        to_origin, extents = trimesh.bounds.oriented_bounds(mesh)
+        self.to_origin = to_origin
+        self.bbox = np.stack([-extents / 2, extents / 2], axis=0).reshape(2, 3)
+
 
     def update(self, rgb, depth):
         if not self.initialized:
@@ -35,4 +39,8 @@ class FoundationPoseWorker:
             self.initialized = True
 
         print("TRACKING")
-        return self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)
+        pose = self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)
+        center_pose = pose@np.linalg.inv(self.to_origin)
+
+        # TODO: Add bounding box to result
+        return center_pose
