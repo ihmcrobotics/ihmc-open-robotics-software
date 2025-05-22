@@ -402,7 +402,7 @@ public class RapidHeightMapExtractor
                           (float) cameraIntrinsics.getFy(),
                           (float) centerIndexGlobal,
                           (float) heightMapParameters.getLocalWidthInMeters() / 2,
-                          (float) parameters.getHeightFilterAlpha(),
+                          (float) parameters.getKalmanFilterPredictionNoise(),
                           (float) cellsPerAxisLocal,
                           (float) cellsPerAxisGlobal,
                           (float) parameters.getHeightScaleFactor(),

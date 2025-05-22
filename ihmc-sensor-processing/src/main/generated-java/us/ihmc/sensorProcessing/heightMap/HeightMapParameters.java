@@ -28,7 +28,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
    public static final DoubleStoredPropertyKey minHeightDifference = keys.addDoubleKey("Min height difference");
    public static final DoubleStoredPropertyKey maxHeightDifference = keys.addDoubleKey("Max height difference");
-   public static final DoubleStoredPropertyKey heightFilterAlpha = keys.addDoubleKey("Height filter alpha");
+   public static final DoubleStoredPropertyKey kalmanFilterPredictionNoise = keys.addDoubleKey("Kalman filter prediction noise");
    public static final DoubleStoredPropertyKey spatialAlpha = keys.addDoubleKey("Spatial alpha");
    public static final DoubleStoredPropertyKey heightOffset = keys.addDoubleKey("Height offset");
    public static final DoubleStoredPropertyKey minClampHeight = keys.addDoubleKey("Min Clamp Height");

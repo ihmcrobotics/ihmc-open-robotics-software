@@ -60,9 +60,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxHeightDifference);
    }
 
-   default double getHeightFilterAlpha()
+   default double getKalmanFilterPredictionNoise()
    {
-      return get(heightFilterAlpha);
+      return get(kalmanFilterPredictionNoise);
    }
 
    default double getSpatialAlpha()

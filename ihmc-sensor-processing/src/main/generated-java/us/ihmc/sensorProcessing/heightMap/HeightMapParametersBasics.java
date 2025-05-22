@@ -58,9 +58,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
    }
 
-   default void setHeightFilterAlpha(double heightFilterAlpha)
+   default void setKalmanFilterPredictionNoise(double kalmanFilterPredictionNoise)
    {
-      set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
+      set(HeightMapParameters.kalmanFilterPredictionNoise, kalmanFilterPredictionNoise);
    }
 
    default void setSpatialAlpha(double spatialAlpha)

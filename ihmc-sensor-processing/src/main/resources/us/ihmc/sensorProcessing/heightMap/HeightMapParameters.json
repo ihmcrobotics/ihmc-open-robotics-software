@@ -38,7 +38,7 @@
     "lowerBound" : 0.01,
     "upperBound" : 0.4
   },
-  "Height filter alpha" : {
+  "Kalman filter prediction noise" : {
     "value" : 0.25,
     "lowerBound" : 0.0,
     "upperBound" : 1.0

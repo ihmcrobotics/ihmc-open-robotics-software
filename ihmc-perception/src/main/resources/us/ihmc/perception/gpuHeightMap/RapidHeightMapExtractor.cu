@@ -13,7 +13,7 @@ extern "C"
 #define DEPTH_FY 8
 #define GLOBAL_CENTER_INDEX 9
 #define HALF_LOCAL_WIDTH_IM_METERS 10
-#define HEIGHT_FILTER_ALPHA 11
+#define KALMAN_FILTER_PREDICTION_NOISE 11
 #define LOCAL_CELLS_PER_AXIS 12
 #define GLOBAL_CELLS_PER_AXIS 13
 #define HEIGHT_SCALING_FACTOR 14
@@ -453,7 +453,7 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
     {
         // Predict step of the filter
         float predictedMean = globalMeanF;
-        float predictedVariance = globalVarianceF + 1.0;
+        float predictedVariance = globalVarianceF + params[KALMAN_FILTER_PREDICTION_NOISE];
 
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF);
         float updatedMean = globalMeanF + kalmanGain * (localMeanF - globalMeanF);
