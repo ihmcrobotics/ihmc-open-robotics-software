@@ -79,10 +79,7 @@ class FoundationPoseROS2Node(Node):
 
     def camera_info_callback(self, camera_info):
         k = np.array(camera_info.k).reshape((3, 3))
-        k[0, 0] *= IMAGE_SCALE
-        k[1, 1] *= IMAGE_SCALE
-        k[0, 2] *= IMAGE_SCALE
-        k[1, 2] *= IMAGE_SCALE
+        k[:2] *= IMAGE_SCALE
         self.camera_k = k
 
 
@@ -103,12 +100,12 @@ class FoundationPoseROS2Node(Node):
         # Get the message data
         mesh = self.meshes[request.mesh_file]
         color = self.bridge.imgmsg_to_cv2(request.color, "rgb8")
-        depth = self.bridge.imgmsg_to_cv2(request.depth, "32FC1") / 1e3
+        depth = self.bridge.imgmsg_to_cv2(request.depth, "32FC1")
         mask = self.bridge.imgmsg_to_cv2(request.object_mask, "8UC1")
 
         # Scale images
         color = cv2.resize(src=color, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
-        depth = cv2.resize(src=depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
+        depth = cv2.resize(src=depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE) / 1e3
 
         # Ensure mask is same size as color
         if mask.shape[:2] != color.shape[:2]:
