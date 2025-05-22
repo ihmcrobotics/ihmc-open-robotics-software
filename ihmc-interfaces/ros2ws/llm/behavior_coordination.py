@@ -16,9 +16,13 @@ from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
 import cv2
 import numpy as np
 from llm_interface import LLMInterface
+import re
+import sys
+
+
 
 # Example usage:
-print(" Calling the LLM")
+print(" Calling the LLM ")
 llm = LLMInterface(config_file="config.json")
 
 ros2 = {}
@@ -29,12 +33,16 @@ waiting_for_command = True
 behavior_queue = []
 current_behavior_index = 0
 
+# Set counter to count the number of times LLM is called
+llm_call_counter = 0
+
 def behavior_message_callback(msg):
     #print("Received AI2R Status Message")
     global initialized  # Access the global variables
     global waiting_for_command
     global behavior_queue
     global current_behavior_index
+    global llm_call_counter
 
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
@@ -55,14 +63,7 @@ def behavior_message_callback(msg):
 
         # --------- Behaviors -----------
         behaviors = msg.available_behaviors
-        #print("Available behaviors:")
-        # if behaviors:
-        #     for behavior in behaviors:
-        #         print(behavior)
-        # else:
-        #     print("-")
-
-
+  
         # Get available behaviors
         available_behaviors = msg.available_behaviors
 
@@ -95,15 +96,32 @@ def behavior_message_callback(msg):
 
             print("LLM Input for reasoning:", llm_input)
 
+            # Check if it is first time calling the LLM
+            if llm_call_counter == 0:
+                llm.first_log_interaction(llm_input)
             # Query LLM for next action
             response        = llm.call_model(llm_input)
-            print("LLM Response:", response)
+            
+            # Increment the LLM call counter
+            llm_call_counter += 1
+            
+            #print("LLM Response:", response)
 
             next_behavior   = response.strip()
+            # # Extract content after the last </think>
+            # match = re.search(r'</think>(.*)$', response, re.DOTALL)
+            # if match:
+            #     next_behavior = match.group(1).strip()
+            # else:
+            #     next_behavior = response.strip()            
+
+        next_behavior = available_behaviors[current_behavior_index] if current_behavior_index < len(available_behaviors) else None
+        
 
         # Check if the LLM suggests a valid action
         if waiting_for_command:
             if (next_behavior in available_behaviors):
+                print("LLM Response:", next_behavior)
                 # Execute the suggested behavior
                 behavior_command = AI2RCommandMessage()
                 behavior_command.behavior_to_execute = next_behavior
@@ -113,35 +131,38 @@ def behavior_message_callback(msg):
                 current_behavior_index += 1  # Move to the next behavior in the queue
 
             else:
+                sys.exit(1)
                 print("[WARNING] LLM suggested an invalid action or no action needed.")
 
 
-    #     # Get available behaviors once at initialization
-    #     behavior_queue = msg.available_behaviors
-    #     print("Available behaviors:", behavior_queue)
+        # # Get available behaviors once at initialization
+        # behavior_queue = msg.available_behaviors
+        # print("Available behaviors:", behavior_queue)
 
-    #     if not behavior_queue:
-    #         print("[ERROR] No available behaviors.")
-    #         return
+        # if not behavior_queue:
+        #     print("[ERROR] No available behaviors.")
+        #     return
 
-    #     initialized = True
-    #     current_behavior_index = 0  # Start from the first behavior
+        # initialized = True
+        # current_behavior_index = 0  # Start from the first behavior
 
-    # # Monitor behavior execution
-    # completed_behavior = msg.completed_behavior
-    # if completed_behavior and completed_behavior in behavior_queue:
-    #     print(f"Completed Behavior: {completed_behavior}")
-    #     waiting_for_command = True
-    #     current_behavior_index += 1  # Move to the next behavior
+        # # Monitor behavior execution
+        # completed_behavior = msg.completed_behavior
+        # if completed_behavior and completed_behavior in behavior_queue:
+        #     print(f"Completed Behavior: {completed_behavior}")
+        #     waiting_for_command = True
+        #     current_behavior_index += 1  # Move to the next behavior
 
-    # if current_behavior_index < len(behavior_queue) and waiting_for_command:
-    #     # Execute the next behavior in the list
-    #     behavior_command = AI2RCommandMessage()
-    #     behavior_command.behavior_to_execute = behavior_queue[current_behavior_index]
-    #     print(f"Commanded Behavior: {behavior_command.behavior_to_execute}")
-    #     ros2["behavior_publisher"].publish(behavior_command)
-        
-    #     waiting_for_command = False  # Wait until the behavior completes
+        # if current_behavior_index < len(behavior_queue) and waiting_for_command:
+        #     # Execute the next behavior in the list
+        #     behavior_command = AI2RCommandMessage()
+        #     behavior_command.behavior_to_execute = behavior_queue[current_behavior_index]
+        #     print(f"Commanded Behavior: {behavior_command.behavior_to_execute}")
+        #     ros2["behavior_publisher"].publish(behavior_command)
+            
+        #     waiting_for_command = False  # Wait until the behavior completes
+        #     initialized = True
+
 
     # if not initialized:
     #     # --------- Scene -----------

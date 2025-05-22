@@ -21,7 +21,8 @@ from llm_interface import LLMInterface
 print(" Calling the LLM")
 llm = LLMInterface(config_file="config.json")
 
-
+# set counter to count the number of times LLM is called
+llm_call_counter = 0
 
 
 ros2 = {}
@@ -54,17 +55,9 @@ def behavior_message_callback(msg):
    # --------- Reasoning -----------
    # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
    behaviors_str = str(behaviors)
-#    messages = [
-#    {
-#        "role": "assistant",
-#        "content": behaviors_str
-#    },
-#    {
-#        "role": "user",
-#        "content": "Summarize all the behaviors in one paragraph"
-#    }
-#    ]
-#    answer = llama32(messages)
+   # check if it first time calling the LLM
+   
+   
    response = llm.call_model(behaviors_str)
    print("Summarized behaviors: ",response)
 

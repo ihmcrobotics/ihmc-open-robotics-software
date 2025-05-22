@@ -23,8 +23,7 @@ import requests
 import json
 
 # Get a free API key from https://api.together.xyz/settings/api-keys
-os.environ["TOGETHER_API_KEY"] = "1c7f74e3619d28067c154d33480d4063a8dff40b2cf3278312c905e38a796361"
-
+os.environ["TOGETHER_API_KEY"] = ""
 def llama32(messages, model_size=3):
   model = f"meta-llama/Llama-3.2-{model_size}B-Instruct-Turbo"
   url = "https://api.together.xyz/v1/chat/completions"

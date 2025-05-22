@@ -1,0 +1,14 @@
+[
+    {
+        "timestamp": "2025-05-20T16:58:39.091733",
+        "model": "gpt-3.5-turbo",
+        "prompt": "simple_prompt",
+        "output": "simple_prompt"
+    },
+    {
+        "timestamp": "2025-05-20T17:00:37.787407",
+        "model": "gpt-3.5-turbo",
+        "prompt": "simple_prompt",
+        "output": "simple_prompt"
+    }
+]
