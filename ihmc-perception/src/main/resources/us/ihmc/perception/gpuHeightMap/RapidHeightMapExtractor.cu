@@ -451,9 +451,13 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
     }
     else
     {
-        float kalmanGain = globalVarianceF / (globalVarianceF + localVarianceF);
+        // Predict step of the filter
+        float predictedMean = globalMeanF;
+        float predictedVariance = globalVarianceF + 1.0;
+
+        float kalmanGain = predictedVariance / (predictedVariance + localVarianceF);
         float updatedMean = globalMeanF + kalmanGain * (localMeanF - globalMeanF);
-        float updatedVariance = (1.0f - kalmanGain) * globalVarianceF;
+        float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
 
         *globalMean = updatedMean;
         *globalVariance = updatedVariance;
