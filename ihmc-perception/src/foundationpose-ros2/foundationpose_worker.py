@@ -30,7 +30,9 @@ class FoundationPoseWorker:
 
     def update(self, rgb, depth):
         if not self.initialized:
+            print("REGISTERING")
             self.foundation_pose.register(K=self.camera_k, rgb=self.initial_rgb, depth=self.initial_depth, ob_mask=self.initial_mask, ob_id=self.object_id)
             self.initialized = True
 
-        return self.foundation_pose.track_one(rgb=rgb, depth=depth, K=camera_k, iteration=2)
+        print("TRACKING")
+        return self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)

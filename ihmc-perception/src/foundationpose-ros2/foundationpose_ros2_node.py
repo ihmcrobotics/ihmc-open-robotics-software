@@ -24,6 +24,8 @@ CAMERA_INFO_TOPIC = '/foundation_pose/camera/color/camera_info'
 REQUEST_TOPIC = '/foundation_pose/request'
 RESULT_TOPIC = '/foundation_pose/result'
 
+IMAGE_SCALE = 0.5
+
 class FoundationPoseROS2Node(Node):
     def __init__(self, mesh_file_paths):
         super().__init__('foundation_pose_node')
@@ -59,30 +61,51 @@ class FoundationPoseROS2Node(Node):
 
 
     def color_callback(self, color_image):
-        self.rgb = self.bridge.imgmsg_to_cv2(color_image, "rgb8")
+        big_rgb = self.bridge.imgmsg_to_cv2(color_image, "rgb8")
+        self.rgb = cv2.resize(src=big_rgb, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
         self.new_color_available.set()
 
 
     def depth_callback(self, depth_image):
-        self.depth = self.bridge.imgmsg_to_cv2(depth_image, "32FC1") / 1e3
+        big_depth = self.bridge.imgmsg_to_cv2(depth_image, "32FC1") / 1e3
+        self.depth = cv2.resize(src=big_depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
         self.new_depth_available.set()
 
 
     def camera_info_callback(self, camera_info):
-        self.camera_k = np.array(camera_info.k).reshape((3, 3))
+        k = np.array(camera_info.k).reshape((3, 3))
+        k[0, 0] *= IMAGE_SCALE
+        k[1, 1] *= IMAGE_SCALE
+        k[0, 2] *= IMAGE_SCALE
+        k[1, 2] *= IMAGE_SCALE
+        self.camera_k = k
 
 
     def request_callback(self, request):
         print("REQUEST RECEIVED")
         if self.camera_k is None:
-            print("idk the camera intrinsics. Not accepting request atm")
+            print("Idk the camera intrinsics. Not accepting request atm")
             return
 
+        if request.object_id in self.workers:
+            print("Already tracking this obj")
+            return
+
+        if not request.mesh_file in self.meshes:
+            print("Idk this mesh file. Haven't seen anything like it: ", request.mesh_file)
+            return
+
+        # Get the message data
         mesh = self.meshes[request.mesh_file]
         color = self.bridge.imgmsg_to_cv2(request.color, "rgb8")
         depth = self.bridge.imgmsg_to_cv2(request.depth, "32FC1") / 1e3
         mask = self.bridge.imgmsg_to_cv2(request.object_mask, "8UC1")
 
+        # Scale images
+        color = cv2.resize(src=color, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
+        depth = cv2.resize(src=depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
+
+        # Ensure mask is same size as color
         if mask.shape[:2] != color.shape[:2]:
             height, width = color.shape[:2]
             mask = cv2.resize(mask, (width, height))
