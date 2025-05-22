@@ -12,9 +12,9 @@ import cv2
 from cv_bridge import CvBridge
 import trimesh
 import glob
+import threading
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-import threading
 from sensor_msgs.msg import Image, CameraInfo
 from perception_msgs.msg import FoundationPoseRequest, FoundationPoseResult
 from foundationpose_worker import FoundationPoseWorker
@@ -26,6 +26,12 @@ REQUEST_TOPIC = '/foundation_pose/request'
 RESULT_TOPIC = '/foundation_pose/result'
 
 IMAGE_SCALE = 0.5
+
+IHMC_COORD_ROTATION = np.array([
+    [ 0, 0, 1],
+    [-1, 0, 0],
+    [ 0,-1, 0]
+])
 
 class FoundationPoseROS2Node(Node):
     def __init__(self, mesh_file_paths):
@@ -134,8 +140,14 @@ class FoundationPoseROS2Node(Node):
                 for object_id, worker in self.workers.items():
                     pose = worker.update(self.rgb, self.depth)
 
+                    # Get the position and rotation (Z forward, Y up)
                     position = pose[:3, 3]
                     rotation_matrix = pose[:3, :3]
+
+                    # Transform to X forward Z up coordinates
+                    position = IHMC_COORD_ROTATION @ position
+                    rotation_matrix = IHMC_COORD_ROTATION @ rotation_matrix @ IHMC_COORD_ROTATION.T
+
                     quaternion = R.from_matrix(rotation_matrix).as_quat()
 
                     result = FoundationPoseResult()

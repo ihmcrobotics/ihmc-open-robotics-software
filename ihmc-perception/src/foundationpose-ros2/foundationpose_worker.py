@@ -1,14 +1,6 @@
-import sys
-import os
-
-# sys.path.append(os.path.join(os.path.dirname(__file__), 'FoundationPose'))
-base_dir = os.path.dirname(os.path.abspath(__file__))  # Just get the current script folder
-sys.path.append(os.path.join(base_dir, 'FoundationPose'))
-sys.path.append(os.path.join(base_dir, 'FoundationPose', 'nvdiffrast'))
-
+import numpy as np
 import trimesh
-from estimater import *
-
+from estimater import FoundationPose
 
 class FoundationPoseWorker:
     def __init__(self, mesh, rgb, depth, mask, camera_k, object_id=None, glctx=None):
@@ -41,11 +33,6 @@ class FoundationPoseWorker:
         print("TRACKING")
         pose = self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)
         center_pose = pose@np.linalg.inv(self.to_origin)
-
-        vis = draw_posed_3d_box(self.camera_k, img=rgb, ob_in_cam=center_pose, bbox=self.bbox)
-        vis = draw_xyz_axis(rgb, ob_in_cam=center_pose, scale=0.1, K=self.camera_k, thickness=3, transparency=0, is_input_rgb=True)
-        cv2.imshow('1', vis[...,::-1])
-        cv2.waitKey(1)
 
         # TODO: Add bounding box to result
         return center_pose
