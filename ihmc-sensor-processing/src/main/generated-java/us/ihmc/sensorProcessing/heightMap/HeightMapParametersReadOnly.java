@@ -65,9 +65,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(kalmanFilterPredictionNoise);
    }
 
-   default double getSpatialAlpha()
+   default double getAdditionalTranslationalVarianceAdded()
    {
-      return get(spatialAlpha);
+      return get(additionalTranslationalVarianceAdded);
    }
 
    default double getHeightOffset()

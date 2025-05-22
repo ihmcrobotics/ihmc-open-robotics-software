@@ -43,7 +43,7 @@
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
-  "Spatial alpha" : {
+  "Additional translational variance added" : {
     "value" : 0.5,
     "lowerBound" : 0.0,
     "upperBound" : 1.0

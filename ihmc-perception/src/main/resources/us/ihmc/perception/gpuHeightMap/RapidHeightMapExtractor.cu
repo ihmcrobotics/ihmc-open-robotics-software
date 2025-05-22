@@ -13,20 +13,20 @@ extern "C"
 #define DEPTH_FY 8
 #define GLOBAL_CENTER_INDEX 9
 #define HALF_LOCAL_WIDTH_IM_METERS 10
-#define KALMAN_FILTER_PREDICTION_NOISE 11
-#define LOCAL_CELLS_PER_AXIS 12
-#define GLOBAL_CELLS_PER_AXIS 13
-#define HEIGHT_SCALING_FACTOR 14
-#define MIN_HEIGHT_REGISTRATION 15
-#define MAX_HEIGHT_REGISTRATION 16
-#define MIN_HEIGHT_DIFFERENCE 17
-#define MAX_HEIGHT_DIFFERENCE 18
-#define SEARCH_WINDOW_HEIGHT 19
-#define SEARCH_WINDOW_WIDTH 20
-#define MIN_CLAMP_HEIGHT 21
-#define MAX_CLAMP_HEIGHT 22
-#define HEIGHT_OFFSET 23
-#define SPATIAL_ALPHA 24
+#define LOCAL_CELLS_PER_AXIS 11
+#define GLOBAL_CELLS_PER_AXIS 12
+#define HEIGHT_SCALING_FACTOR 13
+#define MIN_HEIGHT_REGISTRATION 14
+#define MAX_HEIGHT_REGISTRATION 15
+#define MIN_HEIGHT_DIFFERENCE 16
+#define MAX_HEIGHT_DIFFERENCE 17
+#define SEARCH_WINDOW_HEIGHT 18
+#define SEARCH_WINDOW_WIDTH 19
+#define MIN_CLAMP_HEIGHT 20
+#define MAX_CLAMP_HEIGHT 21
+#define HEIGHT_OFFSET 22
+#define KALMAN_FILTER_PREDICTION_NOISE 23
+#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 24
 #define SEARCH_SKIP_SIZE 25
 #define GROUND_HEIGHT 26
 
@@ -113,49 +113,49 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
     return heightAverage;
 }
 
-__device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
-{
-    float totalDeviation = 0.0f;
-    int count = 0;
-    int globalCellsPerAxis = (int)params[GLOBAL_CELLS_PER_AXIS];
+// __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
+// {
+//     float totalDeviation = 0.0f;
+//     int count = 0;
+//     int globalCellsPerAxis = (int)params[GLOBAL_CELLS_PER_AXIS];
+//
+//     for (int i = -1; i < 2; i++)
+//     {
+//         for (int j = -1; j < 2; j++)
+//         {
+//             int nxIndex = xIndex + i;
+//             int nyIndex = yIndex + j;
+//
+//             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
+//             {
+//                 unsigned short *heightValue = (unsigned short *)((char *)globalHeightMap + nxIndex * pitchGlobal) + nyIndex;
+//                 float height = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+//                 totalDeviation += (height - average) * (height - average);
+//                 count++;
+//             }
+//         }
+//     }
+//     float heightStddev = sqrt(totalDeviation / (float)count);
+//     return heightStddev;
+// }
 
-    for (int i = -1; i < 2; i++)
-    {
-        for (int j = -1; j < 2; j++)
-        {
-            int nxIndex = xIndex + i;
-            int nyIndex = yIndex + j;
-
-            if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
-            {
-                unsigned short *heightValue = (unsigned short *)((char *)globalHeightMap + nxIndex * pitchGlobal) + nyIndex;
-                float height = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-                totalDeviation += (height - average) * (height - average);
-                count++;
-            }
-        }
-    }
-    float heightStddev = sqrt(totalDeviation / (float)count);
-    return heightStddev;
-}
-
-__device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
-{
-    float averageHeightZ = get_spatial_average(xIndex, yIndex, globalHeightMap, pitchGlobal, params);
-    float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalHeightMap, pitchGlobal, params);
-    float finalHeight = height;
-
-    if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
-    {
-        // finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
-    }
-    else
-    {
-        finalHeight = averageHeightZ * params[SPATIAL_ALPHA] * 0.0001f + finalHeight * (1.0f - params[SPATIAL_ALPHA] * 0.0001f);
-    }
-
-    return finalHeight;
-}
+// __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
+// {
+//     float averageHeightZ = get_spatial_average(xIndex, yIndex, globalHeightMap, pitchGlobal, params);
+//     float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalHeightMap, pitchGlobal, params);
+//     float finalHeight = height;
+//
+//     if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
+//     {
+//         // finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
+//     }
+//     else
+//     {
+//         finalHeight = averageHeightZ * params[SPATIAL_ALPHA] * 0.0001f + finalHeight * (1.0f - params[SPATIAL_ALPHA] * 0.0001f);
+//     }
+//
+//     return finalHeight;
+// }
 
 __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraToWorldAlignedGround, float* params)
 {
@@ -390,7 +390,11 @@ __global__ void translateHeightMapKernel(unsigned short *oldHeightMapMean, size_
         unsigned short* newVarianceRow = (unsigned short*)((char*)newVarianceMap + x * pitchNewVariance);
 
         newMeanRow[y] = oldMeanRow[srcY];
-        newVarianceRow[y] = oldVarianceRow[srcY];
+
+        // Add variance due to the translation
+        unsigned int increasedVariance = (unsigned int)oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
+        // We use min here to prevent over flow of the max value of a unsigned short
+        newVarianceRow[y] = (unsigned short)min(increasedVariance, (unsigned int)USHRT_MAX);
     }
     else
     {

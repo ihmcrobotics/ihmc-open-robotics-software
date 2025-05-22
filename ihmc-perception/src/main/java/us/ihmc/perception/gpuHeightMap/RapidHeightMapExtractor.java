@@ -402,7 +402,6 @@ public class RapidHeightMapExtractor
                           (float) cameraIntrinsics.getFy(),
                           (float) centerIndexGlobal,
                           (float) heightMapParameters.getLocalWidthInMeters() / 2,
-                          (float) parameters.getKalmanFilterPredictionNoise(),
                           (float) cellsPerAxisLocal,
                           (float) cellsPerAxisGlobal,
                           (float) parameters.getHeightScaleFactor(),
@@ -415,7 +414,8 @@ public class RapidHeightMapExtractor
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getHeightOffset(),
-                          (float) parameters.getSpatialAlpha(),
+                          (float) parameters.getKalmanFilterPredictionNoise(),
+                          (float) parameters.getAdditionalTranslationalVarianceAdded(),
                           (float) parameters.getSearchSkipSize(),
                           (float) groundHeightGuess};
    }

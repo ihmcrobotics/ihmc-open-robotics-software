@@ -43,10 +43,10 @@
     "lowerBound": 0.2,
     "upperBound": 5.0
   },
-  "Spatial alpha": {
-    "value": 0.5,
-    "lowerBound": 0.0,
-    "upperBound": 1.0
+  "Additional translational variance added": {
+    "value": 10.0,
+    "lowerBound": 1.0,
+    "upperBound": 100.0
   },
   "Height offset": {
     "value": 3.2768,
