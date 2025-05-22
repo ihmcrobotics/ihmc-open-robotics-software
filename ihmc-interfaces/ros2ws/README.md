@@ -27,6 +27,7 @@ test that everything's working correctly.
 Requirements (install via pip):
 - rclpy
 - opencv-python
+- together
 
 In the UI, locate the Behavior Panel and click on AI2RDemo.json to load a predefined list of behaviors.
 Then run the module that hosts the reasoning for coordinating the behaviors:
