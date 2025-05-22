@@ -157,6 +157,7 @@ public class DepthImageBodyCollisionFilter
    {
       // Need to free this memory on the GPU to shut down correctly
       cudaFree(deviceCollidableGeometryPointer);
+      cudaFree(collidableGeometryPointer);
 
       deviceCollidableGeometryPointer.close();
       collidableGeometryPointer.close();

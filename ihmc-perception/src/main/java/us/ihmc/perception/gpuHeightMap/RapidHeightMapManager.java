@@ -108,6 +108,7 @@ public class RapidHeightMapManager
                                                          (float) heightMapParameters.getHeightScaleFactor());
 
       hostGlobalHeightMap.close();
+      deviceGlobalHeightMap.close();
    }
 
    /**
@@ -206,7 +207,8 @@ public class RapidHeightMapManager
 
    public void destroy()
    {
-      rapidHeightMapExtractor.destroy();
       compressedCroppedHeightMapPointer.close();
+      heightMapPublisher.remove();
+      rapidHeightMapExtractor.destroy();
    }
 }

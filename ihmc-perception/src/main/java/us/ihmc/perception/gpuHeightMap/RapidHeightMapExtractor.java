@@ -451,17 +451,19 @@ public class RapidHeightMapExtractor
    public void destroy()
    {
       heightMapProgram.close();
+      blockSize.close();
+
       updateKernel.close();
+      translateKernel.close();
       registerKernel.close();
       planOffsetKernel.close();
+      emptyRegisterKernel.close();
 
       // Clean up each resource
       deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer, stream);
       deallocateFloatPointer(sensorToGroundTransformHostPointer, sensorToGroundTransformDevicePointer, stream);
       deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, ZUpCameraToWorldAlignedGroundDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
-
-      blockSize.close();
 
       localMeanMap.close();
       localVarianceMap.close();
