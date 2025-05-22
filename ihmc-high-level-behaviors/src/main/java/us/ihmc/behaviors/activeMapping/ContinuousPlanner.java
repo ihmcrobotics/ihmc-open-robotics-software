@@ -158,6 +158,7 @@ public class ContinuousPlanner
       {
          request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
       }
+
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);
@@ -251,6 +252,9 @@ public class ContinuousPlanner
 
       // Helpful print to let the use know what is going on with the request at all times
       LogTools.info("AStar {}", request);
+
+      // Temp for ONR demo, only plan on flat ground for footstep portion
+      footstepPlanner.getAStarFootstepPlanner().setOverrideFlatGround(true);
 
       FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(request);
 

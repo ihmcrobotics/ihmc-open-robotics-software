@@ -76,6 +76,8 @@ public class AStarFootstepPlanner
    /** Called at the status publish frequency. Post-processes the plan and publishes it */
    private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
 
+   private boolean overrideFlatGround = true;
+
    private double planningStartTime;
    private final Stopwatch stopwatch;
    private int iterations = 0;
@@ -154,6 +156,11 @@ public class AStarFootstepPlanner
       boolean hasHeightMap = request.getEnvironmentHandler().getHeightMapData() != null && !request.getEnvironmentHandler().getHeightMapData().isEmpty();
       boolean hasTerrainMap = request.getEnvironmentHandler().getTerrainMapData() != null;
       boolean flatGroundMode = request.getAssumeFlatGround() || (!hasHeightMap && !hasTerrainMap);
+
+      if (overrideFlatGround)
+      {
+         flatGroundMode = true;
+      }
 
       HeightMapData heightMapData = flatGroundMode ? null : request.getEnvironmentHandler().getHeightMapData();
       TerrainMapData terrainMapData = flatGroundMode ? null : request.getEnvironmentHandler().getTerrainMapData();
@@ -553,5 +560,10 @@ public class AStarFootstepPlanner
    public ReferenceBasedIdealStepCalculator getReferenceBasedIdealStepCalculator()
    {
       return referenceBasedIdealStepCalculator;
+   }
+
+   public void setOverrideFlatGround(boolean overrideFlatGround)
+   {
+      this.overrideFlatGround = overrideFlatGround;
    }
 }

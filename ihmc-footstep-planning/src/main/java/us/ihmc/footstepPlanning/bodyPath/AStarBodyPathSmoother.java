@@ -33,7 +33,7 @@ public class AStarBodyPathSmoother
    static final double traversibilitySampleWindowX = 0.2;
    static final double traversibilitySampleWindowY = 0.14;
 
-   static final int iterations = 180;
+   static final int iterations = 120;
 
    static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
@@ -163,7 +163,7 @@ public class AStarBodyPathSmoother
             for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
             {
                /* Collision gradient */
-               gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradient());
+//               gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradient());
                maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
 
                /* Traversibility gradient */

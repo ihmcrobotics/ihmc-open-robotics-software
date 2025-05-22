@@ -72,7 +72,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MainTabController
 {
-   private static final boolean verbose = false;
+   private static final boolean verbose = true;
 
    // control
    @FXML

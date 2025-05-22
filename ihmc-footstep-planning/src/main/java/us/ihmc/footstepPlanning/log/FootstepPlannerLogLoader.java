@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -527,27 +528,47 @@ public class FootstepPlannerLogLoader
 
    public static void main(String[] args) throws IOException
    {
-      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      logLoader.load();
+//      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+//      logLoader.load();
+//
+//      FootstepPlannerLog log = logLoader.getLog();
+//      HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
+//
+//      JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+//      byte[] serializedHeightMap = serializer.serializeToBytes(heightMapMessage);
+//
+//      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+//      String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";
+//      String file = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + fileName;
+//
+//      FileTools.ensureFileExists(new File(file).toPath());
+//      FileOutputStream outputStream = new FileOutputStream(file);
+//      PrintStream printStream = new PrintStream(outputStream);
+//
+//      printStream.write(serializedHeightMap);
+//      printStream.flush();
+//      outputStream.close();
+//      printStream.close();
 
-      FootstepPlannerLog log = logLoader.getLog();
-      HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
+      FramePose3D start = new FramePose3D();
+      start.getPosition().set(0.0, -0.1, 0.0);
+      start.getOrientation().setToYawOrientation(Math.PI);
+      printSides(start);
 
-      JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
-      byte[] serializedHeightMap = serializer.serializeToBytes(heightMapMessage);
+      FramePose3D goal = new FramePose3D();
+      goal.getPosition().set(1.9, 1.0, 0.15);
+      goal.getOrientation().setToYawOrientation(1.2);
+      printSides(goal);
+   }
 
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-      String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";
-      String file = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + fileName;
-
-      FileTools.ensureFileExists(new File(file).toPath());
-      FileOutputStream outputStream = new FileOutputStream(file);
-      PrintStream printStream = new PrintStream(outputStream);
-
-      printStream.write(serializedHeightMap);
-      printStream.flush();
-      outputStream.close();
-      printStream.close();
-
+   private static void printSides(FramePose3D midFootPose)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         System.out.println(robotSide);
+         FramePose3D pose = new FramePose3D(midFootPose);
+         pose.appendTranslation(0.0, 0.5 * robotSide.negateIfRightSide(0.25), 0.0);
+         System.out.println(pose);
+      }
    }
 }

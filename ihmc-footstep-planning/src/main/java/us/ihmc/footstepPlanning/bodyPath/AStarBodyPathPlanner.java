@@ -319,8 +319,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
          for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
          {
             BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
-            if (node.getXIndex() == 8 && node.getYIndex() == 2 && neighbor.getXIndex() == 10 && neighbor.getY() == 3)
-               LogTools.info("break");
 
             this.snapHeight.set(snap(neighbor));
             heuristicCost.set(xyDistance(neighbor, goalNode));
