@@ -95,6 +95,8 @@ def behavior_message_callback(msg):
         new_goto_behavior.distance_to_frame = 0.6
         new_goto_behavior.secondary_reference_frame_name = "DoorPanel1"
         new_goto_behavior.spatial_relation = AI2RNavigationMessage.FRONT
+        if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
+            new_goto_behavior.secondary_reference_frame_name = "walkingFrame"
 
         behavior_command.navigation = new_goto_behavior
 

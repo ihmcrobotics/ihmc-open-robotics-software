@@ -70,6 +70,11 @@ public class AI2RSkillEditor
                   direction.scale(distanceToReferenceFrame);
                   switch (spatialRelationType)
                   {
+                     case DEFAULT ->
+                     {
+                        direction.scale(0.1);
+                        goalStancePoint.add(direction);
+                     }
                      case FRONT -> goalStancePoint.add(direction);
                      case BEHIND -> goalStancePoint.sub(direction);
                      case LEFT ->
