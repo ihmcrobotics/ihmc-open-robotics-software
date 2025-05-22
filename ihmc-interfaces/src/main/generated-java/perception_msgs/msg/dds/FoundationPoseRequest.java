@@ -19,23 +19,23 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
    /**
             * Color image containing the object
             */
-   public sensor_msgs.msg.dds.Image color_;
+   public perception_msgs.msg.dds.ImageMessage color_;
    /**
             * Depth image containing the object
             */
-   public sensor_msgs.msg.dds.Image depth_;
+   public perception_msgs.msg.dds.ImageMessage depth_;
    /**
             * Mask of the object in the image
             */
-   public sensor_msgs.msg.dds.Image object_mask_;
+   public perception_msgs.msg.dds.ImageMessage object_mask_;
 
    public FoundationPoseRequest()
    {
       object_id_ = new java.lang.StringBuilder(255);
       mesh_file_ = new java.lang.StringBuilder(255);
-      color_ = new sensor_msgs.msg.dds.Image();
-      depth_ = new sensor_msgs.msg.dds.Image();
-      object_mask_ = new sensor_msgs.msg.dds.Image();
+      color_ = new perception_msgs.msg.dds.ImageMessage();
+      depth_ = new perception_msgs.msg.dds.ImageMessage();
+      object_mask_ = new perception_msgs.msg.dds.ImageMessage();
    }
 
    public FoundationPoseRequest(FoundationPoseRequest other)
@@ -52,9 +52,9 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
       mesh_file_.setLength(0);
       mesh_file_.append(other.mesh_file_);
 
-      sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.color_, color_);
-      sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.depth_, depth_);
-      sensor_msgs.msg.dds.ImagePubSubType.staticCopy(other.object_mask_, object_mask_);
+      perception_msgs.msg.dds.ImageMessagePubSubType.staticCopy(other.color_, color_);
+      perception_msgs.msg.dds.ImageMessagePubSubType.staticCopy(other.depth_, depth_);
+      perception_msgs.msg.dds.ImageMessagePubSubType.staticCopy(other.object_mask_, object_mask_);
    }
 
    /**
@@ -109,7 +109,7 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
    /**
             * Color image containing the object
             */
-   public sensor_msgs.msg.dds.Image getColor()
+   public perception_msgs.msg.dds.ImageMessage getColor()
    {
       return color_;
    }
@@ -118,7 +118,7 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
    /**
             * Depth image containing the object
             */
-   public sensor_msgs.msg.dds.Image getDepth()
+   public perception_msgs.msg.dds.ImageMessage getDepth()
    {
       return depth_;
    }
@@ -127,7 +127,7 @@ public class FoundationPoseRequest extends Packet<FoundationPoseRequest> impleme
    /**
             * Mask of the object in the image
             */
-   public sensor_msgs.msg.dds.Image getObjectMask()
+   public perception_msgs.msg.dds.ImageMessage getObjectMask()
    {
       return object_mask_;
    }

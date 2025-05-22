@@ -16,14 +16,12 @@ import threading
 import queue
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import String as StringMessage
-from perception_msgs.msg import FoundationPoseRequest, FoundationPoseResult
+from perception_msgs.msg import FoundationPoseRequest, FoundationPoseResult, ImageMessage
 from foundationpose_worker import FoundationPoseWorker
 
-COLOR_TOPIC = '/foundation_pose/camera/color/image_raw'
-DEPTH_TOPIC = '/foundation_pose/camera/aligned_depth_to_color/image_raw'
-CAMERA_INFO_TOPIC = '/foundation_pose/camera/color/camera_info'
+COLOR_TOPIC = '/foundation_pose/color'
+DEPTH_TOPIC = '/foundation_pose/depth'
 REQUEST_TOPIC = '/foundation_pose/request'
 REMOVE_TOPIC = '/foundation_pose/remove'
 RESULT_TOPIC = '/foundation_pose/result'
@@ -58,11 +56,10 @@ class FoundationPoseROS2Node(Node):
         self.new_depth_available = threading.Event()
         self.new_color_available = threading.Event()
 
-        # Create subscriptions to camera topics (color, depth, camera info)
+        # Create subscriptions to camera topics (color, depth images)
         print("Creating subscriptions...")
-        self.rgb_subscription = self.create_subscription(Image, COLOR_TOPIC, self.color_callback, 10)
-        self.depth_subscription = self.create_subscription(Image, DEPTH_TOPIC, self.depth_callback, 10)
-        self.camera_info_subscription = self.create_subscription(CameraInfo, CAMERA_INFO_TOPIC, self.camera_info_callback, 10)
+        self.rgb_subscription = self.create_subscription(ImageMessage, COLOR_TOPIC, self.color_callback, 10)
+        self.depth_subscription = self.create_subscription(ImageMessage, DEPTH_TOPIC, self.depth_callback, 10)
 
         # Create subscription to request messages
         self.request_subscription = self.create_subscription(FoundationPoseRequest, REQUEST_TOPIC, self.request_callback, 10)
@@ -80,21 +77,27 @@ class FoundationPoseROS2Node(Node):
 
 
     def color_callback(self, color_image):
-        big_rgb = self.bridge.imgmsg_to_cv2(color_image, "rgb8")
-        self.rgb = cv2.resize(src=big_rgb, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
+        # Get the camera intrinsics
+        fx = IMAGE_SCALE * color_image.focal_length_x_pixels
+        fy = IMAGE_SCALE * color_image.focal_length_y_pixels
+        cx = IMAGE_SCALE * color_image.principal_point_x_pixels
+        cy = IMAGE_SCALE * color_image.principal_point_y_pixels
+        self.camera_k = np.array([
+            [fx, 0,cx],
+            [ 0,fy,cy],
+            [ 0, 0, 1]
+        ])
+
+        # Read the color image
+        bgr = self.decode_and_resize(image_message=color_image, scale=IMAGE_SCALE)
+        self.rgb = cv2.cvtColor(src=bgr, flags=cv2.COLOR_BGR2RGB)
         self.new_color_available.set()
 
 
     def depth_callback(self, depth_image):
-        big_depth = self.bridge.imgmsg_to_cv2(depth_image, "32FC1")
-        self.depth = cv2.resize(src=big_depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE) / 1e3
+        mm_depth = self.decode_and_resize(image_message=depth_image, scale=IMAGE_SCALE)
+        self.depth = mm_depth.astype(dtype=np.float32) / 1e3
         self.new_depth_available.set()
-
-
-    def camera_info_callback(self, camera_info):
-        k = np.array(camera_info.k).reshape((3, 3))
-        k[:2] *= IMAGE_SCALE
-        self.camera_k = k
 
 
     def request_callback(self, request):
@@ -113,18 +116,15 @@ class FoundationPoseROS2Node(Node):
 
         # Get the message data
         mesh = self.meshes[request.mesh_file]
-        color = self.bridge.imgmsg_to_cv2(request.color, "rgb8")
-        depth = self.bridge.imgmsg_to_cv2(request.depth, "32FC1")
-        mask = self.bridge.imgmsg_to_cv2(request.object_mask, "8UC1")
 
-        # Scale images
-        color = cv2.resize(src=color, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
-        depth = cv2.resize(src=depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE) / 1e3
+        bgr = self.decode_and_resize(image_message=request.color, scale=IMAGE_SCALE)
+        color = cv2.cvtColor(src=bgr, flags=cv2.COLOR_BGR2RGB)
 
-        # Ensure mask is same size as color
-        if mask.shape[:2] != color.shape[:2]:
-            height, width = color.shape[:2]
-            mask = cv2.resize(mask, (width, height))
+        mm_depth = self.decode_and_resize(image_message=request.depth, scale=IMAGE_SCALE)
+        depth = mm_depth.astype(dtype=np.float32) / 1e3
+
+        height, width = color.shape[:2]
+        mask = self.decode_and_resize(image_message=request.object_mask, dsize=(width, height))
 
         self.workers[request.object_id] = FoundationPoseWorker(
             mesh=mesh,
@@ -185,6 +185,11 @@ class FoundationPoseROS2Node(Node):
             self.new_color_available.clear()
             self.new_depth_available.clear()
 
+
+    def decode_and_resize(image_message, dsize, scale):
+        image_data = np.frombuffer(buffer=image_message.data, dtype=np.uint8)
+        image = cv2.imdecode(buf=image_data, flags=cv2.IMREAD_UNCHANGED)
+        return cv2.resize(src=image, dsize=dsize, fx=scale, fy=scale)
 
 def main():
     # initialize ROS

@@ -1,10 +1,11 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.FoundationPoseRequest;
 import perception_msgs.msg.dds.FoundationPoseResult;
-import sensor_msgs.msg.dds.CameraInfo;
-import sensor_msgs.msg.dds.Image;
+import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -15,6 +16,7 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionThread;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -40,10 +42,13 @@ class RDXFoundationPoseDemo
 {
    private static final String OBJECT_ID = "mustard_bottle";
    private static final String OBJECT_NAME = "bottle";
+
+   private static final BytePointer JPG = new BytePointer(".jpg");
+   private static final BytePointer PNG = new BytePointer(".png");
+
    private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<Image> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/color/image_raw").withType(Image.class);
-   private static final ROS2Topic<Image> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/aligned_depth_to_color/image_raw").withType(Image.class);
-   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/color/camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/color").withType(ImageMessage.class);
+   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/depth").withType(ImageMessage.class);
    private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/remove").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().withModule("foundation_pose/result").withType(FoundationPoseResult.class);
@@ -92,8 +97,6 @@ class RDXFoundationPoseDemo
       imagePublishThread = new ImageSensorPublishThread(ros2Node, zed);
       imagePublishThread.addTopic(COLOR_TOPIC, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
       imagePublishThread.addTopic(DEPTH_TOPIC, ZEDImageSensor.DEPTH_IMAGE_KEY);
-      imagePublishThread.addTopic(CAMERA_INFO_TOPIC, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      imagePublishThread.enableROS2Frames(true);
 
       yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
       yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
@@ -210,12 +213,30 @@ class RDXFoundationPoseDemo
          {
             System.out.println("Sending request");
 
+            RawImage color = yoloDetection.getColorImage();
+            RawImage depth = yoloDetection.getDepthImage();
+            RawImage mask = yoloDetection.getObjectMask();
+
+            // Compress images
+            BytePointer encodedColor = new BytePointer();
+            BytePointer encodedDepth = new BytePointer();
+            BytePointer encodedMask = new BytePointer();
+
+            opencv_imgcodecs.imencode(JPG, color.getCpuImageMat(), encodedColor);
+            opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
+            opencv_imgcodecs.imencode(PNG, mask.getCpuImageMat(), encodedMask);
+
             requestMessage.setObjectId(OBJECT_ID);
             requestMessage.setMeshFile("mustard0.obj");
-            PerceptionMessageTools.packImageMessage(yoloDetection.getColorImage(), "odom", requestMessage.getColor());
-            PerceptionMessageTools.packImageMessage(yoloDetection.getDepthImage(), "odom", requestMessage.getDepth());
-            PerceptionMessageTools.packImageMessage(yoloDetection.getObjectMask(), "odom", requestMessage.getObjectMask());
+            PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, requestMessage.getColor());
+            PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, requestMessage.getDepth());
+            PerceptionMessageTools.packImageMessage(mask, encodedMask, CompressionType.PNG, requestMessage.getObjectMask());
             requestPublisher.publish(requestMessage);
+
+            // Release pointers
+            encodedColor.close();
+            encodedDepth.close();
+            encodedMask.close();
 
             sendRequest = false;
          }
