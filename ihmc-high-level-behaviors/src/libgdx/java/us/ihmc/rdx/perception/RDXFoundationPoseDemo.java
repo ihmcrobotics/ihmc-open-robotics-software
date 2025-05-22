@@ -58,8 +58,6 @@ class RDXFoundationPoseDemo
    private final YOLOv8DetectionThread yoloThread;
    private final RepeatingTaskThread zedImageConsumerThread;
 
-   private final Pose3D objectPose;
-
    // UI Stuff
    private final RDXBaseUI baseUI;
    private final RDXRawImagePointCloudVisualizer pointCloudVisualizer;
@@ -97,9 +95,6 @@ class RDXFoundationPoseDemo
 
       zedImageConsumerThread = new RepeatingTaskThread("ZEDImageConsumer", this::consumeZEDImage);
 
-      objectPose = new Pose3D();
-      objectPose.setToNaN();
-
       baseUI = new RDXBaseUI();
       pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
       yoloSettings = new RDXROS2YOLOv8Visualizer("YOLO Results", ros2Node, uiClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
@@ -114,7 +109,7 @@ class RDXFoundationPoseDemo
             yoloSettings.create();
             yoloSettings.setActive(true);
             zedPoseGizmo = new RDXPose3DGizmo();
-            objectPoseGraphic = new RDXReferenceFrameGraphic(1.0);
+            objectPoseGraphic = new RDXReferenceFrameGraphic(0.2);
 
             baseUI.getImGuiPanelManager().addPanel(yoloSettings.getPanel());
             baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSettings::renderImGuiWidgets);
@@ -146,7 +141,6 @@ class RDXFoundationPoseDemo
             pointCloudVisualizer.update();
             yoloSettings.update();
             yoloSettings.updateHeartbeat();
-            objectPoseGraphic.setPoseInWorldFrame(objectPose);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -167,7 +161,9 @@ class RDXFoundationPoseDemo
 
    private void receivePose(FoundationPoseResult result)
    {
-      objectPose.set(result.getObjectPose());
+      Pose3D pose = result.getObjectPose();
+      pose.applyTransform(zed.getImageFrame(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY).getTransformToWorldFrame());
+      objectPoseGraphic.setPoseInWorldFrame(pose);
    }
 
    private void consumeZEDImage()
