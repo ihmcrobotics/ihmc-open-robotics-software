@@ -42,5 +42,10 @@ class FoundationPoseWorker:
         pose = self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)
         center_pose = pose@np.linalg.inv(self.to_origin)
 
+        vis = draw_posed_3d_box(self.camera_k, img=rgb, ob_in_cam=center_pose, bbox=self.bbox)
+        vis = draw_xyz_axis(rgb, ob_in_cam=center_pose, scale=0.1, K=self.camera_k, thickness=3, transparency=0, is_input_rgb=True)
+        cv2.imshow('1', vis[...,::-1])
+        cv2.waitKey(1)
+
         # TODO: Add bounding box to result
         return center_pose
