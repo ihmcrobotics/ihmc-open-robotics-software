@@ -510,6 +510,39 @@ __global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, 
 }
 
 extern "C"
+__global__ void heightMapEmptyRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
+                                                 unsigned short *globalMap, size_t pitchGlobal,
+                                                 float *zUpCameraToWorldAlignedGround,
+                                                 float *params, float resetOffset)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // Compute global map size
+    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    // Check bounds for global indices
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
+        return;
+
+    int2 localIndex = make_int2(xIndex, yIndex);
+
+    int2 globalIndex = getGlobalIndexFromLocalIndex(localIndex, zUpCameraToWorldAlignedGround, params);
+
+    if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
+        return;
+
+    unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
+
+    if (*localHeight == 0)
+        return;
+
+    unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+    *globalHeight = *localHeight;
+}
+
+extern "C"
 __global__ void planOffsetKernel(unsigned short *matrixToModify, size_t pitchMatrixToModify,
                                  unsigned short *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
                                  float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,

@@ -105,7 +105,7 @@ public class RapidHeightMapExtractor
          registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
          terrainCroppingKernel = heightMapProgram.loadKernel("terrainCroppingHeightMapKernel");
          planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
-         emptyRegisterKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
+         emptyRegisterKernel = heightMapProgram.loadKernel("heightMapEmptyRegistrationKernel");
 
          updateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          translateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
