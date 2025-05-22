@@ -9,6 +9,22 @@ import us.ihmc.pubsub.TopicDataType;
 public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> implements Settable<AI2RNavigationMessage>, EpsilonComparable<AI2RNavigationMessage>
 {
    /**
+          * SPATIAL RELATION TYPE
+          */
+   public static final byte DEFAULT = (byte) 0;
+   public static final byte FRONT = (byte) 1;
+   public static final byte BEHIND = (byte) 2;
+   public static final byte LEFT = (byte) 3;
+   public static final byte RIGHT = (byte) 4;
+   /**
+            * The type of spatial relation with the secondary reference object as defined above
+            */
+   public byte spatial_relation_;
+   /**
+            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            */
+   public java.lang.StringBuilder secondary_reference_frame_name_;
+   /**
             * Goto action - Reference frame for the action
             */
    public java.lang.StringBuilder reference_frame_name_;
@@ -19,6 +35,7 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
    public AI2RNavigationMessage()
    {
+      secondary_reference_frame_name_ = new java.lang.StringBuilder(255);
       reference_frame_name_ = new java.lang.StringBuilder(255);
    }
 
@@ -30,11 +47,55 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
    public void set(AI2RNavigationMessage other)
    {
+      spatial_relation_ = other.spatial_relation_;
+
+      secondary_reference_frame_name_.setLength(0);
+      secondary_reference_frame_name_.append(other.secondary_reference_frame_name_);
+
       reference_frame_name_.setLength(0);
       reference_frame_name_.append(other.reference_frame_name_);
 
       distance_to_frame_ = other.distance_to_frame_;
 
+   }
+
+   /**
+            * The type of spatial relation with the secondary reference object as defined above
+            */
+   public void setSpatialRelation(byte spatial_relation)
+   {
+      spatial_relation_ = spatial_relation;
+   }
+   /**
+            * The type of spatial relation with the secondary reference object as defined above
+            */
+   public byte getSpatialRelation()
+   {
+      return spatial_relation_;
+   }
+
+   /**
+            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            */
+   public void setSecondaryReferenceFrameName(java.lang.String secondary_reference_frame_name)
+   {
+      secondary_reference_frame_name_.setLength(0);
+      secondary_reference_frame_name_.append(secondary_reference_frame_name);
+   }
+
+   /**
+            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            */
+   public java.lang.String getSecondaryReferenceFrameNameAsString()
+   {
+      return getSecondaryReferenceFrameName().toString();
+   }
+   /**
+            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            */
+   public java.lang.StringBuilder getSecondaryReferenceFrameName()
+   {
+      return secondary_reference_frame_name_;
    }
 
    /**
@@ -94,6 +155,10 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.spatial_relation_, other.spatial_relation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.secondary_reference_frame_name_, other.secondary_reference_frame_name_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.reference_frame_name_, other.reference_frame_name_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_frame_, other.distance_to_frame_, epsilon)) return false;
@@ -111,6 +176,10 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       AI2RNavigationMessage otherMyClass = (AI2RNavigationMessage) other;
 
+      if(this.spatial_relation_ != otherMyClass.spatial_relation_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.secondary_reference_frame_name_, otherMyClass.secondary_reference_frame_name_)) return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.reference_frame_name_, otherMyClass.reference_frame_name_)) return false;
 
       if(this.distance_to_frame_ != otherMyClass.distance_to_frame_) return false;
@@ -125,6 +194,10 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("AI2RNavigationMessage {");
+      builder.append("spatial_relation=");
+      builder.append(this.spatial_relation_);      builder.append(", ");
+      builder.append("secondary_reference_frame_name=");
+      builder.append(this.secondary_reference_frame_name_);      builder.append(", ");
       builder.append("reference_frame_name=");
       builder.append(this.reference_frame_name_);      builder.append(", ");
       builder.append("distance_to_frame=");

@@ -18,11 +18,9 @@ import numpy as np
 
 ros2 = {}
 initialized = False
-waiting_for_command = True
 
 def behavior_message_callback(msg):
     global initialized  # Access the global variables
-    global waiting_for_command
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
@@ -51,52 +49,65 @@ def behavior_message_callback(msg):
     # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
 
     # --------- Monitoring -----------
-    completed_behavior = msg.completed_behavior
-    if not completed_behavior == "-":
-       print("Completed Behavior: " + completed_behavior)
-       waiting_for_command  = True
-    else:
-       waiting_for_command  = False
+    print("Behavior in Progress: " + msg.behavior_in_progress)
+    print("Completed Behavior: " + msg.completed_behavior)
 
-    failed_behavior = msg.failed_behavior
+    failed_behavior = msg.failure
     if failed_behavior:
-       print("[FAILURE] Failed behavior: " + failure_behavior)
-       # Failure details
-       failure = msg.failure
-       print("Description: " + failure.action_name)
-       print("Type: " + failure.action_type)
-       print("Frame: " + failure.action_frame)
+        print("[FAILURE] -----------")
+        print("Failed behavior: ")
+        # Failure details
+        print("Name: " + failed_behavior.action_name)
+        print("Type: " + failed_behavior.action_type)
+#         print("Frame: " + failed_behavior.action_frame)
+        print("Missing Frame: " + str(failed_behavior.missing_frame))
+        print("Navigation Collision Frame Name: " + failed_behavior.collision_name)
 
-       position_error = failure.position_error
-       # Convert Point to numpy array
-       error_vector = np.array([position_error.x, position_error.y, position_error.z])
-       # Calculate the Euclidean norm (L2 norm)
-       norm = np.linalg.norm(error_vector)
-       print(f"The position error is: {norm}")
-       orientation_error = failure.orientation_error
+        position_error = failed_behavior.position_error
+        # Convert Point to numpy array
+        error_vector = np.array([position_error.x, position_error.y, position_error.z])
+        # Calculate the Euclidean norm (L2 norm)
+        norm = np.linalg.norm(error_vector)
+        print(f"The position error is: {norm}")
+        orientation_error = failed_behavior.orientation_error
 
-       position_tolerance = failure.position_tolerance
-       orientation_tolerance = failure.orientation_tolerance
+        position_tolerance = failed_behavior.position_tolerance
+        orientation_tolerance = failed_behavior.orientation_tolerance
+        print("----------[FAILURE]")
 
     # --------- Reasoning -----------
     # CAN DO SOME REASONING HERE based on failed behaviors
+    waiting_for_command = False
+    if msg.behavior_in_progress == "-":
+       waiting_for_command  = True
 
     if waiting_for_command or not initialized:
-       # --------- Coordination -----------
-       behavior_command = AI2RCommandMessage()
-       # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
-       behavior_command.behavior_to_execute = "GOTO CHARGE"
-       print("Commanded Behavior: " + behavior_command.behavior_to_execute)
-       ros2["behavior_publisher"].publish(behavior_command)
-       waiting_for_command = False
-       initialized = True
+        # --------- Coordination -----------
+        behavior_command = AI2RCommandMessage()
+        # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
+        behavior_command.behavior_to_execute = "GOTO"
+        behavior_command.adapting_behavior = True
+
+        new_goto_behavior = AI2RNavigationMessage()
+        # Set the reference frame name - can copy from scene_objects.obj_name
+        new_goto_behavior.reference_frame_name = "Barrier1"
+        # Set the distance to the object
+        new_goto_behavior.distance_to_frame = 0.6
+        new_goto_behavior.secondary_reference_frame_name = "DoorPanel1"
+        new_goto_behavior.spatial_relation = AI2RNavigationMessage.FRONT
+
+        behavior_command.navigation = new_goto_behavior
+
+        print("Commanded Behavior: " + behavior_command.behavior_to_execute)
+        ros2["behavior_publisher"].publish(behavior_command)
+        initialized = True
 
 
 def main(args=None):
     rclpy.init(args=args)
     
     qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.RELIABLE,
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
         history=QoSHistoryPolicy.KEEP_LAST,
         depth=1
     )

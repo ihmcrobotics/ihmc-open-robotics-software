@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f511c836e8938880106920d683424a7418c36dcfd1ff3e8c24c8631d164a2a84";
+   		return "237917456f616f21e11650d95164755afa14c5b245f081421bee62a09d576737";
    }
    
    @Override
