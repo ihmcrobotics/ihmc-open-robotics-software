@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__FoundationPoseRequest__idl__
 #define __perception_msgs__msg__FoundationPoseRequest__idl__
 
-#include "sensor_msgs/msg/./Image_.idl"
+#include "perception_msgs/msg/./ImageMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -23,15 +23,15 @@ module perception_msgs
         /**
          * Color image containing the object
          */
-        sensor_msgs::msg::dds::Image color;
+        perception_msgs::msg::dds::ImageMessage color;
         /**
          * Depth image containing the object
          */
-        sensor_msgs::msg::dds::Image depth;
+        perception_msgs::msg::dds::ImageMessage depth;
         /**
          * Mask of the object in the image
          */
-        sensor_msgs::msg::dds::Image object_mask;
+        perception_msgs::msg::dds::ImageMessage object_mask;
       };
     };
   };
