@@ -30,6 +30,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DoorSceneNodeDefinitions
 {
+   public static final String DOOR_PULL_HANDLE_NAME = "DoorPullHandle";
    // RIGHT PANEL AND OPENERS
    public static final String RIGHT_DOOR_PANEL_NAME = "RightDoorPanel";
    public static final String RIGHT_DOOR_LEVER_HANDLE_NAME = "RightDoorLeverHandle";
@@ -323,6 +324,24 @@ public class DoorSceneNodeDefinitions
                                                                LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                                sceneGraph.getCRDTInfo());
             modificationQueue.accept(new SceneGraphNodeAddition(doorPushBarNode, parentNode));
+         }
+      }
+
+      // Add door pull handle
+      {
+         String doorPullHandleNodeName = DOOR_PULL_HANDLE_NAME;
+         SceneNode doorPullHandleNode = sceneGraph.getNamesToNodesMap().get(doorPullHandleNodeName);
+         if (doorPullHandleNode == null)
+         {
+            doorPullHandleNode = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                               doorPullHandleNodeName,
+                                                               sceneGraph.getIDToNodeMap(),
+                                                               parentNode.getID(),
+                                                               doorOpenerToMarkerTransform,
+                                                               DOOR_PULL_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                               DOOR_PULL_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                               sceneGraph.getCRDTInfo());
+            modificationQueue.accept(new SceneGraphNodeAddition(doorPullHandleNode, parentNode));
          }
       }
    }
