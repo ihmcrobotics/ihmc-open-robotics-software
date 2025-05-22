@@ -1,0 +1,28 @@
+#ifndef __perception_msgs__msg__FoundationPoseResult__idl__
+#define __perception_msgs__msg__FoundationPoseResult__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::FoundationPoseResult_")
+      struct FoundationPoseResult
+      {
+        /**
+         * ID of the detected object
+         */
+        string object_id;
+        /**
+         * Pose of the object
+         */
+        geometry_msgs::msg::dds::Pose object_pose;
+      };
+    };
+  };
+};
+
+#endif
