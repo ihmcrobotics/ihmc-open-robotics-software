@@ -5,5 +5,7 @@
     "top_k": "N/A",
     "top_p": 1.0,
     "goal": "Assist with selecting next behavior",
-    "prompt": "Task: Deliver the charge to the door, You should return only the name of the next behavior to execute based on the task, scene objects, and available behaviors. If the task is already completed or no valid action exists, return NO_ACTION."
+    "system_prompt": "You are an assistant for a robot operating in a dynamic environment. Your task is to decide the most appropriate action the robot should take next based on Task: The high-level goal the robot needs to accomplish. Scene Objects: The objects currently detected in the environment, Available Behaviors: A list of actions that robot can perform",
+    "prompt_type": "simple_prompt",
+    "prompt": "Task: From available_behaviors and previously_executed return each behavior sequentially. You should return only the name of the next behavior. If the task is already completed or no valid action exists, return NO_ACTION."
 }
