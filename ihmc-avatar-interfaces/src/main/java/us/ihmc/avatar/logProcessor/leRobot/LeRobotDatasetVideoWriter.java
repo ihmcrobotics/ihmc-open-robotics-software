@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.apache.commons.lang3.SystemUtils;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -96,6 +97,8 @@ public class LeRobotDatasetVideoWriter
 
       // ZED outputs bgra but frame recorder wants rgba
       opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_BGR2RGBA);
+      if (SystemUtils.IS_OS_WINDOWS) // FIXME Epic hacking to get Ben's setup working
+         opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_RGBA2BGR);
 
       Frame frame = frameConverter.convert(cropped);
       cropped.close();
