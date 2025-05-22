@@ -15,11 +15,11 @@ from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
 
 import cv2
 import numpy as np
-from llm_interface import LLMInterface
+from llm.llm_interface import LLMInterface
 
 # Example usage:
 print(" Calling the LLM")
-llm = LLMInterface(config_file="config.json")
+llm = LLMInterface(config_file="llm/config.json")
 
 
 
