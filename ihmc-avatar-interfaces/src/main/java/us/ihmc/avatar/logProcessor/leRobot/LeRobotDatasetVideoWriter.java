@@ -97,8 +97,7 @@ public class LeRobotDatasetVideoWriter
 
       // ZED outputs bgra but frame recorder wants rgba
       opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_BGR2RGBA);
-      if (SystemUtils.IS_OS_WINDOWS) // FIXME Epic hacking to get Ben's setup working
-         opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_RGBA2BGR);
+      opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_RGBA2BGR);
 
       Frame frame = frameConverter.convert(cropped);
       cropped.close();
