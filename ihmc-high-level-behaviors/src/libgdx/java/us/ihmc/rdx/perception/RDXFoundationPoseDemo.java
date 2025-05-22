@@ -38,12 +38,14 @@ import static us.ihmc.zed.global.zed.*;
 
 class RDXFoundationPoseDemo
 {
+   private static final String OBJECT_ID = "mustard_bottle";
    private static final String OBJECT_NAME = "bottle";
    private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
    private static final ROS2Topic<Image> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/color/image_raw").withType(Image.class);
    private static final ROS2Topic<Image> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/aligned_depth_to_color/image_raw").withType(Image.class);
    private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/camera/color/camera_info").withType(CameraInfo.class);
    private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
+   private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/remove").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().withModule("foundation_pose/result").withType(FoundationPoseResult.class);
 
    private final ROS2Node ros2Node;
@@ -51,7 +53,9 @@ class RDXFoundationPoseDemo
    private final ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
    private final ROS2Publisher<FoundationPoseRequest> requestPublisher;
    private final FoundationPoseRequest requestMessage;
-   private boolean requestSent;
+   private boolean sendRequest;
+   private final ROS2Publisher<std_msgs.msg.dds.String> removePublisher;
+   private final std_msgs.msg.dds.String removeMessage;
 
    private final ImageSensor zed;
    private final ImageSensorPublishThread imagePublishThread;
@@ -76,7 +80,9 @@ class RDXFoundationPoseDemo
       uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       requestPublisher = ros2Node.createPublisher(REQUEST_TOPIC);
       requestMessage = new FoundationPoseRequest();
-      requestSent = false;
+      sendRequest = false;
+      removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
+      removeMessage = new std_msgs.msg.dds.String();
 
       ros2Node.createSubscription2(RESULT_TOPIC, this::receivePose);
 
@@ -132,7 +138,13 @@ class RDXFoundationPoseDemo
          private void renderOptions()
          {
             if (ImGui.button("Send request"))
-               requestSent = false;
+               sendRequest = true;
+
+            if (ImGui.button("Stop tracking"))
+            {
+               removeMessage.setData(OBJECT_ID);
+               removePublisher.publish(removeMessage);
+            }
          }
 
          @Override
@@ -186,7 +198,7 @@ class RDXFoundationPoseDemo
 
    private void publishRequest(List<InstantDetection> yoloDetections)
    {
-      if (requestSent)
+      if (!sendRequest)
          return;
 
       for (InstantDetection detection : yoloDetections)
@@ -198,13 +210,14 @@ class RDXFoundationPoseDemo
          {
             System.out.println("Sending request");
 
+            requestMessage.setObjectId(OBJECT_ID);
             requestMessage.setMeshFile("mustard0.obj");
             PerceptionMessageTools.packImageMessage(yoloDetection.getColorImage(), "odom", requestMessage.getColor());
             PerceptionMessageTools.packImageMessage(yoloDetection.getDepthImage(), "odom", requestMessage.getDepth());
             PerceptionMessageTools.packImageMessage(yoloDetection.getObjectMask(), "odom", requestMessage.getObjectMask());
             requestPublisher.publish(requestMessage);
 
-            requestSent = true;
+            sendRequest = false;
          }
       }
    }
