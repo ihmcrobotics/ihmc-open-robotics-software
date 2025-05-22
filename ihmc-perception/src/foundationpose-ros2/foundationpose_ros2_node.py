@@ -13,9 +13,10 @@ from cv_bridge import CvBridge
 import trimesh
 import glob
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 import threading
 from sensor_msgs.msg import Image, CameraInfo
-from perception_msgs.msg import FoundationPoseRequest
+from perception_msgs.msg import FoundationPoseRequest, FoundationPoseResult
 from foundationpose_worker import FoundationPoseWorker
 
 COLOR_TOPIC = '/foundation_pose/camera/color/image_raw'
@@ -55,6 +56,10 @@ class FoundationPoseROS2Node(Node):
         # Create subscription to request messages
         self.request_subscription = self.create_subscription(FoundationPoseRequest, REQUEST_TOPIC, self.request_callback, 10)
 
+        # Create a result publisher
+        print("Creating publisher...")
+        self.result_publisher = self.create_publisher(FoundationPoseResult, RESULT_TOPIC, 10)
+
         print("Starting the process thread...")
         self.pose_estimation_thread = threading.Thread(target=self.process)
         self.pose_estimation_thread.start()
@@ -67,8 +72,8 @@ class FoundationPoseROS2Node(Node):
 
 
     def depth_callback(self, depth_image):
-        big_depth = self.bridge.imgmsg_to_cv2(depth_image, "32FC1") / 1e3
-        self.depth = cv2.resize(src=big_depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE)
+        big_depth = self.bridge.imgmsg_to_cv2(depth_image, "32FC1")
+        self.depth = cv2.resize(src=big_depth, dsize=None, fx=IMAGE_SCALE, fy=IMAGE_SCALE) / 1e3
         self.new_depth_available.set()
 
 
@@ -129,8 +134,25 @@ class FoundationPoseROS2Node(Node):
                 self.new_color_available.wait()
                 self.new_depth_available.wait()
 
-                for _, worker in self.workers.items():
-                    worker.update(self.rgb, self.depth)
+                for object_id, worker in self.workers.items():
+                    pose = worker.update(self.rgb, self.depth)
+
+                    position = pose[:3, 3]
+                    rotation_matrix = pose[:3, :3]
+                    quaternion = R.from_matrix(rotation_matrix).as_quat()
+
+                    result = FoundationPoseResult()
+                    result.object_id = object_id
+                    result.object_pose.position.x = position[0]
+                    result.object_pose.position.y = position[1]
+                    result.object_pose.position.z = position[2]
+
+                    result.object_pose.orientation.x = quaternion[0]
+                    result.object_pose.orientation.y = quaternion[1]
+                    result.object_pose.orientation.z = quaternion[2]
+                    result.object_pose.orientation.w = quaternion[3]
+
+                    self.result_publisher.publish(result)
 
                 self.new_color_available.clear()
                 self.new_depth_available.clear()
