@@ -4,7 +4,7 @@ echo Ensure you have at least 20-25GB of RAM free before running this build scri
 
 sleep 5
 
-docker build . -t ihmc/foundationpose --no-cache # Add --no-cache to rebuild the entire Dockerfile
+docker build . -t ihmc/foundationpose # Add --no-cache to rebuild the entire Dockerfile
 
 ##
 # Below are things we want to run every time we build and do not want cached
