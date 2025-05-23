@@ -23,7 +23,7 @@ import requests
 import json
 
 # Get a free API key from https://api.together.xyz/settings/api-keys
-os.environ["TOGETHER_API_KEY"] = ""
+#os.environ["TOGETHER_API_KEY"] = ""
 def llama32(messages, model_size=3):
   model = f"meta-llama/Llama-3.2-{model_size}B-Instruct-Turbo"
   url = "https://api.together.xyz/v1/chat/completions"
@@ -151,7 +151,7 @@ def main(args=None):
     rclpy.init(args=args)
     
     qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.RELIABLE,
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
         history=QoSHistoryPolicy.KEEP_LAST,
         depth=1
     )
@@ -420,7 +420,7 @@ def main(args=None):
     rclpy.init(args=args)
     
     qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.RELIABLE,
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
         history=QoSHistoryPolicy.KEEP_LAST,
         depth=1
     )
