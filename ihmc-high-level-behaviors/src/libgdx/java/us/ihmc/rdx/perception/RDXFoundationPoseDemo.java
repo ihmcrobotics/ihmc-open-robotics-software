@@ -10,7 +10,6 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.InstantDetection;
@@ -184,9 +183,7 @@ class RDXFoundationPoseDemo
 
    private void receivePose(FoundationPoseResult result)
    {
-      Pose3D pose = result.getObjectPose();
-      pose.applyTransform(zed.getImageFrame(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY).getTransformToWorldFrame());
-      objectPoseGraphic.setPoseInWorldFrame(pose);
+      objectPoseGraphic.setPoseInWorldFrame(result.getObjectPose());
    }
 
    private void consumeZEDImage()
