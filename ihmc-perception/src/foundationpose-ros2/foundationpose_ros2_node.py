@@ -69,6 +69,8 @@ class FoundationPoseROS2Node(Node):
         self.rgb = None
         self.depth = None
         self.camera_k = None
+        self.camera_position = None
+        self.camera_orientation = None
 
         self.remove_queue = queue.Queue()
 
@@ -98,6 +100,13 @@ class FoundationPoseROS2Node(Node):
     def color_callback(self, color_image):
         # Get the camera intrinsics
         self.camera_k = read_camera_k(color_image)
+
+        # Get the camera pose
+        point = color_image.position
+        self.camera_position = np.array(object=[point.x, point.y, point.z])
+
+        quaternion = color_image.orientation
+        self.camera_orientation = R.from_quat(quat=[quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 
         # Read the color image
         self.rgb = decode_and_resize(message=color_image, scale=IMAGE_SCALE)
@@ -168,7 +177,11 @@ class FoundationPoseROS2Node(Node):
 
                 # Transform to X forward Z up coordinates
                 position = IHMC_COORD_ROTATION @ position
-                rotation_matrix = IHMC_COORD_ROTATION @ rotation_matrix @ IHMC_COORD_ROTATION.T
+                rotation_matrix = R.from_matrix(IHMC_COORD_ROTATION @ rotation_matrix @ IHMC_COORD_ROTATION.T)
+
+                # Transform to world frame
+                position = self.camera_position + self.camera_orientation.apply(position)
+                rotation_matrix = self.camera_orientation * rotation_matrix
 
                 # Create the result message and publish it
                 result = FoundationPoseResult()
@@ -177,7 +190,7 @@ class FoundationPoseROS2Node(Node):
                 result.object_pose.position.y = position[1]
                 result.object_pose.position.z = position[2]
 
-                quaternion = R.from_matrix(rotation_matrix).as_quat()
+                quaternion = rotation_matrix.as_quat()
                 result.object_pose.orientation.x = quaternion[0]
                 result.object_pose.orientation.y = quaternion[1]
                 result.object_pose.orientation.z = quaternion[2]
