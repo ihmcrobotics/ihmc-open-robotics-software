@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FoundationPoseRequest;
 import perception_msgs.msg.dds.FoundationPoseResult;
 import perception_msgs.msg.dds.ImageMessage;
@@ -10,13 +11,13 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.perception.ImageSensorPublishThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionThread;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -47,8 +48,8 @@ class RDXFoundationPoseDemo
    private static final BytePointer PNG = new BytePointer(".png");
 
    private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/color").withType(ImageMessage.class);
-   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/depth").withType(ImageMessage.class);
+   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/color_rgb8").withType(ImageMessage.class);
+   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/depth_mono16").withType(ImageMessage.class);
    private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/remove").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().withModule("foundation_pose/result").withType(FoundationPoseResult.class);
@@ -56,16 +57,23 @@ class RDXFoundationPoseDemo
    private final ROS2Node ros2Node;
    private final ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
    private final ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
+
    private final ROS2Publisher<FoundationPoseRequest> requestPublisher;
    private final FoundationPoseRequest requestMessage;
    private boolean sendRequest;
+
    private final ROS2Publisher<std_msgs.msg.dds.String> removePublisher;
    private final std_msgs.msg.dds.String removeMessage;
 
+   private final ROS2Publisher<ImageMessage> colorPublisher;
+   private final ROS2Publisher<ImageMessage> depthPublisher;
+   private final ImageMessage colorMessage;
+   private final ImageMessage depthMessage;
+
    private final ImageSensor zed;
-   private final ImageSensorPublishThread imagePublishThread;
    private final YOLOv8DetectionThread yoloThread;
    private final RepeatingTaskThread zedImageConsumerThread;
+
 
    // UI Stuff
    private final RDXBaseUI baseUI;
@@ -94,9 +102,10 @@ class RDXFoundationPoseDemo
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
       zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
 
-      imagePublishThread = new ImageSensorPublishThread(ros2Node, zed);
-      imagePublishThread.addTopic(COLOR_TOPIC, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      imagePublishThread.addTopic(DEPTH_TOPIC, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      colorPublisher = ros2Node.createPublisher(COLOR_TOPIC);
+      depthPublisher = ros2Node.createPublisher(DEPTH_TOPIC);
+      colorMessage = new ImageMessage();
+      depthMessage = new ImageMessage();
 
       yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
       yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
@@ -133,7 +142,6 @@ class RDXFoundationPoseDemo
 
             zed.setSensorFrame(zedPoseGizmo.getGizmoFrame());
             zed.run(true);
-            imagePublishThread.startRepeating();
             yoloThread.startRepeating();
             zedImageConsumerThread.startRepeating();
          }
@@ -190,9 +198,31 @@ class RDXFoundationPoseDemo
          RawImage color = zed.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
          RawImage depth = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
+         // Get color in RGB
+         Mat rgbColor = new Mat();
+         color.getPixelFormat().convertToPixelFormat(color.getCpuImageMat(), rgbColor, PixelFormat.RGB8);
+
+         // Compress images
+         BytePointer encodedColor = new BytePointer();
+         BytePointer encodedDepth = new BytePointer();
+
+         opencv_imgcodecs.imencode(JPG, rgbColor, encodedColor);
+         opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
+
+         // Publish compressed images
+         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, colorMessage);
+         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, depthMessage);
+
+         colorPublisher.publish(colorMessage);
+         depthPublisher.publish(depthMessage);
+
+         // Update visualizer
          pointCloudVisualizer.setColorImage(color);
          pointCloudVisualizer.setDepthImage(depth);
 
+         rgbColor.close();
+         encodedColor.close();
+         encodedDepth.close();
          color.release();
          depth.release();
       }
@@ -217,15 +247,20 @@ class RDXFoundationPoseDemo
             RawImage depth = yoloDetection.getDepthImage();
             RawImage mask = yoloDetection.getObjectMask();
 
+            // Get color in rgb
+            Mat rgbColor = new Mat();
+            color.getPixelFormat().convertToPixelFormat(color.getCpuImageMat(), rgbColor, PixelFormat.RGB8);
+
             // Compress images
             BytePointer encodedColor = new BytePointer();
             BytePointer encodedDepth = new BytePointer();
             BytePointer encodedMask = new BytePointer();
 
-            opencv_imgcodecs.imencode(JPG, color.getCpuImageMat(), encodedColor);
+            opencv_imgcodecs.imencode(JPG, rgbColor, encodedColor);
             opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
             opencv_imgcodecs.imencode(PNG, mask.getCpuImageMat(), encodedMask);
 
+            // Pack and publish request
             requestMessage.setObjectId(OBJECT_ID);
             requestMessage.setMeshFile("mustard0.obj");
             PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, requestMessage.getColor());
@@ -234,6 +269,7 @@ class RDXFoundationPoseDemo
             requestPublisher.publish(requestMessage);
 
             // Release pointers
+            rgbColor.close();
             encodedColor.close();
             encodedDepth.close();
             encodedMask.close();
@@ -248,7 +284,6 @@ class RDXFoundationPoseDemo
       if (destroyed.getAndSet(true))
          return;
 
-      imagePublishThread.blockingKill();
       yoloThread.blockingKill();
       zedImageConsumerThread.blockingKill();
       zed.close();
