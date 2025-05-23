@@ -166,8 +166,15 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          ros2OpticalFrames.replace(imageKey, opticalFrame);
       }
 
-      cameraFrame.update();
-      opticalFrame.update();
+      try
+      {
+         cameraFrame.update();
+         opticalFrame.update();
+      }
+      catch (Exception exception)
+      {
+         System.out.println("Hmm");
+      }
    }
 
    @Override

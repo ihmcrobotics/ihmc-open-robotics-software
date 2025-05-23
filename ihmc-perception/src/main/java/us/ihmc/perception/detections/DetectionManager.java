@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class DetectionManager
 {
@@ -22,6 +23,7 @@ public class DetectionManager
    private final Set<PersistentDetection> persistentDetections = new HashSet<>();
    /** Set of detections that have become valid for the first time. Only accessed by the SceneGraph*/
    private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
+   private final List<Consumer<PersistentDetection>> newlyValidDetectionConsumers = new ArrayList<>();
    private final Object persistentDetectionsLock = new Object();
 
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
@@ -112,6 +114,11 @@ public class DetectionManager
       }
    }
 
+   public void addNewlyValidDetectionConsumer(Consumer<PersistentDetection> consumer)
+   {
+      newlyValidDetectionConsumers.add(consumer);
+   }
+
    public <T extends InstantDetection> List<PersistentDetection> updateAndGetDetectionsOfType(Class<T> classType)
    {
       synchronized (persistentDetectionsLock)
@@ -181,6 +188,7 @@ public class DetectionManager
                {
                   detection.setStabilityConfidenceThreshold(settings.getStabilityAverageConfidence());
                   newlyValidDetections.add(detection);
+                  newlyValidDetectionConsumers.forEach(consumer -> consumer.accept(detection));
                }
             }
          }
