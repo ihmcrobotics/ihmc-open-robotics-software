@@ -1,8 +1,8 @@
 #!/bin/sh
 
-##
-# You should have at least 20-25GB of RAM free before running this build script
-##
+echo Ensure you have at least 20-25GB of RAM free before running this build script. Continuing in 5 seconds.
+
+sleep 5
 
 docker build . -t ihmc/foundationpose --no-cache # Add --no-cache to rebuild the entire Dockerfile
 
