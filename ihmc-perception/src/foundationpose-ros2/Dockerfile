@@ -1,87 +1,61 @@
-FROM nvcr.io/nvidia/cuda:12.1.0-devel-ubuntu22.04
-LABEL Name=foundationpose-ros2 Version="0.0.2"
+##
+# Please do not publish this giant image to Dockerhub
+##
+
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-# 1. Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    locales \
-    lsb-release \
-    curl \
-    wget \
-    gnupg2 \
-    software-properties-common \
-    git \
-    sudo \
-    python3-pip \
-    v4l-utils \
-    udev \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    cmake \
-    libgtk-3-dev \
-    libusb-1.0-0-dev \
-    libssl-dev \
-    libudev-dev \
-    libboost-all-dev \
-    pkg-config \
-    libx11-dev \
-    libxext-dev \
-    libglfw3-dev \
-    libgl1-mesa-dev \
-    libglu1-mesa-dev \
-    x11proto-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
+RUN apt-get install -y curl locales git python3-pip build-essential cmake libboost-all-dev wget python-is-python3 libgl1
 
-# 2. Set up locale
-RUN locale-gen en_US en_US.UTF-8 && \
-    update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+# Set up locale
+RUN locale-gen en_US en_US.UTF-8 && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-# 4. Install ROS 2 Humble
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-    ros-humble-desktop \
-    ros-humble-cv-bridge \
-    ros-humble-image-transport \
-    ros-humble-rviz2 \
-    python3-colcon-common-extensions && \
-    rm -rf /var/lib/apt/lists/*
+# Install ROS 2 Humble
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+RUN apt-get update
+RUN apt-get install -y ros-humble-desktop ros-humble-cv-bridge python3-colcon-common-extensions
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
-# 5. Install IHMC ROS2 interfaces
-WORKDIR /root/ihmc_ros2_ws
-# TODO: Remove branch before merging to develop
-RUN git clone -b feature/foundation-pose-integration https://github.com/ihmcrobotics/ihmc-open-robotics-software.git /opt/ihmc-open-robotics-software && \
-    mkdir src && \
-    cp -r /opt/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces ./src/ihmc_interfaces && \
-    rm -rf /opt/ihmc-open-robotics-software && \
-    . /opt/ros/humble/setup.sh && colcon build
-
-SHELL ["/bin/bash", "--login", "-c"]
-
-# 6. Install Miniconda + FoundationPose Env
-RUN cd / && wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /miniconda.sh && \
-    /bin/bash /miniconda.sh -b -p /opt/conda && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc && \
-    /opt/conda/bin/conda update -n base -c defaults conda -y && \
-    /opt/conda/bin/conda config --set ssl_verify no && \
-    /opt/conda/bin/conda config --add channels conda-forge && \
-    /opt/conda/bin/conda create -n foundationpose-ros2 python=3.10 -y
-
-ENV PATH=$PATH:/opt/conda/envs/foundationpose-ros2/bin
-
-COPY requirements.txt /root/foundationpose-ros2/
+# Install FoundationPose
+RUN git clone https://github.com/ArghyaChatterjee/FoundationPose.git /root/FoundationPose
+WORKDIR /root/FoundationPose
+RUN pip install -r requirements.txt
+RUN git clone https://github.com/pybind/pybind11 && \
+	cd pybind11 && \
+	git checkout v2.10.0 && \
+	mkdir build && \
+	cd build && \
+	cmake .. -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_BUILD_TYPE=Release -DPYBIND11_INSTALL=ON -DPYBIND11_TEST=OFF && \
+	make -j$(nproc) && \
+	make install
+RUN wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && \
+	tar xvzf eigen-3.4.0.tar.gz && rm eigen-3.4.0.tar.gz && \
+	cd eigen-3.4.0 && \
+	mkdir build && \
+	cd build && \
+	cmake .. && \
+	make -j$(nproc) && \
+	make install
+RUN git clone https://github.com/NVlabs/nvdiffrast && \
+	cd nvdiffrast && \
+	pip install .
+RUN cd mycpp && \
+	rm -rf build && \
+	mkdir build && \
+	cd build && \
+	cmake .. && \
+	make -j$(nproc)
+RUN cd bundlesdf/mycuda && \
+	rm -rf build *egg* *.so && \
+	TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9+PTX" python3 -m pip install -e .
+RUN git clone --recursive https://github.com/NVIDIAGameWorks/kaolin /kaolin && \
+	pip install Cython && \
+	cd /kaolin && \
+	FORCE_CUDA=1 python setup.py develop
+RUN pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
 
 WORKDIR /root/foundationpose-ros2
-
-# Conda init and environment activation
-RUN conda init bash && \
-    echo "conda activate foundationpose-ros2" >> ~/.bashrc && \
-    pip install torchvision==0.16.0+cu121 torchaudio==2.1.0 torch==2.1.0+cu121 --index-url https://download.pytorch.org/whl/cu121 && \
-    pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable"
-    
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
