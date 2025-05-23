@@ -85,9 +85,9 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getHeightMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getTerrainMapData().getHeightMapCenter().getY() * parameters.getNodesPerMeter());
-      refresh(request.getTerrainMapData());
+      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
+      refresh(request.getEnvironmentHandler().getTerrainMapData());
    }
 
    public void refresh(TerrainMapData terrainMapData)
@@ -95,8 +95,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getHeightMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (terrainMapData.getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (terrainMapData.getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
@@ -314,7 +314,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      PerceptionDebugTools.printMat("Contact Map", request.getTerrainMapData().getContactMap(), 4);
+      PerceptionDebugTools.printMat("Contact Map", request.getEnvironmentHandler().getTerrainMapData().getContactMap(), 4);
    }
 
    public void printHeightMap()
@@ -322,7 +322,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      PerceptionDebugTools.printMat("Height Map", request.getTerrainMapData().getHeightMap(), 4);
+      PerceptionDebugTools.printMat("Height Map", request.getEnvironmentHandler().getTerrainMapData().getHeightMap(), 4);
    }
 
    public void publishContinuousWalkingStatusMessage()

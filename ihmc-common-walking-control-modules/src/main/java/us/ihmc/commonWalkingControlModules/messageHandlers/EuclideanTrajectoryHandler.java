@@ -283,6 +283,14 @@ public class EuclideanTrajectoryHandler
       return true;
    }
 
+   public void clear()
+   {
+      while (!trajectoryPoints.isEmpty())
+      {
+         trajectoryPoints.removeFirst();
+      }
+   }
+
    /**
     * @return true if there are no trajectory points currently stored
     */

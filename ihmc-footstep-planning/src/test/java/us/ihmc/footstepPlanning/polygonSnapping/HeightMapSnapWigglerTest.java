@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -39,10 +39,10 @@ public class HeightMapSnapWigglerTest
       polygonToSnap.update();
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(new ConvexPolygon2D(polygonToSnap), new ConvexPolygon2D(polygonToSnap));
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       HeightMapSnapWiggler wiggler = new HeightMapSnapWiggler(footPolygons, new WiggleParameters());
-      environmentHandler.setHeightMap(heightMapData);
+      environmentHandler.setHeightMapData(heightMapData);
 
       FootstepSnapData snapData = new FootstepSnapData();
       DiscreteFootstep footstep = new DiscreteFootstep(0.0, 0.0);

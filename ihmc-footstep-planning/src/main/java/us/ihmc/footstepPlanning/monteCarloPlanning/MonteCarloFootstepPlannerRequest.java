@@ -1,11 +1,10 @@
 package us.ihmc.footstepPlanning.monteCarloPlanning;
 
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -59,15 +58,9 @@ public class MonteCarloFootstepPlannerRequest
    private float snapHeightThreshold = 0.05f;
 
    /**
-    * Height Map image in OpenCV format
+    * Holds the data for the {@link HeightMapData} and the {@link TerrainMapData}
     */
-   private TerrainMapData terrainMapData;
-
-   /**
-    * TODO: Remove this variable
-    * Height Map data for legacy support
-    */
-   private HeightMapData heightMapData;
+   private EnvironmentHandler environmentHandler;
 
    public MonteCarloFootstepPlannerRequest()
    {
@@ -211,24 +204,25 @@ public class MonteCarloFootstepPlannerRequest
       return snapHeightThreshold;
    }
 
-   public void setTerrainMapData(TerrainMapData terrainMap)
+   public void setEnvironmentHandler(EnvironmentHandler environmentHandler)
    {
-      this.terrainMapData = terrainMap;
+      this.environmentHandler = environmentHandler;
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.heightMapData = heightMapData;
+      environmentHandler.setHeightMapData(heightMapData);
    }
 
-   public TerrainMapData getTerrainMapData()
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      return terrainMapData;
+      environmentHandler.setTerrainMapData(terrainMapData);
    }
 
-   public HeightMapData getHeightMapData()
+
+   public EnvironmentHandler getEnvironmentHandler()
    {
-      return heightMapData;
+      return environmentHandler;
    }
 
    public void setPacket(MonteCarloFootstepPlannerRequest requestPacket)
@@ -261,12 +255,23 @@ public class MonteCarloFootstepPlannerRequest
       StringBuilder builder = new StringBuilder();
 
       builder.append("Monte-Carlo Footstep Planner Request: [")
-             .append("Stance Side: ").append(this.requestedInitialStanceSide).append(", ")
-             .append("Start Pose (Left): Position: ").append(startFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
-             .append("Start Pose (Right): Position: ").append(startFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
-             .append("Goal Pose (Left): Position: ").append(goalFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
-             .append("Goal Pose (Right): Position: ").append(goalFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
-             .append("Timeout: ").append(this.timeout);
+             .append("Stance Side: ")
+             .append(this.requestedInitialStanceSide)
+             .append(", ")
+             .append("Start Pose (Left): Position: ")
+             .append(startFootPoses.get(RobotSide.LEFT).getPosition())
+             .append(", ")
+             .append("Start Pose (Right): Position: ")
+             .append(startFootPoses.get(RobotSide.RIGHT).getPosition())
+             .append(", ")
+             .append("Goal Pose (Left): Position: ")
+             .append(goalFootPoses.get(RobotSide.LEFT).getPosition())
+             .append(", ")
+             .append("Goal Pose (Right): Position: ")
+             .append(goalFootPoses.get(RobotSide.RIGHT).getPosition())
+             .append(", ")
+             .append("Timeout: ")
+             .append(this.timeout);
 
       builder.append("]\n");
       return builder.toString();

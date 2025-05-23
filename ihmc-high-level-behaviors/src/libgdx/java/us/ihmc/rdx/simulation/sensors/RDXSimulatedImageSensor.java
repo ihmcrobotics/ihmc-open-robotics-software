@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.sensors.ImageSensor;
@@ -278,11 +279,18 @@ public class RDXSimulatedImageSensor extends ImageSensor
       public void render(RigidBodyTransform sensorTransformToWorld)
       {
          // Find the world to part transform
-         cameraFrame.update();
-         RigidBodyTransform cameraToWorldTransform = cameraFrame.getTransformToRoot();
+         try // Something throws NotARotationMatrixExceptions. Race condition?
+         {
+            cameraFrame.update();
+            RigidBodyTransform cameraToWorldTransform = cameraFrame.getTransformToRoot();
 
-         // Render
-         super.render(cameraToWorldTransform);
+            // Render
+            super.render(cameraToWorldTransform);
+         }
+         catch (Exception exception)
+         {
+            LogTools.error(exception);
+         }
       }
 
       public int getColorImageKey()

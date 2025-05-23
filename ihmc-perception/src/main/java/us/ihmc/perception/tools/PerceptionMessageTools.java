@@ -33,6 +33,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.ShortBuffer;
 import java.time.Instant;
 
 public class PerceptionMessageTools
@@ -85,8 +86,52 @@ public class PerceptionMessageTools
 
    public static void packImageMessageData(ImageMessage imageMessage, ByteBuffer dataBuffer)
    {
-      imageMessage.getData().resetQuick();
-      imageMessage.getData().getBuffer().put(dataBuffer);
+      packDataArray(imageMessage.getData(), dataBuffer);
+   }
+
+   public static void packDataArray(IDLSequence.Byte dataToPack, ByteBuffer dataBuffer)
+   {
+      dataToPack.resetQuick();
+      dataToPack.getBuffer().put(dataBuffer);
+   }
+
+   public static void packDataArray(IDLSequence.Byte dataToPack, BytePointer dataPointer)
+   {
+      packDataArray(dataToPack, dataPointer.asBuffer());
+   }
+
+   public static void packImageMessageData(ImageMessage imageMessage, Mat mat)
+   {
+      packDataArray(imageMessage.getData(), mat);
+   }
+
+   public static void packDataArray(IDLSequence.Byte dataToPack, Mat mat)
+   {
+      long size = mat.step() * mat.rows();
+      packDataArray(dataToPack, mat.data().limit(size).asBuffer());
+   }
+
+   public static void packShortDataArray(IDLSequence.Byte dataToPack, Mat mat)
+   {
+      if (mat.type() != opencv_core.CV_16UC1)
+         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+
+      // Note: Due to how the backing native memory layout is, ensure we get the total Buffer
+      // mat.asByteBuffer() doesn't always return the entire buffer, also the data may be wrong
+      int totalBytes = mat.rows() * mat.cols() * 2; // 2 bytes per short
+      ByteBuffer matBuffer = mat.data().limit(totalBytes).asByteBuffer();
+      ShortBuffer shortBuffer = matBuffer.asShortBuffer();
+
+      while (shortBuffer.hasRemaining())
+      {
+         int ushort = shortBuffer.get() & 0xFFFF; // Mask to make sure it's unsigned
+         byte low = (byte) (ushort & 0xFF);      // Lower 8 bits
+         byte high = (byte) ((ushort >> 8) & 0xFF); // Upper 8 bits
+
+         // Pack in little-endian format (low byte first)
+         dataToPack.add(low);
+         dataToPack.add(high);
+      }
    }
 
    public static void packImageMessageData(ImageMessage imageMessage, BytePointer dataPointer)
@@ -390,8 +435,8 @@ public class PerceptionMessageTools
 
    public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGlobalCellSizeInMeters());
-      int cellsPerAxis = 2 * centerIndex + 1;
+      int cellsPerAxis = heightMapData.getCellsPerAxis();
+      int centerIndex = heightMapData.getCenterIndex();
 
       // Create a new Mat object to hold the height map data
       Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
@@ -435,7 +480,7 @@ public class PerceptionMessageTools
 
    public static void unpackMessage(HeightMapMessage heightMapMessage, TerrainMapData terrainMapData)
    {
-      terrainMapData.getHeightMapCenter().set(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
+      terrainMapData.setSensorOrigin(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)

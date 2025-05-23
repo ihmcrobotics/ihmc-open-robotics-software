@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
@@ -37,7 +37,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
-   private final FootstepPlannerEnvironmentHandler environmentHandler;
+   private final EnvironmentHandler environmentHandler;
    private final HeightMapCliffAvoider heightMapCliffAvoider;
    private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
    private final FootstepPlannerBodyCollisionDetector collisionDetector;
@@ -57,7 +57,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    public HeightMapFootstepChecker(DefaultFootstepPlannerParametersReadOnly parameters,
                                    SideDependentList<ConvexPolygon2D> footPolygons,
-                                   FootstepPlannerEnvironmentHandler environmentHandler,
+                                   EnvironmentHandler environmentHandler,
                                    FootstepSnapperReadOnly snapper,
                                    StepReachabilityData stepReachabilityData,
                                    YoRegistry parentRegistry)
@@ -142,7 +142,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          }
 
          // Check height map cliff avoidance
-         heightMapCliffAvoider.setHeightMapData(environmentHandler.getHeightMap());
+         heightMapCliffAvoider.setHeightMapData(environmentHandler.getHeightMapData());
          if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE);
@@ -271,7 +271,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       {
          try
          {
-            obstacleBetweenStepsChecker.setHeightMapData(environmentHandler.getHeightMap());
+            obstacleBetweenStepsChecker.setHeightMapData(environmentHandler.getHeightMapData());
 
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
@@ -305,7 +305,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
       double candidateStepHeight = DiscreteFootstepTools.getSnappedStepHeight(candidateStep, candidateStepSnapData.getSnapTransform());
       double stanceStepHeight = DiscreteFootstepTools.getSnappedStepHeight(stanceStep, stanceStepSnapData.getSnapTransform());
-      collisionDetector.setHeightMapData(environmentHandler.getHeightMap());
+      collisionDetector.setHeightMapData(environmentHandler.getHeightMapData());
       boolean collisionDetected = collisionDetector.checkForCollision(candidateStep,
                                                                       stanceStep,
                                                                       candidateStepHeight,

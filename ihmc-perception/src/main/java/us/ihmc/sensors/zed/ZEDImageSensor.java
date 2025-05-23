@@ -50,7 +50,9 @@ public class ZEDImageSensor extends ImageSensor
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
-   private final int streamingPort = nextStreamingPort++;
+   private String remoteStreamingAddress;
+   private int remoteStreamingPort;
+   private final int localStreamingPort = nextStreamingPort++;
 
    private final RawImage[] grabbedImages = new RawImage[OUTPUT_IMAGE_COUNT];
    private final Pointer[] slMatPointers = new Pointer[OUTPUT_IMAGE_COUNT];
@@ -98,6 +100,17 @@ public class ZEDImageSensor extends ImageSensor
       zedRuntimeParameters.enable_fill_mode(false);
    }
 
+   /**
+    * Constructor to connect to a remote ZED SDK instance
+    */
+   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String remoteStreamingAddress, int remoteStreamingPort)
+   {
+      this(cameraID, zedModel, SL_INPUT_TYPE_STREAM, slDepthMode);
+
+      this.remoteStreamingAddress = remoteStreamingAddress;
+      this.remoteStreamingPort = remoteStreamingPort;
+   }
+
    private void updateReferenceFrames()
    {
       if (leftSensorFrame != null)
@@ -140,12 +153,20 @@ public class ZEDImageSensor extends ImageSensor
             sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
          }
 
-         sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, 8000, (short) streamingPort, -1, 0, 16084, CAMERA_FPS);
-
          // Get camera intrinsics
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
          imageWidth = sl_get_width(cameraID);
          imageHeight = sl_get_height(cameraID);
+
+         if (slInputType != SL_INPUT_TYPE_STREAM)
+            sl_enable_streaming(cameraID,
+                                SL_STREAMING_CODEC_H264,
+                                calculateBitrate(imageWidth, imageHeight, CAMERA_FPS),
+                                (short) localStreamingPort,
+                                -1,
+                                0,
+                                16084,
+                                CAMERA_FPS);
 
          leftSensorIntrinsics.setWidth(imageWidth);
          leftSensorIntrinsics.setHeight(imageHeight);
@@ -174,6 +195,14 @@ public class ZEDImageSensor extends ImageSensor
       catch (ZEDException exception)
       {
          LogTools.error(exception);
+
+         if (slInputType == SL_INPUT_TYPE_STREAM)
+         {
+            // Do not retry if stream, it can cause a native crash. TODO: Look into this
+            LogTools.info("Connection to remote ZED SDK failed, not retrying.");
+            close();
+         }
+
          return false;
       }
 
@@ -208,7 +237,10 @@ public class ZEDImageSensor extends ImageSensor
 
    protected int openCamera()
    {
-      return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
+      if (slInputType == SL_INPUT_TYPE_STREAM)
+         return sl_open_camera(cameraID, zedInitParameters, 0, "", remoteStreamingAddress, remoteStreamingPort, "", "", "");
+      else
+         return sl_open_camera(cameraID, zedInitParameters, 0, "", "", 0, "", "", "");
    }
 
    @Override
@@ -372,7 +404,7 @@ public class ZEDImageSensor extends ImageSensor
 
    public int getStreamingPort()
    {
-      return streamingPort;
+      return localStreamingPort;
    }
 
    public void enablePositionalTracking(boolean enable)
@@ -469,5 +501,11 @@ public class ZEDImageSensor extends ImageSensor
          case SL_ERROR_CODE_SENSORS_DATA_REQUIRED -> "SL_ERROR_CODE_SENSORS_DATA_REQUIRED";
          default -> "UNKNOWN";
       };
+   }
+
+   private static int calculateBitrate(int width, int height, int fps)
+   {
+      double bpp = 0.128; // Derived from 8000 kbps for 1080p30
+      return (int) ((width * height * fps * bpp) / 1000);
    }
 }

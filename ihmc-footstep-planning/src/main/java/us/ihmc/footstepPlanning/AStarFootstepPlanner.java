@@ -10,7 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -49,7 +49,7 @@ public class AStarFootstepPlanner
 
    private final AStarFootstepPlannerIterationConductor iterationConductor;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
-   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
    private final HeightMapFootstepChecker heightMapFootstepChecker;
@@ -151,12 +151,12 @@ public class AStarFootstepPlanner
       result = FootstepPlanningResult.PLANNING;
 
       // Update what we should use for planning
-      boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
-      boolean hasTerrainMap = request.getTerrainMapData() != null;
+      boolean hasHeightMap = request.getEnvironmentHandler().getHeightMapData() != null && !request.getEnvironmentHandler().getHeightMapData().isEmpty();
+      boolean hasTerrainMap = request.getEnvironmentHandler().getTerrainMapData() != null;
       boolean flatGroundMode = request.getAssumeFlatGround() || (!hasHeightMap && !hasTerrainMap);
 
-      HeightMapData heightMapData = flatGroundMode ? null : request.getHeightMapData();
-      TerrainMapData terrainMapData = flatGroundMode ? null : request.getTerrainMapData();
+      HeightMapData heightMapData = flatGroundMode ? null : request.getEnvironmentHandler().getHeightMapData();
+      TerrainMapData terrainMapData = flatGroundMode ? null : request.getEnvironmentHandler().getTerrainMapData();
 
       if (flatGroundMode)
       {
@@ -165,7 +165,7 @@ public class AStarFootstepPlanner
       }
 
       snapper.clearSnapData();
-      environmentHandler.setHeightMap(heightMapData);
+      environmentHandler.setHeightMapData(heightMapData);
       environmentHandler.setTerrainMapData(terrainMapData);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
@@ -283,6 +283,11 @@ public class AStarFootstepPlanner
                                                                                       0.8 * request.getStatusPublishPeriod());
    }
 
+   /**
+    * This method does two things. It both publishes the current status of the planner, and also performs the wiggle step when computing the snap again.
+    * @param request
+    * @param outputToPack
+    */
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       outputToPack.setFootstepPlanningResult(result);
@@ -294,8 +299,14 @@ public class AStarFootstepPlanner
       {
          FootstepGraphNode footstepNode = path.get(i);
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
+
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
+         if (!snapData.getCroppedFoothold().isEmpty())
+         {
+            footstep.getFoothold().set(snapData.getCroppedFoothold());
+            footstep.limitFootholdVertices();
+         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {
@@ -306,7 +317,7 @@ public class AStarFootstepPlanner
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
-      swingPlanningModule.computeSwingWaypoints(request.getHeightMapData(),
+      swingPlanningModule.computeSwingWaypoints(request.getEnvironmentHandler().getHeightMapData(),
                                                 outputToPack.getFootstepPlan(),
                                                 request.getStartFootPoses(),
                                                 request.getSwingPlannerType());

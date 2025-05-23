@@ -7,8 +7,11 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,11 +25,11 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
-import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -37,8 +40,9 @@ public class RDXVRModeManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
+   private RDXVRManager vrManager;
    private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
-   private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
+   private RDXVRFootstepPlacement footstepPlacer;
    @Nullable
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
@@ -47,17 +51,16 @@ public class RDXVRModeManager
 
    private RDX3DSituatedImGuiPanel vrModeControls3DPanel;
    private final FramePose3D vrModeControls3DPanelPose = new FramePose3D();
-   private RDXROS2RobotVisualizer robotVisualizer;
-   private ImBoolean interactablesEnabled;
    private ControllerStatusTracker controllerStatusTracker;
-   private RDXManualFootstepPlacement footstepPlacer;
+   private ImBoolean interactablesEnabled;
    private RDXHandConfigurationManager handManager;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
                       RDXROS2RobotVisualizer robotVisualizer,
                       ROS2ControllerHelper controllerHelper,
-                      boolean createKinematicsStreamingToolboxModule)
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
       create(baseUI,
              syncedRobot,
@@ -65,7 +68,8 @@ public class RDXVRModeManager
              controllerHelper,
              new DefaultRetargetingParameters(),
              new SceneGraph(),
-             createKinematicsStreamingToolboxModule);
+             createKinematicsStreamingToolboxModule,
+             kstParameters);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -73,9 +77,10 @@ public class RDXVRModeManager
                       RDXROS2RobotVisualizer robotVisualizer,
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
-                      boolean createKinematicsStreamingToolboxModule)
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
-      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph(), createKinematicsStreamingToolboxModule);
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph(), createKinematicsStreamingToolboxModule, kstParameters);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -84,25 +89,24 @@ public class RDXVRModeManager
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
                       SceneGraph sceneGraph,
-                      boolean createKinematicsStreamingToolboxModule)
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
-      this.robotVisualizer = robotVisualizer;
+      vrManager = baseUI.getVRManager();
 
       Collection<RDXPanel> baseUIPanels =  RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
+      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), controllerHelper.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
       for (RDXPanel panel : baseUIPanels)
       {
          if (panel instanceof RDXTeleoperationManager teleoperationPanel)
          {
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
-            controllerStatusTracker = teleoperationPanel.getControllerStatusTracker();
-            footstepPlacer = teleoperationPanel.getLocomotionManager().getManualFootstepPlacement();
             handManager = teleoperationPanel.getArmManager().getHandManager();
             break;
          }
       }
 
-      handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode(baseUI.getVRManager().getContext());
-      handPlacedFootstepMode.create(syncedRobot, controllerHelper);
+      footstepPlacer = new RDXVRFootstepPlacement(baseUI.getVRManager().getContext(), syncedRobot, controllerHelper);
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
       {
@@ -113,8 +117,9 @@ public class RDXVRModeManager
                                                                     sceneGraph,
                                                                     controllerStatusTracker,
                                                                     footstepPlacer,
-                                                                    handManager);
-         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
+                                                                    handManager,
+                                                                    robotVisualizer);
+         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule,  kstParameters);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
@@ -127,31 +132,54 @@ public class RDXVRModeManager
       vrModeControls3DPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", vrModeControls::render);
       vrModeControls3DPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
       vrModeControls3DPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
-      baseUI.getVRManager().getContext().addVRPickCalculator(vrModeControls3DPanel::calculateVRPick);
-      baseUI.getVRManager().getContext().addVRInputProcessor(vrModeControls3DPanel::processVRInput);
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
+      RDXBaseUI.getInstance().getKeyBindings().register("Teleport to projected location", "Right B button");
+      RDXBaseUI.getInstance().getKeyBindings().register("Teleport to robot", "Right joystick click");
       RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");
+      RDXBaseUI.getInstance().getKeyBindings().register("Toggle left hand panel", "Left joystick click");
       RDXBaseUI.getInstance().getKeyBindings().register("Move 3D panels", "Right trigger click & drag");
+
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+      baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+      baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
    }
 
-   public void processVRInput(RDXVRContext vrContext)
+   private void calculateVRPick(RDXVRContext vrContext)
    {
       if (vrModeControls.getRenderOnLeftHand().get())
       {
-         vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+         vrModeControls3DPanel.calculateVRPick(vrContext);
+      }
+   }
+
+   private void processVRInput(RDXVRContext vrContext)
+   {
+      if (vrModeControls.getRenderOnLeftHand().get())
+      {
+         vrModeControls3DPanel.processVRInput(vrContext);
+      }
+
+      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+      {
+         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
+         if (leftJoystickButton.bChanged() && !leftJoystickButton.bState())
+         {
+            vrModeControls.getRenderOnLeftHand().set(!vrModeControls.getRenderOnLeftHand().get());
+         }
+
+         if (vrModeControls.getRenderOnLeftHand().get())
          {
             vrModeControls3DPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
             vrModeControls3DPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
             vrModeControls3DPanelPose.getPosition().addY(-0.05);
             vrModeControls3DPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
             vrModeControls3DPanel.updateDesiredPose(vrModeControls3DPanelPose::get);
-         });
-      }
+         }
+      });
 
       switch (mode)
       {
-         case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput();
+         case FOOTSTEP_PLACEMENT -> footstepPlacer.processVRInput();
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
@@ -162,31 +190,18 @@ public class RDXVRModeManager
 
    public void update()
    {
+      vrManager.getTeleporter().setEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
+
       if (kinematicsStreamingMode != null)
       {
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
-
-         // Fade robot graphics
-         if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
-         { // Fade graphics out if in stereo vision mode while streaming
-            kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
-            robotVisualizer.fadeVisuals(0.0f, 0.01f);
-         }
-         else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.getDisabledNotification().poll()
-                                                                || kinematicsStreamingMode.getStreamingDisabledNotification().poll()
-                                                                || robotVisualizer.isFading()))
-         { // Fade graphics in if either stereo vision or streaming are exited
-            robotVisualizer.fadeVisuals(1.0f, 0.05f);
-            if (!robotVisualizer.isFading())
-               kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
-         }
       }
       if (vrModeControls.getRenderOnLeftHand().get())
          vrModeControls3DPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
 
-      if (mode == RDXVRMode.FOOTSTEP_PLACEMENT)
+      if (mode == RDXVRMode.FOOTSTEP_PLACEMENT || mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
       { // Disable interactables because we do not want to collide with the walking control ring
          interactablesEnabled.set(false);
       }
@@ -197,10 +212,15 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get(RDXVRMode.INPUTS_DISABLED.getReadableName()), mode == RDXVRMode.INPUTS_DISABLED))
       {
          mode = RDXVRMode.INPUTS_DISABLED;
+         if (kinematicsStreamingMode != null)
+            kinematicsStreamingMode.setEnabled(false);
+         footstepPlacer.reset();
       }
       if (ImGui.radioButton(labels.get(RDXVRMode.FOOTSTEP_PLACEMENT.getReadableName()), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
+         if (kinematicsStreamingMode != null)
+            kinematicsStreamingMode.setEnabled(false);
       }
       if (kinematicsStreamingMode == null)
       {
@@ -209,6 +229,7 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get(RDXVRMode.WHOLE_BODY_IK_STREAMING.getReadableName()), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
+         footstepPlacer.reset();
       }
       if (kinematicsStreamingMode == null)
       {
@@ -217,6 +238,9 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get(RDXVRMode.JOYSTICK_WALKING.getReadableName()), mode == RDXVRMode.JOYSTICK_WALKING))
       {
          mode = RDXVRMode.JOYSTICK_WALKING;
+         if (kinematicsStreamingMode != null)
+            kinematicsStreamingMode.setEnabled(false);
+         footstepPlacer.reset();
       }
    }
 
@@ -225,17 +249,18 @@ public class RDXVRModeManager
       stereoVision.renderProjection();
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          switch (mode)
          {
-            case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.getRenderables(renderables, pool);
+            case FOOTSTEP_PLACEMENT -> footstepPlacer.getRenderables(renderables, pool);
             case WHOLE_BODY_IK_STREAMING ->
             {
                if (kinematicsStreamingMode != null)
                   kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
+               footstepPlacer.getRenderables(renderables, pool);
             }
             case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
          }
@@ -255,6 +280,7 @@ public class RDXVRModeManager
          kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
       stereoVision.getDualBlackflySphericalProjection().shutdown();
+      footstepPlacer.destroy();
    }
 
    public RDXVRMode getMode()
@@ -262,9 +288,9 @@ public class RDXVRModeManager
       return mode;
    }
 
-   public RDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
+   public RDXVRFootstepPlacement getFootstepPlacer()
    {
-      return handPlacedFootstepMode;
+      return footstepPlacer;
    }
 
    @Nullable
