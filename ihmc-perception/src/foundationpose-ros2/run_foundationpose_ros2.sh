@@ -17,7 +17,6 @@ docker run -it \
   --mount type=bind,source=.,target=/root/foundationpose-ros2 \
   ihmc/foundationpose:latest \
   bash -c "
-  
   source /opt/ros/humble/setup.bash
   source /root/ihmc_ros2_ws/install/setup.bash
   export PYTHONPATH=/root/FoundationPose:\$PYTHONPATH
