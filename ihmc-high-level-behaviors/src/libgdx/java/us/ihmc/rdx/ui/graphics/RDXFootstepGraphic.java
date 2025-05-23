@@ -39,6 +39,8 @@ public class RDXFootstepGraphic implements RenderableProvider
    public static final Color RIGHT_FOOT_GREEN_COLOR = new Color(0.0f, 0.5f, 0.0f, 1.0f);
    public static final SideDependentList<Color> FOOT_COLORS = new SideDependentList<>(LEFT_FOOT_RED_COLOR, RIGHT_FOOT_GREEN_COLOR);
 
+   public static final SideDependentList<Color> DEBUG_FOOT_COLORS = new SideDependentList<>(Color.CORAL, Color.PURPLE);
+
    private final Color color;
    private final Color highlightColor;
    private final ConvexPolygon2D defaultContactPoints = new ConvexPolygon2D();

@@ -115,6 +115,10 @@ public class SceneGraph
       {
          staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
       }
+      else if (sceneNode instanceof YOLOv8Node yoloNode)
+      {
+         yoloNode.updateRobotOrientation(sensorFrame.getTransformToRoot().getRotation());
+      }
 
       for (SceneNode child : sceneNode.getChildren())
       {
@@ -227,8 +231,8 @@ public class SceneGraph
          });
       }
 
-//      for (PersistentDetection newDetection : newlyValidDetections)
-//         addNodeFromDetection(newDetection);
+      for (PersistentDetection newDetection : newlyValidDetections)
+         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }

@@ -88,34 +88,19 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxClampHeight, maxClampHeight);
    }
 
+   default void setCellSizeInMeters(double cellSizeInMeters)
+   {
+      set(HeightMapParameters.cellSizeInMeters, cellSizeInMeters);
+   }
+
    default void setLocalWidthInMeters(double localWidthInMeters)
    {
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setLocalCellSizeInMeters(double localCellSizeInMeters)
+   default void setCroppedWidthInMeters(double croppedWidthInMeters)
    {
-      set(HeightMapParameters.localCellSizeInMeters, localCellSizeInMeters);
-   }
-
-   default void setGlobalWidthInMeters(double globalWidthInMeters)
-   {
-      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
-   }
-
-   default void setTerrainWidthInMeters(double terrainWidthInMeters)
-   {
-      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
-   }
-
-   default void setGlobalCellSizeInMeters(double globalCellSizeInMeters)
-   {
-      set(HeightMapParameters.globalCellSizeInMeters, globalCellSizeInMeters);
-   }
-
-   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
-   {
-      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
+      set(HeightMapParameters.croppedWidthInMeters, croppedWidthInMeters);
    }
 
    default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
@@ -123,24 +108,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
    }
 
-   default void setInternalGlobalCellSizeInMeters(double internalGlobalCellSizeInMeters)
+   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
    {
-      set(HeightMapParameters.internalGlobalCellSizeInMeters, internalGlobalCellSizeInMeters);
+      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
    }
 
    default void setHeightScaleFactor(double heightScaleFactor)
    {
       set(HeightMapParameters.heightScaleFactor, heightScaleFactor);
-   }
-
-   default void setCropWindowSize(int cropWindowSize)
-   {
-      set(HeightMapParameters.cropWindowSize, cropWindowSize);
-   }
-
-   default void setTerrainObjectSize(int terrainObjectSize)
-   {
-      set(HeightMapParameters.terrainObjectSize, terrainObjectSize);
    }
 
    default void setSteppingContactThreshold(int steppingContactThreshold)

@@ -1,14 +1,17 @@
 package us.ihmc.footstepPlanning;
 
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -94,10 +97,9 @@ public class FootstepPlannerRequest
    private double horizonLength;
 
    /**
-    * Height map. May be null to enable flat ground mode.
+    * Holds the data for the {@link HeightMapData} and the {@link TerrainMapData}
     */
-   private HeightMapData heightMapData;
-   private TerrainMapData terrainMapData;
+   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -147,8 +149,7 @@ public class FootstepPlannerRequest
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
-      heightMapData = null;
-      terrainMapData = null;
+      environmentHandler.clear();
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -273,12 +274,12 @@ public class FootstepPlannerRequest
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.heightMapData = heightMapData;
+      environmentHandler.setHeightMapData(heightMapData);
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.terrainMapData = terrainMapData;
+      environmentHandler.setTerrainMapData(terrainMapData);
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
@@ -379,14 +380,9 @@ public class FootstepPlannerRequest
       return horizonLength;
    }
 
-   public HeightMapData getHeightMapData()
+   public EnvironmentHandler getEnvironmentHandler()
    {
-      return heightMapData;
-   }
-
-   public TerrainMapData getTerrainMapData()
-   {
-      return terrainMapData;
+      return environmentHandler;
    }
 
    public boolean getAssumeFlatGround()
@@ -443,7 +439,7 @@ public class FootstepPlannerRequest
       setGoalYawProximity(requestPacket.getGoalYawProximity());
       setTimeout(requestPacket.getTimeout());
       setMaximumIterations(requestPacket.getMaxIterations());
-      if(requestPacket.getHorizonLength() > 0.0)
+      if (requestPacket.getHorizonLength() > 0.0)
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
       setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
@@ -463,6 +459,11 @@ public class FootstepPlannerRequest
          setHeightMapData(heightMapData);
       else
          setHeightMapData(null);
+
+      if (!TerrainMapTools.isEmpty(requestPacket.getTerrainMapMessage()))
+         setTerrainMapData(new TerrainMapData(requestPacket.getTerrainMapMessage()));
+      else
+         setTerrainMapData(null);
    }
 
    public void setPacket(FootstepPlanningRequestPacket requestPacket)
@@ -495,12 +496,17 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
-      if (getHeightMapData() != null)
+      if (getEnvironmentHandler().getHeightMapData() != null)
       {
-         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getHeightMapData());
+         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getEnvironmentHandler().getHeightMapData());
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
-      // TODO need to add a message for the terrain map.
+
+      if (getEnvironmentHandler().getTerrainMapData() != null)
+      {
+         TerrainMapMessage terrainMapMessage = TerrainMapTools.toMessage(getEnvironmentHandler().getTerrainMapData());
+         requestPacket.getTerrainMapMessage().set(terrainMapMessage);
+      }
 
       if (referencePlan != null && !referencePlan.isEmpty())
       {
@@ -540,8 +546,15 @@ public class FootstepPlannerRequest
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
-      // todo should be a copy
-      this.heightMapData = other.heightMapData;
+      if (environmentHandler.getHeightMapData() != null)
+         environmentHandler.setHeightMapData(other.getEnvironmentHandler().getHeightMapData());
+      else if (other.getEnvironmentHandler().getTerrainMapData() != null)
+         environmentHandler.setHeightMapData(new HeightMapData(other.getEnvironmentHandler().getHeightMapData()));
+
+      if (environmentHandler.getTerrainMapData() != null)
+         environmentHandler.setTerrainMapData(other.getEnvironmentHandler().getTerrainMapData());
+      else if (other.getEnvironmentHandler().getTerrainMapData() != null)
+         environmentHandler.setTerrainMapData(new TerrainMapData(other.getEnvironmentHandler().getTerrainMapData()));
 
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);
@@ -552,15 +565,32 @@ public class FootstepPlannerRequest
       StringBuilder builder = new StringBuilder();
 
       builder.append("Footstep Planner Request: [")
-             .append("Stance Side: ").append(this.requestedInitialStanceSide).append(", ")
-             .append("Start Pose (Left): Position: ").append(startFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
-             .append("Start Pose (Right): Position: ").append(startFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
-             .append("Goal Pose (Left): Position: ").append(goalFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
-             .append("Goal Pose (Right): Position: ").append(goalFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
-             .append("Assume Flat Ground: ").append(this.assumeFlatGround).append(", ")
-             .append("Snap Goal Steps: ").append(this.snapGoalSteps).append(", ")
-             .append("Perform AStar Search: ").append(this.performAStarSearch).append(", ")
-             .append("Timeout: ").append(this.timeout);
+             .append("Stance Side: ")
+             .append(this.requestedInitialStanceSide)
+             .append(", ")
+             .append("Start Pose (Left): Position: ")
+             .append(startFootPoses.get(RobotSide.LEFT).getPosition())
+             .append(", ")
+             .append("Start Pose (Right): Position: ")
+             .append(startFootPoses.get(RobotSide.RIGHT).getPosition())
+             .append(", ")
+             .append("Goal Pose (Left): Position: ")
+             .append(goalFootPoses.get(RobotSide.LEFT).getPosition())
+             .append(", ")
+             .append("Goal Pose (Right): Position: ")
+             .append(goalFootPoses.get(RobotSide.RIGHT).getPosition())
+             .append(", ")
+             .append("Assume Flat Ground: ")
+             .append(this.assumeFlatGround)
+             .append(", ")
+             .append("Snap Goal Steps: ")
+             .append(this.snapGoalSteps)
+             .append(", ")
+             .append("Perform AStar Search: ")
+             .append(this.performAStarSearch)
+             .append(", ")
+             .append("Timeout: ")
+             .append(this.timeout);
 
       builder.append("]\n");
       return builder.toString();

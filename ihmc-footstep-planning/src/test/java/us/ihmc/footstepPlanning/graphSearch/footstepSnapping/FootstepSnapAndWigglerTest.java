@@ -9,11 +9,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
@@ -47,7 +46,7 @@ public class FootstepSnapAndWigglerTest
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry graphicsListRegistry;
    private YoRegistry registry;
-   private FootstepPlannerEnvironmentHandler environmentHandler;
+   private EnvironmentHandler environmentHandler;
    private FootstepSnapAndWiggler snapAndWiggler;
    private final DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
    private YoDouble achievedDeltaInside;
@@ -64,12 +63,14 @@ public class FootstepSnapAndWigglerTest
          scs.setGroundVisible(false);
          registry = new YoRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
-         environmentHandler = new FootstepPlannerEnvironmentHandler();
+         environmentHandler = new EnvironmentHandler();
          snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
 
          Graphics3DObject graphics3DObject = new Graphics3DObject();
-         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1).getPlanarRegionsList(), YoAppearance.DarkGray());
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject,
+                                                    DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1).getPlanarRegionsList(),
+                                                    YoAppearance.DarkGray());
          scs.addStaticLinkGraphics(graphics3DObject);
 
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
@@ -78,11 +79,10 @@ public class FootstepSnapAndWigglerTest
       }
       else
       {
-         environmentHandler = new FootstepPlannerEnvironmentHandler();
+         environmentHandler = new EnvironmentHandler();
          snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
       }
    }
-
 
    @Test
    public void testMaximumSnapHeightOnFlatRegions()
@@ -130,11 +130,11 @@ public class FootstepSnapAndWigglerTest
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper  = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
+      environmentHandler.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-5;
@@ -176,7 +176,7 @@ public class FootstepSnapAndWigglerTest
    {
       double groundHeight = -0.2;
       double maximumSnapHeight = 2.7;
-      double rotatedAngle = Math.toRadians(- 45.0);
+      double rotatedAngle = Math.toRadians(-45.0);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
@@ -187,11 +187,11 @@ public class FootstepSnapAndWigglerTest
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepSnapAndWiggler snapper  = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
+      environmentHandler.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-5;
@@ -199,7 +199,7 @@ public class FootstepSnapAndWigglerTest
       DiscreteFootstep stanceNode = new DiscreteFootstep(0.0, 0.0);
       snapper.snapFootstep(stanceNode, null, false);
 
-      FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(- 1.0, 0.0), stanceNode, false);
+      FootstepSnapData snapData = snapper.snapFootstep(new DiscreteFootstep(-1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
       EuclidCoreTestTools.assertEquals(expectedTransform, snapData.getSnapTransform(), epsilon);
 
@@ -229,7 +229,7 @@ public class FootstepSnapAndWigglerTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       parameters.setMinClearanceFromStance(0.0);
 
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters, environmentHandler);
 
       FootstepSnapData snapData1 = new FootstepSnapData();
@@ -264,13 +264,12 @@ public class FootstepSnapAndWigglerTest
       Assertions.assertFalse(overlap);
    }
 
-
    @Test
    public void testSnappingToFlatGroundHeight()
    {
       double flatGroundHeight = 0.7;
       snapAndWiggler.setFlatGroundHeight(flatGroundHeight);
-      environmentHandler.setHeightMap(null);
+      environmentHandler.setHeightMapData(null);
 
       DiscreteFootstep footstep = new DiscreteFootstep(3, -2, 5, RobotSide.LEFT);
       FootstepSnapData snapData = snapAndWiggler.snapFootstep(footstep);
@@ -293,12 +292,13 @@ public class FootstepSnapAndWigglerTest
       snapAndWiggler.initialize();
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMap(HeightMapMessageTools.unpackMessage(heightMapMessage));
+      environmentHandler.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
 
       DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
       DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);
 
-      RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871,0.01066136,-0.00008137,0.99992954), new Vector3D(-0.00110121,0.00147726,0.88437723));
+      RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871, 0.01066136, -0.00008137, 0.99992954),
+                                                                      new Vector3D(-0.00110121, 0.00147726, 0.88437723));
       FootstepSnapData stanceSnapData = new FootstepSnapData(stanceSnapTransform);
       stanceSnapData.setRegionIndex(2);
       snapAndWiggler.addSnapData(stanceStep, stanceSnapData);

@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
@@ -39,7 +39,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
    private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private final FootstepPlannerEnvironmentHandler environmentHandler;
+   private final EnvironmentHandler environmentHandler;
    private final FootstepCheckerInterface nodeChecker;
 
    private SideDependentList<DiscreteFootstep> goalSteps;
@@ -65,7 +65,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    public IdealStepCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                               FootstepCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
-                              FootstepPlannerEnvironmentHandler environmentHandler,
+                              EnvironmentHandler environmentHandler,
                               YoRegistry registry)
    {
       this.parameters = parameters;

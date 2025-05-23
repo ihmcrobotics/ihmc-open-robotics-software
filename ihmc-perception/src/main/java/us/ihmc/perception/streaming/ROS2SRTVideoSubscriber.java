@@ -27,7 +27,7 @@ import static us.ihmc.perception.streaming.StreamingTools.CONNECTION_TIMEOUT;
 
 public class ROS2SRTVideoSubscriber
 {
-   private static final double UPDATE_TIMEOUT = 0.5; // half a second
+   private static final double UPDATE_TIMEOUT = 1.0; // a second
 
    private final ROS2StreamStatusMonitor streamStatusMonitor;
    private final SRTVideoReceiver videoReceiver;

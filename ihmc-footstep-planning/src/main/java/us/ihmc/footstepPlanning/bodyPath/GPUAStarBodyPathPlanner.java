@@ -342,7 +342,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      heightMapData = request.getHeightMapData();
+      heightMapData = request.getEnvironmentHandler().getHeightMapData();
       if (firstTick)
       {
          firstTickSetup();

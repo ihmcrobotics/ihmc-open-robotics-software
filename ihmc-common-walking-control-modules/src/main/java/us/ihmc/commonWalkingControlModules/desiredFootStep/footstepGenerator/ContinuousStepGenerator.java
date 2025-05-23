@@ -127,6 +127,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
+   private final YoBoolean isWalking = new YoBoolean("isWalking" + variableNameSuffix, registry);
 
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
@@ -192,6 +193,12 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                                 if (quicksterFootstepProvider.hasValue())
                                    quicksterFootstepProvider.get().initialize();
                           });
+
+      walk.addListener(change ->
+                       {
+                          if (!walk.getBooleanValue())
+                             isWalking.set(walk.getBooleanValue());
+                       });
 
       setSupportFootBasedFootstepAdjustment(true);
    }
@@ -317,10 +324,16 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       double desiredVelocityY = desiredVelocity.getY();
       double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
 
+      double minMaxVelocityX = maxStepLength / stepTime.getValue();
+      double minMaxVelocityY = maxStepWidth / stepTime.getValue();
+
       if (desiredVelocityProvider.isUnitVelocity())
       {
-         double minMaxVelocityX = maxStepLength / stepTime.getValue();
-         double minMaxVelocityY = maxStepWidth / stepTime.getValue();
+         desiredVelocityX = MathTools.clamp(desiredVelocityX, minMaxVelocityX);
+         desiredVelocityY = MathTools.clamp(desiredVelocityY, minMaxVelocityY);
+      }
+      else
+      {
          desiredVelocityX = minMaxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
          desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
       }
@@ -402,8 +415,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          //         }
 
          footstep.setRobotSide(swingSide.toByte());
-         footstep.setCsgMode(currentCSGMode.getEnumValue().toByte());
-         footstep.setWalkingInPlace(desiredVelocityProvider.getDesiredVelocity().getX() == 0 && desiredVelocityProvider.getDesiredVelocity().getY() == 0);
+         footstep.setUpdateFootstepReferenceContinuously(currentCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.QFP));
+         footstep.setDisableCopFeedbackControl(currentCSGMode.getEnumValue().equals(ContinuousStepGeneratorMode.QFP)
+                                               && (desiredVelocityProvider.getDesiredVelocity().getX() != 0 || desiredVelocityProvider.getDesiredVelocity().getY() != 0)
+                                               && isWalking.getBooleanValue());
 
          if (swingHeightInputProvider == null && currentCSGMode.getEnumValue() == ContinuousStepGeneratorMode.STANDARD)
             footstep.setSwingHeight(parameters.getSwingHeight());
@@ -674,6 +689,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       latestStatusReceived.setValue(FootstepStatus.COMPLETED);
       currentSupportSide.set(robotSide);
 
+      isWalking.set(walk.getBooleanValue());
+
       if (!requestedCSGMode.valueEquals(currentCSGMode.getEnumValue()))
          currentCSGMode.set(requestedCSGMode.getEnumValue());
    }
@@ -687,6 +704,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     */
    public void notifyFootstepStarted(RobotSide robotSide)
    {
+      isWalking.set(walk.getBooleanValue());
       latestStatusReceived.setValue(FootstepStatus.STARTED);
       currentSupportSide.set(robotSide.getOppositeSide());
    }

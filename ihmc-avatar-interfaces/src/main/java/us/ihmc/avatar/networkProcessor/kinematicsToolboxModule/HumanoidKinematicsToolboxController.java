@@ -372,7 +372,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          computeSupportZUpTransform(desiredFullRobotModel, initialTransform); // The robot is at the current initial configuration.
 
-         initializePrivilegedConfiguration(); // The robot is now at the privileged configuration.
+         // Force the privileged configuration to be the initial configuration
+         initializePrivilegedConfiguration();
          rootJoint.getJointPose().setToZero();
          desiredFullRobotModel.updateFrames();
          computeSupportZUpTransform(desiredFullRobotModel, desiredTransform); // The robot is at the privileged configuration.
@@ -731,6 +732,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       { // CoM constraint polygon is computed through {@link CenterOfMassStabilityMarginRegionCalculator}
          initializeWholeBodyContactState();
       }
+
+      activeContactPointPositions.clear();
 
       // CoM constraint polygon is the convex hull of the feet contact points. Even when upper body is load-bearing, initialize to this.
       Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();

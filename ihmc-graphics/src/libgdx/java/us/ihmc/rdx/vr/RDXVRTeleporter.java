@@ -10,6 +10,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -19,8 +21,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
+   private static final Vector3D CHEST_TO_VR_HOME_OFFSET = new Vector3D(0.25, 0.0, 0.45);
+   private static ReferenceFrame robotVRHomeReferenceFrame;
    private boolean preparingToTeleport = false;
-
    private ModelInstance ring;
    private ModelInstance arrow;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -29,7 +32,9 @@ public class RDXVRTeleporter
    private final RigidBodyTransform xyYawHeadsetToTeleportTransform = new RigidBodyTransform();
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
+   private boolean enabled = true;
 
+   private ReferenceFrame linkBeforeCameraReferenceFrame;
    // Reference frame of cameras to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
    private final SideDependentList<ReferenceFrame> robotCameraReferenceFrames = new SideDependentList<>();
 
@@ -58,74 +63,74 @@ public class RDXVRTeleporter
    private void processVRInput(RDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-     {
-        InputDigitalActionData bButton = controller.getBButtonActionData();
+      {
+         InputDigitalActionData bButton = controller.getBButtonActionData();
 
-        // Only enable teleportation when nothing is pick selected
-        if (controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
-        {
-           controller.setBButtonText("Teleport");
-           InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+         // Only enable teleportation when nothing is pick selected
+         if (enabled && controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
+         {
+            controller.setBButtonText("Teleport");
+            InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
 
-           if (bButton.bChanged() && bButton.bState()) // Pressed B button
-           {
-              preparingToTeleport = true;
-           }
-           else if (preparingToTeleport && bButton.bChanged() && !bButton.bState())
-           {
-              vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-              {
-                 xyYawHeadsetToTeleportTransform.setIdentity();
-                 vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
-                 {
-                    headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                    xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-                    xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                 });
-                 teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-                 teleportIHMCZUpToIHMCZUpWorld.invert();
-                 proposedTeleportPose.get(tempTransform);
-                 tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-              });
-           }
+            if (bButton.bChanged() && bButton.bState()) // Pressed B button
+            {
+               preparingToTeleport = true;
+            }
+            else if (preparingToTeleport && bButton.bChanged() && !bButton.bState())
+            {
+               vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+               {
+                  xyYawHeadsetToTeleportTransform.setIdentity();
+                  vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
+                  {
+                     headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                     xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                     xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                  });
+                  teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+                  teleportIHMCZUpToIHMCZUpWorld.invert();
+                  proposedTeleportPose.get(tempTransform);
+                  tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+               });
+            }
 
-           // Pressed right joystick button
-           if (!robotCameraReferenceFrames.isEmpty() && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
-           {
-              snapToCameraView(vrContext);
-           }
-           else if (preparingToTeleport) // Holding B button
-           {
-              proposedTeleportPose.set(pickPlaneYawCalculator.calculate(controller.getPickPoseFrame(), vrContext.getTeleportFrameIHMCZUp()));
+            // Pressed right joystick button
+            if (linkBeforeCameraReferenceFrame != null && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
+            {
+               snapToVRHome(vrContext);
+            }
+            else if (preparingToTeleport) // Holding B button
+            {
+               proposedTeleportPose.set(pickPlaneYawCalculator.calculate(controller.getPickPoseFrame(), vrContext.getTeleportFrameIHMCZUp()));
 
-              controller.setPickRayColliding(controller.getPickPointPose().getPosition().distance(proposedTeleportPose.getPosition()));
+               controller.setPickRayColliding(controller.getPickPointPose().getPosition().distance(proposedTeleportPose.getPosition()));
 
-              proposedTeleportPose.get(tempTransform);
-              LibGDXTools.toLibGDX(tempTransform, ring.transform);
-              LibGDXTools.toLibGDX(tempTransform, arrow.transform);
-           }
+               proposedTeleportPose.get(tempTransform);
+               LibGDXTools.toLibGDX(tempTransform, ring.transform);
+               LibGDXTools.toLibGDX(tempTransform, arrow.transform);
+            }
 
-           if (controller.getTouchpadTouchedActionData().bState())
-           {
-              double y = controller.getTouchpadActionData().y();
-              if (!Double.isNaN(lastTouchpadY))
-              {
-                 double delta = y - lastTouchpadY;
-                 vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
-              }
-              lastTouchpadY = y;
-           }
-           else
-           {
-              lastTouchpadY = Double.NaN;
-           }
-        }
+            if (controller.getTouchpadTouchedActionData().bState())
+            {
+               double y = controller.getTouchpadActionData().y();
+               if (!Double.isNaN(lastTouchpadY))
+               {
+                  double delta = y - lastTouchpadY;
+                  vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
+               }
+               lastTouchpadY = y;
+            }
+            else
+            {
+               lastTouchpadY = Double.NaN;
+            }
+         }
 
-        if (!bButton.bState())
-        {
-           preparingToTeleport = false;
-        }
-     });
+         if (!bButton.bState())
+         {
+            preparingToTeleport = false;
+         }
+      });
    }
 
    public void snapToCameraView(RDXVRContext vrContext)
@@ -161,6 +166,26 @@ public class RDXVRTeleporter
        });
    }
 
+   public void snapToVRHome(RDXVRContext vrContext)
+   {
+      vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+      {
+         xyYawHeadsetToTeleportTransform.setIdentity();
+         vrContext.getHeadset().runIfConnected(headset ->
+                                             {
+                                                headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                                                xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                                             });
+         teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+         teleportIHMCZUpToIHMCZUpWorld.invert();
+
+         RigidBodyTransform vrHomeFramePlanarTransformToWorld = new RigidBodyTransform(robotVRHomeReferenceFrame.getTransformToWorldFrame());
+         vrHomeFramePlanarTransformToWorld.getRotation().setYawPitchRoll(vrHomeFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
+         tempTransform.set(vrHomeFramePlanarTransformToWorld);
+         tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+      });
+   }
+
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (preparingToTeleport)
@@ -170,9 +195,26 @@ public class RDXVRTeleporter
       }
    }
 
+   public void setLinkBeforeCameraReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      linkBeforeCameraReferenceFrame = referenceFrame;
+      RigidBodyTransform chestToVRHomeTransform = new RigidBodyTransform(new Quaternion(), CHEST_TO_VR_HOME_OFFSET);
+      robotVRHomeReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(linkBeforeCameraReferenceFrame, chestToVRHomeTransform);
+   }
+
    public void setRobotCameraReferenceFrames(ReferenceFrame leftCameraReferenceFrame, ReferenceFrame rightCameraReferenceFrame)
    {
       robotCameraReferenceFrames.put(RobotSide.LEFT, leftCameraReferenceFrame);
       robotCameraReferenceFrames.put(RobotSide.RIGHT, rightCameraReferenceFrame);
+   }
+
+   public static ReferenceFrame getRobotVRHomeFrame()
+   {
+      return robotVRHomeReferenceFrame;
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
    }
 }
