@@ -15,7 +15,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5e950813da1b2f21e7c171e5a64034f963f4f27a265e3fd410d7b24d6e8f7480";
+   		return "505c2825b2a32f8a2841fe8761c663a6dd7c9cced6a483139686928f1531b14b";
    }
    
    @Override
