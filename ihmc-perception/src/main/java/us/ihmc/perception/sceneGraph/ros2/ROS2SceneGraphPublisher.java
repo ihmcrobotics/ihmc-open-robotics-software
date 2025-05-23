@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
+import perception_msgs.msg.dds.FoundationPoseNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -25,6 +26,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -65,6 +67,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getCenterposeSceneNodes().clear();
       sceneGraphMessage.getYoloSceneNodes().clear();
+      sceneGraphMessage.getFoundationPoseSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
       sceneGraphMessage.getDoorSceneNodes().clear();
@@ -146,6 +149,15 @@ public class ROS2SceneGraphPublisher
             yoloNode.toMessage(yoloNodeMessage);
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
+         }
+         else if (sceneNode instanceof FoundationPoseNode foundationPoseNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.FOUNDATION_POSE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getFoundationPoseSceneNodes().size());
+            FoundationPoseNodeMessage foundationPoseNodeMessage = sceneGraphMessage.getFoundationPoseSceneNodes().add();
+            foundationPoseNode.toMessage(foundationPoseNodeMessage);
+
+            detectableSceneNodeMessage = foundationPoseNodeMessage.getDetectableSceneNode();
          }
          else if (sceneNode instanceof DoorNode doorNode)
          {

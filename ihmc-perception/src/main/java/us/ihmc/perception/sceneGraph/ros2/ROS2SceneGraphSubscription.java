@@ -6,6 +6,7 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
+import perception_msgs.msg.dds.FoundationPoseNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -25,6 +26,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
@@ -179,6 +181,10 @@ public class ROS2SceneGraphSubscription
          {
             yoloNode.fromMessage(subscriptionNode.getYOLONodeMessage());
          }
+         if (localNode instanceof FoundationPoseNode foundationPoseNode)
+         {
+            foundationPoseNode.fromMessage(subscriptionNode.getFoundationPoseNodeMessage());
+         }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
@@ -294,6 +300,13 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setYOLONodeMessage(yoloNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(yoloNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(yoloNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
+         case SceneGraphMessage.FOUNDATION_POSE_NODE_TYPE ->
+         {
+            FoundationPoseNodeMessage foundationPoseNodeMessage = sceneGraphMessage.getFoundationPoseSceneNodes().get(indexInTypesList);
+            subscriptionNode.setFoundationPoseNodeMessage(foundationPoseNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(foundationPoseNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(foundationPoseNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
          {
