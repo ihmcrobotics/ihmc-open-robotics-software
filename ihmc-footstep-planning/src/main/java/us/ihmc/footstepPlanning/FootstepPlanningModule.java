@@ -317,6 +317,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
          planThenSnapPlanner.setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
 
+         if (request.getPlanBodyPath())
+            planThenSnapPlanner.setBodyPath(bodyPathPlanHolder);
+         else
+            planThenSnapPlanner.clearBodyPath();
+
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
          goal.setGoalPoseBetweenFeet(goalMidFootPose);
          planThenSnapPlanner.setGoal(goal);

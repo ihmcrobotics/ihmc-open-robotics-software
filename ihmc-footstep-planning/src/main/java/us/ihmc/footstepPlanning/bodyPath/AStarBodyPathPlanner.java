@@ -441,11 +441,11 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
          iterationData.setParentNodeHeight(parentSnapHeight);
          this.iterationData.add(iterationData);
 
-         if (publishStatus(request))
-         {
-            reportStatus(request, outputToPack);
-            stopwatch.lap();
-         }
+//         if (publishStatus(request))
+//         {
+//            reportStatus(request, outputToPack);
+//            stopwatch.lap();
+//         }
       }
 
       reportStatus(request, outputToPack);
