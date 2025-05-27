@@ -13,8 +13,12 @@ import java.util.Collection;
 
 public enum OpenAlexanderVersion implements AlexanderVersionInterface
 {
-   V0_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY, OpenAlexanderURDFParameters.URDF_LEFT_ARM, OpenAlexanderURDFParameters.URDF_RIGHT_ARM), null),
-   V0_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY, OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM, OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null);
+   V0_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+                               OpenAlexanderURDFParameters.URDF_LEFT_ARM,
+                               OpenAlexanderURDFParameters.URDF_RIGHT_ARM), null),
+   V0_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+                                 OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
+                                 OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null);
 
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
@@ -86,11 +90,15 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       {
          case V0_FULL_ROBOT:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM));
+                                             new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM),
+                                             true,
+                                             true);
             break;
          case V0_NUB_FOREARMS:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB));
+                                             new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB),
+                                             true,
+                                             true);
             break;
       }
       return jointMap;
