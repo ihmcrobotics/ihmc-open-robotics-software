@@ -215,6 +215,15 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             executeNextLeaf();
          }
       }
+
+      if (state.pollFailureResetRequested())
+      {
+         failedLeaves.clear();
+         for (int i = 0; i < state.getOrderedLeaves().size(); i++)
+         {
+            state.getOrderedLeaves().get(i).setFailed(false);
+         }
+      }
    }
 
    public void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)

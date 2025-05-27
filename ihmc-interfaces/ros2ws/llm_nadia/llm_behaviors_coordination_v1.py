@@ -68,7 +68,8 @@ def behavior_message_callback(msg):
         # Completed and failed behaviors
         behavior_in_progress = msg.behavior_in_progress
         completed_behavior = msg.completed_behavior
-        failed_behavior = msg.failure
+        failed_behavior = msg.failed_behavior
+        failure = msg.failure
 
         waiting_for_command = False
         if msg.behavior_in_progress == "-":
@@ -77,27 +78,27 @@ def behavior_message_callback(msg):
         if completed_behavior and completed_behavior != "-":
             print(f"Completed Behavior: {completed_behavior}")
 
-        if failed_behavior:
+        if failed_behavior != "-":
             print("[FAILURE] -----------")
-            print("Failed behavior: " + msg.failed_behavior)
+            print("Failed behavior: " + failed_behavior)
             # # Failure details
-            # print("Name: " + failed_behavior.action_name)
-            # print("Type: " + failed_behavior.action_type)
-            # print("Frame: " + failed_behavior.action_frame)
-            # print("Missing Frame: " + str(failed_behavior.missing_frame))
-            # print("Navigation Collision Frame Name: " + failed_behavior.collision_name)
+            # print("Name: " + failure.action_name)
+            # print("Type: " + failure.action_type)
+            # print("Frame: " + failure.action_frame)
+            # print("Missing Frame: " + str(failure.missing_frame))
+            # print("Navigation Collision Frame Name: " + failure.collision_name)
 
-            position_error = failed_behavior.position_error
+            position_error = failure.position_error
             # Convert Point to numpy array
             error_vector = np.array([position_error.x, position_error.y, position_error.z])
             # Calculate the Euclidean norm (L2 norm)
             norm = np.linalg.norm(error_vector)
-            print(f"The position error is: {norm}")
-            orientation_error = failed_behavior.orientation_error
+#             print(f"The position error is: {norm}")
+            orientation_error = failure.orientation_error
 
-            position_tolerance = failed_behavior.position_tolerance
-            orientation_tolerance = failed_behavior.orientation_tolerance
-            print("----------[FAILURE]")
+            position_tolerance = failure.position_tolerance
+            orientation_tolerance = failure.orientation_tolerance
+#             print("----------[FAILURE]")
 
         # Construct input for LLM decision-making
         llm_input = {
@@ -122,8 +123,6 @@ def behavior_message_callback(msg):
             
             # Increment the LLM call counter
             llm_call_counter += 1
-            
-            #print("LLM Response:", response)
 
             next_behavior   = response.strip()
             # # Extract content after the last </think>
@@ -131,9 +130,7 @@ def behavior_message_callback(msg):
             # if match:
             #     next_behavior = match.group(1).strip()
             # else:
-            #     next_behavior = response.strip()            
-
-        next_behavior = available_behaviors[current_behavior_index] if current_behavior_index < len(available_behaviors) else None
+            #     next_behavior = response.strip()
 
         # Check if the LLM suggests a valid action
         if waiting_for_command:

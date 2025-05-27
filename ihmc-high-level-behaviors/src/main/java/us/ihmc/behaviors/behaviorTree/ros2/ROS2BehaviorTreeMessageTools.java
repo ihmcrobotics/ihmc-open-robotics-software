@@ -56,7 +56,7 @@ public class ROS2BehaviorTreeMessageTools
       if (modificationOutgoing || hasStatus)
       {
          if (modificationOutgoing)
-            LogTools.info("%s: Seq # %d Packing full data: %s outgoing = %b  status = %b"
+            LogTools.debug("%s: Seq # %d Packing full data: %s outgoing = %b  status = %b"
                                 .formatted(crdtInfo.getActorDesignation().name(),
                                            treeStateMessage.getSequenceId(),
                                            nodeState.getDefinition().getName(),

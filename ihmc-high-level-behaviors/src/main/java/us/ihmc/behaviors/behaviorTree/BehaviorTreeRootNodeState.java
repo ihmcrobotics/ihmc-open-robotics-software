@@ -22,6 +22,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTBidirectionalNotification manualExecutionRequested;
+   private final CRDTBidirectionalNotification failureResetRequested;
    private final CRDTBidirectionalBoolean concurrencyEnabled;
 
    private final TLongObjectHashMap<BehaviorTreeNodeState<?>> idToNodeMap = new TLongObjectHashMap<>();
@@ -37,6 +38,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
       manualExecutionRequested = new CRDTBidirectionalNotification(definition);
       concurrencyEnabled = new CRDTBidirectionalBoolean(definition, true);
+      failureResetRequested = new CRDTBidirectionalNotification(definition);
    }
 
    @Override
@@ -79,6 +81,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setConcurrencyEnabled(concurrencyEnabled.toMessage());
+      message.setFailureResetRequested(failureResetRequested.toMessage());
    }
 
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
@@ -91,6 +94,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       concurrencyEnabled.fromMessage(message.getConcurrencyEnabled());
+      failureResetRequested.fromMessage(message.getFailureResetRequested());
    }
 
    @Nullable
@@ -159,6 +163,21 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public void setManualExecutionRequested()
    {
       manualExecutionRequested.set();
+   }
+
+   public boolean pollFailureResetRequested()
+   {
+      return failureResetRequested.poll();
+   }
+
+   public boolean getFailureResetRequested()
+   {
+      return failureResetRequested.peek();
+   }
+
+   public void setFailureResetRequested()
+   {
+      failureResetRequested.set();
    }
 
    public boolean getConcurrencyEnabled()

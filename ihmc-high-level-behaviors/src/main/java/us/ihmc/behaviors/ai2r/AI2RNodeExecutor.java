@@ -106,6 +106,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    {
       statusMessage.setBehaviorInProgress("-");
       statusMessage.setCompletedBehavior("-");
+      statusMessage.setFailedBehavior("-");
       statusMessage.getFailure().setActionName("-");
       statusMessage.getFailure().setActionType("-");
       statusMessage.getFailure().setCollisionName("-");
@@ -165,7 +166,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private void setFailedBehaviors()
    {
-      statusMessage.setFailedBehavior("");
+      statusMessage.setFailedBehavior("-");
       for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
          if (leaf.getFailed() && !state.getActionSequence().getAutomaticExecution())
@@ -279,7 +280,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   }
                   else
                   {
-                     LogTools.warn("Cannot check collision of next step");
+                     LogTools.debug("Cannot check collision of next step");
                   }
                }
             }
