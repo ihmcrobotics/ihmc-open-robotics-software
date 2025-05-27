@@ -90,13 +90,13 @@ def behavior_message_callback(msg):
 
         new_goto_behavior = AI2RNavigationMessage()
         # Set the reference frame name - can copy from scene_objects.obj_name
-        new_goto_behavior.reference_frame_name = "Barrier1"
+        new_goto_behavior.object_name = "Barrier1"
         # Set the distance to the object
-        new_goto_behavior.distance_to_frame = 0.6
-        new_goto_behavior.secondary_reference_frame_name = "DoorPanel1"
+        new_goto_behavior.distance_to_object = 0.6
+        new_goto_behavior.pov_reference_frame_name = "DoorPanel1"
         new_goto_behavior.spatial_relation = AI2RNavigationMessage.FRONT
         if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
-            new_goto_behavior.secondary_reference_frame_name = "walkingFrame"
+            new_goto_behavior.pov_reference_frame_name = "walkingFrame"
 
         behavior_command.navigation = new_goto_behavior
 

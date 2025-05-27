@@ -3,6 +3,8 @@ package us.ihmc.behaviors.ai2r;
 import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
+import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
+import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
@@ -11,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AI2RSkillEditor
 {
@@ -29,6 +32,7 @@ public class AI2RSkillEditor
    {
       // GoTo behavior - Navigation
       updateGoTo(behaviorToExecuteName, state, message, commandedBehaviorIndex);
+      updateReceiveObject(behaviorToExecuteName, state, message, commandedBehaviorIndex);
       updatePickAndPlace(behaviorToExecuteName, state, message, commandedBehaviorIndex);
    }
 
@@ -41,18 +45,18 @@ public class AI2RSkillEditor
             if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
             {
                AI2RNavigationMessage navigationMessage = message.getNavigation();
-               String referenceFrameName = navigationMessage.getReferenceFrameNameAsString();
+               String referenceFrameName = navigationMessage.getObjectNameAsString();
                changeParentFrameGoToNode(gotoActionState.getDefinition(), gotoActionState, referenceFrameName);
                ReferenceFrame referenceFrame = gotoActionState.getFrameByName(referenceFrameName);
 
-               String secondaryFrameName = navigationMessage.getSecondaryReferenceFrameNameAsString();
+               String secondaryFrameName = navigationMessage.getPovReferenceFrameNameAsString();
                ReferenceFrame secondaryFrame = gotoActionState.getFrameByName(secondaryFrameName);
 
                FramePoint3D goalStancePoint = new FramePoint3D(gotoActionState.getParentFrame());
                goalStancePoint.changeFrame(referenceFrame);
                goalStancePoint.setToZero();
                goalStancePoint.changeFrame(ReferenceFrame.getWorldFrame());
-               double distanceToReferenceFrame = navigationMessage.getDistanceToFrame();
+               double distanceToReferenceFrame = navigationMessage.getDistanceToObject();
 
                FramePoint3D goalFocalPoint = new FramePoint3D(gotoActionState.getParentFrame());
                goalFocalPoint.changeFrame(secondaryFrame);
@@ -116,6 +120,23 @@ public class AI2RSkillEditor
                gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
                gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
                break;
+            }
+         }
+      }
+   }
+
+   private void updateReceiveObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   {
+      if (behaviorToExecuteName.contains("RECEIVE") && message.getAdaptingBehavior())
+      {
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         {
+            if (leaf instanceof ConditionNodeState conditionNodeState)
+            {
+               AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
+               receiveMessage.getObjectNameAsString();
+               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveMessage.getObjectNameAsString());
+               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
             }
          }
       }

@@ -13,13 +13,13 @@ int8 RIGHT=4
 # The type of spatial relation with the secondary reference object as defined above
 int8 spatial_relation
 
-# Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
-string secondary_reference_frame_name
+# Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
+string pov_reference_frame_name
 
-# Goto action - Reference frame for the action
-string reference_frame_name
+# Reference frame (object) to go to
+string object_name
 
-# Goto action - The distance to the frame
-float64 distance_to_frame
+# The distance to the reference frame (located at the object's centroid)
+float64 distance_to_object
 
 

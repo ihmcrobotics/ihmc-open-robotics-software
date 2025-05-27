@@ -26,7 +26,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  available_behaviors_;
    /**
-            * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+            * Name of the behavior that is in progress
             */
    public java.lang.StringBuilder behavior_in_progress_;
    /**
@@ -104,7 +104,7 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
    }
 
    /**
-            * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+            * Name of the behavior that is in progress
             */
    public void setBehaviorInProgress(java.lang.String behavior_in_progress)
    {
@@ -113,14 +113,14 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
    }
 
    /**
-            * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+            * Name of the behavior that is in progress
             */
    public java.lang.String getBehaviorInProgressAsString()
    {
       return getBehaviorInProgress().toString();
    }
    /**
-            * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+            * Name of the behavior that is in progress
             */
    public java.lang.StringBuilder getBehaviorInProgress()
    {

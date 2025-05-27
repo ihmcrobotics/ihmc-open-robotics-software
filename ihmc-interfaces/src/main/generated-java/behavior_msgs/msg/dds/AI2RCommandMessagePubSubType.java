@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "237917456f616f21e11650d95164755afa14c5b245f081421bee62a09d576737";
+   		return "7d7a92e64fa9d50e1a49d131394eb508611857f33c8ab37c9c6e6791c0d2b544";
    }
    
    @Override
@@ -59,6 +59,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,6 +83,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getCdrSerializedSize(data.getNavigation(), current_alignment);
 
+      current_alignment += behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.getCdrSerializedSize(data.getReceiveObject(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +99,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.write(data.getHandPoseAdaptation(), cdr);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.write(data.getNavigation(), cdr);
+      behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.write(data.getReceiveObject(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -104,6 +109,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       	
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.read(data.getHandPoseAdaptation(), cdr);	
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.read(data.getNavigation(), cdr);	
+      behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.read(data.getReceiveObject(), cdr);	
 
    }
 
@@ -116,6 +122,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       ser.write_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
 
+      ser.write_type_a("receive_object", new behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType(), data.getReceiveObject());
+
    }
 
    @Override
@@ -126,6 +134,8 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.read_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
       ser.read_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
+
+      ser.read_type_a("receive_object", new behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType(), data.getReceiveObject());
 
    }
 
