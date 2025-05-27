@@ -35,6 +35,8 @@ extern "C"
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
 
+const bool DEBUG = true;
+
 __device__ int2 spherical_projection(float3 cellCenter, float *params)
 {
     float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
@@ -355,6 +357,15 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     motionVarianceF += distance * params[VARIANCE_PER_METER];
     motionVarianceF += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
     motionVarianceF += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
+    
+    if (DEBUG && xIndex == 40 && yIndex == 40)
+    {
+        printf("Update Kernel -----------------------------\n");
+        printf("Mean: %f\n", meanZ);
+        printf("Variance: %f\n", currentVariance);
+        printf("Motion Variance: %f\n", motionVarianceF);
+        printf("Scaled Variance: %f\n", scaledVariance);
+    }
 
     if (count == 0)
         meanZ = -params[HEIGHT_OFFSET];
@@ -480,6 +491,15 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
         float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
+
+        if (DEBUG && xIndex == 40 && yIndex == 40)
+        {
+            printf("Registration Kernel -----------------------------\n");
+            printf("Global Mean: %f\n", globalMeanF);
+            printf("Kalman Gain: %f\n", kalmanGain);
+            printf("New Mean: %f\n", updatedMean);
+            printf("New Variance: %f\n", updatedVariance);
+        }
 
         *globalMean = updatedMean;
         *globalVariance = updatedVariance;
