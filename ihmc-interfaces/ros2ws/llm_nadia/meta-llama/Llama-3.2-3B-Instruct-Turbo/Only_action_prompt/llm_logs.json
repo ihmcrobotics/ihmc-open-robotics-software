@@ -28,7 +28,11 @@
         "output": "'PLACE CHARGE ON DOOR'"
     },
     {
+<<<<<<< Updated upstream
         "timestamp": "2025-05-27T15:15:53.284349",
+=======
+        "timestamp": "2025-05-27T16:12:58.033670",
+>>>>>>> Stashed changes
         "model": "meta-llama/Llama-3.2-3B-Instruct-Turbo",
         "temperature": 0.0,
         "token_limit": 2048,
@@ -40,6 +44,7 @@
         "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of available_behaviors based on the following rules: 1. The list available_behaviors defines the exact execution order. 2. If both previously_executed and failed_behaviors are empty, return the first behavior in available_behaviors. 3. If previously_executed is not empty: Find the behavior from previously_executed that appears in available_behaviors and return the next behavior in available_behaviors, double check to make sure it is next behavior , skipping any in failed_behaviors. If no valid next behavior exists, return 'NO_ACTION'.Return only a quoted string with the behavior name, and nothing else. Do not explain or include any code. Return: '<next behavior to execute>'"
     },
     {
+<<<<<<< Updated upstream
         "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of available_behaviors based on the following rules: 1. The list available_behaviors defines the exact execution order. 2. If both previously_executed and failed_behaviors are empty, return the first behavior in available_behaviors. 3. If previously_executed is not empty: Find the behavior from previously_executed that appears in available_behaviors and return the next behavior in available_behaviors, double check to make sure it is next behavior , skipping any in failed_behaviors. If no valid next behavior exists, return 'NO_ACTION'.Return only a quoted string with the behavior name, and nothing else. Do not explain or include any code. Return: '<next behavior to execute>' {'scene_objects': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'available_behaviors': ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR'], 'previously_executed': '', 'failed_behaviors': ''}",
         "output": "\"SCAN\""
     },
@@ -78,5 +83,13 @@
     {
         "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of available_behaviors based on the following rules: 1. The list available_behaviors defines the exact execution order. 2. If both previously_executed and failed_behaviors are empty, return the first behavior in available_behaviors. 3. If previously_executed is not empty: Find the behavior from previously_executed that appears in available_behaviors and return the next behavior in available_behaviors, double check to make sure it is next behavior , skipping any in failed_behaviors. If no valid next behavior exists, return 'NO_ACTION'.Return only a quoted string with the behavior name, and nothing else. Do not explain or include any code. Return: '<next behavior to execute>' {'scene_objects': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'available_behaviors': ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR'], 'previously_executed': 'GOTO', 'failed_behaviors': '-'}",
         "output": "\"SCAN\""
+=======
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of available_behaviors based on the following rules: 1. The list available_behaviors defines the exact execution order. 2. If both previously_executed and failed_behaviors are empty, return the first behavior in available_behaviors. 3. If previously_executed is not empty: Find the behavior from previously_executed that appears in available_behaviors and return the next behavior in available_behaviors, double check to make sure it is next behavior , skipping any in failed_behaviors. If no valid next behavior exists, return 'NO_ACTION'.Return only a quoted string with the behavior name, and nothing else. Do not explain or include any code. Return: '<next behavior to execute>' {'scene_objects': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'available_behaviors': ['GOTO CHARGE', 'SCAN', 'PICK UP CHARGE', 'GOTO DOOR', 'PLACE CHARGE ON DOOR'], 'previously_executed': '', 'failed_behaviors': behavior_msgs.msg.AI2RActionFailureMessage(action_name='-', action_type='-', action_frame='', missing_frame=False, collision_name='-', position_tolerance=0.0, orientation_tolerance=0.0, position_error=geometry_msgs.msg.Point(x=0.0, y=0.0, z=0.0), orientation_error=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.0, w=1.0))}",
+        "output": "\"GOTO CHARGE\""
+    },
+    {
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of available_behaviors based on the following rules: 1. The list available_behaviors defines the exact execution order. 2. If both previously_executed and failed_behaviors are empty, return the first behavior in available_behaviors. 3. If previously_executed is not empty: Find the behavior from previously_executed that appears in available_behaviors and return the next behavior in available_behaviors, double check to make sure it is next behavior , skipping any in failed_behaviors. If no valid next behavior exists, return 'NO_ACTION'.Return only a quoted string with the behavior name, and nothing else. Do not explain or include any code. Return: '<next behavior to execute>' {'scene_objects': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'available_behaviors': ['GOTO CHARGE', 'SCAN', 'PICK UP CHARGE', 'GOTO DOOR', 'PLACE CHARGE ON DOOR'], 'previously_executed': '', 'failed_behaviors': behavior_msgs.msg.AI2RActionFailureMessage(action_name='-', action_type='-', action_frame='', missing_frame=False, collision_name='-', position_tolerance=0.0, orientation_tolerance=0.0, position_error=geometry_msgs.msg.Point(x=0.0, y=0.0, z=0.0), orientation_error=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.0, w=1.0))}",
+        "output": "\"GOTO CHARGE\""
+>>>>>>> Stashed changes
     }
 ]

@@ -33,6 +33,8 @@ def behavior_message_callback(msg):
     global llm_call_counter
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
+    #print("initialized: ", initialized)
+    #print("waiting_for_command: ", waiting_for_command)
     if not initialized:
         # --------- Scene -----------
         scene_objects = msg.objects
@@ -55,59 +57,64 @@ def behavior_message_callback(msg):
         else:
             print("-")
 
-    # --------- Reasoning -----------
-    # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
+        # --------- Reasoning -----------
+        # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
 
-    # --------- Monitoring -----------
-    completed_behavior = msg.completed_behavior
-    #print("Completed Behavior: " + str(completed_behavior))
-    if not completed_behavior == "-":
-       print("Completed Behavior: " + completed_behavior)
-       waiting_for_command  = True
-    else:
-       waiting_for_command  = False
 
-    failed_behavior = msg.failed_behavior
-    if failed_behavior:
-       print("[FAILURE] Failed behavior: " + failed_behavior)
-       # Failure details
-       failure = msg.failure
-       print("Description: " + failure.action_name)
-       print("Type: " + failure.action_type)
-       print("Frame: " + failure.action_frame)
+    if not waiting_for_command and initialized:
+        # --------- Monitoring -----------
+        completed_behavior = msg.completed_behavior
 
-       position_error = failure.position_error
-       # Convert Point to numpy array
-       error_vector = np.array([position_error.x, position_error.y, position_error.z])
-       # Calculate the Euclidean norm (L2 norm)
-       norm = np.linalg.norm(error_vector)
-       print(f"The position error is: {norm}")
-       orientation_error = failure.orientation_error
+        if not completed_behavior == "-":
+            print("Completed Behavior: " + completed_behavior)
+            waiting_for_command  = True
+        else:
+            waiting_for_command  = False
 
-       position_tolerance = failure.position_tolerance
-       orientation_tolerance = failure.orientation_tolerance
+        failed_behavior = msg.failed_behavior
+        if failed_behavior:
+            print("[FAILURE] Failed behavior: " + failed_behavior)
+            # Failure details
+            # failure = msg.failure
+            # print("Description: " + failure.action_name)
+            # print("Type: " + failure.action_type)
+            # print("Frame: " + failure.action_frame)
 
-    # --------- Reasoning -----------
-    # CAN DO SOME REASONING HERE based on failed behaviors
-    
-    # Get all scene objects names
-    scene_objects_name = [obj.object_name for obj in msg.objects]
-    
-    # Get all available behaviors
-    available_behaviors = msg.available_behaviors
-    
-    # Construct input for LLM decision-making
-    llm_input = {
-        # "task": current_task,
-        "scene_objects": scene_objects_name,
-        "available_behaviors": available_behaviors,
-        "previously_executed": completed_behavior if completed_behavior != "-" else "",
-        "failed_behaviors": failed_behavior if failed_behavior else "",
-    }
-    
+            # position_error = failure.position_error
+            # # Convert Point to numpy array
+            # error_vector = np.array([position_error.x, position_error.y, position_error.z])
+            # # Calculate the Euclidean norm (L2 norm)
+            # norm = np.linalg.norm(error_vector)
+            # print(f"The position error is: {norm}")
+            # orientation_error = failure.orientation_error
+
+            # position_tolerance = failure.position_tolerance
+            # orientation_tolerance = failure.orientation_tolerance
+
+
 
     if waiting_for_command or not initialized:
-    #if waiting_for_command :
+        # --------- Reasoning -----------
+        # CAN DO SOME REASONING HERE based on failed behaviors
+        
+        # Get all scene objects names
+        scene_objects_name  = [obj.object_name for obj in msg.objects]
+        
+        # Get all available behaviors
+        available_behaviors = msg.available_behaviors
+        completed_behavior  = msg.completed_behavior
+        failed_behavior     = msg.failed_behavior
+        
+        # Construct input for LLM decision-making
+        llm_input = {
+            # "task": current_task,
+            "scene_objects": scene_objects_name,
+            "available_behaviors": available_behaviors,
+            "previously_executed": completed_behavior if completed_behavior != "-" else "",
+            "failed_behaviors": failed_behavior if failed_behavior else "",
+        }
+        
+        #if waiting_for_command :
         # Convert the input to a string for LLM processing
         llm_input       = str(llm_input)
 
@@ -120,44 +127,31 @@ def behavior_message_callback(msg):
         # Query LLM for next action
         print(" Calling the LLM ")
         response        = llm.call_model(llm_input)
-        # if llm_call_counter == 5:
+        # if llm_call_counter == 0:
+        #     response         =  "GOTO CHARGE" # For testing purposes
+        # elif llm_call_counter == 1:
+        #     response         =  "SCAN"
+        # elif llm_call_counter == 2:
+        #     response         =  "PICK UP CHARGE"
+        # elif llm_call_counter == 3:
+        #     response         =  "GOTO DOOR"
+        # elif llm_call_counter == 4:
+        #     response         =  "PLACE CHARGE ON DOOR"
+        # else:
         #     # end the program after 5 calls
         #     print("Reached maximum number of LLM calls. Exiting.")
         #     sys.exit(0)
-        if llm_call_counter == 0:
-            response         =  "GOTO CHARGE" # For testing purposes
-        elif llm_call_counter == 1:
-            response         =  "SCAN"
-        elif llm_call_counter == 2:
-            response         =  "PICK UP CHARGE"
-        elif llm_call_counter == 3:
-            response         =  "GOTO DOOR"
-        elif llm_call_counter == 4:
-            response         =  "PLACE CHARGE ON DOOR"
-        else:
-            # end the program after 5 calls
-            print("Reached maximum number of LLM calls. Exiting.")
-            sys.exit(0)
         
 
         # Increment the LLM call counter
         llm_call_counter += 1
         
-        print("LLM Response:", response)
+        print("LLM Response:", response, "type of response:", type(response), "length of response:", len(response))
         print("LLM Call Counter:", llm_call_counter)
 
-        next_behavior   = response.strip()
-        
-        # match = re.search(r"Return:\s*'(.*?)'", response)
-        # if match:
-        #     next_behavior = match.group(1)
-        print("Next behavior:", next_behavior)
-        # # Extract content after the last </think>
-        # match = re.search(r'</think>(.*)$', response, re.DOTALL)
-        # if match:
-        #     next_behavior = match.group(1).strip()
-        # else:
-        #     next_behavior = response.strip() 
+        next_behavior   = response.strip('.\"')  # Remove any trailing punctuation or quotes
+        print("Next behavior:", next_behavior, "type of next behavior:", type(next_behavior), "length of next behavior:", len(next_behavior))
+
         # --------- Coordination -----------
         behavior_command = AI2RCommandMessage()
         # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
@@ -166,7 +160,10 @@ def behavior_message_callback(msg):
         print("Commanded Behavior: " + behavior_command.behavior_to_execute)
         ros2["behavior_publisher"].publish(behavior_command)
         waiting_for_command = False
-        initialized = True
+        initialized = True  
+
+
+
 
 
 def main(args=None):
