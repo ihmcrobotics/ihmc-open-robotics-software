@@ -80,12 +80,12 @@ def behavior_message_callback(msg):
         if failed_behavior:
             print("[FAILURE] -----------")
             print("Failed behavior: " + msg.failed_behavior)
-            # Failure details
-            print("Name: " + failed_behavior.action_name)
-            print("Type: " + failed_behavior.action_type)
-    #         print("Frame: " + failed_behavior.action_frame)
-            print("Missing Frame: " + str(failed_behavior.missing_frame))
-            print("Navigation Collision Frame Name: " + failed_behavior.collision_name)
+            # # Failure details
+            # print("Name: " + failed_behavior.action_name)
+            # print("Type: " + failed_behavior.action_type)
+            # print("Frame: " + failed_behavior.action_frame)
+            # print("Missing Frame: " + str(failed_behavior.missing_frame))
+            # print("Navigation Collision Frame Name: " + failed_behavior.collision_name)
 
             position_error = failed_behavior.position_error
             # Convert Point to numpy array

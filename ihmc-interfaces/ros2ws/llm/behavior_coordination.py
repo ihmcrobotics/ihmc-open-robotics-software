@@ -120,25 +120,26 @@ def behavior_message_callback(msg):
         # Query LLM for next action
         print(" Calling the LLM ")
         response        = llm.call_model(llm_input)
-        # if llm_call_counter == 0:
-        #     response         =  "GOTO CHARGE" # For testing purposes
-        # elif llm_call_counter == 1:
-        #     response         =  "SCAN"
-        # elif llm_call_counter == 2:
-        #     response         =  "PICK UP CHARGE"
-        # elif llm_call_counter == 3:
-        #     response         =  "GOTO DOOR"
-        # elif llm_call_counter == 4:
-        #     response         =  "PLACE CHARGE ON DOOR"
-        # else:
+        # if llm_call_counter == 5:
         #     # end the program after 5 calls
         #     print("Reached maximum number of LLM calls. Exiting.")
         #     sys.exit(0)
-        
-        if llm_call_counter == 5:
+        if llm_call_counter == 0:
+            response         =  "GOTO CHARGE" # For testing purposes
+        elif llm_call_counter == 1:
+            response         =  "SCAN"
+        elif llm_call_counter == 2:
+            response         =  "PICK UP CHARGE"
+        elif llm_call_counter == 3:
+            response         =  "GOTO DOOR"
+        elif llm_call_counter == 4:
+            response         =  "PLACE CHARGE ON DOOR"
+        else:
             # end the program after 5 calls
             print("Reached maximum number of LLM calls. Exiting.")
             sys.exit(0)
+        
+
         # Increment the LLM call counter
         llm_call_counter += 1
         
