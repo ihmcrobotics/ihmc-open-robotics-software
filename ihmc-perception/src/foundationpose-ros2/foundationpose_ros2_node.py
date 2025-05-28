@@ -207,7 +207,7 @@ def main():
 
     # Find mesh files paths
     base_directory = os.path.dirname(os.path.realpath(__file__))
-    mesh_file_paths = glob.glob(os.path.join(base_dir, "demo_data", "**", "*.obj"), recursive=True)
+    mesh_file_paths = glob.glob(os.path.join(base_dir, "object_meshes", "**", "*.obj"), recursive=True)
 
     print("Found meshes", mesh_file_paths)
 
