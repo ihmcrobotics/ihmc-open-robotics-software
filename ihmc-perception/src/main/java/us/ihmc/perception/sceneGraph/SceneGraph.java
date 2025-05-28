@@ -324,10 +324,7 @@ public class SceneGraph
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
          detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
       else if (detectionClass.equals(FoundationPoseInstantDetection.class))
-      {
-         System.out.println("FoundationPose!");
          detectableNode = new FoundationPoseNode(newNodeID, newNodeName, getCRDTInfo(), detection);
-      }
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
