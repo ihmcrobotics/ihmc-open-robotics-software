@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
@@ -173,7 +174,7 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       }
       catch (Exception exception)
       {
-         System.out.println("Hmm");
+         LogTools.error(exception);
       }
    }
 
