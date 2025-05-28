@@ -118,13 +118,13 @@ class FoundationPoseROS2Node(Node):
 
 
     def request_callback(self, request):
-        print("REQUEST RECEIVED")
+        print("REQUEST RECEIVED FOR", request.object_id)
         if request.object_id in self.workers:
             print("Already tracking this obj")
             return
 
         if not request.mesh_file in self.meshes:
-            print("Idk this mesh file. Haven't seen anything like it: ", request.mesh_file)
+            print("Idk this mesh file. Haven't seen anything like it:", request.mesh_file)
             return
 
         # Read the message data
@@ -148,6 +148,7 @@ class FoundationPoseROS2Node(Node):
 
 
     def remove_callback(self, remove_target):
+        print("REMOVE REQUEST RECEIVED FOR", remove_target.data)
         if remove_target.data in self.workers:
             self.remove_queue.put(remove_target.data)
 
