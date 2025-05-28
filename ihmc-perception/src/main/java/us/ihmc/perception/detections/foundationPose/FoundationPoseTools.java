@@ -8,7 +8,10 @@ import java.util.Set;
 public class FoundationPoseTools
 {
    private static final Map<String, String> YOLO_CLASS_TO_OBJECT_MESH_MAP
-         = Map.of("bottle", "mustard0.obj");
+         = Map.of("bottle", "mustard0.obj",
+                  "door_panel", "DoorPanel.obj",
+                  "charge", "charge.obj",
+                  "traffic_barrier", "traffic_barrier.obj");
 
    public static Map<String, String> getYOLOClassToObjectMeshMap()
    {
