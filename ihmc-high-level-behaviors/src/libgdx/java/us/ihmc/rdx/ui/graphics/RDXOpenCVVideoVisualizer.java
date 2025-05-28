@@ -70,7 +70,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    {
       hasRenderedOne = true;
       updateImageDimensions(mat.cols(), mat.rows());
-      opencv_imgproc.cvtColor(mat, rgba8Mat, inputColorFormat);
+      opencv_imgproc.cvtColor(mat, rgba8Mat, toRGBAConversion);
    }
 
    @Override
