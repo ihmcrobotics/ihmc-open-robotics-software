@@ -28,12 +28,15 @@ class FoundationPoseWorker:
         if not self.initialized:
             print("REGISTERING", self.object_id)
             pose = self.foundation_pose.register(K=self.camera_k, rgb=self.initial_rgb, depth=self.initial_depth, ob_mask=self.initial_mask, ob_id=self.object_id)
-            self.initialized = True
+
+            # Make sure pose isn't identity (returned when register fails)
+            if not np.allclose(pose, np.eye(pose.shape[0])):
+                self.initialized = True
         else:
             print("TRACKING", self.object_id)
             pose = self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)
 
-        center_pose = pose@np.linalg.inv(self.to_origin)
+        center_pose = pose @ np.linalg.inv(self.to_origin)
 
         # TODO: Add bounding box to result
         return center_pose

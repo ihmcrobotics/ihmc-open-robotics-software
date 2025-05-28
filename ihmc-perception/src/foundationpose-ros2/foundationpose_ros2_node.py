@@ -10,8 +10,7 @@ import cv2
 from cv_bridge import CvBridge
 import trimesh
 import glob
-import threading
-import queue
+from threading import Thread, Event, Lock
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 from std_msgs.msg import String as StringMessage
@@ -70,10 +69,9 @@ class FoundationPoseROS2Node(Node):
         self.camera_position = None
         self.camera_orientation = None
 
-        self.remove_queue = queue.Queue()
-
-        self.new_depth_available = threading.Event()
-        self.new_color_available = threading.Event()
+        self.new_depth_available = Event()
+        self.new_color_available = Event()
+        self.worker_lock = Lock()
 
         # Create subscriptions to camera topics (color, depth images)
         print("Creating subscriptions...")
@@ -91,7 +89,7 @@ class FoundationPoseROS2Node(Node):
         self.result_publisher = self.create_publisher(FoundationPoseResult, RESULT_TOPIC, 10)
 
         print("Starting the process thread...")
-        self.pose_estimation_thread = threading.Thread(target=self.process, daemon=True)
+        self.pose_estimation_thread = Thread(target=self.process, daemon=True)
         self.pose_estimation_thread.start()
 
 
@@ -119,10 +117,13 @@ class FoundationPoseROS2Node(Node):
 
     def request_callback(self, request):
         print("REQUEST RECEIVED FOR", request.object_id)
+
+        # Make sure we're not already tracking the object
         if request.object_id in self.workers:
             print("Already tracking this obj")
             return
 
+        # Make sure we have the mesh for the object
         if not request.mesh_file in self.meshes:
             print("Idk this mesh file. Haven't seen anything like it:", request.mesh_file)
             return
@@ -136,21 +137,35 @@ class FoundationPoseROS2Node(Node):
         height, width = color.shape[:2]
         mask = decode_and_resize(message=request.object_mask, dsize=(width, height))
 
-        self.workers[request.object_id] = FoundationPoseWorker(
-            mesh=mesh,
-            rgb=color,
-            depth=depth,
-            mask=mask,
-            camera_k=camera_k,
-            object_id=request.object_id,
-            glctx=self.glctx
-        )
+        # Add a worker to track the object
+        try:
+            self.worker_lock.acquire()
+            self.workers[request.object_id] = FoundationPoseWorker(
+                mesh=mesh,
+                rgb=color,
+                depth=depth,
+                mask=mask,
+                camera_k=camera_k,
+                object_id=request.object_id,
+                glctx=self.glctx
+            )
+        finally:
+            self.worker_lock.release()
 
 
     def remove_callback(self, remove_target):
         print("REMOVE REQUEST RECEIVED FOR", remove_target.data)
-        if remove_target.data in self.workers:
-            self.remove_queue.put(remove_target.data)
+
+        # Make sure the remove target exists
+        if not remove_target.data in self.workers:
+            return
+
+        # Remove the requested worker
+        try:
+            self.worker_lock.acquire()
+            del self.workers[remove_target.data]
+        finally:
+            self.worker_lock.release()
 
 
     def process(self):
@@ -160,16 +175,21 @@ class FoundationPoseROS2Node(Node):
             self.new_color_available.wait()
             self.new_depth_available.wait()
 
-            # Remove workers requested on the remove topic
-            while not self.remove_queue.empty():
-                remove_target = self.remove_queue.get()
-                if remove_target in self.workers:
-                    del self.workers[remove_target]
+            # Update each worker and record results
+            results = {}
+            try:
+                self.worker_lock.acquire()
+                for object_id, worker in self.workers.items():
+                    pose = worker.update(self.rgb, self.depth)
+                    results[object_id] = pose
+            finally:
+                self.worker_lock.release()
 
-            # Update each worker and publish the result pose
-            for object_id, worker in self.workers.items():
-                pose = worker.update(self.rgb, self.depth)
+            self.new_color_available.clear()
+            self.new_depth_available.clear()
 
+            # Publish all the results
+            for object_id, pose in results.items():
                 # Get the position and rotation (Z forward, Y up)
                 position = pose[:3, 3]
                 rotation_matrix = pose[:3, :3]
@@ -196,9 +216,6 @@ class FoundationPoseROS2Node(Node):
                 result.object_pose.orientation.w = quaternion[3]
 
                 self.result_publisher.publish(result)
-
-            self.new_color_available.clear()
-            self.new_depth_available.clear()
 
 
 def main():
