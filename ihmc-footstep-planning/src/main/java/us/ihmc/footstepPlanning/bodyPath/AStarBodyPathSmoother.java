@@ -23,7 +23,8 @@ import java.util.stream.Collectors;
 
 public class AStarBodyPathSmoother
 {
-   static final int maxPoints = 80;
+   private static final boolean OVERRIDE_COMPUTE_TRAVERSABILITY = false;
+   static final int maxPoints = 120;
    static final double gradientEpsilon = 1e-6;
 
    static final int minIterations = 20;
@@ -33,7 +34,7 @@ public class AStarBodyPathSmoother
    static final double traversibilitySampleWindowX = 0.2;
    static final double traversibilitySampleWindowY = 0.14;
 
-   static final int iterations = 120;
+   static final int iterations = 20;
 
    static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
@@ -118,7 +119,7 @@ public class AStarBodyPathSmoother
          waypoints[i].setNeighbors(waypoints);
       }
 
-      if (heightMapData != null)
+      if (OVERRIDE_COMPUTE_TRAVERSABILITY && heightMapData != null)
       {
          double patchWidth = 0.7;
          leastSquaresNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
@@ -149,16 +150,16 @@ public class AStarBodyPathSmoother
          {
             computeSmoothenessGradient(waypointIndex, gradients[waypointIndex]);
 
-//            Tuple3DReadOnly displacementGradient = waypoints[waypointIndex].computeDisplacementGradient();
-//            gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
+            Tuple3DReadOnly displacementGradient = waypoints[waypointIndex].computeDisplacementGradient();
+            gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
          }
 
          if (heightMapData != null)
          {
-            for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
-            {
-               waypoints[waypointIndex].computeCurrentTraversibility();
-            }
+//            for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
+//            {
+//               waypoints[waypointIndex].computeCurrentTraversibility();
+//            }
 
             for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
             {
@@ -167,8 +168,8 @@ public class AStarBodyPathSmoother
                maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
 
                /* Traversibility gradient */
-               Tuple3DReadOnly traversibilityGradient = waypoints[waypointIndex].computeTraversibilityGradient();
-               gradients[waypointIndex].sub(traversibilityGradient.getX(), traversibilityGradient.getY());
+//               Tuple3DReadOnly traversibilityGradient = waypoints[waypointIndex].computeTraversibilityGradient();
+//               gradients[waypointIndex].sub(traversibilityGradient.getX(), traversibilityGradient.getY());
 
                if (waypoints[waypointIndex].isTurnPoint())
                {
@@ -176,22 +177,22 @@ public class AStarBodyPathSmoother
                }
 
                /* Ground plane gradient */
-               Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradient();
-               gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
+//               Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradient();
+//               gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
 
                /* Roll-z gradient */
-               Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(heightMapData);
-               gradients[waypointIndex - 1].sub(rollGradient);
-               gradients[waypointIndex + 1].add(rollGradient);
+//               Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(heightMapData);
+//               gradients[waypointIndex - 1].sub(rollGradient);
+//               gradients[waypointIndex + 1].add(rollGradient);
 
-               if (visualize)
-               {
-                  waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
-                  if (waypointIndex + 1 != pathSize - 1)
-                  {
-                     waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
-                  }
-               }
+//               if (visualize)
+//               {
+//                  waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
+//                  if (waypointIndex + 1 != pathSize - 1)
+//                  {
+//                     waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
+//                  }
+//               }
             }
 
             double gradientMagnitudeSq = 0.0;
@@ -206,10 +207,12 @@ public class AStarBodyPathSmoother
             }
          }
 
+         double gain = 0.001;
+
          for (int j = 1; j < pathSize - 1; j++)
          {
-            waypoints[j].getPosition().subX(plannerParameters.getSmootherHillClimbGain() * gradients[j].getX());
-            waypoints[j].getPosition().subY(plannerParameters.getSmootherHillClimbGain() * gradients[j].getY());
+            waypoints[j].getPosition().subX(gain * gradients[j].getX());
+            waypoints[j].getPosition().subY(gain * gradients[j].getY());
          }
 
          for (int j = 1; j < pathSize - 1; j++)

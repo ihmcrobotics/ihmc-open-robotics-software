@@ -83,7 +83,7 @@ public class PlanThenSnapPlanner
 
          DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
          FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, internalEnvironmentHandler, snapHeightThreshold, minSurfaceIncline);
-         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData, snapHeightThreshold, minSurfaceIncline);
+//         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData, snapHeightThreshold, minSurfaceIncline);
          ConvexPolygon2D footHold = snapData.getCroppedFoothold();
          solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
 

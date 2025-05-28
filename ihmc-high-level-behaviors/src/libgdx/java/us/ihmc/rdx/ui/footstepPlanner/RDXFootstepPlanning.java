@@ -174,9 +174,6 @@ public class RDXFootstepPlanning
 
       footstepPlannerRequest.setPlanBodyPath(locomotionParameters.getPlanWithBodyPath());
 
-      // Temp for ONR demo, only plan on flat ground for footstep portion
-      footstepPlanner.setOverrideFlatGround(true);
-
       // If we are not planning the body path,
       // for teleoperation we usually want to stay facing the direction of the goal pose.
       // TODO: Add options and control over this, ideally via the gizmo or context menu
