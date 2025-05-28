@@ -96,6 +96,14 @@ public class FoundationPoseManager
       publishRequest(newestDetection);
    }
 
+   public void remove(PersistentDetection detection)
+   {
+      if (!FoundationPoseInstantDetection.class.equals(detection.getInstantDetectionClass()))
+         return;
+
+      remove(detection.getDetectedObjectName());
+   }
+
    public void remove(String objectId)
    {
       removeMessage.setData(objectId);
@@ -136,7 +144,7 @@ public class FoundationPoseManager
       opencv_imgcodecs.imencode(PNG, mask.getCpuImageMat(), encodedMask);
 
       // Pack and publish request
-      String objectId = yoloDetection.getDetectedObjectName() + ID.getAndIncrement();
+      String objectId = yoloDetection.getDetectedObjectName() + "_fp_" + ID.getAndIncrement();
       String meshFile = FoundationPoseTools.getYOLOClassToObjectMeshMap().get(yoloDetection.getDetectedObjectClass());
 
       requestMessage.setObjectId(objectId);

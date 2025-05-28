@@ -2,7 +2,6 @@ package us.ihmc.perception.detections;
 
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Node;
 
@@ -23,7 +22,8 @@ public class DetectionManager
    private final Set<PersistentDetection> persistentDetections = new HashSet<>();
    /** Set of detections that have become valid for the first time. Only accessed by the SceneGraph*/
    private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
-   private final List<Consumer<PersistentDetection>> newlyValidDetectionConsumers = new ArrayList<>();
+   private final List<Consumer<PersistentDetection>> newlyValidDetectionCallbacks = new ArrayList<>();
+   private final List<Consumer<PersistentDetection>> detectionRemovedCallbacks = new ArrayList<>();
    private final Object persistentDetectionsLock = new Object();
 
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
@@ -114,9 +114,14 @@ public class DetectionManager
       }
    }
 
-   public void addNewlyValidDetectionConsumer(Consumer<PersistentDetection> consumer)
+   public void addNewlyValidDetectionCallback(Consumer<PersistentDetection> callback)
    {
-      newlyValidDetectionConsumers.add(consumer);
+      newlyValidDetectionCallbacks.add(callback);
+   }
+
+   public void addDetectionRemovedCallback(Consumer<PersistentDetection> callback)
+   {
+      detectionRemovedCallbacks.add(callback);
    }
 
    public <T extends InstantDetection> List<PersistentDetection> updateAndGetDetectionsOfType(Class<T> classType)
@@ -178,6 +183,7 @@ public class DetectionManager
             PersistentDetection detection = detectionIterator.next();
             if (detection.isReadyForDeletion())
             {
+               detectionRemovedCallbacks.forEach(callback -> callback.accept(detection));
                detection.destroy();
                detectionIterator.remove();
             }
@@ -188,7 +194,7 @@ public class DetectionManager
                {
                   detection.setStabilityConfidenceThreshold(settings.getStabilityAverageConfidence());
                   newlyValidDetections.add(detection);
-                  newlyValidDetectionConsumers.forEach(consumer -> consumer.accept(detection));
+                  newlyValidDetectionCallbacks.forEach(callback -> callback.accept(detection));
                }
             }
          }
