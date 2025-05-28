@@ -22,15 +22,11 @@ import sys
 
 # Example usage:
 print(" Calling the LLM ")
-llm = LLMInterface(config_file="config.json")
+llm = LLMInterface(config_file="config_obj_identifier.json")
 
 ros2 = {}
 initialized = False
 waiting_for_command = True
-
-# Store the list of behaviors to execute in sequence
-behavior_queue = []
-current_behavior_index = 0
 
 # Set counter to count the number of times LLM is called
 llm_call_counter = 0
@@ -39,11 +35,7 @@ def behavior_message_callback(msg):
     #print("Received AI2R Status Message")
     global initialized  # Access the global variables
     global waiting_for_command
-    global behavior_queue
-    global current_behavior_index
     global llm_call_counter
-
-    robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
         # --------- Scene -----------
@@ -61,47 +53,14 @@ def behavior_message_callback(msg):
         scene_objects_names = [obj.object_name for obj in msg.objects]
         scene_objects_poses = [obj.object_pose_in_world for obj in msg.objects]
         scene_objects_positions = [pose.position for pose in scene_objects_poses]
-
-        # --------- Behaviors -----------
-        behaviors = msg.available_behaviors
-  
-        # Get available behaviors
-        available_behaviors = msg.available_behaviors
+        robot_position = msg.robot_mid_feet_under_pelvis_pose_in_world.position
 
         # Completed and failed behaviors
         behavior_in_progress = msg.behavior_in_progress
-        completed_behavior = msg.completed_behavior
-        failed_behavior = msg.failed_behavior
-        failure = msg.failure
 
         waiting_for_command = False
         if msg.behavior_in_progress == "-":
             waiting_for_command  = True
-
-        if completed_behavior and completed_behavior != "-":
-            print(f"Completed Behavior: {completed_behavior}")
-
-        if failed_behavior != "-":
-            print("[FAILURE] -----------")
-            print("Failed behavior: " + failed_behavior)
-            # # Failure details
-            # print("Name: " + failure.action_name)
-            # print("Type: " + failure.action_type)
-            # print("Frame: " + failure.action_frame)
-            # print("Missing Frame: " + str(failure.missing_frame))
-            # print("Navigation Collision Frame Name: " + failure.collision_name)
-
-            position_error = failure.position_error
-            # Convert Point to numpy array
-            error_vector = np.array([position_error.x, position_error.y, position_error.z])
-            # Calculate the Euclidean norm (L2 norm)
-            norm = np.linalg.norm(error_vector)
-#             print(f"The position error is: {norm}")
-            orientation_error = failure.orientation_error
-
-            position_tolerance = failure.position_tolerance
-            orientation_tolerance = failure.orientation_tolerance
-#             print("----------[FAILURE]")
 
         # Construct input for LLM decision-making
         llm_input = {
@@ -136,36 +95,13 @@ def behavior_message_callback(msg):
                 spatial_relation=lines[3],
                 scene_object_names=scene_objects_names,
                 scene_object_positions=scene_objects_positions,
+                robot_pose=robot_position,
                 spatial_context_object=lines[2])
 
             print(selected_object)
 
             # Increment the LLM call counter
             llm_call_counter += 1
-
-            next_behavior   = response.strip()
-            # # Extract content after the last </think>
-            # match = re.search(r'</think>(.*)$', response, re.DOTALL)
-            # if match:
-            #     next_behavior = match.group(1).strip()
-            # else:
-            #     next_behavior = response.strip()
-
-        # Check if the LLM suggests a valid action
-        if waiting_for_command:
-            if (next_behavior in available_behaviors):
-                print("LLM Response:", next_behavior)
-                # Execute the suggested behavior
-                behavior_command = AI2RCommandMessage()
-                behavior_command.behavior_to_execute = next_behavior
-                print(f"Commanded Behavior: {next_behavior}")
-                ros2["behavior_publisher"].publish(behavior_command)
-                waiting_for_command = False
-                current_behavior_index += 1  # Move to the next behavior in the queue
-
-            else:
-                sys.exit(1)
-                print("[WARNING] LLM suggested an invalid action or no action needed.")
 
 def point_to_numpy(point: Point) -> np.ndarray:
     """Convert geometry_msgs/Point to numpy array"""
@@ -226,8 +162,8 @@ def select_target_object(
         return None
 
     if spatial_context_object == "-":
-        spatial_context_object = "robot"
-    ctx_pose = get_pose_by_name(spatial_context_object, scene_object_names, scene_object_positions) if spatial_context_object else None
+        spatial_context_object = "Robot"
+    ctx_pose = get_pose_by_name(spatial_context_object, scene_object_names, scene_object_positions, robot_pose) if spatial_context_object else None
 
     # Handle DEFAULT relation
     if spatial_relation == "DEFAULT":
@@ -258,10 +194,10 @@ def select_target_object(
         elif spatial_relation == "FRONT":
             if np.dot(offset, dir_norm) > 0.7:
                 qualified.append((name, np.linalg.norm(offset)))
-        elif spatial_relation == "LEFT":
+        elif spatial_relation == "RIGHT":
             if np.dot(offset, left_vec) > 0.7:
                 qualified.append((name, np.linalg.norm(offset)))
-        elif spatial_relation == "RIGHT":
+        elif spatial_relation == "LEFT":
             if np.dot(offset, left_vec) < -0.7:
                 qualified.append((name, np.linalg.norm(offset)))
 

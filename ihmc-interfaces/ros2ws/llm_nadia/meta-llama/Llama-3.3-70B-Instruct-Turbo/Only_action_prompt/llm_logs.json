@@ -1,0 +1,2510 @@
+[
+    {
+        "timestamp": "2025-05-27T16:20:55.800859",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "You serve as an AI-powered decision module for a robot operating in dynamic, partially observable environments. Your primary function is to resolve referential ambiguity when interacting with objects that share these properties:\n\n    Naming Convention: Objects are uniquely identified as NAME+ORDINAL (e.g., \"PERSON1\" or \"CHARGE3\").\n\n    Contextual Selection: When multiple objects with identical NAME but distinct ORDINAL identifiers exist in the environment, you must determine which specific instance (ORDINAL) the robot should interact with. \n\nYour input is required only when multiple NAMEORDINAL objects share the same NAME (e.g., \"CUP1\", \"CUP2\").\n\nUse available environmental data (e.g., spatial relationships, historical interactions, task goals) to infer the correct ORDINAL.\n\nPrioritize logical consistency with the robot's current task and observable context\n\n Do not explain or include any code. Return: ORDINAL",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind to the person behind the barrier"
+    },
+    {
+        "prompt": "Go behind to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8803427428267527, y=2.476369999855335, z=1.3319999446666835), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.724718074443342, w=0.6890455083484216)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.6362427428317006, y=2.5362399998755074, z=-5.5333316567596214e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.67781738051963, w=0.7352303031469167)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=3.0657127423923387, y=-2.780280000242625, z=-5.5333316567596214e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.9570885556360725, w=0.2897956118895806)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.5384872572160891, y=1.957960000055229, z=-5.5333316567596214e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7407904104288277, w=0.6717362338125652)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.9594872572394525, y=1.675250000090021, z=0.9366499446666834), orientation=geometry_msgs.msg.Quaternion(x=0.009477433760570218, y=-0.00934699698331767, z=-0.7119281688534759, w=0.7021261242039386)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8183827426221035, y=-1.3954443754579624e-10, z=-5.5333316567596214e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6844199936959044, w=0.7290879729012804)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8772227426211128, y=-0.011990000144407023, z=0.7990699446666834), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790825837, w=0.6942284940412105))]}",
+        "output": "2"
+    },
+    {
+        "timestamp": "2025-05-27T16:22:01.867466",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "You serve as an AI-powered decision module for a robot operating in dynamic, partially observable environments. Your primary function is to resolve referential ambiguity when interacting with objects that share these properties:\n\n    Naming Convention: Objects are uniquely identified as NAME+ORDINAL (e.g., \"PERSON1\" or \"CHARGE3\").\n\n    Contextual Selection: When multiple objects with identical NAME but distinct ORDINAL identifiers exist in the environment, you must determine which specific instance (ORDINAL) the robot should interact with. \n\nYour input is required only when multiple NAMEORDINAL objects share the same NAME (e.g., \"CUP1\", \"CUP2\").\n\nUse available environmental data (e.g., spatial relationships, historical interactions, task goals) to infer the correct ORDINAL.\n\nPrioritize logical consistency with the robot's current task and observable context\n\n Do not explain or include any code. Return: ORDINAL",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind to the person behind the barrier"
+    },
+    {
+        "prompt": "Go behind to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8803427428251773, y=2.4763699998568622, z=1.3319999446666217), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7247180744431134, w=0.689045508348662)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.6362427428300854, y=2.5362399998768725, z=-5.5333378226607444e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.677817380519874, w=0.7352303031466919)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=3.0657127423942505, y=-2.7802800002403116, z=-5.5333378226607444e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.9570885556361688, w=0.2897956118892631)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.5384872572173204, y=1.9579600000551518, z=-5.5333378226607444e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7407904104286049, w=0.6717362338128109)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.9594872572404963, y=1.6752500000896644, z=0.9366499446666218), orientation=geometry_msgs.msg.Quaternion(x=0.009477433760573317, y=-0.009346996983314525, z=-0.7119281688532428, w=0.7021261242041748)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8183827426221706, y=-1.3805861292893545e-10, z=-5.5333378226607444e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.684419993696146, w=0.7290879729010535)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8772227426211876, y=-0.011990000142882174, z=0.7990699446666217), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790823535, w=0.6942284940414492))]}",
+        "output": "2"
+    },
+    {
+        "timestamp": "2025-05-27T16:23:06.501724",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "You serve as an AI-powered decision module for a robot operating in dynamic, partially observable environments. Your primary function is to resolve referential ambiguity when interacting with objects that share these properties:\n\n    Naming Convention: Objects are uniquely identified as NAME+ORDINAL (e.g., \"PERSON1\" or \"CHARGE3\").\n\n    Contextual Selection: When multiple objects with identical NAME but distinct ORDINAL identifiers exist in the environment, you must determine which specific instance (ORDINAL) the robot should interact with. \n\nYour input is required only when multiple NAMEORDINAL objects share the same NAME (e.g., \"CUP1\", \"CUP2\").\n\nUse available environmental data (e.g., spatial relationships, historical interactions, task goals) to infer the correct ORDINAL.\n\nPrioritize logical consistency with the robot's current task and observable context\n\n Do not explain or include any code. Return: ORDINAL",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind to the person behind the barrier"
+    },
+    {
+        "prompt": "Go behind to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8803427428267305, y=2.4763699998551973, z=1.3319999446668054), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7247180744433231, w=0.6890455083484414)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.636242742831675, y=2.5362399998753564, z=-5.53331946789859e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6778173805196501, w=0.7352303031468983)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=3.065712742392602, y=-2.780280000242698, z=-5.53331946789859e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.9570885556360804, w=0.2897956118895546)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.5384872572160833, y=1.9579600000549597, z=-5.53331946789859e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7407904104288094, w=0.6717362338125853)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.9594872572394312, y=1.6752500000897288, z=0.9366499446668053), orientation=geometry_msgs.msg.Quaternion(x=0.009477433760570472, y=-0.009346996983317413, z=-0.7119281688534568, w=0.7021261242039579)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8183827426222157, y=-1.3968573312646862e-10, z=-5.53331946789859e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6844199936959242, w=0.7290879729012618)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8772227426212253, y=-0.011990000144545125, z=0.7990699446668053), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790825649, w=0.69422849404123))]}",
+        "output": "2"
+    },
+    {
+        "timestamp": "2025-05-27T16:40:28.358939",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\n\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\n\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nInput Format\n\nYour input will include:\n\n    Base name of the target object (e.g., \"Person\")\n\n    Reference object with its full ordinal identifier (e.g., \"DoorPanel1\")\n\n    Spatially related object (e.g., \"wall\")\n\n    Spatial relation (e.g., \"behind\")\n\nContextual Selection Criteria\n\nWhen multiple objects share the same base name (e.g., Cup1, Cup2), analyze environmental data\u2014such as spatial relationships, task objectives, and interaction history\u2014to infer the correct ordinal identifier. Prioritize choices that align logically with the robot\u2019s immediate task and observable context.\nOutput\n\nReturn only the ordinal number (e.g., 2) when ambiguity exists. No explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Given a natural language instruction, extract and present the following information in this format:\n\n    Base name of the target object (e.g., \"Person\")\n\n    Reference object with its full ordinal identifier (e.g., \"DoorPanel1\")\n\n    Spatially related object (e.g., \"wall\")\n\n    Spatial relation (e.g., \"behind\")\n\nNext, based on the system prompt, output only the ORDINAL of the object being referred to.\n\nTo assist you in making this selection, you will be provided with:\n\n    A list of scene object names (e.g., 'scene_object_names': ['DoorPullHandle1', ...])\n\n    A list of their poses relative to the robot (e.g., 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.88, y=2.47, z=1.33), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.72, w=0.68)), ...])\n\nUse this information to accurately identify and return the correct ORDINAL."
+    },
+    {
+        "prompt": "Given a natural language instruction, extract and present the following information in this format:\n\n    Base name of the target object (e.g., \"Person\")\n\n    Reference object with its full ordinal identifier (e.g., \"DoorPanel1\")\n\n    Spatially related object (e.g., \"wall\")\n\n    Spatial relation (e.g., \"behind\")\n\nNext, based on the system prompt, output only the ORDINAL of the object being referred to.\n\nTo assist you in making this selection, you will be provided with:\n\n    A list of scene object names (e.g., 'scene_object_names': ['DoorPullHandle1', ...])\n\n    A list of their poses relative to the robot (e.g., 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.88, y=2.47, z=1.33), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.72, w=0.68)), ...])\n\nUse this information to accurately identify and return the correct ORDINAL. {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.880342742823488, y=2.476369999857228, z=1.3319999446665916), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7247180744428402, w=0.6890455083489494)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.6362427428283486, y=2.536239999877045, z=-5.533340856345159e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6778173805201655, w=0.7352303031464231)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=3.0657127423967316, y=-2.780280000239005, z=-5.533340856345159e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.9570885556362837, w=0.28979561188888353)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.5384872572185985, y=1.9579600000535986, z=-5.533340856345159e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7407904104283385, w=0.6717362338131047)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.9594872572415499, y=1.675250000087777, z=0.9366499446665915), orientation=geometry_msgs.msg.Quaternion(x=0.009477433760577025, y=-0.009346996983310768, z=-0.7119281688529645, w=0.7021261242044571)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.818382742622446, y=-1.377419248727244e-10, z=-5.533340856345159e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6844199936964352, w=0.729087972900782)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8772227426214725, y=-0.011990000142518803, z=0.7990699446665914), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790820781, w=0.6942284940417346))]}",
+        "output": "Base name of the target object: Person\nReference object with its full ordinal identifier: DoorPanel1\nSpatially related object: wall\nSpatial relation: behind\n\n2"
+    },
+    {
+        "timestamp": "2025-05-27T16:42:24.421388",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\n\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\n\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nInput Format\n\nYour input will include:\n\n    Base name of the target object (e.g., \"Person\")\n\n    Reference object with its full ordinal identifier (e.g., \"DoorPanel1\")\n\n    Spatially related object (e.g., \"wall\")\n\n    Spatial relation (e.g., \"behind\")\n\nContextual Selection Criteria\n\nWhen multiple objects share the same base name (e.g., Cup1, Cup2), analyze environmental data\u2014such as spatial relationships, task objectives, and interaction history\u2014to infer the correct ordinal identifier. Prioritize choices that align logically with the robot\u2019s immediate task and observable context.\nOutput\n\nReturn only the ordinal number (e.g., 2) when ambiguity exists. No explanations or code are permitted.\n\nGiven a natural language instruction, extract and present the following information in this format:\n\n    Base name of the target object (e.g., \"Person\")\n\n    Reference object with its full ordinal identifier (e.g., \"DoorPanel1\")\n\n    Spatially related object (e.g., \"wall\")\n\n    Spatial relation (e.g., \"behind\")\n\nNext, based on the system prompt, output only the ORDINAL of the object being referred to.\n\nTo assist you in making this selection, you will be provided with:\n\n    A list of scene object names (e.g., 'scene_object_names': ['DoorPullHandle1', ...])\n\n    A list of their poses relative to the robot (e.g., 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.88, y=2.47, z=1.33), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.72, w=0.68)), ...])\n\nUse this information to accurately identify and return the correct ORDINAL.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from  the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from  the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_poses': [geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8803427428266963, y=2.476369999854816, z=1.3319999446669102), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7247180744433167, w=0.6890455083484481)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.6362427428316397, y=2.53623999987497, z=-5.533308987393237e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6778173805196568, w=0.735230303146892)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=3.065712742392666, y=-2.7802800002430574, z=-5.533308987393237e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.9570885556360832, w=0.2897956118895456)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.5384872572161076, y=1.9579600000545327, z=-5.533308987393237e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.740790410428803, w=0.6717362338125923)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=-0.9594872572394504, y=1.6752500000892938, z=0.9366499446669101), orientation=geometry_msgs.msg.Quaternion(x=0.009477433760570558, y=-0.009346996983317323, z=-0.7119281688534502, w=0.7021261242039646)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8183827426222279, y=-1.4006866306606746e-10, z=-5.533308987393237e-08), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.684419993695931, w=0.7290879729012554)), geometry_msgs.msg.Pose(position=geometry_msgs.msg.Point(x=1.8772227426212378, y=-0.011990000144926953, z=0.7990699446669101), orientation=geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790825583, w=0.6942284940412368))]}",
+        "output": "Base name of the target object: Person\nReference object with its full ordinal identifier: DoorPanel1\nSpatially related object: Barrier\nSpatial relation: behind\n\n2"
+    },
+    {
+        "timestamp": "2025-05-27T17:45:41.855780",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nContextual Selection Criteria\nWhen multiple objects share the same base name (e.g., Cup1, Cup2), analyze environmental data\u2014such as spatial relationships, task objectives, and interaction history\u2014to infer the correct ordinal identifier. Prioritize choices that align logically with the robot\u2019s immediate task and observable context.\nOutput\nReturn only the ordinal number (e.g., 4) when ambiguity exists. No explanations or code are permitted.\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Person\")\n    Reference object with its full ordinal identifier (e.g., \"Barrier1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNext, based on the system prompt, output only the ORDINAL of the object being referred to.\nTo help you make this selection, you will be given:\n    A list of scene object names (e.g., 'scene_object_names': ['DoorPullHandle1', ...])\n    A list of their positions in the WORLD frame (e.g., 'scene_objects_positions': [(x=1.88, y=2.47, z=1.33), ...])\n    The position of the robot in the WORLD frame (useful only if the reference object is the robot)\nUse this information to identify and return the correct ORDINAL.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_positions': [(1.83381, 2.47637, 1.332), (1.58971, 2.53624, 0.0), (1.9721763798879937, -0.7479968482556529, -4.01574095246138e-18), (-0.58502, 1.95796, 0.0), (-1.00602, 1.67525, 0.93665), (1.77185, 0.0, 0.0), (1.83069, -0.01199, 0.79907)], 'robot_position': [-0.046532742622060405, -1.1031870900092036e-11, 5.533357834430763e-08]}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND\n2"
+    },
+    {
+        "timestamp": "2025-05-27T18:00:41.417443",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nContextual Selection Criteria\nWhen multiple objects share the same base name (e.g., Cup1, Cup2), analyze environmental data\u2014such as spatial relationships, task objectives, and interaction history\u2014to infer the correct ordinal identifier. Prioritize choices that align logically with the robot\u2019s immediate task and observable context.\nOutput\nReturn only the ordinal number (e.g., 4) when ambiguity exists. No explanations or code are permitted.\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNext, based on the system prompt, output only the ORDINAL of the object being referred to.\nTo help you make this selection, you will be given:\n    A list of scene object names (e.g., 'scene_object_names': ['DoorPullHandle1', ...])\n    A list of their positions in the WORLD frame (e.g., 'scene_objects_positions': [(x=1.88, y=2.47, z=1.33), ...])\n    The position of the robot in the WORLD frame (useful only if the reference object is the robot)\nFor each object name in the list you should check its position in its corresponding index in the list of object positions. \nTo know which object we are referring to (e.g. \"Cup1\" or \"Cup2\"), you need to check which position best satisfies the spatial constraint.\nUse this information to identify and return the correct ORDINAL.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_positions': [(1.83381, 2.47637, 1.332), (1.58971, 2.53624, 0.0), (1.9721763798879937, -0.7479968482556529, -4.01574095246138e-18), (-0.58502, 1.95796, 0.0), (-1.00602, 1.67525, 0.93665), (1.77185, 0.0, 0.0), (1.83069, -0.01199, 0.79907)], 'robot_position': [-0.04653274262206174, -1.0802622014716704e-11, 5.533324359818792e-08]}",
+        "output": "Person\nDoorPanel1\nBarrier1\nBEHIND\n2"
+    },
+    {
+        "timestamp": "2025-05-28T09:34:54.752558",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_positions': [(1.83381, 2.47637, 1.332), (1.58971, 2.53624, 0.0), (1.97218, -0.748, 0.0), (-0.58502, 1.95796, 0.0), (-1.00602, 1.67525, 0.93665), (1.77185, 0.0, 0.0), (1.83069, -0.01199, 0.79907)], 'robot_position': [-0.04653275628832229, -1.1986384529188002e-11, 5.5319087324812166e-08]}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T09:36:49.385537",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2'], 'scene_objects_positions': [(1.83381, 2.47637, 1.332), (1.58971, 2.53624, 0.0), (1.97218, -0.748, 0.0), (-0.58502, 1.95796, 0.0), (-1.00602, 1.67525, 0.93665), (1.77185, 0.0, 0.0), (1.83069, -0.01199, 0.79907)], 'robot_position': [-0.046532742622226037, -1.0435407341144784e-11, 5.533339263175119e-08]}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:10:43.136441",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:11:57.249546",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "timestamp": "2025-05-28T10:12:12.503707",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "timestamp": "2025-05-28T10:12:30.818298",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:13:17.680910",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:13:58.981200",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:19:53.281817",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:20:09.348315",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:20:17.215448",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:33:25.903729",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind the last person behind the barrier"
+    },
+    {
+        "prompt": "Go behind the last person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier2\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:34:10.793019",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind the first person behind the barrier"
+    },
+    {
+        "prompt": "Go behind the first person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:35:41.993336",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind the first person behind the barrier"
+    },
+    {
+        "prompt": "Go behind the first person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:35:54.902803",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind the first person behind the barrier"
+    },
+    {
+        "prompt": "Go behind the first person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:36:08.048635",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go behind the first person behind the barrier"
+    },
+    {
+        "prompt": "Go behind the first person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:38:01.545428",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the door"
+    },
+    {
+        "prompt": "Go to the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Door\n-\n-\nDEFAULT"
+    },
+    {
+        "timestamp": "2025-05-28T10:40:41.382110",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door"
+    },
+    {
+        "prompt": "Go to the person behind the barrier, behind defined from the perspective of the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\nDoorPanel1\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T10:42:08.810457",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the door"
+    },
+    {
+        "prompt": "Go to the door {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Door\n-\n-\nDEFAULT"
+    },
+    {
+        "timestamp": "2025-05-28T10:42:21.528968",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the door"
+    },
+    {
+        "timestamp": "2025-05-28T10:42:43.695641",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the door panel"
+    },
+    {
+        "prompt": "Go to the door panel {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "DoorPanel\n-\n-\nDEFAULT"
+    },
+    {
+        "timestamp": "2025-05-28T11:22:57.354828",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:27:27.287246",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:27:43.654080",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:28:24.387462",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:29:18.120535",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:30:36.354517",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:31:04.420562",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:31:33.487259",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:32:53.120697",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:33:25.120617",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:33:51.554010",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:34:08.553853",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:34:41.720677",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:36:44.287433",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:37:06.620766",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:38:44.920665",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:39:01.122425",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:42:21.184784",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the right of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "prompt": "Go to the person to the right of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nRIGHT"
+    },
+    {
+        "timestamp": "2025-05-28T11:42:30.684640",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the left of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "timestamp": "2025-05-28T11:42:58.184861",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T11:43:17.251137",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person in front of the barrier"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "timestamp": "2025-05-28T11:43:50.118295",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person behind the barrier"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "prompt": "Go to the person behind the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nBEHIND"
+    },
+    {
+        "timestamp": "2025-05-28T11:44:39.984594",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person in front of the barrier"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "prompt": "Go to the person in front of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nFRONT"
+    },
+    {
+        "timestamp": "2025-05-28T11:45:10.784715",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the left of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "timestamp": "2025-05-28T12:02:36.719402",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting the right object",
+        "system_prompt": "Role\nYou function as an AI decision module for robots operating in dynamic, partially observable environments. Your core task is resolving referential ambiguities during object interactions.\nNaming Convention\nAll objects are uniquely identified by combining their base name with an ordinal suffix (e.g., Person1, Charge3).\nOutput\nGiven a natural language instruction, extract and present the following information in this format:\n    Base name of the target object (e.g., \"Cup\")\n    Reference object with its full ordinal identifier (e.g., \"Couch1\" or \"-\" if not specified)\n    Spatially related object with its full ordinal identifier (e.g., \"Wall1\" or \"-\" if not specified)\n    Spatial relation, all uppercase (this will be either \"BEHIND\", \"FRONT\", \"RIGHT\", \"LEFT\", or \"DEFAULT\" if not specified)\nNo explanations or code are permitted.",
+        "prompt_type": "Only_action_prompt",
+        "prompt": "Go to the person to the left of the barrier"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    },
+    {
+        "prompt": "Go to the person to the left of the barrier {'scene_objects_names': ['DoorPullHandle1', 'DoorPanel1', 'Person1', 'Person2', 'Charge1', 'Barrier1', 'Barrier2']}",
+        "output": "Person\nBarrier1\n-\nLEFT"
+    }
+]

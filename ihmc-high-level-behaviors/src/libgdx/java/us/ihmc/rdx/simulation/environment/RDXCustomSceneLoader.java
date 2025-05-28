@@ -40,8 +40,8 @@ public class RDXCustomSceneLoader
                                                              new Point3D(1.58971, 2.53624, 0.00)));
 
             addNode("Person", 1);
-            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(146.30856), 0.0, 0.0),
-                                                          new Point3D(3.01918, -2.78028, 0.00)));
+            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(179.76236), 0.0, 0.0),
+                                                          new Point3D(1.97218, -0.74800, 0.00)));
 
             addNode("Person", 2);
             setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-95.59758), 0.0, 0.0),
