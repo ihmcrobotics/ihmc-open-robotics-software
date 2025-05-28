@@ -222,7 +222,7 @@ public class AStarBodyPathSmoother
 
          if (iteration.getValue() == turnPointIteration)
          {
-            computeTurnPoints();
+//            computeTurnPoints();
          }
 
          if (visualize)

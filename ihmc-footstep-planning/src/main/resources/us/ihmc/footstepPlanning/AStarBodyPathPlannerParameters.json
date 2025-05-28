@@ -49,11 +49,11 @@
     "The max incline, in degrees, that is allowed for the body path planner to traverse."
   ],
   "Collision box size Y": [
-    2.0,
+    1.6,
     "Width of the collision box used for checking collisions with the environment."
   ],
   "Collision box size X": [
-    1.0,
+    0.8,
     "Depth of the collision box used for checking collisions with the environment."
   ],
   "Collision box ground clearance": [

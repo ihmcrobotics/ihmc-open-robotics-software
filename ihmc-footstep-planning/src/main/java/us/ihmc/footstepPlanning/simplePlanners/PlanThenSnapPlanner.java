@@ -25,6 +25,7 @@ public class PlanThenSnapPlanner
    private HeightMapData heightMapData;
    private final HeightMapPolygonSnapper snapper;
    private final HeightMapSnapWiggler wiggler;
+   private final FramePose3D stanceFootPose = new FramePose3D();
 
    public PlanThenSnapPlanner(DefaultFootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
@@ -39,6 +40,7 @@ public class PlanThenSnapPlanner
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide stanceSide)
    {
       turnWalkTurnPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
+      this.stanceFootPose.set(stanceFootPose);
    }
 
    public void setGoal(FootstepPlannerGoal goal)
@@ -84,6 +86,12 @@ public class PlanThenSnapPlanner
          DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
          FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, internalEnvironmentHandler, snapHeightThreshold, minSurfaceIncline);
 //         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData, snapHeightThreshold, minSurfaceIncline);
+
+         // force flat ground
+         snapData.getSnapTransform().getRotation().setIdentity();
+         snapData.getCroppedFoothold().clear();
+         snapData.getSnapTransform().getTranslation().setZ(stanceFootPose.getZ());
+
          ConvexPolygon2D footHold = snapData.getCroppedFoothold();
          solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
 
