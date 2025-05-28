@@ -4,15 +4,19 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetEpisode;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.session.log.LogDataReader;
 
 import java.awt.*;
@@ -21,11 +25,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Supplier;
 
 public class RDXLeRobotDatasetCreator
 {
    private final RDXSCS2LogSession logSession;
-   private final RDXPanel panel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private transient final ImString datasetName = new ImString(512);
    private transient final ImString imTaskName = new ImString(512);
@@ -33,13 +37,21 @@ public class RDXLeRobotDatasetCreator
    private List<Path> datasets;
    private LeRobotDataset dataset;
    private final Queue<Runnable> frameTaskQueue = new ConcurrentLinkedQueue<>();
+   private final RDXLeRobotTestSimulator testSimulator;
 
-   public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession)
+   public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession,
+                                   RDXBaseUI baseUI,
+                                   Supplier<SCS2AvatarSimulation> simulationStarter,
+                                   Supplier<KinematicsStreamingToolboxModule> ikStreamingSupplier,
+                                   Supplier<DRCRobotModel> robotModelSupplier)
    {
       this.logSession = logSession;
 
-      panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
+      testSimulator = new RDXLeRobotTestSimulator(simulationStarter, ikStreamingSupplier, robotModelSupplier, baseUI);
+
+      RDXPanel panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
       panel.addChild(new RDXPanel("Log Scrubber", this::renderLogScrubberWidgets));
+      baseUI.getImGuiPanelManager().addPanel(panel);
 
       // Set recommended settings for generating episodes
       logSession.getSession().setBufferRecordTickPeriod(5);
@@ -52,6 +64,8 @@ public class RDXLeRobotDatasetCreator
    {
       for (int i = 0; i < 50 && !frameTaskQueue.isEmpty(); i++)
          frameTaskQueue.remove().run(); // Run n tasks per frame
+
+      testSimulator.update();
    }
 
    private void renderImGuiWidgets()
@@ -157,6 +171,8 @@ public class RDXLeRobotDatasetCreator
          {
             dataset.writeParquetData();
          }
+
+         testSimulator.renderImGuiWidgets(dataset);
       }
       else
       {
@@ -201,8 +217,13 @@ public class RDXLeRobotDatasetCreator
       datasets = LeRobotDatasetTools.findLeRobotDatasetSubdirectories(logSession.getSession().getLogDataReader().getLogDirectory().toPath());
    }
 
-   public RDXPanel getPanel()
+   public void destroy()
    {
-      return panel;
+      testSimulator.destroy();
+   }
+
+   public RDXLeRobotTestSimulator getTestSimulator()
+   {
+      return testSimulator;
    }
 }
