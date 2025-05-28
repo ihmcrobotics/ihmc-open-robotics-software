@@ -13,6 +13,9 @@ import java.util.*;
 
 public class AlexanderJointMap implements HumanoidJointNameMap
 {
+   private final boolean hasHead;
+   private final boolean hasArms;
+
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final SideDependentList<String> forearmNames = new SideDependentList<>();
    private final SideDependentList<String> footNames = new SideDependentList<>();
@@ -31,7 +34,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
    private final LegJointName[] legJoints = {LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH,
                                              LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL};
    private final SpineJointName[] spineJoints = new SpineJointName[] {SpineJointName.SPINE_YAW};//, SpineJointName.SPINE_PITCH};
-   private final NeckJointName[] neckJoints = new NeckJointName[] {NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
+   private final NeckJointName[] neckJoints;
    private final SideDependentList<ArmJointName[]> armJoints = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<>();
@@ -45,10 +48,15 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
    private final HashSet<String> lastSimulatedJoints = new HashSet<>();
 
-   public AlexanderJointMap(AlexanderPhysicalProperties alexanderPhysicalProperties, SideDependentList<AlexanderArmConfiguration> armConfigurations)
+   public AlexanderJointMap(AlexanderPhysicalProperties alexanderPhysicalProperties,
+                            SideDependentList<AlexanderArmConfiguration> armConfigurations,
+                            boolean hasHead,
+                            boolean hasArms)
    {
       this.alexanderPhysicalProperties = alexanderPhysicalProperties;
       this.armConfigurations = armConfigurations;
+      this.hasHead = hasHead;
+      this.hasArms = hasArms;
 
       List<String> jointNameList = new ArrayList<>();
       for (Joints joint : Joints.values())
@@ -59,17 +67,29 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
       jointNames = jointNameList.toArray(new String[0]);
 
-      setArmJointNames();
+      if (hasArms)
+         setArmJointNames();
+      else
+         armJoints.set(new SideDependentList<>(new ArmJointName[0], new ArmJointName[0]));
+
       setLegJointNames();
 
-      neckJointNames.put(Joints.NECK_Y.getName(), NeckJointName.DISTAL_NECK_PITCH);
-      neckJointNames.put(Joints.NECK_Z.getName(), NeckJointName.DISTAL_NECK_YAW);
-      neckJointStrings.put(NeckJointName.DISTAL_NECK_YAW, Joints.NECK_Z.getName());
-      neckJointStrings.put(NeckJointName.DISTAL_NECK_PITCH, Joints.NECK_Y.getName());
-
-      for (String neckJointString : neckJointNames.keySet())
+      if (hasHead)
       {
-         jointRoles.put(neckJointString, JointRole.NECK);
+         neckJoints = new NeckJointName[] {NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH};
+         neckJointNames.put(Joints.NECK_Y.getName(), NeckJointName.DISTAL_NECK_PITCH);
+         neckJointNames.put(Joints.NECK_Z.getName(), NeckJointName.DISTAL_NECK_YAW);
+         neckJointStrings.put(NeckJointName.DISTAL_NECK_YAW, Joints.NECK_Z.getName());
+         neckJointStrings.put(NeckJointName.DISTAL_NECK_PITCH, Joints.NECK_Y.getName());
+
+         for (String neckJointString : neckJointNames.keySet())
+         {
+            jointRoles.put(neckJointString, JointRole.NECK);
+         }
+      }
+      else
+      {
+         neckJoints = new NeckJointName[0];
       }
 
       spineJointNames.put(Joints.SPINE_Z.getName(), SpineJointName.SPINE_YAW);
@@ -82,41 +102,44 @@ public class AlexanderJointMap implements HumanoidJointNameMap
          jointRoles.put(spineJointString, JointRole.SPINE);
       }
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (hasArms)
       {
-         Joints lastSimulatedJoint = null;
-
-         if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.NUB)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_ELBOW_PITCH_LINK : Links.RIGHT_ELBOW_PITCH_LINK;
-            handNames.put(robotSide, hand.name);
+            Joints lastSimulatedJoint = null;
 
-            lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
+            if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.NUB)
+            {
+               Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_ELBOW_PITCH_LINK : Links.RIGHT_ELBOW_PITCH_LINK;
+               handNames.put(robotSide, hand.name);
 
-            handControlFrameToWristTransforms.put(robotSide, new RigidBodyTransform(new AxisAngle(), AlexanderNubHandModel.getElbowToControlFrame()));
+               lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
 
-            Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
-            nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
-         }
-         else if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.FOREARM)
-         {
-            Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_GRIPPER_Z_LINK : Links.RIGHT_GRIPPER_Z_LINK;
-            handNames.put(robotSide, hand.name);
+               handControlFrameToWristTransforms.put(robotSide, new RigidBodyTransform(new AxisAngle(), AlexanderNubHandModel.getElbowToControlFrame()));
 
-            Links forearm = robotSide == RobotSide.LEFT ? Links.LEFT_WRIST_YAW_LINK : Links.RIGHT_WRIST_YAW_LINK;
-            forearmNames.put(robotSide, forearm.name);
+               Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
+               nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
+            }
+            else if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.FOREARM)
+            {
+               Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_GRIPPER_Z_LINK : Links.RIGHT_GRIPPER_Z_LINK;
+               handNames.put(robotSide, hand.name);
 
-            lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
+               Links forearm = robotSide == RobotSide.LEFT ? Links.LEFT_WRIST_YAW_LINK : Links.RIGHT_WRIST_YAW_LINK;
+               forearmNames.put(robotSide, forearm.name);
 
-            handControlFrameToWristTransforms.put(robotSide, alexanderPhysicalProperties.getHandControlFrameToWristTransform(robotSide));
+               lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
 
-            Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
-            nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
-         }
+               handControlFrameToWristTransforms.put(robotSide, alexanderPhysicalProperties.getHandControlFrameToWristTransform(robotSide));
 
-         if (lastSimulatedJoint != null)
-         {
-            lastSimulatedJoints.add(lastSimulatedJoint.name);
+               Joints jointBeforeHand = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
+               nameOfJointsBeforeHands.put(robotSide, jointBeforeHand.name);
+            }
+
+            if (lastSimulatedJoint != null)
+            {
+               lastSimulatedJoints.add(lastSimulatedJoint.name);
+            }
          }
       }
    }
@@ -189,7 +212,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
       public boolean isPresent(SideDependentList<AlexanderArmConfiguration> armConfigurations)
       {
-         if (this.armConfiguration == null)
+         if (this.armConfiguration == null || armConfigurations == null)
             return true;
          else
             return armConfigurations.get(armJointSide).ordinal() >= this.armConfiguration.ordinal();
@@ -540,11 +563,15 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
    public boolean hasLeftCycloidForearm()
    {
+      if (armConfigurations == null)
+         return false;
       return armConfigurations.get(RobotSide.LEFT) == AlexanderArmConfiguration.FOREARM;
    }
 
    public boolean hasRightCycloidForearm()
    {
+      if (armConfigurations == null)
+         return false;
       return armConfigurations.get(RobotSide.RIGHT) == AlexanderArmConfiguration.FOREARM;
    }
 }

@@ -3,12 +3,16 @@ package us.ihmc.alexander;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
-import us.ihmc.alexander.parameters.controller.*;
+import us.ihmc.alexander.parameters.controller.AlexanderContactPointParameters;
+import us.ihmc.alexander.parameters.controller.AlexanderHighLevelControllerParameters;
+import us.ihmc.alexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
+import us.ihmc.alexander.parameters.controller.AlexanderStateEstimatorParameters;
+import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.alexander.parameters.diagnostic.AlexanderDiagnosticParameters;
 import us.ihmc.alexander.parameters.model.AlexanderKinematicsCollisionModel;
+import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.alexander.parameters.model.AlexanderSimulationCollisionModel;
-import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
+import us.ihmc.alexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderFootstepPlannerParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderLocomotionParameters;
 import us.ihmc.alexander.parameters.planning.AlexanderSwingPlannerParameters;
@@ -18,12 +22,10 @@ import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -52,10 +54,10 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.simulation.collision.CollidableHelper;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -80,7 +82,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private double stepGeneratorDT = 10 * controllerDT;
 
    protected final AlexanderPhysicalProperties physicalProperties;
-   private final WalkingControllerParameters walkingControllerParameters;
+   protected final OptionalFactoryField<WalkingControllerParameters> walkingControllerParameters = new OptionalFactoryField<>("WalkingControllerParameters");
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final AlexanderSensorInformation sensorInformation;
    protected final AlexanderJointMap jointMap;
@@ -94,40 +96,40 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private final LogModelProvider logModelProvider;
    private final AlexanderModelFactory modelFactory;
 
-   private final RobotTarget robotTarget;
-   private final AlexanderVersion robotVersion;
+   protected final RobotTarget robotTarget;
+   protected final AlexanderVersionInterface robotVersion;
    private final SideDependentList<HandModel> handModels = new SideDependentList<>();
 
    private final SideDependentList<RigidBodyTransform> handGraphicToHandFrameTransforms = new SideDependentList<>();
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion)
    {
       this(robotVersion, RobotTarget.SCS);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget)
    {
       this(robotVersion, robotTarget, null, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this(robotVersion, robotTarget, null, contactPointParameters);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial)
    {
       this(robotVersion, robotTarget, robotMaterial, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, boolean createHandContactPoints)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, boolean createHandContactPoints)
    {
       this(robotVersion, robotTarget, robotMaterial, new AlexanderContactPointParameters(robotVersion.getJointMap(),
                                                                                          robotVersion.getPhysicalProperties(),
                                                                                          createHandContactPoints));
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersion robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, RobotContactPointParameters<RobotSide> contactPointParameters)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, MaterialDefinition robotMaterial, RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this.robotVersion = robotVersion;
       this.robotTarget = robotTarget;
@@ -137,7 +139,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       sensorInformation = robotVersion.getSensorInformation();
       physicalProperties = robotVersion.getPhysicalProperties();
 
-      walkingControllerParameters = new OpenAlexanderWalkingControllerParameters(robotVersion, robotTarget, jointMap, physicalProperties, contactPointParameters);
+      setWalkingControllerParameters();
       highLevelControllerParameters = new AlexanderHighLevelControllerParameters(robotVersion, jointMap, robotTarget);
       diagnosticParameters = new AlexanderDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
       stateEstimatorParameters = new AlexanderStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
@@ -182,8 +184,13 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       }
    }
 
+   protected void setWalkingControllerParameters()
+   {
+      walkingControllerParameters.set(new OpenAlexanderWalkingControllerParameters(robotVersion, robotTarget, jointMap, physicalProperties, contactPointParameters));
+   }
+
    @Override
-   public AlexanderVersion getRobotVersion()
+   public AlexanderVersionInterface getRobotVersion()
    {
       return robotVersion;
    }
@@ -208,7 +215,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public WalkingControllerParameters getWalkingControllerParameters()
    {
-      return walkingControllerParameters;
+      return walkingControllerParameters.get();
    }
 
    @Override
@@ -226,7 +233,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public String toString()
    {
-      return AlexanderURDFParameters.URDF_MODEL_NAME;
+      return OpenAlexanderURDFParameters.URDF_MODEL_NAME;
    }
 
    @Override

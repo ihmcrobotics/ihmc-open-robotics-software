@@ -2,7 +2,7 @@ package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.alexander.parameters.controller.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,7 +21,7 @@ public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecov
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()

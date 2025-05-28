@@ -2,7 +2,7 @@ package us.ihmc.alexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.alexander.parameters.controller.AlexanderStepAdjustmentParameters;
 import us.ihmc.alexander.parameters.controller.AlexanderSteppingParameters;
@@ -42,7 +42,7 @@ public class AlexanderPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderRobotModel alexanderRobotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+      OpenAlexanderRobotModel alexanderRobotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()

@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 
 public class AlexanderStepInPlaceTest extends AvatarStepInPlaceTest
 {
-   private final AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target)
    {

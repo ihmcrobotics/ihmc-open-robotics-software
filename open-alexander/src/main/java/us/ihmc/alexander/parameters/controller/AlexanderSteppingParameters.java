@@ -28,7 +28,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    public double getInPlaceWidth()
    {
       // TODO Needs tune up.
-      return 0.25;
+      return 0.22;
    }
 
    @Override
@@ -41,7 +41,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMinStepWidth()
    {
-      return 0.09;
+      return 0.12;
    }
 
    @Override

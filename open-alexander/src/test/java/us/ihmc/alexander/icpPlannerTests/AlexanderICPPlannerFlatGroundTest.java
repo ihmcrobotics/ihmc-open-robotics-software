@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.alexander.AlexanderJointMap;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
@@ -17,7 +17,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 @Tag("humanoid-flat-ground")
 public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
 {
-   private final DRCRobotModel robotModel = new TestModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new TestModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Disabled
@@ -68,7 +68,7 @@ public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroun
    {
       private final TestWalkingParameters walkingParameters;
 
-      public TestModel(AlexanderVersion version, RobotTarget target)
+      public TestModel(OpenAlexanderVersion version, RobotTarget target)
       {
          super(version, target);
          walkingParameters = new TestWalkingParameters(version, target, getJointMap(), getPhysicalProperties());
@@ -84,7 +84,7 @@ public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroun
 
    private static class TestWalkingParameters extends OpenAlexanderWalkingControllerParameters
    {
-      public TestWalkingParameters(AlexanderVersion version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
+      public TestWalkingParameters(OpenAlexanderVersion version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
       {
          super(version, target, jointMap,physicalProperties);
       }
