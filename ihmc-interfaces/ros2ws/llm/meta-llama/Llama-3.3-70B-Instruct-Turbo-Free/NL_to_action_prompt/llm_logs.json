@@ -1,0 +1,66 @@
+[
+    {
+        "timestamp": "2025-05-28T13:38:57.257518",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "NL_to_action_prompt",
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to '1. First always SCAN the enviroonment to populate the scene_objects. 2. Go to the person behind the barrier. 3. Receive the charge from the person. 4. Go to the door 5. Place the charge on the door. 6. Go behind the barrier.'. From the avaiable behaviors give the sequqnece of behaviors to execute based on the task.If no valid next behavior exists, return 'NO_ACTION'.Return the full list of behavior names to execute, and nothing else. Do not include any code."
+    },
+    {
+        "timestamp": "2025-05-28T13:41:07.056864",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "NL_to_action_prompt",
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to '1. First always SCAN the enviroonment to populate the scene_objects. 2. Go to the person behind the barrier. 3. Receive the charge from the person. 4. Go to the door 5. Place the charge on the door. 6. Go behind the barrier.'. From the avaiable behaviors give the sequqnece of behaviors to execute based on the task.If no valid next behavior exists, return 'NO_ACTION'.Return the full list of behavior names to execute, and nothing else. Do not include any code."
+    },
+    {
+        "timestamp": "2025-05-28T13:58:23.366078",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "NL_to_action_prompt",
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to '1. First always SCAN the enviroonment to populate the scene_objects. 2. Go to the person behind the barrier. 3. Receive the charge from the person. 4. Go to the door 5. Place the charge on the door. 6. Go behind the barrier.'. From the avaiable behaviors give the sequqnece of behaviors to execute based on the task.If no valid next behavior exists, return 'NO_ACTION'.Return the full list of behavior names to execute, and nothing else. Do not include any code."
+    },
+    {
+        "timestamp": "2025-05-28T13:59:45.633735",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "NL_to_action_prompt",
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to '1. First always SCAN the enviroonment to populate the scene_objects. 2. Go to the person behind the barrier. 3. Receive the charge from the person. 4. Go to the door 5. Place the charge on the door. 6. Go behind the barrier.'. From the avaiable behaviors give the sequqnece of behaviors to execute based on the task.If no valid next behavior exists, return 'NO_ACTION'.Return the full list of behavior names to execute, and nothing else. Do not include any code."
+    },
+    {
+        "prompt": "{'scene_objects': [{'object_name': 'DoorPullHandle1', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=1.83381, y=2.47637, z=1.332), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7247180744148702, w=0.6890455083783673)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=1.8803427428244424, y=2.476369999856418, z=1.3319999446665518), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7247180744430904, w=0.6890455083486862)}}, {'object_name': 'DoorPanel1', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=1.58971, y=2.53624, z=0.0), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6778173805500101, w=0.735230303118909)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=1.6362427428293465, y=2.5362399998764125, z=-5.533344825392472e-08), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6778173805198985, w=0.7352303031466693)}}, {'object_name': 'Person1', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=2.01548, y=-0.57308, z=0.0), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.7149034243911725, w=0.6992232074193299)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=2.0620127425746597, y=-0.5730800001584628, z=-5.533344825392472e-08), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.7149034243625358, w=0.6992232074486089)}}, {'object_name': 'Person2', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=1.97584, y=-1.22519, z=0.0), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.7086125448297859, w=0.7055978042127502)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=2.022372742521245, y=-1.2251900001552158, z=-5.533344825392472e-08), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.708612544800888, w=0.7055978042417717)}}, {'object_name': 'Charge1', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=1.5354, y=-0.48509, z=1.00433), 'orientation': geometry_msgs.msg.Quaternion(x=-0.013289830868172666, y=0.0007537625159451319, z=0.99830690943685, w=-0.0566226704440008)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=1.5819327425818674, y=-0.48509000011913916, z=1.0043299446665517), 'orientation': geometry_msgs.msg.Quaternion(x=-0.013289830868141797, y=0.0007537625164894216, z=0.998306909439169, w=-0.05662267040311482)}}, {'object_name': 'Barrier1', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=1.77185, y=0.0, z=0.0), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6844199937260306, w=0.7290879728729999)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=1.8183827426216013, y=-1.3850692352351093e-10, z=-5.533344825392472e-08), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=0.6844199936961705, w=0.7290879729010306)}}, {'object_name': 'Barrier2', 'pose_in_world': {'pose': geometry_msgs.msg.Point(x=1.83069, y=-0.01199, z=0.79907), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790538979, w=0.694228494070951)}, 'pose_wrt_robot': {'pose': geometry_msgs.msg.Point(x=1.8772227426206192, y=-0.011990000143326547, z=0.7990699446665517), 'orientation': geometry_msgs.msg.Quaternion(x=0.0, y=0.0, z=-0.7197546790823303, w=0.6942284940414732)}}], 'available_behaviors': ['GOTO', 'SCAN', 'RECEIVE OBJECT', 'PLACE CHARGE ON DOOR'], 'previously_executed': '', 'failed_behaviors': '-'} You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to '1. First always SCAN the enviroonment to populate the scene_objects. 2. Go to the person behind the barrier. 3. Receive the charge from the person. 4. Go to the door 5. Place the charge on the door. 6. Go behind the barrier.'. From the avaiable behaviors give the sequqnece of behaviors to execute based on the task.If no valid next behavior exists, return 'NO_ACTION'.Return the full list of behavior names to execute, and nothing else. Do not include any code.",
+        "output": "Since the task is to follow a specific sequence of actions and the 'previously_executed' behaviors are empty, the sequence should start from the beginning. The first action is to 'SCAN' the environment, which has likely already been done given the 'scene_objects' are populated. However, based on the provided information and the task sequence:\n\n1. SCAN\n2. GOTO (to the person behind the barrier)\n3. RECEIVE OBJECT (receive the charge from the person)\n4. GOTO (to the door)\n5. PLACE CHARGE ON DOOR\n6. GOTO (behind the barrier)\n\nGiven the context, the next logical step after scanning (which seems to have been done implicitly as the scene is populated) is to move towards the person behind the barrier. Therefore, the sequence of behaviors to execute, considering the task and the current state, is:\n\nSCAN, GOTO, RECEIVE OBJECT, GOTO, PLACE CHARGE ON DOOR, GOTO"
+    },
+    {
+        "timestamp": "2025-05-28T14:31:43.054251",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "NL_to_action_prompt",
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to '1. First always SCAN the enviroonment to populate the scene_objects. 2. Go to the person behind the barrier. 3. Receive the charge from the person. 4. Go to the door 5. Place the charge on the door. 6. Go behind the barrier.'. From the avaiable behaviors give the sequqnece of behaviors to execute based on the task.If no valid next behavior exists, return 'NO_ACTION'.Return the full list of behavior names to execute, and nothing else. Do not include any code."
+    }
+]

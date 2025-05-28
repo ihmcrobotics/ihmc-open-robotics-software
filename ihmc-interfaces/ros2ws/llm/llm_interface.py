@@ -67,7 +67,7 @@ class LLMInterface:
         # },
         {
            "role": "user",
-           "content": self.prompt + " " + llm_input
+           "content": self.llm_input + " " + self.prompt
         }
         ]
         
@@ -138,7 +138,7 @@ class LLMInterface:
 
     def log_interaction(self, output):
         log_data = {
-            "prompt": self.prompt + " " + self.llm_input,
+            "prompt": self.llm_input + " " + self.prompt,
             "output": output
         }
         

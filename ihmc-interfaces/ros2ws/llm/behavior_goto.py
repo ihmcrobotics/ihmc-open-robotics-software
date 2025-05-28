@@ -98,7 +98,35 @@ def behavior_message_callback(msg):
         # CAN DO SOME REASONING HERE based on failed behaviors
         
         # Get all scene objects names
-        scene_objects_name  = [obj.object_name for obj in msg.objects]
+        scene_objects_name  = []
+        scene_objects = msg.objects
+        if scene_objects:  # This checks if the list is not empty
+           for obj in scene_objects:
+               id = obj.object_name
+               pose_in_world = obj.object_pose_in_world
+               pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
+               #print(f"{id} - Pose in World: {pose_in_world}, Pose wrt Robot: {pose_wrt_robot}")
+               #insert id, pose_in_world, pose_wrt_robot into a dictionary or list if needed
+               object_list = {
+                   "object_name": id,
+                   "pose_in_world": {
+                       "pose" : pose_in_world.position,
+                       "orientation": pose_in_world.orientation
+                    #    "x": pose_in_world.position.x,
+                    #    "y": pose_in_world.position.y,
+                    #    "z": pose_in_world.position.z
+                   },
+                   "pose_wrt_robot": {
+                        "pose": pose_wrt_robot.position,
+                        "orientation": pose_wrt_robot.orientation
+                    #    "x": pose_wrt_robot.position.x,
+                    #    "y": pose_wrt_robot.position.y,
+                    #    "z": pose_wrt_robot.position.z
+                   }
+               }
+               scene_objects_name.append(object_list)
+        #print("Scene Objects:", scene_objects_name)
+
         
         # Get all available behaviors
         available_behaviors = msg.available_behaviors
