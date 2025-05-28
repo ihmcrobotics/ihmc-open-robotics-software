@@ -22,7 +22,7 @@ import sys
 
 # Example usage:
 print(" Calling the LLM ")
-llm = LLMInterface(config_file="config_obj_identifier.json")
+llm = LLMInterface(config_file="config_goto.json")
 
 ros2 = {}
 initialized = False
@@ -85,123 +85,15 @@ def behavior_message_callback(msg):
             lines = response.strip().split('\n')
             # Each variable now holds one line
             base_name = lines[0]
-            reference_object = lines[1]
-            spatially_related_object = lines[2]
-            spatial_relation = lines[3]
+            spatial_context_object = lines[1]
+            spatial_relation = lines[2]
 
-            selected_object = select_target_object(
-                base_name=lines[0],
-                reference_object=lines[1],
-                spatial_relation=lines[3],
-                scene_object_names=scene_objects_names,
-                scene_object_positions=scene_objects_positions,
-                robot_pose=robot_position,
-                spatial_context_object=lines[2])
 
-            print(selected_object)
+
 
             # Increment the LLM call counter
             llm_call_counter += 1
 
-def point_to_numpy(point: Point) -> np.ndarray:
-    """Convert geometry_msgs/Point to numpy array"""
-    return np.array([point.x, point.y, point.z])
-
-def get_pose_by_name(
-    object_name_to_find: str,
-    scene_object_names: List[str],
-    scene_object_poses: List[Point],
-    robot_pose_world: Optional[Point] = None
-) -> Optional[Point]:
-    """Retrieve object position by name"""
-    if object_name_to_find.lower() == "robot" and robot_pose_world:
-        return robot_pose_world
-    if object_name_to_find in ("-", ""):
-        return None
-    try:
-        return scene_object_poses[scene_object_names.index(object_name_to_find)]
-    except ValueError:
-        print(f"Object '{object_name_to_find}' not found")
-        return None
-
-def select_target_object(
-    base_name: str,
-    reference_object: str,
-    spatial_relation: str,
-    scene_object_names: List[str],
-    scene_object_positions: List[Point],
-    robot_pose: Optional[Point] = None,
-    spatial_context_object: Optional[str] = None
-) -> Optional[str]:
-    """
-    Selects target object based on spatial relationships
-    Args:
-        base_name: Object base name (e.g. "Cup")
-        reference_object: Reference object name (e.g. "Table1")
-        spatial_relation: BEHIND/FRONT/LEFT/RIGHT/DEFAULT
-        scene_object_names: List of all object names
-        scene_object_positions: Corresponding object positions
-        robot_pose: Robot's position (required if reference is robot)
-        spatial_context_object: Secondary spatial reference
-    Returns:
-        Full object name (e.g. "Cup2") or None
-    """
-    # Find candidate objects
-    candidates = [
-        (name, pose) for name, pose in zip(scene_object_names, scene_object_positions)
-        if name.startswith(base_name) and name[len(base_name):].isdigit()
-    ]
-    if not candidates:
-        print(f"No {base_name} objects found")
-        return None
-
-    # Get reference positions
-    ref_pose = get_pose_by_name(reference_object, scene_object_names, scene_object_positions, robot_pose)
-    if not ref_pose:
-        print(f"Reference object '{reference_object}' not found")
-        return None
-
-    if spatial_context_object == "-":
-        spatial_context_object = "Robot"
-    ctx_pose = get_pose_by_name(spatial_context_object, scene_object_names, scene_object_positions, robot_pose) if spatial_context_object else None
-
-    # Handle DEFAULT relation
-    if spatial_relation == "DEFAULT":
-        return min(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
-
-    # Calculate spatial relationship
-    ref_pos = point_to_numpy(ref_pose)
-    ctx_pos = point_to_numpy(ctx_pose) if ctx_pose else ref_pos
-
-    direction = ctx_pos - ref_pos
-    if np.linalg.norm(direction) < 1e-6:
-        print("Reference and context positions coincide")
-        return candidates[0][0]
-
-    dir_norm = direction / np.linalg.norm(direction)
-    left_vec = np.cross(np.array([0, 0, 1]), dir_norm[:3])
-    left_vec /= np.linalg.norm(left_vec)
-
-    # Evaluate candidates
-    qualified = []
-    for name, pose in candidates:
-        candidate_pos = point_to_numpy(pose)
-        offset = candidate_pos - ref_pos
-
-        if spatial_relation == "BEHIND":
-            if np.dot(offset, dir_norm) < -0.7:
-                qualified.append((name, np.linalg.norm(offset)))
-        elif spatial_relation == "FRONT":
-            if np.dot(offset, dir_norm) > 0.7:
-                qualified.append((name, np.linalg.norm(offset)))
-        elif spatial_relation == "RIGHT":
-            if np.dot(offset, left_vec) > 0.7:
-                qualified.append((name, np.linalg.norm(offset)))
-        elif spatial_relation == "LEFT":
-            if np.dot(offset, left_vec) < -0.7:
-                qualified.append((name, np.linalg.norm(offset)))
-
-    return min(qualified, key=lambda x: x[1])[0] if qualified else None
 
 def main(args=None):
     rclpy.init(args=args)

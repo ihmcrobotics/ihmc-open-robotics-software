@@ -85,18 +85,18 @@ def behavior_message_callback(msg):
             lines = response.strip().split('\n')
             # Each variable now holds one line
             base_name = lines[0]
-            reference_object = lines[1]
-            spatially_related_object = lines[2]
-            spatial_relation = lines[3]
+            spatially_related_object = lines[1]
+            spatial_relation = lines[2]
+            spatial_context_object = lines[3]
 
             selected_object = select_target_object(
                 base_name=lines[0],
-                reference_object=lines[1],
-                spatial_relation=lines[3],
+                spatially_related_object=lines[1],
+                spatial_relation=lines[2],
                 scene_object_names=scene_objects_names,
                 scene_object_positions=scene_objects_positions,
                 robot_pose=robot_position,
-                spatial_context_object=lines[2])
+                spatial_context_object=lines[3])
 
             print(selected_object)
 
@@ -126,7 +126,7 @@ def get_pose_by_name(
 
 def select_target_object(
     base_name: str,
-    reference_object: str,
+    spatially_related_object: str,
     spatial_relation: str,
     scene_object_names: List[str],
     scene_object_positions: List[Point],
@@ -137,7 +137,7 @@ def select_target_object(
     Selects target object based on spatial relationships
     Args:
         base_name: Object base name (e.g. "Cup")
-        reference_object: Reference object name (e.g. "Table1")
+        spatially_related_object: Reference object name (e.g. "Table1")
         spatial_relation: BEHIND/FRONT/LEFT/RIGHT/DEFAULT
         scene_object_names: List of all object names
         scene_object_positions: Corresponding object positions
@@ -156,9 +156,9 @@ def select_target_object(
         return None
 
     # Get reference positions
-    ref_pose = get_pose_by_name(reference_object, scene_object_names, scene_object_positions, robot_pose)
+    ref_pose = get_pose_by_name(spatially_related_object, scene_object_names, scene_object_positions, robot_pose)
     if not ref_pose:
-        print(f"Reference object '{reference_object}' not found")
+        print(f"Reference object '{spatially_related_object}' not found")
         return None
 
     if spatial_context_object == "-":
