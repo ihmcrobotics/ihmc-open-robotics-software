@@ -161,7 +161,7 @@ public class ROS2HumanoidFrames
                ros2FrameCopy = ankleFrame;
             }
             else if (frameToCopy.equals(humanoidFrames.getSoleFrame(side)))
-            {  // sole == sole 👍
+            {  // sole == sole
                ROS2Frame parentFrame = ros2FrameCopyMap.getOrDefault(frameToCopy.getParent(), ankleFrames.get(side));
                ROS2Frame soleFrame = createFrameCopy(frameToCopy, sidePrefix + "sole", parentFrame);
                soleFrames.put(side, soleFrame);

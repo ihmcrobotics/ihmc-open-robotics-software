@@ -16,7 +16,7 @@ public class AlexanderFlatGroundRewindabilityTest extends DRCFlatGroundRewindabi
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override

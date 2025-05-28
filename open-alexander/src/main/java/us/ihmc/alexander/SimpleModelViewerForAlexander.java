@@ -1,7 +1,7 @@
 package us.ihmc.alexander;
 
 import jakarta.xml.bind.JAXBException;
-import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
+import us.ihmc.alexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
 import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
@@ -15,8 +15,8 @@ public class SimpleModelViewerForAlexander
    public static void main(String[] args) throws JAXBException
    {
       // We define the version of the robot we want to us
-      AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
-      AlexanderURDFParameters modelParameters = new AlexanderURDFParameters(version);
+      OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
+      OpenAlexanderURDFParameters modelParameters = new OpenAlexanderURDFParameters(version);
 
       // We create the URDF model to be loaded into SCS2
       URDFModel urdfModel = URDFTools.loadURDFModel(modelParameters.getURDFAsInputStream(),

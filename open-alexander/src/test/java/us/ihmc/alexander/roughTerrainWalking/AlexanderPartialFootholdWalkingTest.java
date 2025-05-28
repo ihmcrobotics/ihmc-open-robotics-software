@@ -3,7 +3,7 @@ package us.ihmc.alexander.roughTerrainWalking;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.alexander.parameters.controller.AlexanderContactPointParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -23,7 +23,7 @@ public class AlexanderPartialFootholdWalkingTest extends HumanoidPartialFoothold
    @Override
    public DRCRobotModel getRobotModel()
    {
-      AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
+      OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 5, true, false);
       AlexanderContactPointParameters contactPointParameters=  new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters)

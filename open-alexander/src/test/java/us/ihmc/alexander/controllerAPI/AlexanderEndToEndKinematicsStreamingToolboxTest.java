@@ -1,6 +1,6 @@
 package us.ihmc.alexander.controllerAPI;
 
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -10,7 +10,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
 public class AlexanderEndToEndKinematicsStreamingToolboxTest extends KinematicsStreamingToolboxEndToEndTest
 {
-   private final AlexanderVersion robotVersion = AlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion robotVersion = OpenAlexanderVersion.V0_FULL_ROBOT;
    private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(robotVersion, RobotTarget.SCS);
 
    @Override

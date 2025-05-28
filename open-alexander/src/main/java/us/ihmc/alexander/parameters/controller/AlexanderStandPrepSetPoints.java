@@ -1,7 +1,6 @@
 package us.ihmc.alexander.parameters.controller;
 
 import us.ihmc.alexander.AlexanderJointMap;
-import us.ihmc.alexander.AlexanderVersion;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;

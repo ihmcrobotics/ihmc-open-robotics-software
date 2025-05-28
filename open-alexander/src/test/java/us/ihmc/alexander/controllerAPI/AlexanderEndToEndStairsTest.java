@@ -3,7 +3,7 @@ package us.ihmc.alexander.controllerAPI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
@@ -15,7 +15,7 @@ public class AlexanderEndToEndStairsTest extends HumanoidEndToEndStairsTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT);
    }
 
    @Disabled

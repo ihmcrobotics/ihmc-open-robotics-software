@@ -2,7 +2,7 @@ package us.ihmc.alexander.angularMomentum;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.angularMomentumTest.AvatarAngularExcursionTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 @Tag("humanoid-flat-ground-slow-2")
 public class AlexanderAngularExcursionTest extends AvatarAngularExcursionTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    protected double getStepLength()

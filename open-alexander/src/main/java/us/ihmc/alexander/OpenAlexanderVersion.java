@@ -2,8 +2,8 @@ package us.ihmc.alexander;
 
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalPropertiesV0;
-import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
-import us.ihmc.avatar.drcRobot.RobotVersion;
+import us.ihmc.alexander.parameters.model.OpenAlexanderURDFParameters;
+import us.ihmc.alexander.parameters.model.HumanoidURDFParameterInterface;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -11,10 +11,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.Arrays;
 import java.util.Collection;
 
-public enum AlexanderVersion implements RobotVersion
+public enum OpenAlexanderVersion implements AlexanderVersionInterface
 {
-   V0_FULL_ROBOT(Arrays.asList(AlexanderURDFParameters.URDF_LOWER_BODY, AlexanderURDFParameters.URDF_LEFT_ARM, AlexanderURDFParameters.URDF_RIGHT_ARM), null),
-   V0_NUB_FOREARMS(Arrays.asList(AlexanderURDFParameters.URDF_LOWER_BODY, AlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM, AlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null);
+   V0_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+                               OpenAlexanderURDFParameters.URDF_LEFT_ARM,
+                               OpenAlexanderURDFParameters.URDF_RIGHT_ARM), null),
+   V0_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+                                 OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
+                                 OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null);
 
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
@@ -27,18 +31,21 @@ public enum AlexanderVersion implements RobotVersion
    private AlexanderJointMap jointMap;
    private AlexanderPhysicalProperties physicalProperties;
    private AlexanderSensorInformation sensorInformation;
+   private OpenAlexanderURDFParameters urdfParameters;
 
-   AlexanderVersion(Collection<String> urdfModelPath, Collection<String> hardwareMapResources)
+   OpenAlexanderVersion(Collection<String> urdfModelPath, Collection<String> hardwareMapResources)
    {
       this.urdfModelPath = urdfModelPath;
       this.hardwareMapResources = hardwareMapResources;
    }
 
+   @Override
    public Collection<String> getModelPath()
    {
       return urdfModelPath;
    }
 
+   @Override
    public Collection<String> getHardwareMapResources()
    {
       return hardwareMapResources;
@@ -55,6 +62,7 @@ public enum AlexanderVersion implements RobotVersion
       }
    }
 
+   @Override
    public boolean hasCycloidForearms()
    {
       switch (this)
@@ -71,6 +79,7 @@ public enum AlexanderVersion implements RobotVersion
       return false;
    }
 
+   @Override
    public AlexanderJointMap getJointMap()
    {
       if (jointMap != null)
@@ -81,11 +90,15 @@ public enum AlexanderVersion implements RobotVersion
       {
          case V0_FULL_ROBOT:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM));
+                                             new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM),
+                                             true,
+                                             true);
             break;
          case V0_NUB_FOREARMS:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
-                                             new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB));
+                                             new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB),
+                                             true,
+                                             true);
             break;
       }
       return jointMap;
@@ -118,6 +131,7 @@ public enum AlexanderVersion implements RobotVersion
       }
    }
 
+   @Override
    public boolean hasNubHands(RobotSide side)
    {
       switch (this)
@@ -129,6 +143,7 @@ public enum AlexanderVersion implements RobotVersion
       }
    }
 
+   @Override
    public AlexanderSensorInformation getSensorInformation()
    {
       if (sensorInformation != null)
@@ -148,6 +163,7 @@ public enum AlexanderVersion implements RobotVersion
       return sensorInformation;
    }
 
+   @Override
    public AlexanderPhysicalProperties getPhysicalProperties()
    {
       if (physicalProperties != null)
@@ -164,5 +180,14 @@ public enum AlexanderVersion implements RobotVersion
             break;
       }
       return physicalProperties;
+   }
+
+   @Override
+   public HumanoidURDFParameterInterface getURDFParameters()
+   {
+      if (urdfParameters != null)
+         return urdfParameters;
+      urdfParameters = new OpenAlexanderURDFParameters(this);
+      return urdfParameters;
    }
 }
