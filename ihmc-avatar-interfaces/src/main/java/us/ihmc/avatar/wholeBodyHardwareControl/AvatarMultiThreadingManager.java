@@ -1,4 +1,4 @@
-package us.ihmc.avatar.hardwareControl;
+package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.avatar.*;
@@ -60,6 +60,16 @@ public class AvatarMultiThreadingManager
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
 
+   /**
+    * This class is responsible for converting AvatarEstimatorThread, AvatarControllerThread, and
+    * AvatarStepGenerator thread into tasks and either regular threads or realtime threads. They are
+    * then organized into either a SingleThreadedRobotController (in the case of single threading), or a
+    * BarrierScheduledRobotController (in the case of multi-threading). These dictate the execution
+    * of each thread and our entire control process itself. Lastly, this class manages the passing of
+    * measured and desired robot data to and from a hardware communication interface
+    *
+    * @author Stefan Fasano
+    */
    public AvatarMultiThreadingManager(String prefix,
                                       DRCRobotModel robotModel,
                                       HumanoidRobotContextData masterContext,
@@ -137,7 +147,7 @@ public class AvatarMultiThreadingManager
       // Set up Controller Task
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / schedulerDt);
       if (!Precision.equals(robotModel.getControllerDT() / schedulerDt, controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of estimator DT.");
+         throw new RuntimeException("Controller DT must be multiple of scheduler DT.");
 
       controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, schedulerDt, masterFullRobotModel);
 
@@ -171,7 +181,7 @@ public class AvatarMultiThreadingManager
       // Set up Step Generator Task
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / schedulerDt);
       if (!Precision.equals(robotModel.getStepGeneratorDT() / schedulerDt, stepGeneratorDivisor))
-         throw new RuntimeException("Step generator DT must be multiple of estimator DT.");
+         throw new RuntimeException("Step generator DT must be multiple of scheduler DT.");
 
       stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, schedulerDt, masterFullRobotModel);
 

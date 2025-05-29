@@ -1,4 +1,4 @@
-package us.ihmc.avatar.hardwareControl;
+package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.InterpolationTools;
@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -14,7 +15,7 @@ public class AvatarLowLevelOutputProcessor
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private static final double RAMP_UP_DOWN_DURATION = 6.0;
+   private static final double DEFAULT_SERVO_DURATION = 6.0;
    private static final double LOW_MASTER_GAIN = 0.0;
    private static final double HIGH_MASTER_GAIN = 1.00;
 
@@ -26,6 +27,7 @@ public class AvatarLowLevelOutputProcessor
    private final YoBoolean isUnservoing = new YoBoolean("isUnservoing", registry);
    private final YoBoolean isServod = new YoBoolean("isRobotServod", registry);
 
+   private final YoDouble servoDuration = new YoDouble("servoDuration", registry);
    private final YoDouble servoTime = new YoDouble("servoTime", registry);
    private final YoDouble masterGain = new YoDouble("masterGain", registry);
 
@@ -35,12 +37,22 @@ public class AvatarLowLevelOutputProcessor
    private double servoStartGain = 0.0;
    private double unservoStartGain = 0.0;
 
+   /**
+    * This class is responsible for applying a master gain to all low-level desired outputs.
+    * It also provides a 'servo' and 'unservo' functionality which interpolates that master
+    * gain between 0 and 1 over a period of time. This is designed to be the last layer of
+    * control before these desired values get sent to the hardware drivers/managers
+    *
+    * @author Stefan Fasano
+    */
    public AvatarLowLevelOutputProcessor(OneDoFJointBasics[] controlledJoints, double updateDt, YoRegistry parentRegistry)
    {
       this.updateDt = updateDt;
 
       unprocessedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder("h1", controlledJoints, registry);
       processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder("h1Processed", controlledJoints, registry);
+
+      servoDuration.set(DEFAULT_SERVO_DURATION);
 
       addServoListener(change ->
                        {
@@ -92,10 +104,10 @@ public class AvatarLowLevelOutputProcessor
 
    private void computeMasterGainForServo()
    {
-      if (servoTime.getDoubleValue() < RAMP_UP_DOWN_DURATION)
+      if (servoTime.getDoubleValue() < servoDuration.getDoubleValue())
       {
          servoTime.add(updateDt);
-         masterGain.set(computeMasterGain(servoTime.getDoubleValue(), servoStartGain, HIGH_MASTER_GAIN));
+         masterGain.set(computeMasterGain(servoTime.getDoubleValue(), servoDuration.getDoubleValue(), servoStartGain, HIGH_MASTER_GAIN));
       }
       else
       {
@@ -107,10 +119,10 @@ public class AvatarLowLevelOutputProcessor
 
    private void computeMasterGainForUnservo()
    {
-      if (servoTime.getDoubleValue() < RAMP_UP_DOWN_DURATION)
+      if (servoTime.getDoubleValue() < servoDuration.getDoubleValue())
       {
          servoTime.add(updateDt);
-         masterGain.set(computeMasterGain(servoTime.getDoubleValue(), unservoStartGain, LOW_MASTER_GAIN));
+         masterGain.set(computeMasterGain(servoTime.getDoubleValue(), servoDuration.getDoubleValue(), unservoStartGain, LOW_MASTER_GAIN));
       }
       else
       {
@@ -135,9 +147,9 @@ public class AvatarLowLevelOutputProcessor
       servo.addListener(listener);
    }
 
-   private static double computeMasterGain(double servoTime, double startGain, double endGain)
+   private static double computeMasterGain(double servoTime, double servoDuration, double startGain, double endGain)
    {
-      double alpha = servoTime / RAMP_UP_DOWN_DURATION;
+      double alpha = servoTime / servoDuration;
       double masterGain = InterpolationTools.linearInterpolate(startGain, endGain, alpha);
       return MathTools.clamp(masterGain, LOW_MASTER_GAIN, HIGH_MASTER_GAIN);
    }

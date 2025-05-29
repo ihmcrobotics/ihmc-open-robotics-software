@@ -1,4 +1,4 @@
-package us.ihmc.avatar.hardwareControl;
+package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -55,17 +55,16 @@ import java.util.*;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
-public class AvatarMultiThreadedController
+public class AvatarMultiThreadingFactory
 {
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final boolean DISABLE_STEP_GENERATOR_THREAD = false;
 
-   private final String robotName;
-
-   private final DRCRobotModel robotModel;
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final String robotName;
+   private final DRCRobotModel robotModel;
 
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
@@ -81,7 +80,7 @@ public class AvatarMultiThreadedController
    private final AvatarEstimatorThreadFactory estimatorThreadFactory;
    private final HighLevelHumanoidControllerFactory controllerFactory;
 
-   // The three threads
+   // The threads
    private final RequiredFactoryField<AvatarEstimatorThread> estimatorThread = new RequiredFactoryField<>("AvatarEstimatorThread");
    private final RequiredFactoryField<AvatarControllerThread> controllerThread = new RequiredFactoryField<>("AvatarControllerThread");
    private final RequiredFactoryField<AvatarStepGeneratorThread> stepGeneratorThread = new RequiredFactoryField<>("AvatarStepGeneratorThread");
@@ -101,19 +100,25 @@ public class AvatarMultiThreadedController
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
 
-   public AvatarMultiThreadedController(String robotName,
-                                        DRCRobotModel robotModel,
-                                        HardwareCommunicationInterface hardwareCommunicationInterface,
-                                        SensorReaderFactory sensorReaderFactory,
-                                        HighLevelControllerStateFactory standPrepStateFactory,
-                                        HighLevelControllerStateFactory freezeStateFactory,
-                                        AvatarAffinityInterface affinity,
-                                        boolean useRealtimeThreads,
-                                        boolean useMultiThreading,
-                                        MonotonicTime period,
-                                        double schedulerDt,
-                                        TimestampProvider monotonicTimeProvider,
-                                        YoVariableServer yoVariableServer)
+   /**
+    * This class is responsible for creating the estimator, controller, and step generator
+    * threads, along with the multi-threading manager that handles the execution of those threads
+    *
+    * @author Stefan Fasano
+    */
+   public AvatarMultiThreadingFactory(String robotName,
+                                      DRCRobotModel robotModel,
+                                      HardwareCommunicationInterface hardwareCommunicationInterface,
+                                      SensorReaderFactory sensorReaderFactory,
+                                      HighLevelControllerStateFactory standPrepStateFactory,
+                                      HighLevelControllerStateFactory freezeStateFactory,
+                                      AvatarAffinityInterface affinity,
+                                      boolean useRealtimeThreads,
+                                      boolean useMultiThreading,
+                                      MonotonicTime period,
+                                      double schedulerDt,
+                                      TimestampProvider monotonicTimeProvider,
+                                      YoVariableServer yoVariableServer)
    {
       this.robotName = robotName;
       this.robotModel = robotModel;
@@ -174,7 +179,7 @@ public class AvatarMultiThreadedController
       threadingManager.get().join();
    }
 
-   public void build()
+   public void buildThreads()
    {
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
