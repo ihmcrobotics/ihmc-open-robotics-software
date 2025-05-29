@@ -530,6 +530,30 @@ __global__ void terrainCroppingHeightMapKernel(float *globalHeightMap, size_t pi
 }
 
 extern "C"
+__global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGlobalHeightMap,
+                                       unsigned short *scaledHeightMap, size_t pitchScaledHeightMap,
+                                       float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    // Compute global map size
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    // Check bounds for global indices
+    if (xIndex >= globalCellsPerAxis || yIndex >= globalCellsPerAxis)
+        return;
+
+    float *globalHeight = (float *)((char *)globalHeightMap + xIndex * pitchGlobalHeightMap) + yIndex;
+    float heightClamped = fminf(fmaxf(*globalHeight, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
+    heightClamped += params[HEIGHT_OFFSET];
+    heightClamped *= params[HEIGHT_SCALING_FACTOR];
+
+    unsigned short *heightValue = (unsigned short *)((char *)scaledHeightMap + xIndex * pitchScaledHeightMap) + yIndex;
+    *heightValue = static_cast<unsigned short>(heightClamped);
+}
+
+extern "C"
 __global__ void heightMapEmptyRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
                                                  unsigned short *globalMap, size_t pitchGlobal,
                                                  float *zUpCameraToWorldAlignedGround,
