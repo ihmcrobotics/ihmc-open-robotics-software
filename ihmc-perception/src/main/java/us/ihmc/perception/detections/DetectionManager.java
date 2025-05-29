@@ -181,7 +181,11 @@ public class DetectionManager
          while (detectionIterator.hasNext())
          {
             PersistentDetection detection = detectionIterator.next();
-            if (detection.isReadyForDeletion())
+            if (detection.isDestroyed())
+            {
+               detectionIterator.remove();
+            }
+            else if (detection.isReadyForDeletion())
             {
                detectionRemovedCallbacks.forEach(callback -> callback.accept(detection));
                detection.destroy();

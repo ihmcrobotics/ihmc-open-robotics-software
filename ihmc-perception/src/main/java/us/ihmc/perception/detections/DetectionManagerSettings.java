@@ -10,10 +10,10 @@ public class DetectionManagerSettings extends StoredPropertySet
 
    public static final DoubleStoredPropertyKey poseFilterAlpha = keys.addDoubleKey("Pose Filter Alpha", 0.2);
    public static final DoubleStoredPropertyKey maxMatchDistanceSquared = keys.addDoubleKey("Max Match Distance Squared", 1.0);
-   public static final DoubleStoredPropertyKey acceptanceAverageConfidence = keys.addDoubleKey("Acceptance Average Confidence", 0.25);
-   public static final DoubleStoredPropertyKey stabilityAverageConfidence = keys.addDoubleKey("Stability Average Confidence", 0.4);
-   public static final DoubleStoredPropertyKey stabilityDetectionFrequency = keys.addDoubleKey("Stability Detection Frequency", 2.5);
-   public static final DoubleStoredPropertyKey detectionHistoryDuration = keys.addDoubleKey("Detection History Duration", 1.0);
+   public static final DoubleStoredPropertyKey acceptanceAverageConfidence = keys.addDoubleKey("Acceptance Average Confidence", 0.7);
+   public static final DoubleStoredPropertyKey stabilityAverageConfidence = keys.addDoubleKey("Stability Average Confidence", 0.5);
+   public static final DoubleStoredPropertyKey stabilityDetectionFrequency = keys.addDoubleKey("Stability Detection Frequency", 1.0);
+   public static final DoubleStoredPropertyKey detectionHistoryDuration = keys.addDoubleKey("Detection History Duration", 5.0);
 
    public DetectionManagerSettings()
    {
