@@ -79,6 +79,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.communication.packets.MessageTools.toFrameId;
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
@@ -100,6 +101,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean toolboxCommunicationEnabled = new ImBoolean(false);
    private final ImBoolean controlRobotEnabled = new ImBoolean(false);
+   private final ImBoolean bButtonPressed = new ImBoolean(false);
 
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
@@ -312,7 +314,6 @@ public class RDXVRKinematicsStreamingMode
        //    }
        // }
       });
-
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
         controller.setAButtonText(toolboxCommunicationEnabled.get() ? "Stop preview" : "Start preview");
@@ -329,6 +330,16 @@ public class RDXVRKinematicsStreamingMode
             {
                performHandAction(RobotSide.RIGHT);
             }
+
+            InputDigitalActionData bButton = controller.getBButtonActionData();
+            if (bButton.bChanged() && !bButton.bState() && bButtonPressed.get())
+            {
+               bButtonPressed.set(true);
+            }
+            else
+            {
+               bButtonPressed.set(false);
+            }
          }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
@@ -341,6 +352,11 @@ public class RDXVRKinematicsStreamingMode
          processTrackers(toolboxInputMessage);
          processControllers(toolboxInputMessage);
          retargetMotion(toolboxInputMessage);
+
+         if (bButtonPressed.get())
+         {
+            toolboxInputMessage.setRecordEpisode(!toolboxInputMessage.getRecordEpisode());
+         }
 
          if (toolboxCommunicationEnabled.get())
             toolboxInputMessage.setStreamToController(controlRobotEnabled.get());

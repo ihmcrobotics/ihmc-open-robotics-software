@@ -40,6 +40,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -188,6 +189,7 @@ public class IKStreamingRTPluginFactory
       private final AtomicBoolean receivedInput = new AtomicBoolean();
       private final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
       private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
+      private final YoBoolean recordEpisode = new YoBoolean("recordingEpisode", registry);
       private final AtomicReference<ToolboxState> newToolboxStateRequestedRef = new AtomicReference<>();
       private final YoEnum<ToolboxState> toolboxState = new YoEnum<>("toolboxState", registry, ToolboxState.class);
       private final HumanoidRobotContextData humanoidRobotContextData;
@@ -269,11 +271,13 @@ public class IKStreamingRTPluginFactory
          contextDataFactory.setProcessedJointData(processedJointData);
          contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
          humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-
+         KinematicsStreamingToolboxInputMessage kinematicMessage = new KinematicsStreamingToolboxInputMessage();
          ros2Node.createSubscription(inputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class), s ->
          {
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
+            s.takeNextData(kinematicMessage, null);
+            recordEpisode.set(kinematicMessage.getRecordEpisode());
          });
          ToolboxStateMessage message = new ToolboxStateMessage();
          ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
