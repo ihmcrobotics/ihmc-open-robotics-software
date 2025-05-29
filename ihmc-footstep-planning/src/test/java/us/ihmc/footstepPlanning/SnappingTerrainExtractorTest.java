@@ -7,7 +7,6 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.tools.HeightMapTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -38,7 +37,12 @@ public class SnappingTerrainExtractorTest
                                                       0,
                                                       0);
 
-      HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F, heightMapParameters);
+      PerceptionMessageTools.convertToHeightMapData(heightMap,
+                                                    heightMapData,
+                                                    new Point3D(0.0, 0.0, 0.0),
+                                                    (float) 4.0,
+                                                    0.02F,
+                                                    heightMapParameters);
 
       snappingTerrainExtractor.update(heightMapData);
       snappingTerrainExtractor.close();

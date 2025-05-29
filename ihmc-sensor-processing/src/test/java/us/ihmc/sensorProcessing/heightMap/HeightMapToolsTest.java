@@ -1,4 +1,4 @@
-package us.ihmc.perception.tools;
+package us.ihmc.sensorProcessing.heightMap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
