@@ -124,9 +124,9 @@ public class RapidHeightMapExtractor
 
          globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
-         previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
-         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
+         previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
          emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
          // Initialize transformation pointers

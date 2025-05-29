@@ -1,7 +1,6 @@
 #ifndef MATH_UTILS
 #define MATH_UTILS
 
-const float USHRT_MAX = 36635;
 const float PI_F = 3.1415927f;
 
 __device__ float dot(const float3 a, const float3 b)

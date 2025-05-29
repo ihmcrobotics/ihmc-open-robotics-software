@@ -390,10 +390,10 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 }
 
 extern "C"
-__global__ void translateHeightMapKernel(unsigned short *oldHeightMapMean, size_t pitchOldHeightMapMean,
-                                         unsigned short *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
-                                         unsigned short *newMeanMap, size_t pitchNewMean,
-                                         unsigned short *newVarianceMap, size_t pitchNewVariance,
+__global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOldHeightMapMean,
+                                         float *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
+                                         float *newMeanMap, size_t pitchNewMean,
+                                         float *newVarianceMap, size_t pitchNewVariance,
                                          int shiftX, int shiftY, float *params, int defaultValue)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -409,23 +409,23 @@ __global__ void translateHeightMapKernel(unsigned short *oldHeightMapMean, size_
 
     if (srcX >= 0 && srcX < globalCellsPerAxis && srcY >= 0 && srcY < globalCellsPerAxis)
     {
-        unsigned short* oldMeanRow = (unsigned short*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
-        unsigned short* oldVarianceRow = (unsigned short *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
+        float* oldMeanRow = (float*)((char*)oldHeightMapMean + srcX * pitchOldHeightMapMean);
+        float* oldVarianceRow = (float *)((char*)oldHeightMapVariance + srcX * pitchOldHeightMapVariance);
 
-        unsigned short* newMeanRow = (unsigned short*)((char*)newMeanMap + x * pitchNewMean);
-        unsigned short* newVarianceRow = (unsigned short*)((char*)newVarianceMap + x * pitchNewVariance);
+        float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
+        float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
 
         newMeanRow[y] = oldMeanRow[srcY];
 
         // Add variance due to the translation
         unsigned int increasedVariance = (unsigned int)oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
         // We use min here to prevent over flow of the max value of a unsigned short
-        newVarianceRow[y] = (unsigned short)min(increasedVariance, (unsigned int)USHRT_MAX);
+        newVarianceRow[y] = increasedVariance;
     }
     else
     {
-        unsigned short* newMeanRow = (unsigned short*)((char*)newMeanMap + x * pitchNewMean);
-        unsigned short* newVarianceRow = (unsigned short*)((char*)newVarianceMap + x * pitchNewVariance);
+        float* newMeanRow = (float*)((char*)newMeanMap + x * pitchNewMean);
+        float* newVarianceRow = (float*)((char*)newVarianceMap + x * pitchNewVariance);
 
         newMeanRow[y] = defaultValue;
         newVarianceRow[y] = defaultValue;
@@ -507,8 +507,8 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, size_t pitchGlobal,
-                                               unsigned short *terrainMap, size_t pitchTerrain,
+__global__ void terrainCroppingHeightMapKernel(float *globalHeightMap, size_t pitchGlobal,
+                                               float *terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -523,8 +523,8 @@ __global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, 
     int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
 
     // Access pitched memory properly
-    unsigned short *globalRow = (unsigned short *)((char *)globalHeightMap + globalX * pitchGlobal);
-    unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
+    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
+    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
 
     terrainRow[yIndex] = globalRow[globalY];
 }
