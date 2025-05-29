@@ -280,7 +280,7 @@ public class PerceptionDebugTools
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
             if (image.type() == opencv_core.CV_32FC1)
-               matString.append("%.2f\t".formatted(image.ptr(i, j).getFloat()));
+               matString.append("%.6f\t".formatted(image.ptr(i, j).getFloat()));
             if (image.type() == opencv_core.CV_32FC2)
                matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
          }

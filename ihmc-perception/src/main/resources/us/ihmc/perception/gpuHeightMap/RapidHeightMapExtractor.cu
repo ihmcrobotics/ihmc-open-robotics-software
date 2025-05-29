@@ -207,9 +207,9 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
 extern "C"
 __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDepth,
                                       unsigned short *previousGlobalHeightMap, size_t pitchGlobal,
-                                      unsigned short *localMeanMap, size_t pitchLocalMean,
-                                      unsigned short *localVarianceMap, size_t pitchLocalVariance,
-                                      unsigned short *localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                      float *localMeanMap, size_t pitchLocalMean,
+                                      float *localVarianceMap, size_t pitchLocalVariance,
+                                      float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                       unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
                                       float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf,
                                       float *zUpCameraToWorldAlignedGround,
@@ -230,20 +230,20 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 
     float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT]);
 
-    int2 globalIndex = getGlobalIndexFromLocalIndex(make_int2(xIndex, yIndex), zUpCameraToWorldAlignedGround, params);
-
-    if (globalIndex.x >= 0 && globalIndex.x < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS])
-        && globalIndex.y >= 0 && globalIndex.y < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]))
-    {
-        unsigned short *globalHeight = (unsigned short *)((char *)previousGlobalHeightMap + globalIndex.x * pitchGlobal) + globalIndex.y;
-
-        if (*globalHeight != resetOffset)
-        {
-             float unScaledHeight = static_cast<float>(*globalHeight) / params[HEIGHT_SCALING_FACTOR];
-             float heightInMeters = unScaledHeight - params[HEIGHT_OFFSET];
-             cellCenterInZUp.z = heightInMeters;
-        }
-    }
+//     int2 globalIndex = getGlobalIndexFromLocalIndex(make_int2(xIndex, yIndex), zUpCameraToWorldAlignedGround, params);
+//
+//     if (globalIndex.x >= 0 && globalIndex.x < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS])
+//         && globalIndex.y >= 0 && globalIndex.y < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]))
+//     {
+//         unsigned short *globalHeight = (unsigned short *)((char *)previousGlobalHeightMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+//
+//         if (*globalHeight != resetOffset)
+//         {
+//              float unScaledHeight = static_cast<float>(*globalHeight) / params[HEIGHT_SCALING_FACTOR];
+//              float heightInMeters = unScaledHeight - params[HEIGHT_OFFSET];
+//              cellCenterInZUp.z = heightInMeters;
+//         }
+//     }
 
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),
@@ -371,19 +371,19 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
         meanZ = -params[HEIGHT_OFFSET];
 
     // Clamp height to the specified range
-    meanZ = fminf(fmaxf(meanZ, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
+//     meanZ = fminf(fmaxf(meanZ, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
 
     // Apply height offset
-    meanZ += params[HEIGHT_OFFSET];
+//     meanZ += params[HEIGHT_OFFSET];
 
     // Scale to the appropriate range
-    float heightValue = (meanZ * params[HEIGHT_SCALING_FACTOR]);
+//     float heightValue = (meanZ * params[HEIGHT_SCALING_FACTOR]);
 
-    unsigned short *meanHeight = (unsigned short *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
-    *meanHeight = heightValue;
-    unsigned short *variance = (unsigned short *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
-    *variance = scaledVariance;
-    unsigned short *motionVariance = (unsigned short *)((char *)localMotionVarianceMap + xIndex * pitchLocalMotionVariance) + yIndex;
+    float *meanHeight = (float *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
+    *meanHeight = meanZ;
+    float *variance = (float *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
+    *variance = currentVariance;
+    float *motionVariance = (float *)((char *)localMotionVarianceMap + xIndex * pitchLocalMotionVariance) + yIndex;
     *motionVariance = motionVarianceF;
     unsigned short *numberOfSamples = (unsigned short *)((char *)localSampleCountMap + xIndex * pitchLocalSampleCount) + yIndex;
     *numberOfSamples = count;

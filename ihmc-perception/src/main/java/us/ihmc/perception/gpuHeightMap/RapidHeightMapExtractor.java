@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -18,6 +19,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -115,9 +117,9 @@ public class RapidHeightMapExtractor
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          // Initialize matrices and images
-         localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
-         localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
-         localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
+         localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
+         localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
+         localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
 
          globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
@@ -257,6 +259,10 @@ public class RapidHeightMapExtractor
          cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
          checkCUDAError();
       }
+
+      Mat test = new Mat();
+      localMeanMap.download(test);
+      PerceptionDebugTools.printMat("s", test, 10);
 
       // ---------- Run the translate kernel ---------
       {
