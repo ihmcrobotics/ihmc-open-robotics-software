@@ -75,13 +75,13 @@ public class IKStreamingRTPluginFactory
    {
       if (ikStreamingRTThread == null)
          ikStreamingRTThread = new IKStreamingRTThread(robotName,
-                                                       ros2Node,
-                                                       walkingInputManager,
-                                                       walkingOutputManager,
-                                                       fullRobotModelFactory,
-                                                       contextDataFactory,
-                                                       collisionModel,
-                                                       parameters);
+                 ros2Node,
+                 walkingInputManager,
+                 walkingOutputManager,
+                 fullRobotModelFactory,
+                 contextDataFactory,
+                 collisionModel,
+                 parameters);
       return ikStreamingRTThread;
    }
 
@@ -103,7 +103,7 @@ public class IKStreamingRTPluginFactory
       if (!EuclidCoreTools.epsilonEquals(divisor * schedulerDT, parameters.getToolboxUpdatePeriod(), 1.0e-7) || divisor < 1)
       {
          throw new IllegalArgumentException("The schedulerDT (%s) does not divide the toolbox update period (%s).".formatted(schedulerDT,
-                                                                                                                             parameters.getToolboxUpdatePeriod()));
+                 parameters.getToolboxUpdatePeriod()));
       }
       return new IKStreamingRTTask(ikStreamingRTThread, divisor, schedulerDT);
    }
@@ -189,7 +189,6 @@ public class IKStreamingRTPluginFactory
       private final AtomicBoolean receivedInput = new AtomicBoolean();
       private final YoDouble timeWithoutInputsBeforeGoingToSleep = new YoDouble("timeWithoutInputsBeforeGoingToSleep", registry);
       private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
-      private final YoBoolean recordEpisode = new YoBoolean("recordingEpisode", registry);
       private final AtomicReference<ToolboxState> newToolboxStateRequestedRef = new AtomicReference<>();
       private final YoEnum<ToolboxState> toolboxState = new YoEnum<>("toolboxState", registry, ToolboxState.class);
       private final HumanoidRobotContextData humanoidRobotContextData;
@@ -213,19 +212,19 @@ public class IKStreamingRTPluginFactory
          this.commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
          this.statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
          ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
-                                                                                                   commandInputManager,
-                                                                                                   outputTopic,
-                                                                                                   statusOutputManager,
-                                                                                                   ros2Node);
+                 commandInputManager,
+                 outputTopic,
+                 statusOutputManager,
+                 ros2Node);
          commandInputManager.registerHasReceivedInputListener(commandClass -> receivedInput.set(true));
 
          this.kinematicsStreamingToolboxController = new KinematicsStreamingToolboxController(commandInputManager,
-                                                                                              statusOutputManager,
-                                                                                              parameters,
-                                                                                              desiredFullRobotModel,
-                                                                                              fullRobotModelFactory,
-                                                                                              yoGraphicsListRegistry,
-                                                                                              registry);
+                 statusOutputManager,
+                 parameters,
+                 desiredFullRobotModel,
+                 fullRobotModelFactory,
+                 yoGraphicsListRegistry,
+                 registry);
 
          List<String> inactiveJoints = parameters.getInactiveJoints();
          for (int i = 0; i < inactiveJoints.size(); i++)
@@ -239,21 +238,21 @@ public class IKStreamingRTPluginFactory
          List<Settable<?>> unpackedMessages = new ArrayList<>();
 
          kinematicsStreamingToolboxController.setStreamingMessagePublisher(streamingMessage ->
-                                                                           {
-                                                                              wholeBodyStreamingMessageUnpacker.unpackMessage(streamingMessage,
-                                                                                                                              unpackedMessages);
-                                                                              walkingInputManager.submitMessages(unpackedMessages);
-                                                                              unpackedMessages.clear();
-                                                                           });
+         {
+            wholeBodyStreamingMessageUnpacker.unpackMessage(streamingMessage,
+                    unpackedMessages);
+            walkingInputManager.submitMessages(unpackedMessages);
+            unpackedMessages.clear();
+         });
 
          MessageUnpacker<WholeBodyTrajectoryMessage> wholeBodyTrajectoryMessageUnpacker = MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker();
          kinematicsStreamingToolboxController.setTrajectoryMessagePublisher(trajectoryMessage ->
-                                                                            {
-                                                                               wholeBodyTrajectoryMessageUnpacker.unpackMessage(trajectoryMessage,
-                                                                                                                                unpackedMessages);
-                                                                               walkingInputManager.submitMessages(unpackedMessages);
-                                                                               unpackedMessages.clear();
-                                                                            });
+         {
+            wholeBodyTrajectoryMessageUnpacker.unpackMessage(trajectoryMessage,
+                    unpackedMessages);
+            walkingInputManager.submitMessages(unpackedMessages);
+            unpackedMessages.clear();
+         });
 
          walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, kinematicsStreamingToolboxController::updateCapturabilityBasedStatus);
 
@@ -271,13 +270,10 @@ public class IKStreamingRTPluginFactory
          contextDataFactory.setProcessedJointData(processedJointData);
          contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
          humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-         KinematicsStreamingToolboxInputMessage kinematicMessage = new KinematicsStreamingToolboxInputMessage();
          ros2Node.createSubscription(inputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class), s ->
          {
             if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
-            s.takeNextData(kinematicMessage, null);
-            recordEpisode.set(kinematicMessage.getRecordEpisode());
          });
          ToolboxStateMessage message = new ToolboxStateMessage();
          ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
@@ -290,10 +286,10 @@ public class IKStreamingRTPluginFactory
          toolboxState.set(ToolboxState.SLEEP);
 
          kinematicsStreamingToolboxController.setRobotStateUpdater(new ContextBasedRobotStateUpdater(humanoidRobotContextData,
-                                                                                                     desiredFullRobotModel,
-                                                                                                     kinematicsStreamingToolboxController.getTools()
-                                                                                                                                         .getIKController()
-                                                                                                                                         .getDesiredOneDoFJoints()));
+                 desiredFullRobotModel,
+                 kinematicsStreamingToolboxController.getTools()
+                         .getIKController()
+                         .getDesiredOneDoFJoints()));
       }
 
       private long initialTime = -1L;
