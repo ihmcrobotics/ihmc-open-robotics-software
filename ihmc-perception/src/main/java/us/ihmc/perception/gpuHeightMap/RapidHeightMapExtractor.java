@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -19,7 +18,6 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -85,7 +83,7 @@ public class RapidHeightMapExtractor
    private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
    private int previousCellX;
    private int previousCellY;
-   private int resetOffset;
+   private float resetOffset;
 
    public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -131,7 +129,7 @@ public class RapidHeightMapExtractor
          previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
-         scaledHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
+         scaledHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
          emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
          // Initialize transformation pointers
@@ -170,9 +168,9 @@ public class RapidHeightMapExtractor
       reset(footHeight, 0);
    }
 
-   public void reset(double footHeight, int loweredValue)
+   public void reset(double footHeight, float loweredValue)
    {
-      resetOffset = (int) ((footHeight + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+      resetOffset = (float) footHeight;
       resetOffset -= loweredValue;
 
       globalMeanMap.setTo(new Scalar(resetOffset));
@@ -289,7 +287,7 @@ public class RapidHeightMapExtractor
             translateKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
             translateKernel.withInt(shiftX).withInt(shiftY);
             translateKernel.withPointer(parametersDevicePointer);
-            translateKernel.withInt(resetOffset);
+            translateKernel.withFloat(resetOffset);
 
             translateKernel.run(stream, translateKernelGridDim, blockSize, 0);
 
@@ -324,7 +322,7 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the Scaling kernel ----------
       {
-         int scalingKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int scalingKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 scalingKernelGridDim = new dim3(scalingKernelGridSizeXY, scalingKernelGridSizeXY, 1);
 
          scalingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());

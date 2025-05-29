@@ -35,7 +35,7 @@ extern "C"
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
 
-const bool DEBUG = true;
+const bool DEBUG = false;
 
 __device__ int2 spherical_projection(float3 cellCenter, float *params)
 {
@@ -337,7 +337,7 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
                                          float *oldHeightMapVariance, size_t pitchOldHeightMapVariance,
                                          float *newMeanMap, size_t pitchNewMean,
                                          float *newVarianceMap, size_t pitchNewVariance,
-                                         int shiftX, int shiftY, float *params, int defaultValue)
+                                         int shiftX, int shiftY, float *params, float defaultValue)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -475,8 +475,8 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(float *globalHeightMap, size_t pitchGlobal,
-                                               float *terrainMap, size_t pitchTerrain,
+__global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, size_t pitchGlobal,
+                                               unsigned short *terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -491,8 +491,8 @@ __global__ void terrainCroppingHeightMapKernel(float *globalHeightMap, size_t pi
     int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
 
     // Access pitched memory properly
-    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
-    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
+    unsigned short *globalRow = (unsigned short *)((char *)globalHeightMap + globalX * pitchGlobal);
+    unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
 
     terrainRow[yIndex] = globalRow[globalY];
 }
