@@ -149,7 +149,7 @@ def behavior_message_callback(msg):
         print("LLM Response:", response, "type of response:", type(response), "length of response:", len(response))
         print("LLM Call Counter:", llm_call_counter)
 
-        next_behavior   = response.strip('.\"')  # Remove any trailing punctuation or quotes
+        next_behavior   = response.strip('.\'')  # Remove any trailing punctuation or quotes
         print("Next behavior:", next_behavior, "type of next behavior:", type(next_behavior), "length of next behavior:", len(next_behavior))
 
         # --------- Coordination -----------
