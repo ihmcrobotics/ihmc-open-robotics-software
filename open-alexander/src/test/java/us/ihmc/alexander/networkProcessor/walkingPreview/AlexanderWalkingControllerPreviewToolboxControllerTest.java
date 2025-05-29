@@ -1,7 +1,7 @@
 package us.ihmc.alexander.networkProcessor.walkingPreview;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -9,7 +9,7 @@ import us.ihmc.avatar.networkProcessor.walkingPreview.AvatarWalkingControllerPre
 
 public class AlexanderWalkingControllerPreviewToolboxControllerTest extends AvatarWalkingControllerPreviewToolboxControllerTest
 {
-   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Test

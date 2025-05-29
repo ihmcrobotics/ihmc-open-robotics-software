@@ -6,7 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.alexander.AlexanderJointMap;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.AlexanderVersionInterface;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -28,12 +29,12 @@ import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.POSITI
 
 public class AlexanderHighLevelControllerParameters implements HighLevelControllerParameters
 {
-   private final AlexanderVersion alexanderVersion;
+   private final AlexanderVersionInterface alexanderVersion;
    private final AlexanderJointMap jointMap;
    private final RobotTarget target;
    private final AlexanderStandPrepSetPoints standPrepSetPoints;
 
-   public AlexanderHighLevelControllerParameters(AlexanderVersion alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
+   public AlexanderHighLevelControllerParameters(AlexanderVersionInterface alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
    {
       this.alexanderVersion = alexanderVersion;
       this.jointMap = jointMap;

@@ -1,8 +1,7 @@
 package us.ihmc.alexander;
 
 import org.apache.commons.lang3.SystemUtils;
-import us.ihmc.alexander.parameters.controller.AlexanderContactPointParameters;
-import us.ihmc.alexander.parameters.model.AlexanderURDFParameters;
+import us.ihmc.alexander.parameters.model.HumanoidURDFParameterInterface;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
@@ -21,26 +20,27 @@ import java.util.function.Predicate;
 
 public class AlexanderModelFactory
 {
-   private final String[] resourceModelsToBeLogged = {"models/alexander_v0"};
-   private final AlexanderURDFParameters urdfParameters;
+   private final String[] resourceModelsToBeLogged;
+   private final HumanoidURDFParameterInterface urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
-   private final AlexanderVersion alexanderVersion;
+   private final AlexanderVersionInterface alexanderVersion;
    private RobotDefinition controllerRobotDefinition;
    private final AlexanderJointMap jointMap;
    private final Consumer<RobotDefinition> robotDefinitionMutator;
 
-   public AlexanderModelFactory(AlexanderVersion alexanderVersion,
-                               AlexanderJointMap jointMap,
-                               RobotContactPointParameters<RobotSide> contactPointParameters,
-                               Consumer<RobotDefinition> robotDefinitionMutator)
+   public AlexanderModelFactory(AlexanderVersionInterface alexanderVersion,
+                                AlexanderJointMap jointMap,
+                                RobotContactPointParameters<RobotSide> contactPointParameters,
+                                Consumer<RobotDefinition> robotDefinitionMutator)
    {
       this.alexanderVersion = alexanderVersion;
       this.jointMap = jointMap;
       this.contactPointParameters = contactPointParameters;
       this.robotDefinitionMutator = robotDefinitionMutator;
 //
-      urdfParameters = new AlexanderURDFParameters(alexanderVersion);
+      urdfParameters = alexanderVersion.getURDFParameters();
+      resourceModelsToBeLogged = urdfParameters.getLoggedResources();
    }
 
    public LogModelProvider createLogModelProvider()

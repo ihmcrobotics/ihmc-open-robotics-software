@@ -29,7 +29,7 @@ import us.ihmc.simulationToolkit.RobotDefinitionTools;
 
 import java.util.ArrayList;
 
-public class AlexanderModelViewer
+public class OpenAlexanderModelViewer
 {
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_IMU_FRAMES = false;
@@ -39,9 +39,9 @@ public class AlexanderModelViewer
    private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
 
-   public AlexanderModelViewer()
+   public OpenAlexanderModelViewer()
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_NUB_FOREARMS, RobotTarget.SCS);
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_NUB_FOREARMS, RobotTarget.SCS);
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
 
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
@@ -165,6 +165,6 @@ public class AlexanderModelViewer
 
    public static void main(String[] args)
    {
-      new AlexanderModelViewer();
+      new OpenAlexanderModelViewer();
    }
 }

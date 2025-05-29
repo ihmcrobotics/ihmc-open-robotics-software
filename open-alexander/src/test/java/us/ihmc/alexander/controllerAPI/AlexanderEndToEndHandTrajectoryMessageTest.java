@@ -3,7 +3,7 @@ package us.ihmc.alexander.controllerAPI;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalPropertiesV0;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
@@ -12,11 +12,10 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AlexanderEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public double getHeightOffsetFromChestForSphereCenter()
