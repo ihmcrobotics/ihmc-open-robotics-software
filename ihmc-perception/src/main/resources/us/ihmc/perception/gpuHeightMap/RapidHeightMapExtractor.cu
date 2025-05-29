@@ -449,28 +449,6 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
     }
 }
 
-extern "C"
-__global__ void terrainCroppingHeightMapKernel(float *globalHeightMap, size_t pitchGlobal,
-                                               float *terrainMap, size_t pitchTerrain,
-                                               int centerIndexTerrain, float *params)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-
-    int terrainCellsPerAxis = 2 * centerIndexTerrain + 1;
-    if (xIndex >= terrainCellsPerAxis || yIndex >= terrainCellsPerAxis)
-        return;
-
-    // Compute coordinates in the global map
-    int globalX = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + xIndex;
-    int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
-
-    // Access pitched memory properly
-    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
-    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
-
-    terrainRow[yIndex] = globalRow[globalY];
-}
 
 extern "C"
 __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGlobalHeightMap,
@@ -494,6 +472,29 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
 
     unsigned short *heightValue = (unsigned short *)((char *)scaledHeightMap + xIndex * pitchScaledHeightMap) + yIndex;
     *heightValue = static_cast<unsigned short>(heightClamped);
+}
+
+extern "C"
+__global__ void terrainCroppingHeightMapKernel(float *globalHeightMap, size_t pitchGlobal,
+                                               float *terrainMap, size_t pitchTerrain,
+                                               int centerIndexTerrain, float *params)
+{
+    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
+    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
+
+    int terrainCellsPerAxis = 2 * centerIndexTerrain + 1;
+    if (xIndex >= terrainCellsPerAxis || yIndex >= terrainCellsPerAxis)
+        return;
+
+    // Compute coordinates in the global map
+    int globalX = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + xIndex;
+    int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
+
+    // Access pitched memory properly
+    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
+    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
+
+    terrainRow[yIndex] = globalRow[globalY];
 }
 
 extern "C"
