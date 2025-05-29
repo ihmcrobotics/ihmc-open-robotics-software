@@ -70,6 +70,11 @@ module toolbox_msgs
          * If use_center_of_mass_input is false, this message is ignored.
          */
         toolbox_msgs::msg::dds::KinematicsToolboxCenterOfMassMessage center_of_mass_input;
+        /**
+         * When false, episode is not being recorded for lerobot diffusion
+         * When true, episode is being recorded for lerobot diffusion
+         */
+        boolean record_episode;
       };
     };
   };

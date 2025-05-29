@@ -62,6 +62,11 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
             * If use_center_of_mass_input is false, this message is ignored.
             */
    public toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage center_of_mass_input_;
+   /**
+            * When false, episode is not being recorded for lerobot diffusion
+            * When true, episode is being recorded for lerobot diffusion
+            */
+   public boolean record_episode_;
 
    public KinematicsStreamingToolboxInputMessage()
    {
@@ -94,6 +99,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       use_center_of_mass_input_ = other.use_center_of_mass_input_;
 
       toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.staticCopy(other.center_of_mass_input_, center_of_mass_input_);
+      record_episode_ = other.record_episode_;
+
    }
 
    /**
@@ -245,6 +252,23 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       return center_of_mass_input_;
    }
 
+   /**
+            * When false, episode is not being recorded for lerobot diffusion
+            * When true, episode is being recorded for lerobot diffusion
+            */
+   public void setRecordEpisode(boolean record_episode)
+   {
+      record_episode_ = record_episode;
+   }
+   /**
+            * When false, episode is not being recorded for lerobot diffusion
+            * When true, episode is being recorded for lerobot diffusion
+            */
+   public boolean getRecordEpisode()
+   {
+      return record_episode_;
+   }
+
 
    public static Supplier<KinematicsStreamingToolboxInputMessagePubSubType> getPubSubType()
    {
@@ -285,6 +309,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_center_of_mass_input_, other.use_center_of_mass_input_, epsilon)) return false;
 
       if (!this.center_of_mass_input_.epsilonEquals(other.center_of_mass_input_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.record_episode_, other.record_episode_, epsilon)) return false;
+
 
       return true;
    }
@@ -314,6 +340,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       if(this.use_center_of_mass_input_ != otherMyClass.use_center_of_mass_input_) return false;
 
       if (!this.center_of_mass_input_.equals(otherMyClass.center_of_mass_input_)) return false;
+      if(this.record_episode_ != otherMyClass.record_episode_) return false;
+
 
       return true;
    }
@@ -341,7 +369,9 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       builder.append("use_center_of_mass_input=");
       builder.append(this.use_center_of_mass_input_);      builder.append(", ");
       builder.append("center_of_mass_input=");
-      builder.append(this.center_of_mass_input_);
+      builder.append(this.center_of_mass_input_);      builder.append(", ");
+      builder.append("record_episode=");
+      builder.append(this.record_episode_);
       builder.append("}");
       return builder.toString();
    }
