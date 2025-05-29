@@ -27,10 +27,16 @@ class FoundationPoseWorker:
     def update(self, rgb, depth):
         if not self.initialized:
             print("REGISTERING", self.object_id)
-            pose = self.foundation_pose.register(K=self.camera_k, rgb=self.initial_rgb, depth=self.initial_depth, ob_mask=self.initial_mask, ob_id=self.object_id)
+            pose = self.foundation_pose.register(K=self.camera_k,
+                                                 rgb=self.initial_rgb,
+                                                 depth=self.initial_depth,
+                                                 ob_mask=self.initial_mask,
+                                                 ob_id=self.object_id,
+                                                 iteration=2)
 
-            # Make sure pose isn't identity (returned when register fails)
-            if not np.allclose(pose, np.eye(pose.shape[0])):
+            # Make sure rotation isn't identity (returned when register fails)
+            rotation_matrix = pose[:3, :3]
+            if not np.allclose(rotation_matrix, np.eye(rotation_matrix.shape[0])):
                 self.initialized = True
         else:
             print("TRACKING", self.object_id)
