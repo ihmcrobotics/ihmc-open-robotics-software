@@ -353,10 +353,6 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      Mat test = new Mat();
-      scaledHeightMap.download(test);
-      PerceptionDebugTools.printMat("s", test, 10);
-
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
       cudaFreeAsync(ZUpCameraToWorldAlignedGroundDevicePointer, stream);

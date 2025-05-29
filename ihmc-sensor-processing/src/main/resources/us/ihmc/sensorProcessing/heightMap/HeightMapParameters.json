@@ -39,27 +39,27 @@
     "upperBound" : 0.4
   },
   "Kalman filter prediction noise" : {
-    "value" : 0.25,
+    "value" : 0.005,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Additional translational variance added" : {
-    "value" : 0.5,
-    "lowerBound" : 0.0,
-    "upperBound" : 1.0
-  },
-  "Variance per meter" : {
     "value" : 0.05,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
+  "Variance per meter" : {
+    "value" : 0.01,
+    "lowerBound" : 0.0,
+    "upperBound" : 1.0
+  },
   "Variance per translation speed" : {
-    "value" : 0.1,
+    "value" : 0.05,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Variance per rotation speed" : {
-    "value" : 0.2,
+    "value" : 0.05,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

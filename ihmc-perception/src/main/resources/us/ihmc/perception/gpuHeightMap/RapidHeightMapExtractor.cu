@@ -162,7 +162,7 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
 // Compute the average height for points within the grid cell while filtering outliers.
 extern "C"
 __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDepth,
-                                      unsigned short *previousGlobalHeightMap, size_t pitchGlobal,
+                                      float *previousGlobalHeightMap, size_t pitchGlobal,
                                       float *localMeanMap, size_t pitchLocalMean,
                                       float *localVarianceMap, size_t pitchLocalVariance,
                                       float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
@@ -186,20 +186,18 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 
     float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT]);
 
-//     int2 globalIndex = getGlobalIndexFromLocalIndex(make_int2(xIndex, yIndex), zUpCameraToWorldAlignedGround, params);
-//
-//     if (globalIndex.x >= 0 && globalIndex.x < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS])
-//         && globalIndex.y >= 0 && globalIndex.y < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]))
-//     {
-//         unsigned short *globalHeight = (unsigned short *)((char *)previousGlobalHeightMap + globalIndex.x * pitchGlobal) + globalIndex.y;
-//
-//         if (*globalHeight != resetOffset)
-//         {
-//              float unScaledHeight = static_cast<float>(*globalHeight) / params[HEIGHT_SCALING_FACTOR];
-//              float heightInMeters = unScaledHeight - params[HEIGHT_OFFSET];
-//              cellCenterInZUp.z = heightInMeters;
-//         }
-//     }
+    int2 globalIndex = getGlobalIndexFromLocalIndex(make_int2(xIndex, yIndex), zUpCameraToWorldAlignedGround, params);
+
+    if (globalIndex.x >= 0 && globalIndex.x < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS])
+        && globalIndex.y >= 0 && globalIndex.y < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]))
+    {
+        float *globalHeight = (float *)((char *)previousGlobalHeightMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+
+        if (*globalHeight != resetOffset)
+        {
+             cellCenterInZUp.z = *globalHeight;
+        }
+    }
 
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),
@@ -363,7 +361,7 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
         newMeanRow[y] = oldMeanRow[srcY];
 
         // Add variance due to the translation
-        unsigned int increasedVariance = (unsigned int)oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
+        float increasedVariance = oldVarianceRow[srcY] + params[ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED];
         // We use min here to prevent over flow of the max value of a unsigned short
         newVarianceRow[y] = increasedVariance;
     }
