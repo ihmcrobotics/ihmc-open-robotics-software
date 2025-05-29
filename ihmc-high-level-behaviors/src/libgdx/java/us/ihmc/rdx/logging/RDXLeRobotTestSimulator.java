@@ -101,6 +101,8 @@ public class RDXLeRobotTestSimulator
                controllerState = null;
                time = null;
             }
+
+            // TODO Reset kinematics simulation robot to the log robot's pose
          }
          else
          {
