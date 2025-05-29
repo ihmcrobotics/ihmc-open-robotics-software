@@ -3,7 +3,6 @@ package us.ihmc.behaviors.ai2r;
 import behavior_msgs.msg.dds.AI2RActionFailureMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
-import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
@@ -16,10 +15,8 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -42,11 +39,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
 
-   private CRDTStatusFootstepList plannedSteps;
-//   private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
-   private boolean navigationFailureForObstacle = false;
    private boolean actionFailureMissingFrame = false;
-   private String navigationFailureObstacleName;
    private final AI2RSkillEditor skillEditor = new AI2RSkillEditor();
 
 
@@ -92,7 +85,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                failedLeaves.get(j).setFailed(false);
             }
             failedLeaves.clear();
-            navigationFailureForObstacle = false;
             actionFailureMissingFrame = false;
             state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
             state.getActionSequence().setAutomaticExecution(true);
@@ -111,7 +103,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       statusMessage.setFailedBehavior("-");
       statusMessage.getFailure().setActionName("-");
       statusMessage.getFailure().setActionType("-");
-      statusMessage.getFailure().setCollisionName("-");
       statusMessage.getFailure().setMissingFrame(false);
       statusMessage.getFailure().getPositionError().set(new Point3D());
       statusMessage.getFailure().getOrientationError().set(new Quaternion());
@@ -133,7 +124,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
 
       endSequenceAfterBehaviorExecution();
-      reportNavigationFailures();
+      reportMissingFrameFailures();
    }
 
    private void setSceneInfo()
@@ -194,10 +185,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                      if (action instanceof FootstepPlanActionState walkAction)
                      {
                         failureMessage.setActionFrame(walkAction.getDefinition().getParentFrameName());
-                        if (navigationFailureForObstacle)
-                        {
-                           failureMessage.setCollisionName(navigationFailureObstacleName);
-                        }
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
                         failureMessage.setActionType(walkAction.getDefinition().getClass().getSimpleName());
                      }
@@ -236,6 +223,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                      if (conditionNodeState.getDefinition().getType().getValue() == ConditionNodeDefinition.Type.PROXIMITY)
                      {
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
+                        double maxDistanceAllowed = conditionNodeState.getDefinition().getProximityCheck().getMaxDistanceToObject();
+                        double currentDistance = conditionNodeState.getProximityCheck().getCurrentDistance().getValue();
+                        double error = currentDistance - maxDistanceAllowed;
+                        failureMessage.getPositionError().set(error, 0.0, 0.0);
+                        failureMessage.setPositionTolerance(0.0);
                      }
                      failureMessage.setActionType(conditionNodeState.getDefinition().getClass().getSimpleName());
                   }
@@ -247,7 +239,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
    }
 
-   private void reportNavigationFailures()
+   private void reportMissingFrameFailures()
    {
       // Check if Goto action is executing and if next steps are colliding with objects in the scene
       goToCollisionLoop:
@@ -260,47 +252,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                actionFailureMissingFrame = true;
             }
          }
-
-//         if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
-//         {
-//            if (gotoActionState.getIsExecuting())
-//            {
-//               if (plannedSteps == null)
-//               {
-//                  plannedSteps = gotoActionState.getPreviewFootsteps();
-//               }
-//               else // Check if the next step's pose is too close with any object in the scene
-//               {
-//                  int stepsLeft = gotoActionState.getNumberOfIncompleteFootsteps();
-//                  if (stepsLeft > plannedSteps.getSize())
-//                     plannedSteps = gotoActionState.getPreviewFootsteps();
-//                  if (stepsLeft > 0 && plannedSteps.getSize() >= stepsLeft + 1)
-//                  {
-//                     Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - (stepsLeft + 1)).getTranslation();
-//                     for (var object : statusMessage.getObjects())
-//                     {
-//                        Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
-//                        if (positionNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
-//                        {
-//                           gotoActionState.setFailed(true);
-//                           navigationFailureForObstacle = true;
-//                           navigationFailureObstacleName = object.getObjectNameAsString();
-//                           // Have the executor abort
-//                           ros2.publishToController(new AbortWalkingMessage());
-//
-//                           plannedSteps = null;
-//                           break goToCollisionLoop;
-//                        }
-//                     }
-//                  }
-//                  else
-//                  {
-//                     LogTools.debug("Cannot check collision of next step");
-//                  }
-//               }
-//            }
-//            break;
-//         }
       }
    }
 
