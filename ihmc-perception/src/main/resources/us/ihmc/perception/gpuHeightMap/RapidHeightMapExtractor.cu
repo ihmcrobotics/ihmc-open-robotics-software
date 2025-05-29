@@ -306,7 +306,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
 
     float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
 
-    // Motion variance
+    // Motion variance for distance from sensor origin, and "speed" of a cell
     motionVarianceF += distance * params[VARIANCE_PER_METER];
     motionVarianceF += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
     motionVarianceF += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
@@ -431,6 +431,7 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
         float predictedMean = globalMeanF;
         float predictedVariance = globalVarianceF + params[KALMAN_FILTER_PREDICTION_NOISE];
 
+        // Update step of the filter
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
         float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
@@ -449,7 +450,6 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
     }
 }
 
-
 extern "C"
 __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGlobalHeightMap,
                                        unsigned short *scaledHeightMap, size_t pitchScaledHeightMap,
@@ -466,6 +466,7 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
         return;
 
     float *globalHeight = (float *)((char *)globalHeightMap + xIndex * pitchGlobalHeightMap) + yIndex;
+    // Scale the value to be visualized an an unsigned short
     float heightClamped = fminf(fmaxf(*globalHeight, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
     heightClamped += params[HEIGHT_OFFSET];
     heightClamped *= params[HEIGHT_SCALING_FACTOR];
@@ -490,7 +491,7 @@ __global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, 
     int globalX = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + xIndex;
     int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
 
-    // Access pitched memory properly
+    // Set the terrain map index to the equivalent index in the global map
     unsigned short *globalRow = (unsigned short *)((char *)globalHeightMap + globalX * pitchGlobal);
     unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
 
