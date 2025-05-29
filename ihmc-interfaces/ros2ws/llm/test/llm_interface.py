@@ -51,7 +51,24 @@ class LLMInterface:
         self.goal           = config.get("goal", "")
         self.system_prompt  = config.get("system_prompt", "")
         self.prompt_type    = config.get("prompt_type", "simple_prompt")
-        self.prompt         = config.get("prompt", "Summarize all the behaviors in one paragraph")
+        self.prompt         = config.get("prompt", "")
+        self.task_description = config.get("task_description", "")
+        self.examples       = config.get("examples", "")
+        self.immediate_task = config.get("immediate_task", "")
+        self.precognition = config.get("precognition", "")
+        self.output_formatting = config.get("output_formatting", "")
+
+        if self.task_description:
+            self.prompt += f"\nTask Description: {self.task_description}"
+        if self.examples:
+            self.prompt += f"\nExamples: {self.examples}"
+        if self.immediate_task:
+            self.prompt += f"\nImmediate Task: {self.immediate_task}"
+        if self.precognition:
+            self.prompt += f"\nPrecognition: {self.precognition}"
+        if self.output_formatting:
+            self.prompt += f"\nOutput Formatting: {self.output_formatting}"
+
 
     def call_model(self, llm_input):
         #messages = [{"role": "user", "content": self.prompt}]
@@ -61,10 +78,6 @@ class LLMInterface:
            "role": "system",
            "content": self.system_prompt
         },
-        # {
-        #    "role": "assistant",
-        #    "content": llm_input
-        # },
         {
            "role": "user",
            "content": self.llm_input + " " + self.prompt
@@ -98,54 +111,6 @@ class LLMInterface:
         
         return output
     
-    def call_model_with_response(self, llm_prev_input, llm_response, llm_input):
-        #messages = [{"role": "user", "content": self.prompt}]
-        self.llm_input = llm_input
-        messages = [
-        {
-           "role": "system",
-           "content": self.system_prompt
-        },
-        {
-           "role": "user",
-           "content": llm_prev_input + " " + self.prompt
-        },
-        {
-           "role": "assistant",
-           "content": llm_response
-        },
-        {
-           "role": "user",
-           "content": self.llm_input + " " + self.prompt
-        }
-        ]
-        
-        payload = {
-            "model": self.model,
-            "max_tokens": self.token_limit,
-            "temperature": self.temperature,
-            "top_k": self.top_k,
-            "top_p": self.top_p,
-            "messages": messages
-        }
-
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}"
-        }
-
-        response = requests.post(self.api_url, headers=headers, json=payload)
-        res_json = response.json()
-        
-        if 'error' in res_json:
-            raise Exception(res_json['error'])
-        
-        output = res_json['choices'][0]['message']['content']
-        #self.log_interaction(messages)
-        self.log_interaction(output)
-        
-        return output
         
     def first_log_interaction(self, output):
         log_data = {
