@@ -9,7 +9,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.NotNull;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -24,6 +24,7 @@ import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -47,12 +48,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final TerrainMapData terrainMapData;
    @org.jetbrains.annotations.NotNull
    private final HeightMapParameters heightMapParameters;
-   private final int cellsPerAxisCropped;
+   private final int cellsPerAxisGlobal;
 
    private ROS2PublishSubscribeAPI ros2;
-   private Mat heightMapImage;
+   private Mat heightMap;
 
-   private float pixelScalingFactor = 10000.0f;
    private HeightMapData latestHeightMapData;
 
    public RDXROS2HeightMapVisualizer(String title, @NotNull HeightMapParameters heightMapParameters)
@@ -62,10 +62,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       this.heightMapParameters = heightMapParameters;
 
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
+      cellsPerAxisGlobal = 2 * croppedCenterIndex + 1;
 
-      terrainMapData = new TerrainMapData(cellsPerAxisCropped,
-                                          cellsPerAxisCropped,
+      heightMap = new Mat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+
+      terrainMapData = new TerrainMapData(cellsPerAxisGlobal,
+                                          cellsPerAxisGlobal,
                                           heightMapParameters.getHeightScaleFactor(),
                                           heightMapParameters.getHeightOffset());
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
@@ -81,13 +83,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public void create()
    {
       super.create();
-      heightMapRenderer.create(cellsPerAxisCropped * cellsPerAxisCropped);
+      heightMapRenderer.create(cellsPerAxisGlobal * cellsPerAxisGlobal);
    }
 
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptImageMessage);
       ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
@@ -106,7 +108,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       }
    }
 
-   public void acceptImageMessage(ImageMessage imageMessage)
+   public void acceptImageMessage(HeightMapMessage imageMessage)
    {
       // Even if the height map is publishing, we aren't going to update anything with that data unless its active
       if (!isActive())
@@ -114,13 +116,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       executorService.clearQueueAndExecute(() ->
                                            {
-                                              pixelScalingFactor = imageMessage.getDepthDiscretization();
                                               zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
 
-                                              if (heightMapImage == null)
-                                                 heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
+                                              latestHeightMapData = HeightMapMessageTools.unpackMessage(imageMessage);
 
-                                              PerceptionMessageTools.convertToHeightMapImage(imageMessage, heightMapImage);
+                                              heightMap = PerceptionMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
                                               if (latestHeightMapData == null)
                                               {
@@ -130,7 +130,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                          imageMessage.getPosition().getY());
                                               }
 
-                                              PerceptionMessageTools.convertToHeightMapData(heightMapImage,
+                                              PerceptionMessageTools.convertToHeightMapData(heightMap,
                                                                                             latestHeightMapData,
                                                                                             imageMessage.getPosition(),
                                                                                             (float) heightMapParameters.getGlobalWidthInMeters(),
@@ -192,16 +192,17 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          globalHeightMapGraphic.update();
       }
 
-      if (enableHeightMapRenderer.get() && heightMapImage != null)
+      if (enableHeightMapRenderer.get() && heightMap != null)
       {
          // An additional check here to make sure that we have data in the image
-         if (heightMapImage.ptr(0) != null)
+         if (heightMap.ptr(0) != null)
          {
-            heightMapRenderer.update(heightMapImage,
+            float pixelScalingFactor = 10000.0f;
+            heightMapRenderer.update(heightMap,
                                      (float) heightMapParameters.getHeightOffset(),
                                      zUpToWorldTransform.getTranslation().getX32(),
                                      zUpToWorldTransform.getTranslation().getY32(),
-                                     heightMapImage.rows() / 2,
+                                     heightMap.rows() / 2,
                                      (float) heightMapParameters.getCellSizeInMeters(),
                                      pixelScalingFactor);
          }

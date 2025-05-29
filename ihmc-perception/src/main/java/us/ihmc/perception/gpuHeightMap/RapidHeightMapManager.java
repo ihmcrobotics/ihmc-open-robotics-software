@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -14,12 +15,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.time.Instant;
@@ -44,7 +45,7 @@ public class RapidHeightMapManager
 
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
-   private final ROS2Publisher<ImageMessage> heightMapPublisher;
+   private final ROS2Publisher<HeightMapMessage> heightMapPublisher;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
@@ -66,7 +67,7 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
-      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
+      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
@@ -96,16 +97,20 @@ public class RapidHeightMapManager
       // Don't close this mat as its being used in the extractor till that finish's
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
-      OpenCVTools.compressImagePNG(hostGlobalHeightMap, compressedCroppedHeightMapPointer);
-      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
-                                                         croppedHeightMapImageMessage,
-                                                         heightMapPublisher,
-                                                         cameraPose,
-                                                         acquisitionTime,
-                                                         sequenceNumber++,
-                                                         hostGlobalHeightMap.rows(),
-                                                         hostGlobalHeightMap.cols(),
-                                                         (float) heightMapParameters.getHeightScaleFactor());
+
+      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                            sensorOrigin.getX(),
+                                                            sensorOrigin.getY());
+      PerceptionMessageTools.convertToHeightMapData(hostGlobalHeightMap,
+                                                    latestHeightMapData,
+                                                    sensorOrigin,
+                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                    (float) heightMapParameters.getCellSizeInMeters(),
+                                                    heightMapParameters);
+      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
+      heightMapPublisher.publish(heightMapMessage);
 
       hostGlobalHeightMap.close();
       deviceGlobalHeightMap.close();
