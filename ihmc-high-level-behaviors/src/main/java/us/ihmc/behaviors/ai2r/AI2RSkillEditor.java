@@ -79,12 +79,11 @@ public class AI2RSkillEditor
                      {
                         direction.scale(distanceToReferenceFrame);
                         goalStancePoint.add(direction);
-                        // After calculation, go back to pointing at object
-                        goalFocalPoint.changeFrame(referenceFrame);
-                        goalFocalPoint.setToZero();
-                        goalFocalPoint.changeFrame(ReferenceFrame.getWorldFrame());
                      }
-                     case FRONT -> goalStancePoint.add(direction);
+                     case FRONT ->
+                           {
+                              goalStancePoint.add(direction);
+                           }
                      case BEHIND -> goalStancePoint.sub(direction);
                      case LEFT ->
                      {
@@ -120,7 +119,9 @@ public class AI2RSkillEditor
                      }
                   }
                }
+               // After calculation, go back to pointing at object
                goalFocalPoint.changeFrame(referenceFrame);
+               goalFocalPoint.setToZero();
                goalStancePoint.changeFrame(referenceFrame);
                gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
                gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);
