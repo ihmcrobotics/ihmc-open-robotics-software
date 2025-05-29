@@ -110,6 +110,8 @@ public class RapidHeightMapManager
                                                     heightMapParameters);
       HeightMapMessage heightMapMessage = new HeightMapMessage();
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
+      heightMapMessage.getOrientation().set(cameraPose.getOrientation());
+      heightMapMessage.getPosition().set(cameraPose.getPosition());
       heightMapPublisher.publish(heightMapMessage);
 
       hostGlobalHeightMap.close();
