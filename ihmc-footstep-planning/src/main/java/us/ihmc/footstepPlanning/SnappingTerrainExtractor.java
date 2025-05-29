@@ -17,7 +17,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.HeightMapTools;
 
 import java.net.URL;
 
@@ -142,7 +142,7 @@ public class SnappingTerrainExtractor
 
       Point2D gridCenter = heightMapData.getGridCenter();
 
-      Mat heightMap = PerceptionMessageTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
+      Mat heightMap = HeightMapTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
       GpuMat gpuHeightMap = new GpuMat();
       gpuHeightMap.upload(heightMap);
 

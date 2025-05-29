@@ -16,7 +16,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 

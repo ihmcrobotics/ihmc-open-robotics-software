@@ -15,7 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.perception.tools.HeightMapTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -102,12 +102,12 @@ public class RapidHeightMapManager
                                                             (float) heightMapParameters.getTerrainWidthInMeters(),
                                                             sensorOrigin.getX(),
                                                             sensorOrigin.getY());
-      PerceptionMessageTools.convertToHeightMapData(hostGlobalHeightMap,
-                                                    latestHeightMapData,
-                                                    sensorOrigin,
-                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getCellSizeInMeters(),
-                                                    heightMapParameters);
+      HeightMapTools.convertToHeightMapData(hostGlobalHeightMap,
+                                            latestHeightMapData,
+                                            sensorOrigin,
+                                            (float) heightMapParameters.getTerrainWidthInMeters(),
+                                            (float) heightMapParameters.getCellSizeInMeters(),
+                                            heightMapParameters);
       HeightMapMessage heightMapMessage = new HeightMapMessage();
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
       heightMapMessage.getOrientation().set(cameraPose.getOrientation());
@@ -183,12 +183,12 @@ public class RapidHeightMapManager
       Mat heightMap = new Mat();
       GpuMat deviceTerrainHeightMap = rapidHeightMapExtractor.getTerrainHeightMap();
       deviceTerrainHeightMap.download(heightMap);
-      PerceptionMessageTools.convertToHeightMapData(heightMap,
-                                                    latestHeightMapData,
-                                                    sensorOrigin,
-                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getCellSizeInMeters(),
-                                                    heightMapParameters);
+      HeightMapTools.convertToHeightMapData(heightMap,
+                                            latestHeightMapData,
+                                            sensorOrigin,
+                                            (float) heightMapParameters.getTerrainWidthInMeters(),
+                                            (float) heightMapParameters.getCellSizeInMeters(),
+                                            heightMapParameters);
       heightMap.close();
       deviceTerrainHeightMap.close();
 

@@ -26,7 +26,7 @@ import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -118,7 +118,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                            {
                                               zUpToWorldTransform.set(heightMapMessage.getOrientation(), heightMapMessage.getPosition());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-                                              heightMap = PerceptionMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
+                                              heightMap = HeightMapTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
                                            });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();
