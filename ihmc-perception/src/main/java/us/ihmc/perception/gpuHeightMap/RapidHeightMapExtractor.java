@@ -130,7 +130,7 @@ public class RapidHeightMapExtractor
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
+         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
          scaledHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
          emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
@@ -322,22 +322,6 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      // ---------- Run the Terrain cropping kernel ----------
-      {
-         int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
-
-         terrainCroppingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         terrainCroppingKernel.withPointer(terrainCroppedHeightMap.data()).withLong(terrainCroppedHeightMap.step());
-         terrainCroppingKernel.withInt(centerIndexTerrain);
-         terrainCroppingKernel.withPointer(parametersDevicePointer);
-
-         terrainCroppingKernel.run(stream, terrainKernelGridDim, blockSize, 0);
-
-         terrainKernelGridDim.close();
-         checkCUDAError();
-      }
-
       // ---------- Run the Scaling kernel ----------
       {
          int scalingKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -350,6 +334,22 @@ public class RapidHeightMapExtractor
          scalingKernel.run(stream, scalingKernelGridDim, blockSize, 0);
 
          scalingKernelGridDim.close();
+         checkCUDAError();
+      }
+
+      // ---------- Run the Terrain cropping kernel ----------
+      {
+         int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
+
+         terrainCroppingKernel.withPointer(scaledHeightMap.data()).withLong(scaledHeightMap.step());
+         terrainCroppingKernel.withPointer(terrainCroppedHeightMap.data()).withLong(terrainCroppedHeightMap.step());
+         terrainCroppingKernel.withInt(centerIndexTerrain);
+         terrainCroppingKernel.withPointer(parametersDevicePointer);
+
+         terrainCroppingKernel.run(stream, terrainKernelGridDim, blockSize, 0);
+
+         terrainKernelGridDim.close();
          checkCUDAError();
       }
 
