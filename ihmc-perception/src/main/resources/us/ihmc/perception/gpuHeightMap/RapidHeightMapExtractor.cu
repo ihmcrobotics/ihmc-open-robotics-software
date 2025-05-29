@@ -117,50 +117,6 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
     return heightAverage;
 }
 
-// __device__ float get_spatial_stddev(int xIndex, int yIndex, float average, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
-// {
-//     float totalDeviation = 0.0f;
-//     int count = 0;
-//     int globalCellsPerAxis = (int)params[GLOBAL_CELLS_PER_AXIS];
-//
-//     for (int i = -1; i < 2; i++)
-//     {
-//         for (int j = -1; j < 2; j++)
-//         {
-//             int nxIndex = xIndex + i;
-//             int nyIndex = yIndex + j;
-//
-//             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
-//             {
-//                 unsigned short *heightValue = (unsigned short *)((char *)globalHeightMap + nxIndex * pitchGlobal) + nyIndex;
-//                 float height = *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-//                 totalDeviation += (height - average) * (height - average);
-//                 count++;
-//             }
-//         }
-//     }
-//     float heightStddev = sqrt(totalDeviation / (float)count);
-//     return heightStddev;
-// }
-
-// __device__ float get_spatial_filtered_height(int xIndex, int yIndex, float height, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
-// {
-//     float averageHeightZ = get_spatial_average(xIndex, yIndex, globalHeightMap, pitchGlobal, params);
-//     float heightStddev = get_spatial_stddev(xIndex, yIndex, averageHeightZ, globalHeightMap, pitchGlobal, params);
-//     float finalHeight = height;
-//
-//     if (fabs(finalHeight - averageHeightZ) < 0.5f * heightStddev)
-//     {
-//         // finalHeight = averageHeightZ * params[SPATIAL_ALPHA] + finalHeight * (1.0f - params[SPATIAL_ALPHA]);
-//     }
-//     else
-//     {
-//         finalHeight = averageHeightZ * params[SPATIAL_ALPHA] * 0.0001f + finalHeight * (1.0f - params[SPATIAL_ALPHA] * 0.0001f);
-//     }
-//
-//     return finalHeight;
-// }
-
 __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraToWorldAlignedGround, float* params)
 {
     // The Z value doesn't matter since we are staying in Z-Up frames
@@ -351,7 +307,6 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     }
 
     float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
-    float scaledVariance = currentVariance * params[HEIGHT_SCALING_FACTOR] * params[HEIGHT_SCALING_FACTOR];
 
     // Motion variance
     motionVarianceF += distance * params[VARIANCE_PER_METER];
@@ -364,20 +319,10 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
         printf("Mean: %f\n", meanZ);
         printf("Variance: %f\n", currentVariance);
         printf("Motion Variance: %f\n", motionVarianceF);
-        printf("Scaled Variance: %f\n", scaledVariance);
     }
 
     if (count == 0)
-        meanZ = -params[HEIGHT_OFFSET];
-
-    // Clamp height to the specified range
-//     meanZ = fminf(fmaxf(meanZ, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
-
-    // Apply height offset
-//     meanZ += params[HEIGHT_OFFSET];
-
-    // Scale to the appropriate range
-//     float heightValue = (meanZ * params[HEIGHT_SCALING_FACTOR]);
+        meanZ = 0;
 
     float *meanHeight = (float *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
     *meanHeight = meanZ;
