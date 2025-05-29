@@ -531,7 +531,7 @@ __global__ void heightMapEmptyRegistrationKernel(unsigned short *localMap, size_
 }
 
 extern "C"
-__global__ void planOffsetKernel(unsigned short *matrixToModify, size_t pitchMatrixToModify,
+__global__ void planOffsetKernel(float *matrixToModify, size_t pitchMatrixToModify,
                                  unsigned short *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
                                  float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
                                  float resetOffset)
@@ -548,6 +548,6 @@ __global__ void planOffsetKernel(unsigned short *matrixToModify, size_t pitchMat
     if (abs( (int) skipRow[indexX] - resetOffset) >= 2)
         return;
 
-    unsigned short *matrixRow = (unsigned short *)((char *)matrixToModify + indexY * pitchMatrixToModify);
-    matrixRow[indexX] += static_cast<short>(offsetInZ * 10000.0f);
+    float *matrixRow = (float *)((char *)matrixToModify + indexY * pitchMatrixToModify);
+    matrixRow[indexX] += offsetInZ;
 }
