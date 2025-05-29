@@ -1,208 +1,147 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FoundationPoseRequest;
-import perception_msgs.msg.dds.FoundationPoseResult;
-import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
-import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 
-import java.time.Instant;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class FoundationPoseManager
 {
-   private static final BytePointer JPG = new BytePointer(".jpg");
-   private static final BytePointer PNG = new BytePointer(".png");
-
-   private static final ROS2Topic<?> FOUNDATION_POSE_TOPIC = new ROS2Topic<>().withPrefix("foundation_pose").withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = FOUNDATION_POSE_TOPIC.withModule("color_rgb8").withType(ImageMessage.class);
-   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = FOUNDATION_POSE_TOPIC.withModule("depth_mono16").withType(ImageMessage.class);
-   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = FOUNDATION_POSE_TOPIC.withModule("request").withType(FoundationPoseRequest.class);
-   private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = FOUNDATION_POSE_TOPIC.withModule("remove").withType(std_msgs.msg.dds.String.class);
-   private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = FOUNDATION_POSE_TOPIC.withModule("result").withType(FoundationPoseResult.class);
-
+   private static final int DELTA = 10;
    private static final AtomicLong ID = new AtomicLong(0L);
 
-   private final ROS2Publisher<FoundationPoseRequest> requestPublisher;
-   private final FoundationPoseRequest requestMessage;
+   private final Set<PersistentDetection> allYOLODetections;
+   private final Set<PersistentDetection> trackedYOLODetections;
 
-   private final ROS2Publisher<std_msgs.msg.dds.String> removePublisher;
-   private final std_msgs.msg.dds.String removeMessage;
+   private final ROS2FoundationPoseCommunicator communicator;
 
-   private final ROS2Publisher<ImageMessage> colorPublisher;
-   private final ROS2Publisher<ImageMessage> depthPublisher;
-   private final ImageMessage colorMessage;
-   private final ImageMessage depthMessage;
-
-   private final ImageSensor imageSensor;
-   private final int colorKey;
-   private final int depthKey;
-   private final RepeatingTaskThread sensorPublishThread;
-
-   private final List<Consumer<List<InstantDetection>>> resultCallbacks;
+   private final RepeatingTaskThread updateThread;
 
    public FoundationPoseManager(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
-      requestPublisher = ros2Node.createPublisher(REQUEST_TOPIC);
-      requestMessage = new FoundationPoseRequest();
+      allYOLODetections = new HashSet<>();
+      trackedYOLODetections = new HashSet<>();
 
-      removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
-      removeMessage = new std_msgs.msg.dds.String();
+      communicator = new ROS2FoundationPoseCommunicator(ros2Node, imageSensor, colorKey, depthKey);
 
-      colorPublisher = ros2Node.createPublisher(COLOR_TOPIC);
-      depthPublisher = ros2Node.createPublisher(DEPTH_TOPIC);
-      colorMessage = new ImageMessage();
-      depthMessage = new ImageMessage();
-
-      ros2Node.createSubscription2(RESULT_TOPIC, this::resultCallback);
-
-      this.imageSensor = imageSensor;
-      this.colorKey = colorKey;
-      this.depthKey = depthKey;
-      sensorPublishThread = new RepeatingTaskThread(getClass().getSimpleName() + "SensorPublishThread", this::publishSensor);
-      sensorPublishThread.startRepeating();
-
-      resultCallbacks = new ArrayList<>();
+      updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Update", this::update);
+      updateThread.setFrequencyLimit(10.0).startRepeating();
    }
 
-   public void addResultCallback(Consumer<List<InstantDetection>> callback)
+   /**
+    * Register callbacks between this class and the {@link DetectionManager}.
+    *
+    * @param detectionManager The {@link DetectionManager}.
+    */
+   public void registerDetectionManagerCallbacks(DetectionManager detectionManager)
    {
-      resultCallbacks.add(callback);
+      addResultCallback(detectionManager::addDetections);
+      detectionManager.addNewlyValidDetectionCallback(this::onNewDetection);
+      detectionManager.addDetectionRemovedCallback(this::onDetectionRemoved);
    }
 
-   public void track(PersistentDetection detection)
+   private void onNewDetection(PersistentDetection detection)
    {
-      if (!YOLOv8InstantDetection.class.equals(detection.getInstantDetectionClass()))
-         return;
-
-      YOLOv8InstantDetection newestDetection = (YOLOv8InstantDetection) detection.getMostRecentDetection();
-      publishRequest(newestDetection);
+      if (YOLOv8InstantDetection.class.equals(detection.getInstantDetectionClass()))
+      {
+         synchronized (allYOLODetections)
+         {
+            allYOLODetections.add(detection);
+         }
+      }
    }
 
-   public void remove(PersistentDetection detection)
+   private void onDetectionRemoved(PersistentDetection detection)
    {
-      if (!FoundationPoseInstantDetection.class.equals(detection.getInstantDetectionClass()))
-         return;
-
-      remove(detection.getDetectedObjectName());
+      if (YOLOv8InstantDetection.class.equals(detection.getInstantDetectionClass()))
+      {
+         synchronized (allYOLODetections)
+         {
+            allYOLODetections.remove(detection);
+            trackedYOLODetections.remove(detection);
+         }
+      }
+      else if (FoundationPoseInstantDetection.class.equals(detection.getInstantDetectionClass()))
+      {
+         communicator.remove(detection.getDetectedObjectName());
+      }
    }
 
-   public void remove(String objectId)
+   /**
+    * Add a callback that's ran when a new result is received from FoundationPose
+    *
+    * @param resultCallback Callback to run. The FoundationPose result will be provided to it.
+    */
+   public void addResultCallback(Consumer<List<InstantDetection>> resultCallback)
    {
-      removeMessage.setData(objectId);
-      removePublisher.publish(removeMessage);
+      communicator.addResultCallback(resultCallback);
    }
 
    public void destroy()
    {
-      sensorPublishThread.kill();
-      sensorPublishThread.interrupt();
-
-      requestPublisher.remove();
-      removePublisher.remove();
-      colorPublisher.remove();
-      depthPublisher.remove();
+      communicator.destroy();
+      updateThread.blockingKill();
    }
 
-   private void publishRequest(YOLOv8InstantDetection yoloDetection)
+   private void update()
    {
-      if (!FoundationPoseTools.getTrackableYOLOClasses().contains(yoloDetection.getDetectedObjectClass()))
-         return;
-
-      RawImage color = yoloDetection.getColorImage();
-      RawImage depth = yoloDetection.getDepthImage();
-      RawImage mask = yoloDetection.getObjectMask();
-
-      // Get color in rgb
-      Mat rgbColor = new Mat();
-      color.getPixelFormat().convertToPixelFormat(color.getCpuImageMat(), rgbColor, PixelFormat.RGB8);
-
-      // Compress images
-      BytePointer encodedColor = new BytePointer();
-      BytePointer encodedDepth = new BytePointer();
-      BytePointer encodedMask = new BytePointer();
-
-      opencv_imgcodecs.imencode(JPG, rgbColor, encodedColor);
-      opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
-      opencv_imgcodecs.imencode(PNG, mask.getCpuImageMat(), encodedMask);
-
-      // Pack and publish request
-      String objectId = yoloDetection.getDetectedObjectName() + "_fp_" + ID.getAndIncrement();
-      String meshFile = FoundationPoseTools.getYOLOClassToObjectMeshMap().get(yoloDetection.getDetectedObjectClass());
-
-      requestMessage.setObjectId(objectId);
-      requestMessage.setMeshFile(meshFile);
-      PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, requestMessage.getColor());
-      PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, requestMessage.getDepth());
-      PerceptionMessageTools.packImageMessage(mask, encodedMask, CompressionType.PNG, requestMessage.getObjectMask());
-      requestPublisher.publish(requestMessage);
-
-      // Release pointers
-      rgbColor.close();
-      encodedColor.close();
-      encodedDepth.close();
-      encodedMask.close();
-   }
-
-   private void resultCallback(FoundationPoseResult result)
-   {
-      FoundationPoseInstantDetection instantDetection = new FoundationPoseInstantDetection(result.getObjectIdAsString(), result.getObjectPose(), Instant.now());
-      List<InstantDetection> list = List.of(instantDetection);
-
-      for (Consumer<List<InstantDetection>> resultCallback : resultCallbacks)
-         resultCallback.accept(list);
-   }
-
-   private void publishSensor()
-   {
-      try
+      // Look through untracked detections, and determine which we want to track
+      Set<PersistentDetection> untrackedYOLODetections;
+      synchronized (allYOLODetections)
       {
-         imageSensor.waitForGrab();
-
-         RawImage color = imageSensor.getImage(colorKey);
-         RawImage depth = imageSensor.getImage(depthKey);
-
-         // Get color in RGB
-         Mat rgbColor = new Mat();
-         color.getPixelFormat().convertToPixelFormat(color.getCpuImageMat(), rgbColor, PixelFormat.RGB8);
-
-         // Compress images
-         BytePointer encodedColor = new BytePointer();
-         BytePointer encodedDepth = new BytePointer();
-
-         opencv_imgcodecs.imencode(JPG, rgbColor, encodedColor);
-         opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
-
-         // Publish compressed images
-         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, colorMessage);
-         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, depthMessage);
-
-         colorPublisher.publish(colorMessage);
-         depthPublisher.publish(depthMessage);
-
-         rgbColor.close();
-         encodedColor.close();
-         encodedDepth.close();
-         color.release();
-         depth.release();
+         untrackedYOLODetections = new HashSet<>(allYOLODetections);
+         untrackedYOLODetections.removeAll(trackedYOLODetections);
       }
-      catch (InterruptedException ignored) {}
+      Set<PersistentDetection> detectionsToTrack = new HashSet<>();
+      for (PersistentDetection detection : untrackedYOLODetections)
+      {
+         YOLOv8InstantDetection yoloDetection = (YOLOv8InstantDetection) detection.getMostRecentDetection();
+         RawImage colorImage = yoloDetection.getColorImage().get();
+         BoundingBox2DReadOnly boundingBox = yoloDetection.getBoundingBox();
+
+         // Ensure image exists
+         if (colorImage == null)
+            continue;
+
+         // If the bounding box is not at the edge, we want to track the detection
+         if (boundingBoxIsNotAtEdge(boundingBox, colorImage.getWidth(), colorImage.getHeight()))
+            detectionsToTrack.add(detection);
+
+         colorImage.release();
+      }
+
+      // Send requests to track the detections we want to track
+      for (PersistentDetection detection : detectionsToTrack)
+      {
+         YOLOv8InstantDetection yoloDetection = (YOLOv8InstantDetection) detection.getMostRecentDetection();
+         String objectId = detection.getDetectedObjectName() + "_fp_#" + ID.getAndIncrement();
+         String meshFile = FoundationPoseTools.getYOLOClassToObjectMeshMap().get(detection.getDetectedObjectName());
+         communicator.track(objectId, meshFile, yoloDetection.getObjectMask(), yoloDetection.getColorImage(), yoloDetection.getDepthImage());
+         synchronized (allYOLODetections)
+         {
+            trackedYOLODetections.add(detection);
+         }
+      }
+   }
+
+   private boolean boundingBoxIsNotAtEdge(BoundingBox2DReadOnly boundingBox, int imageWidth, int imageHeight)
+   {
+      int minX = (int) Math.round(boundingBox.getMinX());
+      int minY = (int) Math.round(boundingBox.getMinY());
+      int maxX = (int) Math.round(boundingBox.getMaxX());
+      int maxY = (int) Math.round(boundingBox.getMaxY());
+
+      return minX > DELTA && minY > DELTA && maxX < imageWidth - 1 - DELTA && maxY < imageHeight - 1 - DELTA;
    }
 }
