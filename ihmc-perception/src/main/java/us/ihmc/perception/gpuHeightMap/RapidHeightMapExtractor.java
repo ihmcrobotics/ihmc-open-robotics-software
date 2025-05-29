@@ -122,8 +122,8 @@ public class RapidHeightMapExtractor
          localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
 
-         globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
-         globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
          previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
          terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
@@ -260,10 +260,6 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      Mat test = new Mat();
-      localMeanMap.download(test);
-      PerceptionDebugTools.printMat("s", test, 10);
-
       // ---------- Run the translate kernel ---------
       {
          int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
@@ -320,6 +316,10 @@ public class RapidHeightMapExtractor
          registerKernelGridDim.close();
          checkCUDAError();
       }
+
+      Mat test = new Mat();
+      globalMeanMap.download(test);
+      PerceptionDebugTools.printMat("s", test, 10);
 
       // ---------- Run the Terrain cropping kernel ----------
       {

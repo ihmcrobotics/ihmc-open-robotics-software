@@ -433,12 +433,12 @@ __global__ void translateHeightMapKernel(unsigned short *oldHeightMapMean, size_
 }
 
 extern "C"
-__global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t pitchLocalMean,
-                                            unsigned short *localVarianceMap, size_t pitchLocalVariance,
-                                            unsigned short *localMotionVarianceMap, size_t pitchLocalMotionVariance,
+__global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLocalMean,
+                                            float *localVarianceMap, size_t pitchLocalVariance,
+                                            float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                             unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
-                                            unsigned short *globalMeanMap, size_t pitchGlobalMean,
-                                            unsigned short *globalVarianceMap, size_t pitchGlobalVariance,
+                                            float *globalMeanMap, size_t pitchGlobalMean,
+                                            float *globalVarianceMap, size_t pitchGlobalVariance,
                                             float *zUpCameraToWorldAlignedGround,
                                             float *params, float resetOffset)
 {
@@ -460,15 +460,15 @@ __global__ void heightMapRegistrationKernel(unsigned short *localMeanMap, size_t
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
-    unsigned short *localMean = (unsigned short *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
-    unsigned short *localVariance = (unsigned short *)((char *)localVarianceMap + localIndex.x * pitchLocalVariance) + localIndex.y;
-    unsigned short *localMotionVariance = (unsigned short *)((char *)localMotionVarianceMap + localIndex.x * pitchLocalMotionVariance) + localIndex.y;
+    float *localMean = (float *)((char *)localMeanMap + localIndex.x * pitchLocalMean) + localIndex.y;
+    float *localVariance = (float *)((char *)localVarianceMap + localIndex.x * pitchLocalVariance) + localIndex.y;
+    float *localMotionVariance = (float *)((char *)localMotionVarianceMap + localIndex.x * pitchLocalMotionVariance) + localIndex.y;
 
     if (*localMean == 0)
         return;
 
-    unsigned short *globalMean = (unsigned short *)((char *)globalMeanMap + globalIndex.x * pitchGlobalMean) + globalIndex.y;
-    unsigned short *globalVariance = (unsigned short *)((char *)globalVarianceMap + globalIndex.x * pitchGlobalVariance) + globalIndex.y;
+    float *globalMean = (float *)((char *)globalMeanMap + globalIndex.x * pitchGlobalMean) + globalIndex.y;
+    float *globalVariance = (float *)((char *)globalVarianceMap + globalIndex.x * pitchGlobalVariance) + globalIndex.y;
 
     float localMeanF = static_cast<float>(*localMean);
     float localVarianceF = static_cast<float>(*localVariance);
