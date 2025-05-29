@@ -108,7 +108,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       }
    }
 
-   public void acceptImageMessage(HeightMapMessage imageMessage)
+   public void acceptImageMessage(HeightMapMessage heightMapMessage)
    {
       // Even if the height map is publishing, we aren't going to update anything with that data unless its active
       if (!isActive())
@@ -116,26 +116,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       executorService.clearQueueAndExecute(() ->
                                            {
-                                              zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
-
-                                              latestHeightMapData = HeightMapMessageTools.unpackMessage(imageMessage);
-
+                                              zUpToWorldTransform.set(heightMapMessage.getOrientation(), heightMapMessage.getPosition());
+                                              latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
                                               heightMap = PerceptionMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
-
-                                              if (latestHeightMapData == null)
-                                              {
-                                                 latestHeightMapData = new HeightMapData(heightMapParameters.getCellSizeInMeters(),
-                                                                                         heightMapParameters.getGlobalWidthInMeters(),
-                                                                                         imageMessage.getPosition().getX(),
-                                                                                         imageMessage.getPosition().getY());
-                                              }
-
-                                              PerceptionMessageTools.convertToHeightMapData(heightMap,
-                                                                                            latestHeightMapData,
-                                                                                            imageMessage.getPosition(),
-                                                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                                                            (float) heightMapParameters.getCellSizeInMeters(),
-                                                                                            heightMapParameters);
                                            });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();
