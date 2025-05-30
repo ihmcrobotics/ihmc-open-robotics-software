@@ -276,12 +276,12 @@ public class HeightMapPolygonSnapper
 
       double minZ = maxPoint.getZ() - snapHeightThreshold;
       double slope = Math.tan(minSurfaceIncline);
-      footPointsInEnvironmentToPack.removeIf(point ->
-                                       {
-                                          double distance = point.distanceXY(maxPoint);
-                                          double extraHeight = distance * slope;
-                                          return point.getZ() < minZ - extraHeight;
-                                       });
+//      footPointsInEnvironmentToPack.removeIf(point ->
+//                                       {
+//                                          double distance = point.distanceXY(maxPoint);
+//                                          double extraHeight = distance * slope;
+//                                          return point.getZ() < minZ - extraHeight;
+//                                       });
 
       return footPointsInEnvironmentToPack.size() >= 3;
    }

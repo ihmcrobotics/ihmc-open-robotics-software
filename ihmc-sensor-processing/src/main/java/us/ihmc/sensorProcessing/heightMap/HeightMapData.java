@@ -127,10 +127,12 @@ public class HeightMapData
       if (!MathTools.intervalContains(x, minX, maxX) || !MathTools.intervalContains(y, minY, maxY))
       {
          //LogTools.debug(String.format("Outside height map bounds: %.2f, %.2f, %.2f, %.2f", minX, maxX, minY, maxY));
-         return Double.NaN;
+         return estimatedGroundHeight;
       }
 
       int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
+      if (key < 0 || key >= heights.length)
+         return estimatedGroundHeight;
       return Double.isNaN(heights[key]) ? estimatedGroundHeight : heights[key];
    }
 

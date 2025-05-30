@@ -98,14 +98,19 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setCroppedWidthInMeters(double croppedWidthInMeters)
+   default void setPublishedWidthInMeters(double publishedWidthInMeters)
    {
-      set(HeightMapParameters.croppedWidthInMeters, croppedWidthInMeters);
+      set(HeightMapParameters.publishedWidthInMeters, publishedWidthInMeters);
    }
 
-   default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
+   default void setTerrainWidthInMeters(double terrainWidthInMeters)
    {
-      set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
+      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
+   }
+
+   default void setGlobalWidthInMeters(double globalWidthInMeters)
+   {
+      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
    default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)

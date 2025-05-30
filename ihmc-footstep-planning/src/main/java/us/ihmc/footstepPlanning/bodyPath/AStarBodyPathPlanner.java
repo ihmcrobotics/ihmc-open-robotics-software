@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
@@ -41,6 +42,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 {
    private static final boolean debug = false;
    private static final boolean useRANSACTraversibility = true;
+   private static final boolean OVERRIDE_COMPUTE_TRAVERSABILITY = false;
+   private static final double COLLISION_START_TOLERANCE = 0.5;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -264,7 +267,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       leastCost = heuristics(leastCostNode);
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
 
-      if (plannerParameters.getComputeSurfaceNormalCost())
+      if (OVERRIDE_COMPUTE_TRAVERSABILITY && plannerParameters.getComputeSurfaceNormalCost())
       {
          double patchWidth = 0.3;
          surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
@@ -319,8 +322,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
          for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
          {
             BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
-            if (node.getXIndex() == 8 && node.getYIndex() == 2 && neighbor.getXIndex() == 10 && neighbor.getY() == 3)
-               LogTools.info("break");
 
             this.snapHeight.set(snap(neighbor));
             heuristicCost.set(xyDistance(neighbor, goalNode));
@@ -336,6 +337,13 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
+            if (deltaHeight.getValue() > 0.1)
+            {
+               rejectionReason.set(RejectionReason.TOO_STEEP);
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
+
             if (Math.abs(incline.getValue()) > Math.toRadians(plannerParameters.getMaxIncline()))
             {
                rejectionReason.set(RejectionReason.TOO_STEEP);
@@ -343,7 +351,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                continue;
             }
 
-            if (plannerParameters.getCheckForCollisions())
+            double distanceFromStart = EuclidCoreTools.normSquared(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
+            if (plannerParameters.getCheckForCollisions() && distanceFromStart > COLLISION_START_TOLERANCE)
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
                                                                               neighbor,
@@ -360,7 +369,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
             edgeCost.set(xyDistance);
 
-            if (plannerParameters.getComputeSurfaceNormalCost() && plannerParameters.getComputeTraversibility())
+            if (OVERRIDE_COMPUTE_TRAVERSABILITY && plannerParameters.getComputeSurfaceNormalCost() && plannerParameters.getComputeTraversibility())
             {
                if (useRANSACTraversibility)
                {
@@ -392,7 +401,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                }
             }
 
-            if (plannerParameters.getComputeSurfaceNormalCost())
+            if (OVERRIDE_COMPUTE_TRAVERSABILITY && plannerParameters.getComputeSurfaceNormalCost())
             {
                double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
                Pose2D bodyPose = new Pose2D();
@@ -406,7 +415,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             {
                inclineCost.set(0.0);
             }
-            else
+            else if (OVERRIDE_COMPUTE_TRAVERSABILITY)
             {
                double inclineDelta = Math.abs(incline.getValue() - nominalIncline.getValue());
                inclineCost.set(plannerParameters.getInclineCostWeight() * Math.max(0.0, inclineDelta - plannerParameters.getInclineCostDeadband()));
@@ -443,11 +452,11 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
          iterationData.setParentNodeHeight(parentSnapHeight);
          this.iterationData.add(iterationData);
 
-         if (publishStatus(request))
-         {
-            reportStatus(request, outputToPack);
-            stopwatch.lap();
-         }
+//         if (publishStatus(request))
+//         {
+//            reportStatus(request, outputToPack);
+//            stopwatch.lap();
+//         }
       }
 
       reportStatus(request, outputToPack);

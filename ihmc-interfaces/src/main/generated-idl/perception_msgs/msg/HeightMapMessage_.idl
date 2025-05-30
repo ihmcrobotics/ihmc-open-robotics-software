@@ -45,24 +45,24 @@ module perception_msgs
         /**
          * List of height map keys. See HeightMapTools for converting keys to coordinates
          */
-        sequence<long, 45000> keys;
+        sequence<long, 180000> keys;
         /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<float, 45000> heights;
+        sequence<float, 180000> heights;
         /**
          * List of variances, which correspond to the list of keys. May be empty.
          */
-        sequence<float, 45000> variances;
+        sequence<float, 180000> variances;
         /**
          * List of centroids for each cell, which correspond to the list of keys. May be empty
          * Note: The z coordinate of each point is ignored, but should correspond to the height.
          */
-        sequence<geometry_msgs::msg::dds::Point, 45000> centroids;
+        sequence<geometry_msgs::msg::dds::Point, 180000> centroids;
         /**
          * List of normals for each cell, which correspond to the list of keys. May be empty.
          */
-        sequence<geometry_msgs::msg::dds::Vector3, 45000> normals;
+        sequence<geometry_msgs::msg::dds::Vector3, 180000> normals;
       };
     };
   };

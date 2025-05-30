@@ -37,6 +37,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -132,7 +133,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            walkingControllerParameters,
            footPolygons,
            stepReachabilityData,
-           true);
+           false);
    }
 
    public FootstepPlanningModule(String name,
@@ -195,6 +196,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       try
       {
+         request.setPlanBodyPath(true);
+         request.setPerformAStarSearch(false);
+
          handleRequestInternal(request);
       }
       catch (Exception exception)
@@ -257,6 +261,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPlanBodyPath() && !flatGroundMode)
       {
+         HeightMapData heightMapData = request.getEnvironmentHandler().getHeightMapData();
+         double footHeight = 0.5 * (request.getStartFootPoses().get(RobotSide.LEFT).getZ() + request.getStartFootPoses().get(RobotSide.RIGHT).getZ());
+         heightMapData.setEstimatedGroundHeight(footHeight);
+
          bodyPathPlannerInterface.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
 
@@ -316,6 +324,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
          planThenSnapPlanner.setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
+
+         if (request.getPlanBodyPath())
+            planThenSnapPlanner.setBodyPath(bodyPathPlanHolder);
+         else
+            planThenSnapPlanner.clearBodyPath();
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
          goal.setGoalPoseBetweenFeet(goalMidFootPose);
