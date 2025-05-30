@@ -8,8 +8,8 @@ import javafx.scene.control.TableView;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.messager.javafx.JavaFXMessager;
-import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapFilterParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class HeightMapParametersUIController
 {

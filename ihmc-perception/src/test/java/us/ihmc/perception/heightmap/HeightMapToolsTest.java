@@ -1,8 +1,9 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightmap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Random;
 

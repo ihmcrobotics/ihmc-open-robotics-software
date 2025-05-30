@@ -8,7 +8,7 @@ import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 public class MonteCarloFootstepPlannerRequest
 {

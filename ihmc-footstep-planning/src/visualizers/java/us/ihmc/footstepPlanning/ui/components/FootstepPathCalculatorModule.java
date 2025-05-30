@@ -20,8 +20,8 @@ import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

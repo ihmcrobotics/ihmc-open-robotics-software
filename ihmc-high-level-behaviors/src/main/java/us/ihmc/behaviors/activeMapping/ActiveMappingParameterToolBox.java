@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class ActiveMappingParameterToolBox
 {

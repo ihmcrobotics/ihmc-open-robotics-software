@@ -72,8 +72,8 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 public class FootstepPlannerLogVisualizerController
 {

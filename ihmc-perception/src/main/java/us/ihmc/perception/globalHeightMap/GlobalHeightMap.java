@@ -1,8 +1,8 @@
-package us.ihmc.sensorProcessing.globalHeightMap;
+package us.ihmc.perception.globalHeightMap;
 
 import com.esotericsoftware.kryo.util.IntMap;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.Collection;
 import java.util.HashSet;

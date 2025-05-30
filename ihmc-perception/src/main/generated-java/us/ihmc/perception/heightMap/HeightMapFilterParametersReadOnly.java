@@ -1,8 +1,8 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters.*;
+import static us.ihmc.perception.heightMap.HeightMapFilterParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file

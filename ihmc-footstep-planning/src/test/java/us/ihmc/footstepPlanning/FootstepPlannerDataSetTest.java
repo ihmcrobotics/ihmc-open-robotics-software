@@ -15,7 +15,7 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
