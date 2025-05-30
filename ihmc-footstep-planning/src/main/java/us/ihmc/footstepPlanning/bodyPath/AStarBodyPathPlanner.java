@@ -265,7 +265,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       leastCost = heuristics(leastCostNode);
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
 
-      if (plannerParameters.getComputeSurfaceNormalCost())
+      if (OVERRIDE_COMPUTE_TRAVERSABILITY && plannerParameters.getComputeSurfaceNormalCost())
       {
          double patchWidth = 0.3;
          surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
