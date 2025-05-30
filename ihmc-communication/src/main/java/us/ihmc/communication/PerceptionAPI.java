@@ -243,6 +243,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
 
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
+   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_IMAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(ImageMessage.class);
 
    public static final ROS2Topic<ImageMessage> OCCUPANCY_GRID_MESSAGE = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("occupancy_grid");
    public static final ROS2Topic<ImageMessage> HEIGHT_MAP_CROPPED = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_cropped_global");

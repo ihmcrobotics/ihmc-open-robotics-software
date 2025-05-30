@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.opencv.core.CvType;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
@@ -15,6 +16,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
@@ -45,7 +48,8 @@ public class RapidHeightMapManager
 
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
-   private final ROS2Publisher<HeightMapMessage> heightMapPublisher;
+   private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
+   private final ROS2Publisher<ImageMessage> heightMapImagePublisher;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
@@ -67,7 +71,8 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
-      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      heightMapImagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_IMAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
@@ -84,6 +89,7 @@ public class RapidHeightMapManager
    }
 
    public void updateAndPublishHeightMap(GpuMat latestDepthImage,
+                                         Instant acquisitionTime,
                                          CameraIntrinsics depthIntrinsics,
                                          ReferenceFrame cameraFrame,
                                          ReferenceFrame cameraZUpFrame)
@@ -111,7 +117,25 @@ public class RapidHeightMapManager
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
       heightMapMessage.getOrientation().set(cameraPose.getOrientation());
       heightMapMessage.getPosition().set(cameraPose.getPosition());
-      heightMapPublisher.publish(heightMapMessage);
+      heightMapMessagePublisher.publish(heightMapMessage);
+
+
+      Mat normalizedHeightMap = new Mat();
+      hostGlobalHeightMap.convertTo(normalizedHeightMap, CvType.CV_8U, 255.0 / 65535.0, 0);
+
+      PerceptionDebugTools.printMat("ho", hostGlobalHeightMap, 10);
+      PerceptionDebugTools.printMat("S", normalizedHeightMap, 10);
+
+      OpenCVTools.compressImagePNG(normalizedHeightMap, compressedCroppedHeightMapPointer);
+      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
+                                                         croppedHeightMapImageMessage,
+                                                         heightMapImagePublisher,
+                                                         cameraPose,
+                                                         acquisitionTime,
+                                                         sequenceNumber++,
+                                                         normalizedHeightMap.rows(),
+                                                         normalizedHeightMap.cols(),
+                                                         (float) heightMapParameters.getHeightScaleFactor());
 
       hostGlobalHeightMap.close();
       deviceGlobalHeightMap.close();
@@ -214,7 +238,8 @@ public class RapidHeightMapManager
    public void destroy()
    {
       compressedCroppedHeightMapPointer.close();
-      heightMapPublisher.remove();
+      heightMapMessagePublisher.remove();
+      heightMapImagePublisher.remove();
       rapidHeightMapExtractor.destroy();
    }
 }

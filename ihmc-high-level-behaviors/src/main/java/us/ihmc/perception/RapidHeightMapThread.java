@@ -86,6 +86,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
          // Get everything we need from the image
          GpuMat latestDepthImage = depthImage.getGpuImageMat();
+         Instant acquisitionTime = depthImage.getAcquisitionTime();
          CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
          GpuMat filteredDepthImage = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
 
@@ -110,7 +111,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
          }
 
          filteredDepthImage.close();
