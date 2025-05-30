@@ -182,7 +182,7 @@ public class FootstepPlanActionPlanningThread
          modifiedFootstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
       }
 
-      if (!isPreviewPlanner)
+//      if (!isPreviewPlanner) // always log when planning
       {
          FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
          footstepPlannerLogger.logSession();
