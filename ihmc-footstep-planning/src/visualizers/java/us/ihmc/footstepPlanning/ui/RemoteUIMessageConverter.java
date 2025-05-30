@@ -18,6 +18,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
+import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerActionMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
@@ -37,6 +38,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -75,7 +78,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RemoteUIMessageConverter
 {
-   private static final boolean verbose = false;
+   private static final boolean verbose = true;
 
    private final RealtimeROS2Node ros2Node;
 
@@ -84,6 +87,7 @@ public class RemoteUIMessageConverter
    private final String robotName;
 
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
+   private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> bodyPathPlannerParametersReference;
    private final AtomicReference<DefaultFootstepPlannerParametersReadOnly> plannerParametersReference;
    private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference;
    private final AtomicReference<Pose3DReadOnly> leftFootPose;
@@ -120,6 +124,7 @@ public class RemoteUIMessageConverter
    private ROS2Publisher<FootstepPlannerActionMessage> plannerActionPublisher;
    private ROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
    private ROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
+   private ROS2Publisher<AStarBodyPathPlannerParametersPacket> bodyPathParametersPublisher;
    private ROS2Publisher<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
    private ROS2Publisher<SwingPlanningRequestPacket> swingReplanRequestPublisher;
 
@@ -151,6 +156,7 @@ public class RemoteUIMessageConverter
 
       plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParameters, null);
       visibilityGraphParametersReference = messager.createInput(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, null);
+      bodyPathPlannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.AStarBodyPathPlannerParameters, null);
       swingPlannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.SwingPlannerParameters, null);
 
       leftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -223,6 +229,7 @@ public class RemoteUIMessageConverter
 
       /* publishers */
       plannerParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlannerParametersPacket.class));
+      bodyPathParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(AStarBodyPathPlannerParametersPacket.class));
       visibilityGraphsParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(VisibilityGraphsParametersPacket.class));
       plannerActionPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlannerActionMessage.class));
       swingPlannerParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(SwingPlannerParametersPacket.class));
@@ -407,6 +414,12 @@ public class RemoteUIMessageConverter
          VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
          FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
          visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
+      }
+
+      AStarBodyPathPlannerParametersReadOnly bodyPathParameters = bodyPathPlannerParametersReference.get();
+      if (bodyPathParameters != null)
+      {
+         bodyPathParametersPublisher.publish(bodyPathParameters.getAsPacket());
       }
 
       DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();

@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -24,6 +25,7 @@ public class PlanThenSnapPlanner
    private HeightMapData heightMapData;
    private final HeightMapPolygonSnapper snapper;
    private final HeightMapSnapWiggler wiggler;
+   private final FramePose3D stanceFootPose = new FramePose3D();
 
    public PlanThenSnapPlanner(DefaultFootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
@@ -38,6 +40,7 @@ public class PlanThenSnapPlanner
    public void setInitialStanceFoot(FramePose3D stanceFootPose, RobotSide stanceSide)
    {
       turnWalkTurnPlanner.setInitialStanceFoot(stanceFootPose, stanceSide);
+      this.stanceFootPose.set(stanceFootPose);
    }
 
    public void setGoal(FootstepPlannerGoal goal)
@@ -49,6 +52,16 @@ public class PlanThenSnapPlanner
    {
       internalEnvironmentHandler.setHeightMapData(heightMapData);
       this.heightMapData = heightMapData;
+   }
+
+   public void setBodyPath(WaypointDefinedBodyPathPlanHolder bodyPath)
+   {
+      turnWalkTurnPlanner.setBodyPath(bodyPath);
+   }
+
+   public void clearBodyPath()
+   {
+      turnWalkTurnPlanner.clearBodyPath();
    }
 
    private FootstepPlan footstepPlan = new FootstepPlan();
@@ -72,7 +85,13 @@ public class PlanThenSnapPlanner
 
          DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
          FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, internalEnvironmentHandler, snapHeightThreshold, minSurfaceIncline);
-         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData, snapHeightThreshold, minSurfaceIncline);
+//         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData, snapHeightThreshold, minSurfaceIncline);
+
+         // force flat ground
+         snapData.getSnapTransform().getRotation().setIdentity();
+         snapData.getCroppedFoothold().clear();
+         snapData.getSnapTransform().getTranslation().setZ(stanceFootPose.getZ());
+
          ConvexPolygon2D footHold = snapData.getCroppedFoothold();
          solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
 

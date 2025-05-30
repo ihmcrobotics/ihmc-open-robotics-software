@@ -158,6 +158,7 @@ public class ContinuousPlanner
       {
          request.setSwingPlannerType(SwingPlannerType.MULTI_WAYPOINT_POSITION);
       }
+
       request.setPerformAStarSearch(true);
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(false);

@@ -65,9 +65,9 @@ public class RapidHeightMapManager
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
 
-      int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      int cellsPerAxisCropped = 2 * croppedCenterIndex + 1;
-      deviceCroppedHeightMap = new GpuMat(cellsPerAxisCropped, cellsPerAxisCropped, opencv_core.CV_16UC1);
+      int centerIndexPublished = HeightMapTools.computeCenterIndex(heightMapParameters.getPublishedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int cellsPerAxisPublished = 2 * centerIndexPublished + 1;
+      deviceCroppedHeightMap = new GpuMat(cellsPerAxisPublished, cellsPerAxisPublished, opencv_core.CV_16UC1);
       rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(1, heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
@@ -166,7 +166,7 @@ public class RapidHeightMapManager
 
       // Perform update, this actually creates the height map
       rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
-      GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getCroppedHeightMap();
+      GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getPublishedHeightMap();
 
       // Don't close this mat as its being used in the extractor till that finish's
       deviceCroppedHeightMap.convertTo(deviceHeightMapToPack, deviceCroppedHeightMap.type());
@@ -175,19 +175,21 @@ public class RapidHeightMapManager
    public HeightMapData getLatestHeightMapData()
    {
       HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                                            (float) heightMapParameters.getCroppedWidthInMeters(),
+                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
                                                             sensorOrigin.getX(),
                                                             sensorOrigin.getY());
 
+      GpuMat terrainHeightMap = rapidHeightMapExtractor.getTerrainHeightMap();
       Mat heightMap = new Mat();
-      deviceCroppedHeightMap.download(heightMap);
+      terrainHeightMap.download(heightMap);
       PerceptionMessageTools.convertToHeightMapData(heightMap,
                                                     latestHeightMapData,
                                                     sensorOrigin,
-                                                    (float) heightMapParameters.getCroppedWidthInMeters(),
+                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
                                                     (float) heightMapParameters.getCellSizeInMeters(),
                                                     heightMapParameters);
       heightMap.close();
+      terrainHeightMap.close();
 
       return latestHeightMapData;
    }

@@ -20,6 +20,9 @@ class BodyPathCollisionDetector
       }
    }
 
+   /* Tolerance towards noise in the height map, allow for n "collisions" in the body box */
+   private static final int maxAllowableCollisions = 10;
+
    /**
     * Yaw index (0-15) represents the angle of the collision box and corresponds to a yaw rotation of (pi * yawIndex / 8)
     */
@@ -32,6 +35,7 @@ class BodyPathCollisionDetector
 
       TIntArrayList xOffsets = getOffsets(yawIndex, this.xOffsets);
       TIntArrayList yOffsets = getOffsets(yawIndex, this.yOffsets);
+      int collisionCount = 0;
 
       for (int i = 0; i < xOffsets.size(); i++)
       {
@@ -45,8 +49,11 @@ class BodyPathCollisionDetector
 
          if (heightQuery >= heightThreshold)
          {
-            return true;
+            collisionCount++;
          }
+
+         if (collisionCount >= maxAllowableCollisions)
+            return true;
       }
 
       return false;

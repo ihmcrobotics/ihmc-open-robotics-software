@@ -10,6 +10,8 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -20,8 +22,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -37,7 +39,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,6 +157,11 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.button("Save Height Map To File"))
+      {
+         saveHeightMapToFile(environmentHandler.getHeightMapData());
+      }
+
       // Allow for visualizing the stance pose grid
       if (calculateStancePose.get() && ImGui.isKeyPressed('P'))
       {
@@ -159,27 +173,49 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      if (ImGui.button("Print Contact Map"))
-      {
-         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Print Height Map"))
-      {
-         PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 4);
-      }
-      ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
-      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
-      {
-         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
-         ImGui.text(
-               "Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
-      }
+//      if (ImGui.button("Print Contact Map"))
+//      {
+//         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
+//      }
+//      ImGui.sameLine();
+//      if (ImGui.button("Print Height Map"))
+//      {
+//         PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 4);
+//      }
+//      ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
+//      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
+//      {
+//         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+//         ImGui.text(
+//               "Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+//      }
 
       ImGui.checkbox(labels.get("Calculate Stance Pose"), calculateStancePose);
       if (ImGui.collapsingHeader(labels.get("Stance Pose Parameters")))
       {
          stancePoseCalculatorParametersTuner.renderImGuiWidgets();
+      }
+   }
+
+   public void saveHeightMapToFile(HeightMapData heightMapData)
+   {
+      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
+
+      JSONSerializer<HeightMapMessage> heightMapSerializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+
+      String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
+      Path heightMapDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
+      String heightMapDirectoryString = heightMapDirectory.toString();
+      File heightMapFile = new File(heightMapDirectoryString + "/" + timestamp + "_HeightMapData.json");
+
+      try
+      {
+         heightMapSerializer.serialize(heightMapFile, heightMapMessage);
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
       }
    }
 
