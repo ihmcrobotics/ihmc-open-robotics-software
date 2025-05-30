@@ -123,8 +123,8 @@ public class RapidHeightMapManager
       Mat normalizedHeightMap = new Mat();
       hostGlobalHeightMap.convertTo(normalizedHeightMap, CvType.CV_8U, 255.0 / 65535.0, 0);
 
-      PerceptionDebugTools.printMat("ho", hostGlobalHeightMap, 10);
-      PerceptionDebugTools.printMat("S", normalizedHeightMap, 10);
+//      PerceptionDebugTools.printMat("ho", hostGlobalHeightMap, 10);
+//      PerceptionDebugTools.printMat("S", normalizedHeightMap, 10);
 
       OpenCVTools.compressImagePNG(normalizedHeightMap, compressedCroppedHeightMapPointer);
       PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
