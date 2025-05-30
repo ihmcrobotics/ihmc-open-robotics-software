@@ -103,25 +103,27 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
-      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
-      footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
+      // hard-coding for ONR demo
+      footstepPlannerRequest.setPlanBodyPath(true);
+      footstepPlannerRequest.setPerformAStarSearch(false);
+      footstepPlanner.enableGPUBodyPathPlanner(false);
 
-      footstepPlanner.enableGPUBodyPathPlanner(definition.getPlannerParametersReadOnly().getUseGPU());
-      footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
+      // TODO!!
+      footstepPlannerRequest.setHeightMapData(null);
 
       // TODO: Add body path planning options to user
-      footstepPlannerRequest.setPlanBodyPath(false);
-      if (definition.getPlannerWalkWithGoalOrientation().getValue())
-      {
-         // At beginning, first turn in place to face the direction that the goal stance faces
-         startMidFeetPose.interpolate(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT), 0.5);
-         goalMidFeetPose.interpolate(goalFootPoses.get(RobotSide.LEFT), goalFootPoses.get(RobotSide.RIGHT), 0.5);
-         startTurnedToMatchGoalFacing.set(startMidFeetPose);
-         startTurnedToMatchGoalFacing.getOrientation().set(goalMidFeetPose.getOrientation());
-         footstepPlannerRequest.getBodyPathWaypoints().add(startMidFeetPose);
-         footstepPlannerRequest.getBodyPathWaypoints().add(startTurnedToMatchGoalFacing);
-         footstepPlannerRequest.getBodyPathWaypoints().add(goalMidFeetPose);
-      }
+//      footstepPlannerRequest.setPlanBodyPath(false);
+//      if (definition.getPlannerWalkWithGoalOrientation().getValue())
+//      {
+//         // At beginning, first turn in place to face the direction that the goal stance faces
+//         startMidFeetPose.interpolate(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT), 0.5);
+//         goalMidFeetPose.interpolate(goalFootPoses.get(RobotSide.LEFT), goalFootPoses.get(RobotSide.RIGHT), 0.5);
+//         startTurnedToMatchGoalFacing.set(startMidFeetPose);
+//         startTurnedToMatchGoalFacing.getOrientation().set(goalMidFeetPose.getOrientation());
+//         footstepPlannerRequest.getBodyPathWaypoints().add(startMidFeetPose);
+//         footstepPlannerRequest.getBodyPathWaypoints().add(startTurnedToMatchGoalFacing);
+//         footstepPlannerRequest.getBodyPathWaypoints().add(goalMidFeetPose);
+//      }
 
       if (!isPreviewPlanner)
          state.getLogger().info("Planning footsteps...");
