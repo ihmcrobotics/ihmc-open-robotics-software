@@ -22,8 +22,6 @@ public class LeRobotDatasetDataWriter
 {
    private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
 
-   private final YoRegistry yoRegistry;
-   private final String feedbackController;
    record EndEffectorVariables(YoPose3D current,YoPose3D desired) { }
    private final SideDependentList<EndEffectorVariables> endEffectorVariables = new SideDependentList<>();
    private final long episodeIndex;
@@ -33,18 +31,17 @@ public class LeRobotDatasetDataWriter
    {
       this.episodeIndex = episodeIndex;
       this.datasetLengthSoFar = datasetLengthSoFar;
-      this.yoRegistry = yoRegistry;
-
-      String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-      feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
 
       for (RobotSide side : RobotSide.values)
-         endEffectorVariables.put(side, new EndEffectorVariables(findYoPose(side, "Current"), findYoPose(side, "Desired")));
+         endEffectorVariables.put(side, new EndEffectorVariables(findYoPose(side, "Current", yoRegistry), findYoPose(side, "Desired", yoRegistry)));
    }
 
-   private YoPose3D findYoPose(RobotSide side, String qualifier)
+   public static YoPose3D findYoPose(RobotSide side, String qualifier, YoRegistry yoRegistry)
    {
+      String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
+      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
+      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
+
       if (yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sPositionX".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble xVariable
        && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sPositionY".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble yVariable
        && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sPositionZ".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble zVariable

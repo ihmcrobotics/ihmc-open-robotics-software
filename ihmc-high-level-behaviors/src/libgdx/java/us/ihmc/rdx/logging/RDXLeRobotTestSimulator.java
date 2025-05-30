@@ -5,9 +5,13 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
+import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetDataWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
@@ -25,11 +29,15 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;
+import us.ihmc.yoVariables.euclid.YoPose3D;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -37,11 +45,17 @@ import java.nio.file.Files;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static us.ihmc.zed.global.zed.*;
+import static us.ihmc.zed.global.zed.SL_MEM_CPU;
+
 public class RDXLeRobotTestSimulator
 {
    private final Function<Pose3DReadOnly, SCS2AvatarSimulation> simulationStarter;
    private final Supplier<KinematicsStreamingToolboxModule> ikStreamingSupplier;
    private final RDXSCS2LogSession logSession;
+   private final ZEDSVOScrubber zedScrubber;
+   private final SideDependentList<YoPose3D> logHandPoses = new SideDependentList<>();
+   private long lastZEDTimestamp = -1;
    private final ROS2Node ros2Node;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXROS2RobotVisualizer robotVisualizer;
@@ -67,6 +81,10 @@ public class RDXLeRobotTestSimulator
       this.ikStreamingSupplier = ikStreamingSupplier;
       this.logSession = logSession;
 
+      zedScrubber = logSession.getFirstZEDScrubber();
+      for (RobotSide side : RobotSide.values)
+         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(side, "Current", logSession.getSession().getRootRegistry()));
+
       ros2Node = new ROS2NodeBuilder().build("lerobot_test_ui");
       DRCRobotModel robotModel = robotModelSupplier.get();
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
@@ -80,6 +98,30 @@ public class RDXLeRobotTestSimulator
    {
       syncedRobot.update();
       robotVisualizer.update();
+
+      if (inferenceManager != null && inferenceManager.isRunning())
+      {
+         long zedSVOTimestamp = zedScrubber.getCurrentTimestamp();
+
+         if (zedSVOTimestamp > 0 && zedSVOTimestamp != lastZEDTimestamp)
+         {
+            inferenceManager.publishHandPoses(logHandPoses.get(RobotSide.LEFT), logHandPoses.get(RobotSide.RIGHT));
+
+            int imageHeight = zedScrubber.getImageHeight();
+            int imageWidth = zedScrubber.getImageWidth();
+
+            for (RobotSide side : RobotSide.values)
+            {
+               Pointer zedColorImageSLMatPointer = side == RobotSide.LEFT ? zedScrubber.getLeftColorImageSlMatPointer()
+                                                                          : zedScrubber.getRightColorImageSlMatPointer();
+               Mat bgra8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
+                                      sl_mat_get_ptr(zedColorImageSLMatPointer, SL_MEM_CPU),
+                                      sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
+
+               inferenceManager.publishImage(side, bgra8Mat);
+            }
+         }
+      }
    }
 
    public void renderImGuiWidgets(LeRobotDataset dataset)
@@ -193,6 +235,8 @@ public class RDXLeRobotTestSimulator
             {
                inferenceManager.setRunning(runInference.get());
             }
+
+            ImGui.text("Python side status: %.2f Hz".formatted(inferenceManager.getStatusFrequency()));
 
             ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
             if (ImGui.button(labels.get("Stop IK streaming")))
