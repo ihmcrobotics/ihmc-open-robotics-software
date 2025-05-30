@@ -42,6 +42,7 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -59,13 +60,15 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
+   private final RapidHeightMapThread rapidHeightMapUpdateThread;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           SceneGraph sceneGraph,
-                                          DetectionManager detectionManager)
+                                          DetectionManager detectionManager,
+                                          RapidHeightMapThread rapidHeightMapUpdateThread)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -73,6 +76,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.sceneGraph = sceneGraph;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.detectionManager = detectionManager;
+      this.rapidHeightMapUpdateThread = rapidHeightMapUpdateThread;
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
@@ -135,7 +139,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                                syncedRobot,
                                                controllerStatusTracker,
                                                referenceFrameLibrary,
-                                               walkingControllerParameters);
+                                               walkingControllerParameters,
+                                               rapidHeightMapUpdateThread);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {

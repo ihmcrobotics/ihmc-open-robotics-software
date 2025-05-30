@@ -6,6 +6,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -22,7 +23,8 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                        ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
                                        DRCRobotModel robotModel,
                                        SceneGraph sceneGraph,
-                                       DetectionManager detectionManager)
+                                       DetectionManager detectionManager,
+                                       RapidHeightMapThread rapidHeightMapUpdateThread)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
       setFrequencyLimit(ROS2BehaviorTree.SYNC_FREQUENCY);
@@ -41,7 +43,8 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                               peerClockOffsetEstimator,
                                               referenceFrameLibrary,
                                               sceneGraph,
-                                              detectionManager);
+                                              detectionManager,
+                                              rapidHeightMapUpdateThread);
    }
 
    @Override
