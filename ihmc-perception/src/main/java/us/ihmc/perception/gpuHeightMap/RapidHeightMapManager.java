@@ -84,7 +84,6 @@ public class RapidHeightMapManager
    }
 
    public void updateAndPublishHeightMap(GpuMat latestDepthImage,
-                                         Instant acquisitionTime,
                                          CameraIntrinsics depthIntrinsics,
                                          ReferenceFrame cameraFrame,
                                          ReferenceFrame cameraZUpFrame)
