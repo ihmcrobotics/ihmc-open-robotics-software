@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Transform the end effector poses to walking frame or something
 public class LeRobotDatasetDataWriter
 {
    private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
