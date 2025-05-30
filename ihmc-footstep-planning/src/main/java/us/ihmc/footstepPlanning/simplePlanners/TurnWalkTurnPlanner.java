@@ -256,7 +256,7 @@ public class TurnWalkTurnPlanner
          // updating for final turn logic
          planStanceFootFrame.setPoseAndUpdate(footstep);
 
-         footstep.appendTranslation(0.0, lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth()));
+         footstep.appendTranslation(0.0, 0.5 * lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth()));
 
          footstepListToPack.add(footstep);
          lastStepSide = lastStepSide.getOppositeSide();
