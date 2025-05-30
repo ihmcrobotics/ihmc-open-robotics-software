@@ -1,0 +1,14 @@
+{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Open Hand",
+    "Type": "-"
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Grasp object",
+    "Type": "-"
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.2623331867710496
+}

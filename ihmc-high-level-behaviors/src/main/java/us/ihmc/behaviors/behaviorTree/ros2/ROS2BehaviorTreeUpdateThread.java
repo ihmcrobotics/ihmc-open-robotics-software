@@ -10,6 +10,7 @@ import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.Collections;
@@ -36,6 +37,10 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
+      for (RobotSide side: RobotSide.values)
+      {
+         referenceFrameLibrary.addAll(Collections.singleton(syncedRobot.getReferenceFrames().getHandZUpFrame(side)));
+      }
 
       executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                               robotModel,

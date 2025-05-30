@@ -20,7 +20,7 @@ import json
 
 ros2 = {}
 initialized = False
-loggedFailure == False
+loggedFailure = False
 
 behavior_counter = 0
 behaviors_baseline = ["SCAN", "GOTO", "RECEIVE OBJECT", "GOTO", "PLACE CHARGE ON DOOR", "GOTO"]

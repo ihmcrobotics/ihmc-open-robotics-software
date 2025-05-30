@@ -188,13 +188,13 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
                         failureMessage.setActionType(walkAction.getDefinition().getClass().getSimpleName());
                      }
-                     else
+                     else if (action instanceof HandPoseActionState handPoseAction)
                      {
                         failureMessage.setOrientationTolerance(action.getOrientationDistanceToGoalTolerance());
                         failureMessage.setPositionTolerance(action.getPositionDistanceToGoalTolerance());
 
-                        var desiredValue = action.getCommandedTrajectory().getLastValueReadOnly();
-                        var actualValue = action.getCurrentPose().getValueReadOnly();
+                        var desiredValue = handPoseAction.getCommandedTrajectory().getLastValueReadOnly();
+                        var actualValue = handPoseAction.getCurrentPose().getValueReadOnly();
 
                         Quaternion errorOrientation = new Quaternion(actualValue.getOrientation());
                         errorOrientation.multiply(desiredValue.getOrientation());
@@ -203,13 +203,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                         Point3D errorPosition = new Point3D(desiredValue.getPosition());
                         errorPosition.sub(actualValue.getPosition());
                         failureMessage.getPositionError().set(errorPosition);
+
+                        failureMessage.setActionFrame(handPoseAction.getDefinition().getPalmParentFrameName());
+                        failureMessage.setActionType(handPoseAction.getDefinition().getClass().getSimpleName());
                      }
 
-                     if (action instanceof HandPoseActionState handAction)
-                     {
-                        failureMessage.setActionFrame(handAction.getDefinition().getPalmParentFrameName());
-                        failureMessage.setActionType(handAction.getDefinition().getClass().getSimpleName());
-                     }
                      if (action instanceof ChestOrientationActionState chestAction)
                      {
                         failureMessage.setActionFrame(chestAction.getDefinition().getParentFrameName());
