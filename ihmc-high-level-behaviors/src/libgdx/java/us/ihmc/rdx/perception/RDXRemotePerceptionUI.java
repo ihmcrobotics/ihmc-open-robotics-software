@@ -28,7 +28,7 @@ public class RDXRemotePerceptionUI
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
    private final ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
-   private final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    private SwingPlannerParametersBasics swingPlannerParameters;
    private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;

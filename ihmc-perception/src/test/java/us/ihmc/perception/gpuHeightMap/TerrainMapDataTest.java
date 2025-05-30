@@ -9,7 +9,7 @@ import us.ihmc.perception.heightMap.HeightMapParameters;
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
-   private final HeightMapParameters parameters = new HeightMapParameters("GPU");
+   private final HeightMapParameters parameters = new HeightMapParameters();
    private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset());
 
    @Test

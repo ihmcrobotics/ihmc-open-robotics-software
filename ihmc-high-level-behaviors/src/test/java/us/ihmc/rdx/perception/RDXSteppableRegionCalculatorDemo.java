@@ -59,7 +59,7 @@ public class RDXSteppableRegionCalculatorDemo
       // Configure the height map visualizer
       perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
-      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map", new HeightMapParameters("GPU"));
+      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map", new HeightMapParameters());
       heightMapVisualizer.setActive(true);
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);

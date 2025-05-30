@@ -20,12 +20,6 @@ __device__ float3 transformPoint3D(float3 point, const float* transform)
                        dot(make_float3(transform[8], transform[9], transform[10]), point) + transform[11]);
 }
 
-__device__ float3 transformPoint3D32_2(float3 point, float3 rotationMatrixRow0, float3 rotationMatrixRow1, float3 rotationMatrixRow2, float3 translation)
-{
-    return make_float3(dot(rotationMatrixRow0, point) + translation.x, dot(rotationMatrixRow1, point) + translation.y,
-                       dot(rotationMatrixRow2, point) + translation.z);
-}
-
 __device__ float clamp(float value, float minVal, float maxVal)
 {
     return fminf(fmaxf(value, minVal), maxVal);
@@ -34,6 +28,12 @@ __device__ float clamp(float value, float minVal, float maxVal)
 __device__ float length2D(float2 vec)
 {
     return sqrtf(vec.x * vec.x + vec.y * vec.y);
+}
+
+// Euclidean distance
+__device__ float length(float3 v)
+{
+    return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
 __device__ float3 normalize(float3 v)

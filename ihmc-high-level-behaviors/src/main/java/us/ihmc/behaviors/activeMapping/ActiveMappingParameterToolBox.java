@@ -29,7 +29,7 @@ public class ActiveMappingParameterToolBox
       monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters(taskPurpose);
       swingPlannerParameters = robotModel.getSwingPlannerParameters(taskPurpose);
-      heightMapParameters = new HeightMapParameters("GPU");
+      heightMapParameters = new HeightMapParameters();
       depthImageFilteringParameters = new DepthImageFilteringParameters();
 
       // Add Parameters to be synced between the UI and this process
