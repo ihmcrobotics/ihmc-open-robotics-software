@@ -28,7 +28,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 public class RapidHeightMapExtractor
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
-   static final int BLOCK_SIZE_XY = 32;
+   private static final int BLOCK_SIZE_XY = 32;
    private static final int MODE = 1; // 0 -> Ouster, 1 -> Realsense
 
    private final HeightMapParameters heightMapParameters;
@@ -68,7 +68,7 @@ public class RapidHeightMapExtractor
    private final FloatPointer sensorToGroundTransformHostPointer;
    private final FloatPointer sensorToGroundTransformDevicePointer;
    private final FloatPointer zUpCameraToWorldAlignedGroundHostPointer;
-   private final FloatPointer ZUpCameraToWorldAlignedGroundDevicePointer;
+   private final FloatPointer zUpCameraToWorldAlignedGroundDevicePointer;
 
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
@@ -85,7 +85,7 @@ public class RapidHeightMapExtractor
    private int previousCellY;
    private float resetOffset;
 
-   private FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor;
+   private final FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor;
 
    public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
@@ -142,7 +142,7 @@ public class RapidHeightMapExtractor
          sensorToGroundTransformDevicePointer = new FloatPointer();
 
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
-         ZUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
+         zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
          parametersHostPointer = new FloatPointer(27);
          parametersDevicePointer = new FloatPointer();
@@ -211,8 +211,8 @@ public class RapidHeightMapExtractor
 
       groundToWorldAlignedGround.get(worldToGroundTransformArray);
       zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
-      CUDATools.mallocAsync(ZUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
-      CUDATools.memcpyAsync(ZUpCameraToWorldAlignedGroundDevicePointer, zUpCameraToWorldAlignedGroundHostPointer, worldToGroundTransformArray.length, stream);
+      CUDATools.mallocAsync(zUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
+      CUDATools.memcpyAsync(zUpCameraToWorldAlignedGroundDevicePointer, zUpCameraToWorldAlignedGroundHostPointer, worldToGroundTransformArray.length, stream);
       checkCUDAError();
 
       // --------- Run the update kernel ---------
@@ -255,7 +255,7 @@ public class RapidHeightMapExtractor
          updateKernel.withPointer(parametersDevicePointer);
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
-         updateKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         updateKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
          updateKernel.withFloat((float) linearMotionMagnitude).withFloat((float) angularMotionMagnitude);
          updateKernel.withFloat(resetOffset);
 
@@ -272,7 +272,7 @@ public class RapidHeightMapExtractor
          int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
          int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
 
-         // This means we have moved more then 2cm. So each cell should shift to one of its neighboring cells
+         // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
          {
             // We will be updating the global height map with the applied translation of the data
@@ -314,7 +314,7 @@ public class RapidHeightMapExtractor
          registerKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
-         registerKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         registerKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
          registerKernel.withPointer(parametersDevicePointer);
          registerKernel.withFloat(resetOffset);
 
@@ -363,7 +363,7 @@ public class RapidHeightMapExtractor
 
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
-      cudaFreeAsync(ZUpCameraToWorldAlignedGroundDevicePointer, stream);
+      cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
 
@@ -397,8 +397,8 @@ public class RapidHeightMapExtractor
 
          groundToWorldAlignedGround.get(worldToGroundTransformArray);
          zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
-         CUDATools.mallocAsync(ZUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
-         CUDATools.memcpyAsync(ZUpCameraToWorldAlignedGroundDevicePointer,
+         CUDATools.mallocAsync(zUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
+         CUDATools.memcpyAsync(zUpCameraToWorldAlignedGroundDevicePointer,
                                zUpCameraToWorldAlignedGroundHostPointer,
                                worldToGroundTransformArray.length,
                                stream);
@@ -412,7 +412,7 @@ public class RapidHeightMapExtractor
 
          emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         emptyRegisterKernel.withPointer(ZUpCameraToWorldAlignedGroundDevicePointer);
+         emptyRegisterKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
          emptyRegisterKernel.withPointer(parametersDevicePointer);
          emptyRegisterKernel.withFloat(resetOffset);
 
@@ -439,6 +439,8 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
+      deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
+      cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       // Synchronize the stream so the cpu has the data when this method returns
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
@@ -486,6 +488,7 @@ public class RapidHeightMapExtractor
       updateKernel.close();
       translateKernel.close();
       registerKernel.close();
+      terrainCroppingKernel.close();
       scalingKernel.close();
       planOffsetKernel.close();
       emptyRegisterKernel.close();
@@ -493,7 +496,7 @@ public class RapidHeightMapExtractor
       // Clean up each resource
       deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer, stream);
       deallocateFloatPointer(sensorToGroundTransformHostPointer, sensorToGroundTransformDevicePointer, stream);
-      deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, ZUpCameraToWorldAlignedGroundDevicePointer, stream);
+      deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, zUpCameraToWorldAlignedGroundDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
 
       localMeanMap.close();

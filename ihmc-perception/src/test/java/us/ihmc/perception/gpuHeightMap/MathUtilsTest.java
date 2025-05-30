@@ -37,7 +37,6 @@ public class MathUtilsTest
       FloatPointer cpuResultPointer = new FloatPointer(1);
 
       CUDATools.mallocAsync(gpuResultPointer, 1, stream);
-//      cudaMallocAsync(gpuResultPointer, (long) cpuResultPointer.sizeof() * (cpuResultPointer.limit() + 1), stream);
 
       // Set up the vectors that will be used in the dot product
       Vector3D vectorA = new Vector3D();
@@ -57,7 +56,6 @@ public class MathUtilsTest
       kernel.run(stream, new dim3(), new dim3(), 0);
 
       CUDATools.memcpyAsync(cpuResultPointer, gpuResultPointer, 1, stream);
-//      cudaMemcpyAsync(cpuResultPointer, gpuResultPointer, gpuResultPointer.sizeof() * (gpuResultPointer.limit() + 1), cudaMemcpyDefault, stream);
 
       cudaStreamSynchronize(stream);
 

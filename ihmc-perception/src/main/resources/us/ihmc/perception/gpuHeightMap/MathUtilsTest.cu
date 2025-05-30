@@ -44,13 +44,17 @@ __global__ void test_math_utils_transform_point(float px, float py, float pz,
     printf("Row 2: (%f, %f, %f)\n", r2x, r2y, r2z);
     printf("Translation: (%f, %f, %f)\n", tx, ty, tz);
 
-    float3 point = make_float3(px, py, pz);
-    float3 row0 = make_float3(r0x, r0y, r0z);
-    float3 row1 = make_float3(r1x, r1y, r1z);
-    float3 row2 = make_float3(r2x, r2y, r2z);
-    float3 translation = make_float3(tx, ty, tz);
 
-    float3 transformedPoint = transformPoint3D32_2(point, row0, row1, row2, translation);
+    float3 point = make_float3(px, py, pz);
+
+    float transform[12] =
+    {
+        r0x, r0y, r0z, tx,
+        r1x, r1y, r1z, ty,
+        r2x, r2y, r2z, tz
+    };
+
+    float3 transformedPoint = transformPoint3D(point, transform);
 
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     result[index * 3 + 0] = transformedPoint.x;
