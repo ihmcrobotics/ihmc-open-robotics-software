@@ -122,6 +122,7 @@ public class RDXLeRobotTestSimulator
          {
             ImGui.text("Kinematic simulation state: %s time: %.2f s".formatted(controllerState.getEnumValue(), time.getValue()));
 
+            ImGui.beginDisabled();
             if (ImGui.button(labels.get("Reset to log robot (not working)")))
             {
                for (Robot logRobot : logSession.getSession().getRobots())
@@ -146,6 +147,7 @@ public class RDXLeRobotTestSimulator
                   }
                }
             }
+            ImGui.endDisabled();
 
             ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
             if (ImGui.button(labels.get("Stop kinematic simulation")))
@@ -191,6 +193,18 @@ public class RDXLeRobotTestSimulator
             {
                inferenceManager.setRunning(runInference.get());
             }
+
+            ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
+            if (ImGui.button(labels.get("Stop IK streaming")))
+            {
+               ikStreamingStarted = false;
+               ikStreaming.destroy();
+               inferenceManager.destroy();
+               ikStreaming = null;
+               toolboxTime = null;
+               inferenceManager = null;
+            }
+            ImGui.popStyleColor();
          }
          else
          {
