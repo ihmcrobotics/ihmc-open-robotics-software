@@ -343,18 +343,18 @@ public class RDXVRKinematicsStreamingMode
          retargetMotion(toolboxInputMessage);
 
          if (toolboxCommunicationEnabled.get())
-            toolboxInputMessage.setStreamToController(false);
+            toolboxInputMessage.setStreamToController(controlRobotEnabled.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 
-         if (toolboxInputStreamRateLimiter.run(streamPeriod) && !pausedForWalking)
+         if (!pausedForWalking)
          {
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
             outputFrequencyPlot.recordEvent();
          }
 
-         boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.2f && gripButtonsValue.get(RobotSide.RIGHT) > 0.2f;
+         boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.8f && gripButtonsValue.get(RobotSide.RIGHT) > 0.8f;
          footstepStreaming.processVRInput(isStepping);
       }
    }

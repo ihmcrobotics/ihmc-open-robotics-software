@@ -12,7 +12,7 @@ extern "C"
 #define DEPTH_FX 7
 #define DEPTH_FY 8
 #define GLOBAL_CENTER_INDEX 9
-#define HALF_LOCAL_WIDTH_IM_METERS 10
+#define HALF_LOCAL_WIDTH_IN_METERS 10
 #define LOCAL_CELLS_PER_AXIS 11
 #define GLOBAL_CELLS_PER_AXIS 12
 #define HEIGHT_SCALING_FACTOR 13
@@ -125,7 +125,7 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
 
     // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(localIndex,
-                                            make_float2(params[HALF_LOCAL_WIDTH_IM_METERS], 0.0f),
+                                            make_float2(params[HALF_LOCAL_WIDTH_IN_METERS], 0.0f),
                                             params[CELL_SIZE],
                                             params[LOCAL_CENTER_INDEX]);
 
@@ -133,13 +133,7 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
     cellCenterInZUp.y = xyCoords.y;
 
     // Transform cell center from previous Z-up to current Z-up
-    float3 cellCenterInGroundNoRotation = transformPoint3D32_2(
-        cellCenterInZUp,
-        make_float3(zUpCameraToWorldAlignedGround[0], zUpCameraToWorldAlignedGround[1], zUpCameraToWorldAlignedGround[2]),
-        make_float3(zUpCameraToWorldAlignedGround[4], zUpCameraToWorldAlignedGround[5], zUpCameraToWorldAlignedGround[6]),
-        make_float3(zUpCameraToWorldAlignedGround[8], zUpCameraToWorldAlignedGround[9], zUpCameraToWorldAlignedGround[10]),
-        make_float3(zUpCameraToWorldAlignedGround[3], zUpCameraToWorldAlignedGround[7], zUpCameraToWorldAlignedGround[11]));
-
+    float3 cellCenterInGroundNoRotation = transformPoint3D(cellCenterInZUp, zUpCameraToWorldAlignedGround);
 
     int2 newCellIndex = coordinate_to_indices(
         make_float2(cellCenterInGroundNoRotation.x, cellCenterInGroundNoRotation.y),
@@ -147,11 +141,7 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
         params[CELL_SIZE],
         params[GLOBAL_CENTER_INDEX]);
 
-    int2 globalIndex = make_int2(0, 0);
-    globalIndex.x = newCellIndex.x;
-    globalIndex.y = newCellIndex.y;
-
-    return globalIndex;
+    return newCellIndex;
 }
 
 // Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
@@ -205,7 +195,8 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                                             params[CELL_SIZE],
                                             params[LOCAL_CENTER_INDEX]);
 
-    cellCenterInZUp.x = xyCoords.x + params[HALF_LOCAL_WIDTH_IM_METERS];
+    // Shift forward in X so that this cell appears in front of the robot, meaning it likely has depth data
+    cellCenterInZUp.x = xyCoords.x + params[HALF_LOCAL_WIDTH_IN_METERS];
     cellCenterInZUp.y = xyCoords.y;
 
     float halfCellWidth = params[CELL_SIZE] / 2.0f;
@@ -217,12 +208,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     int skip = static_cast<int>(params[SEARCH_SKIP_SIZE]);
 
     // Transform cell center from Z-Up to Sensor frame
-    float3 cellCenterInSensor = transformPoint3D32_2(
-        cellCenterInZUp,
-        make_float3(zUpToSensorFrameTf[0], zUpToSensorFrameTf[1], zUpToSensorFrameTf[2]),
-        make_float3(zUpToSensorFrameTf[4], zUpToSensorFrameTf[5], zUpToSensorFrameTf[6]),
-        make_float3(zUpToSensorFrameTf[8], zUpToSensorFrameTf[9], zUpToSensorFrameTf[10]),
-        make_float3(zUpToSensorFrameTf[3], zUpToSensorFrameTf[7], zUpToSensorFrameTf[11]));
+    float3 cellCenterInSensor = transformPoint3D(cellCenterInZUp, zUpToSensorFrameTf);
 
     // Perform projection (spherical or perspective)
     int2 projectedPoint;
@@ -275,12 +261,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                 queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
 
                 // Transform back to Z-Up frame
-                float3 queryPointInZUp = transformPoint3D32_2(
-                    queryPointInSensor,
-                    make_float3(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
-                    make_float3(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
-                    make_float3(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
-                    make_float3(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
+                float3 queryPointInZUp = transformPoint3D(queryPointInSensor, sensorToZUpFrameTf);
 
                 // Check if the point is within the cell
                 if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
@@ -310,7 +291,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     motionVarianceF += distance * params[VARIANCE_PER_METER];
     motionVarianceF += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
     motionVarianceF += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
-    
+
     if (DEBUG && xIndex == 40 && yIndex == 40)
     {
         printf("Update Kernel -----------------------------\n");
@@ -546,7 +527,7 @@ __global__ void planOffsetKernel(float *matrixToModify, size_t pitchMatrixToModi
     unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
     // This is less then or equal to due to a round error that can give +- 1 offsets
     // This skips the cells that have real data in them coming from the values to skip
-    if (abs( (int) skipRow[indexX] - resetOffset) >= 2)
+    if (abs((int) skipRow[indexX] - resetOffset) >= 2)
         return;
 
     float *matrixRow = (float *)((char *)matrixToModify + indexY * pitchMatrixToModify);

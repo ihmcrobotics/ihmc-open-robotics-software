@@ -27,7 +27,6 @@ import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -58,8 +57,8 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;

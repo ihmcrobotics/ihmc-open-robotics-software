@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -22,7 +22,7 @@ public class AlexanderLiftOffAndTouchDownTest
    @Test
    public void testForwardStepRotated() throws SimulationExceededMaximumTimeException
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT)
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()

@@ -2,7 +2,8 @@ package us.ihmc.alexander.parameters.controller;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.alexander.AlexanderJointMap;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.AlexanderVersionInterface;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
@@ -42,7 +43,7 @@ import java.util.Map;
 
 public class OpenAlexanderWalkingControllerParameters extends WalkingControllerParameters
 {
-   private final AlexanderVersion version;
+   private final AlexanderVersionInterface version;
    private final RobotTarget target;
    private final AlexanderJointMap jointMap;
    private final AlexanderPhysicalProperties physicalProperties;
@@ -83,12 +84,12 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    /* Setting to true makes the arms stiffer but more responsive for streaming */
    static final boolean RESPONSIVE_STREAMING_MODE = false;
 
-   public OpenAlexanderWalkingControllerParameters(AlexanderVersion version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
+   public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
    {
       this(version, target, jointMap, physicalProperties, new AlexanderContactPointParameters(jointMap, physicalProperties, true));
    }
 
-   public OpenAlexanderWalkingControllerParameters(AlexanderVersion version,
+   public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version,
                                                    RobotTarget target,
                                                    AlexanderJointMap jointMap,
                                                    AlexanderPhysicalProperties physicalProperties,

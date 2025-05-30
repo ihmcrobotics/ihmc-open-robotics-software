@@ -26,9 +26,9 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final String rightForearmIMUSensor = "right_wrist_yaw_imu";
    private final String rightHandIMUSensor = null; // "right_gripper_yaw_imu";
 
-   private AlexanderVersion alexanderVersion;
+   private AlexanderVersionInterface alexanderVersion;
 
-   public AlexanderSensorInformation(AlexanderVersion alexanderVersion)
+   public AlexanderSensorInformation(AlexanderVersionInterface alexanderVersion)
    {
       this.alexanderVersion = alexanderVersion;
 

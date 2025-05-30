@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;

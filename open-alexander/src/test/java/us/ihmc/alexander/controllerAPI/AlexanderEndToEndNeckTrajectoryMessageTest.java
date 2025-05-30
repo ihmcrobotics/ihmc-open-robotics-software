@@ -2,7 +2,7 @@ package us.ihmc.alexander.controllerAPI;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.AlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.alexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndNeckTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -11,7 +11,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
 public class AlexanderEndToEndNeckTrajectoryMessageTest extends EndToEndNeckTrajectoryMessageTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(AlexanderVersion.V0_FULL_ROBOT);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT);
 
    @Override
    public DRCRobotModel getRobotModel()

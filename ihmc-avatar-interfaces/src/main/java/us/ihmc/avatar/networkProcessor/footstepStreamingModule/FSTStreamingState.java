@@ -155,7 +155,7 @@ public class FSTStreamingState implements State
    @Override
    public void onEntry()
    {
-      LogTools.info("Footstep Streaming enabled");
+      LogTools.debug("Footstep Streaming enabled");
       for (RobotSide side : RobotSide.values())
       {
          isUserStepping.put(side, false);
@@ -344,7 +344,7 @@ public class FSTStreamingState implements State
                               }
 
                               reset(side, currentTrackerTransform);
-                              LogTools.info("User completed stepping with {}", side);
+                              LogTools.debug("User completed stepping with {}", side);
                            }
                         }
                         else  // Still moving
@@ -689,7 +689,7 @@ public class FSTStreamingState implements State
    @Override
    public void onExit(double timeInState)
    {
-      LogTools.info("Footstep Streaming disabled");
+      LogTools.debug("Footstep Streaming disabled");
       tools.flushInputCommands();
    }
 }

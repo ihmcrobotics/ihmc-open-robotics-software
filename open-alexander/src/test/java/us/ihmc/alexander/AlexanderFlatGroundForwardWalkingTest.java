@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 @Tag("humanoid-flat-ground-slow-2")
 public class AlexanderFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
-   private final AlexanderVersion version = AlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target)
    {

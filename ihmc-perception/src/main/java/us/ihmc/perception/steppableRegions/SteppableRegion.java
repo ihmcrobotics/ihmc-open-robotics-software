@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.PlanarRegionNormal;
 import us.ihmc.robotics.geometry.PlanarRegionOrigin;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.List;
 
