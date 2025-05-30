@@ -178,27 +178,25 @@ public class RDXLeRobotTestSimulator
          else if (toolboxTime != null)
          {
             ImGui.text("IK streaming time: %.2f s".formatted(toolboxTime.getValue()));
+
+            if (inferenceManager == null || !inferenceManager.getModelName().equals(dataset.getName()))
+            {
+               if (inferenceManager != null)
+                  inferenceManager.destroy();
+
+               inferenceManager = new LeRobotManager(dataset.getName());
+            }
+
+            if (ImGui.checkbox(labels.get("Run model"), runInference))
+            {
+               inferenceManager.setRunning(runInference.get());
+            }
          }
          else
          {
             ImGui.text("IK streaming starting...");
          }
 
-
-
-         if (inferenceManager == null || inferenceManager.getModelName().equals(dataset.getName()))
-         {
-            inferenceManager = new LeRobotManager(dataset.getName());
-
-
-            
-
-         }
-
-         if (ImGui.checkbox(labels.get("Run model"), runInference))
-         {
-
-         }
       }
       else
       {
@@ -208,6 +206,7 @@ public class RDXLeRobotTestSimulator
 
    public void destroy()
    {
+      inferenceManager.destroy();
       robotVisualizer.destroy();
       syncedRobot.destroy();
       ros2Node.destroy();
