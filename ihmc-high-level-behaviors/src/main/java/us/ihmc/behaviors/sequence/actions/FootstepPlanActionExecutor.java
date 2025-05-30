@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -60,7 +61,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ROS2SyncedRobotModel syncedRobot,
                                      ControllerStatusTracker controllerStatusTracker,
                                      ReferenceFrameLibrary referenceFrameLibrary,
-                                     WalkingControllerParameters walkingControllerParameters)
+                                     WalkingControllerParameters walkingControllerParameters,
+                                     RapidHeightMapThread rapidHeightMapUpdateThread)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, syncedRobot.getRobotModel()));
 
@@ -69,8 +71,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition);
-      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition);
+      previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition, rapidHeightMapUpdateThread);
+      executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition, rapidHeightMapUpdateThread);
    }
 
    @Override
@@ -353,7 +355,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       meetsDesiredCompletionCriteria &= incompleteFootsteps == 0;
       meetsDesiredCompletionCriteria &= !isWalking;
 
-      if (meetsDesiredCompletionCriteria || hitTimeLimit)
+      if (meetsDesiredCompletionCriteria || hitTimeLimit || state.getFailed())
       {
          state.setIsExecuting(false);
       }

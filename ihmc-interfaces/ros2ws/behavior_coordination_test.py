@@ -11,16 +11,32 @@ from behavior_msgs.msg import AI2RCommandMessage
 from behavior_msgs.msg import AI2RObjectMessage
 from behavior_msgs.msg import AI2RStatusMessage
 from behavior_msgs.msg import AI2RNavigationMessage
-from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
+from behavior_msgs.msg import AI2RReceiveObjectMessage
 
 import cv2
 import numpy as np
+from typing import List
+import json
 
 ros2 = {}
 initialized = False
+loggedFailure = False
+
+behavior_counter = 0
+behaviors_baseline = ["SCAN", "GOTO", "RECEIVE OBJECT", "GOTO", "PLACE CHARGE ON DOOR", "GOTO"]
+
+goto_person_param = ("Person1", AI2RNavigationMessage.DEFAULT, "")
+goto_door_param = ("DoorPanel1", AI2RNavigationMessage.FRONT, "Barrier1")
+goto_barrier_param = ("Barrier1", AI2RNavigationMessage.BEHIND, "DoorPanel1")
+receive_charge_param = ("Charge1",)
+parameters = [None, goto_person_param, receive_charge_param, goto_door_param, None, goto_barrier_param]
 
 def behavior_message_callback(msg):
     global initialized  # Access the global variables
+    global loggedFailure
+    global behavior_counter
+    global behaviors_baseline
+    global parameters
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
@@ -45,65 +61,75 @@ def behavior_message_callback(msg):
         else:
             print("-")
 
-    # --------- Reasoning -----------
-    # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
-
     # --------- Monitoring -----------
     print("Behavior in Progress: " + msg.behavior_in_progress)
     print("Completed Behavior: " + msg.completed_behavior)
-
-    failed_behavior = msg.failure
-    if failed_behavior:
+    failed_behavior = msg.failed_behavior
+    failure = msg.failure
+    if failed_behavior != "-" and loggedFailure == False:
         print("[FAILURE] -----------")
-        print("Failed behavior: ")
-        # Failure details
-        print("Name: " + failed_behavior.action_name)
-        print("Type: " + failed_behavior.action_type)
-#         print("Frame: " + failed_behavior.action_frame)
-        print("Missing Frame: " + str(failed_behavior.missing_frame))
-        print("Navigation Collision Frame Name: " + failed_behavior.collision_name)
+        print("Failed behavior: " + failed_behavior)
 
-        position_error = failed_behavior.position_error
-        # Convert Point to numpy array
+        failure_info = {
+            "Failed behavior": failed_behavior,
+            "Description": failure.action_name,
+            "Type": failure.action_type
+        }
+
+        if failure.missing_frame:
+            failure_info["Missing Frame"] = failure.reference_frame
+
+        position_error = failure.position_error
         error_vector = np.array([position_error.x, position_error.y, position_error.z])
-        # Calculate the Euclidean norm (L2 norm)
         norm = np.linalg.norm(error_vector)
-        print(f"The position error is: {norm}")
-        orientation_error = failed_behavior.orientation_error
+        if norm > failure.position_tolerance:
+            failure_info["Position error"] = norm
 
-        position_tolerance = failed_behavior.position_tolerance
-        orientation_tolerance = failed_behavior.orientation_tolerance
-        print("----------[FAILURE]")
+        json_filename = 'failure_info.json'
+        with open(json_filename, 'a') as json_file:
+            json.dump(failure_info, json_file, indent=4)
+        loggedFailure = True
 
-    # --------- Reasoning -----------
-    # CAN DO SOME REASONING HERE based on failed behaviors
+    # --------- Coordination -----------
     waiting_for_command = False
     if msg.behavior_in_progress == "-":
        waiting_for_command  = True
 
     if waiting_for_command or not initialized:
-        # --------- Coordination -----------
         behavior_command = AI2RCommandMessage()
         # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
-        behavior_command.behavior_to_execute = "GOTO"
-        behavior_command.adapting_behavior = True
+        behavior_command.behavior_to_execute = behaviors_baseline[behavior_counter]
+        behavior_command.adapting_behavior = False
 
-        new_goto_behavior = AI2RNavigationMessage()
-        # Set the reference frame name - can copy from scene_objects.obj_name
-        new_goto_behavior.object_name = "Barrier1"
-        # Set the distance to the object
-        new_goto_behavior.distance_to_object = 0.6
-        new_goto_behavior.pov_reference_frame_name = "DoorPanel1"
-        new_goto_behavior.spatial_relation = AI2RNavigationMessage.FRONT
-        if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
-            new_goto_behavior.pov_reference_frame_name = "walkingFrame"
+        if (behavior_command.behavior_to_execute == "GOTO"):
+            behavior_command.adapting_behavior = True
+            new_goto_behavior = AI2RNavigationMessage()
+            goto_parameters = parameters[behavior_counter]
 
-        behavior_command.navigation = new_goto_behavior
+            # Set the reference frame name - can copy from scene_objects.obj_name
+            new_goto_behavior.object_name = goto_parameters[0]
+            # Set the distance to the object
+            new_goto_behavior.distance_to_object = 1.0
+            new_goto_behavior.pov_reference_frame_name = goto_parameters[2]
+            new_goto_behavior.spatial_relation = goto_parameters[1]
+            if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
+                new_goto_behavior.pov_reference_frame_name = "walkingFrame"
+
+            behavior_command.navigation = new_goto_behavior
+
+        if (behavior_command.behavior_to_execute == "RECEIVE OBJECT"):
+            behavior_command.adapting_behavior = True
+            new_receive_behavior = AI2RReceiveObjectMessage()
+            new_receive_behavior.object_name = parameters[behavior_counter][0]
+            new_receive_behavior.side =  bytes([1])
+
+            behavior_command.receive_object = new_receive_behavior
 
         print("Commanded Behavior: " + behavior_command.behavior_to_execute)
         ros2["behavior_publisher"].publish(behavior_command)
         initialized = True
-
+        loggedFailure = False
+        behavior_counter += 1
 
 def main(args=None):
     rclpy.init(args=args)

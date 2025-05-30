@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AI2RSkillEditor
@@ -76,10 +77,13 @@ public class AI2RSkillEditor
                   {
                      case DEFAULT ->
                      {
-                        direction.scale(0.1);
+                        direction.scale(distanceToReferenceFrame);
                         goalStancePoint.add(direction);
                      }
-                     case FRONT -> goalStancePoint.add(direction);
+                     case FRONT ->
+                           {
+                              goalStancePoint.add(direction);
+                           }
                      case BEHIND -> goalStancePoint.sub(direction);
                      case LEFT ->
                      {
@@ -115,7 +119,9 @@ public class AI2RSkillEditor
                      }
                   }
                }
+               // After calculation, go back to pointing at object
                goalFocalPoint.changeFrame(referenceFrame);
+               goalFocalPoint.setToZero();
                goalStancePoint.changeFrame(referenceFrame);
                gotoActionState.getDefinition().getGoalStancePoint().getValue().set(goalStancePoint);
                gotoActionState.getDefinition().getGoalFocalPoint().getValue().set(goalFocalPoint);

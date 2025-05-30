@@ -48,16 +48,13 @@ public class RDXCustomSceneLoader
                                                           new Point3D(-0.58502, 1.95796, 0.00)));
 
             addNode("Charge", 1);
-            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.79404), Math.toRadians(0.02114), Math.toRadians(1.52525)),
-                                                          new Point3D(-1.00602, 1.67525, 0.93665)));
+            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(179.60069), Math.toRadians(1.52536), Math.toRadians(-0.01063)),
+                                                          new Point3D(1.61975, -1.10095, 1.00657)));
 
             addNode("Barrier", 1);
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
                                                           new Point3D(1.77185, 0.000, 0.00000)));
 
-            addNode("Barrier", 2);
-            setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199, 0.79907)));
             break;
 
          case EXPLOSIVE_BREACHING_B:

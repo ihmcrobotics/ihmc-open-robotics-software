@@ -8,6 +8,7 @@ import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -24,12 +25,13 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
                                ReferenceFrameLibrary referenceFrameLibrary,
                                SceneGraph sceneGraph,
                                DetectionManager detectionManager,
-                               ROS2ControllerHelper ros2ControllerHelper)
+                               ROS2ControllerHelper ros2ControllerHelper,
+                               RapidHeightMapThread rapidHeightMapUpdateThread)
    {
       super(ROS2ActorDesignation.ROBOT,
             peerClockEstimator,
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
-            new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager));
+            new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager, rapidHeightMapUpdateThread));
    }
 
    public void update()

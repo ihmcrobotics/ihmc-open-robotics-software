@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -33,12 +34,14 @@ public class FootstepPlanActionPlanningThread
    private final FramePose3D goalMidFeetPose = new FramePose3D();
    private FootstepPlan result;
    private final TypedNotification<FootstepPlan> resultNotification = new TypedNotification<>();
+   private final RapidHeightMapThread rapidHeightMapUpdateThread;
 
-   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition)
+   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition, RapidHeightMapThread rapidHeightMapUpdateThread)
    {
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
       this.definition = definition;
+      this.rapidHeightMapUpdateThread = rapidHeightMapUpdateThread;
       footstepPlanner = new FootstepPlanningModule(definition.getPlannerParametersReadOnly().getUseGPU());
    }
 
@@ -53,17 +56,17 @@ public class FootstepPlanActionPlanningThread
       }
 
       Thread thread = new Thread(() ->
-      {
-         try
-         {
-            plan(started);
-         }
-         catch (Throwable throwable)
-         {
-            LogTools.error(throwable.getMessage());
-            throwable.printStackTrace();
-         }
-      }, getClass().getSimpleName() + started);
+                                 {
+                                    try
+                                    {
+                                       plan(started);
+                                    }
+                                    catch (Throwable throwable)
+                                    {
+                                       LogTools.error(throwable.getMessage());
+                                       throwable.printStackTrace();
+                                    }
+                                 }, getClass().getSimpleName() + started);
       thread.start();
    }
 
@@ -103,25 +106,27 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
-      footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
-      footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
+      // hard-coding for ONR demo
+      footstepPlannerRequest.setPlanBodyPath(true);
+      footstepPlannerRequest.setPerformAStarSearch(false);
+      footstepPlanner.enableGPUBodyPathPlanner(false);
 
-      footstepPlanner.enableGPUBodyPathPlanner(definition.getPlannerParametersReadOnly().getUseGPU());
-      footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
+      // TODO!!
+      footstepPlannerRequest.setHeightMapData(rapidHeightMapUpdateThread.getLatestHeightMapData());
 
       // TODO: Add body path planning options to user
-      footstepPlannerRequest.setPlanBodyPath(false);
-      if (definition.getPlannerWalkWithGoalOrientation().getValue())
-      {
-         // At beginning, first turn in place to face the direction that the goal stance faces
-         startMidFeetPose.interpolate(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT), 0.5);
-         goalMidFeetPose.interpolate(goalFootPoses.get(RobotSide.LEFT), goalFootPoses.get(RobotSide.RIGHT), 0.5);
-         startTurnedToMatchGoalFacing.set(startMidFeetPose);
-         startTurnedToMatchGoalFacing.getOrientation().set(goalMidFeetPose.getOrientation());
-         footstepPlannerRequest.getBodyPathWaypoints().add(startMidFeetPose);
-         footstepPlannerRequest.getBodyPathWaypoints().add(startTurnedToMatchGoalFacing);
-         footstepPlannerRequest.getBodyPathWaypoints().add(goalMidFeetPose);
-      }
+//      footstepPlannerRequest.setPlanBodyPath(false);
+//      if (definition.getPlannerWalkWithGoalOrientation().getValue())
+//      {
+//         // At beginning, first turn in place to face the direction that the goal stance faces
+//         startMidFeetPose.interpolate(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT), 0.5);
+//         goalMidFeetPose.interpolate(goalFootPoses.get(RobotSide.LEFT), goalFootPoses.get(RobotSide.RIGHT), 0.5);
+//         startTurnedToMatchGoalFacing.set(startMidFeetPose);
+//         startTurnedToMatchGoalFacing.getOrientation().set(goalMidFeetPose.getOrientation());
+//         footstepPlannerRequest.getBodyPathWaypoints().add(startMidFeetPose);
+//         footstepPlannerRequest.getBodyPathWaypoints().add(startTurnedToMatchGoalFacing);
+//         footstepPlannerRequest.getBodyPathWaypoints().add(goalMidFeetPose);
+//      }
 
       if (!isPreviewPlanner)
          state.getLogger().info("Planning footsteps...");
@@ -159,8 +164,10 @@ public class FootstepPlanActionPlanningThread
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
             state.getLogger().info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
          }
-         state.getLogger().info("Footstep planning failed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(),
-                                                                                footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+         state.getLogger()
+              .info("Footstep planning failed with {}, {} step(s)",
+                    footstepPlannerOutput.getFootstepPlanningResult(),
+                    footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
       }
 
       // Copy of the output to be safe & use clean empty plan when no solution found
@@ -175,7 +182,7 @@ public class FootstepPlanActionPlanningThread
          modifiedFootstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
       }
 
-      if (!isPreviewPlanner)
+//      if (!isPreviewPlanner) // always log when planning
       {
          FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
          footstepPlannerLogger.logSession();
