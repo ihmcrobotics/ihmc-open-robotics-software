@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
@@ -42,6 +43,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private static final boolean debug = false;
    private static final boolean useRANSACTraversibility = true;
    private static final boolean OVERRIDE_COMPUTE_TRAVERSABILITY = false;
+   private static final double COLLISION_START_TOLERANCE = 0.5;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -349,7 +351,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                continue;
             }
 
-            if (plannerParameters.getCheckForCollisions())
+            double distanceFromStart = EuclidCoreTools.normSquared(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
+            if (plannerParameters.getCheckForCollisions() && distanceFromStart > COLLISION_START_TOLERANCE)
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
                                                                               neighbor,
