@@ -85,7 +85,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public void create()
    {
       super.create();
-      heightMapImageVisualizer.create();
       heightMapRenderer.create(cellsPerAxisGlobal * cellsPerAxisGlobal);
    }
 
@@ -190,7 +189,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
       }
       ImGui.unindent();
-
    }
 
    @Override
