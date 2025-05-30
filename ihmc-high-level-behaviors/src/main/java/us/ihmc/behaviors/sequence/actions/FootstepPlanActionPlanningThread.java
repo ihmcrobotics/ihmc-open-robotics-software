@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -33,12 +34,14 @@ public class FootstepPlanActionPlanningThread
    private final FramePose3D goalMidFeetPose = new FramePose3D();
    private FootstepPlan result;
    private final TypedNotification<FootstepPlan> resultNotification = new TypedNotification<>();
+   private final RapidHeightMapThread rapidHeightMapUpdateThread;
 
-   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition)
+   public FootstepPlanActionPlanningThread(boolean isPreviewPlanner, FootstepPlanActionState state, FootstepPlanActionDefinition definition, RapidHeightMapThread rapidHeightMapUpdateThread)
    {
       this.isPreviewPlanner = isPreviewPlanner;
       this.state = state;
       this.definition = definition;
+      this.rapidHeightMapUpdateThread = rapidHeightMapUpdateThread;
       footstepPlanner = new FootstepPlanningModule(definition.getPlannerParametersReadOnly().getUseGPU());
    }
 
@@ -105,6 +108,7 @@ public class FootstepPlanActionPlanningThread
 
       footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
       footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
+      rapidHeightMapUpdateThread.getLatestHeightMapData();
 
       footstepPlanner.enableGPUBodyPathPlanner(definition.getPlannerParametersReadOnly().getUseGPU());
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
