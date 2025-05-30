@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -44,6 +43,7 @@ public class RapidHeightMapManager
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
+   private final HeightMapData latestHeightMapData;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 FullHumanoidRobotModel robotModel,
@@ -54,6 +54,10 @@ public class RapidHeightMapManager
                                 HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
+      latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                              (float) heightMapParameters.getTerrainWidthInMeters(),
+                                              0.0,
+                                              0.0);
 
       footSoleFrames.add(leftFootSoleFrame);
       footSoleFrames.add(rightFootSoleFrame);
@@ -90,10 +94,6 @@ public class RapidHeightMapManager
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                            sensorOrigin.getX(),
-                                                            sensorOrigin.getY());
       HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
                                                    latestHeightMapData,
                                                    sensorOrigin,
@@ -168,22 +168,6 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                            sensorOrigin.getX(),
-                                                            sensorOrigin.getY());
-      Mat heightMap = new Mat();
-      GpuMat deviceTerrainHeightMap = rapidHeightMapExtractor.getTerrainHeightMap();
-      deviceTerrainHeightMap.download(heightMap);
-      HeightMapMessageTools.convertToHeightMapData(heightMap,
-                                                   latestHeightMapData,
-                                                   sensorOrigin,
-                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                   (float) heightMapParameters.getCellSizeInMeters(),
-                                                   heightMapParameters);
-      heightMap.close();
-      deviceTerrainHeightMap.close();
-
       return latestHeightMapData;
    }
 
