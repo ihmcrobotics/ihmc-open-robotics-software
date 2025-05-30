@@ -5,9 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.jetbrains.annotations.NotNull;
+import org.bytedeco.opencv.opencv_core.Point;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
@@ -21,6 +23,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -37,46 +40,45 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
+   private ROS2PublishSubscribeAPI ros2;
+   private final ResettableExceptionHandlingExecutorService executorService;
+
+   private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXGlobalHeightMapGraphic globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
-   private final ResettableExceptionHandlingExecutorService executorService;
 
    private final ImBoolean enableGlobalHeightMapVisualizer = new ImBoolean(false);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
 
-   private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
-   private final TerrainMapData terrainMapData;
-   @org.jetbrains.annotations.NotNull
+   private Mat heightMap;
+   private HeightMapData latestHeightMapData;
    private final HeightMapParameters heightMapParameters;
+   private final TerrainMapData terrainMapData;
+
+   private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
    private final int cellsPerAxisGlobal;
 
-   private ROS2PublishSubscribeAPI ros2;
-   private Mat heightMap;
-
-   private HeightMapData latestHeightMapData;
-
-   public RDXROS2HeightMapVisualizer(String title, @NotNull HeightMapParameters heightMapParameters)
+   public RDXROS2HeightMapVisualizer(String title, HeightMapParameters heightMapParameters)
    {
       super(title);
 
       this.heightMapParameters = heightMapParameters;
-
       int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisGlobal = 2 * croppedCenterIndex + 1;
 
       heightMap = new Mat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
-
       terrainMapData = new TerrainMapData(cellsPerAxisGlobal,
                                           cellsPerAxisGlobal,
                                           heightMapParameters.getHeightScaleFactor(),
                                           heightMapParameters.getHeightOffset());
+
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
    @Override
    public List<ROS2Topic<?>> getTopics()
    {
-      return List.of(PerceptionAPI.HEIGHT_MAP_OUTPUT, PerceptionAPI.HEIGHT_MAP_CROPPED);
+      return List.of(PerceptionAPI.HEIGHT_MAP_MESSAGE);
    }
 
    @Override
@@ -119,9 +121,37 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               zUpToWorldTransform.set(heightMapMessage.getOrientation(), heightMapMessage.getPosition());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
                                               heightMap = PerceptionMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
+
+                                              updateHeightMapImage();
                                            });
 
-      getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();
+      getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
+   }
+
+   private void updateHeightMapImage()
+   {
+      DoublePointer minVal = new DoublePointer(1);
+      DoublePointer maxVal = new DoublePointer(1);
+      Point minLoc = new Point();
+      Point maxLoc = new Point();
+
+      opencv_core.minMaxLoc(heightMap, minVal, maxVal, minLoc, maxLoc, null);
+
+      // Normalize depth to 8-bit
+      Mat normalized = new Mat();
+      double alpha = 255.0 / (maxVal.get() - minVal.get());
+      double beta = -minVal.get() * alpha;
+      heightMap.convertTo(normalized, opencv_core.CV_8U, alpha, beta);
+
+      // Apply colormap
+      Mat colorized = new Mat();
+      opencv_imgproc.applyColorMap(normalized, colorized, opencv_imgproc.COLORMAP_JET);
+
+      // Convert to RGBA for display/publishing
+      Mat colorizedRGBA = new Mat();
+      opencv_imgproc.cvtColor(colorized, colorizedRGBA, opencv_imgproc.COLOR_BGR2RGBA);
+
+      heightMapImageVisualizer.setImage(colorizedRGBA);
    }
 
    public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
@@ -129,8 +159,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       // Even if the height map is publishing, we aren't going to update anything with that data unless its active
       if (!isActive())
          return;
-      TerrainMapData latestTerrainMapData = new TerrainMapData(terrainMapMessage);
 
+      TerrainMapData latestTerrainMapData = new TerrainMapData(terrainMapMessage);
       terrainMapData.set(latestTerrainMapData);
    }
 
@@ -229,5 +259,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public TerrainMapData getLatestTerrainMapData()
    {
       return terrainMapData;
+   }
+
+   public RDXOpenCVVideoVisualizer getHeightMapImageVisualizer()
+   {
+      return heightMapImageVisualizer;
    }
 }

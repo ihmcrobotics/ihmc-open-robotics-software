@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -23,7 +22,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,16 +36,14 @@ public class RapidHeightMapManager
    private final Point3D sensorOrigin = new Point3D();
    private final FramePose3D cameraPose = new FramePose3D();
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
-   public int sequenceNumber = 0;
 
    private final Notification resetHeightMapRequested = new Notification();
    private final Notification lowerHeightMapBackdropRequested = new Notification();
 
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
-   private final ROS2Publisher<HeightMapMessage> heightMapPublisher;
-   private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
-   private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
+   private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
+   private final BytePointer compressedHeightMapPointer = new BytePointer();
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 FullHumanoidRobotModel robotModel,
@@ -67,7 +63,7 @@ public class RapidHeightMapManager
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
-      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
@@ -83,10 +79,7 @@ public class RapidHeightMapManager
       }
    }
 
-   public void updateAndPublishHeightMap(GpuMat latestDepthImage,
-                                         CameraIntrinsics depthIntrinsics,
-                                         ReferenceFrame cameraFrame,
-                                         ReferenceFrame cameraZUpFrame)
+   public void updateAndPublishHeightMap(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       updateInternal(latestDepthImage, depthIntrinsics, cameraFrame, cameraZUpFrame);
 
@@ -111,7 +104,7 @@ public class RapidHeightMapManager
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
       heightMapMessage.getOrientation().set(cameraPose.getOrientation());
       heightMapMessage.getPosition().set(cameraPose.getPosition());
-      heightMapPublisher.publish(heightMapMessage);
+      heightMapMessagePublisher.publish(heightMapMessage);
 
       hostGlobalHeightMap.close();
       deviceGlobalHeightMap.close();
@@ -213,8 +206,8 @@ public class RapidHeightMapManager
 
    public void destroy()
    {
-      compressedCroppedHeightMapPointer.close();
-      heightMapPublisher.remove();
+      compressedHeightMapPointer.close();
+      heightMapMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
    }
 }
