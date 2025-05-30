@@ -100,6 +100,7 @@ def behavior_message_callback(msg):
 
 
     if waiting_for_command or not initialized:
+        behavior_command = AI2RCommandMessage()
         # --------- Reasoning -----------
         # CAN DO SOME REASONING HERE based on failed behaviors
         
@@ -233,8 +234,34 @@ def behavior_message_callback(msg):
                 scene_object_positions=scene_objects_positions,
                 robot_pose=robot_position,
                 spatial_context_object=data['pov_object'])
-
+            selected_object = 'Person1'
             print("selected_object: ", selected_object)
+            behavior_command.behavior_to_execute = next_behavior
+            behavior_command.adapting_behavior = True
+            new_goto_behavior = AI2RNavigationMessage()
+
+            # Set the reference frame name - can copy from scene_objects.obj_name
+            new_goto_behavior.object_name = selected_object
+            # Set the distance to the object
+            new_goto_behavior.distance_to_object = 1.0
+            new_goto_behavior.pov_reference_frame_name = data['pov_object']
+            if hasattr(AI2RNavigationMessage, data['spatial_relation']):
+                new_goto_behavior.spatial_relation = getattr(AI2RNavigationMessage, data['spatial_relation'])
+            else:
+                raise ValueError(f"Unknown spatial relation: {data['spatial_relation']}")
+
+            #new_goto_behavior.spatial_relation = data['spatial_relation']
+            if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
+                new_goto_behavior.pov_reference_frame_name = "walkingFrame"
+
+            behavior_command.navigation = new_goto_behavior
+
+        else:
+            behavior_command.behavior_to_execute = next_behavior
+        print("Commanded Behavior: " + behavior_command.behavior_to_execute)
+        ros2["behavior_publisher"].publish(behavior_command)
+        waiting_for_command = False
+        initialized = True  
 
 
         # # Query LLM for next action
@@ -254,14 +281,7 @@ def behavior_message_callback(msg):
         # print("Next behavior:", next_behavior)
 
         # --------- Coordination -----------
-        behavior_command = AI2RCommandMessage()
-        # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
-        #behavior_command.behavior_to_execute = "GOTO CHARGE"
-        behavior_command.behavior_to_execute = next_behavior
-        print("Commanded Behavior: " + behavior_command.behavior_to_execute)
-        ros2["behavior_publisher"].publish(behavior_command)
-        waiting_for_command = False
-        initialized = True  
+
 
 
 def point_to_numpy(point: Point) -> np.ndarray:
