@@ -141,11 +141,12 @@ public class RDXCustomSceneLoader
    {
       RDXPredefinedRigidBodySceneNode node = predefinedRigidBodySceneNodeBuilder.build(nodeName, nodeName + id);
       sceneGraphUI.getSceneGraph().modifyTree(modificationQueue ->
-                                              {
-                                                 modificationQueue.accept(new SceneGraphNodeAddition(node.getSceneNode(),
-                                                                                                     predefinedRigidBodySceneNodeBuilder.getParent()));
-                                                 sceneGraphUI.addUISceneNode(node);
-                                              });
+      {
+         modificationQueue.accept(new SceneGraphNodeAddition(node.getSceneNode(),
+                                                             predefinedRigidBodySceneNodeBuilder.getParent(),
+                                                             sceneGraphUI.getSceneGraph()));
+         sceneGraphUI.addUISceneNode(node);
+      });
    }
 
    private void setNodePose(String nodeName, RigidBodyTransform  rigidBodyTransform)

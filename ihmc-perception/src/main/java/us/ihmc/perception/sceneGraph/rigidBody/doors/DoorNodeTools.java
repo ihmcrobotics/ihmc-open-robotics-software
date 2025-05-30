@@ -104,7 +104,7 @@ public final class DoorNodeTools
                                                                   visualModelPath,
                                                                   modelToPoseTransform,
                                                                   sceneGraph.getCRDTInfo());
-      modificationQueue.accept(new SceneGraphNodeAddition(doorHelperNode, sceneGraph.getRootNode()));
+      modificationQueue.accept(new SceneGraphNodeAddition(doorHelperNode, sceneGraph.getRootNode(), sceneGraph));
       return doorHelperNode;
    }
 }

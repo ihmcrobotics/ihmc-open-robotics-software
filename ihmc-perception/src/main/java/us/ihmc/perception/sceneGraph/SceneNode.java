@@ -10,6 +10,8 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a node on the scene graph which is
@@ -22,7 +24,9 @@ public class SceneNode extends RequestConfirmFreezable
 {
    /** The node's unique ID. */
    private final long id;
-   private final String name;
+   private final String givenName;
+   private int nameSuffix;
+   private String uniqueName = null;
    private final MutableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
 
@@ -31,8 +35,28 @@ public class SceneNode extends RequestConfirmFreezable
       super(crdtInfo);
 
       this.id = id;
-      this.name = name;
+      this.givenName = name;
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
+   }
+
+   public void createUniqueName(SceneGraph sceneGraph)
+   {
+      Map<String, Set<Integer>> minimumUniqueSuffixMap = sceneGraph.getMinimumUniqueSuffixMap();
+      if (minimumUniqueSuffixMap.containsKey(givenName))
+      {
+         Set<Integer> takenSuffixes = minimumUniqueSuffixMap.get(givenName);
+
+         int nextSuffix = 0;
+         while (takenSuffixes.contains(nextSuffix))
+            ++nextSuffix;
+
+         nameSuffix = nextSuffix;
+      }
+      else
+      {
+         nameSuffix = 0;
+      }
+      uniqueName = givenName + "_#" + nameSuffix;
    }
 
    public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
@@ -47,7 +71,17 @@ public class SceneNode extends RequestConfirmFreezable
 
    public String getName()
    {
-      return name;
+      return uniqueName != null ? uniqueName : givenName;
+   }
+
+   public String getNonUniqueName()
+   {
+      return givenName;
+   }
+
+   public int getNameSuffix()
+   {
+      return nameSuffix;
    }
 
    public ReferenceFrame getNodeFrame()
