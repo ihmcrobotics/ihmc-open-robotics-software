@@ -12,6 +12,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -142,7 +143,7 @@ public class SnappingTerrainExtractor
 
       Point2D gridCenter = heightMapData.getGridCenter();
 
-      Mat heightMap = PerceptionMessageTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
+      Mat heightMap = HeightMapMessageTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
       GpuMat gpuHeightMap = new GpuMat();
       gpuHeightMap.upload(heightMap);
 

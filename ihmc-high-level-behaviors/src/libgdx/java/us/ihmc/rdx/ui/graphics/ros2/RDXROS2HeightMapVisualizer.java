@@ -120,7 +120,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                            {
                                               zUpToWorldTransform.set(heightMapMessage.getOrientation(), heightMapMessage.getPosition());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-                                              heightMap = PerceptionMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
+                                              heightMap = HeightMapMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
                                               updateHeightMapImage();
                                            });

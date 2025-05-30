@@ -94,12 +94,12 @@ public class RapidHeightMapManager
                                                             (float) heightMapParameters.getTerrainWidthInMeters(),
                                                             sensorOrigin.getX(),
                                                             sensorOrigin.getY());
-      PerceptionMessageTools.convertToHeightMapData(hostGlobalHeightMap,
-                                                    latestHeightMapData,
-                                                    sensorOrigin,
-                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getCellSizeInMeters(),
-                                                    heightMapParameters);
+      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
+                                                   latestHeightMapData,
+                                                   sensorOrigin,
+                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getCellSizeInMeters(),
+                                                   heightMapParameters);
       HeightMapMessage heightMapMessage = new HeightMapMessage();
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
       heightMapMessage.getOrientation().set(cameraPose.getOrientation());
@@ -175,12 +175,12 @@ public class RapidHeightMapManager
       Mat heightMap = new Mat();
       GpuMat deviceTerrainHeightMap = rapidHeightMapExtractor.getTerrainHeightMap();
       deviceTerrainHeightMap.download(heightMap);
-      PerceptionMessageTools.convertToHeightMapData(heightMap,
-                                                    latestHeightMapData,
-                                                    sensorOrigin,
-                                                    (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                    (float) heightMapParameters.getCellSizeInMeters(),
-                                                    heightMapParameters);
+      HeightMapMessageTools.convertToHeightMapData(heightMap,
+                                                   latestHeightMapData,
+                                                   sensorOrigin,
+                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getCellSizeInMeters(),
+                                                   heightMapParameters);
       heightMap.close();
       deviceTerrainHeightMap.close();
 
