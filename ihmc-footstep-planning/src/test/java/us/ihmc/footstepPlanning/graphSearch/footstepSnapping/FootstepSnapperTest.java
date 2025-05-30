@@ -9,8 +9,8 @@ import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.Random;
 

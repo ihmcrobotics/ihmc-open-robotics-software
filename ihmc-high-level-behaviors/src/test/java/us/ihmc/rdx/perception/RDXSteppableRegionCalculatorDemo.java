@@ -22,7 +22,7 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class RDXSteppableRegionCalculatorDemo
 {

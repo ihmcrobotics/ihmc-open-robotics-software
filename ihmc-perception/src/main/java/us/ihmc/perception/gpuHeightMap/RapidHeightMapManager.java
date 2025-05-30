@@ -19,8 +19,9 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.time.Instant;
 import java.util.ArrayList;

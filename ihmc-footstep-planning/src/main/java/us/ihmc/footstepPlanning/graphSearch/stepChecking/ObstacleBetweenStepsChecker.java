@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperRead
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;

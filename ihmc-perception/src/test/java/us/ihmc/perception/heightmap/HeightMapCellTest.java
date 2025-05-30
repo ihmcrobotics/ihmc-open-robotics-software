@@ -1,8 +1,10 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightmap;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.perception.heightMap.HeightMapCell;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 import java.util.Random;
 

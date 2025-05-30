@@ -22,10 +22,10 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.globalHeightMap.GlobalLattice;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 

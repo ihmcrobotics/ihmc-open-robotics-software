@@ -34,7 +34,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.Timer;
 
 /**

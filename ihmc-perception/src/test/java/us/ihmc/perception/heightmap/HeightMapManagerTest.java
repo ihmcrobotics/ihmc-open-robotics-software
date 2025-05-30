@@ -1,11 +1,12 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightmap;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.heightMap.HeightMapManager;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
