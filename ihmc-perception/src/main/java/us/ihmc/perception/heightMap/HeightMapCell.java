@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import gnu.trove.list.array.TDoubleArrayList;

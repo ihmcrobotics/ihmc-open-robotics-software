@@ -3,7 +3,7 @@ package us.ihmc.perception.cuda;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import static org.junit.jupiter.api.Assertions.*;
 

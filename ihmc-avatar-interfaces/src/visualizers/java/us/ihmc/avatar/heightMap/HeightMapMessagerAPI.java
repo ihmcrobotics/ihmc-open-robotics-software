@@ -3,8 +3,8 @@ package us.ihmc.avatar.heightMap;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.messager.MessagerAPIFactory;
-import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapFilterParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class HeightMapMessagerAPI
 {

@@ -6,8 +6,8 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class SnappingTerrainManager
 {
