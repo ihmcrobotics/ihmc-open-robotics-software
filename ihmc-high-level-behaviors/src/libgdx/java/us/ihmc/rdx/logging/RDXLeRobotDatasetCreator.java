@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -25,6 +26,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class RDXLeRobotDatasetCreator
@@ -41,13 +43,13 @@ public class RDXLeRobotDatasetCreator
 
    public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession,
                                    RDXBaseUI baseUI,
-                                   Supplier<SCS2AvatarSimulation> simulationStarter,
+                                   Function<Pose3DReadOnly, SCS2AvatarSimulation> simulationStarter,
                                    Supplier<KinematicsStreamingToolboxModule> ikStreamingSupplier,
                                    Supplier<DRCRobotModel> robotModelSupplier)
    {
       this.logSession = logSession;
 
-      testSimulator = new RDXLeRobotTestSimulator(simulationStarter, ikStreamingSupplier, robotModelSupplier, baseUI);
+      testSimulator = new RDXLeRobotTestSimulator(simulationStarter, ikStreamingSupplier, robotModelSupplier, baseUI, logSession);
 
       RDXPanel panel = new RDXPanel("LeRobot Dataset Creator", this::renderImGuiWidgets, false, true);
       panel.addChild(new RDXPanel("Log Scrubber", this::renderLogScrubberWidgets));
