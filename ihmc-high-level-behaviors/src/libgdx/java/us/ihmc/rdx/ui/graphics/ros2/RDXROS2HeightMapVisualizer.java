@@ -19,7 +19,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
@@ -130,6 +129,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    private void updateHeightMapImage()
    {
+      if (!heightMapImageVisualizer.getHasRenderedOne())
+         return;
+
       DoublePointer minVal = new DoublePointer(1);
       DoublePointer maxVal = new DoublePointer(1);
       Point minLoc = new Point();
