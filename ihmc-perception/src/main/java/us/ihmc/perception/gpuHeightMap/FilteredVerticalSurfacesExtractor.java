@@ -45,8 +45,8 @@ public class FilteredVerticalSurfacesExtractor
       int error;
       GpuMat croppedHeightMapCopy = croppedHeightMapToBePacked.clone();
 
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
+//      error = cudaStreamSynchronize(stream);
+//      CUDATools.checkCUDAError(error);
 
       kernel.withPointer(croppedHeightMapCopy.data()).withLong(croppedHeightMapCopy.step());
       kernel.withPointer(croppedHeightMapToBePacked.data()).withLong(croppedHeightMapToBePacked.step());
