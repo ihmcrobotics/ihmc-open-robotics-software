@@ -50,20 +50,24 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-
 import java.util.*;
-
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
+/**
+ * This class is responsible for creating the estimator, controller, and step generator
+ * threads, along with the multi-threading manager that handles the execution of those threads.
+ *
+ * @author Stefan Fasano
+ */
 public class AvatarMultiThreadingFactory
 {
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final boolean DISABLE_STEP_GENERATOR_THREAD = false;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry registry;
 
-   private final String robotName;
+   // Robot model
    private final DRCRobotModel robotModel;
 
    // Hardware communication API
@@ -71,8 +75,8 @@ public class AvatarMultiThreadingFactory
 
    // ROS stuff
    public static final PriorityParameters ros2Priority = new PriorityParameters(25);
-   public final String H1_IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
-   public final String NADIA_IHMC_ROS_CONTROLLER_NODE_NAME;
+   public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
+   public final String IHMC_ROS_CONTROLLER_NODE_NAME;
    private final RealtimeROS2Node estimatorRealtimeROS2Node;
    private final RealtimeROS2Node controllerRealtimeROS2Node;
 
@@ -100,14 +104,8 @@ public class AvatarMultiThreadingFactory
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
 
-   /**
-    * This class is responsible for creating the estimator, controller, and step generator
-    * threads, along with the multi-threading manager that handles the execution of those threads
-    *
-    * @author Stefan Fasano
-    */
-   public AvatarMultiThreadingFactory(String robotName,
-                                      DRCRobotModel robotModel,
+   public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
+                                      FullHumanoidRobotModel fullRobotModel,
                                       HardwareCommunicationInterface hardwareCommunicationInterface,
                                       SensorReaderFactory sensorReaderFactory,
                                       HighLevelControllerStateFactory standPrepStateFactory,
@@ -118,9 +116,9 @@ public class AvatarMultiThreadingFactory
                                       MonotonicTime period,
                                       double schedulerDt,
                                       TimestampProvider monotonicTimeProvider,
+                                      YoRegistry registry,
                                       YoVariableServer yoVariableServer)
    {
-      this.robotName = robotName;
       this.robotModel = robotModel;
       this.period = period;
       this.schedulerDt = schedulerDt;
@@ -129,21 +127,19 @@ public class AvatarMultiThreadingFactory
       this.affinity = affinity;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
+      this.registry = registry;
       this.yoVariableServer = yoVariableServer;
-
-      // Create full robot model
-      FullHumanoidRobotModel fullHumanoidRobotModel = robotModel.createFullRobotModel();
 
       // Estimator and controller ROS2 nodes
       // PeriodicRealtimeThreadSchedulerFactory ros2RealtimeThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(ros2Priority);
-      H1_IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotName + "_ihmc_state_estimator";
-      NADIA_IHMC_ROS_CONTROLLER_NODE_NAME = robotName + "_" + HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME;
+      IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_state_estimator";
+      IHMC_ROS_CONTROLLER_NODE_NAME =robotModel.getSimpleRobotName().toLowerCase() + "_" + HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME;
       PeriodicNonRealtimeThreadSchedulerFactory ros2RealtimeThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
-      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(H1_IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2RealtimeThreadFactory);
-      controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(NADIA_IHMC_ROS_CONTROLLER_NODE_NAME, ros2RealtimeThreadFactory);
+      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2RealtimeThreadFactory);
+      controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2RealtimeThreadFactory);
 
       // Set up low-level output processor
-      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(fullHumanoidRobotModel.getControllableOneDoFJoints(), schedulerDt, registry);
+      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), schedulerDt, registry);
 
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, sensorReaderFactory);
@@ -160,8 +156,13 @@ public class AvatarMultiThreadingFactory
    {
       estimatorRealtimeROS2Node.spin();
       controllerRealtimeROS2Node.spin();
+      hardwareCommunicationInterface.start();
       threadingManager.get().start();
-      // TODO spin hardware node?
+   }
+
+   public void join()
+   {
+      threadingManager.get().join();
    }
 
    public void stop()
@@ -169,14 +170,16 @@ public class AvatarMultiThreadingFactory
       LogTools.info("Calling shutdown in the controller factory");
       estimatorRealtimeROS2Node.stopSpinning();
       controllerRealtimeROS2Node.stopSpinning();
+      hardwareCommunicationInterface.stop();
       threadingManager.get().stop();
-      // TODO stop hardware node
-      // TODO destroy any nodes?
    }
 
-   public void join()
+   public void destroy()
    {
-      threadingManager.get().join();
+      estimatorRealtimeROS2Node.destroy();
+      controllerRealtimeROS2Node.destroy();
+      hardwareCommunicationInterface.destroy();
+      threadingManager.get().stop();
    }
 
    public void buildThreads()
@@ -194,7 +197,7 @@ public class AvatarMultiThreadingFactory
       stateModeMap.put(CUSTOM1, StateEstimatorMode.NORMAL);
       estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
       HumanoidRobotContextDataFactory controllerContextFactory = new HumanoidRobotContextDataFactory();
-      controllerThread.set(new AvatarControllerThread(robotName,
+      controllerThread.set(new AvatarControllerThread(robotModel.getSimpleRobotName().toLowerCase(),
                                                       robotModel,
                                                       null,
                                                       robotModel.getSensorInformation(),
@@ -209,7 +212,7 @@ public class AvatarMultiThreadingFactory
       stepGeneratorThread.set(createStepGeneratorThread(robotModel, controllerThread.get(), controllerContextFactory, controllerFactory));
 
       // Create threading manager
-      threadingManager.set(new AvatarMultiThreadingManager("h1",
+      threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
                                                            estimatorThread.get().getHumanoidRobotContextData(),
                                                            estimatorThread.get().getFullRobotModel(),
@@ -400,7 +403,7 @@ public class AvatarMultiThreadingFactory
          pluginFactory.addUpdatable(environmentalConstraints);
 
          // create the callback listeners for the planar regions in the stepping plugin
-         pluginFactory.createStepGeneratorNetworkSubscriber(robotName, controllerRealtimeROS2Node);
+         pluginFactory.createStepGeneratorNetworkSubscriber(robotModel.getSimpleRobotName().toLowerCase(), controllerRealtimeROS2Node);
 
          controllerFactory.addControllerPlugin(pluginFactory);
 

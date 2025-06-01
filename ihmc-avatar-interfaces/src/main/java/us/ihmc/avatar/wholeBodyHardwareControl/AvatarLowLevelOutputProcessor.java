@@ -6,16 +6,23 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * This class is responsible for applying a master gain to all low-level desired outputs.
+ * It also provides a 'servo' and 'unservo' functionality which interpolates that master
+ * gain between 0 and 1 over a period of time. This is designed to be the last layer of
+ * control before these desired values get sent to the hardware drivers/managers.
+ *
+ * @author Stefan Fasano
+ */
 public class AvatarLowLevelOutputProcessor
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private static final double DEFAULT_SERVO_DURATION = 6.0;
+   private static final double DEFAULT_SERVO_DURATION = 6.0; // In units of seconds
    private static final double LOW_MASTER_GAIN = 0.0;
    private static final double HIGH_MASTER_GAIN = 1.00;
 
@@ -37,20 +44,12 @@ public class AvatarLowLevelOutputProcessor
    private double servoStartGain = 0.0;
    private double unservoStartGain = 0.0;
 
-   /**
-    * This class is responsible for applying a master gain to all low-level desired outputs.
-    * It also provides a 'servo' and 'unservo' functionality which interpolates that master
-    * gain between 0 and 1 over a period of time. This is designed to be the last layer of
-    * control before these desired values get sent to the hardware drivers/managers
-    *
-    * @author Stefan Fasano
-    */
-   public AvatarLowLevelOutputProcessor(OneDoFJointBasics[] controlledJoints, double updateDt, YoRegistry parentRegistry)
+   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointBasics[] controlledJoints, double updateDt, YoRegistry parentRegistry)
    {
       this.updateDt = updateDt;
 
-      unprocessedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder("h1", controlledJoints, registry);
-      processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder("h1Processed", controlledJoints, registry);
+      unprocessedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName, controlledJoints, registry);
+      processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Processed", controlledJoints, registry);
 
       servoDuration.set(DEFAULT_SERVO_DURATION);
 

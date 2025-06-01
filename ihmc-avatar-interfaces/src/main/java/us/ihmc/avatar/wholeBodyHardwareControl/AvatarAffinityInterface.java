@@ -5,7 +5,7 @@ import us.ihmc.realtime.PriorityParameters;
 
 /**
  * This class is used to define thread processor and priority assignment
- * for realtime control on hardware
+ * for realtime control on hardware.
  *
  * @author Stefan Fasano
  */

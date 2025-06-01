@@ -19,11 +19,20 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * This class is responsible for converting AvatarEstimatorThread, AvatarControllerThread, and
+ * AvatarStepGenerator thread into tasks and either regular threads or realtime threads. They are
+ * then organized into either a SingleThreadedRobotController (in the case of single threading), or a
+ * BarrierScheduledRobotController (in the case of multi-threading). These dictate the execution
+ * of each thread and our entire control process itself. Lastly, this class manages the passing of
+ * measured and desired robot data to and from a hardware communication interface.
+ *
+ * @author Stefan Fasano
+ */
 public class AvatarMultiThreadingManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -60,16 +69,6 @@ public class AvatarMultiThreadingManager
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
 
-   /**
-    * This class is responsible for converting AvatarEstimatorThread, AvatarControllerThread, and
-    * AvatarStepGenerator thread into tasks and either regular threads or realtime threads. They are
-    * then organized into either a SingleThreadedRobotController (in the case of single threading), or a
-    * BarrierScheduledRobotController (in the case of multi-threading). These dictate the execution
-    * of each thread and our entire control process itself. Lastly, this class manages the passing of
-    * measured and desired robot data to and from a hardware communication interface
-    *
-    * @author Stefan Fasano
-    */
    public AvatarMultiThreadingManager(String prefix,
                                       DRCRobotModel robotModel,
                                       HumanoidRobotContextData masterContext,
@@ -232,6 +231,16 @@ public class AvatarMultiThreadingManager
       }
    }
 
+   public void pause()
+   {
+      isPaused.set(true);
+   }
+
+   public void resume()
+   {
+      isPaused.set(false);
+   }
+
    private void doControl()
    {
       if (isPaused.getBooleanValue())
@@ -243,7 +252,7 @@ public class AvatarMultiThreadingManager
       if (!hardwareCommunicationInterface.hasReceivedFirstState())
          return;
 
-      masterContext.setTimestamp(monotonicTimeProvider.getTimestamp()); //TODO should this be before the hasReceivedFirstState check?
+      masterContext.setTimestamp(monotonicTimeProvider.getTimestamp()); //TODO(sfasano, 20250530) should this be before the hasReceivedFirstState check?
 
       // Update estimator thread
       estimatorThread.run();
@@ -276,16 +285,6 @@ public class AvatarMultiThreadingManager
    public void addRunnableOnEstimatorSchedulerThread(Runnable runnable)
    {
       estimatorSchedulerThreadRunnables.add(runnable);
-   }
-
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   public void resume()
-   {
-      isPaused.set(false);
    }
 
    private void updateYoVariableServer()
