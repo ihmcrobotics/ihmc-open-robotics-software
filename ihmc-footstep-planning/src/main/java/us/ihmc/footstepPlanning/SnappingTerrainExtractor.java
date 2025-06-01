@@ -15,9 +15,9 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.net.URL;
 
@@ -100,7 +100,7 @@ public class SnappingTerrainExtractor
       }
       catch (Exception e)
       {
-          throw new RuntimeException(e);
+         throw new RuntimeException(e);
       }
 
       // 16 is the number of parameters being passed in as floats
@@ -132,7 +132,7 @@ public class SnappingTerrainExtractor
     */
    private void computeDerivedParameters()
    {
-      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getCroppedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
@@ -298,7 +298,7 @@ public class SnappingTerrainExtractor
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
                           (float) heightMapParameters.getCellSizeInMeters(),
-                          (float) heightMapParameters.getCroppedWidthInMeters(),
+                          (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),
                           (float) steppableRegionParameters.getFootLength(),

@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.globalHeightMap;
+package us.ihmc.perception.globalHeightMap;
 
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 

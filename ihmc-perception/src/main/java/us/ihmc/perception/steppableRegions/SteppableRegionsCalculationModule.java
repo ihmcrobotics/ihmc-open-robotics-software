@@ -21,7 +21,7 @@ import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

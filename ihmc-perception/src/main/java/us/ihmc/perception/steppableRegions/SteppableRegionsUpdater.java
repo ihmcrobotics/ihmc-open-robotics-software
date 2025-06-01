@@ -3,8 +3,8 @@ package us.ihmc.perception.steppableRegions;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 

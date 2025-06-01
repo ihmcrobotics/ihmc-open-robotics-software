@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -16,11 +16,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setFlyingPointsFilter(boolean flyingPointsFilter)
    {
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
-   }
-
-   default void setEnableAlphaFilter(boolean enableAlphaFilter)
-   {
-      set(HeightMapParameters.enableAlphaFilter, enableAlphaFilter);
    }
 
    default void setEnableVerticalFilter(boolean enableVerticalFilter)
@@ -63,14 +58,29 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
    }
 
-   default void setHeightFilterAlpha(double heightFilterAlpha)
+   default void setKalmanFilterPredictionNoise(double kalmanFilterPredictionNoise)
    {
-      set(HeightMapParameters.heightFilterAlpha, heightFilterAlpha);
+      set(HeightMapParameters.kalmanFilterPredictionNoise, kalmanFilterPredictionNoise);
    }
 
-   default void setSpatialAlpha(double spatialAlpha)
+   default void setAdditionalTranslationalVarianceAdded(double additionalTranslationalVarianceAdded)
    {
-      set(HeightMapParameters.spatialAlpha, spatialAlpha);
+      set(HeightMapParameters.additionalTranslationalVarianceAdded, additionalTranslationalVarianceAdded);
+   }
+
+   default void setVariancePerMeter(double variancePerMeter)
+   {
+      set(HeightMapParameters.variancePerMeter, variancePerMeter);
+   }
+
+   default void setVariancePerTranslationSpeed(double variancePerTranslationSpeed)
+   {
+      set(HeightMapParameters.variancePerTranslationSpeed, variancePerTranslationSpeed);
+   }
+
+   default void setVariancePerRotationSpeed(double variancePerRotationSpeed)
+   {
+      set(HeightMapParameters.variancePerRotationSpeed, variancePerRotationSpeed);
    }
 
    default void setHeightOffset(double heightOffset)
@@ -98,19 +108,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
    }
 
-   default void setCroppedWidthInMeters(double croppedWidthInMeters)
+   default void setTerrainWidthInMeters(double terrainWidthInMeters)
    {
-      set(HeightMapParameters.croppedWidthInMeters, croppedWidthInMeters);
+      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
    }
 
-   default void setInternalGlobalWidthInMeters(double internalGlobalWidthInMeters)
+   default void setGlobalWidthInMeters(double globalWidthInMeters)
    {
-      set(HeightMapParameters.internalGlobalWidthInMeters, internalGlobalWidthInMeters);
-   }
-
-   default void setRobotCollisionCylinderRadius(double robotCollisionCylinderRadius)
-   {
-      set(HeightMapParameters.robotCollisionCylinderRadius, robotCollisionCylinderRadius);
+      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
    default void setHeightScaleFactor(double heightScaleFactor)

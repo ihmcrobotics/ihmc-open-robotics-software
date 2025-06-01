@@ -16,6 +16,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-convex-optimization:0.17.21")
    api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-perception:source")
 }
 
 visualizersDependencies {

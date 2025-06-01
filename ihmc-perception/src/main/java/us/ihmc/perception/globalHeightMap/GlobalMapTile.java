@@ -1,6 +1,6 @@
-package us.ihmc.sensorProcessing.globalHeightMap;
+package us.ihmc.perception.globalHeightMap;
 
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 public class GlobalMapTile extends HeightMapData
 {

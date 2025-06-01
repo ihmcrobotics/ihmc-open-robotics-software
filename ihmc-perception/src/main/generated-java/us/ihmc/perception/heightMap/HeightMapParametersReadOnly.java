@@ -1,8 +1,8 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.sensorProcessing.heightMap.HeightMapParameters.*;
+import static us.ihmc.perception.heightMap.HeightMapParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
@@ -18,11 +18,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default boolean getFlyingPointsFilter()
    {
       return get(flyingPointsFilter);
-   }
-
-   default boolean getEnableAlphaFilter()
-   {
-      return get(enableAlphaFilter);
    }
 
    default boolean getEnableVerticalFilter()
@@ -65,14 +60,29 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxHeightDifference);
    }
 
-   default double getHeightFilterAlpha()
+   default double getKalmanFilterPredictionNoise()
    {
-      return get(heightFilterAlpha);
+      return get(kalmanFilterPredictionNoise);
    }
 
-   default double getSpatialAlpha()
+   default double getAdditionalTranslationalVarianceAdded()
    {
-      return get(spatialAlpha);
+      return get(additionalTranslationalVarianceAdded);
+   }
+
+   default double getVariancePerMeter()
+   {
+      return get(variancePerMeter);
+   }
+
+   default double getVariancePerTranslationSpeed()
+   {
+      return get(variancePerTranslationSpeed);
+   }
+
+   default double getVariancePerRotationSpeed()
+   {
+      return get(variancePerRotationSpeed);
    }
 
    default double getHeightOffset()
@@ -100,19 +110,14 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(localWidthInMeters);
    }
 
-   default double getCroppedWidthInMeters()
+   default double getTerrainWidthInMeters()
    {
-      return get(croppedWidthInMeters);
+      return get(terrainWidthInMeters);
    }
 
-   default double getInternalGlobalWidthInMeters()
+   default double getGlobalWidthInMeters()
    {
-      return get(internalGlobalWidthInMeters);
-   }
-
-   default double getRobotCollisionCylinderRadius()
-   {
-      return get(robotCollisionCylinderRadius);
+      return get(globalWidthInMeters);
    }
 
    default double getHeightScaleFactor()

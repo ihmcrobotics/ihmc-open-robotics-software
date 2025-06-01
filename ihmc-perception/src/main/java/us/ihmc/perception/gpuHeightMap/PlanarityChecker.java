@@ -1,9 +1,7 @@
 package us.ihmc.perception.gpuHeightMap;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-
-import java.util.concurrent.Executors;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 public class PlanarityChecker
 {

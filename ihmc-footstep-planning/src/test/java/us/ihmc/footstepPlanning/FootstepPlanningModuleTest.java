@@ -16,7 +16,7 @@ import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
