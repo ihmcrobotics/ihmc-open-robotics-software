@@ -231,7 +231,7 @@ def behavior_message_callback(msg):
             print("selected_object: ", selected_object)
 
             # Set the reference frame name - can copy from scene_objects.obj_name
-            new_goto_behavior.object_name = selected_object
+            new_goto_behavior.target_object = selected_object
             # Set the distance to the object
             new_goto_behavior.distance_to_object = 1.0
             new_goto_behavior.pov_reference_frame_name = ""

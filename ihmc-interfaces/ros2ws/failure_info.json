@@ -60,4 +60,13 @@
     "Failed behavior": "GOTO",
     "Description": "Go to Action",
     "Type": "FootstepPlanActionDefinition"
+}{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition"
+}{
+    "Failed behavior": "PLACE CHARGE ON DOOR",
+    "Description": "Approach pose",
+    "Type": "HandPoseActionDefinition",
+    "Position error": 0.18436048377502676
 }
