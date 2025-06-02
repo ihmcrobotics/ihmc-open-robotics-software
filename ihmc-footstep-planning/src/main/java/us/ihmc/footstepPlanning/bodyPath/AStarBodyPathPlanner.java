@@ -358,7 +358,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             double distanceFromStart = EuclidCoreTools.normSquared(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
             double distanceFromGoal = EuclidCoreTools.normSquared(goalPose.getX() - neighbor.getX(), goalPose.getY() - neighbor.getY());
 
-            if (plannerParameters.getCheckForCollisions() && (distanceFromStart > COLLISION_START_TOLERANCE || distanceFromGoal > COLLISION_GOAL_TOLERANCE))
+            if (plannerParameters.getCheckForCollisions() && distanceFromStart > COLLISION_START_TOLERANCE && distanceFromGoal > COLLISION_GOAL_TOLERANCE)
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
                                                                               neighbor,
