@@ -34,7 +34,7 @@ class FoundationPoseWorker:
                                                  depth=self.initial_depth,
                                                  ob_mask=self.initial_mask,
                                                  ob_id=self.object_id,
-                                                 iteration=2)
+                                                 iteration=1)
 
             # Make sure rotation isn't identity (returned when register fails)
             rotation_matrix = pose[:3, :3]
@@ -42,7 +42,7 @@ class FoundationPoseWorker:
                 self.initialized = True
         else:
             print("TRACKING", self.object_id)
-            pose = self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=2)
+            pose = self.foundation_pose.track_one(rgb=rgb, depth=depth, K=self.camera_k, iteration=1)
 
         center_pose = pose @ np.linalg.inv(self.to_origin)
 

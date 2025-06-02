@@ -42,7 +42,7 @@ public class FoundationPoseManager
       communicator = new ROS2FoundationPoseCommunicator(ros2Node, imageSensor, colorKey, depthKey);
 
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Update", this::update);
-      updateThread.setFrequencyLimit(10.0).startRepeating();
+      updateThread.setFrequencyLimit(30.0).startRepeating();
    }
 
    /**
@@ -80,7 +80,9 @@ public class FoundationPoseManager
       }
       else if (FoundationPoseInstantDetection.class.equals(detection.getInstantDetectionClass()))
       {
-         communicator.remove(detection.getDetectedObjectName());
+         String objectId = detection.getDetectedObjectName();
+         communicator.remove(objectId);
+         trackedYOLODetections.remove(objectId);
       }
    }
 
@@ -122,7 +124,7 @@ public class FoundationPoseManager
             PersistentDetection detection = entry.getValue();
 
             // If detection is not stable or if it's been more than a second since last detection, we stop tracking the object
-            if (!detection.isStable(now))
+            if (!detection.isStable(now) || boundingBoxIsAtEdge((YOLOv8InstantDetection) detection.getMostRecentDetection()))
             {
                communicator.remove(objectId);
                detectionIterator.remove();
@@ -140,19 +142,9 @@ public class FoundationPoseManager
       Set<PersistentDetection> detectionsToTrack = new HashSet<>();
       for (PersistentDetection detection : untrackedYOLODetections)
       {
-         YOLOv8InstantDetection yoloDetection = (YOLOv8InstantDetection) detection.getMostRecentDetection();
-         RawImage colorImage = yoloDetection.getColorImage().get();
-         BoundingBox2DReadOnly boundingBox = yoloDetection.getBoundingBox();
-
-         // Ensure image exists
-         if (colorImage == null)
-            continue;
-
          // If the detection is stable and the bounding box is not at the edge, we want to track the detection
-         if (detection.isStable(now) && boundingBoxIsNotAtEdge(boundingBox, colorImage.getWidth(), colorImage.getHeight()))
+         if (detection.isStable(now) && !boundingBoxIsAtEdge((YOLOv8InstantDetection) detection.getMostRecentDetection()))
             detectionsToTrack.add(detection);
-
-         colorImage.release();
       }
 
       // Send requests to track the detections we want to track
@@ -169,13 +161,24 @@ public class FoundationPoseManager
       }
    }
 
-   private boolean boundingBoxIsNotAtEdge(BoundingBox2DReadOnly boundingBox, int imageWidth, int imageHeight)
+   private boolean boundingBoxIsAtEdge(YOLOv8InstantDetection detection)
    {
+      RawImage colorImage = detection.getColorImage().get();
+      BoundingBox2DReadOnly boundingBox = detection.getBoundingBox();
+
+      // Ensure image exists
+      if (colorImage == null)
+         return false;
+
+      int imageWidth = colorImage.getWidth();
+      int imageHeight = colorImage.getHeight();
+      colorImage.release();
+
       int minX = (int) Math.round(boundingBox.getMinX());
       int minY = (int) Math.round(boundingBox.getMinY());
       int maxX = (int) Math.round(boundingBox.getMaxX());
       int maxY = (int) Math.round(boundingBox.getMaxY());
 
-      return minX > DELTA && minY > DELTA && maxX < imageWidth - 1 - DELTA && maxY < imageHeight - 1 - DELTA;
+      return minX <= DELTA || minY <= DELTA || maxX >= imageWidth - 1 - DELTA || maxY >= imageHeight - 1 - DELTA;
    }
 }
