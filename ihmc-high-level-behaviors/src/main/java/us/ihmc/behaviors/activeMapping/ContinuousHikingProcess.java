@@ -8,6 +8,7 @@ import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.StandAloneRealsenseProcess;
+import us.ihmc.perception.steppableRegions.SteppableRegionsManager;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -28,6 +29,7 @@ public class ContinuousHikingProcess
    private final StandAloneRealsenseProcess standAloneRealsenseProcess;
 
    private final SnappingTerrainManager snappingTerrainManager;
+   private final SteppableRegionsManager steppableRegionsManager;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
    {
@@ -47,6 +49,7 @@ public class ContinuousHikingProcess
       activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
       environmentHandler = new EnvironmentHandler();
       snappingTerrainManager = new SnappingTerrainManager(ros2Node, activeMappingParameterToolBox.getHeightMapParameters());
+      steppableRegionsManager = new SteppableRegionsManager(ros2Node);
       standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
                                                                   ros2Helper,
                                                                   syncedRobot,
@@ -78,6 +81,8 @@ public class ContinuousHikingProcess
          environmentHandler.setHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());
          snappingTerrainManager.updateAndPublish(standAloneRealsenseProcess.getLatestHeightMapData());
          environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
+
+         steppableRegionsManager.update(environmentHandler.getTerrainMapData());
       }
 
       continuousPlannerSchedulingTask.setLatestEnvironmentHandler(environmentHandler);
@@ -87,6 +92,7 @@ public class ContinuousHikingProcess
    {
       continuousPlannerSchedulingTask.destroy();
       snappingTerrainManager.close();
+      steppableRegionsManager.destroy();
       standAloneRealsenseProcess.destroy();
    }
 }

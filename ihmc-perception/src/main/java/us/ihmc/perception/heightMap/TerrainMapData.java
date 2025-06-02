@@ -25,6 +25,8 @@ public class TerrainMapData
    private int cellsPerMeter = 50;
 
    private double heightScaleFactor;
+   private double gridResolutionXY;
+   private double gridSizeXY;
    private double heightScaleOffset;
 
    private Mat heightMap;
@@ -38,10 +40,16 @@ public class TerrainMapData
    private Mat steppabilityImage;
    private Mat steppabilityConnectionsMat;
    private Mat snappedAreaFractionImage;
+   private int centerIndex;
 
-   public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset)
+   public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset, double gridResolutionXY, double gridSizeXY)
    {
-      setHeightScaleParameters(heightScaleFactor, heightScaleOffset);
+      this.heightScaleOffset = heightScaleOffset;
+      this.heightScaleFactor = heightScaleFactor;
+      this.gridResolutionXY = gridResolutionXY;
+      this.gridSizeXY = gridSizeXY;
+
+      centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
 
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
       localGridSize = height;
@@ -49,20 +57,12 @@ public class TerrainMapData
 
    public TerrainMapData(TerrainMapData other)
    {
-      set(other);
-   }
-
-   public TerrainMapData(TerrainMapMessage other)
-   {
-      setFromPacket(other);
-   }
-
-   public void set(TerrainMapData other)
-   {
       this.localGridSize = other.localGridSize;
       this.cellsPerMeter = other.cellsPerMeter;
       this.heightScaleFactor = other.heightScaleFactor;
       this.heightScaleOffset = other.heightScaleOffset;
+      this.gridResolutionXY = other.gridResolutionXY;
+      this.centerIndex = other.centerIndex;
 
       terrainMapCenter.set(other.terrainMapCenter);
 
@@ -76,6 +76,11 @@ public class TerrainMapData
       setSteppabilityMat(other.steppabilityImage);
       setSteppabilityConnectionsMat(other.steppabilityConnectionsMat);
       setSnappedAreaFractionMat(other.snappedAreaFractionImage);
+   }
+
+   public TerrainMapData(TerrainMapMessage other)
+   {
+      setFromPacket(other);
    }
 
    public boolean isEmpty()
@@ -307,20 +312,24 @@ public class TerrainMapData
       return contactMap;
    }
 
-   public int getCellsPerMeter()
+   public int getCenterIndex()
    {
-      return cellsPerMeter;
+      return centerIndex;
+   }
+
+   public double getGridResolutionXY()
+   {
+      return gridResolutionXY;
+   }
+
+   public double getGridSizeXY()
+   {
+      return gridSizeXY;
    }
 
    public int getLocalGridSize()
    {
       return localGridSize;
-   }
-
-   public void setHeightScaleParameters(double heightScaleFactor, double heightScaleOffset)
-   {
-      this.heightScaleOffset = heightScaleOffset;
-      this.heightScaleFactor = heightScaleFactor;
    }
 
    public double getHeightScaleOffset()

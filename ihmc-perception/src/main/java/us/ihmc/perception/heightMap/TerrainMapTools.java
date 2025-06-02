@@ -39,7 +39,7 @@ public class TerrainMapTools
 
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
    {
-      int cellsPerMeter = terrainMapData.getCellsPerMeter();
+      int cellsPerMeter = terrainMapData.getCenterIndex();
       int localGridSize = terrainMapData.getLocalGridSize();
       double centerX = terrainMapData.getTerrainMapCenter().getX();
       double centerY = terrainMapData.getTerrainMapCenter().getY();
@@ -92,7 +92,7 @@ public class TerrainMapTools
       TerrainMapMessage message = new TerrainMapMessage();
 
       message.setLocalGridSize(terrainMapData.getLocalGridSize());
-      message.setCellsPerMeter((byte) terrainMapData.getCellsPerMeter());
+      message.setCellsPerMeter((byte) terrainMapData.getCenterIndex());
 
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());

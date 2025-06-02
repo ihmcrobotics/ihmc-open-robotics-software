@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -21,7 +22,7 @@ public class SteppableRegionsUpdater
 
    public SteppableRegionsUpdater(SteppableRegionCalculatorParametersReadOnly steppableRegionsParameters)
    {
-      steppableRegionsCalculationModule = new SteppableRegionsCalculationModule(steppableRegionsParameters);
+      steppableRegionsCalculationModule = new SteppableRegionsCalculationModule(steppableRegionsParameters, new HeightMapParameters());
    }
 
    public void submitLatestHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -60,11 +61,12 @@ public class SteppableRegionsUpdater
       if (latestParameters != null)
          steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(latestParameters);
 
-      steppableRegionsCalculationModule.compute(heightMapData);
+
+
+//      steppableRegionsCalculationModule.compute(heightMapData);
    }
 
    public void destroy()
    {
-      steppableRegionsCalculationModule.destroy();
    }
 }

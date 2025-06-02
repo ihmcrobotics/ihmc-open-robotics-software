@@ -52,7 +52,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
    private final HeightMapParameters heightMapParameters;
-   private final TerrainMapData terrainMapData;
+   private TerrainMapData terrainMapData;
 
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
    private final int cellsPerAxisGlobal;
@@ -69,7 +69,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       terrainMapData = new TerrainMapData(cellsPerAxisGlobal,
                                           cellsPerAxisGlobal,
                                           heightMapParameters.getHeightScaleFactor(),
-                                          heightMapParameters.getHeightOffset());
+                                          heightMapParameters.getHeightOffset(),
+                                          heightMapParameters.getGridResolutionXY(),
+                                          heightMapParameters.getGridSizeXY());
 
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
@@ -162,8 +164,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      TerrainMapData latestTerrainMapData = new TerrainMapData(terrainMapMessage);
-      terrainMapData.set(latestTerrainMapData);
+      terrainMapData = new TerrainMapData(terrainMapMessage);
    }
 
    @Override

@@ -1,5 +1,6 @@
 package us.ihmc.perception.steppableRegions;
 
+import controller_msgs.msg.dds.SnapFootstepPacket;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;

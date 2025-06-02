@@ -1,5 +1,6 @@
 package us.ihmc.perception.steppableRegions;
 
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -8,11 +9,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.data.SteppableBorderRing;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -27,14 +29,14 @@ public class SteppableRegionsCalculator
 {
    private static final int maxRecursionDepth = 500;
 
-   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
-                                                                                             BytedecoImage snappedHeight,
-                                                                                             BytedecoImage snappedNormalX,
-                                                                                             BytedecoImage snappedNormalY,
-                                                                                             BytedecoImage snappedNormalZ,
-                                                                                             BytedecoImage connections,
+   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(Mat steppability,
+                                                                                             Mat snappedHeight,
+                                                                                             Mat snappedNormalX,
+                                                                                             Mat snappedNormalY,
+                                                                                             Mat snappedNormalZ,
+                                                                                             Mat connections,
                                                                                              SteppableRegionCalculatorParametersReadOnly parameters,
-                                                                                             HeightMapData heightMapData)
+                                                                                             TerrainMapData terrainMapData)
    {
       return createEnvironmentByMergingCellsIntoRegions(steppability,
                                                         snappedHeight,
@@ -43,18 +45,18 @@ public class SteppableRegionsCalculator
                                                         snappedNormalZ,
                                                         connections,
                                                         parameters,
-                                                        heightMapData.getGridCenter().getX(),
-                                                        heightMapData.getGridCenter().getY(),
-                                                        heightMapData.getGridResolutionXY(),
-                                                        heightMapData.getCenterIndex());
+                                                        terrainMapData.getTerrainMapCenter().getX(),
+                                                        terrainMapData.getTerrainMapCenter().getY(),
+                                                        terrainMapData.getCenterIndex(),
+                                                        terrainMapData.getCenterIndex());
    }
 
-   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
-                                                                                             BytedecoImage snappedHeight,
-                                                                                             BytedecoImage snappedNormalX,
-                                                                                             BytedecoImage snappedNormalY,
-                                                                                             BytedecoImage snappedNormalZ,
-                                                                                             BytedecoImage connections,
+   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(Mat steppability,
+                                                                                             Mat snappedHeight,
+                                                                                             Mat snappedNormalX,
+                                                                                             Mat snappedNormalY,
+                                                                                             Mat snappedNormalZ,
+                                                                                             Mat connections,
                                                                                              SteppableRegionCalculatorParametersReadOnly parameters,
                                                                                              double gridCenterX,
                                                                                              double gridCenterY,
@@ -68,7 +70,7 @@ public class SteppableRegionsCalculator
                                                                                                    snappedNormalZ,
                                                                                                    connections);
 
-      if (steppability.getImageHeight() != steppability.getImageWidth())
+      if (steppability.rows() != steppability.cols())
          throw new RuntimeException("The input steppability should be square");
 
       while (environmentModel.hasUnexpandedBorderCells())
@@ -114,18 +116,18 @@ public class SteppableRegionsCalculator
                                                              PolygonizerParameters polygonizerParameters,
                                                              SteppableRegionCalculatorParametersReadOnly steppableRegionCalculatorParameters,
                                                              SteppableRegionsEnvironmentModel environmentModel,
-                                                             HeightMapData heightMapData,
+                                                             TerrainMapData terrainMapData,
                                                              double footYaw)
    {
       return createSteppableRegions(concaveHullFactoryParameters,
                                     polygonizerParameters,
                                     steppableRegionCalculatorParameters,
                                     environmentModel,
-                                    heightMapData.getGridCenter().getX(),
-                                    heightMapData.getGridCenter().getY(),
-                                    heightMapData.getGridSizeXY(),
-                                    heightMapData.getGridResolutionXY(),
-                                    heightMapData.getCenterIndex(),
+                                    terrainMapData.getTerrainMapCenter().getX(),
+                                    terrainMapData.getTerrainMapCenter().getY(),
+                                    terrainMapData.getGridSizeXY(),
+                                    terrainMapData.getGridResolutionXY(),
+                                    terrainMapData.getCenterIndex(),
                                     footYaw);
    }
 
@@ -318,14 +320,15 @@ public class SteppableRegionsCalculator
       return regionHeightMap;
    }
 
-   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(BytedecoImage steppability,
-                                                                                            BytedecoImage snappedHeight,
-                                                                                            BytedecoImage snappedNormalX,
-                                                                                            BytedecoImage snappedNormalY,
-                                                                                            BytedecoImage snappedNormalZ,
-                                                                                            BytedecoImage connections)
+   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(Mat steppability,
+                                                                                            Mat snappedHeight,
+                                                                                            Mat snappedNormalX,
+                                                                                            Mat snappedNormalY,
+                                                                                            Mat snappedNormalZ,
+                                                                                            Mat connections)
    {
-      int cellsPerSide = steppability.getImageHeight();
+
+      int cellsPerSide = steppability.rows();
       SteppableRegionsEnvironmentModel steppableRegionsToConvert = new SteppableRegionsEnvironmentModel(cellsPerSide);
 
       for (int x = 0; x < cellsPerSide; x++)
@@ -333,17 +336,17 @@ public class SteppableRegionsCalculator
          for (int y = 0; y < cellsPerSide; y++)
          {
             // this cell is steppable. Also remember the image x-y is switched
-            if (steppability.getByteAsInteger(x, y) == SnapResult.VALID.ordinal())
+            if (steppability.ptr(x, y).get() == SnapResult.VALID.ordinal())
             {
                boolean isBorderCell;
-               int connection = connections.getByteAsInteger(x, y);
+               int connection = connections.ptr(x, y).get() & 0xFF;
 
                if (Integer.bitCount(connection) != 8) // 8 bits is fully connected
                   isBorderCell = true;
                else
                   isBorderCell = false;
 
-               double z = snappedHeight.getFloat(x, y);
+               double z = snappedHeight.ptr(x, y).getFloat();
                Vector3D normal = new Vector3D(normalValueAsFloat(snappedNormalX, x, y),
                                               normalValueAsFloat(snappedNormalY, x, y),
                                               normalValueAsFloat(snappedNormalZ, x, y));
@@ -366,9 +369,9 @@ public class SteppableRegionsCalculator
       return steppableRegionsToConvert;
    }
 
-   private static float normalValueAsFloat(BytedecoImage image, int x, int y)
+   private static float normalValueAsFloat(Mat image, int x, int y)
    {
-      return ((float) ((image.getBytedecoOpenCVMat().ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
+      return ((float) ((image.ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
@@ -485,12 +488,13 @@ public class SteppableRegionsCalculator
     * This collects a list of all the cells that are in a circle around {@param cell}, as long as they are contained within the "environment". It does not
     * check for connection.
     */
-   private static void collectConnectedCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, BytedecoImage connections)
+   private static void collectConnectedCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, Mat connections)
    {
       List<SteppableCell> cellNeighborsToPack = cell.getValidNeighbors();
       int cellsPerSide = environmentModel.getCellsPerSide();
 
-      int boundaryConnectionsEncodedAsOnes = connections.getByteAsInteger(cell.getXIndex(), cell.getYIndex());
+      // Need to convert the byte to an int, that is what (0xFF) does
+      int boundaryConnectionsEncodedAsOnes = (connections.ptr(cell.getXIndex(), cell.getYIndex()).get() & 0xFF);
 
       int neighborId = 0;
       for (int x_offset = -1; x_offset <= 1; x_offset++)
