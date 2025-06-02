@@ -44,6 +44,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private static final boolean useRANSACTraversibility = true;
    private static final boolean OVERRIDE_COMPUTE_TRAVERSABILITY = false;
    private static final double COLLISION_START_TOLERANCE = 0.5;
+   private static final double COLLISION_GOAL_TOLERANCE = 0.4;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -77,6 +78,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private BodyPathLatticePoint leastCostNode = null;
    private double leastCost = Double.POSITIVE_INFINITY;
    private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
+
+   private double startHeight = 0.0;
 
    /* Indicator of how flat and planar and available footholds are, using least squares */
    private final BodyPathLSTraversibilityCalculator leastSqTraversibilityCalculator;
@@ -255,6 +258,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
       startPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
+      startHeight = startPose.getZ();
 
       startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY());
       goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY());
@@ -352,7 +356,9 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             }
 
             double distanceFromStart = EuclidCoreTools.normSquared(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
-            if (plannerParameters.getCheckForCollisions() && distanceFromStart > COLLISION_START_TOLERANCE)
+            double distanceFromGoal = EuclidCoreTools.normSquared(goalPose.getX() - neighbor.getX(), goalPose.getY() - neighbor.getY());
+
+            if (plannerParameters.getCheckForCollisions() && (distanceFromStart > COLLISION_START_TOLERANCE || distanceFromGoal > COLLISION_GOAL_TOLERANCE))
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
                                                                               neighbor,
@@ -654,8 +660,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
       if (heights.isEmpty())
       {
-         gridHeightMap.put(latticePoint, Double.NaN);
-         return Double.NaN;
+         gridHeightMap.put(latticePoint, startHeight);
+         return startHeight;
       }
 
       double maxHeight = heights.max();

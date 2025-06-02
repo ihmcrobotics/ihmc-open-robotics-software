@@ -91,7 +91,7 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       {
          sceneGraph.modifyTree(modificationQueue ->
          {
-            rigidBodySceneNode.setTrackInitialParent(trackDetectedPoseChanged.read(), modificationQueue);
+            rigidBodySceneNode.setTrackInitialParent(trackDetectedPoseChanged.read(), sceneGraph, modificationQueue);
             // This modification is to get queued after a basic node one
             // in order to subsequently update the UI node after the node
             // has been moved.

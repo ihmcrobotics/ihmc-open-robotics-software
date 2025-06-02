@@ -268,19 +268,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          bodyPathPlannerInterface.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
 
-         if (bodyPathWaypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
+         if (bodyPathWaypoints.size() < 2) // && request.getAbortIfBodyPathPlannerFails())
          {
             reportBodyPathPlan(BodyPathPlanningResult.NO_PATH_EXISTS);
             output.setBodyPathPlanningResult(BodyPathPlanningResult.NO_PATH_EXISTS);
             statusCallbacks.forEach(callback -> callback.accept(output));
             return;
          }
-         else if (bodyPathWaypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
-         {
-            bodyPathWaypoints.clear();
-            bodyPathWaypoints.add(new Pose3D(startMidFootPose));
-            bodyPathWaypoints.add(new Pose3D(goalMidFootPose));
-         }
+//         else if (bodyPathWaypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
+//         {
+//            bodyPathWaypoints.clear();
+//            bodyPathWaypoints.add(new Pose3D(startMidFootPose));
+//            bodyPathWaypoints.add(new Pose3D(goalMidFootPose));
+//         }
 
          // set the start orientation to be the heading
          double dx = bodyPathWaypoints.get(1).getX() - bodyPathWaypoints.get(0).getX();
