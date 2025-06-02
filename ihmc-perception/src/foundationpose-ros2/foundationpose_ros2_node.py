@@ -181,6 +181,7 @@ class FoundationPoseROS2Node(Node):
                 self.worker_lock.acquire()
                 for object_id, worker in self.workers.items():
                     pose = worker.update(self.rgb, self.depth)
+                    # TODO: Add getter to worker, add mesh file into result
                     results[object_id] = pose
             finally:
                 self.worker_lock.release()

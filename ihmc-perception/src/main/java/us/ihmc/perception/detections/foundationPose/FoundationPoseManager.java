@@ -10,7 +10,9 @@ import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
+import java.time.Instant;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -85,7 +87,13 @@ public class FoundationPoseManager
     */
    public void addResultCallback(Consumer<List<InstantDetection>> resultCallback)
    {
-      communicator.addResultCallback(resultCallback);
+      communicator.addResultCallback(result ->
+      {
+         // TODO: Generate messages, rebuild container, pass in object mesh file name
+         FoundationPoseInstantDetection instantDetection = new FoundationPoseInstantDetection("mesh file goes here", result.getObjectIdAsString(), result.getObjectPose(), Instant.now());
+         List<InstantDetection> list = List.of(instantDetection);
+         resultCallback.accept(list);
+      });
    }
 
    public void destroy()
@@ -96,6 +104,27 @@ public class FoundationPoseManager
 
    private void update()
    {
+      Instant now = Instant.now();
+      Instant secondAgo = now.minusSeconds(1);
+
+      // Look through Tracked detections and determine which we should stop tracking
+      synchronized (allYOLODetections)
+      {
+         Iterator<PersistentDetection> detectionIterator = trackedYOLODetections.iterator();
+         while (detectionIterator.hasNext())
+         {
+            PersistentDetection detection = detectionIterator.next();
+            String objectId = detection.getDetectedObjectName();
+
+            // If detection is not stable or if it's been more than a second since last detection, we stop tracking the object
+            if (!detection.isStable(now) || detection.getMostRecentDetection().getDetectionTime().isBefore(secondAgo))
+            {
+               communicator.remove(objectId);
+               detectionIterator.remove();
+            }
+         }
+      }
+
       // Look through untracked detections, and determine which we want to track
       Set<PersistentDetection> untrackedYOLODetections;
       synchronized (allYOLODetections)
@@ -114,8 +143,8 @@ public class FoundationPoseManager
          if (colorImage == null)
             continue;
 
-         // If the bounding box is not at the edge, we want to track the detection
-         if (boundingBoxIsNotAtEdge(boundingBox, colorImage.getWidth(), colorImage.getHeight()))
+         // If the detection is stable and the bounding box is not at the edge, we want to track the detection
+         if (detection.isStable(now) && boundingBoxIsNotAtEdge(boundingBox, colorImage.getWidth(), colorImage.getHeight()))
             detectionsToTrack.add(detection);
 
          colorImage.release();

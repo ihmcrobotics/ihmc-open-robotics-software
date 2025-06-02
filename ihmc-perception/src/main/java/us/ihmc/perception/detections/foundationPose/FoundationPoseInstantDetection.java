@@ -12,8 +12,8 @@ import java.time.Instant;
  */
 public class FoundationPoseInstantDetection extends InstantDetection
 {
-   public FoundationPoseInstantDetection(String objectId, Pose3DReadOnly pose, Instant detectionTime)
+   public FoundationPoseInstantDetection(String objectMeshFile, String objectId, Pose3DReadOnly pose, Instant detectionTime)
    {
-      super(objectId, objectId, 1.0, pose, detectionTime);
+      super(objectMeshFile, objectId, 1.0, pose, detectionTime);
    }
 }
