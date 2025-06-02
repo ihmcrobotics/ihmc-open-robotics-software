@@ -110,7 +110,6 @@ public class FoundationPoseManager
    private void update()
    {
       Instant now = Instant.now();
-      Instant secondAgo = now.minusSeconds(1);
 
       // Look through Tracked detections and determine which we should stop tracking
       synchronized (allYOLODetections)
@@ -123,7 +122,7 @@ public class FoundationPoseManager
             PersistentDetection detection = entry.getValue();
 
             // If detection is not stable or if it's been more than a second since last detection, we stop tracking the object
-            if (!detection.isStable(now) || detection.getMostRecentDetection().getDetectionTime().isBefore(secondAgo))
+            if (!detection.isStable(now))
             {
                communicator.remove(objectId);
                detectionIterator.remove();
