@@ -7,15 +7,10 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions.*;
 
 public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<RDXPredefinedRigidBodySceneNode>
 {
-   private final Map<String, Integer> ids = new HashMap<>();
-
    public RDXPredefinedRigidBodySceneNodeBuilder(SceneGraph sceneGraph)
    {
       super(sceneGraph);
@@ -52,8 +47,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
       {
          if (super.name.isEmpty())
          {
-            ids.merge(modelName, 1, Integer::sum);
-            name = modelName + ids.get(modelName).toString();
+            name = modelName;
          }
          else
          {
