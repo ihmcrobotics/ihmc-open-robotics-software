@@ -13,6 +13,7 @@ import org.bytedeco.opencv.opencv_core.Point;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -57,6 +58,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
    private final int cellsPerAxisGlobal;
 
+   private final Stopwatch stopwatch = new Stopwatch();
+
    public RDXROS2HeightMapVisualizer(String title, HeightMapParameters heightMapParameters)
    {
       super(title);
@@ -85,6 +88,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       super.create();
       heightMapRenderer.create(cellsPerAxisGlobal * cellsPerAxisGlobal);
+      stopwatch.start();
    }
 
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
@@ -121,7 +125,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
                                               heightMap = HeightMapMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
-                                              updateHeightMapImage();
+                                              // This prevents the rendering from happening to early, it was throwing exceptions
+                                              if (stopwatch.lapElapsed() > 3)
+                                                 updateHeightMapImage();
                                            });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
@@ -129,9 +135,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    private void updateHeightMapImage()
    {
-      if (!heightMapImageVisualizer.getHasRenderedOne())
-         return;
-
       DoublePointer minVal = new DoublePointer(1);
       DoublePointer maxVal = new DoublePointer(1);
       Point minLoc = new Point();
