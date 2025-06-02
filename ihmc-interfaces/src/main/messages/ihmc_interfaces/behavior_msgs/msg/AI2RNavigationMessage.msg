@@ -8,11 +8,11 @@ byte RIGHT = 4
 # The type of spatial relation with the secondary reference object as defined above
 byte spatial_relation
 
-# Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
-string pov_reference_frame_name
+# Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
+string pov_object
 
-# Reference frame (object) to go to
-string object_name
+# Target reference frame (object) to go to
+string target_object
 
 # The distance to the reference frame (located at the object's centroid)
 float64 distance_to_object

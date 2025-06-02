@@ -46,11 +46,11 @@ public class AI2RSkillEditor
             if (leaf.getDefinition().getName().toLowerCase().contains("go to action") && leaf instanceof FootstepPlanActionState gotoActionState)
             {
                AI2RNavigationMessage navigationMessage = message.getNavigation();
-               String referenceFrameName = navigationMessage.getObjectNameAsString();
+               String referenceFrameName = navigationMessage.getTargetObjectAsString();
                changeParentFrameGoToNode(gotoActionState.getDefinition(), gotoActionState, referenceFrameName);
                ReferenceFrame referenceFrame = gotoActionState.getFrameByName(referenceFrameName);
 
-               String secondaryFrameName = navigationMessage.getPovReferenceFrameNameAsString();
+               String secondaryFrameName = navigationMessage.getPovObjectAsString();
                ReferenceFrame secondaryFrame = gotoActionState.getFrameByName(secondaryFrameName);
 
                FramePoint3D goalStancePoint = new FramePoint3D(gotoActionState.getParentFrame());

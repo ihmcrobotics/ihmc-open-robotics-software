@@ -106,6 +106,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private void resetStatusMessage()
    {
+      navigationFailureForObstacle = false;
+      navigationFailureObstacleName = "";
+      actionFailureMissingFrame = false;
       statusMessage.setBehaviorInProgress("-");
       statusMessage.setCompletedBehavior("-");
       statusMessage.setFailedBehavior("-");
@@ -271,7 +274,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                CRDTStatusFootstepList plannedSteps = gotoActionState.getPreviewFootsteps();
                // Check if the next step's pose is too close with any object in the scene
                int stepsLeft = gotoActionState.getNumberOfIncompleteFootsteps();
-               if (stepsLeft > 0)
+               if (stepsLeft > 0 && plannedSteps.getSize() > 0)
                {
                   Point3DReadOnly positionNextStep = plannedSteps.getPoseReadOnly(plannedSteps.getSize() - stepsLeft).getTranslation();
                   for (var object : statusMessage.getObjects())

@@ -34,13 +34,13 @@ module behavior_msgs
          */
         octet spatial_relation;
         /**
-         * Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
+         * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
          */
-        string pov_reference_frame_name;
+        string pov_object;
         /**
-         * Reference frame (object) to go to
+         * Target reference frame (object) to go to
          */
-        string object_name;
+        string target_object;
         /**
          * The distance to the reference frame (located at the object's centroid)
          */

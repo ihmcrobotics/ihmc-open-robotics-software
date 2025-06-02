@@ -26,8 +26,8 @@ behavior_counter = 0
 behaviors_baseline = ["SCAN", "GOTO", "RECEIVE OBJECT", "GOTO", "PLACE CHARGE ON DOOR", "GOTO"]
 
 goto_person_param = ("Person1", AI2RNavigationMessage.DEFAULT, "")
-goto_door_param = ("DoorPanel1", AI2RNavigationMessage.FRONT, "Barrier1")
-goto_barrier_param = ("Barrier1", AI2RNavigationMessage.BEHIND, "DoorPanel1")
+goto_door_param = ("DoorPanel1", AI2RNavigationMessage.FRONT, "")
+goto_barrier_param = ("Barrier1", AI2RNavigationMessage.BEHIND, "")
 receive_charge_param = ("Charge1",)
 parameters = [None, goto_person_param, receive_charge_param, goto_door_param, None, goto_barrier_param]
 
@@ -107,13 +107,13 @@ def behavior_message_callback(msg):
             goto_parameters = parameters[behavior_counter]
 
             # Set the reference frame name - can copy from scene_objects.obj_name
-            new_goto_behavior.object_name = goto_parameters[0]
+            new_goto_behavior.target_object = goto_parameters[0]
             # Set the distance to the object
             new_goto_behavior.distance_to_object = 1.0
-            new_goto_behavior.pov_reference_frame_name = goto_parameters[2]
+            new_goto_behavior.pov_object = goto_parameters[2]
             new_goto_behavior.spatial_relation = goto_parameters[1]
-            if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
-                new_goto_behavior.pov_reference_frame_name = "walkingFrame"
+            if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT or goto_parameters[2] == "":
+                new_goto_behavior.pov_object = "walkingFrame"
 
             behavior_command.navigation = new_goto_behavior
 
