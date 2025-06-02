@@ -75,6 +75,8 @@ public class SceneGraph
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
    private int numberOfFrozenNodes = 0;
 
+   private final Map<String, Set<Integer>> minimumUniqueSuffixMap = new HashMap<>();
+
    /** Create without CRDT synchronization. */
    public SceneGraph()
    {
@@ -113,7 +115,7 @@ public class SceneGraph
 
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
+         staticRelativeSceneNode.updateTrackingState(sensorFrame, this, modificationQueue);
       }
       else if (sceneNode instanceof YOLOv8Node yoloNode)
       {
@@ -154,6 +156,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
       numberOfFrozenNodes = 0;
+      minimumUniqueSuffixMap.clear();
       updateCaches(rootNode);
    }
 
@@ -198,6 +201,11 @@ public class SceneGraph
       if (node.isFrozen())
          ++numberOfFrozenNodes;
 
+      if (minimumUniqueSuffixMap.containsKey(node.getNonUniqueName()))
+         minimumUniqueSuffixMap.get(node.getNonUniqueName()).add(node.getNameSuffix());
+      else
+         minimumUniqueSuffixMap.put(node.getNonUniqueName(), new HashSet<>(Set.of(node.getNameSuffix())));
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
@@ -226,7 +234,7 @@ public class SceneGraph
             {
                // Create new door node
                DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
-               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode));
+               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode, this));
             }
          });
       }
@@ -287,6 +295,11 @@ public class SceneGraph
       return numberOfFrozenNodes;
    }
 
+   public Map<String, Set<Integer>> getMinimumUniqueSuffixMap()
+   {
+      return minimumUniqueSuffixMap;
+   }
+
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
    {
       Function<String, ReferenceFrame> frameLookup = nodeName ->
@@ -316,7 +329,7 @@ public class SceneGraph
 
       if (detectableNode != null)
       {
-         modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode)));
+         modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode, this)));
       }
    }
 }
