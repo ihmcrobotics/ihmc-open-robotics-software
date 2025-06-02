@@ -1,6 +1,7 @@
 package us.ihmc.perception.detections.foundationPose;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.DetectionManager;
@@ -11,9 +12,12 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -24,7 +28,7 @@ public class FoundationPoseManager
    private static final AtomicLong ID = new AtomicLong(0L);
 
    private final Set<PersistentDetection> allYOLODetections;
-   private final Set<PersistentDetection> trackedYOLODetections;
+   private final Map<String, PersistentDetection> trackedYOLODetections;
 
    private final ROS2FoundationPoseCommunicator communicator;
 
@@ -33,7 +37,7 @@ public class FoundationPoseManager
    public FoundationPoseManager(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
       allYOLODetections = new HashSet<>();
-      trackedYOLODetections = new HashSet<>();
+      trackedYOLODetections = new HashMap<>();
 
       communicator = new ROS2FoundationPoseCommunicator(ros2Node, imageSensor, colorKey, depthKey);
 
@@ -71,7 +75,7 @@ public class FoundationPoseManager
          synchronized (allYOLODetections)
          {
             allYOLODetections.remove(detection);
-            trackedYOLODetections.remove(detection);
+            trackedYOLODetections.values().remove(detection);
          }
       }
       else if (FoundationPoseInstantDetection.class.equals(detection.getInstantDetectionClass()))
@@ -89,10 +93,11 @@ public class FoundationPoseManager
    {
       communicator.addResultCallback(result ->
       {
-         // TODO: Generate messages, rebuild container, pass in object mesh file name
-         FoundationPoseInstantDetection instantDetection = new FoundationPoseInstantDetection("mesh file goes here", result.getObjectIdAsString(), result.getObjectPose(), Instant.now());
-         List<InstantDetection> list = List.of(instantDetection);
-         resultCallback.accept(list);
+         FoundationPoseInstantDetection instantDetection = new FoundationPoseInstantDetection(result.getMeshFileAsString(),
+                                                                                              result.getObjectIdAsString(),
+                                                                                              result.getObjectPose(),
+                                                                                              MessageTools.toInstant(result.getTimestamp()));
+         resultCallback.accept(List.of(instantDetection));
       });
    }
 
@@ -110,11 +115,12 @@ public class FoundationPoseManager
       // Look through Tracked detections and determine which we should stop tracking
       synchronized (allYOLODetections)
       {
-         Iterator<PersistentDetection> detectionIterator = trackedYOLODetections.iterator();
+         Iterator<Entry<String, PersistentDetection>> detectionIterator = trackedYOLODetections.entrySet().iterator();
          while (detectionIterator.hasNext())
          {
-            PersistentDetection detection = detectionIterator.next();
-            String objectId = detection.getDetectedObjectName();
+            Entry<String, PersistentDetection> entry = detectionIterator.next();
+            String objectId = entry.getKey();
+            PersistentDetection detection = entry.getValue();
 
             // If detection is not stable or if it's been more than a second since last detection, we stop tracking the object
             if (!detection.isStable(now) || detection.getMostRecentDetection().getDetectionTime().isBefore(secondAgo))
@@ -130,7 +136,7 @@ public class FoundationPoseManager
       synchronized (allYOLODetections)
       {
          untrackedYOLODetections = new HashSet<>(allYOLODetections);
-         untrackedYOLODetections.removeAll(trackedYOLODetections);
+         untrackedYOLODetections.removeAll(trackedYOLODetections.values());
       }
       Set<PersistentDetection> detectionsToTrack = new HashSet<>();
       for (PersistentDetection detection : untrackedYOLODetections)
@@ -159,7 +165,7 @@ public class FoundationPoseManager
          communicator.track(objectId, meshFile, yoloDetection.getObjectMask(), yoloDetection.getColorImage(), yoloDetection.getDepthImage());
          synchronized (allYOLODetections)
          {
-            trackedYOLODetections.add(detection);
+            trackedYOLODetections.put(objectId, detection);
          }
       }
    }

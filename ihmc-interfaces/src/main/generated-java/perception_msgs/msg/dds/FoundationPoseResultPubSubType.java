@@ -15,7 +15,7 @@ public class FoundationPoseResultPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a8a8140598205419fc9d2cc9c35eda27c55d51b435129465c805e4251052341e";
+   		return "1713137489585ad8840f7d75f5696274c62da348440dc73c6be70d919ad01273";
    }
    
    @Override
@@ -52,6 +52,9 @@ public class FoundationPoseResultPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -68,7 +71,11 @@ public class FoundationPoseResultPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getTimestamp(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectId().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getMeshFile().length() + 1;
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getObjectPose(), current_alignment);
 
@@ -78,16 +85,23 @@ public class FoundationPoseResultPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(perception_msgs.msg.dds.FoundationPoseResult data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getTimestamp(), cdr);
       if(data.getObjectId().length() <= 255)
       cdr.write_type_d(data.getObjectId());else
           throw new RuntimeException("object_id field exceeds the maximum length: %d > %d".formatted(data.getObjectId().length(), 255));
+
+      if(data.getMeshFile().length() <= 255)
+      cdr.write_type_d(data.getMeshFile());else
+          throw new RuntimeException("mesh_file field exceeds the maximum length: %d > %d".formatted(data.getMeshFile().length(), 255));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.FoundationPoseResult data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getTimestamp(), cdr);	
       cdr.read_type_d(data.getObjectId());	
+      cdr.read_type_d(data.getMeshFile());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
 
    }
@@ -95,7 +109,10 @@ public class FoundationPoseResultPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(perception_msgs.msg.dds.FoundationPoseResult data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("timestamp", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getTimestamp());
+
       ser.write_type_d("object_id", data.getObjectId());
+      ser.write_type_d("mesh_file", data.getMeshFile());
       ser.write_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());
 
    }
@@ -103,7 +120,10 @@ public class FoundationPoseResultPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.FoundationPoseResult data)
    {
+      ser.read_type_a("timestamp", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getTimestamp());
+
       ser.read_type_d("object_id", data.getObjectId());
+      ser.read_type_d("mesh_file", data.getMeshFile());
       ser.read_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());
 
    }

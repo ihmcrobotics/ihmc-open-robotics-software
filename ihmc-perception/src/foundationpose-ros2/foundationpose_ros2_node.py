@@ -65,6 +65,7 @@ class FoundationPoseROS2Node(Node):
 
         self.rgb = None
         self.depth = None
+        self.image_timestamp = None
         self.camera_k = None
         self.camera_position = None
         self.camera_orientation = None
@@ -104,6 +105,9 @@ class FoundationPoseROS2Node(Node):
         quaternion = color_image.orientation
         self.camera_orientation = R.from_quat(quat=[quaternion.x, quaternion.y, quaternion.z, quaternion.w])
 
+        # Get image acquisition time (will be used for detection timestamp)
+        self.image_timestamp = color_image.acquisition_time
+
         # Read the color image
         self.rgb = decode_and_resize(message=color_image, scale=IMAGE_SCALE)
         self.new_color_available.set()
@@ -142,6 +146,7 @@ class FoundationPoseROS2Node(Node):
             self.worker_lock.acquire()
             self.workers[request.object_id] = FoundationPoseWorker(
                 mesh=mesh,
+                mesh_file=request.mesh_file,
                 rgb=color,
                 depth=depth,
                 mask=mask,
@@ -180,9 +185,12 @@ class FoundationPoseROS2Node(Node):
             try:
                 self.worker_lock.acquire()
                 for object_id, worker in self.workers.items():
-                    pose = worker.update(self.rgb, self.depth)
-                    # TODO: Add getter to worker, add mesh file into result
-                    results[object_id] = pose
+                    pose, bbox = worker.update(self.rgb, self.depth)
+                    results[object_id] = {
+                        'pose': pose,
+                        'bbox': bbox,
+                        'mesh': worker.mesh_file
+                    }
             finally:
                 self.worker_lock.release()
 
@@ -190,8 +198,9 @@ class FoundationPoseROS2Node(Node):
             self.new_depth_available.clear()
 
             # Publish all the results
-            for object_id, pose in results.items():
+            for object_id, result in results.items():
                 # Get the position and rotation (Z forward, Y up)
+                pose = result['pose']
                 position = pose[:3, 3]
                 rotation_matrix = pose[:3, :3]
 
@@ -204,19 +213,22 @@ class FoundationPoseROS2Node(Node):
                 rotation_matrix = self.camera_orientation * rotation_matrix
 
                 # Create the result message and publish it
-                result = FoundationPoseResult()
-                result.object_id = object_id
-                result.object_pose.position.x = position[0]
-                result.object_pose.position.y = position[1]
-                result.object_pose.position.z = position[2]
+                result_message = FoundationPoseResult()
+                result_message.timestamp = self.image_timestamp
+                result_message.object_id = object_id
+                result_message.mesh_file = result['mesh']
+
+                result_message.object_pose.position.x = position[0]
+                result_message.object_pose.position.y = position[1]
+                result_message.object_pose.position.z = position[2]
 
                 quaternion = rotation_matrix.as_quat()
-                result.object_pose.orientation.x = quaternion[0]
-                result.object_pose.orientation.y = quaternion[1]
-                result.object_pose.orientation.z = quaternion[2]
-                result.object_pose.orientation.w = quaternion[3]
+                result_message.object_pose.orientation.x = quaternion[0]
+                result_message.object_pose.orientation.y = quaternion[1]
+                result_message.object_pose.orientation.z = quaternion[2]
+                result_message.object_pose.orientation.w = quaternion[3]
 
-                self.result_publisher.publish(result)
+                self.result_publisher.publish(result_message)
 
 
 def main():

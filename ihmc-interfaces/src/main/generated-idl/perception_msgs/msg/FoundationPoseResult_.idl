@@ -2,6 +2,7 @@
 #define __perception_msgs__msg__FoundationPoseResult__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -13,9 +14,17 @@ module perception_msgs
       struct FoundationPoseResult
       {
         /**
+         * Detection timestamp. Should be the acquisition time of the image used for detection
+         */
+        ihmc_common_msgs::msg::dds::InstantMessage timestamp;
+        /**
          * ID of the detected object
          */
         string object_id;
+        /**
+         * Mesh file name of the object (to identify it's class)
+         */
+        string mesh_file;
         /**
          * Pose of the object
          */

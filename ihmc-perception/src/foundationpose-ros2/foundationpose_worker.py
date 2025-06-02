@@ -3,13 +3,15 @@ import trimesh
 from estimater import FoundationPose
 
 class FoundationPoseWorker:
-    def __init__(self, mesh, rgb, depth, mask, camera_k, object_id=None, glctx=None):
+    def __init__(self, mesh, mesh_file, rgb, depth, mask, camera_k, object_id=None, glctx=None):
         self.foundation_pose = FoundationPose(
             model_pts=mesh.vertices,
             model_normals=mesh.vertex_normals,
             mesh=mesh,
             glctx=glctx
         )
+
+        self.mesh_file = mesh_file
 
         self.camera_k = camera_k
 
@@ -44,5 +46,7 @@ class FoundationPoseWorker:
 
         center_pose = pose @ np.linalg.inv(self.to_origin)
 
-        # TODO: Add bounding box to result
-        return center_pose
+        # TODO: Add bounding box calculation
+        bbox = None
+
+        return center_pose, bbox

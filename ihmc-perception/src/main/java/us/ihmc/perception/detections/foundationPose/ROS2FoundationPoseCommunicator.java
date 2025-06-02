@@ -51,7 +51,7 @@ public class ROS2FoundationPoseCommunicator
    private final int depthKey;
    private final RepeatingTaskThread sensorPublishThread;
 
-   private final List<Consumer<List<InstantDetection>>> resultCallbacks;
+   private final List<Consumer<FoundationPoseResult>> resultCallbacks;
 
    public ROS2FoundationPoseCommunicator(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
@@ -77,7 +77,7 @@ public class ROS2FoundationPoseCommunicator
       resultCallbacks = new ArrayList<>();
    }
 
-   public void addResultCallback(Consumer<List<InstantDetection>> callback)
+   public void addResultCallback(Consumer<FoundationPoseResult> callback)
    {
       resultCallbacks.add(callback);
    }
@@ -148,11 +148,8 @@ public class ROS2FoundationPoseCommunicator
 
    private void onResultReceived(FoundationPoseResult result)
    {
-      FoundationPoseInstantDetection instantDetection = new FoundationPoseInstantDetection(result.getObjectIdAsString(), result.getObjectPose(), Instant.now());
-      List<InstantDetection> list = List.of(instantDetection);
-
-      for (Consumer<List<InstantDetection>> resultCallback : resultCallbacks)
-         resultCallback.accept(list);
+      for (Consumer<FoundationPoseResult> resultCallback : resultCallbacks)
+         resultCallback.accept(result);
    }
 
    private void publishSensor()
