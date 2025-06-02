@@ -90,7 +90,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptImageMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptHeightMapMessage);
       ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
@@ -109,7 +109,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       }
    }
 
-   public void acceptImageMessage(HeightMapMessage heightMapMessage)
+   public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
    {
       // Even if the height map is publishing, we aren't going to update anything with that data unless its active
       if (!isActive())
