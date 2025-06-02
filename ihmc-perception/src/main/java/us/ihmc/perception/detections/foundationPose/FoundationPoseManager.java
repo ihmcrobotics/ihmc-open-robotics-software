@@ -27,7 +27,7 @@ public class FoundationPoseManager
    private static final int DELTA = 10;
    private static final AtomicLong ID = new AtomicLong(0L);
 
-   private final Set<PersistentDetection> allYOLODetections;
+   private final Map<PersistentDetection, Instant> allYOLODetections;
    private final Map<String, PersistentDetection> trackedYOLODetections;
 
    private final ROS2FoundationPoseCommunicator communicator;
@@ -36,7 +36,7 @@ public class FoundationPoseManager
 
    public FoundationPoseManager(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
-      allYOLODetections = new HashSet<>();
+      allYOLODetections = new HashMap<>();
       trackedYOLODetections = new HashMap<>();
 
       communicator = new ROS2FoundationPoseCommunicator(ros2Node, imageSensor, colorKey, depthKey);
@@ -63,7 +63,7 @@ public class FoundationPoseManager
       {
          synchronized (allYOLODetections)
          {
-            allYOLODetections.add(detection);
+            allYOLODetections.put(detection, null);
          }
       }
    }
@@ -112,10 +112,19 @@ public class FoundationPoseManager
    private void update()
    {
       Instant now = Instant.now();
+      Instant secondAgo = now.minusSeconds(1);
 
-      // Look through Tracked detections and determine which we should stop tracking
       synchronized (allYOLODetections)
       {
+         // Update the last time each YOLO detection was "bad"
+         allYOLODetections.forEach((yoloDetection, lastBadDetectionTime) ->
+         {
+            boolean detectionIsBad = !yoloDetection.isStable(now) || boundingBoxIsAtEdge((YOLOv8InstantDetection) yoloDetection.getMostRecentDetection());
+            if (detectionIsBad)
+               allYOLODetections.put(yoloDetection, yoloDetection.getMostRecentDetection().getDetectionTime());
+         });
+
+         // Look through tracked detections and stop tracking ones that are bad
          Iterator<Entry<String, PersistentDetection>> detectionIterator = trackedYOLODetections.entrySet().iterator();
          while (detectionIterator.hasNext())
          {
@@ -123,8 +132,9 @@ public class FoundationPoseManager
             String objectId = entry.getKey();
             PersistentDetection detection = entry.getValue();
 
-            // If detection is not stable or if it's been more than a second since last detection, we stop tracking the object
-            if (!detection.isStable(now) || boundingBoxIsAtEdge((YOLOv8InstantDetection) detection.getMostRecentDetection()))
+            // If detection was bad within the last second, we shouldn't be tracking it
+            Instant lastBadDetectionTime = allYOLODetections.get(detection);
+            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(secondAgo))
             {
                communicator.remove(objectId);
                detectionIterator.remove();
@@ -136,14 +146,15 @@ public class FoundationPoseManager
       Set<PersistentDetection> untrackedYOLODetections;
       synchronized (allYOLODetections)
       {
-         untrackedYOLODetections = new HashSet<>(allYOLODetections);
+         untrackedYOLODetections = new HashSet<>(allYOLODetections.keySet());
          untrackedYOLODetections.removeAll(trackedYOLODetections.values());
       }
       Set<PersistentDetection> detectionsToTrack = new HashSet<>();
       for (PersistentDetection detection : untrackedYOLODetections)
       {
-         // If the detection is stable and the bounding box is not at the edge, we want to track the detection
-         if (detection.isStable(now) && !boundingBoxIsAtEdge((YOLOv8InstantDetection) detection.getMostRecentDetection()))
+         // Track detections that haven't been bad for at least a second
+         Instant lastBadDetectionTime = allYOLODetections.get(detection);
+         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(secondAgo))
             detectionsToTrack.add(detection);
       }
 
