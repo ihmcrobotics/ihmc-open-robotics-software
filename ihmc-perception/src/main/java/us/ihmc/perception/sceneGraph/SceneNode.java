@@ -46,7 +46,7 @@ public class SceneNode extends RequestConfirmFreezable
       {
          Set<Integer> takenSuffixes = minimumUniqueSuffixMap.get(givenName);
 
-         int nextSuffix = 0;
+         int nextSuffix = 1;
          while (takenSuffixes.contains(nextSuffix))
             ++nextSuffix;
 
@@ -54,7 +54,7 @@ public class SceneNode extends RequestConfirmFreezable
       }
       else
       {
-         nameSuffix = 0;
+         nameSuffix = 1;
       }
       uniqueName = givenName + nameSuffix;
    }
