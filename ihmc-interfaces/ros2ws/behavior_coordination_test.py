@@ -109,7 +109,7 @@ def behavior_message_callback(msg):
             # Set the reference frame name - can copy from scene_objects.obj_name
             new_goto_behavior.target_object = goto_parameters[0]
             # Set the distance to the object
-            new_goto_behavior.distance_to_object = 1.0
+            new_goto_behavior.distance_to_object = 1.2
             new_goto_behavior.pov_object = goto_parameters[2]
             new_goto_behavior.spatial_relation = goto_parameters[1]
             if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT or goto_parameters[2] == "":
