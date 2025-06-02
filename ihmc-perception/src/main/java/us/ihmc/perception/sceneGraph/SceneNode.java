@@ -56,7 +56,7 @@ public class SceneNode extends RequestConfirmFreezable
       {
          nameSuffix = 0;
       }
-      uniqueName = givenName + "_#" + nameSuffix;
+      uniqueName = givenName + nameSuffix;
    }
 
    public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
