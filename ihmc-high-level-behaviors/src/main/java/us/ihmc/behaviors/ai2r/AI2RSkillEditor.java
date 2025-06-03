@@ -51,6 +51,7 @@ public class AI2RSkillEditor
                ReferenceFrame referenceFrame = gotoActionState.getFrameByName(referenceFrameName);
 
                String secondaryFrameName = navigationMessage.getPovObjectAsString();
+               LogTools.warn(secondaryFrameName);
                ReferenceFrame secondaryFrame = gotoActionState.getFrameByName(secondaryFrameName);
 
                FramePoint3D goalStancePoint = new FramePoint3D(gotoActionState.getParentFrame());

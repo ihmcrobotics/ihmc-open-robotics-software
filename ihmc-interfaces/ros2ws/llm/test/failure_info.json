@@ -88,4 +88,53 @@
     "Description": "Is Close Enough Condition",
     "Type": "ConditionNodeDefinition",
     "Position error": 0.12924069567085728
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.0765132647274427
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.04692163237783825
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.017821245099804123
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is object in hand",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.00907816581957191
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.3352897332378296
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is object in hand",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.005248480641412923
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is object in hand",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.005248480641412923
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.11083720633944821
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is object in hand",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.10774762161606749
+}{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition"
 }
