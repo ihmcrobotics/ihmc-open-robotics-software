@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./AI2RHandPoseAdaptationMessage_.idl"
 #include "behavior_msgs/msg/./AI2RNavigationMessage_.idl"
 #include "behavior_msgs/msg/./AI2RReceiveObjectMessage_.idl"
+#include "behavior_msgs/msg/./AI2RScanMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -20,6 +21,7 @@ module behavior_msgs
         string behavior_to_execute;
         boolean adapting_behavior;
         behavior_msgs::msg::dds::AI2RHandPoseAdaptationMessage hand_pose_adaptation;
+        behavior_msgs::msg::dds::AI2RScanMessage scan;
         behavior_msgs::msg::dds::AI2RNavigationMessage navigation;
         behavior_msgs::msg::dds::AI2RReceiveObjectMessage receive_object;
       };

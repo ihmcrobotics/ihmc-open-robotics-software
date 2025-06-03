@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
+import behavior_msgs.msg.dds.AI2RScanMessage;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionFootstepState;
@@ -31,10 +32,25 @@ public class AI2RSkillEditor
 
    public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
    {
-      // GoTo behavior - Navigation
+      updateScan(behaviorToExecuteName, state, message, commandedBehaviorIndex);
       updateGoTo(behaviorToExecuteName, state, message, commandedBehaviorIndex);
       updateReceiveObject(behaviorToExecuteName, state, message, commandedBehaviorIndex);
       updatePickAndPlace(behaviorToExecuteName, state, message, commandedBehaviorIndex);
+   }
+
+   private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   {
+      if (behaviorToExecuteName.contains("SCAN") && message.getAdaptingBehavior())
+      {
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         {
+            if (leaf instanceof ConditionNodeState conditionNodeState)
+            {
+               AI2RScanMessage scanMessage = message.getScan();
+               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanMessage.getTargetObjectAsString());
+            }
+         }
+      }
    }
 
    private void updateGoTo(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)

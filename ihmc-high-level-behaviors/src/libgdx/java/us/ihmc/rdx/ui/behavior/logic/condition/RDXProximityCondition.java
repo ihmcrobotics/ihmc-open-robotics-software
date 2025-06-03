@@ -4,7 +4,9 @@ import imgui.ImGui;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.logic.condition.ProximityConditionDefinition.DistanceType;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -19,6 +21,7 @@ public class RDXProximityCondition
    private final CRDTBidirectionalDouble distance;
    private final CRDTBidirectionalDouble maxDistance;
    private final CRDTBidirectionalDouble maxEvaluationTime;
+//   private final CRDTBidirectionalBoolean manageMissingFrameInternally;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
@@ -26,6 +29,7 @@ public class RDXProximityCondition
    private final ImDoubleWrapper maxDistanceWidget;
    private final ImDoubleWrapper distanceWidget;
    private final ImDoubleWrapper maxEvaluationTimeWidget;
+//   private final ImBooleanWrapper manageMissingFrameInternallyCheckbox;
 
    public RDXProximityCondition(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
    {

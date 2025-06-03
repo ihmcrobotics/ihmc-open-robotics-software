@@ -14,17 +14,18 @@ import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.foundationPose.FoundationPoseManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
@@ -51,6 +52,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private String navigationFailureObstacleName;
    private boolean actionFailureMissingFrame = false;
    private final AI2RSkillEditor skillEditor = new AI2RSkillEditor();
+   private final FoundationPoseManager foundationPoseManager;
 
 
    public AI2RNodeExecutor(long id,
@@ -58,7 +60,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                            WorkspaceResourceDirectory saveFileDirectory,
                            ROS2ControllerHelper ros2,
                            ROS2SyncedRobotModel syncedRobot,
-                           SceneGraph sceneGraph)
+                           SceneGraph sceneGraph,
+                           FoundationPoseManager foundationPoseManager)
    {
       super(new AI2RNodeState(id, crdtInfo, saveFileDirectory));
 
@@ -67,6 +70,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       this.sceneGraph = sceneGraph;
       resetStatusMessage();
       controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
+      this.foundationPoseManager = foundationPoseManager;
 
       ros2.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {
@@ -140,7 +144,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
 
       endSequenceAfterBehaviorExecution();
-      reportFailures();
+      executeBehaviorLogic();
    }
 
    private void setSceneInfo()
@@ -258,12 +262,13 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
    }
 
-   private void reportFailures()
+   private void executeBehaviorLogic()
    {
-      // Check if Goto action is executing and if next steps are colliding with objects in the scene
-      goToCollisionLoop:
+      boolean trackingObjectsInProgress = false;
+      leavesLoop:
       for (var leaf : state.getActionSequence().getOrderedLeaves())
       {
+         // Check if actions can't execute because of missing frames
          if (leaf.getIsNextForExecution())
          {
             if (!leaf.getCanExecute())
@@ -271,6 +276,20 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                actionFailureMissingFrame = true;
             }
          }
+
+         // Check if we are executing Receive object action and active/de-active foundationPose tracking
+         if (leaf.getParent().getDefinition().getName().contains("ReceiveObject"))
+         {
+               trackingObjectsInProgress |= leaf.getIsExecuting();
+         }
+
+         // Check if we are executing Scan action and active/de-active foundationPose tracking
+         if (leaf.getDefinition().getName().contains("SCANNING") && leaf instanceof WaitDurationActionState waitActionState)
+         {
+            trackingObjectsInProgress |= waitActionState.getIsExecuting();
+         }
+
+         // Check if Goto action is executing and if next steps are colliding with objects in the scene
          if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
          {
             if (gotoActionState.getIsExecuting())
@@ -294,7 +313,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                            // Have the executor abort
                            ros2.publishToController(new AbortWalkingMessage());
 
-                           break goToCollisionLoop;
+                           break leavesLoop;
                         }
                      }
 
@@ -305,8 +324,11 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   LogTools.warn("Cannot check collision of next step");
                }
             }
-            break;
          }
+      }
+      if (foundationPoseManager != null)
+      {
+         foundationPoseManager.setActive(trackingObjectsInProgress);
       }
    }
 

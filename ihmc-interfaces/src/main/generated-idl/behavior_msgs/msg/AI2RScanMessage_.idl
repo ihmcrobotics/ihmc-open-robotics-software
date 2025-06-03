@@ -1,0 +1,23 @@
+#ifndef __behavior_msgs__msg__AI2RScanMessage__idl__
+#define __behavior_msgs__msg__AI2RScanMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::AI2RScanMessage_")
+      struct AI2RScanMessage
+      {
+        /**
+         * Target reference frame (object) to look for
+         */
+        string target_object;
+      };
+    };
+  };
+};
+
+#endif

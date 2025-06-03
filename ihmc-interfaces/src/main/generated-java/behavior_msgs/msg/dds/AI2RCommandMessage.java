@@ -14,6 +14,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    public java.lang.StringBuilder behavior_to_execute_;
    public boolean adapting_behavior_;
    public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage hand_pose_adaptation_;
+   public behavior_msgs.msg.dds.AI2RScanMessage scan_;
    public behavior_msgs.msg.dds.AI2RNavigationMessage navigation_;
    public behavior_msgs.msg.dds.AI2RReceiveObjectMessage receive_object_;
 
@@ -21,6 +22,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    {
       behavior_to_execute_ = new java.lang.StringBuilder(255);
       hand_pose_adaptation_ = new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage();
+      scan_ = new behavior_msgs.msg.dds.AI2RScanMessage();
       navigation_ = new behavior_msgs.msg.dds.AI2RNavigationMessage();
       receive_object_ = new behavior_msgs.msg.dds.AI2RReceiveObjectMessage();
    }
@@ -39,6 +41,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       adapting_behavior_ = other.adapting_behavior_;
 
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.staticCopy(other.hand_pose_adaptation_, hand_pose_adaptation_);
+      behavior_msgs.msg.dds.AI2RScanMessagePubSubType.staticCopy(other.scan_, scan_);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.staticCopy(other.navigation_, navigation_);
       behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.staticCopy(other.receive_object_, receive_object_);
    }
@@ -83,6 +86,12 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    }
 
 
+   public behavior_msgs.msg.dds.AI2RScanMessage getScan()
+   {
+      return scan_;
+   }
+
+
    public behavior_msgs.msg.dds.AI2RNavigationMessage getNavigation()
    {
       return navigation_;
@@ -117,6 +126,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.adapting_behavior_, other.adapting_behavior_, epsilon)) return false;
 
       if (!this.hand_pose_adaptation_.epsilonEquals(other.hand_pose_adaptation_, epsilon)) return false;
+      if (!this.scan_.epsilonEquals(other.scan_, epsilon)) return false;
       if (!this.navigation_.epsilonEquals(other.navigation_, epsilon)) return false;
       if (!this.receive_object_.epsilonEquals(other.receive_object_, epsilon)) return false;
 
@@ -137,6 +147,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       if(this.adapting_behavior_ != otherMyClass.adapting_behavior_) return false;
 
       if (!this.hand_pose_adaptation_.equals(otherMyClass.hand_pose_adaptation_)) return false;
+      if (!this.scan_.equals(otherMyClass.scan_)) return false;
       if (!this.navigation_.equals(otherMyClass.navigation_)) return false;
       if (!this.receive_object_.equals(otherMyClass.receive_object_)) return false;
 
@@ -155,6 +166,8 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       builder.append(this.adapting_behavior_);      builder.append(", ");
       builder.append("hand_pose_adaptation=");
       builder.append(this.hand_pose_adaptation_);      builder.append(", ");
+      builder.append("scan=");
+      builder.append(this.scan_);      builder.append(", ");
       builder.append("navigation=");
       builder.append(this.navigation_);      builder.append(", ");
       builder.append("receive_object=");
