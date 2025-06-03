@@ -39,6 +39,8 @@ public class FoundationPoseManager
 
    private final RepeatingTaskThread updateThread;
 
+   private boolean isActive;
+
    public FoundationPoseManager(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
       allYOLODetections = new HashMap<>();
@@ -46,8 +48,24 @@ public class FoundationPoseManager
 
       communicator = new ROS2FoundationPoseCommunicator(ros2Node, imageSensor, colorKey, depthKey);
 
+      isActive = false;
+
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Update", this::update);
       updateThread.setFrequencyLimit(30.0).startRepeating();
+   }
+
+   /**
+    * Set whether FoundationPose should be tracking objects.
+    * <p>
+    * If {@code true}, this object will send requests to the FoundationPose process to track objects seen by YOLO.
+    * If {@code false}, this object will send remove messages for any objects that are being tracked,
+    * and will not send any requests.
+    *
+    * @param active Whether FoundationPose should be tracking objects.
+    */
+   public void setActive(boolean active)
+   {
+      this.isActive = active;
    }
 
    /**
@@ -142,7 +160,7 @@ public class FoundationPoseManager
 
             // If detection was bad within the last second, we shouldn't be tracking it
             Instant lastBadDetectionTime = allYOLODetections.get(detection);
-            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime))
+            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime) || !isActive)
             {
                LogTools.debug("Removing {}", objectId);
                communicator.remove(objectId);
@@ -163,7 +181,7 @@ public class FoundationPoseManager
       {
          // Track detections that haven't been bad for at least a second
          Instant lastBadDetectionTime = allYOLODetections.get(detection);
-         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(goodDetectionTime))
+         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(goodDetectionTime) && isActive)
             detectionsToTrack.add(detection);
       }
 
