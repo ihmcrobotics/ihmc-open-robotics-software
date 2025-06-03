@@ -667,7 +667,7 @@ public class RapidPlanarRegionsExtractor
          if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getInternalSearchDepthLimit())
             return;
 
-         LogTools.debug("Expanding block at row: {}, column: {}, searchDepth: {}", row, column, searchDepth);
+//         LogTools.debug("Expanding block at row: {}, column: {}, searchDepth: {}", row, column, searchDepth);
 
          if (searchDepth > regionMaxSearchDepth)
             regionMaxSearchDepth = searchDepth;

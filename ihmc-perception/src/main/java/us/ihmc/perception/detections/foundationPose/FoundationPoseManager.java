@@ -11,6 +11,7 @@ import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,9 @@ import java.util.function.Consumer;
 
 public class FoundationPoseManager
 {
+   private static final Duration YOLO_DETECTION_TIMEOUT = Duration.ofSeconds(1);
+   private static final Duration GOOD_DETECTION_DURATION = Duration.ofSeconds(2);
+
    private static final int DELTA = 10;
    private static final AtomicLong ID = new AtomicLong(0L);
 
@@ -112,16 +116,19 @@ public class FoundationPoseManager
    private void update()
    {
       Instant now = Instant.now();
-      Instant secondAgo = now.minusSeconds(1);
+      Instant yoloTimeout = now.minus(YOLO_DETECTION_TIMEOUT);
+      Instant goodDetectionTime = now.minus(GOOD_DETECTION_DURATION);
 
       synchronized (allYOLODetections)
       {
          // Update the last time each YOLO detection was "bad"
          allYOLODetections.forEach((yoloDetection, lastBadDetectionTime) ->
          {
-            boolean detectionIsBad = !yoloDetection.isStable(now) || boundingBoxIsAtEdge((YOLOv8InstantDetection) yoloDetection.getMostRecentDetection());
+            boolean detectionIsBad = !yoloDetection.isStable(now) ||
+                                     yoloDetection.getMostRecentDetection().getDetectionTime().isBefore(yoloTimeout) ||
+                                     boundingBoxIsAtEdge((YOLOv8InstantDetection) yoloDetection.getMostRecentDetection());
             if (detectionIsBad)
-               allYOLODetections.put(yoloDetection, yoloDetection.getMostRecentDetection().getDetectionTime());
+               allYOLODetections.put(yoloDetection, now);
          });
 
          // Look through tracked detections and stop tracking ones that are bad
@@ -134,7 +141,7 @@ public class FoundationPoseManager
 
             // If detection was bad within the last second, we shouldn't be tracking it
             Instant lastBadDetectionTime = allYOLODetections.get(detection);
-            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(secondAgo))
+            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime))
             {
                communicator.remove(objectId);
                detectionIterator.remove();
@@ -154,7 +161,7 @@ public class FoundationPoseManager
       {
          // Track detections that haven't been bad for at least a second
          Instant lastBadDetectionTime = allYOLODetections.get(detection);
-         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(secondAgo))
+         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(goodDetectionTime))
             detectionsToTrack.add(detection);
       }
 
