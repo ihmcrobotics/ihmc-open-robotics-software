@@ -11,7 +11,7 @@ behavior_msgs/AI2RObjectMessage[] objects
 # List of available behaviors (checkpoints from a pre-loaded behavior)
 string[] available_behaviors
 
-# Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+# Name of the behavior that is in progress
 string behavior_in_progress
 
 # Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)

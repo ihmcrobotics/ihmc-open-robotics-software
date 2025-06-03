@@ -32,7 +32,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.time.Instant;
 
@@ -259,7 +258,7 @@ public class PerceptionMessageTools
       ByteBuffer dataBuffer = messageToPack.getData().getBuffer();
 
       // Set byte order
-      messageToPack.setIsBigendian((byte) (dataBuffer.order().equals(ByteOrder.BIG_ENDIAN) ? 1 : 0));
+      messageToPack.setIsBigendian((byte) 0);
 
       // Set step
       Mat cpuImage = image.getCpuImageMat();

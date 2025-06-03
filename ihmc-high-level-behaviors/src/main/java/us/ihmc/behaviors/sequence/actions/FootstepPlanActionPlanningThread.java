@@ -106,13 +106,14 @@ public class FootstepPlanActionPlanningThread
          footstepPlannerRequest.setRequestedInitialStanceSide(leftStartToGoal < rightStartToGoal ? RobotSide.LEFT : RobotSide.RIGHT);
       }
 
-      // hard-coding for ONR demo
-      footstepPlannerRequest.setPlanBodyPath(true);
-      footstepPlannerRequest.setPerformAStarSearch(false);
-      footstepPlanner.enableGPUBodyPathPlanner(false);
-
-      // TODO!!
-      footstepPlannerRequest.setHeightMapData(rapidHeightMapUpdateThread.getLatestHeightMapData());
+      if (rapidHeightMapUpdateThread != null)
+      {
+         // hard-coding for ONR demo
+         footstepPlannerRequest.setPlanBodyPath(true);
+         footstepPlannerRequest.setPerformAStarSearch(false);
+         footstepPlanner.enableGPUBodyPathPlanner(false);
+         footstepPlannerRequest.setHeightMapData(rapidHeightMapUpdateThread.getLatestHeightMapData());
+      }
 
       // TODO: Add body path planning options to user
 //      footstepPlannerRequest.setPlanBodyPath(false);
@@ -182,7 +183,7 @@ public class FootstepPlanActionPlanningThread
          modifiedFootstepPlan.getFootstep(i).setSwingDuration(definition.getSwingDuration());
       }
 
-//      if (!isPreviewPlanner) // always log when planning
+      if (!isPreviewPlanner) // always log when planning
       {
          FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
          footstepPlannerLogger.logSession();

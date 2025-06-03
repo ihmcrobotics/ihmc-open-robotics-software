@@ -1,0 +1,26 @@
+[
+    {
+        "timestamp": "2025-05-28T11:17:12.639105",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "GOTO_action_prompt",
+        "prompt": "You are an intelligent planner. Given the robot's current context, determine the next valid behavior from the list of 'available_behaviors'.The task is to 'Go to the person behind the barrier who has the charge'. If no valid next behavior exists, return 'NO_ACTION'.Return only a quoted string with the behavior name, and nothing else. Do not include any code. Return: <next behavior to execute>"
+    },
+    {
+        "timestamp": "2025-05-28T15:01:26.926185",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo-Free",
+        "temperature": 0.0,
+        "token_limit": 2048,
+        "top_k": "N/A",
+        "top_p": 1.0,
+        "goal": "Assist with selecting next behavior",
+        "system_prompt": "You are an intelligent assistant for a robot operating in a dynamic and partially observable environment. Your role is to select the next most appropriate behavior for the robot, given the current task, the objects detected in the scene given in 'scene_objects', and the set of behaviors available in 'available_behaviors'. The robot may have previously executed behaviors or encountered failures. Use this context to choose the next logical step toward achieving the task. Among all logically valid behaviors, choose the earliest one in this list that is feasible in the current context. This ensures consistent prioritization and execution order.",
+        "prompt_type": "GOTO_action_prompt",
+        "prompt": "You are an intelligent action planner. Given the robot's current context, determine how to update the parameters of a particular action.If no valid next behavior exists, return 'NO_ACTION'. Do not include any code. Here the action is 'GOTO (to the person behind the barrier). GOTO action takes a single parameter: 'target'. The target is the object to which the robot should go. The task is to 'Go to the person behind the barrier who has the charge'. Return quoted string with the action parameters.{behavior_to_execute : '', object_name : '', pov_reference_frame_name :'',spatial_relation :''}"
+    }
+]

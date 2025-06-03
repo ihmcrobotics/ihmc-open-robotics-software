@@ -32,7 +32,7 @@ module behavior_msgs
          */
         sequence<string, 200> available_behaviors;
         /**
-         * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
+         * Name of the behavior that is in progress
          */
         string behavior_in_progress;
         /**

@@ -18,7 +18,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
-   public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
+   public static final double ORIENTATION_TOLERANCE = Math.toRadians(20.0);
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;

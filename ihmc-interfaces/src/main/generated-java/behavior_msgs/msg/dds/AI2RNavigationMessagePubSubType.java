@@ -15,7 +15,7 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2dedcb0be4210c321a0e50e4407b9a14d04b78fb03c733b05f7a72326d24aa56";
+   		return "a7383c10d80df74e26958ff971c55d8d62800a2c2b3b690e6577938c70c7c5d0";
    }
    
    @Override
@@ -74,9 +74,9 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getSecondaryReferenceFrameName().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPovObject().length() + 1;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReferenceFrameName().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getTargetObject().length() + 1;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -89,15 +89,15 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       cdr.write_type_9(data.getSpatialRelation());
 
-      if(data.getSecondaryReferenceFrameName().length() <= 255)
-      cdr.write_type_d(data.getSecondaryReferenceFrameName());else
-          throw new RuntimeException("secondary_reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getSecondaryReferenceFrameName().length(), 255));
+      if(data.getPovObject().length() <= 255)
+      cdr.write_type_d(data.getPovObject());else
+          throw new RuntimeException("pov_object field exceeds the maximum length: %d > %d".formatted(data.getPovObject().length(), 255));
 
-      if(data.getReferenceFrameName().length() <= 255)
-      cdr.write_type_d(data.getReferenceFrameName());else
-          throw new RuntimeException("reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getReferenceFrameName().length(), 255));
+      if(data.getTargetObject().length() <= 255)
+      cdr.write_type_d(data.getTargetObject());else
+          throw new RuntimeException("target_object field exceeds the maximum length: %d > %d".formatted(data.getTargetObject().length(), 255));
 
-      cdr.write_type_6(data.getDistanceToFrame());
+      cdr.write_type_6(data.getDistanceToObject());
 
    }
 
@@ -105,9 +105,9 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       data.setSpatialRelation(cdr.read_type_9());
       	
-      cdr.read_type_d(data.getSecondaryReferenceFrameName());	
-      cdr.read_type_d(data.getReferenceFrameName());	
-      data.setDistanceToFrame(cdr.read_type_6());
+      cdr.read_type_d(data.getPovObject());	
+      cdr.read_type_d(data.getTargetObject());	
+      data.setDistanceToObject(cdr.read_type_6());
       	
 
    }
@@ -116,18 +116,18 @@ public class AI2RNavigationMessagePubSubType implements us.ihmc.pubsub.TopicData
    public final void serialize(behavior_msgs.msg.dds.AI2RNavigationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_9("spatial_relation", data.getSpatialRelation());
-      ser.write_type_d("secondary_reference_frame_name", data.getSecondaryReferenceFrameName());
-      ser.write_type_d("reference_frame_name", data.getReferenceFrameName());
-      ser.write_type_6("distance_to_frame", data.getDistanceToFrame());
+      ser.write_type_d("pov_object", data.getPovObject());
+      ser.write_type_d("target_object", data.getTargetObject());
+      ser.write_type_6("distance_to_object", data.getDistanceToObject());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RNavigationMessage data)
    {
       data.setSpatialRelation(ser.read_type_9("spatial_relation"));
-      ser.read_type_d("secondary_reference_frame_name", data.getSecondaryReferenceFrameName());
-      ser.read_type_d("reference_frame_name", data.getReferenceFrameName());
-      data.setDistanceToFrame(ser.read_type_6("distance_to_frame"));
+      ser.read_type_d("pov_object", data.getPovObject());
+      ser.read_type_d("target_object", data.getTargetObject());
+      data.setDistanceToObject(ser.read_type_6("distance_to_object"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RNavigationMessage src, behavior_msgs.msg.dds.AI2RNavigationMessage dest)

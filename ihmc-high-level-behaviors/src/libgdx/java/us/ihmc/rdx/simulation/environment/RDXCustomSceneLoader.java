@@ -14,6 +14,7 @@ public class RDXCustomSceneLoader
    {
       EXPLOSIVE_BREACHING_A,
       EXPLOSIVE_BREACHING_B,
+      EXPLOSIVE_BREACHING_C,
       MANIPULATION_2X4,
       NAVIGATION_BARRIER;
    }
@@ -33,62 +34,93 @@ public class RDXCustomSceneLoader
             // Addition of custom nodes in custom locations
             addNode("DoorPullHandle");
             setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
-                                                             new Point3D(1.83381, 2.47637, 1.33200)));
+                                                             new Point3D(1.83381, 2.47637+0.97246, 1.33200)));
 
             addNode("DoorPanel");
             setNodePose("DoorPanel1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(85.34664), 0.0, 0.0),
-                                                             new Point3D(1.58971, 2.53624, 0.00)));
+                                                             new Point3D(1.58971, 2.53624+0.97246, 0.00)));
 
             addNode("Person");
             setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(146.30856), 0.0, 0.0),
-                                                          new Point3D(3.01918, -2.78028, 0.00)));
+                                                          new Point3D(3.01918, -2.78028+0.97246, 0.00)));
 
             addNode("Person");
             setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-95.59758), 0.0, 0.0),
-                                                          new Point3D(-0.58502, 1.95796, 0.00)));
+                                                          new Point3D(-0.58502, 1.95796+0.97246, 0.00)));
 
             addNode("Charge");
             setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.79404), Math.toRadians(0.02114), Math.toRadians(1.52525)),
-                                                          new Point3D(-1.00602, 1.67525, 0.93665)));
+                                                          new Point3D(-1.00602, 1.67525+0.97246, 0.93665)));
 
             addNode("Barrier");
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
-                                                          new Point3D(1.77185, 0.000, 0.00000)));
+                                                          new Point3D(1.77185, 0.97246+0.97246, 0.00000)));
 
             addNode("Barrier");
             setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199, 0.79907)));
+                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
             break;
 
          case EXPLOSIVE_BREACHING_B:
             // Addition of custom nodes in custom locations
             addNode("DoorPullHandle");
             setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
-                                                                  new Point3D(1.83381, 2.47637, 1.33200)));
+                                                                  new Point3D(2.07860, 2.23652+0.97246, 1.33200)));
 
             addNode("DoorPanel");
             setNodePose("DoorPanel1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(85.34664), 0.0, 0.0),
-                                                             new Point3D(1.58971, 2.53624, 0.00)));
+                                                             new Point3D(1.83915, 2.30509+0.97246, 0.00)));
 
             addNode("Person");
             setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(91.27057), 0.0, 0.0),
-                                                          new Point3D(2.01548, -0.57308, 0.00)));
+                                                          new Point3D(2.01548, -0.57308+0.97246, 0.00)));
 
             addNode("Person");
             setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.24428), 0.0, 0.0),
-                                                          new Point3D(1.97584, -1.22519, 0.00)));
+                                                          new Point3D(1.97584, -1.22519+0.97246, 0.00)));
 
             addNode("Charge");
             setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-173.50519), Math.toRadians(1.51561), Math.toRadians(0.17252)),
-                                                          new Point3D(1.53540, -0.48509, 1.00433)));
+                                                          new Point3D(1.53540, -0.48509+0.97246, 1.00433)));
 
             addNode("Barrier");
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
-                                                           new Point3D(1.77185, 0.000, 0.00000)));
+                                                           new Point3D(1.77185, 0.97246, 0.00000)));
 
             addNode("Barrier");
             setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199, 0.79907)));
+                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
+            break;
+
+         case EXPLOSIVE_BREACHING_C:
+            // Addition of custom nodes in custom locations
+            addNode("DoorPullHandle");
+            setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
+                                                                  new Point3D(1.07860, 2.23652, 1.33200)));
+
+            addNode("DoorPanel");
+            setNodePose("DoorPanel1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(85.34664), 0.0, 0.0),
+                                                             new Point3D(0.83915, 2.30509, 0.00)));
+
+            addNode("Person");
+            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(91.27057), 0.0, 0.0),
+                                                          new Point3D(2.01548, -0.57308+0.97246, 0.00)));
+
+            addNode("Person");
+            setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.24428), 0.0, 0.0),
+                                                          new Point3D(1.97584, -1.22519+0.97246, 0.00)));
+
+            addNode("Charge");
+            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-173.50519), Math.toRadians(1.51561), Math.toRadians(0.17252)),
+                                                          new Point3D(1.53540, -0.48509+0.97246, 1.00433)));
+
+            addNode("Barrier");
+            setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
+                                                           new Point3D(1.77185, 0.97246, 0.00000)));
+
+            addNode("Barrier");
+            setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
+                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
             break;
 
          case MANIPULATION_2X4:

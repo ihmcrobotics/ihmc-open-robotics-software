@@ -21,22 +21,22 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
             */
    public byte spatial_relation_;
    /**
-            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public java.lang.StringBuilder secondary_reference_frame_name_;
+   public java.lang.StringBuilder pov_object_;
    /**
-            * Goto action - Reference frame for the action
+            * Target reference frame (object) to go to
             */
-   public java.lang.StringBuilder reference_frame_name_;
+   public java.lang.StringBuilder target_object_;
    /**
-            * Goto action - The distance to the frame
+            * The distance to the reference frame (located at the object's centroid)
             */
-   public double distance_to_frame_;
+   public double distance_to_object_;
 
    public AI2RNavigationMessage()
    {
-      secondary_reference_frame_name_ = new java.lang.StringBuilder(255);
-      reference_frame_name_ = new java.lang.StringBuilder(255);
+      pov_object_ = new java.lang.StringBuilder(255);
+      target_object_ = new java.lang.StringBuilder(255);
    }
 
    public AI2RNavigationMessage(AI2RNavigationMessage other)
@@ -49,13 +49,13 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
    {
       spatial_relation_ = other.spatial_relation_;
 
-      secondary_reference_frame_name_.setLength(0);
-      secondary_reference_frame_name_.append(other.secondary_reference_frame_name_);
+      pov_object_.setLength(0);
+      pov_object_.append(other.pov_object_);
 
-      reference_frame_name_.setLength(0);
-      reference_frame_name_.append(other.reference_frame_name_);
+      target_object_.setLength(0);
+      target_object_.append(other.target_object_);
 
-      distance_to_frame_ = other.distance_to_frame_;
+      distance_to_object_ = other.distance_to_object_;
 
    }
 
@@ -75,66 +75,66 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
    }
 
    /**
-            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public void setSecondaryReferenceFrameName(java.lang.String secondary_reference_frame_name)
+   public void setPovObject(java.lang.String pov_object)
    {
-      secondary_reference_frame_name_.setLength(0);
-      secondary_reference_frame_name_.append(secondary_reference_frame_name);
+      pov_object_.setLength(0);
+      pov_object_.append(pov_object);
    }
 
    /**
-            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public java.lang.String getSecondaryReferenceFrameNameAsString()
+   public java.lang.String getPovObjectAsString()
    {
-      return getSecondaryReferenceFrameName().toString();
+      return getPovObject().toString();
    }
    /**
-            * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public java.lang.StringBuilder getSecondaryReferenceFrameName()
+   public java.lang.StringBuilder getPovObject()
    {
-      return secondary_reference_frame_name_;
-   }
-
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public void setReferenceFrameName(java.lang.String reference_frame_name)
-   {
-      reference_frame_name_.setLength(0);
-      reference_frame_name_.append(reference_frame_name);
+      return pov_object_;
    }
 
    /**
-            * Goto action - Reference frame for the action
+            * Target reference frame (object) to go to
             */
-   public java.lang.String getReferenceFrameNameAsString()
+   public void setTargetObject(java.lang.String target_object)
    {
-      return getReferenceFrameName().toString();
-   }
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public java.lang.StringBuilder getReferenceFrameName()
-   {
-      return reference_frame_name_;
+      target_object_.setLength(0);
+      target_object_.append(target_object);
    }
 
    /**
-            * Goto action - The distance to the frame
+            * Target reference frame (object) to go to
             */
-   public void setDistanceToFrame(double distance_to_frame)
+   public java.lang.String getTargetObjectAsString()
    {
-      distance_to_frame_ = distance_to_frame;
+      return getTargetObject().toString();
    }
    /**
-            * Goto action - The distance to the frame
+            * Target reference frame (object) to go to
             */
-   public double getDistanceToFrame()
+   public java.lang.StringBuilder getTargetObject()
    {
-      return distance_to_frame_;
+      return target_object_;
+   }
+
+   /**
+            * The distance to the reference frame (located at the object's centroid)
+            */
+   public void setDistanceToObject(double distance_to_object)
+   {
+      distance_to_object_ = distance_to_object;
+   }
+   /**
+            * The distance to the reference frame (located at the object's centroid)
+            */
+   public double getDistanceToObject()
+   {
+      return distance_to_object_;
    }
 
 
@@ -157,11 +157,11 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.spatial_relation_, other.spatial_relation_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.secondary_reference_frame_name_, other.secondary_reference_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.pov_object_, other.pov_object_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.reference_frame_name_, other.reference_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.target_object_, other.target_object_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_frame_, other.distance_to_frame_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_object_, other.distance_to_object_, epsilon)) return false;
 
 
       return true;
@@ -178,11 +178,11 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       if(this.spatial_relation_ != otherMyClass.spatial_relation_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.secondary_reference_frame_name_, otherMyClass.secondary_reference_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.pov_object_, otherMyClass.pov_object_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.reference_frame_name_, otherMyClass.reference_frame_name_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.target_object_, otherMyClass.target_object_)) return false;
 
-      if(this.distance_to_frame_ != otherMyClass.distance_to_frame_) return false;
+      if(this.distance_to_object_ != otherMyClass.distance_to_object_) return false;
 
 
       return true;
@@ -196,12 +196,12 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       builder.append("AI2RNavigationMessage {");
       builder.append("spatial_relation=");
       builder.append(this.spatial_relation_);      builder.append(", ");
-      builder.append("secondary_reference_frame_name=");
-      builder.append(this.secondary_reference_frame_name_);      builder.append(", ");
-      builder.append("reference_frame_name=");
-      builder.append(this.reference_frame_name_);      builder.append(", ");
-      builder.append("distance_to_frame=");
-      builder.append(this.distance_to_frame_);
+      builder.append("pov_object=");
+      builder.append(this.pov_object_);      builder.append(", ");
+      builder.append("target_object=");
+      builder.append(this.target_object_);      builder.append(", ");
+      builder.append("distance_to_object=");
+      builder.append(this.distance_to_object_);
       builder.append("}");
       return builder.toString();
    }

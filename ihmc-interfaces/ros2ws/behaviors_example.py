@@ -15,11 +15,11 @@ from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
 
 import cv2
 import numpy as np
-from llm_interface import LLMInterface
+from llm.llm_interface import LLMInterface
 
 # Example usage:
 print(" Calling the LLM")
-llm = LLMInterface(config_file="config.json")
+llm = LLMInterface(config_file="llm/config.json")
 
 
 
@@ -73,7 +73,7 @@ def behavior_message_callback(msg):
    print("Completed Behavior: " + completed_behavior)
    failed_behavior = msg.failed_behavior
    if failed_behavior:
-       print("[FAILURE] Failed behavior: " + failure_behavior)
+       print("[FAILURE] Failed behavior: " + failed_behavior)
        # Failure details
        failure = msg.failure
        print("Description: " + failure.action_name)
@@ -128,7 +128,7 @@ def main(args=None):
     rclpy.init(args=args)
     
     qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.RELIABLE,
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
         history=QoSHistoryPolicy.KEEP_LAST,
         depth=1
     )

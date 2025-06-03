@@ -34,17 +34,17 @@ module behavior_msgs
          */
         octet spatial_relation;
         /**
-         * Goto action - Secondary reference object used to defined the spatial relation with reference_frame_name
+         * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
          */
-        string secondary_reference_frame_name;
+        string pov_object;
         /**
-         * Goto action - Reference frame for the action
+         * Target reference frame (object) to go to
          */
-        string reference_frame_name;
+        string target_object;
         /**
-         * Goto action - The distance to the frame
+         * The distance to the reference frame (located at the object's centroid)
          */
-        double distance_to_frame;
+        double distance_to_object;
       };
     };
   };
