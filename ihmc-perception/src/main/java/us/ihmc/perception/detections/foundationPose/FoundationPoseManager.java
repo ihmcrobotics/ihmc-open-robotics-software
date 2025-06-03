@@ -3,6 +3,7 @@ package us.ihmc.perception.detections.foundationPose;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
@@ -67,7 +68,7 @@ public class FoundationPoseManager
       {
          synchronized (allYOLODetections)
          {
-            allYOLODetections.put(detection, null);
+            allYOLODetections.put(detection, detection.getMostRecentDetection().getDetectionTime());
          }
       }
    }
@@ -143,6 +144,7 @@ public class FoundationPoseManager
             Instant lastBadDetectionTime = allYOLODetections.get(detection);
             if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime))
             {
+               LogTools.debug("Removing {}", objectId);
                communicator.remove(objectId);
                detectionIterator.remove();
             }
@@ -171,6 +173,7 @@ public class FoundationPoseManager
          YOLOv8InstantDetection yoloDetection = (YOLOv8InstantDetection) detection.getMostRecentDetection();
          String objectId = detection.getDetectedObjectName() + "_fp_#" + ID.getAndIncrement();
          String meshFile = FoundationPoseTools.getYOLOClassToObjectMeshMap().get(detection.getDetectedObjectName());
+         LogTools.debug("Requesting tracking for {}", objectId);
          communicator.track(objectId, meshFile, yoloDetection.getObjectMask(), yoloDetection.getColorImage(), yoloDetection.getDepthImage());
          synchronized (allYOLODetections)
          {

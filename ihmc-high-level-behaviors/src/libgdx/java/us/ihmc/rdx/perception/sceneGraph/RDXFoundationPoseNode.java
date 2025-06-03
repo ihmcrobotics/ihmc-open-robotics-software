@@ -22,7 +22,7 @@ public class RDXFoundationPoseNode extends RDXDetectableSceneNode
 
       this.foundationPoseNode = foundationPoseNode;
 
-      poseGraphic = new RDXReferenceFrameGraphic(0.2, Color.ORANGE);
+      poseGraphic = new RDXReferenceFrameGraphic(0.75);
       poseGraphic.setToReferenceFrame(foundationPoseNode.getNodeFrame());
    }
 
