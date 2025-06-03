@@ -21,8 +21,6 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
@@ -41,7 +39,6 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -221,25 +218,25 @@ public class SceneGraph
       Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
 
       // Update or add door nodes
-      Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
-                                                                              .filter(DoorNodeTools::detectionIsDoorComponent)
-                                                                              .collect(Collectors.toSet());
-      for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
-      {
-         // Does this new detection correspond with an existing door node?
-         modifyTree(modificationQueue ->
-         {
-            boolean matched = sceneNodesByID.stream()
-                                            .filter(sceneNode -> sceneNode instanceof DoorNode)
-                                            .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
-            if (!matched)
-            {
-               // Create new door node
-               DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
-               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode, this));
-            }
-         });
-      }
+//      Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
+//                                                                              .filter(DoorNodeTools::detectionIsDoorComponent)
+//                                                                              .collect(Collectors.toSet());
+//      for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
+//      {
+//         // Does this new detection correspond with an existing door node?
+//         modifyTree(modificationQueue ->
+//         {
+//            boolean matched = sceneNodesByID.stream()
+//                                            .filter(sceneNode -> sceneNode instanceof DoorNode)
+//                                            .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
+//            if (!matched)
+//            {
+//               // Create new door node
+//               DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
+//               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode, this));
+//            }
+//         });
+//      }
 
       for (PersistentDetection newDetection : newlyValidDetections)
          addNodeFromDetection(newDetection);
@@ -316,15 +313,14 @@ public class SceneGraph
    {
       DetectableSceneNode detectableNode;
       long newNodeID = getNextID().getAndIncrement();
-      String newNodeName = detection.getDetectedObjectName() + newNodeID;
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
+         detectableNode = new YOLOv8Node(newNodeID, "Ignore_" + detection.getDetectedObjectName(), getCRDTInfo(), detection);
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
-         detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
+         detectableNode = new CenterposeNode(newNodeID, detection.getDetectedObjectName(), detection, true, getCRDTInfo());
       else if (detectionClass.equals(FoundationPoseInstantDetection.class))
-         detectableNode = new FoundationPoseNode(newNodeID, newNodeName, getCRDTInfo(), detection);
+         detectableNode = new FoundationPoseNode(newNodeID, detection.getDetectedObjectClass().split("\\.")[0], getCRDTInfo(), detection);
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
