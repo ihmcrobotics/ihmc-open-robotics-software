@@ -198,12 +198,12 @@ public class SteppableRegionsCalculator
       ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInRegion, concaveHullFactoryParameters);
 
       // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
-      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
-      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
-      double lengthThreshold = polygonizerParameters.getLengthThreshold();
+//      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
+//      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
+//      double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
-      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+//      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+//      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
       //      if (polygonizerParameters.getCutNarrowPassage())
       //         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
