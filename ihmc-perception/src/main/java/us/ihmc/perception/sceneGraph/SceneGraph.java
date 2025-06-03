@@ -11,10 +11,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.perception.detections.foundationPose.FoundationPoseInstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
@@ -321,6 +323,8 @@ public class SceneGraph
          detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
          detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
+      else if (detectionClass.equals(FoundationPoseInstantDetection.class))
+         detectableNode = new FoundationPoseNode(newNodeID, newNodeName, getCRDTInfo(), detection);
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);

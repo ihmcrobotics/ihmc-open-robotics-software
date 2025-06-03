@@ -53,7 +53,7 @@
     "Width of the collision box used for checking collisions with the environment."
   ],
   "Collision box size X": [
-    0.8,
+    0.5,
     "Depth of the collision box used for checking collisions with the environment."
   ],
   "Collision box ground clearance": [

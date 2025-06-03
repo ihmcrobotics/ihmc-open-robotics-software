@@ -1,5 +1,6 @@
 package us.ihmc.perception.detections.yolo;
 
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
@@ -18,6 +19,7 @@ public class YOLOv8InstantDetection extends InstantDetection
    private final RawImage colorImage;
    private final RawImage depthImage;
    private final RawImage objectMask;
+   private final BoundingBox2DReadOnly boundingBox;
    private final List<Point3D32> objectPointCloud;
 
    public YOLOv8InstantDetection(String detectedObjectClass,
@@ -27,26 +29,15 @@ public class YOLOv8InstantDetection extends InstantDetection
                                  RawImage colorImage,
                                  RawImage objectMask,
                                  RawImage depthImage,
+                                 BoundingBox2DReadOnly boundingBox,
                                  List<Point3D32> objectPointCloud)
    {
-      this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime, colorImage, objectMask, depthImage, objectPointCloud);
-   }
-
-   public YOLOv8InstantDetection(String detectedObjectClass,
-                                 String detectedObjectName,
-                                 double confidence,
-                                 Pose3DReadOnly pose,
-                                 Instant detectionTime,
-                                 RawImage colorImage,
-                                 RawImage objectMask,
-                                 RawImage depthImage,
-                                 List<Point3D32> objectPointCloud)
-   {
-      super(detectedObjectClass, detectedObjectName, confidence, pose, detectionTime);
+      super(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime);
 
       this.colorImage = colorImage.get();
       this.depthImage = depthImage.get();
       this.objectMask = objectMask.get();
+      this.boundingBox = boundingBox;
       this.objectPointCloud = objectPointCloud;
    }
 
@@ -68,6 +59,11 @@ public class YOLOv8InstantDetection extends InstantDetection
    public RawImage getObjectMask()
    {
       return objectMask;
+   }
+
+   public BoundingBox2DReadOnly getBoundingBox()
+   {
+      return boundingBox;
    }
 
    @Override

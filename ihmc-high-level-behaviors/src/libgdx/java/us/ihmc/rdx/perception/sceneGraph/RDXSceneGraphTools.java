@@ -4,6 +4,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -36,6 +37,10 @@ public class RDXSceneGraphTools
       else if (sceneNodeToCopy instanceof YOLOv8Node yoloNode)
       {
          return new RDXYOLOv8Node(yoloNode, labels);
+      }
+      else if (sceneNodeToCopy instanceof FoundationPoseNode foundationPoseNode)
+      {
+         return new RDXFoundationPoseNode(foundationPoseNode);
       }
       else if (sceneNodeToCopy instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
