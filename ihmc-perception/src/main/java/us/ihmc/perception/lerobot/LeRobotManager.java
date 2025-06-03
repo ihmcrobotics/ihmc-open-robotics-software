@@ -55,11 +55,11 @@ public class LeRobotManager
       });
       ros2.subscribeViaVolatileCallback(ACTION_HAND_POSES, message ->
       {
+         IDLSequence.Float data = message.getData();
          int i = 0;
          for (RobotSide side : RobotSide.values)
          {
             Pose3D pose = actionHandPoses.get(side);
-            IDLSequence.Float data = message.getData();
             pose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
             pose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
          }
@@ -72,10 +72,10 @@ public class LeRobotManager
    public void publishHandPoses(Pose3DReadOnly leftPose, Pose3DReadOnly rightPose)
    {
       int i = 0;
+      IDLSequence.Float data = stateHandPosesMessage.getData();
+      data.resetQuick();
       for (RobotSide side : RobotSide.values)
       {
-         IDLSequence.Float data = stateHandPosesMessage.getData();
-         data.resetQuick();
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getX32());
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getY32());
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getZ32());
