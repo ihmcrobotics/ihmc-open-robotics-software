@@ -25,8 +25,6 @@ import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.sensors.ImageSensor;
 
-import java.time.Instant;
-
 public class RapidHeightMapThread extends RepeatingTaskThread
 {
    private final DepthImageBodyCollisionFilter bodyCollisionFilter;
@@ -86,7 +84,6 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
          // Get everything we need from the image
          GpuMat latestDepthImage = depthImage.getGpuImageMat();
-         Instant acquisitionTime = depthImage.getAcquisitionTime();
          CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
          GpuMat filteredDepthImage = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
 
@@ -111,7 +108,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, acquisitionTime, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
          }
 
          filteredDepthImage.close();

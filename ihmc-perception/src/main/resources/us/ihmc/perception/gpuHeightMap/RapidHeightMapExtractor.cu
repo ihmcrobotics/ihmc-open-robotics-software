@@ -266,16 +266,8 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
                 // Check if the point is within the cell
                 if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
                 {
-                    // Remove outliers and compute average height
-                    if (count > 1)
-                    {
-                        if (fabsf(queryPointInZUp.z - meanZ) > 0.1f)
-                            continue; // Skip if the height deviates significantly
-                    }
-
-                    count++;
-
                     // Update mean and variance using Welford's algorithm
+                    count++;
                     float delta = queryPointInZUp.z - meanZ;
                     meanZ += delta / count;
                     float delta2 = queryPointInZUp.z - meanZ;
@@ -291,7 +283,7 @@ __global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDe
     motionVarianceF += distance * params[VARIANCE_PER_METER];
     motionVarianceF += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
     motionVarianceF += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
-    
+
     if (DEBUG && xIndex == 40 && yIndex == 40)
     {
         printf("Update Kernel -----------------------------\n");

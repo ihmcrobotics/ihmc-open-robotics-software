@@ -1,8 +1,8 @@
 {
   "title" : "HeightMapParameters",
   "Drift offset filter" : true,
-  "Flying points filter" : true,
-  "Enable vertical filter" : true,
+  "Flying points filter" : false,
+  "Enable vertical filter" : false,
   "Search window height" : {
     "value" : 450,
     "lowerBound" : 100,

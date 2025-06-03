@@ -16,6 +16,14 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             */
    public long sequence_id_;
    /**
+            * Position of the focal point at sensor data acquisition
+            */
+   public us.ihmc.euclid.tuple3D.Point3D position_;
+   /**
+            * Orientation of the focal point at sensor data acquisition
+            */
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   /**
             * Discretization of the height map grid
             */
    public double xy_resolution_ = -1.0;
@@ -59,6 +67,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
    public HeightMapMessage()
    {
+      position_ = new us.ihmc.euclid.tuple3D.Point3D();
+      orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       keys_ = new us.ihmc.idl.IDLSequence.Integer (45000, "type_2");
 
       heights_ = new us.ihmc.idl.IDLSequence.Float (45000, "type_5");
@@ -80,6 +90,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    {
       sequence_id_ = other.sequence_id_;
 
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       xy_resolution_ = other.xy_resolution_;
 
       grid_size_xy_ = other.grid_size_xy_;
@@ -110,6 +122,24 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+
+   /**
+            * Position of the focal point at sensor data acquisition
+            */
+   public us.ihmc.euclid.tuple3D.Point3D getPosition()
+   {
+      return position_;
+   }
+
+
+   /**
+            * Orientation of the focal point at sensor data acquisition
+            */
+   public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
+   {
+      return orientation_;
    }
 
    /**
@@ -253,6 +283,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
+      if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.xy_resolution_, other.xy_resolution_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_size_xy_, other.grid_size_xy_, epsilon)) return false;
@@ -298,6 +330,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if (!this.position_.equals(otherMyClass.position_)) return false;
+      if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
       if(this.xy_resolution_ != otherMyClass.xy_resolution_) return false;
 
       if(this.grid_size_xy_ != otherMyClass.grid_size_xy_) return false;
@@ -325,6 +359,10 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append("HeightMapMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("position=");
+      builder.append(this.position_);      builder.append(", ");
+      builder.append("orientation=");
+      builder.append(this.orientation_);      builder.append(", ");
       builder.append("xy_resolution=");
       builder.append(this.xy_resolution_);      builder.append(", ");
       builder.append("grid_size_xy=");
