@@ -47,7 +47,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
 
    private final ControllerStatusTracker controllerStatusTracker;
-   private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
+   private static final double DISTANCE_COLLISION_THRESHOLD = 0.0;
    private boolean navigationFailureForObstacle = false;
    private String navigationFailureObstacleName;
    private boolean actionFailureMissingFrame = false;

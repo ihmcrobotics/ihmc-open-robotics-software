@@ -1,0 +1,5 @@
+{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition"
+}

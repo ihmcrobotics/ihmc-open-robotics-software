@@ -352,6 +352,9 @@ def select_target_object(
         if name.startswith(base_name) and name[len(base_name):].isdigit()
     ]
     print("candidates : ", candidates)
+    if len(candidates) == 1:
+        return candidates[0][0]  # Only one candidate, return it
+
     if not candidates:
         print(f"No {base_name} objects found")
         return None
