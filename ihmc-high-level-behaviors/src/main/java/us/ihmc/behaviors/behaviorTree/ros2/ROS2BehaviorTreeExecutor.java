@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.detections.foundationPose.FoundationPoseManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
@@ -26,7 +27,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
                                    SceneGraph sceneGraph,
                                    DetectionManager detectionManager)
    {
-      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper, null);
+      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper, null, null);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2ControllerHelper);
    }
@@ -38,9 +39,10 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
                                    ReferenceFrameLibrary referenceFrameLibrary,
                                    SceneGraph sceneGraph,
                                    DetectionManager detectionManager,
-                                   RapidHeightMapThread rapidHeightMapUpdateThread)
+                                   RapidHeightMapThread rapidHeightMapUpdateThread,
+                                   FoundationPoseManager foundationPoseManager)
    {
-      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper, rapidHeightMapUpdateThread);
+      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper, rapidHeightMapUpdateThread, foundationPoseManager);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2ControllerHelper);
    }

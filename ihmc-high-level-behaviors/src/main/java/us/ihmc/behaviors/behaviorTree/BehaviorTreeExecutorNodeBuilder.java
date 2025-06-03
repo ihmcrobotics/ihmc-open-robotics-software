@@ -44,6 +44,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.detections.foundationPose.FoundationPoseManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -61,6 +62,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
    private final RapidHeightMapThread rapidHeightMapUpdateThread;
+   private final FoundationPoseManager foundationPoseManager;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
@@ -68,7 +70,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           SceneGraph sceneGraph,
                                           DetectionManager detectionManager,
-                                          RapidHeightMapThread rapidHeightMapUpdateThread)
+                                          RapidHeightMapThread rapidHeightMapUpdateThread,
+                                          FoundationPoseManager foundationPoseManager)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -77,6 +80,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.detectionManager = detectionManager;
       this.rapidHeightMapUpdateThread = rapidHeightMapUpdateThread;
+      this.foundationPoseManager = foundationPoseManager;
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
@@ -96,7 +100,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       }
       if (nodeType == AI2RNodeDefinition.class)
       {
-         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
+         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph, foundationPoseManager);
       }
       if (nodeType == ActionSequenceDefinition.class)
       {

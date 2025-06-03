@@ -9,6 +9,7 @@ import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -49,6 +50,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       idToNodeMap.clear();
       leafIndexAssignment.setValue(0);
       orderedLeaves.clear();
+      orderedActions.clear();
       updateSubtree(this, leafIndexAssignment);
    }
 

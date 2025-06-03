@@ -138,6 +138,7 @@ public class FoundationPoseManager
       Instant yoloTimeout = now.minus(YOLO_DETECTION_TIMEOUT);
       Instant goodDetectionTime = now.minus(GOOD_DETECTION_DURATION);
 
+      LogTools.warn(isActive);
       synchronized (allYOLODetections)
       {
          // Update the last time each YOLO detection was "bad"
