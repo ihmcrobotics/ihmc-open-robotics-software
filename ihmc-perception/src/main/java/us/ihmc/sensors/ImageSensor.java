@@ -6,6 +6,12 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public abstract class ImageSensor implements AutoCloseable
 {
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
@@ -16,6 +22,7 @@ public abstract class ImageSensor implements AutoCloseable
 
    private final RepeatingTaskThread grabThread;
    private final Object grabNotification = new Object();
+   private final Map<Integer, List<Collection<RawImage>>> imageCollectors = new HashMap<>();
 
    public ImageSensor(String sensorName)
    {
@@ -63,6 +70,8 @@ public abstract class ImageSensor implements AutoCloseable
     */
    protected abstract boolean grab();
 
+   public abstract int[] getImageKeys();
+
    /**
     * <p>
     * Get the latest image grabbed by the sensor, specifying the image to get using its key.
@@ -94,6 +103,27 @@ public abstract class ImageSensor implements AutoCloseable
     *       Image keys do not work on the returned array.
     */
    public abstract ReferenceFrame[] getImageFrames();
+
+   /**
+    * Register an image collector for images of a particular key.
+    * <p>
+    * Every image grabbed by the sensor will be added to the passed in collection.
+    * The code accessing the collection must call {@link RawImage#release()} on each image,
+    * once it's done using the image.
+    * <p>
+    * Although any class that implements {@link Collection} can be passed in, the implementation of
+    * the {@link Collection#add(Object)} method should not take a significant amount of time.
+    *
+    * @param imageKey The key for images to be collected.
+    * @param imageCollector Collection into which the images will be added.
+    */
+   public void registerImageCollector(int imageKey, Collection<RawImage> imageCollector)
+   {
+      if (imageCollectors.containsKey(imageKey))
+         imageCollectors.get(imageKey).add(imageCollector);
+      else
+         imageCollectors.put(imageKey, new ArrayList<>(List.of(imageCollector)));
+   }
 
    public String getSensorName()
    {
@@ -155,6 +185,11 @@ public abstract class ImageSensor implements AutoCloseable
       synchronized (grabNotification)
       {
          grabNotification.notifyAll();
+      }
+
+      for (int imageKey : getImageKeys())
+      {
+         imageCollectors.get(imageKey).forEach(collector -> collector.add(getImage(imageKey)));
       }
    }
 }
