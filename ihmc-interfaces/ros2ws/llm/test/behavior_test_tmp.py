@@ -11,128 +11,389 @@ from behavior_msgs.msg import AI2RCommandMessage
 from behavior_msgs.msg import AI2RObjectMessage
 from behavior_msgs.msg import AI2RStatusMessage
 from behavior_msgs.msg import AI2RNavigationMessage
-from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
+from behavior_msgs.msg import AI2RReceiveObjectMessage
 
 import cv2
 import numpy as np
 from llm_interface import LLMInterface
 import re
 import sys
+import json
+from typing import List, Optional
 
+ros2                = {}
+initialized         = False
+loggedFailure       = False
 
+llm_call_counter    = 0
+llm_plan            = []
+plan_queue          = []
 
-# Example usage:
-print(" Calling the LLM ")
-llm = LLMInterface(config_file="config.json")
+behavior_counter = 0
+behaviors_baseline = ["SCAN", "GOTO", "RECEIVE OBJECT", "GOTO", "PLACE CHARGE ON DOOR", "GOTO"]
 
-ros2 = {}
-initialized = False
-waiting_for_command = True
-
-# Store the list of behaviors to execute in sequence
-behavior_queue = []
-current_behavior_index = 0
-
-# Set counter to count the number of times LLM is called
-llm_call_counter = 0
+goto_person_param = ("Person1", AI2RNavigationMessage.DEFAULT, "")
+goto_door_param = ("DoorPanel1", AI2RNavigationMessage.FRONT, "Barrier1")
+goto_barrier_param = ("Barrier1", AI2RNavigationMessage.BEHIND, "DoorPanel1")
+receive_charge_param = ("Charge1",)
+parameters = [None, goto_person_param, receive_charge_param, goto_door_param, None, goto_barrier_param]
 
 def behavior_message_callback(msg):
-    #print("Received AI2R Status Message")
-    global initialized  # Access the global variables
-    global waiting_for_command
-    global behavior_queue
-    global current_behavior_index
+    global initialized  
+    global loggedFailure
+    global behavior_counter
+    global behaviors_baseline
+    global parameters
     global llm_call_counter
-
+    global llm_plan
+    global plan_queue
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
         # --------- Scene -----------
         scene_objects = msg.objects
-        #print("Objects in the scene:")
-        #print("scene_objects: ",scene_objects)
+        print("Objects in the scene:")
         if scene_objects:  # This checks if the list is not empty
            for obj in scene_objects:
                id = obj.object_name
-               #print(f"{id}")
+               print(f"{id}")
                pose_in_world = obj.object_pose_in_world
                pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
         else:
            print("-")
-        scene_objects_name = [obj.object_name for obj in msg.objects]
 
         # --------- Behaviors -----------
         behaviors = msg.available_behaviors
-  
-        # Get available behaviors
-        available_behaviors = msg.available_behaviors
+        print("Available behaviors:")
+        if behaviors:
+            for behavior in behaviors:
+                print(behavior)
+        else:
+            print("-")
 
-        # Completed and failed behaviors
-        completed_behavior = msg.completed_behavior
-        failed_behavior = msg.failed_behavior
-        #initialized = True
+    # --------- Monitoring -----------
+    #print("Behavior in Progress: " + msg.behavior_in_progress)
+    #if (msg.completed_behavior != "-"):
+    print("Completed Behavior: " + msg.completed_behavior)
+    failed_behavior = msg.failed_behavior
+    failure = msg.failure
+    if failed_behavior != "-" and loggedFailure == False:
+        print("[FAILURE] -----------")
+        print("Failed behavior: " + failed_behavior)
 
-        #print("current_behavior_index: ", current_behavior_index)
-
-        if completed_behavior and completed_behavior != "-":
-            print(f"Completed Behavior: {completed_behavior}")
-            waiting_for_command = True
-
-        if failed_behavior:
-            print(f"[FAILURE] Failed Behavior: {failed_behavior}")
-
-        # Construct input for LLM decision-making
-        llm_input = {
-            # "task": current_task,
-            "scene_objects": scene_objects_name,
-            "available_behaviors": available_behaviors,
-            "previously_executed": completed_behavior if completed_behavior != "-" else "",
-            "failed_behaviors": failed_behavior if failed_behavior else "",
+        failure_info = {
+            "Failed behavior": failed_behavior,
+            "Description": failure.action_name,
+            "Type": failure.action_type
         }
 
-        if waiting_for_command:
-            # Convert the input to a string for LLM processing
-            llm_input = str(llm_input)
+        if failure.missing_frame:
+            failure_info["Missing Frame"] = failure.reference_frame
 
-            print("LLM Input for reasoning:", llm_input)
+        position_error = failure.position_error
+        error_vector = np.array([position_error.x, position_error.y, position_error.z])
+        norm = np.linalg.norm(error_vector)
+        if norm > failure.position_tolerance:
+            failure_info["Position error"] = norm
 
-            # Check if it is first time calling the LLM
-            if llm_call_counter == 0:
-                llm.first_log_interaction(llm_input)
-            # Query LLM for next action
-            response        = llm.call_model(llm_input)
+        json_filename = 'failure_info.json'
+        with open(json_filename, 'a') as json_file:
+            json.dump(failure_info, json_file, indent=4)
+        loggedFailure = True
+
+    # --------- Coordination -----------
+    waiting_for_command = False
+    if msg.behavior_in_progress == "-":
+       waiting_for_command  = True
+
+
+
+    if waiting_for_command or not initialized:
+
+        # # Get all scene objects names
+        # scene_objects_names  = []
+        # scene_objects = msg.objects
+        # if scene_objects:  # This checks if the list is not empty
+        #    for obj in scene_objects:
+        #        id = obj.object_name
+        #        pose_in_world = obj.object_pose_in_world
+        #        pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose 
+        #        scene_objects_names = [obj.object_name for obj in scene_objects]
+
+        # scene_objects_poses = [obj.object_pose_in_world for obj in msg.objects]
+        # scene_objects_positions = [pose.position for pose in scene_objects_poses]
+        # robot_position = msg.robot_mid_feet_under_pelvis_pose_in_world.position
+
+        # # If calling llm for the first time, we can initialize the scene_objects_names as empty
+        # if llm_call_counter == 0:
+        #     scene_objects_names = ''
+        # #print("Scene Objects:", scene_objects_names)
+        
+        # # Get all available behaviors
+        # available_behaviors = msg.available_behaviors
+        # completed_behavior  = msg.completed_behavior
+        # failed_behavior     = msg.failed_behavior
+        
+        # # Construct input for LLM decision-making
+        # llm_input = {
+        #     # "task": current_task,
+        #     "scene_objects": scene_objects_names,
+        #     "available_behaviors": available_behaviors,
+        #     "previously_executed": completed_behavior if completed_behavior != "-" else "",
+        #     "failed_behaviors": failed_behavior if failed_behavior else "",
+        # }
+        
+        # #if waiting_for_command :
+        # # Convert the input to a string for LLM processing
+        # llm_input       = str(llm_input)
+
+        # print("LLM Input for reasoning:", llm_input)
+
+        # # Check if it is first time calling the LLM
+        # if llm_call_counter == 0:
+        #     llm                 = LLMInterface(config_file="config.json")
+        #     llm.first_log_interaction(llm_input)
+
+        #     print(" --------- Calling the LLM for the first time --------- ")
             
-            # Increment the LLM call counter
-            llm_call_counter += 1
+        #     # Get the plan from the LLM
+        #     response        = llm.call_model(llm_input)
+        #     print(" --------- Output of LLM Planner: --------- \n", response)
+        #     llm_call_counter += 1
+
+        #     # Extract behavior list from the LLM plan
+        #     match = re.search(r'behavior_list\s*=\s*\[(.*?)\]', response, re.DOTALL)
+        #     if match:
+        #         list_block = match.group(1)
+
+        #         # Extract each behavior entry including content inside parentheses
+        #         behaviors = re.findall(r'([^\n]+?\([^\)]+\))', list_block)
+
+        #         # Step 3: Clean up whitespace
+        #         llm_plan = [b.strip().rstrip(',') for b in behaviors]
+
+        #         print('llm_plan : ', llm_plan)
+        #         # Create list of [action, full_step]
+        #         plan_queue = [[re.match(r'^(.+?)\s*\(', step).group(1).strip(), step] for step in llm_plan]
+        #         print("Plan Queue:", plan_queue)
+        #     else:
+        #         print("No behavior_list found.")
+
+        # if llm_plan == []:
+        #     print("No behaviors found in the LLM plan. Exiting.")
+        #     return
+        # else:
+        #     # Get the next behavior from the plan queue
+        #     if plan_queue:
+        #         next_behavior, task_description = plan_queue.pop(0)
+        #         print("Next behavior from plan queue:", next_behavior)
+        #         print("task_description:", task_description)
+        #     else:
+        #         print("Plan queue is empty. No next behavior to execute.")
+        #         return
             
-            #print("LLM Response:", response)
-
-            next_behavior   = response.strip()
-            # # Extract content after the last </think>
-            # match = re.search(r'</think>(.*)$', response, re.DOTALL)
-            # if match:
-            #     next_behavior = match.group(1).strip()
-            # else:
-            #     next_behavior = response.strip()            
-
-        next_behavior = available_behaviors[current_behavior_index] if current_behavior_index < len(available_behaviors) else None
+        # After getting the plan from the LLM, we begin executing the next behavior
+        behavior_command = AI2RCommandMessage()
+        
+        # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
+        behavior_command.behavior_to_execute = behaviors_baseline[behavior_counter]
+        behavior_command.adapting_behavior = False
         
 
-        # Check if the LLM suggests a valid action
-        if waiting_for_command:
-            if (next_behavior in available_behaviors):
-                print("LLM Response:", next_behavior)
-                # Execute the suggested behavior
-                behavior_command = AI2RCommandMessage()
-                behavior_command.behavior_to_execute = next_behavior
-                print(f"Commanded Behavior: {next_behavior}")
-                ros2["behavior_publisher"].publish(behavior_command)
-                waiting_for_command = False
-                current_behavior_index += 1  # Move to the next behavior in the queue
 
-            else:
-                sys.exit(1)
-                print("[WARNING] LLM suggested an invalid action or no action needed.")
+        # # Code for loading config files for different actions Eg: GOTO, RECEIVE, etc.
+        # if (behavior_command.behavior_to_execute == "GOTO"):
+
+        #     behavior_command.adapting_behavior = True
+        #     new_goto_behavior = AI2RNavigationMessage()
+        #     # Load the config file for GOTO action
+        #     print("Loading config for GOTO action")
+        #     llm                 = LLMInterface(config_file="config_goto.json")
+        #     llm_input           = llm_input + "\ntask_description : " + task_description
+        #     response            = llm.call_model(llm_input)
+        #     print(" --------- Output for GOTO action: --------- \n", response)
+
+        #     # print("type of response:", type(response))
+            
+        #     # Replace single quotes with double quotes and remove any trailing commas or leading/trailing whitespace
+        #     clean_response = response.replace("'", '"')
+
+        #     # Convert string to dictionary
+        #     data = json.loads(clean_response)
+
+        #     # # Extract variables
+        #     # target_object = data['target_object']
+        #     # spatially_related_object = data['spatially_related_object']
+        #     # spatial_relation = data['spatial_relation']
+        #     # pov_object = data['pov_object']
+
+        #     # print(target_object)                # Person
+        #     # print(spatially_related_object)     # Barrier1
+        #     # print(spatial_relation)             # BEHIND
+        #     # print(pov_object)                   # -
+
+        #     selected_object = select_target_object(
+        #         base_name= data['target_object'],
+        #         spatially_related_object= data['spatially_related_object'],
+        #         spatial_relation=data['spatial_relation'],
+        #         scene_object_names=scene_objects_names,
+        #         scene_object_positions=scene_objects_positions,
+        #         robot_pose=robot_position,
+        #         spatial_context_object=data['pov_object'])
+            
+        #     selected_object = 'Person1'
+        #     print("selected_object: ", selected_object)
+
+        #     # Set the reference frame name - can copy from scene_objects.obj_name
+        #     new_goto_behavior.object_name = selected_object
+        #     # Set the distance to the object
+        #     new_goto_behavior.distance_to_object = 1.0
+        #     new_goto_behavior.pov_reference_frame_name = data['pov_object']
+        #     if hasattr(AI2RNavigationMessage, data['spatial_relation']):
+        #         new_goto_behavior.spatial_relation = getattr(AI2RNavigationMessage, data['spatial_relation'])
+        #     else:
+        #         raise ValueError(f"Unknown spatial relation: {data['spatial_relation']}")
+
+        #     # new_goto_behavior.spatial_relation = data['spatial_relation']
+        #     if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
+        #         new_goto_behavior.pov_reference_frame_name = "walkingFrame"
+
+        #     behavior_command.navigation = new_goto_behavior 
+        # print("Commanded Behavior: " + behavior_command.behavior_to_execute)
+        # ros2["behavior_publisher"].publish(behavior_command)
+        # initialized = True
+        # loggedFailure = False  
+
+        if (behavior_command.behavior_to_execute == "GOTO"):
+            behavior_command.adapting_behavior = True
+            new_goto_behavior = AI2RNavigationMessage()
+            goto_parameters = parameters[behavior_counter]
+
+            # Set the reference frame name - can copy from scene_objects.obj_name
+            new_goto_behavior.object_name = goto_parameters[0]
+            # Set the distance to the object
+            new_goto_behavior.distance_to_object = 1.0
+            new_goto_behavior.pov_reference_frame_name = goto_parameters[2]
+            new_goto_behavior.spatial_relation = goto_parameters[1]
+            if new_goto_behavior.spatial_relation == AI2RNavigationMessage.DEFAULT:
+                new_goto_behavior.pov_reference_frame_name = "walkingFrame"
+
+            behavior_command.navigation = new_goto_behavior
+
+        if (behavior_command.behavior_to_execute == "RECEIVE OBJECT"):
+            behavior_command.adapting_behavior = True
+            new_receive_behavior = AI2RReceiveObjectMessage()
+            new_receive_behavior.object_name = parameters[behavior_counter][0]
+            new_receive_behavior.side =  bytes([1])
+
+            behavior_command.receive_object = new_receive_behavior
+
+        print("Commanded Behavior: " + behavior_command.behavior_to_execute)
+        ros2["behavior_publisher"].publish(behavior_command)
+        initialized = True
+        loggedFailure = False
+        behavior_counter += 1
+
+
+def point_to_numpy(point: Point) -> np.ndarray:
+    """Convert geometry_msgs/Point to numpy array"""
+    return np.array([point.x, point.y, point.z])
+
+def get_pose_by_name(
+    object_name_to_find: str,
+    scene_object_names: List[str],
+    scene_object_poses: List[Point],
+    robot_pose_world: Optional[Point] = None
+) -> Optional[Point]:
+    """Retrieve object position by name"""
+    if object_name_to_find.lower() == "robot" and robot_pose_world:
+        return robot_pose_world
+    if object_name_to_find in ("-", ""):
+        return None
+    try:
+        return scene_object_poses[scene_object_names.index(object_name_to_find)]
+    except ValueError:
+        print(f"Object '{object_name_to_find}' not found")
+        return None
+
+def select_target_object(
+    base_name: str,
+    spatially_related_object: str,
+    spatial_relation: str,
+    scene_object_names: List[str],
+    scene_object_positions: List[Point],
+    robot_pose: Optional[Point] = None,
+    spatial_context_object: Optional[str] = None
+) -> Optional[str]:
+    """
+    Selects target object based on spatial relationships
+    Args:
+        base_name: Object base name (e.g. "Cup")
+        spatially_related_object: Reference object name (e.g. "Table1")
+        spatial_relation: BEHIND/FRONT/LEFT/RIGHT/DEFAULT
+        scene_object_names: List of all object names
+        scene_object_positions: Corresponding object positions
+        robot_pose: Robot's position (required if reference is robot)
+        spatial_context_object: Secondary spatial reference
+    Returns:
+        Full object name (e.g. "Cup2") or None
+    """
+    # Find candidate objects
+    candidates = [
+        (name, pose) for name, pose in zip(scene_object_names, scene_object_positions)
+        if name.startswith(base_name) and name[len(base_name):].isdigit()
+    ]
+    if not candidates:
+        print(f"No {base_name} objects found")
+        return None
+
+    # Get reference positions
+    ref_pose = get_pose_by_name(spatially_related_object, scene_object_names, scene_object_positions, robot_pose)
+    if not ref_pose:
+        print(f"Reference object '{spatially_related_object}' not found")
+        return None
+
+    if spatial_context_object == "-":
+        spatial_context_object = "Robot"
+    ctx_pose = get_pose_by_name(spatial_context_object, scene_object_names, scene_object_positions, robot_pose) if spatial_context_object else None
+
+    # Handle DEFAULT relation
+    if spatial_relation == "DEFAULT":
+        return min(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
+
+    # Calculate spatial relationship
+    ref_pos = point_to_numpy(ref_pose)
+    ctx_pos = point_to_numpy(ctx_pose) if ctx_pose else ref_pos
+
+    direction = ctx_pos - ref_pos
+    if np.linalg.norm(direction) < 1e-6:
+        print("Reference and context positions coincide")
+        return candidates[0][0]
+
+    dir_norm = direction / np.linalg.norm(direction)
+    left_vec = np.cross(np.array([0, 0, 1]), dir_norm[:3])
+    left_vec /= np.linalg.norm(left_vec)
+
+    # Evaluate candidates
+    qualified = []
+    for name, pose in candidates:
+        candidate_pos = point_to_numpy(pose)
+        offset = candidate_pos - ref_pos
+
+        if spatial_relation == "BEHIND":
+            if np.dot(offset, dir_norm) < -0.7:
+                qualified.append((name, np.linalg.norm(offset)))
+        elif spatial_relation == "FRONT":
+            if np.dot(offset, dir_norm) > 0.7:
+                qualified.append((name, np.linalg.norm(offset)))
+        elif spatial_relation == "RIGHT":
+            if np.dot(offset, left_vec) > 0.7:
+                qualified.append((name, np.linalg.norm(offset)))
+        elif spatial_relation == "LEFT":
+            if np.dot(offset, left_vec) < -0.7:
+                qualified.append((name, np.linalg.norm(offset)))
+
+    return min(qualified, key=lambda x: x[1])[0] if qualified else None
 
 
 

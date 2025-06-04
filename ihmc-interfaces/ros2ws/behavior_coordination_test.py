@@ -62,8 +62,8 @@ def behavior_message_callback(msg):
             print("-")
 
     # --------- Monitoring -----------
-    print("Behavior in Progress: " + msg.behavior_in_progress)
-    print("Completed Behavior: " + msg.completed_behavior)
+    #if (msg.completed_behavior != "-"):
+    print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
     failed_behavior = msg.failed_behavior
     failure = msg.failure
     if failed_behavior != "-" and loggedFailure == False:
@@ -130,6 +130,7 @@ def behavior_message_callback(msg):
         initialized = True
         loggedFailure = False
         behavior_counter += 1
+        print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
 
 def main(args=None):
     rclpy.init(args=args)

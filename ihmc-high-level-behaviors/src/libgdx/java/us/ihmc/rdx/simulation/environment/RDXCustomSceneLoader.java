@@ -112,15 +112,11 @@ public class RDXCustomSceneLoader
 
             addNode("Charge");
             setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-173.50519), Math.toRadians(1.51561), Math.toRadians(0.17252)),
-                                                          new Point3D(1.53540, -0.48509+0.97246, 1.00433)));
+                                                          new Point3D(1.65072, 0.01785, 1.00433)));
 
             addNode("Barrier");
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
                                                            new Point3D(1.77185, 0.97246, 0.00000)));
-
-            addNode("Barrier");
-            setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
             break;
 
          case MANIPULATION_2X4:
