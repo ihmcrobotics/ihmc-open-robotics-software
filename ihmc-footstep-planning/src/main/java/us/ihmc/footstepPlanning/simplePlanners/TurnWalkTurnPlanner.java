@@ -31,7 +31,7 @@ public class TurnWalkTurnPlanner
    private static final double epsilon = 10E-6;
 
    private static final double IDEAL_FOOTSTEP_LENGTH = 0.25;
-   private static final double IDEAL_FOOTSTEP_WIDTH = 0.22;
+   private static final double IDEAL_FOOTSTEP_WIDTH = 0.25;
    private static final double MAX_STEP_YAW = 0.62;
    private static final double MIN_STEP_YAW = -0.4;
    

@@ -129,6 +129,10 @@ public class FootstepPlanActionPlanningThread
 //         footstepPlannerRequest.getBodyPathWaypoints().add(goalMidFeetPose);
 //      }
 
+      footstepPlannerRequest.setPlanBodyPath(true);
+      footstepPlannerRequest.setPerformAStarSearch(false);
+      footstepPlannerRequest.setAbortIfBodyPathPlannerFails(true);
+
       if (!isPreviewPlanner)
          state.getLogger().info("Planning footsteps...");
 
