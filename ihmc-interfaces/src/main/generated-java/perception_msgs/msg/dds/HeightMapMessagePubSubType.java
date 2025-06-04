@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1e933310ad7105d3c65bddfe7ecf47e3639810594ecb5f56066281a95d41cbc0";
+   		return "1671b8788165f08e5f62461a7b103a4bb6378e271d21e0d8e18e35c3283d0c71";
    }
    
    @Override
@@ -54,10 +54,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -95,10 +91,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -145,8 +137,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       cdr.write_type_12(data.getSequenceId());
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
       cdr.write_type_6(data.getXyResolution());
 
       cdr.write_type_6(data.getGridSizeXy());
@@ -183,8 +173,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       data.setSequenceId(cdr.read_type_12());
       	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       data.setXyResolution(cdr.read_type_6());
       	
       data.setGridSizeXy(cdr.read_type_6());
@@ -207,10 +195,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    public final void serialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
-      ser.write_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
-
-      ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
-
       ser.write_type_6("xy_resolution", data.getXyResolution());
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
       ser.write_type_6("grid_center_x", data.getGridCenterX());
@@ -227,10 +211,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.HeightMapMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
-      ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
-
-      ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
-
       data.setXyResolution(ser.read_type_6("xy_resolution"));
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
       data.setGridCenterX(ser.read_type_6("grid_center_x"));

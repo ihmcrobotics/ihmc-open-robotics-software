@@ -3,12 +3,6 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
-# Position of the focal point at sensor data acquisition
-geometry_msgs/Point position
-
-# Orientation of the focal point at sensor data acquisition
-geometry_msgs/Quaternion orientation
-
 # Discretization of the height map grid
 float64 xy_resolution -1.0
 

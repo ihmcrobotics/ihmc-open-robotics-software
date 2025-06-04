@@ -217,7 +217,7 @@ public class RapidHeightMapExtractor
 
       // --------- Run the update kernel ---------
       {
-         // Compute "speed" of the camera
+         // Compute "speed" of the point
          RigidBodyTransform previousToCurrentSensorOrigin = new RigidBodyTransform(previousSensorToWorld);
          previousToCurrentSensorOrigin.invert();
          previousToCurrentSensorOrigin.multiply(sensorToWorldTransform);
@@ -439,7 +439,7 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
       cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       // Synchronize the stream so the cpu has the data when this method returns
       error = cudaStreamSynchronize(stream);
@@ -545,7 +545,7 @@ public class RapidHeightMapExtractor
       return scaledHeightMap.clone();
    }
 
-   public GpuMat getTerrainHeightMap()
+   public GpuMat getTerrainCroppedHeightMap()
    {
       return terrainCroppedHeightMap.clone();
    }
