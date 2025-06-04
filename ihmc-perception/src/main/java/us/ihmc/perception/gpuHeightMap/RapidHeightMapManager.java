@@ -33,7 +33,6 @@ public class RapidHeightMapManager
    private final RapidHeightMapExtractor rapidHeightMapExtractor;
 
    private final Point3D sensorOrigin = new Point3D();
-   private final FramePose3D cameraPose = new FramePose3D();
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
 
    private final Notification resetHeightMapRequested = new Notification();
@@ -94,20 +93,32 @@ public class RapidHeightMapManager
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
-                                                   latestHeightMapData,
-                                                   sensorOrigin,
-                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                   (float) heightMapParameters.getCellSizeInMeters(),
-                                                   heightMapParameters);
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
-      heightMapMessage.getOrientation().set(cameraPose.getOrientation());
-      heightMapMessage.getPosition().set(cameraPose.getPosition());
-      heightMapMessagePublisher.publish(heightMapMessage);
+      publishHeightMap(hostGlobalHeightMap);
 
       hostGlobalHeightMap.close();
       deviceGlobalHeightMap.close();
+   }
+
+   private void publishHeightMap(Mat hostGlobalHeightMap)
+   {
+      // The center of this map should be centered in the world grid
+      // The sensor origin isn't always at the center of a grid point, in fact its often not in the center
+      int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
+      int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+      Point3D gridCellLocation = new Point3D(currentCellX * 0.02, currentCellY * 0.02, 0.0);
+      FramePose3D cameraPose = new FramePose3D();
+      cameraPose.getTranslation().set(gridCellLocation);
+
+      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
+                                                   latestHeightMapData,
+                                                   gridCellLocation,
+                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getCellSizeInMeters(),
+                                                   heightMapParameters);
+
+      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
+      heightMapMessagePublisher.publish(heightMapMessage);
    }
 
    /**
@@ -148,8 +159,6 @@ public class RapidHeightMapManager
       sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
 
       sensorOrigin.set(sensorToWorld.getTranslation());
-      cameraPose.setToZero(cameraZUpFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
       // If we have that parameter set to true, we update the heights of the height map to account for that drift
