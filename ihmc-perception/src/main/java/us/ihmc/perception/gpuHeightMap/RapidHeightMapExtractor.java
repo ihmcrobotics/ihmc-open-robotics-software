@@ -544,9 +544,4 @@ public class RapidHeightMapExtractor
    {
       return scaledHeightMap.clone();
    }
-
-   public GpuMat getTerrainHeightMap()
-   {
-      return terrainCroppedHeightMap.clone();
-   }
 }

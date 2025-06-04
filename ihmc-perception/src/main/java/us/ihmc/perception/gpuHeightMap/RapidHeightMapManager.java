@@ -102,7 +102,7 @@ public class RapidHeightMapManager
    private void publishHeightMap(Mat hostGlobalHeightMap)
    {
       // The center of this map should be centered in the world grid
-      // The sensor origin isn't always at the center of a grid point, in fact its often not in the center
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
       int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
       int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
       Point3D gridCellLocation = new Point3D(currentCellX * 0.02, currentCellY * 0.02, 0.0);
