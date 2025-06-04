@@ -24,7 +24,7 @@ import java.nio.ByteOrder;
 
 public class LeRobotManager
 {
-   private static final ROS2Topic<?> LEROBOT = new ROS2Topic<>().withPrefix("lerobot").withQoS(ROS2QosProfile.RELIABLE());
+   private static final ROS2Topic<?> LEROBOT = new ROS2Topic<>().withPrefix("lerobot");
    private static final ROS2Topic<std_msgs.msg.dds.String> COMMAND = LEROBOT.withSuffix("command").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = LEROBOT.withSuffix("status").withType(std_msgs.msg.dds.String.class);
    private static final SideDependentList<ROS2Topic<Image>> ZED_IMAGES = new SideDependentList<>(LEROBOT.withSuffix("/zed/left/color").withType(Image.class),
