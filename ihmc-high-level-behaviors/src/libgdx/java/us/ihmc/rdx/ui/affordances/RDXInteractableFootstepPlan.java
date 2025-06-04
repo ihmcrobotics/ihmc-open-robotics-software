@@ -269,8 +269,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       // TODO dangerous. However when manually placing footsteps, this is great.
       messageList.getQueueingProperties().setExecutionMode(activeAdjustment ? ExecutionMode.OVERRIDE.toByte() : ExecutionMode.QUEUE.toByte());
       messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      messageList.setOffsetFootstepsHeightWithExecutionError(false);
-      messageList.setTrustHeightOfFootsteps(false);
       messageList.setDefaultSwingDuration(locomotionParameters.getSwingTime());
       messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
       messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
