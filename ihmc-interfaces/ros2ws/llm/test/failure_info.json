@@ -137,4 +137,14 @@
     "Failed behavior": "GOTO",
     "Description": "Go to Action",
     "Type": "FootstepPlanActionDefinition"
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.9173863970773684
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.8876348680956991
 }

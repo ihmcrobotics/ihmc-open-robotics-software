@@ -25,7 +25,6 @@ ros2                = {}
 initialized         = False
 loggedFailure       = False
 next_behavior       = ""
-task_description    = ""
 llm_call_counter    = 0
 llm_plan            = []
 plan_queue          = []
@@ -37,7 +36,6 @@ def behavior_message_callback(msg):
     global llm_plan
     global plan_queue
     global next_behavior
-    global task_description
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
@@ -66,11 +64,6 @@ def behavior_message_callback(msg):
     #print("Behavior in Progress: " + msg.behavior_in_progress)
     #if (msg.completed_behavior != "-"):
     #print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
-
-    # --------- Coordination -----------
-    waiting_for_command = False
-    # print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
-
     failed_behavior = msg.failed_behavior
     failure = msg.failure
     if failed_behavior != "-" and loggedFailure == False:
@@ -96,24 +89,9 @@ def behavior_message_callback(msg):
         with open(json_filename, 'a') as json_file:
             json.dump(failure_info, json_file, indent=4)
         loggedFailure = True
-        # Pretty-print the failure_info dictionary for the user
-        print("A failure has occurred. Details:")
-        print(json.dumps(failure_info, indent=4))
 
-        # Ask the user how to proceed
-        user_input = input("Type 'continue' to rerun or 'exit' to stop or next steps to follow: ").strip().lower()
-        if user_input == 'exit':
-            print("Exiting due to failure.")
-            exit(1)
-        elif user_input == 'continue':
-            print("rerunning the same command.")
-            # Add next_behavior  and task_description to front of plan_queue
-            plan_queue.insert(0, [next_behavior, task_description])
-            waiting_for_command  = True
-        else:
-            print("Continuing after failure.")
-            
-
+    # --------- Coordination -----------
+    waiting_for_command = False
     # print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
     if msg.behavior_in_progress == "-" and msg.completed_behavior == next_behavior:
        print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Past Behavior: " + next_behavior)
@@ -138,8 +116,8 @@ def behavior_message_callback(msg):
         robot_position = msg.robot_mid_feet_under_pelvis_pose_in_world.position
 
         # If calling llm for the first time, we can initialize the scene_objects_names as empty
-        #if llm_call_counter == 0:
-        scene_objects_names = ''
+        if llm_call_counter == 0:
+            scene_objects_names = ''
         #print("Scene Objects:", scene_objects_names)
         
         # Get all available behaviors
@@ -179,13 +157,12 @@ def behavior_message_callback(msg):
 
                 # Extract each behavior entry including content inside parentheses
                 behaviors = re.findall(r'([^\n,]+(?:\([^\)]*\))?)', list_block)
-                #behaviors = re.findall(r'([A-Z ]+\([^\)]*\))', list_block)
-                print("Extracted Behaviors:", behaviors)
+                #print("Extracted Behaviors:", behaviors)
 
                 # Step 3: Clean up whitespace
                 llm_plan = [b.strip().rstrip(',') for b in behaviors]
 
-                print('llm_plan : ', llm_plan)
+                #print('llm_plan : ', llm_plan)
                 # Create list of [action, full_step]
                 plan_queue = [[re.match(r'^([A-Z ]+)', step).group(1).strip(), step] for step in llm_plan]
                 #print("Plan Queue:", plan_queue)
@@ -361,6 +338,9 @@ def select_target_object(
         if name.startswith(base_name) and name[len(base_name):].isdigit()
     ]
     print("candidates : ", candidates)
+    if len(candidates) == 1:
+        return candidates[0][0]  # Only one candidate, return it
+
     if not candidates:
         print(f"No {base_name} objects found")
         return None
