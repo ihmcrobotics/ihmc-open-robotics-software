@@ -439,7 +439,7 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
       cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       // Synchronize the stream so the cpu has the data when this method returns
       error = cudaStreamSynchronize(stream);
