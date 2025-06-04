@@ -39,7 +39,7 @@ public class FoundationPoseManager
 
    private final RepeatingTaskThread updateThread;
 
-   private boolean isActive;
+   private final Set<String> objectsToTrack;
 
    public FoundationPoseManager(ROS2Node ros2Node, ImageSensor imageSensor, int colorKey, int depthKey)
    {
@@ -48,24 +48,37 @@ public class FoundationPoseManager
 
       communicator = new ROS2FoundationPoseCommunicator(ros2Node, imageSensor, colorKey, depthKey);
 
-      isActive = false;
+      objectsToTrack = new HashSet<>();
 
       updateThread = new RepeatingTaskThread(getClass().getSimpleName() + "Update", this::update);
       updateThread.setFrequencyLimit(30.0).startRepeating();
    }
 
    /**
-    * Set whether FoundationPose should be tracking objects.
+    * Specify whether an objects of a class should be tracked.
     * <p>
-    * If {@code true}, this object will send requests to the FoundationPose process to track objects seen by YOLO.
-    * If {@code false}, this object will send remove messages for any objects that are being tracked,
-    * and will not send any requests.
-    *
-    * @param active Whether FoundationPose should be tracking objects.
+    * If {@code true}, the manager will send requests to the FoundationPose process to track the specified objects when seen by YOLO.
+    * If {@code false}, the manager will send remove messages for the objects that are being tracked,
+    * and will not send requests for the object class.
+    * @param objectClass The class of object (should match the mesh file name used by FoundationPose)
+    * @param shouldTrack Whether objects of the class should be tracked.
     */
-   public void setActive(boolean active)
+   public void setObjectToTrack(String objectClass, boolean shouldTrack)
    {
-      this.isActive = active;
+      if (shouldTrack)
+         objectsToTrack.add(objectClass);
+      else
+         objectsToTrack.remove(objectClass);
+   }
+
+   public void trackAll()
+   {
+      objectsToTrack.addAll(FoundationPoseTools.getAvailableMeshes());
+   }
+
+   public void stopTracking()
+   {
+      objectsToTrack.clear();
    }
 
    /**
@@ -160,7 +173,7 @@ public class FoundationPoseManager
 
             // If detection was bad within the last second, we shouldn't be tracking it
             Instant lastBadDetectionTime = allYOLODetections.get(detection);
-            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime) || !isActive)
+            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime) || !objectTrackingIsActive(detection.getDetectedObjectName()))
             {
                LogTools.debug("Removing {}", objectId);
                communicator.remove(objectId);
@@ -181,7 +194,7 @@ public class FoundationPoseManager
       {
          // Track detections that haven't been bad for at least a second
          Instant lastBadDetectionTime = allYOLODetections.get(detection);
-         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(goodDetectionTime) && isActive)
+         if (lastBadDetectionTime != null && lastBadDetectionTime.isBefore(goodDetectionTime) && objectTrackingIsActive(detection.getDetectedObjectName()))
             detectionsToTrack.add(detection);
       }
 
@@ -219,5 +232,15 @@ public class FoundationPoseManager
       int maxY = (int) Math.round(boundingBox.getMaxY());
 
       return minX <= DELTA || minY <= DELTA || maxX >= imageWidth - 1 - DELTA || maxY >= imageHeight - 1 - DELTA;
+   }
+
+   private boolean objectTrackingIsActive(String yoloClass)
+   {
+      String meshName = FoundationPoseTools.getYOLOClassToObjectMeshMap().get(yoloClass);
+      if (meshName == null)
+         return false;
+
+      String objectClass = meshName + ".obj";
+      return objectsToTrack.contains(objectClass);
    }
 }
