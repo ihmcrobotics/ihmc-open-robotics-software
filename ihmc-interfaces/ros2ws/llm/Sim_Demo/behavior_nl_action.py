@@ -10,6 +10,7 @@ from geometry_msgs.msg import Quaternion
 from behavior_msgs.msg import AI2RCommandMessage
 from behavior_msgs.msg import AI2RObjectMessage
 from behavior_msgs.msg import AI2RStatusMessage
+from behavior_msgs.msg import AI2RScanMessage
 from behavior_msgs.msg import AI2RNavigationMessage
 from behavior_msgs.msg import AI2RReceiveObjectMessage
 
@@ -41,15 +42,13 @@ def behavior_message_callback(msg):
     if not initialized:
         # --------- Scene -----------
         scene_objects = msg.objects
-        print("Objects in the scene:")
+#         print("Objects in the scene:")
         if scene_objects:  # This checks if the list is not empty
            for obj in scene_objects:
                id = obj.object_name
                print(f"{id}")
                pose_in_world = obj.object_pose_in_world
                pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
-        else:
-           print("-")
 
         # --------- Behaviors -----------
         behaviors = msg.available_behaviors
@@ -96,8 +95,6 @@ def behavior_message_callback(msg):
     if msg.behavior_in_progress == "-" and msg.completed_behavior == next_behavior:
        print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Past Behavior: " + next_behavior)
        waiting_for_command  = True
-
-
 
     if waiting_for_command or not initialized:
 
@@ -156,7 +153,7 @@ def behavior_message_callback(msg):
                 list_block = match.group(1)
 
                 # Extract each behavior entry including content inside parentheses
-                behaviors = re.findall(r'([^\n,]+(?:\([^\)]*\))?)', list_block)
+                behaviors = re.findall(r'([^,]+(?:\([^\)]*\))?)', list_block)
                 #print("Extracted Behaviors:", behaviors)
 
                 # Step 3: Clean up whitespace
@@ -206,8 +203,25 @@ def behavior_message_callback(msg):
         # DECIDE what behavior to execute based on reasoning. For example can decide to scan environment to detect objects
         behavior_command.behavior_to_execute = next_behavior
         behavior_command.adapting_behavior = False
-        
 
+        if (behavior_command.behavior_to_execute == "SCAN"):
+            behavior_command.adapting_behavior = True
+            new_scan_behavior = AI2RScanMessage()
+            # Load the config file for SCAN action
+            print("Loading config for SCAN action")
+            llm                 = LLMInterface(config_file="config_scan.json")
+            llm_input           = "task_description : " + task_description
+            response            = llm.call_model(llm_input)
+            print(" --------- Output for SCAN action: --------- \n", response)
+            # Replace single quotes with double quotes and remove any trailing commas or leading/trailing whitespace
+            clean_response = response.replace("'", '"')
+
+            # Convert string to dictionary
+            data = json.loads(clean_response)
+
+            # Extract variables
+            target_objects = data['target_objects']
+            print(target_objects)
 
         # Code for loading config files for different actions Eg: GOTO, RECEIVE, etc.
         if (behavior_command.behavior_to_execute == "GOTO"):
