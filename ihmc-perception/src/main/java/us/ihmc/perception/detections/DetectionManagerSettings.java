@@ -13,7 +13,7 @@ public class DetectionManagerSettings extends StoredPropertySet
    public static final DoubleStoredPropertyKey acceptanceAverageConfidence = keys.addDoubleKey("Acceptance Average Confidence", 0.7);
    public static final DoubleStoredPropertyKey stabilityAverageConfidence = keys.addDoubleKey("Stability Average Confidence", 0.5);
    public static final DoubleStoredPropertyKey stabilityDetectionFrequency = keys.addDoubleKey("Stability Detection Frequency", 1.0);
-   public static final DoubleStoredPropertyKey detectionHistoryDuration = keys.addDoubleKey("Detection History Duration", 5.0);
+   public static final DoubleStoredPropertyKey detectionHistoryDuration = keys.addDoubleKey("Detection History Duration", 1.0);
 
    public DetectionManagerSettings()
    {
