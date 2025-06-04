@@ -217,7 +217,7 @@ public class RapidHeightMapExtractor
 
       // --------- Run the update kernel ---------
       {
-         // Compute "speed" of the camera
+         // Compute "speed" of the point
          RigidBodyTransform previousToCurrentSensorOrigin = new RigidBodyTransform(previousSensorToWorld);
          previousToCurrentSensorOrigin.invert();
          previousToCurrentSensorOrigin.multiply(sensorToWorldTransform);
@@ -543,5 +543,10 @@ public class RapidHeightMapExtractor
    public GpuMat getHeightMap()
    {
       return scaledHeightMap.clone();
+   }
+
+   public GpuMat getTerrainCroppedHeightMap()
+   {
+      return terrainCroppedHeightMap.clone();
    }
 }

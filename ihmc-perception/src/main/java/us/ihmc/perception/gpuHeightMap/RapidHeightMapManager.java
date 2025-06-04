@@ -43,6 +43,8 @@ public class RapidHeightMapManager
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestHeightMapData;
+   private final HeightMapData latestTerrainHeightMapData;
+   private Point3D gridCellLocation = new Point3D();
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 FullHumanoidRobotModel robotModel,
@@ -54,9 +56,13 @@ public class RapidHeightMapManager
    {
       this.heightMapParameters = heightMapParameters;
       latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                              (float) heightMapParameters.getTerrainWidthInMeters(),
+                                              (float) heightMapParameters.getGlobalWidthInMeters(),
                                               0.0,
                                               0.0);
+      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                     0.0,
+                                                     0.0);
 
       footSoleFrames.add(leftFootSoleFrame);
       footSoleFrames.add(rightFootSoleFrame);
@@ -105,7 +111,7 @@ public class RapidHeightMapManager
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
       int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
       int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
-      Point3D gridCellLocation = new Point3D(currentCellX * 0.02, currentCellY * 0.02, 0.0);
+      gridCellLocation.set(currentCellX * 0.02, currentCellY * 0.02, 0.0);
       FramePose3D cameraPose = new FramePose3D();
       cameraPose.getTranslation().set(gridCellLocation);
 
@@ -177,7 +183,17 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      return latestHeightMapData;
+      GpuMat terrainCroppedHeightMap = rapidHeightMapExtractor.getTerrainCroppedHeightMap();
+      Mat terrainHeightMap = new Mat();
+      terrainCroppedHeightMap.download(terrainHeightMap);
+
+      HeightMapMessageTools.convertToHeightMapData(terrainHeightMap,
+                                                   latestTerrainHeightMapData,
+                                                   gridCellLocation,
+                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getCellSizeInMeters(),
+                                                   heightMapParameters);
+      return latestTerrainHeightMapData;
    }
 
    private double computeFootHeight()
