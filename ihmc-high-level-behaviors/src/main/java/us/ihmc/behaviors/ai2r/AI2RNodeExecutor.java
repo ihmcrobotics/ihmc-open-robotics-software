@@ -276,6 +276,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                actionFailureMissingFrame = true;
             }
          }
+         String targetObject;
 
          // Check if we are executing Receive object action and active/de-active foundationPose tracking
          if (leaf.getParent().getDefinition().getName().contains("ReceiveObject"))
@@ -328,7 +329,15 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
       if (foundationPoseManager != null)
       {
-         foundationPoseManager.setActive(trackingObjectsInProgress);
+         String objectToTrack = skillEditor.getTargetObject();
+         if (objectToTrack == null)
+         {
+            foundationPoseManager.setActive(trackingObjectsInProgress);
+         }
+         else
+         {
+            foundationPoseManager.setObjectClassTracking(objectToTrack, trackingObjectsInProgress);
+         }
       }
    }
 

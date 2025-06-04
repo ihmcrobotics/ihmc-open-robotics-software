@@ -29,6 +29,7 @@ public class AI2RSkillEditor
 
       public static final AI2RSkillEditor.SpatialRelationType[] values = values();
    }
+   private String targetObject;
 
    public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
    {
@@ -44,10 +45,15 @@ public class AI2RSkillEditor
       {
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (leaf instanceof ConditionNodeState conditionNodeState)
+            if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("Scan"))
             {
                AI2RScanMessage scanMessage = message.getScan();
-               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanMessage.getTargetObjectAsString());
+               String scanTarget = scanMessage.getTargetObjectAsString();
+               if (!scanTarget.isEmpty())
+               {
+                  targetObject = scanTarget;
+               }
+               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanTarget);
             }
          }
       }
@@ -153,11 +159,15 @@ public class AI2RSkillEditor
       {
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (leaf instanceof ConditionNodeState conditionNodeState)
+            if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
             {
                AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
-               receiveMessage.getObjectNameAsString();
-               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveMessage.getObjectNameAsString());
+               String receiveObject = receiveMessage.getObjectNameAsString();
+               if (!receiveObject.isEmpty())
+               {
+                  targetObject = receiveObject;
+               }
+               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveObject);
                conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
             }
          }
@@ -214,5 +224,10 @@ public class AI2RSkillEditor
             }
          }
       }
+   }
+
+   public String getTargetObject()
+   {
+      return targetObject;
    }
 }
