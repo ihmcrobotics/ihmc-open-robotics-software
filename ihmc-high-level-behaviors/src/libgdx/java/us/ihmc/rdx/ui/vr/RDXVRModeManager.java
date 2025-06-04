@@ -213,14 +213,14 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.INPUTS_DISABLED;
          if (kinematicsStreamingMode != null)
-            kinematicsStreamingMode.setEnabled(false);
+            kinematicsStreamingMode.setKSTEnabled(false);
          footstepPlacer.reset();
       }
       if (ImGui.radioButton(labels.get(RDXVRMode.FOOTSTEP_PLACEMENT.getReadableName()), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
          if (kinematicsStreamingMode != null)
-            kinematicsStreamingMode.setEnabled(false);
+            kinematicsStreamingMode.setKSTEnabled(false);
       }
       if (kinematicsStreamingMode == null)
       {
@@ -239,7 +239,7 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.JOYSTICK_WALKING;
          if (kinematicsStreamingMode != null)
-            kinematicsStreamingMode.setEnabled(false);
+            kinematicsStreamingMode.setKSTEnabled(false);
          footstepPlacer.reset();
       }
    }
