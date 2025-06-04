@@ -31,15 +31,18 @@ class RecordTopicManager<T>
       });
    }
 
-   void update()
+   boolean update()
    {
       Pair<Long, T> data = this.latestData.getAndSet(null);
+      boolean hasData = data != null;
 
-      if (data != null)
+      if (hasData)
       {
          timestamps.add(data.getLeft());
          messages.add(data.getRight());
       }
+
+      return hasData;
    }
 
    void clear()
