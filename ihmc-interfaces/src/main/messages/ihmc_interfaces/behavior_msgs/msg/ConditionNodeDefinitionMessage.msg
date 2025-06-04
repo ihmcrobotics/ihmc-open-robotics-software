@@ -56,3 +56,6 @@ float64 distance_to_object
 
 # The maximum time that is spent in evaluating the condition
 float64 evaluation_time
+
+# Whether the failure of missing frame is handled internally by the ocndition node or not
+bool manage_missing_frame_internally

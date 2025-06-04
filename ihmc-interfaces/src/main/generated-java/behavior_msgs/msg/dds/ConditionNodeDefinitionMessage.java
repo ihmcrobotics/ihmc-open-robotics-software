@@ -79,6 +79,10 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
             * The maximum time that is spent in evaluating the condition
             */
    public double evaluation_time_;
+   /**
+            * Whether the failure of missing frame is handled internally by the ocndition node or not
+            */
+   public boolean manage_missing_frame_internally_;
 
    public ConditionNodeDefinitionMessage()
    {
@@ -131,6 +135,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       distance_to_object_ = other.distance_to_object_;
 
       evaluation_time_ = other.evaluation_time_;
+
+      manage_missing_frame_internally_ = other.manage_missing_frame_internally_;
 
    }
 
@@ -398,6 +404,21 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       return evaluation_time_;
    }
 
+   /**
+            * Whether the failure of missing frame is handled internally by the ocndition node or not
+            */
+   public void setManageMissingFrameInternally(boolean manage_missing_frame_internally)
+   {
+      manage_missing_frame_internally_ = manage_missing_frame_internally;
+   }
+   /**
+            * Whether the failure of missing frame is handled internally by the ocndition node or not
+            */
+   public boolean getManageMissingFrameInternally()
+   {
+      return manage_missing_frame_internally_;
+   }
+
 
    public static Supplier<ConditionNodeDefinitionMessagePubSubType> getPubSubType()
    {
@@ -445,6 +466,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.evaluation_time_, other.evaluation_time_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manage_missing_frame_internally_, other.manage_missing_frame_internally_, epsilon)) return false;
+
 
       return true;
    }
@@ -487,6 +510,8 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
 
       if(this.evaluation_time_ != otherMyClass.evaluation_time_) return false;
 
+      if(this.manage_missing_frame_internally_ != otherMyClass.manage_missing_frame_internally_) return false;
+
 
       return true;
    }
@@ -526,7 +551,9 @@ public class ConditionNodeDefinitionMessage extends Packet<ConditionNodeDefiniti
       builder.append("distance_to_object=");
       builder.append(this.distance_to_object_);      builder.append(", ");
       builder.append("evaluation_time=");
-      builder.append(this.evaluation_time_);
+      builder.append(this.evaluation_time_);      builder.append(", ");
+      builder.append("manage_missing_frame_internally=");
+      builder.append(this.manage_missing_frame_internally_);
       builder.append("}");
       return builder.toString();
    }

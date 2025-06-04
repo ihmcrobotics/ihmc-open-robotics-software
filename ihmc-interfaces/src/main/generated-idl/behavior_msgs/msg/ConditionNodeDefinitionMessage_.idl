@@ -95,6 +95,10 @@ module behavior_msgs
          * The maximum time that is spent in evaluating the condition
          */
         double evaluation_time;
+        /**
+         * Whether the failure of missing frame is handled internally by the ocndition node or not
+         */
+        boolean manage_missing_frame_internally;
       };
     };
   };

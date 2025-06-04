@@ -32,44 +32,58 @@ public class ProximityConditionExecutor
    public void update()
    {
       boolean canExecute = true;
-      canExecute &= referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName()) != null;
       canExecute &= referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getReferenceFrameName()) != null;
-      state.setCanExecute(canExecute);
 
-      if ((state.getIsExecuting() || state.getIsNextForExecution() || state.isEvaluatingCondition()) && state.getCanExecute())
+      boolean manageMissingFrameInternally = definition.getProximityCheck().getCRDTManageMissingFrameInternally().getValue();
+      boolean missingFrame = referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName()) == null;
+      if (!manageMissingFrameInternally)
       {
-         FramePose3D objectFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                       referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName())
-                                                                            .getTransformToWorldFrame());
-         FramePose3D referenceFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                          referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getReferenceFrameName())
-                                                                               .getTransformToWorldFrame());
-         switch (definition.getProximityCheck().getType().getValue())
+         canExecute &= !missingFrame;
+      }
+      state.setCanExecute(canExecute);
+      state.getProximityCheck().setMissingFrame(missingFrame);
+
+      if (!missingFrame)
+      {
+         if ((state.getIsExecuting() || state.getIsNextForExecution() || state.isEvaluatingCondition()) && state.getCanExecute())
          {
-            case XYZ -> distance.setValue(objectFramePose.getPosition().distance(referenceFramePose.getPosition()));
-            case XY -> distance.setValue(objectFramePose.getPosition().distanceXY(referenceFramePose.getPosition()));
-            case Z -> distance.setValue(Math.abs(objectFramePose.getPosition().getZ() - referenceFramePose.getPosition().getZ()));
+            FramePose3D objectFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                          referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName())
+                                                                               .getTransformToWorldFrame());
+            FramePose3D referenceFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                             referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getReferenceFrameName())
+                                                                                  .getTransformToWorldFrame());
+            switch (definition.getProximityCheck().getType().getValue())
+            {
+               case XYZ -> distance.setValue(objectFramePose.getPosition().distance(referenceFramePose.getPosition()));
+               case XY -> distance.setValue(objectFramePose.getPosition().distanceXY(referenceFramePose.getPosition()));
+               case Z -> distance.setValue(Math.abs(objectFramePose.getPosition().getZ() - referenceFramePose.getPosition().getZ()));
+            }
          }
       }
+
    }
 
    public void updateCurrentlyExecuting()
    {
-      if (!state.isEvaluatingCondition())
+      if (!state.getProximityCheck().getMissingFrame().getValue())
       {
-         conditionStartTime = System.nanoTime();
-         state.setEvaluatingConditionValue(true);
-      }
-
-      boolean conditionValue = distance.getValue() >= 0 && distance.getValue() < maxDistanceToObject.getValue();
-      state.setConditionValue(conditionValue);
-
-      if (!conditionValue)
-      {
-         if (getTimeElapsedInCondition() > definition.getProximityCheck().getCRDTMaxEvaluationTime().getValue())
+         if (!state.isEvaluatingCondition())
          {
-            state.setFailed(true);
-            state.setEvaluatingConditionValue(false);
+            conditionStartTime = System.nanoTime();
+            state.setEvaluatingConditionValue(true);
+         }
+
+         boolean conditionValue = distance.getValue() >= 0 && distance.getValue() < maxDistanceToObject.getValue();
+         state.setConditionValue(conditionValue);
+
+         if (!conditionValue)
+         {
+            if (getTimeElapsedInCondition() > definition.getProximityCheck().getCRDTMaxEvaluationTime().getValue())
+            {
+               state.setFailed(true);
+               state.setEvaluatingConditionValue(false);
+            }
          }
       }
 

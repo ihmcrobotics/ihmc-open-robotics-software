@@ -38,6 +38,10 @@ module behavior_msgs
          * The current distance of the object from the reference frame
          */
         double current_distance;
+        /**
+         * Whether frame to evaluate the proximity is missing
+         */
+        boolean missing_frame;
       };
     };
   };

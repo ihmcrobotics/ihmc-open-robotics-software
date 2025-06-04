@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d928b88b5296d8d492e392cecb141a8196af3292b33b36a0b94a766ffe273481";
+   		return "5d7b0485e865119702ccc343d269d3e670361a286056a68d8bba9f9c3e3349fc";
    }
    
    @Override
@@ -77,6 +77,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -129,6 +131,9 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -174,6 +179,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_6(data.getEvaluationTime());
 
+      cdr.write_type_7(data.getManageMissingFrameInternally());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -202,6 +209,8 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       	
       data.setEvaluationTime(cdr.read_type_6());
       	
+      data.setManageMissingFrameInternally(cdr.read_type_7());
+      	
 
    }
 
@@ -224,6 +233,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_d("reference_frame_name", data.getReferenceFrameName());
       ser.write_type_6("distance_to_object", data.getDistanceToObject());
       ser.write_type_6("evaluation_time", data.getEvaluationTime());
+      ser.write_type_7("manage_missing_frame_internally", data.getManageMissingFrameInternally());
    }
 
    @Override
@@ -245,6 +255,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_d("reference_frame_name", data.getReferenceFrameName());
       data.setDistanceToObject(ser.read_type_6("distance_to_object"));
       data.setEvaluationTime(ser.read_type_6("evaluation_time"));
+      data.setManageMissingFrameInternally(ser.read_type_7("manage_missing_frame_internally"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

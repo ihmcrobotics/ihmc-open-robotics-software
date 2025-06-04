@@ -21,7 +21,7 @@ public class RDXProximityCondition
    private final CRDTBidirectionalDouble distance;
    private final CRDTBidirectionalDouble maxDistance;
    private final CRDTBidirectionalDouble maxEvaluationTime;
-//   private final CRDTBidirectionalBoolean manageMissingFrameInternally;
+   private final CRDTBidirectionalBoolean manageMissingFrameInternally;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
@@ -29,7 +29,7 @@ public class RDXProximityCondition
    private final ImDoubleWrapper maxDistanceWidget;
    private final ImDoubleWrapper distanceWidget;
    private final ImDoubleWrapper maxEvaluationTimeWidget;
-//   private final ImBooleanWrapper manageMissingFrameInternallyCheckbox;
+   private final ImBooleanWrapper manageMissingFrameInternallyCheckbox;
 
    public RDXProximityCondition(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -39,6 +39,7 @@ public class RDXProximityCondition
       distance =  state.getProximityCheck().getCurrentDistance();
       maxDistance = definition.getProximityCheck().getCRDTMaxDistanceToObject();
       maxEvaluationTime = definition.getProximityCheck().getCRDTMaxEvaluationTime();
+      manageMissingFrameInternally = definition.getProximityCheck().getCRDTManageMissingFrameInternally();
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object Name",
                                                                 referenceFrameLibrary,
@@ -57,6 +58,9 @@ public class RDXProximityCondition
       maxEvaluationTimeWidget = new ImDoubleWrapper(maxEvaluationTime::getValue,
                                                     maxEvaluationTime::setValue,
                                            imDouble -> ImGuiTools.volatileInputDouble(labels.get("Max Evaluation Time"), imDouble));
+      manageMissingFrameInternallyCheckbox = new ImBooleanWrapper(manageMissingFrameInternally::getValue,
+                                                                  manageMissingFrameInternally::setValue,
+                                                                  imBoolean -> ImGui.checkbox(labels.get("Manage Missing Frame Internally"), imBoolean));
    }
 
    public void renderImGuiWidgetsInternal()
@@ -81,5 +85,6 @@ public class RDXProximityCondition
          ImGui.endCombo();
       }
       maxEvaluationTimeWidget.renderImGuiWidget();
+      manageMissingFrameInternallyCheckbox.renderImGuiWidget();
    }
 }

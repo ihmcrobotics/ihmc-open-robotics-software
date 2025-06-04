@@ -3,6 +3,7 @@ package us.ihmc.behaviors.logic.condition;
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
@@ -26,12 +27,14 @@ public class ProximityConditionDefinition
    private final CRDTBidirectionalString referenceFrameName;
    private final CRDTBidirectionalDouble maxDistanceToObject;
    private final CRDTBidirectionalDouble maxEvaluationTime;
+   private final CRDTBidirectionalBoolean manageMissingFrameInternally;
 
    private DistanceType onDiskType;
    private String onDiskObjectFrameName;
    private String onDiskReferenceFrameName;
    private double onDiskDistanceToObject;
    private double onDiskMaxEvaluationTime;
+   private boolean onDiskManageMissingFrameInternally;
 
    public ProximityConditionDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
@@ -40,6 +43,7 @@ public class ProximityConditionDefinition
       referenceFrameName = new CRDTBidirectionalString(latestTimestampModifiable, ReferenceFrame.getWorldFrame().getName());
       maxDistanceToObject = new CRDTBidirectionalDouble(latestTimestampModifiable, 1.0);
       maxEvaluationTime = new CRDTBidirectionalDouble(latestTimestampModifiable, 5.0);
+      manageMissingFrameInternally = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
    }
 
    public void saveToFile(ObjectNode jsonNode)
@@ -49,6 +53,7 @@ public class ProximityConditionDefinition
       jsonNode.put("maxDistanceToObject", maxDistanceToObject.getValue());
       jsonNode.put("distanceType", type.getValue().toString());
       jsonNode.put("maxEvaluationTime", maxEvaluationTime.getValue());
+      jsonNode.put("manageMissingFrameInternally", manageMissingFrameInternally.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -58,6 +63,7 @@ public class ProximityConditionDefinition
       maxDistanceToObject.setValue(jsonNode.get("maxDistanceToObject").asDouble());
       type.setValue(DistanceType.valueOf(jsonNode.get("distanceType").textValue()));
       maxEvaluationTime.setValue(jsonNode.get("maxEvaluationTime").asDouble());
+      manageMissingFrameInternally.setValue(jsonNode.get("manageMissingFrameInternally").asBoolean());
    }
 
    public void setOnDiskFields()
@@ -67,6 +73,7 @@ public class ProximityConditionDefinition
       onDiskReferenceFrameName = referenceFrameName.getValue();
       onDiskDistanceToObject = maxDistanceToObject.getValue();
       onDiskMaxEvaluationTime = maxEvaluationTime.getValue();
+      onDiskManageMissingFrameInternally = manageMissingFrameInternally.getValue();
    }
 
    public void undoAllNontopologicalChanges()
@@ -76,6 +83,7 @@ public class ProximityConditionDefinition
       referenceFrameName.setValue(onDiskReferenceFrameName);
       maxDistanceToObject.setValue(onDiskDistanceToObject);
       maxEvaluationTime.setValue(onDiskMaxEvaluationTime);
+      manageMissingFrameInternally.setValue(onDiskManageMissingFrameInternally);
    }
 
    public boolean hasChanges()
@@ -87,6 +95,7 @@ public class ProximityConditionDefinition
       unchanged &= referenceFrameName.getValue().equals(onDiskReferenceFrameName);
       unchanged &= maxDistanceToObject.getValue() == (onDiskDistanceToObject);
       unchanged &= maxEvaluationTime.getValue() == (onDiskMaxEvaluationTime);
+      unchanged &= manageMissingFrameInternally.getValue() == (onDiskManageMissingFrameInternally);
 
       return !unchanged;
    }
@@ -98,6 +107,7 @@ public class ProximityConditionDefinition
       message.setReferenceFrameName(referenceFrameName.toMessage());
       message.setDistanceToObject(maxDistanceToObject.toMessage());
       message.setEvaluationTime(maxEvaluationTime.toMessage());
+      message.setManageMissingFrameInternally(manageMissingFrameInternally.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
@@ -107,6 +117,7 @@ public class ProximityConditionDefinition
       referenceFrameName.fromMessage(message.getReferenceFrameNameAsString());
       maxDistanceToObject.fromMessage(message.getDistanceToObject());
       maxEvaluationTime.fromMessage(message.getEvaluationTime());
+      manageMissingFrameInternally.fromMessage(message.getManageMissingFrameInternally());
    }
 
    public void setObjectFrameName(String objectFrameName)
@@ -127,6 +138,11 @@ public class ProximityConditionDefinition
    public void setMaxEvaluationTime(double time)
    {
       this.maxEvaluationTime.setValue(time);
+   }
+
+   public void setManageMissingFrameInternally(boolean value)
+   {
+      this.manageMissingFrameInternally.setValue(value);
    }
 
    public String getObjectFrameName()
@@ -162,6 +178,11 @@ public class ProximityConditionDefinition
    public CRDTBidirectionalDouble getCRDTMaxEvaluationTime()
    {
       return maxEvaluationTime;
+   }
+
+   public CRDTBidirectionalBoolean getCRDTManageMissingFrameInternally()
+   {
+      return manageMissingFrameInternally;
    }
 
    public CRDTBidirectionalEnumField<DistanceType> getType()

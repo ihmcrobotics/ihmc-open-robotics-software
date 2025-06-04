@@ -33,6 +33,10 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
             * The current distance of the object from the reference frame
             */
    public double current_distance_;
+   /**
+            * Whether frame to evaluate the proximity is missing
+            */
+   public boolean missing_frame_;
 
    public ConditionNodeStateMessage()
    {
@@ -55,6 +59,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       request_reset_context_ = other.request_reset_context_;
 
       current_distance_ = other.current_distance_;
+
+      missing_frame_ = other.missing_frame_;
 
    }
 
@@ -121,6 +127,21 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       return current_distance_;
    }
 
+   /**
+            * Whether frame to evaluate the proximity is missing
+            */
+   public void setMissingFrame(boolean missing_frame)
+   {
+      missing_frame_ = missing_frame;
+   }
+   /**
+            * Whether frame to evaluate the proximity is missing
+            */
+   public boolean getMissingFrame()
+   {
+      return missing_frame_;
+   }
+
 
    public static Supplier<ConditionNodeStateMessagePubSubType> getPubSubType()
    {
@@ -147,6 +168,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_distance_, other.current_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.missing_frame_, other.missing_frame_, epsilon)) return false;
+
 
       return true;
    }
@@ -168,6 +191,8 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
 
       if(this.current_distance_ != otherMyClass.current_distance_) return false;
 
+      if(this.missing_frame_ != otherMyClass.missing_frame_) return false;
+
 
       return true;
    }
@@ -187,7 +212,9 @@ public class ConditionNodeStateMessage extends Packet<ConditionNodeStateMessage>
       builder.append("request_reset_context=");
       builder.append(this.request_reset_context_);      builder.append(", ");
       builder.append("current_distance=");
-      builder.append(this.current_distance_);
+      builder.append(this.current_distance_);      builder.append(", ");
+      builder.append("missing_frame=");
+      builder.append(this.missing_frame_);
       builder.append("}");
       return builder.toString();
    }
