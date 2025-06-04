@@ -60,25 +60,36 @@ public class FoundationPoseManager
     * If {@code true}, the manager will send requests to the FoundationPose process to track the specified objects when seen by YOLO.
     * If {@code false}, the manager will send remove messages for the objects that are being tracked,
     * and will not send requests for the object class.
+    *
     * @param objectClass The class of object (should match the mesh file name used by FoundationPose)
     * @param shouldTrack Whether objects of the class should be tracked.
     */
-   public void setObjectToTrack(String objectClass, boolean shouldTrack)
+   public void setObjectClassTracking(String objectClass, boolean shouldTrack)
    {
+      if (!FoundationPoseTools.getAvailableMeshes().contains(objectClass + ".obj"))
+         throw new IllegalArgumentException("FoundationPose cannot track objects of class " + objectClass + " because we don't have a mesh for it");
+
       if (shouldTrack)
          objectsToTrack.add(objectClass);
       else
          objectsToTrack.remove(objectClass);
    }
 
-   public void trackAll()
+   /**
+    * Set whether FoundationPose should be tracking objects.
+    * <p>
+    * If {@code true}, this object will send requests to the FoundationPose process to track all objects seen by YOLO.
+    * If {@code false}, this object will send remove messages for all objects that are being tracked,
+    * and will not send any requests.
+    *
+    * @param active Whether FoundationPose should be tracking objects.
+    */
+   public void setActive(boolean active)
    {
-      objectsToTrack.addAll(FoundationPoseTools.getAvailableMeshes());
-   }
-
-   public void stopTracking()
-   {
-      objectsToTrack.clear();
+      if (active)
+         objectsToTrack.addAll(FoundationPoseTools.getAvailableMeshes());
+      else
+         objectsToTrack.clear();
    }
 
    /**
@@ -240,7 +251,7 @@ public class FoundationPoseManager
       if (meshName == null)
          return false;
 
-      String objectClass = meshName + ".obj";
+      String objectClass = meshName.split("\\.")[0];
       return objectsToTrack.contains(objectClass);
    }
 }
