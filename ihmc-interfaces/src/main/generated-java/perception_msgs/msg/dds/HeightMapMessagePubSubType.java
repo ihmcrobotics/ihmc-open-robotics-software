@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1671b8788165f08e5f62461a7b103a4bb6378e271d21e0d8e18e35c3283d0c71";
+   		return "f15bf5112c8ff11b3211240f2fa053bee7e3f782378c29df827a974af25afc84";
    }
    
    @Override
@@ -64,16 +64,16 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 45000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 45000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -147,25 +147,25 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getEstimatedGroundHeight());
 
-      if(data.getKeys().size() <= 45000)
+      if(data.getKeys().size() <= 255000)
       cdr.write_type_e(data.getKeys());else
-          throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 45000));
+          throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 255000));
 
-      if(data.getHeights().size() <= 45000)
+      if(data.getHeights().size() <= 255000)
       cdr.write_type_e(data.getHeights());else
-          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 45000));
+          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 255000));
 
-      if(data.getVariances().size() <= 45000)
+      if(data.getVariances().size() <= 255000)
       cdr.write_type_e(data.getVariances());else
-          throw new RuntimeException("variances field exceeds the maximum length: %d > %d".formatted(data.getVariances().size(), 45000));
+          throw new RuntimeException("variances field exceeds the maximum length: %d > %d".formatted(data.getVariances().size(), 255000));
 
-      if(data.getCentroids().size() <= 45000)
+      if(data.getCentroids().size() <= 255000)
       cdr.write_type_e(data.getCentroids());else
-          throw new RuntimeException("centroids field exceeds the maximum length: %d > %d".formatted(data.getCentroids().size(), 45000));
+          throw new RuntimeException("centroids field exceeds the maximum length: %d > %d".formatted(data.getCentroids().size(), 255000));
 
-      if(data.getNormals().size() <= 45000)
+      if(data.getNormals().size() <= 255000)
       cdr.write_type_e(data.getNormals());else
-          throw new RuntimeException("normals field exceeds the maximum length: %d > %d".formatted(data.getNormals().size(), 45000));
+          throw new RuntimeException("normals field exceeds the maximum length: %d > %d".formatted(data.getNormals().size(), 255000));
 
    }
 
