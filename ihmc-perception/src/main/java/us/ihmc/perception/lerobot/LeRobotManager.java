@@ -112,6 +112,12 @@ public class LeRobotManager
    {
       command.setData(running ? "diffusion" : ""); // TODO: In future, possibly request model name
       ros2.publish(COMMAND, command);
+
+      // Send IK streaming hand pose commands
+      for (RobotSide side : RobotSide.values)
+      {
+
+      }
    }
 
    public void setRunning(boolean running)
