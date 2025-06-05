@@ -17,6 +17,7 @@ public class HeightMapMessageTools
                                              float cellSizeInMeters,
                                              HeightMapParameters heightMapParameters)
    {
+      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
