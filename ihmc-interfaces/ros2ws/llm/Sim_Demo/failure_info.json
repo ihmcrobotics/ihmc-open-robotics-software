@@ -11,4 +11,114 @@
     "Failed behavior": "GOTO",
     "Description": "Go to Action",
     "Type": "FootstepPlanActionDefinition"
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5533152405587307
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5533152405587307
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5533152405587307
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5057497902674903
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5057497902674903
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5083243036102577
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5083243036102577
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5764949382949294
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5764949382949294
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5764949382957915
+}{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition",
+    "Collision Object": "Barrier1"
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.1065834130086567
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.1065834130086567
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.1065834130118404
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5582684169690363
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.558268416968716
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.5582684169687088
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.0431770750958163
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 2.9217234405191332
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.3628567792804775
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 1.362856779277926
+}{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition",
+    "Collision Object": "Barrier1"
 }

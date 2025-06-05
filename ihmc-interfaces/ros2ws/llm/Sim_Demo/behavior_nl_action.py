@@ -26,6 +26,7 @@ ros2                = {}
 initialized         = False
 loggedFailure       = False
 next_behavior       = ""
+task_description    = ""
 llm_call_counter    = 0
 llm_plan            = []
 plan_queue          = []
@@ -37,6 +38,7 @@ def behavior_message_callback(msg):
     global llm_plan
     global plan_queue
     global next_behavior
+    global task_description
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
@@ -58,6 +60,9 @@ def behavior_message_callback(msg):
                 print(behavior)
         else:
             print("-")
+
+     # --------- Coordination -----------
+    waiting_for_command = False
 
     # --------- Monitoring -----------
     #print("Behavior in Progress: " + msg.behavior_in_progress)
@@ -109,8 +114,7 @@ def behavior_message_callback(msg):
             print("Continuing after failure.")
             
 
-    # --------- Coordination -----------
-    waiting_for_command = False
+   
     # print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
     if msg.behavior_in_progress == "-" and msg.completed_behavior == next_behavior:
        print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Past Behavior: " + next_behavior)
@@ -133,8 +137,8 @@ def behavior_message_callback(msg):
         robot_position = msg.robot_mid_feet_under_pelvis_pose_in_world.position
 
         # If calling llm for the first time, we can initialize the scene_objects_names as empty
-        if llm_call_counter == 0:
-            scene_objects_names = ''
+        # if llm_call_counter == 0:
+        #     scene_objects_names = ''
         #print("Scene Objects:", scene_objects_names)
         
         # Get all available behaviors
@@ -317,6 +321,8 @@ def behavior_message_callback(msg):
         ros2["behavior_publisher"].publish(behavior_command)
         initialized = True
         loggedFailure = False  
+        print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
+        time.sleep(1)
         #print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
         #time.sleep(10)  # Sleep for a second to allow the command to be processed
 

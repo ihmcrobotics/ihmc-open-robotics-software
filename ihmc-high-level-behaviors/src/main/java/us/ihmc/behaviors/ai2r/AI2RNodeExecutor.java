@@ -202,6 +202,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   LogTools.info("Leaf failed at index: {}, closest previous checkpoint: {}", leaf.getLeafIndex(), checkpointName);
 
                   statusMessage.setFailedBehavior(checkpointName);
+                  statusMessage.setBehaviorInProgress("-");
                   if (leaf instanceof ActionNodeState<?> action)
                   {
                      AI2RActionFailureMessage failureMessage = statusMessage.getFailure();
@@ -282,6 +283,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             {
                actionFailureMissingFrame = true;
                leaf.setFailed(true);
+               failedLeaves.add(leaf);
             }
          }
 
@@ -330,6 +332,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                         if (positionNextNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
                         {
                            gotoActionState.setFailed(true);
+                           failedLeaves.add(gotoActionState);
                            navigationFailureForObstacle = true;
                            navigationFailureObstacleName = object.getObjectNameAsString();
                            // Have the executor abort
