@@ -189,7 +189,8 @@ public abstract class ImageSensor implements AutoCloseable
 
       for (int imageKey : getImageKeys())
       {
-         imageCollectors.get(imageKey).forEach(collector -> collector.add(getImage(imageKey)));
+         if (imageCollectors.containsKey(imageKey))
+            imageCollectors.get(imageKey).forEach(collector -> collector.add(getImage(imageKey)));
       }
    }
 }

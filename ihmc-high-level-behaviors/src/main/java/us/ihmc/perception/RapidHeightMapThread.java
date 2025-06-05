@@ -5,6 +5,8 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,12 +20,15 @@ import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.sensors.ImageSensor;
+
+import java.util.Collection;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class RapidHeightMapThread extends RepeatingTaskThread
 {
@@ -32,31 +37,22 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    private final RapidHeightMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
-   private final ImageSensor imageSensor;
-   private final ReferenceFrame cameraFrame;
-   private final ReferenceFrame zUpSensorFrame;
    private final HeightMapParameters heightMapParameters;
-   private final int depthImageKey;
    private final CUDACompressionTools cudaCompressionTools = new CUDACompressionTools();
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
+   private final Collection<RawImage> rawImageCollection;
 
    public RapidHeightMapThread(ROS2Node ros2Node,
                                ROS2SyncedRobotModel syncedRobotModel,
                                RobotCollisionModel robotCollisionModel,
-                               ImageSensor imageSensor,
-                               int depthImageKey,
+                               Collection<RawImage> rawImageCollection,
                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                HeightMapParameters heightMapParameters,
                                DepthImageFilteringParameters depthImageFilteringParameters)
    {
-      super(imageSensor.getSensorName() + RapidHeightMapThread.class.getSimpleName());
-
-      this.imageSensor = imageSensor;
-      this.depthImageKey = depthImageKey;
+      super(RapidHeightMapThread.class.getSimpleName());
+      this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
-
-      cameraFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
-      zUpSensorFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraZUpFrame();
 
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
@@ -77,8 +73,14 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    {
       try
       {
-         imageSensor.waitForGrab();
-         RawImage depthImage = imageSensor.getImage(depthImageKey);
+         RawImage depthImage = ((LinkedBlockingQueue<RawImage>) rawImageCollection).take();
+
+         // We can get the transform to world from the image and use that to get the desired camera frames
+         RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
+         ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("RealsenseFrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);
+         ZUpFrame cameraZUpFrameInWorld = new ZUpFrame(cameraFrameInWorld, "RealsenseZUpFrameInWorld");
+         // Need to update this due to how its implemented, other the transform to world will be all zeros
+         cameraZUpFrameInWorld.update();
 
          // Get everything we need from the image
          GpuMat latestDepthImage = depthImage.getGpuImageMat();
@@ -86,7 +88,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          GpuMat filteredDepthImage = new GpuMat(latestDepthImage.size(), latestDepthImage.type());
 
          // Process body collisions
-         bodyCollisionFilter.process(latestDepthImage, filteredDepthImage, depthIntrinsicsCopy, cameraFrame);
+         bodyCollisionFilter.process(latestDepthImage, filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld);
 
          if (heightMapParameters.getFlyingPointsFilter())
          {
@@ -106,7 +108,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, depthIntrinsicsCopy, cameraFrame, zUpSensorFrame);
+            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
          }
 
          filteredDepthImage.close();
