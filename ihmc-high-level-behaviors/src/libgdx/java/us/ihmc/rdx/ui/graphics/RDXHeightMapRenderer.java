@@ -45,6 +45,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
    private float cellSize;
    private float heightScalingFactor;
    private float heightOffset;
+   private boolean hasBeenCreated;
 
    public void create(int maxCells)
    {
@@ -56,7 +57,9 @@ public class RDXHeightMapRenderer implements RenderableProvider
       renderable.material = new Material(PBRColorAttribute.createBaseColorFactor(Color.WHITE));
 
       if (renderable.meshPart.mesh != null)
+      {
          renderable.meshPart.mesh.dispose();
+      }
       boolean isStatic = false;
       int maxIndices = 0;
       renderable.meshPart.mesh = new Mesh(isStatic, maxCells, maxIndices, vertexAttributes);
@@ -67,6 +70,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
       registerUniforms(shader);
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
+      hasBeenCreated = true;
    }
 
    // Registers a bunch of uniforms needed in the shader
@@ -167,5 +171,10 @@ public class RDXHeightMapRenderer implements RenderableProvider
    {
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
+   }
+
+   public boolean isHasBeenCreated()
+   {
+      return hasBeenCreated;
    }
 }

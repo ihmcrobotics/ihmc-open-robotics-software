@@ -16,7 +16,7 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -29,7 +29,6 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.perception.globalHeightMap.GlobalLattice;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -53,27 +52,18 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
    private final HeightMapParameters heightMapParameters;
-   private final TerrainMapData terrainMapData;
+   private TerrainMapData latestTerrainMapData;
 
-   private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
-   private final int cellsPerAxisGlobal;
+   private final Point3D heightMapCenter = new Point3D();
 
    private final Stopwatch stopwatch = new Stopwatch();
+   private int cellsPerAxis;
 
    public RDXROS2HeightMapVisualizer(String title, HeightMapParameters heightMapParameters)
    {
       super(title);
 
       this.heightMapParameters = heightMapParameters;
-      int croppedCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      cellsPerAxisGlobal = 2 * croppedCenterIndex + 1;
-
-      heightMap = new Mat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
-      terrainMapData = new TerrainMapData(cellsPerAxisGlobal,
-                                          cellsPerAxisGlobal,
-                                          heightMapParameters.getHeightScaleFactor(),
-                                          heightMapParameters.getHeightOffset());
-
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
@@ -81,14 +71,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    public List<ROS2Topic<?>> getTopics()
    {
       return List.of(PerceptionAPI.HEIGHT_MAP_MESSAGE);
-   }
-
-   @Override
-   public void create()
-   {
-      super.create();
-      heightMapRenderer.create(cellsPerAxisGlobal * cellsPerAxisGlobal);
-      stopwatch.start();
    }
 
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
@@ -121,7 +103,15 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       executorService.clearQueueAndExecute(() ->
                                            {
-                                              zUpToWorldTransform.set(heightMapMessage.getOrientation(), heightMapMessage.getPosition());
+                                              long sequenceId = heightMapMessage.getSequenceId();
+                                              if (sequenceId > 1)
+                                              {
+                                                 // We add +1 here because the height map is
+                                                 cellsPerAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
+                                              }
+
+                                              heightMapCenter.setX(heightMapMessage.getGridCenterX());
+                                              heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
                                               heightMap = HeightMapMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
@@ -165,8 +155,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      TerrainMapData latestTerrainMapData = new TerrainMapData(terrainMapMessage);
-      terrainMapData.set(latestTerrainMapData);
+      latestTerrainMapData = new TerrainMapData(terrainMapMessage);
    }
 
    @Override
@@ -205,12 +194,17 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
+      if (cellsPerAxis > 0 && !heightMapRenderer.isHasBeenCreated())
+      {
+         heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
+         stopwatch.start();
+      }
       if (enableGlobalHeightMapVisualizer.get())
       {
          globalHeightMapGraphic.update();
       }
 
-      if (enableHeightMapRenderer.get() && heightMap != null)
+      if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
       {
          // An additional check here to make sure that we have data in the image
          if (heightMap.ptr(0) != null)
@@ -218,9 +212,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             float pixelScalingFactor = 10000.0f;
             heightMapRenderer.update(heightMap,
                                      (float) heightMapParameters.getHeightOffset(),
-                                     zUpToWorldTransform.getTranslation().getX32(),
-                                     zUpToWorldTransform.getTranslation().getY32(),
-                                     heightMap.rows() / 2,
+                                     heightMapCenter.getX32(),
+                                     heightMapCenter.getY32(),
+                                     cellsPerAxis / 2,
                                      (float) heightMapParameters.getCellSizeInMeters(),
                                      pixelScalingFactor);
          }
@@ -241,7 +235,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             globalHeightMapGraphic.getRenderables(renderables, pool);
          }
 
-         if (enableHeightMapRenderer.get())
+         if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
          {
             heightMapRenderer.getRenderables(renderables, pool);
          }
@@ -254,6 +248,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       super.destroy();
       executorService.destroy();
       globalHeightMapGraphic.destroy();
+      heightMapRenderer.dispose();
    }
 
    public HeightMapData getLatestHeightMapData()
@@ -263,7 +258,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public TerrainMapData getLatestTerrainMapData()
    {
-      return terrainMapData;
+      return latestTerrainMapData;
    }
 
    public RDXOpenCVVideoVisualizer getHeightMapImageVisualizer()

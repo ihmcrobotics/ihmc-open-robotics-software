@@ -1,12 +1,10 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -33,7 +30,6 @@ public class RapidHeightMapManager
    private final RapidHeightMapExtractor rapidHeightMapExtractor;
 
    private final Point3D sensorOrigin = new Point3D();
-   private final FramePose3D cameraPose = new FramePose3D();
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
 
    private final Notification resetHeightMapRequested = new Notification();
@@ -44,10 +40,11 @@ public class RapidHeightMapManager
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestHeightMapData;
+   private final HeightMapData latestTerrainHeightMapData;
+   private final Point3D gridCellLocation = new Point3D();
+   private long sequenceId = 0;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
-                                FullHumanoidRobotModel robotModel,
-                                String robotName,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
@@ -55,9 +52,13 @@ public class RapidHeightMapManager
    {
       this.heightMapParameters = heightMapParameters;
       latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                              (float) heightMapParameters.getTerrainWidthInMeters(),
+                                              (float) heightMapParameters.getGlobalWidthInMeters(),
                                               0.0,
                                               0.0);
+      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                     0.0,
+                                                     0.0);
 
       footSoleFrames.add(leftFootSoleFrame);
       footSoleFrames.add(rightFootSoleFrame);
@@ -70,17 +71,6 @@ public class RapidHeightMapManager
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
-
-      if (robotModel != null)
-      {
-         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
-         {
-            if (message.takeNextData().getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
-            {
-               resetHeightMapRequested.set();
-            }
-         });
-      }
    }
 
    public void updateAndPublishHeightMap(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
@@ -94,20 +84,34 @@ public class RapidHeightMapManager
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
-                                                   latestHeightMapData,
-                                                   sensorOrigin,
-                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                   (float) heightMapParameters.getCellSizeInMeters(),
-                                                   heightMapParameters);
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
-      heightMapMessage.getOrientation().set(cameraPose.getOrientation());
-      heightMapMessage.getPosition().set(cameraPose.getPosition());
-      heightMapMessagePublisher.publish(heightMapMessage);
+      publishHeightMap(hostGlobalHeightMap);
 
       hostGlobalHeightMap.close();
       deviceGlobalHeightMap.close();
+   }
+
+   private void publishHeightMap(Mat hostGlobalHeightMap)
+   {
+      // The center of this map should be centered in the world grid
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
+      int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
+      int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+      gridCellLocation.set(currentCellX * 0.02, currentCellY * 0.02, 0.0);
+      FramePose3D cameraPose = new FramePose3D();
+      cameraPose.getTranslation().set(gridCellLocation);
+
+      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
+                                                   latestHeightMapData,
+                                                   gridCellLocation,
+                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getCellSizeInMeters(),
+                                                   heightMapParameters);
+
+      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
+      sequenceId++;
+      heightMapMessage.setSequenceId(sequenceId);
+      heightMapMessagePublisher.publish(heightMapMessage);
    }
 
    /**
@@ -148,8 +152,6 @@ public class RapidHeightMapManager
       sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
 
       sensorOrigin.set(sensorToWorld.getTranslation());
-      cameraPose.setToZero(cameraZUpFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
       // If we have that parameter set to true, we update the heights of the height map to account for that drift
@@ -168,7 +170,17 @@ public class RapidHeightMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      return latestHeightMapData;
+      GpuMat terrainCroppedHeightMap = rapidHeightMapExtractor.getTerrainCroppedHeightMap();
+      Mat terrainHeightMap = new Mat();
+      terrainCroppedHeightMap.download(terrainHeightMap);
+
+      HeightMapMessageTools.convertToHeightMapData(terrainHeightMap,
+                                                   latestTerrainHeightMapData,
+                                                   gridCellLocation,
+                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getCellSizeInMeters(),
+                                                   heightMapParameters);
+      return latestTerrainHeightMapData;
    }
 
    private double computeFootHeight()

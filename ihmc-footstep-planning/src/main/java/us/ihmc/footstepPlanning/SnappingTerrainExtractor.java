@@ -15,7 +15,6 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
@@ -219,6 +218,7 @@ public class SnappingTerrainExtractor
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
       // --------------------------- Download all the data from the GPU and set the terrain data object ----------------------------
       {
          Mat cpuTerrainCostMap = new Mat();
