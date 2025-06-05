@@ -27,8 +27,7 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 
-import java.util.Collection;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class RapidHeightMapThread extends RepeatingTaskThread
 {
@@ -40,12 +39,12 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    private final HeightMapParameters heightMapParameters;
    private final CUDACompressionTools cudaCompressionTools = new CUDACompressionTools();
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
-   private final Collection<RawImage> rawImageCollection;
+   private final BlockingQueue<RawImage> rawImageCollection;
 
    public RapidHeightMapThread(ROS2Node ros2Node,
                                ROS2SyncedRobotModel syncedRobotModel,
                                RobotCollisionModel robotCollisionModel,
-                               Collection<RawImage> rawImageCollection,
+                               BlockingQueue<RawImage> rawImageCollection,
                                ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                HeightMapParameters heightMapParameters,
                                DepthImageFilteringParameters depthImageFilteringParameters)
@@ -73,7 +72,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    {
       try
       {
-         RawImage depthImage = ((LinkedBlockingQueue<RawImage>) rawImageCollection).take();
+         RawImage depthImage = rawImageCollection.take();
 
          // We can get the transform to world from the image and use that to get the desired camera frames
          RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
