@@ -11,6 +11,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,6 +118,66 @@ public class LeRobotDataset
                                                                 zedVideoDirs);
       episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue, usePerfectTimestamps);
       episodes.add(episode);
+   }
+
+   public void removeLatestEpisode() throws IOException {
+      if (episodes.isEmpty())
+      {
+         LogTools.warn("No episodes to remove.");
+         return;
+      }
+
+      int lastIndex = episodes.size() - 1;
+      LeRobotDatasetEpisode lastEpisode = episodes.get(lastIndex);
+      String episodeName = lastEpisode.getEpisodeName();
+
+      Path parquetToDelete = dataChunk0Path.resolve(episodeName + ".parquet");
+      if (Files.exists(parquetToDelete))
+      {
+         FileTools.deleteQuietly(parquetToDelete);
+         LogTools.info("Deleted Parquet: " + parquetToDelete);
+      }
+      else
+      {
+         LogTools.warn("Parquet does not exist: " + parquetToDelete);
+         return;
+      }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
+         if (Files.exists(mp4Path))
+         {
+            FileTools.deleteQuietly(mp4Path);
+            LogTools.info("Deleted MP4: " + mp4Path);
+         }
+         else
+         {
+            LogTools.warn("MP4 does not exist: " + mp4Path);
+            return;
+         }
+      }
+
+      removeLastLineFromJsonl(episodesJsonlPath);
+      removeLastLineFromJsonl(episodeStatsJsonlPath);
+
+
+      episodes.remove(lastIndex);
+      LogTools.info("Removed episode: " + episodeName);
+      regenerateAndRewriteMetadata();
+   }
+
+   private void removeLastLineFromJsonl(Path jsonlPath) throws IOException {
+      List<String> allLines = Files.readAllLines(jsonlPath);
+
+      if (allLines.isEmpty())
+      {
+         LogTools.warn("JSONL file is empty (nothing to remove): " + jsonlPath);
+         return;
+      }
+      List<String> linesToWrite = allLines.subList(0, allLines.size() - 1);
+      Files.write(jsonlPath, linesToWrite, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+      LogTools.info("Removed last line from " + jsonlPath + " (now has " + linesToWrite.size() + " lines).");
    }
 
    public void regenerateAndRewriteMetadata()

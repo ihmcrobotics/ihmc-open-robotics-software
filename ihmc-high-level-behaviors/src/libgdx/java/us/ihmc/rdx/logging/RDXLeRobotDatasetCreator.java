@@ -22,6 +22,7 @@ import us.ihmc.scs2.session.log.LogDataReader;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Queue;
@@ -162,6 +163,14 @@ public class RDXLeRobotDatasetCreator
          if (ImGui.button(labels.get("Add Episode")))
          {
             dataset.addEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add); // Use queue to maintain framerate
+         }
+         if (ImGui.button(labels.get("Remove Episode")))
+         {
+             try {
+                 dataset.removeLatestEpisode();
+             } catch (IOException e) {
+                 throw new RuntimeException(e);
+             }
          }
          ImGui.endDisabled();
 
