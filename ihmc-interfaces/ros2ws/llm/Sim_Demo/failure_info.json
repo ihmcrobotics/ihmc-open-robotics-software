@@ -1,0 +1,14 @@
+{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.3433058351366044
+}{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition"
+}{
+    "Failed behavior": "GOTO",
+    "Description": "Go to Action",
+    "Type": "FootstepPlanActionDefinition"
+}

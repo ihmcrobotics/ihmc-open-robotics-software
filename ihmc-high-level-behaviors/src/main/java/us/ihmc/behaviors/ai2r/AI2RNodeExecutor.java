@@ -274,9 +274,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             if (!leaf.getCanExecute())
             {
                actionFailureMissingFrame = true;
+               leaf.setFailed(true);
             }
          }
-         String targetObject;
 
          // Check if we are executing Receive object action and active/de-active foundationPose tracking
          if (leaf.getParent().getDefinition().getName().contains("ReceiveObject"))
@@ -288,6 +288,20 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          if (leaf.getDefinition().getName().contains("SCANNING") && leaf instanceof WaitDurationActionState waitActionState)
          {
             trackingObjectsInProgress |= waitActionState.getIsExecuting();
+         }
+
+         if (leaf.getDefinition().getName().contains("END OF SCAN"))
+         {
+            if (leaf.getIsNextForExecution())
+            {
+               var objectsToScan = skillEditor.getObjectsToScan();
+               if (objectsToScan.size() > 1)
+               {
+                  objectsToScan.remove(0);
+                  skillEditor.updateScan(state);
+                  state.getActionSequence().setExecutionNextIndex(skillEditor.getCommandedBehaviorIndex());
+               }
+            }
          }
 
          // Check if Goto action is executing and if next steps are colliding with objects in the scene
@@ -329,7 +343,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
       if (foundationPoseManager != null)
       {
-         String objectToTrack = skillEditor.getTargetObject();
+         String objectToTrack = skillEditor.getObjectToTrack();
          if (objectToTrack == null)
          {
             foundationPoseManager.setActive(trackingObjectsInProgress);

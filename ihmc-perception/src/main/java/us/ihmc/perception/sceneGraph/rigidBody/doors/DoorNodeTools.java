@@ -17,7 +17,7 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinit
 
 public final class DoorNodeTools
 {
-   public static final String DOOR_HELPER_NODE_NAME_PREFIX = "doorStaticHandle";
+   public static final String DOOR_HELPER_NODE_NAME_PREFIX = "doorStatic";
 
    private static final List<String> doorOpeningMechanismDetectionNames = new ArrayList<>();
    private static final String doorPanelDetectionName = "door_panel";

@@ -1,5 +1,5 @@
 
-# Target reference frame (object) to look for
-string target_object
+# Target reference frames (objects) to look for
+string[] target_objects
 
 

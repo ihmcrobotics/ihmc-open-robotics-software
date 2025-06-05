@@ -319,7 +319,12 @@ public class SceneGraph
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, "Ignore_" + detection.getDetectedObjectName(), getCRDTInfo(), detection);
+      {
+         String nodeName = detection.getDetectedObjectName();
+         if (!nodeName.contains("Person"))
+            nodeName = "Ignore_" + nodeName;
+         detectableNode = new YOLOv8Node(newNodeID, nodeName, getCRDTInfo(), detection);
+      }
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
          detectableNode = new CenterposeNode(newNodeID, detection.getDetectedObjectName(), detection, true, getCRDTInfo());
       else if (detectionClass.equals(FoundationPoseInstantDetection.class))

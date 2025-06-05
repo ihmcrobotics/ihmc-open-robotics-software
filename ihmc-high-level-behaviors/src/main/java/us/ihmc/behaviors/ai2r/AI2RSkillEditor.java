@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.idl.IDLSequence.StringBuilderHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,37 +30,46 @@ public class AI2RSkillEditor
 
       public static final AI2RSkillEditor.SpatialRelationType[] values = values();
    }
-   private String targetObject;
+   private StringBuilderHolder objectsToScan;
+   private String objectToTrack;
+   private int commandedBehaviorIndex;
 
    public void adaptSkills(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
    {
-      updateScan(behaviorToExecuteName, state, message, commandedBehaviorIndex);
-      updateGoTo(behaviorToExecuteName, state, message, commandedBehaviorIndex);
-      updateReceiveObject(behaviorToExecuteName, state, message, commandedBehaviorIndex);
-      updatePickAndPlace(behaviorToExecuteName, state, message, commandedBehaviorIndex);
+      this.commandedBehaviorIndex = commandedBehaviorIndex;
+      updateScan(behaviorToExecuteName, state, message);
+      updateGoTo(behaviorToExecuteName, state, message);
+      updateReceiveObject(behaviorToExecuteName, state, message);
+      updatePickAndPlace(behaviorToExecuteName, state, message);
    }
 
-   private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   private void updateScan(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
       if (behaviorToExecuteName.contains("SCAN") && message.getAdaptingBehavior())
       {
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         AI2RScanMessage scanMessage = message.getScan();
+         objectsToScan = scanMessage.getTargetObjects();
+         updateScan(state);
+      }
+   }
+
+   public void updateScan(AI2RNodeState state)
+   {
+      for (var leaf : state.getActionSequence().getOrderedLeaves())
+      {
+         if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("Scan"))
          {
-            if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("Scan"))
+            String scanTarget = objectsToScan.get(0).toString();
+            if (!scanTarget.isEmpty())
             {
-               AI2RScanMessage scanMessage = message.getScan();
-               String scanTarget = scanMessage.getTargetObjectAsString();
-               if (!scanTarget.isEmpty())
-               {
-                  targetObject = scanTarget;
-               }
-               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanTarget);
+               objectToTrack = scanTarget;
             }
+            conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanTarget);
          }
       }
    }
 
-   private void updateGoTo(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   private void updateGoTo(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
       if (behaviorToExecuteName.contains("GOTO") && message.getAdaptingBehavior())
       {
@@ -154,7 +164,7 @@ public class AI2RSkillEditor
       }
    }
 
-   private void updateReceiveObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   private void updateReceiveObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
       if (behaviorToExecuteName.contains("RECEIVE") && message.getAdaptingBehavior())
       {
@@ -166,7 +176,7 @@ public class AI2RSkillEditor
                String receiveObject = receiveMessage.getObjectNameAsString();
                if (!receiveObject.isEmpty())
                {
-                  targetObject = receiveObject;
+                  objectToTrack = receiveObject;
                }
                conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveObject);
                conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
@@ -207,7 +217,7 @@ public class AI2RSkillEditor
       }
    }
 
-   private void updatePickAndPlace(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message, int commandedBehaviorIndex)
+   private void updatePickAndPlace(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
       if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
       {
@@ -227,8 +237,18 @@ public class AI2RSkillEditor
       }
    }
 
-   public String getTargetObject()
+   public String getObjectToTrack()
    {
-      return targetObject;
+      return objectToTrack;
+   }
+
+   public StringBuilderHolder getObjectsToScan()
+   {
+      return objectsToScan;
+   }
+
+   public int getCommandedBehaviorIndex()
+   {
+      return commandedBehaviorIndex;
    }
 }

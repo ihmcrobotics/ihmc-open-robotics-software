@@ -42,11 +42,11 @@ def behavior_message_callback(msg):
     if not initialized:
         # --------- Scene -----------
         scene_objects = msg.objects
-#         print("Objects in the scene:")
+        #print("Objects in the scene:")
         if scene_objects:  # This checks if the list is not empty
            for obj in scene_objects:
                id = obj.object_name
-               print(f"{id}")
+               #print(f"{id}")
                pose_in_world = obj.object_pose_in_world
                pose_wrt_robot = obj.object_pose_in_robot_frame # This is the pose specified wrt to robot_pose
 
@@ -210,7 +210,7 @@ def behavior_message_callback(msg):
             # Load the config file for SCAN action
             print("Loading config for SCAN action")
             llm                 = LLMInterface(config_file="config_scan.json")
-            llm_input           = "task_description : " + task_description
+            llm_input           = ""
             response            = llm.call_model(llm_input)
             print(" --------- Output for SCAN action: --------- \n", response)
             # Replace single quotes with double quotes and remove any trailing commas or leading/trailing whitespace
@@ -221,7 +221,9 @@ def behavior_message_callback(msg):
 
             # Extract variables
             target_objects = data['target_objects']
-            print(target_objects)
+            new_scan_behavior.target_objects = target_objects
+            
+            behavior_command.scan = new_scan_behavior
 
         # Code for loading config files for different actions Eg: GOTO, RECEIVE, etc.
         if (behavior_command.behavior_to_execute == "GOTO"):

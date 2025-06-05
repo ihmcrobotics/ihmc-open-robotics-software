@@ -12,9 +12,9 @@ module behavior_msgs
       struct AI2RScanMessage
       {
         /**
-         * Target reference frame (object) to look for
+         * Target reference frames (objects) to look for
          */
-        string target_object;
+        sequence<string> target_objects;
       };
     };
   };

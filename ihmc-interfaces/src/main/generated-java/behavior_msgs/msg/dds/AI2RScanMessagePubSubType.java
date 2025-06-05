@@ -15,7 +15,7 @@ public class AI2RScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<b
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "54361c9c28795ae5659fceb65002cafcd9908505c18d30199e8c0c10e5b35769";
+   		return "d75d2857565d53aeb7a7216bca686473fc29f5a1d69da77f680ab6166e16df2c";
    }
    
    @Override
@@ -52,7 +52,10 @@ public class AI2RScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<b
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
       return current_alignment - initial_alignment;
    }
 
@@ -65,35 +68,38 @@ public class AI2RScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<b
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getTargetObject().length() + 1;
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getTargetObjects().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getTargetObjects().get(i0).length() + 1;
+      }
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.AI2RScanMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getTargetObject().length() <= 255)
-      cdr.write_type_d(data.getTargetObject());else
-          throw new RuntimeException("target_object field exceeds the maximum length: %d > %d".formatted(data.getTargetObject().length(), 255));
+      if(data.getTargetObjects().size() <= 100)
+      cdr.write_type_e(data.getTargetObjects());else
+          throw new RuntimeException("target_objects field exceeds the maximum length: %d > %d".formatted(data.getTargetObjects().size(), 100));
 
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RScanMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.read_type_d(data.getTargetObject());	
+      cdr.read_type_e(data.getTargetObjects());	
 
    }
 
    @Override
    public final void serialize(behavior_msgs.msg.dds.AI2RScanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("target_object", data.getTargetObject());
+      ser.write_type_e("target_objects", data.getTargetObjects());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RScanMessage data)
    {
-      ser.read_type_d("target_object", data.getTargetObject());
+      ser.read_type_e("target_objects", data.getTargetObjects());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RScanMessage src, behavior_msgs.msg.dds.AI2RScanMessage dest)

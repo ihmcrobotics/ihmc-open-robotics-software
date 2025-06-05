@@ -9,13 +9,13 @@ import us.ihmc.pubsub.TopicDataType;
 public class AI2RScanMessage extends Packet<AI2RScanMessage> implements Settable<AI2RScanMessage>, EpsilonComparable<AI2RScanMessage>
 {
    /**
-            * Target reference frame (object) to look for
+            * Target reference frames (objects) to look for
             */
-   public java.lang.StringBuilder target_object_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  target_objects_;
 
    public AI2RScanMessage()
    {
-      target_object_ = new java.lang.StringBuilder(255);
+      target_objects_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (100, "type_d");
    }
 
    public AI2RScanMessage(AI2RScanMessage other)
@@ -26,32 +26,16 @@ public class AI2RScanMessage extends Packet<AI2RScanMessage> implements Settable
 
    public void set(AI2RScanMessage other)
    {
-      target_object_.setLength(0);
-      target_object_.append(other.target_object_);
+      target_objects_.set(other.target_objects_);
    }
 
-   /**
-            * Target reference frame (object) to look for
-            */
-   public void setTargetObject(java.lang.String target_object)
-   {
-      target_object_.setLength(0);
-      target_object_.append(target_object);
-   }
 
    /**
-            * Target reference frame (object) to look for
+            * Target reference frames (objects) to look for
             */
-   public java.lang.String getTargetObjectAsString()
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getTargetObjects()
    {
-      return getTargetObject().toString();
-   }
-   /**
-            * Target reference frame (object) to look for
-            */
-   public java.lang.StringBuilder getTargetObject()
-   {
-      return target_object_;
+      return target_objects_;
    }
 
 
@@ -72,7 +56,7 @@ public class AI2RScanMessage extends Packet<AI2RScanMessage> implements Settable
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.target_object_, other.target_object_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.target_objects_, other.target_objects_, epsilon)) return false;
 
       return true;
    }
@@ -86,7 +70,7 @@ public class AI2RScanMessage extends Packet<AI2RScanMessage> implements Settable
 
       AI2RScanMessage otherMyClass = (AI2RScanMessage) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.target_object_, otherMyClass.target_object_)) return false;
+      if (!this.target_objects_.equals(otherMyClass.target_objects_)) return false;
 
       return true;
    }
@@ -97,8 +81,8 @@ public class AI2RScanMessage extends Packet<AI2RScanMessage> implements Settable
       StringBuilder builder = new StringBuilder();
 
       builder.append("AI2RScanMessage {");
-      builder.append("target_object=");
-      builder.append(this.target_object_);
+      builder.append("target_objects=");
+      builder.append(this.target_objects_);
       builder.append("}");
       return builder.toString();
    }
