@@ -154,6 +154,12 @@ public class RealSenseImageSensor extends ImageSensor
    }
 
    @Override
+   public int[] getImageKeys()
+   {
+      return new int[] {COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY};
+   }
+
+   @Override
    public RawImage getImage(int imageKey)
    {
       synchronized (grabbedImages)

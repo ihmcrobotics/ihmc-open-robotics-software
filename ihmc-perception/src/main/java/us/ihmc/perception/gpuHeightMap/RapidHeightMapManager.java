@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -103,7 +104,7 @@ public class RapidHeightMapManager
       HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
                                                    latestHeightMapData,
                                                    gridCellLocation,
-                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                   (float) heightMapParameters.getGlobalWidthInMeters(),
                                                    (float) heightMapParameters.getCellSizeInMeters(),
                                                    heightMapParameters);
 

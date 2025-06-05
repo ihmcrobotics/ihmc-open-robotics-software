@@ -27,6 +27,7 @@ public class RDXSimulatedImageSensor extends ImageSensor
 
    private final Map<Integer, RawImage> grabbedImages = new HashMap<>();
    private final Map<Integer, RDXSimulatedCamera> imageKeyToCameraMap = new HashMap<>();
+   private int[] imageKeys;
 
    private final Throttler grabThrottler = new Throttler();
 
@@ -98,6 +99,11 @@ public class RDXSimulatedImageSensor extends ImageSensor
          imageKeyToCameraMap.put(colorImageKey, camera);
       if (hasDepth)
          imageKeyToCameraMap.put(depthImageKey, camera);
+
+      imageKeys = new int[imageKeyToCameraMap.size()];
+      int i = 0;
+      for (Integer key : imageKeyToCameraMap.keySet())
+         imageKeys[i++] = key;
    }
 
    public void create(RDX3DScene scene)
@@ -174,6 +180,12 @@ public class RDXSimulatedImageSensor extends ImageSensor
       }
 
       return true;
+   }
+
+   @Override
+   public int[] getImageKeys()
+   {
+      return imageKeys;
    }
 
    @Override
