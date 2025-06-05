@@ -56,7 +56,7 @@ public class RDXLeRobotTestSimulator
    private final RDXSCS2LogSession logSession;
    private final ZEDSVOScrubber zedScrubber;
    private final SideDependentList<YoPose3D> logHandPoses = new SideDependentList<>();
-   private final SideDependentList<RDXReferenceFrameGraphic> handGraphics = new SideDependentList<>();
+   private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoses = new SideDependentList<>();
    private long lastZEDTimestamp = -1;
    private final ROS2Node ros2Node;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -84,13 +84,7 @@ public class RDXLeRobotTestSimulator
       this.logSession = logSession;
 
       zedScrubber = logSession.getFirstZEDScrubber();
-      for (RobotSide side : RobotSide.values)
-         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(side, "Current", logSession.getSession().getRootRegistry()));
-      for (RobotSide robotSide : RobotSide.values){
-         RDXReferenceFrameGraphic frame = new RDXReferenceFrameGraphic(0.3);
-         handGraphics.put(robotSide, frame);
-         baseUI.getPrimaryScene().addRenderableProvider(handGraphics.get(robotSide));
-      }
+
       ros2Node = new ROS2NodeBuilder().build("lerobot_test_ui");
       DRCRobotModel robotModel = robotModelSupplier.get();
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(ros2Node, robotModel.getSimpleRobotName());
@@ -98,6 +92,15 @@ public class RDXLeRobotTestSimulator
       robotVisualizer = new RDXROS2RobotVisualizer(ros2, syncedRobot);
       robotVisualizer.createAndSetupStandalone(baseUI);
       robotVisualizer.setActive(false);
+
+      for (RobotSide side : RobotSide.values)
+      {
+         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(side, "Current", logSession.getSession().getRootRegistry()));
+
+         RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
+         actionHandPoses.put(side, graphic);
+         baseUI.getPrimaryScene().addRenderableProvider(graphic);
+      }
    }
 
    public void update()
@@ -127,9 +130,10 @@ public class RDXLeRobotTestSimulator
                inferenceManager.publishImage(side, bgra8Mat);
             }
          }
-         for(RobotSide robotSide : RobotSide.values){
-            Pose3D pose = inferenceManager.getActionHandPoses().get(robotSide);
-            handGraphics.get(robotSide).setPoseInWorldFrame(pose);
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            actionHandPoses.get(robotSide).setPoseInWorldFrame(inferenceManager.getActionHandPoses().get(robotSide));
          }
       }
    }
