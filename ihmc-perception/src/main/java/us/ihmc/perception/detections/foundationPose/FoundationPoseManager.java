@@ -66,14 +66,19 @@ public class FoundationPoseManager
     */
    public void setObjectClassTracking(String objectClass, boolean shouldTrack)
    {
-      String fullObjectClassName = objectClass + ".obj";
+      String objectClassNoNumber = objectClass.replaceAll("\\d+$", "");
+      String fullObjectClassName = objectClassNoNumber + ".obj";
       if (!FoundationPoseTools.getAvailableMeshes().contains(fullObjectClassName))
-         throw new IllegalArgumentException("FoundationPose cannot track objects of class " + objectClass + " because we don't have a mesh for it");
-
-      if (shouldTrack)
-         objectsToTrack.add(fullObjectClassName);
+      {
+         LogTools.error("FoundationPose cannot track objects of class " + objectClass + " because we don't have a mesh for it");
+      }
       else
-         objectsToTrack.remove(fullObjectClassName);
+      {
+         if (shouldTrack)
+            objectsToTrack.add(fullObjectClassName);
+         else
+            objectsToTrack.remove(fullObjectClassName);
+      }
    }
 
    /**

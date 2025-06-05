@@ -222,16 +222,19 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                         failureMessage.setOrientationTolerance(action.getOrientationDistanceToGoalTolerance());
                         failureMessage.setPositionTolerance(action.getPositionDistanceToGoalTolerance());
 
-                        var desiredValue = handPoseAction.getCommandedTrajectory().getLastValueReadOnly();
-                        var actualValue = handPoseAction.getCurrentPose().getValueReadOnly();
+                        if (!handPoseAction.getCommandedTrajectory().isEmpty())
+                        {
+                           var desiredValue = handPoseAction.getCommandedTrajectory().getLastValueReadOnly();
+                           var actualValue = handPoseAction.getCurrentPose().getValueReadOnly();
 
-                        Quaternion errorOrientation = new Quaternion(actualValue.getOrientation());
-                        errorOrientation.multiply(desiredValue.getOrientation());
-                        failureMessage.getOrientationError().set(errorOrientation);
+                           Quaternion errorOrientation = new Quaternion(actualValue.getOrientation());
+                           errorOrientation.multiply(desiredValue.getOrientation());
+                           failureMessage.getOrientationError().set(errorOrientation);
 
-                        Point3D errorPosition = new Point3D(desiredValue.getPosition());
-                        errorPosition.sub(actualValue.getPosition());
-                        failureMessage.getPositionError().set(errorPosition);
+                           Point3D errorPosition = new Point3D(desiredValue.getPosition());
+                           errorPosition.sub(actualValue.getPosition());
+                           failureMessage.getPositionError().set(errorPosition);
+                        }
 
                         failureMessage.setActionFrame(handPoseAction.getDefinition().getPalmParentFrameName());
                         failureMessage.setActionType(handPoseAction.getDefinition().getClass().getSimpleName());
