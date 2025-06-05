@@ -78,7 +78,8 @@ def behavior_message_callback(msg):
 
         if failure.missing_frame:
             failure_info["Missing Frame"] = failure.reference_frame
-
+        if failure.collision_name != "-":
+            failure_info["Collision with"] = failure.collision_name
         position_error = failure.position_error
         error_vector = np.array([position_error.x, position_error.y, position_error.z])
         norm = np.linalg.norm(error_vector)
