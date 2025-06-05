@@ -16,6 +16,7 @@ import us.ihmc.tools.io.JSONFileTools;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -122,7 +123,8 @@ public class LeRobotDataset
       episodes.add(episode);
    }
 
-   public void removeEpisode(int index) throws IOException {
+   public void removeEpisode(int index) throws IOException
+   {
       if (episodes.isEmpty())
       {
          LogTools.warn("No episodes to remove.");
@@ -166,7 +168,6 @@ public class LeRobotDataset
       shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
       shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
 
-
       episodes.remove(episodes.size() - 1);
       LogTools.info("Removed episode: " + episodeName);
       regenerateAndRewriteMetadata();
@@ -174,11 +175,11 @@ public class LeRobotDataset
 
    private void changeNumbers(int index, int finalNumber, Path fileSpot, String fileType)
    {
-      for(int i=index+1; i<finalNumber; i++)
+      for (int i = index + 1; i < finalNumber; i++)
       {
          LeRobotDatasetEpisode moveEpisode = episodes.get(i);
          String episodeName = moveEpisode.getEpisodeName();
-         LeRobotDatasetEpisode newEpisode = episodes.get(i-1);
+         LeRobotDatasetEpisode newEpisode = episodes.get(i - 1);
          String newEpisodeName = newEpisode.getEpisodeName();
 
          Path parquetToMove = fileSpot.resolve(episodeName + fileType);
@@ -193,6 +194,7 @@ public class LeRobotDataset
          }
       }
    }
+
    private void shiftEpisodeIndicesInJsonl(Path jsonlPath, int removedIndex) throws IOException
    {
       // Read all JSONL lines
@@ -217,23 +219,23 @@ public class LeRobotDataset
 
          JsonNode root = mapper.readTree(line);
 
-         JsonNode epIndexNode = root.get("episode_index");
-         if (epIndexNode != null && epIndexNode.isInt())
+         JsonNode episdoeIndexNode = root.get("episode_index");
+         if (episdoeIndexNode != null && episdoeIndexNode.isInt())
          {
-            int oldIdx = epIndexNode.intValue();
-            if (oldIdx > removedIndex)
+            int oldIndex = episdoeIndexNode.intValue();
+            if (oldIndex > removedIndex)
             {
-               ((ObjectNode) root).put("episode_index", oldIdx - 1);
+               ((ObjectNode) root).put("episode_index", oldIndex - 1);
             }
          }
          rewritten.add(mapper.writeValueAsString(root));
       }
-      Files.write(jsonlPath,
-              rewritten,
-              java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+      Files.write(jsonlPath, rewritten, StandardOpenOption.TRUNCATE_EXISTING);
       LogTools.info("Shifted episode_index in JSONL: " + jsonlPath + " (removedIndex=" + removedIndex + ").");
    }
-   private void removeLineFromJsonl(Path jsonlPath, int index) throws IOException {
+
+   private void removeLineFromJsonl(Path jsonlPath, int index) throws IOException
+   {
       List<String> allLines = Files.readAllLines(jsonlPath);
 
       if (allLines.isEmpty())
@@ -252,7 +254,7 @@ public class LeRobotDataset
          secondLines = allLines.subList(index + 1, allLines.size());
       }
       linesToWrite.addAll(secondLines);
-      Files.write(jsonlPath, linesToWrite, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+      Files.write(jsonlPath, linesToWrite, StandardOpenOption.TRUNCATE_EXISTING);
       LogTools.info("Removed last line from " + jsonlPath + " (now has " + linesToWrite.size() + " lines).");
    }
 

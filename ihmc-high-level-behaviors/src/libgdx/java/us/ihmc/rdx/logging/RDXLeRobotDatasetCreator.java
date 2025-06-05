@@ -173,8 +173,8 @@ public class RDXLeRobotDatasetCreator
             List<LeRobotDatasetEpisode> episodes = dataset.getEpisodes();
             for (int i = 0; i < episodes.size(); i++)
             {
-               LeRobotDatasetEpisode ep = episodes.get(i);
-               String name = ep.getEpisodeName();
+               LeRobotDatasetEpisode episode = episodes.get(i);
+               String name = episode.getEpisodeName();
                String selectableLabel = String.format("%d: %s", i, name);
                if (ImGui.selectable(selectableLabel))
                {
