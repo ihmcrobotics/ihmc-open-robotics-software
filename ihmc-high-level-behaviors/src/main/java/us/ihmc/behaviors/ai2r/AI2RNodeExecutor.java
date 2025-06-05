@@ -158,6 +158,10 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             isRoot = false;
             continue;
          }
+         if (nodeName.contains("Ignore"))
+         {
+            continue;
+         }
          AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
          objectMessage.setObjectName(nodeName);
          ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
