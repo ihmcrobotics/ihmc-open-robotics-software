@@ -41,7 +41,7 @@ public class RapidHeightMapManager
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestHeightMapData;
    private final HeightMapData latestTerrainHeightMapData;
-   private Point3D gridCellLocation = new Point3D();
+   private final Point3D gridCellLocation = new Point3D();
    private long sequenceId = 0;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
@@ -111,8 +111,6 @@ public class RapidHeightMapManager
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
-      heightMapMessage.getOrientation().set(cameraPose.getOrientation());
-      heightMapMessage.getPosition().set(cameraPose.getPosition());
       heightMapMessagePublisher.publish(heightMapMessage);
    }
 

@@ -55,11 +55,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private TerrainMapData latestTerrainMapData;
 
    private final Point3D heightMapCenter = new Point3D();
-   private final int cellsPerAxisGlobal;
 
    private final Stopwatch stopwatch = new Stopwatch();
-   private int cellsOnYAxis;
-   private int cellsOnXAxis;
+   private int cellsPerAxis;
 
    public RDXROS2HeightMapVisualizer(String title, HeightMapParameters heightMapParameters)
    {
@@ -109,8 +107,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 cellsOnXAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
-                                                 cellsOnYAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
+                                                 cellsPerAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
                                               }
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
@@ -197,9 +194,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (cellsOnXAxis > 0 && cellsOnYAxis > 0 && !heightMapRenderer.isHasBeenCreated())
+      if (cellsPerAxis > 0 && !heightMapRenderer.isHasBeenCreated())
       {
-         heightMapRenderer.create(cellsOnXAxis * cellsOnYAxis);
+         heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
          stopwatch.start();
       }
       if (enableGlobalHeightMapVisualizer.get())
@@ -217,7 +214,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                      (float) heightMapParameters.getHeightOffset(),
                                      heightMapCenter.getX32(),
                                      heightMapCenter.getY32(),
-                                     cellsOnXAxis / 2,
+                                     cellsPerAxis / 2,
                                      (float) heightMapParameters.getCellSizeInMeters(),
                                      pixelScalingFactor);
          }
