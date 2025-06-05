@@ -250,6 +250,11 @@ public class RDXLeRobotTestSimulator
                inferenceManager.setRunning(runInference.get());
             }
 
+            if (ImGui.button(labels.get("Connect to Python")))
+            {
+               inferenceManager.startPythonServer();
+            }
+
             ImGui.text("Python side status: %.2f Hz".formatted(inferenceManager.getStatusFrequency()));
 
             ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
