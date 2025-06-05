@@ -114,10 +114,10 @@ public abstract class ImageSensor implements AutoCloseable
     * Although any class that implements {@link Collection} can be passed in, the implementation of
     * the {@link Collection#add(Object)} method should not take a significant amount of time.
     *
-    * @param imageKey The key for images to be collected.
     * @param imageCollector Collection into which the images will be added.
+    * @param imageKey The key for images to be collected.
     */
-   public void registerImageCollector(int imageKey, Collection<RawImage> imageCollector)
+   public void registerImageCollector(Collection<RawImage> imageCollector, int imageKey)
    {
       if (imageCollectors.containsKey(imageKey))
          imageCollectors.get(imageKey).add(imageCollector);
