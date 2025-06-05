@@ -185,7 +185,8 @@ public class FoundationPoseManager
 
             // If detection was bad within the last second, we shouldn't be tracking it
             Instant lastBadDetectionTime = allYOLODetections.get(detection);
-            if (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime) || !objectTrackingIsActive(detection.getDetectedObjectName()))
+            if ((!detection.getDetectedObjectName().contains("charge") && (lastBadDetectionTime == null || lastBadDetectionTime.isAfter(goodDetectionTime))) ||
+                !objectTrackingIsActive(detection.getDetectedObjectName()))
             {
                LogTools.debug("Removing {}", objectId);
                communicator.remove(objectId);

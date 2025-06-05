@@ -9,7 +9,7 @@ public class FoundationPoseTools
 {
    private static final Map<String, String> YOLO_CLASS_TO_OBJECT_MESH_MAP
          = Map.of("bottle", "Mustard.obj",
-                  "door_panel", "DoorPanel.obj",
+                  "door_panel", "Door.obj",
                   "charge", "Charge.obj",
                   "traffic_barrier", "Barrier.obj");
 
