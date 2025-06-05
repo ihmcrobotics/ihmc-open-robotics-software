@@ -2,6 +2,7 @@ package us.ihmc.rdx.simulation.sensors;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -190,12 +191,19 @@ public class RDXSimulatedImageSensor extends ImageSensor
       if (!isRunning || !grabThrottler.run())
          return;
 
-      RigidBodyTransform sensorTransformToRoot = sensorFrame.getTransformToRoot();
-
-      for (RDXSimulatedCamera camera : cameras)
+      try // Something throws NotARotationMatrixExceptions. Race condition?
       {
-         // Render the camera's view
-         camera.render(sensorTransformToRoot);
+         RigidBodyTransform sensorTransformToRoot = sensorFrame.getTransformToRoot();
+
+         for (RDXSimulatedCamera camera : cameras)
+         {
+            // Render the camera's view
+            camera.render(sensorTransformToRoot);
+         }
+      }
+      catch (NotARotationMatrixException notARotationMatrixException)
+      {
+         LogTools.error(notARotationMatrixException);
       }
 
       synchronized (renderedNotification)
@@ -279,18 +287,11 @@ public class RDXSimulatedImageSensor extends ImageSensor
       public void render(RigidBodyTransform sensorTransformToWorld)
       {
          // Find the world to part transform
-         try // Something throws NotARotationMatrixExceptions. Race condition?
-         {
-            cameraFrame.update();
-            RigidBodyTransform cameraToWorldTransform = cameraFrame.getTransformToRoot();
+         cameraFrame.update();
+         RigidBodyTransform cameraToWorldTransform = cameraFrame.getTransformToRoot();
 
-            // Render
-            super.render(cameraToWorldTransform);
-         }
-         catch (Exception exception)
-         {
-            LogTools.error(exception);
-         }
+         // Render
+         super.render(cameraToWorldTransform);
       }
 
       public int getColorImageKey()
