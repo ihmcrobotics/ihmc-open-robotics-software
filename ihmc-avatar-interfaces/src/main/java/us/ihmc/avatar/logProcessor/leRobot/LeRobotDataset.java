@@ -1,5 +1,7 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
@@ -134,7 +136,7 @@ public class LeRobotDataset
       if (Files.exists(parquetToDelete))
       {
          FileTools.deleteQuietly(parquetToDelete);
-//         changeNumbers(index, episodes.size(), ".parquet");
+         changeNumbers(index, episodes.size(), dataChunk0Path, ".parquet");
          LogTools.info("Deleted Parquet: " + parquetToDelete);
       }
       else
@@ -149,7 +151,7 @@ public class LeRobotDataset
          if (Files.exists(mp4Path))
          {
             FileTools.deleteQuietly(mp4Path);
-//            changeNumbers(index, episodes.size(), ".mp4");
+            changeNumbers(index, episodes.size(), zedVideoDirs.get(side), ".mp4");
             LogTools.info("Deleted MP4: " + mp4Path);
          }
          else
@@ -161,14 +163,16 @@ public class LeRobotDataset
 
       removeLineFromJsonl(episodesJsonlPath, index);
       removeLineFromJsonl(episodeStatsJsonlPath, index);
+      shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
+      shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
 
 
-      episodes.remove(index);
+      episodes.remove(episodes.size() - 1);
       LogTools.info("Removed episode: " + episodeName);
       regenerateAndRewriteMetadata();
    }
 
-   private void changeNumbers(int index, int finalNumber, String fileType)
+   private void changeNumbers(int index, int finalNumber, Path fileSpot, String fileType)
    {
       for(int i=index+1; i<finalNumber; i++)
       {
@@ -177,8 +181,8 @@ public class LeRobotDataset
          LeRobotDatasetEpisode newEpisode = episodes.get(i-1);
          String newEpisodeName = newEpisode.getEpisodeName();
 
-         Path parquetToMove = dataChunk0Path.resolve(episodeName + fileType);
-         Path parquetSpot = dataChunk0Path.resolve(newEpisodeName + fileType);
+         Path parquetToMove = fileSpot.resolve(episodeName + fileType);
+         Path parquetSpot = fileSpot.resolve(newEpisodeName + fileType);
          try
          {
             Files.move(parquetToMove, parquetSpot);
@@ -188,6 +192,46 @@ public class LeRobotDataset
             LogTools.error("Failed to move parquet file: " + parquetToMove);
          }
       }
+   }
+   private void shiftEpisodeIndicesInJsonl(Path jsonlPath, int removedIndex) throws IOException
+   {
+      // Read all JSONL lines
+      List<String> allLines = Files.readAllLines(jsonlPath);
+      if (allLines.isEmpty())
+      {
+         LogTools.warn("JSONL is empty, nothing to shift: " + jsonlPath);
+         return;
+      }
+
+      ObjectMapper mapper = new ObjectMapper();
+      List<String> rewritten = new ArrayList<>(allLines.size());
+
+      for (int lineIdx = 0; lineIdx < allLines.size(); lineIdx++)
+      {
+         String line = allLines.get(lineIdx).trim();
+         if (line.isEmpty())
+         {
+            rewritten.add(line);
+            continue;
+         }
+
+         JsonNode root = mapper.readTree(line);
+
+         JsonNode epIndexNode = root.get("episode_index");
+         if (epIndexNode != null && epIndexNode.isInt())
+         {
+            int oldIdx = epIndexNode.intValue();
+            if (oldIdx > removedIndex)
+            {
+               ((ObjectNode) root).put("episode_index", oldIdx - 1);
+            }
+         }
+         rewritten.add(mapper.writeValueAsString(root));
+      }
+      Files.write(jsonlPath,
+              rewritten,
+              java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+      LogTools.info("Shifted episode_index in JSONL: " + jsonlPath + " (removedIndex=" + removedIndex + ").");
    }
    private void removeLineFromJsonl(Path jsonlPath, int index) throws IOException {
       List<String> allLines = Files.readAllLines(jsonlPath);
