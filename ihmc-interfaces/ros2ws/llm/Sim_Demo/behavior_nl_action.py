@@ -77,6 +77,8 @@ def behavior_message_callback(msg):
 
         if failure.missing_frame:
             failure_info["Missing Frame"] = failure.reference_frame
+        if failure.collision_name != "-":
+            failure_info["Collision Object"] = failure.collision_name
 
         position_error = failure.position_error
         error_vector = np.array([position_error.x, position_error.y, position_error.z])
@@ -88,6 +90,24 @@ def behavior_message_callback(msg):
         with open(json_filename, 'a') as json_file:
             json.dump(failure_info, json_file, indent=4)
         loggedFailure = True
+            # Pretty-print the failure_info dictionary for the user
+        print("A failure has occurred. Details:")
+        print(json.dumps(failure_info, indent=4))
+
+        # Ask the user how to proceed
+        user_input = input("Type 'continue' to rerun or 'exit' to stop or next steps to follow: ").strip().lower()
+        if user_input == 'exit':
+            print("Exiting due to failure.")
+            exit(1)
+        elif user_input == 'continue':
+            print("rerunning the same command.")
+            # Add next_behavior  and task_description to front of plan_queue
+            plan_queue.insert(0, [next_behavior, task_description])
+            print("Plan queue after rerun:", plan_queue)
+            waiting_for_command  = True
+        else:
+            print("Continuing after failure.")
+            
 
     # --------- Coordination -----------
     waiting_for_command = False

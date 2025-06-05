@@ -137,4 +137,62 @@
     "Failed behavior": "GOTO",
     "Description": "Go to Action",
     "Type": "FootstepPlanActionDefinition"
+<<<<<<< Updated upstream
+=======
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.9173863970773684
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.8876348680956991
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.43984592953024726
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.43984592953024726
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.37725608557868984
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.37725608557868984
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.1297785838777259
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.4653217240225641
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.4653217240225641
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.3459584946843023
+}{
+    "Failed behavior": "RECEIVE OBJECT",
+    "Description": "Is Close Enough Condition",
+    "Type": "ConditionNodeDefinition",
+    "Position error": 0.3459584946843023
+>>>>>>> Stashed changes
 }
