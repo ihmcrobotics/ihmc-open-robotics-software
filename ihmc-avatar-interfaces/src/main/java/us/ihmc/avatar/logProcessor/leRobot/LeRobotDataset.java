@@ -120,21 +120,21 @@ public class LeRobotDataset
       episodes.add(episode);
    }
 
-   public void removeLatestEpisode() throws IOException {
+   public void removeEpisode(int index) throws IOException {
       if (episodes.isEmpty())
       {
          LogTools.warn("No episodes to remove.");
          return;
       }
 
-      int lastIndex = episodes.size() - 1;
-      LeRobotDatasetEpisode lastEpisode = episodes.get(lastIndex);
+      LeRobotDatasetEpisode lastEpisode = episodes.get(index);
       String episodeName = lastEpisode.getEpisodeName();
 
       Path parquetToDelete = dataChunk0Path.resolve(episodeName + ".parquet");
       if (Files.exists(parquetToDelete))
       {
          FileTools.deleteQuietly(parquetToDelete);
+//         changeNumbers(index, episodes.size(), ".parquet");
          LogTools.info("Deleted Parquet: " + parquetToDelete);
       }
       else
@@ -149,6 +149,7 @@ public class LeRobotDataset
          if (Files.exists(mp4Path))
          {
             FileTools.deleteQuietly(mp4Path);
+//            changeNumbers(index, episodes.size(), ".mp4");
             LogTools.info("Deleted MP4: " + mp4Path);
          }
          else
@@ -158,16 +159,37 @@ public class LeRobotDataset
          }
       }
 
-      removeLastLineFromJsonl(episodesJsonlPath);
-      removeLastLineFromJsonl(episodeStatsJsonlPath);
+      removeLineFromJsonl(episodesJsonlPath, index);
+      removeLineFromJsonl(episodeStatsJsonlPath, index);
 
 
-      episodes.remove(lastIndex);
+      episodes.remove(index);
       LogTools.info("Removed episode: " + episodeName);
       regenerateAndRewriteMetadata();
    }
 
-   private void removeLastLineFromJsonl(Path jsonlPath) throws IOException {
+   private void changeNumbers(int index, int finalNumber, String fileType)
+   {
+      for(int i=index+1; i<finalNumber; i++)
+      {
+         LeRobotDatasetEpisode moveEpisode = episodes.get(i);
+         String episodeName = moveEpisode.getEpisodeName();
+         LeRobotDatasetEpisode newEpisode = episodes.get(i-1);
+         String newEpisodeName = newEpisode.getEpisodeName();
+
+         Path parquetToMove = dataChunk0Path.resolve(episodeName + fileType);
+         Path parquetSpot = dataChunk0Path.resolve(newEpisodeName + fileType);
+         try
+         {
+            Files.move(parquetToMove, parquetSpot);
+         }
+         catch (IOException e)
+         {
+            LogTools.error("Failed to move parquet file: " + parquetToMove);
+         }
+      }
+   }
+   private void removeLineFromJsonl(Path jsonlPath, int index) throws IOException {
       List<String> allLines = Files.readAllLines(jsonlPath);
 
       if (allLines.isEmpty())
@@ -175,7 +197,17 @@ public class LeRobotDataset
          LogTools.warn("JSONL file is empty (nothing to remove): " + jsonlPath);
          return;
       }
-      List<String> linesToWrite = allLines.subList(0, allLines.size() - 1);
+      List<String> linesToWrite = new ArrayList<>();
+      List<String> secondLines = new ArrayList<>();
+      if (index > 0)
+      {
+         linesToWrite = allLines.subList(0, index - 1);
+      }
+      if (index < allLines.size())
+      {
+         secondLines = allLines.subList(index + 1, allLines.size());
+      }
+      linesToWrite.addAll(secondLines);
       Files.write(jsonlPath, linesToWrite, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
       LogTools.info("Removed last line from " + jsonlPath + " (now has " + linesToWrite.size() + " lines).");
    }

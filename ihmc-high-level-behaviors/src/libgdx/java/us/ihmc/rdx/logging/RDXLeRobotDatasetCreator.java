@@ -166,11 +166,31 @@ public class RDXLeRobotDatasetCreator
          }
          if (ImGui.button(labels.get("Remove Episode")))
          {
-             try {
-                 dataset.removeLatestEpisode();
-             } catch (IOException e) {
-                 throw new RuntimeException(e);
-             }
+            ImGui.openPopup("Choose Episode to Remove");
+         }
+         if (ImGui.beginPopup("Choose Episode to Remove"))
+         {
+            List<LeRobotDatasetEpisode> episodes = dataset.getEpisodes();
+            for (int i = 0; i < episodes.size(); i++)
+            {
+               LeRobotDatasetEpisode ep = episodes.get(i);
+               String name = ep.getEpisodeName();
+               String selectableLabel = String.format("%d: %s", i, name);
+               if (ImGui.selectable(selectableLabel))
+               {
+                  try
+                  {
+                     dataset.removeEpisode(i);
+                  }
+                  catch (IOException e)
+                  {
+                     throw new RuntimeException(e);
+                  }
+                  ImGui.closeCurrentPopup();
+                  break;
+               }
+            }
+            ImGui.endPopup();
          }
          ImGui.endDisabled();
 
