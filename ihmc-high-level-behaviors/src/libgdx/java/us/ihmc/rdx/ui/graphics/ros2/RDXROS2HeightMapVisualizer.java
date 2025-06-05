@@ -16,7 +16,7 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -54,7 +54,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final HeightMapParameters heightMapParameters;
    private TerrainMapData latestTerrainMapData;
 
-   private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
+   private final Point3D heightMapCenter = new Point3D();
+   private final int cellsPerAxisGlobal;
 
    private final Stopwatch stopwatch = new Stopwatch();
    private int cellsOnYAxis;
@@ -112,7 +113,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                  cellsOnYAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
                                               }
 
-                                              zUpToWorldTransform.set(heightMapMessage.getOrientation(), heightMapMessage.getPosition());
+                                              heightMapCenter.setX(heightMapMessage.getGridCenterX());
+                                              heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
                                               heightMap = HeightMapMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
@@ -213,8 +215,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             float pixelScalingFactor = 10000.0f;
             heightMapRenderer.update(heightMap,
                                      (float) heightMapParameters.getHeightOffset(),
-                                     zUpToWorldTransform.getTranslation().getX32(),
-                                     zUpToWorldTransform.getTranslation().getY32(),
+                                     heightMapCenter.getX32(),
+                                     heightMapCenter.getY32(),
                                      cellsOnXAxis / 2,
                                      (float) heightMapParameters.getCellSizeInMeters(),
                                      pixelScalingFactor);
