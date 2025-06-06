@@ -463,7 +463,7 @@ def select_target_object(
         return None
 
     # Handle DEFAULT relation
-    if spatial_relation == "DEFAULT":
+    if spatial_relation == "DEFAULT" or spatial_relation == "-":
         if class_discriminator == "CLOSE":
             return min(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
         else:

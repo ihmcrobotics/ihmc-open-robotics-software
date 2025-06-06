@@ -1,74 +1,15 @@
 {
-    "Failed behavior": "SCAN",
-    "Description": "Yaw chest left",
-    "Type": "ChestOrientationActionDefinition"
+    "Failed behavior": "PLACE CHARGE ON DOOR",
+    "Description": "Approach door",
+    "Missing Frame": "-",
+    "Position Error": true,
+    "Collision Object": "-",
+    "Retry #": 0
 }{
-    "Failed behavior": "SCAN",
-    "Description": "Yaw chest left",
-    "Type": "ChestOrientationActionDefinition",
+    "Failed behavior": "PLACE CHARGE ON DOOR",
+    "Description": "Approach door",
+    "Missing Frame": "doorStaticPullHandle1",
+    "Position Error": false,
+    "Collision Object": "Barrier1",
     "Retry #": 1
-}{
-    "Failed behavior": "GOTO",
-    "Description": "Go to Action",
-    "Type": "FootstepPlanActionDefinition",
-    "Collision Object": "Person1"
-}{
-    "Failed behavior": "GOTO",
-    "Description": "Go to Action",
-    "Type": "FootstepPlanActionDefinition",
-    "Collision Object": "Barrier1"
-}{
-    "Failed behavior": "GOTO",
-    "Description": "Go to Action",
-    "Type": "FootstepPlanActionDefinition"
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 0.33120672039166277
-}{
-    "Failed behavior": "GOTO",
-    "Description": "Go to Action",
-    "Type": "FootstepPlanActionDefinition",
-    "Collision Object": "Barrier1"
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 0.3312060436900476
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 1.4091299029469937
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 0.8334234630862358
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 1.1363875177221114
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 1.0151893332380284
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 1.0795617718005492
-}{
-    "Failed behavior": "RECEIVE OBJECT",
-    "Description": "Is Close Enough Condition",
-    "Type": "ConditionNodeDefinition",
-    "Position error": 0.8710372030311595
-}{
-    "Failed behavior": "GOTO",
-    "Description": "Go to Action",
-    "Type": "FootstepPlanActionDefinition",
-    "Collision Object": "Barrier1"
 }
