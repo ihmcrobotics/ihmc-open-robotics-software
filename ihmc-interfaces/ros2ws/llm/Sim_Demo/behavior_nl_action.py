@@ -30,6 +30,8 @@ task_description    = ""
 llm_call_counter    = 0
 llm_plan            = []
 plan_queue          = []
+counter_retry = 0
+retried_behavior = "-"
 
 def behavior_message_callback(msg):
     global initialized  
@@ -39,6 +41,8 @@ def behavior_message_callback(msg):
     global plan_queue
     global next_behavior
     global task_description
+    global counter_retry
+    global retried_behavior
     robot_pose = msg.robot_mid_feet_under_pelvis_pose_in_world
 
     if not initialized:
@@ -84,6 +88,8 @@ def behavior_message_callback(msg):
             failure_info["Missing Frame"] = failure.action_frame
         if failure.collision_name != "-":
             failure_info["Collision Object"] = failure.collision_name
+        if counter_retry > 0:
+            failure_info["Retry #"] = counter_retry
 
         position_error = failure.position_error
         error_vector = np.array([position_error.x, position_error.y, position_error.z])
@@ -106,6 +112,8 @@ def behavior_message_callback(msg):
             exit(1)
         elif user_input == 'continue':
             print("rerunning the same command.")
+            counter_retry = counter_retry + 1
+            retried_behavior = next_behavior
             # Add next_behavior  and task_description to front of plan_queue
             plan_queue.insert(0, [next_behavior, task_description])
             print("Plan queue after rerun:", plan_queue)
@@ -145,6 +153,9 @@ def behavior_message_callback(msg):
         available_behaviors = msg.available_behaviors
         completed_behavior  = msg.completed_behavior
         failed_behavior     = msg.failed_behavior
+        if retried_behavior == completed_behavior:
+            counter_retry = 0
+            retried_behavior = "-"
         
         # Construct input for LLM decision-making
         llm_input = {
@@ -228,26 +239,26 @@ def behavior_message_callback(msg):
         behavior_command.behavior_to_execute = next_behavior
         behavior_command.adapting_behavior = False
 
-        if (behavior_command.behavior_to_execute == "SCAN"):
-            behavior_command.adapting_behavior = True
-            new_scan_behavior = AI2RScanMessage()
-            # Load the config file for SCAN action
-            print("Loading config for SCAN action")
-            llm                 = LLMInterface(config_file="config_scan.json")
-            llm_input           = ""
-            response            = llm.call_model(llm_input)
-            print(" --------- Output for SCAN action: --------- \n", response)
-            # Replace single quotes with double quotes and remove any trailing commas or leading/trailing whitespace
-            clean_response = response.replace("'", '"')
-
-            # Convert string to dictionary
-            data = json.loads(clean_response)
-
-            # Extract variables
-            target_objects = data['target_objects']
-            new_scan_behavior.target_objects = target_objects
-            
-            behavior_command.scan = new_scan_behavior
+#         if (behavior_command.behavior_to_execute == "SCAN"):
+#             behavior_command.adapting_behavior = True
+#             new_scan_behavior = AI2RScanMessage()
+#             # Load the config file for SCAN action
+#             print("Loading config for SCAN action")
+#             llm                 = LLMInterface(config_file="config_scan.json")
+#             llm_input           = ""
+#             response            = llm.call_model(llm_input)
+#             print(" --------- Output for SCAN action: --------- \n", response)
+#             # Replace single quotes with double quotes and remove any trailing commas or leading/trailing whitespace
+#             clean_response = response.replace("'", '"')
+#
+#             # Convert string to dictionary
+#             data = json.loads(clean_response)
+#
+#             # Extract variables
+#             target_objects = data['target_objects']
+#             new_scan_behavior.target_objects = target_objects
+#
+#             behavior_command.scan = new_scan_behavior
 
         # Code for loading config files for different actions Eg: GOTO, RECEIVE, etc.
         if (behavior_command.behavior_to_execute == "GOTO"):
@@ -275,6 +286,7 @@ def behavior_message_callback(msg):
             pov_object_goto = data['pov_object_goto']
             spatially_related_object = data['spatially_related_object']
             spatial_relation_obj = data['spatial_relation_obj']
+            class_discriminator = data['class_discriminator']
 
             if target_object in scene_objects_names:
                 selected_object = target_object
@@ -284,6 +296,7 @@ def behavior_message_callback(msg):
                 base_name= data['target_object'],
                 spatially_related_object= data['spatially_related_object'],
                 spatial_relation=data['spatial_relation_obj'],
+                class_discriminator=data['class_discriminator'],
                 scene_object_names=scene_objects_names,
                 scene_object_positions=scene_objects_positions,
                 robot_pose=robot_position,
@@ -320,10 +333,6 @@ def behavior_message_callback(msg):
         #print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
         #time.sleep(10)  # Sleep for a second to allow the command to be processed
 
-        
-
-
-
 
 def point_to_numpy(point: Point) -> np.ndarray:
     """Convert geometry_msgs/Point to numpy array"""
@@ -350,6 +359,7 @@ def select_target_object(
     base_name: str,
     spatially_related_object: str,
     spatial_relation: str,
+    class_discriminator: str,
     scene_object_names: List[str],
     scene_object_positions: List[Point],
     robot_pose: Optional[Point] = None,
@@ -381,18 +391,28 @@ def select_target_object(
         return candidates[0][0]
 
     # Get reference positions
+    if spatially_related_object == "-" or  spatially_related_object == "":
+            spatially_related_object = "Robot"
+    print("ref_pose_object", spatially_related_object)
     ref_pose = get_pose_by_name(spatially_related_object, scene_object_names, scene_object_positions, robot_pose)
     if not ref_pose:
-        print(f"Reference object '{spatially_related_object}' not found")
+        print(f"Spatially related object '{spatially_related_object}' not found")
         return None
 
-    if spatial_context_object == "-":
+    if spatial_context_object == "-" or  spatial_context_object == "":
         spatial_context_object = "Robot"
+    print("ctx_pose_object", spatial_context_object)
     ctx_pose = get_pose_by_name(spatial_context_object, scene_object_names, scene_object_positions, robot_pose) if spatial_context_object else None
+    if not ctx_pose:
+        print(f"POV object '{spatial_context_object}' not found")
+        return None
 
     # Handle DEFAULT relation
     if spatial_relation == "DEFAULT":
-        return min(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
+        if class_discriminator == "CLOSE":
+            return min(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
+        else:
+            return max(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
 
     # Calculate spatial relationship
     ref_pos = point_to_numpy(ref_pose)
@@ -409,26 +429,28 @@ def select_target_object(
 
     # Evaluate candidates
     qualified = []
+    print("spatial_relation", spatial_relation)
     for name, pose in candidates:
         candidate_pos = point_to_numpy(pose)
         offset = candidate_pos - ref_pos
-
         if spatial_relation == "BEHIND":
-            if np.dot(offset, dir_norm) < -0.7:
+            if np.dot(offset, dir_norm) < -0.1:
                 qualified.append((name, np.linalg.norm(offset)))
         elif spatial_relation == "FRONT":
-            if np.dot(offset, dir_norm) > 0.7:
+            if np.dot(offset, dir_norm) > 0.1:
                 qualified.append((name, np.linalg.norm(offset)))
         elif spatial_relation == "RIGHT":
-            if np.dot(offset, left_vec) > 0.7:
+            if np.dot(offset, left_vec) > 0.5:
                 qualified.append((name, np.linalg.norm(offset)))
         elif spatial_relation == "LEFT":
-            if np.dot(offset, left_vec) < -0.7:
+            if np.dot(offset, left_vec) < -0.5:
                 qualified.append((name, np.linalg.norm(offset)))
+    print("qualified ", qualified)
 
-    return min(qualified, key=lambda x: x[1])[0] if qualified else None
-
-
+    if class_discriminator == "CLOSE":
+        return min(qualified, key=lambda x: x[1])[0] if qualified else None
+    else:
+        return max(qualified, key=lambda x: x[1])[0] if qualified else None
 
 def main(args=None):
     rclpy.init(args=args)

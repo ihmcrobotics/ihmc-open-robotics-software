@@ -49,22 +49,17 @@ public class AI2RSkillEditor
       {
          AI2RScanMessage scanMessage = message.getScan();
          objectsToScan = scanMessage.getTargetObjects();
-         updateScan(state);
-      }
-   }
-
-   public void updateScan(AI2RNodeState state)
-   {
-      for (var leaf : state.getActionSequence().getOrderedLeaves())
-      {
-         if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("Scan"))
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            String scanTarget = objectsToScan.get(0).toString();
-            if (!scanTarget.isEmpty())
+            if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("Scan"))
             {
-               objectToTrack = scanTarget;
+               String scanTarget = objectsToScan.get(0).toString();
+               if (!scanTarget.isEmpty())
+               {
+                  objectToTrack = scanTarget;
+               }
+               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanTarget);
             }
-            conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(scanTarget);
          }
       }
    }
@@ -125,7 +120,7 @@ public class AI2RSkillEditor
 
                         // Calculate left direction perpendicular to stance-focal line
                         Vector3D leftDir = new Vector3D();
-                        leftDir.cross(up, direction);
+                        leftDir.cross(direction, up);
 
                         if (leftDir.norm() > 1e-5)
                         {
@@ -141,7 +136,7 @@ public class AI2RSkillEditor
 
                         // Calculate right direction perpendicular to stance-focal line
                         Vector3D rightDir = new Vector3D();
-                        rightDir.cross(direction, up);
+                        rightDir.cross(up, direction);
 
                         if (rightDir.norm() > 1e-5)
                         {

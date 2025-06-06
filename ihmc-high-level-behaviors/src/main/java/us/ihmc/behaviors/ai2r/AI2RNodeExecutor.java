@@ -254,6 +254,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                      if (conditionNodeState.getDefinition().getType().getValue() == ConditionNodeDefinition.Type.PROXIMITY)
                      {
                         failureMessage.setMissingFrame(actionFailureMissingFrame);
+                        failureMessage.setActionFrame(conditionNodeState.getDefinition().getProximityCheck().getObjectFrameName());
                         double maxDistanceAllowed = conditionNodeState.getDefinition().getProximityCheck().getMaxDistanceToObject();
                         double currentDistance = conditionNodeState.getProximityCheck().getCurrentDistance().getValue();
                         double error = currentDistance - maxDistanceAllowed;
@@ -298,23 +299,6 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          {
             trackingObjectsInProgress |= waitActionState.getIsExecuting();
          }
-
-//         if (leaf.getDefinition().getName().contains("END OF SCAN"))
-//         {
-//            if (leaf.getIsNextForExecution())
-//            {
-//               var objectsToScan = skillEditor.getObjectsToScan();
-//               if (objectsToScan != null)
-//               {
-//                  if (objectsToScan.size() > 1)
-//                  {
-//                     objectsToScan.remove(0);
-//                     skillEditor.updateScan(state);
-//                     state.getActionSequence().setExecutionNextIndex(skillEditor.getCommandedBehaviorIndex());
-//                  }
-//               }
-//            }
-//         }
 
          // Check if Goto action is executing and if next steps are colliding with objects in the scene
          if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
