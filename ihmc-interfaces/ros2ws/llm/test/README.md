@@ -129,4 +129,8 @@ print("USER TURN")
 print(PROMPT)
 print("\nASSISTANT TURN")
 print(PREFILL)
-     
+
+source /opt/ros/humble/setup.bash    
+./compile_interfaces.bash 
+source install/setup.bash
+export ROS_DOMAIN_ID=128

@@ -106,7 +106,7 @@ def behavior_message_callback(msg):
         print(json.dumps(failure_info, indent=4))
 
         # Ask the user how to proceed
-        user_input = input("Type 'continue' to rerun or 'exit' to stop or next steps to follow: ").strip().lower()
+        user_input = input("Type 'continue' to rerun or 'exit' to stop or 'next steps' to follow: ").strip().lower()
         if user_input == 'exit':
             print("Exiting due to failure.")
             exit(1)
@@ -114,12 +114,58 @@ def behavior_message_callback(msg):
             print("rerunning the same command.")
             counter_retry = counter_retry + 1
             retried_behavior = next_behavior
-            # Add next_behavior  and task_description to front of plan_queue
+            # Add next_behavior and task_description to front of plan_queue
             plan_queue.insert(0, [next_behavior, task_description])
             print("Plan queue after rerun:", plan_queue)
             waiting_for_command  = True
         else:
+            task_description = user_input
+            print("Next steps: ", task_description)
             print("Continuing after failure.")
+            # Get all scene objects names
+            scene_objects_names  = []
+            scene_objects = msg.objects
+            if scene_objects:  # This checks if the list is not empty
+                for obj in scene_objects:
+                    scene_objects_names = [obj.object_name for obj in scene_objects]
+            else:
+                print("No scene objects detected.")
+            print("Scene Objects:", scene_objects_names)
+            
+            # Get all available behaviors
+            available_behaviors = msg.available_behaviors
+            completed_behavior  = msg.completed_behavior
+            failed_behavior     = msg.failed_behavior
+            
+            # Construct input for LLM decision-making
+            llm_input = {
+                # "task": current_task,
+                "scene_objects": scene_objects_names,
+                "available_behaviors": available_behaviors,
+                "previously_executed": completed_behavior if completed_behavior != "-" else "",
+                "failed_behaviors": failed_behavior if failed_behavior else "",
+            }
+            
+            # Convert the input to a string for LLM processing
+            llm_input       = str(llm_input)
+            print("LLM Input for reasoning after failures:", llm_input)
+            print("Loading config after failure")
+            llm                 = LLMInterface(config_file="config_failure.json")
+            llm_input           = llm_input + "\ntask_description : " + task_description
+            response            = llm.call_model(llm_input)
+            print(" --------- Output after failure: --------- \n", response)
+            queue               = behavior_list_to_planqueue(response)
+            print("Queue after failure:", queue)
+
+            # add this queue to infront of the existing plan_queue
+            if queue:
+                #print("Plan queue before failure:", plan_queue)
+                plan_queue = queue + plan_queue
+                print("Plan queue after failure:", plan_queue)
+                waiting_for_command  = True
+            else:
+                print("No behaviors found in the LLM plan after failure. Exiting.")
+                return
             
 
    
@@ -182,6 +228,8 @@ def behavior_message_callback(msg):
             print(" --------- Output of LLM Planner: --------- \n", response)
             llm_call_counter += 1
 
+            plan_queue = behavior_list_to_planqueue(response)
+
             # Extract behavior list from the LLM plan
             match = re.search(r'behavior_list\s*=\s*\[(.*?)\]', response, re.DOTALL)
             if match:
@@ -194,10 +242,10 @@ def behavior_message_callback(msg):
                 # Step 3: Clean up whitespace
                 llm_plan = [b.strip().rstrip(',') for b in behaviors]
 
-                #print('llm_plan : ', llm_plan)
+                print('llm_plan : ', llm_plan)
                 # Create list of [action, full_step]
                 plan_queue = [[re.match(r'^([A-Z ]+)', step).group(1).strip(), step] for step in llm_plan]
-                #print("Plan Queue:", plan_queue)
+                print("Plan Queue:", plan_queue)
             else:
                 print("No behavior_list found.")
 
@@ -205,22 +253,6 @@ def behavior_message_callback(msg):
             print("No behaviors found in the LLM plan. Exiting.")
             return
         else:
-            # # Maximum number of seconds to wait
-            # max_wait_time = 30  
-            # check_interval = 1  # Check every 1 second
-
-            # waited_time = 0
-            # while (msg.completed_behavior != '-') and (next_behavior != msg.completed_behavior) and (waited_time < max_wait_time):
-            #     time.sleep(check_interval)
-            #     waited_time += check_interval
-            #     print("check_interval : ", check_interval, " seconds")
-
-            # # Proceed after either match or timeout
-            # if next_behavior == msg.completed_behavior:
-            #     print("Behavior completed.")
-            # else:
-            #     print("Timeout waiting for behavior to complete.")
-
             # Get the next behavior from the plan queue
             if plan_queue:
                 #print("plan_queue before:", plan_queue)
@@ -333,6 +365,29 @@ def behavior_message_callback(msg):
         #print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
         #time.sleep(10)  # Sleep for a second to allow the command to be processed
 
+
+def behavior_list_to_planqueue(response):
+    # Extract behavior list from the LLM plan
+    match = re.search(r'behavior_list\s*=\s*\[(.*?)\]', response, re.DOTALL)
+    if match:
+        list_block = match.group(1)
+
+        # Extract each behavior entry including content inside parentheses
+        behaviors = re.findall(r'([^,]+(?:\([^\)]*\))?)', list_block)
+        #print("Extracted Behaviors:", behaviors)
+
+        # Step 3: Clean up whitespace
+        plan = [b.strip().rstrip(',') for b in behaviors]
+
+        print('plan : ', plan)
+        # Create list of [action, full_step]
+        queue = [[re.match(r'^([A-Z ]+)', step).group(1).strip(), step] for step in plan]
+        return queue
+        #print("Plan Queue:", plan_queue)
+    else:
+        queue = []
+        print("No behavior_list found.")
+        return queue
 
 def point_to_numpy(point: Point) -> np.ndarray:
     """Convert geometry_msgs/Point to numpy array"""
