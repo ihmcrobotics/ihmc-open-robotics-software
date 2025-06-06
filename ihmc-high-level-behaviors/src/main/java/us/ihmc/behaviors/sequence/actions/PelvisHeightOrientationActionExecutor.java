@@ -16,7 +16,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
-   public static final double POSITION_TOLERANCE = 0.15;
+   public static final double POSITION_TOLERANCE = 0.5;
 
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;

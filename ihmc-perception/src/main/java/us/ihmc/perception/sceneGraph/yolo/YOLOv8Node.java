@@ -76,7 +76,7 @@ public class YOLOv8Node extends DetectableSceneNode
       Instant secondsAgo = Instant.now().minusSeconds(1);
       setCurrentlyDetected(mostRecentDetection.getDetectionTime().isAfter(secondsAgo) && yoloDetection.isStable());
       setConfidence(mostRecentDetection.getConfidence());
-      setObjectPointCloud(mostRecentDetection.getObjectPointCloud());
+//      setObjectPointCloud(mostRecentDetection.getObjectPointCloud());
 
       objectPose.set(mostRecentDetection.getPose());
       objectPose.appendTransform(centroidToObjectTransform);

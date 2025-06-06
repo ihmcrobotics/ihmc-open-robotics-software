@@ -45,7 +45,7 @@ public class ProximityConditionExecutor
 
       if (!missingFrame)
       {
-         if ((state.getIsExecuting() || state.getIsNextForExecution() || state.isEvaluatingCondition()) && state.getCanExecute())
+         if ((state.getIsExecuting() || state.isEvaluatingCondition()) && state.getCanExecute())
          {
             FramePose3D objectFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                           referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName())

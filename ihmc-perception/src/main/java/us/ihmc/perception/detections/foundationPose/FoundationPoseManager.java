@@ -67,6 +67,7 @@ public class FoundationPoseManager
    public void setObjectClassTracking(String objectClass, boolean shouldTrack)
    {
       String objectClassNoNumber = objectClass.replaceAll("\\d+$", "");
+      LogTools.info(objectClassNoNumber);
       String fullObjectClassName = objectClassNoNumber + ".obj";
       if (!FoundationPoseTools.getAvailableMeshes().contains(fullObjectClassName))
       {

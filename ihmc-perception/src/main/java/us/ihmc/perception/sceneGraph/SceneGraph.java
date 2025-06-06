@@ -220,7 +220,7 @@ public class SceneGraph
 
       Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
 
-      // Update or add door nodes
+//      // Update or add door nodes
       Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
                                                                               .filter(DoorNodeTools::detectionIsDoorComponent)
                                                                               .collect(Collectors.toSet());

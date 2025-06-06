@@ -299,19 +299,22 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             trackingObjectsInProgress |= waitActionState.getIsExecuting();
          }
 
-         if (leaf.getDefinition().getName().contains("END OF SCAN"))
-         {
-            if (leaf.getIsNextForExecution())
-            {
-               var objectsToScan = skillEditor.getObjectsToScan();
-               if (objectsToScan.size() > 1)
-               {
-                  objectsToScan.remove(0);
-                  skillEditor.updateScan(state);
-                  state.getActionSequence().setExecutionNextIndex(skillEditor.getCommandedBehaviorIndex());
-               }
-            }
-         }
+//         if (leaf.getDefinition().getName().contains("END OF SCAN"))
+//         {
+//            if (leaf.getIsNextForExecution())
+//            {
+//               var objectsToScan = skillEditor.getObjectsToScan();
+//               if (objectsToScan != null)
+//               {
+//                  if (objectsToScan.size() > 1)
+//                  {
+//                     objectsToScan.remove(0);
+//                     skillEditor.updateScan(state);
+//                     state.getActionSequence().setExecutionNextIndex(skillEditor.getCommandedBehaviorIndex());
+//                  }
+//               }
+//            }
+//         }
 
          // Check if Goto action is executing and if next steps are colliding with objects in the scene
          if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
@@ -353,15 +356,15 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       }
       if (foundationPoseManager != null)
       {
-         String objectToTrack = skillEditor.getObjectToTrack();
-         if (objectToTrack == null)
-         {
+//         String objectToTrack = skillEditor.getObjectToTrack();
+//         if (objectToTrack == null)
+//         {
             foundationPoseManager.setActive(trackingObjectsInProgress);
-         }
-         else
-         {
-            foundationPoseManager.setObjectClassTracking(objectToTrack, trackingObjectsInProgress);
-         }
+//         }
+//         else
+//         {
+//            foundationPoseManager.setObjectClassTracking(objectToTrack, trackingObjectsInProgress);
+//         }
       }
    }
 

@@ -172,14 +172,17 @@ public class AI2RSkillEditor
          {
             if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
             {
-               AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
-               String receiveObject = receiveMessage.getObjectNameAsString();
-               if (!receiveObject.isEmpty())
-               {
-                  objectToTrack = receiveObject;
-               }
-               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveObject);
-               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
+//               AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
+//               String receiveObject = receiveMessage.getObjectNameAsString();
+//               if (!receiveObject.isEmpty())
+//               {
+//                  objectToTrack = receiveObject;
+//               }
+               objectToTrack = "Charge";
+               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(objectToTrack);
+               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName("rightHandZUp");
+//               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveObject);
+//               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
             }
          }
       }

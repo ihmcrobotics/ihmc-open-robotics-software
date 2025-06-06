@@ -81,7 +81,7 @@ def behavior_message_callback(msg):
         }
 
         if failure.missing_frame:
-            failure_info["Missing Frame"] = failure.reference_frame
+            failure_info["Missing Frame"] = failure.action_frame
         if failure.collision_name != "-":
             failure_info["Collision Object"] = failure.collision_name
 
@@ -139,7 +139,7 @@ def behavior_message_callback(msg):
         # If calling llm for the first time, we can initialize the scene_objects_names as empty
         # if llm_call_counter == 0:
         #     scene_objects_names = ''
-        #print("Scene Objects:", scene_objects_names)
+        print("Scene Objects:", scene_objects_names)
         
         # Get all available behaviors
         available_behaviors = msg.available_behaviors
@@ -276,12 +276,6 @@ def behavior_message_callback(msg):
             spatially_related_object = data['spatially_related_object']
             spatial_relation_obj = data['spatial_relation_obj']
 
-            print(target_object)                
-            print(spatial_relation_goto) 
-            print(pov_object_goto)    
-            print(spatially_related_object)            
-            print(spatial_relation_obj) 
-
             if target_object in scene_objects_names:
                 selected_object = target_object
             else:
@@ -383,6 +377,8 @@ def select_target_object(
     if not candidates:
         print(f"No {base_name} objects found")
         return None
+    if len(candidates) == 1:
+        return candidates[0][0]
 
     # Get reference positions
     ref_pose = get_pose_by_name(spatially_related_object, scene_object_names, scene_object_positions, robot_pose)
