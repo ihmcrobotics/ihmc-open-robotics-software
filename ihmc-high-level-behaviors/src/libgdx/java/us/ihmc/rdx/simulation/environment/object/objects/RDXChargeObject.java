@@ -3,27 +3,27 @@ package us.ihmc.rdx.simulation.environment.object.objects;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObjectFactory;
-import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.rdx.tools.RDXModelLoader;
 
-public class RDXLeftJerseyBarrierObject extends RDXEnvironmentObject
+public class RDXChargeObject extends RDXEnvironmentObject
 {
-   public static final String NAME = "Barrier";
-   public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXLeftJerseyBarrierObject.class);
+   public static final String NAME = "Charge";
+   public static final RDXEnvironmentObjectFactory FACTORY = new RDXEnvironmentObjectFactory(NAME, RDXChargeObject.class);
 
-   public RDXLeftJerseyBarrierObject()
+   public RDXChargeObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/barrier/barrier.g3dj");
+      Model realisticModel = RDXModelLoader.load("environmentObjects/charge/charge.g3dj");
       setRealisticModel(realisticModel);
 
-      double sizeX = 1.055;
-      double sizeY = 0.46;
-      double sizeZ = 0.809;
-      setMass(20.0f);
+      double sizeX = 0.2;
+      double sizeY = 0.2;
+      double sizeZ = 0.3;
+      setMass(2.0f);
       getCollisionShapeOffset().getTranslation().add(sizeX / 2.0 - 0.08 , 0, sizeZ / 2.0);
       getBoundingSphere().setRadius(5.0);
       getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);

@@ -24,6 +24,7 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXL515SensorObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
+      objectFactories.add(RDXChargeObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

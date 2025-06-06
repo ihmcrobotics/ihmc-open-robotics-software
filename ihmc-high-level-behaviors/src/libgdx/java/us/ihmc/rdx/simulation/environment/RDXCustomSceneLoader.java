@@ -1,12 +1,21 @@
 package us.ihmc.rdx.simulation.environment;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.perception.sceneGraph.RDXSceneGraphUI;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNodeBuilder;
+import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class RDXCustomSceneLoader
 {
@@ -20,12 +29,14 @@ public class RDXCustomSceneLoader
    }
    private final RDXSceneGraphUI sceneGraphUI;
    private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
+   private final Map<String, RigidBodyTransform> initialSceneNodeTransforms = new HashMap<>();
 
    public RDXCustomSceneLoader(RDXSceneGraphUI sceneGraphUI)
    {
       this.sceneGraphUI = sceneGraphUI;
       this.predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraphUI.getSceneGraph());
    }
+
    public void loadCustomScene(RDXDemoScene demoScene)
    {
       switch (demoScene)
@@ -65,7 +76,7 @@ public class RDXCustomSceneLoader
             // Addition of custom nodes in custom locations
             addNode("DoorPullHandle");
             setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
-                                                                  new Point3D(2.07860, 2.23652+0.97246, 1.33200)));
+                                                                  new Point3D(1.63098, 3.23158, 1.33200)));
 
             addNode("DoorPanel");
             setNodePose("DoorPanel1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(85.34664), 0.0, 0.0),
@@ -193,5 +204,19 @@ public class RDXCustomSceneLoader
          case EXPLOSIVE_BREACHING_B -> "BreachingDemoB.json";
          default -> "FlatGround.json";
       };
+   }
+
+   public void trackEnvironment(ArrayList<RDXEnvironmentObject> objects)
+   {
+      Map<String, SceneNode> sceneNodesMap = sceneGraphUI.getSceneGraph().getNamesToNodesMap();
+      for (RDXEnvironmentObject object : objects)
+      {
+         int nodeIndex = object.getObjectIndex() + 1;
+         SceneNode sceneNode = sceneNodesMap.get(object.getName() + nodeIndex);
+         if (sceneNode != null)
+         {
+            object.setTransformToWorld(sceneNode.getNodeFrame().getTransformToWorldFrame());
+         }
+      }
    }
 }
