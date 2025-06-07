@@ -1,15 +1,70 @@
-{
-    "Failed behavior": "PLACE CHARGE ON DOOR",
-    "Description": "Approach door",
-    "Missing Frame": "-",
-    "Position Error": true,
-    "Collision Object": "-",
-    "Retry #": 0
-}{
-    "Failed behavior": "PLACE CHARGE ON DOOR",
-    "Description": "Approach door",
-    "Missing Frame": "doorStaticPullHandle1",
-    "Position Error": false,
-    "Collision Object": "Barrier1",
-    "Retry #": 1
-}
+[
+    {
+        "Failed Behavior": "RECEIVE OBJECT",
+        "Description": "Is Close Enough Condition",
+        "Type": "ConditionNodeDefinition",
+        "Missing Frame": "-",
+        "Collision Object": "-",
+        "Position Error": "true",
+        "Retry #": 0,
+        "Queue": [
+            [
+                "RECEIVE OBJECT",
+                "RECEIVE OBJECT (the charge from the person)"
+            ]
+        ]
+    },
+    {
+        "Failed Behavior": "RECEIVE OBJECT",
+        "Description": "Is Close Enough Condition",
+        "Type": "ConditionNodeDefinition",
+        "Missing Frame": "-",
+        "Collision Object": "-",
+        "Position Error": "true",
+        "Retry #": 1,
+        "Queue": [
+            [
+                "GOTO",
+                "GOTO (to Person2)"
+            ],
+            [
+                "RECEIVE OBJECT",
+                "RECEIVE OBJECT (Charge1 from Person2)"
+            ]
+        ]
+    },
+    {
+        "Failed Behavior": "RECEIVE OBJECT",
+        "Description": "Is Close Enough Condition",
+        "Type": "ConditionNodeDefinition",
+        "Missing Frame": "-",
+        "Collision Object": "-",
+        "Position Error": "true",
+        "Retry #": 0,
+        "Queue": [
+            [
+                "RECEIVE OBJECT",
+                "RECEIVE OBJECT (the charge from the person)"
+            ]
+        ]
+    },
+    {
+        "Failed Behavior": "RECEIVE OBJECT",
+        "Description": "Is Close Enough Condition",
+        "Type": "ConditionNodeDefinition",
+        "Missing Frame": "-",
+        "Collision Object": "-",
+        "Position Error": "true",
+        "Retry #": 1,
+        "Queue": [
+            [
+                "GOTO",
+                "GOTO (to Person2)"
+            ],
+            [
+                "RECEIVE OBJECT",
+                "RECEIVE OBJECT (Charge1 from Person2)"
+            ]
+        ]
+    }
+]

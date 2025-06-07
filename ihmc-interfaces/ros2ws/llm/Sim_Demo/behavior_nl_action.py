@@ -79,9 +79,14 @@ def behavior_message_callback(msg):
         print("Failed behavior: " + failed_behavior)
 
         failure_info = {
-            "Failed behavior": failed_behavior,
+            "Failed Behavior": failed_behavior,
             "Description": failure.action_name,
-            "Type": failure.action_type
+            "Type": failure.action_type,
+            "Missing Frame" : "-",
+            "Collision Object": "-",
+            "Position Error": "false",
+            "Retry #": 0,
+            "Queue": "-"
         }
 
         if failure.missing_frame:
@@ -95,66 +100,38 @@ def behavior_message_callback(msg):
         error_vector = np.array([position_error.x, position_error.y, position_error.z])
         norm = np.linalg.norm(error_vector)
         if norm > failure.position_tolerance:
-            failure_info["Position error"] = norm
+            #failure_info["Position Error"] = norm
+            failure_info["Position Error"] = "true"
 
-        json_filename = 'failure_info.json'
-        with open(json_filename, 'a') as json_file:
-            json.dump(failure_info, json_file, indent=4)
-        loggedFailure = True
-            # Pretty-print the failure_info dictionary for the user
+        # Pretty-print the failure_info dictionary for the user
         print("A failure has occurred. Details:")
         print(json.dumps(failure_info, indent=4))
 
-        # Ask the user how to proceed
-        user_input = input("Type 'continue' to rerun or 'exit' to stop or 'next steps' to follow: ").strip().lower()
-        if user_input == 'exit':
-            print("Exiting due to failure.")
-            exit(1)
-        elif user_input == 'continue':
-            print("rerunning the same command.")
-            counter_retry = counter_retry + 1
-            retried_behavior = next_behavior
-            # Add next_behavior and task_description to front of plan_queue
-            plan_queue.insert(0, [next_behavior, task_description])
-            print("Plan queue after rerun:", plan_queue)
-            waiting_for_command  = True
+
+        # json_filename = 'failure_info.json'
+        # with open(json_filename, 'a') as json_file:
+        #     json.dump(failure_info, json_file, indent=4)
+        json_filename = 'failure_info.json'
+
+        # Load existing data if file exists
+        if os.path.exists(json_filename):
+            with open(json_filename, 'r') as json_file:
+                try:
+                    data = json.load(json_file)
+                    if not isinstance(data, list):
+                        data = []
+                except json.JSONDecodeError:
+                    data = []
         else:
-            task_description = user_input
-            print("Next steps: ", task_description)
-            print("Continuing after failure.")
-            # Get all scene objects names
-            scene_objects_names  = []
-            scene_objects = msg.objects
-            if scene_objects:  # This checks if the list is not empty
-                for obj in scene_objects:
-                    scene_objects_names = [obj.object_name for obj in scene_objects]
-            else:
-                print("No scene objects detected.")
-            print("Scene Objects:", scene_objects_names)
-            
-            # Get all available behaviors
-            available_behaviors = msg.available_behaviors
-            completed_behavior  = msg.completed_behavior
-            failed_behavior     = msg.failed_behavior
-            
-            # Construct input for LLM decision-making
-            llm_input = {
-                # "task": current_task,
-                "scene_objects": scene_objects_names,
-                "available_behaviors": available_behaviors,
-                "previously_executed": completed_behavior if completed_behavior != "-" else "",
-                "failed_behaviors": failed_behavior if failed_behavior else "",
-            }
-            
-            # Convert the input to a string for LLM processing
-            llm_input       = str(llm_input)
-            print("LLM Input for reasoning after failures:", llm_input)
-            print("Loading config after failure")
-            llm                 = LLMInterface(config_file="config_failure.json")
-            llm_input           = llm_input + "\ntask_description : " + task_description
-            response            = llm.call_model(llm_input)
-            print(" --------- Output after failure: --------- \n", response)
-            queue               = behavior_list_to_planqueue(response)
+            data = []
+
+        # Run the check
+        duplicate_user_input = find_duplicate_user_input(data, failure_info)
+        is_input_duplicated = False
+
+        if duplicate_user_input:
+            print(f"Duplicate found! Existing queue: '{duplicate_user_input}'")
+            queue = duplicate_user_input
             print("Queue after failure:", queue)
 
             # add this queue to infront of the existing plan_queue
@@ -162,11 +139,94 @@ def behavior_message_callback(msg):
                 #print("Plan queue before failure:", plan_queue)
                 plan_queue = queue + plan_queue
                 print("Plan queue after failure:", plan_queue)
-                waiting_for_command  = True
+                if queue[0][0] == failed_behavior:
+                    counter_retry = counter_retry + 1
+                    retried_behavior = failed_behavior
+                waiting_for_command     = True
+                is_input_duplicated     = True
             else:
                 print("No behaviors found in the LLM plan after failure. Exiting.")
                 return
-            
+        else:
+            print("No duplicate found. Safe to add the new entry.")
+            # Ask the user how to proceed
+            user_input = input("Type 'continue' to rerun or 'exit' to stop or 'next steps' to follow: ").strip().lower()
+
+            #failure_info["User Input"] = user_input
+
+        
+        loggedFailure = True
+
+        if not is_input_duplicated:
+            if user_input == 'exit':
+                print("Exiting due to failure.")
+                exit(1)
+            elif user_input == 'continue':
+                print("rerunning the same command.")
+                counter_retry = counter_retry + 1
+                retried_behavior = next_behavior
+
+                queue = [[next_behavior, task_description]]
+                plan_queue = queue + plan_queue
+                # Add next_behavior and task_description to front of plan_queue
+                #plan_queue.insert(0, [next_behavior, task_description])
+                print("Plan queue after rerun:", plan_queue)
+                waiting_for_command  = True
+            else:
+                task_description = user_input
+                print("Next steps: ", task_description)
+                print("Continuing after failure.")
+                # Get all scene objects names
+                scene_objects_names  = []
+                scene_objects = msg.objects
+                if scene_objects:  # This checks if the list is not empty
+                    for obj in scene_objects:
+                        scene_objects_names = [obj.object_name for obj in scene_objects]
+                else:
+                    print("No scene objects detected.")
+                print("Scene Objects:", scene_objects_names)
+                
+                # Get all available behaviors
+                available_behaviors = msg.available_behaviors
+                completed_behavior  = msg.completed_behavior
+                failed_behavior     = msg.failed_behavior
+                
+                # Construct input for LLM decision-making
+                llm_input = {
+                    # "task": current_task,
+                    "scene_objects": scene_objects_names,
+                    "available_behaviors": available_behaviors,
+                    "previously_executed": completed_behavior if completed_behavior != "-" else "",
+                    "failed_behaviors": failed_behavior if failed_behavior else "",
+                }
+                
+                # Convert the input to a string for LLM processing
+                llm_input       = str(llm_input)
+                print("LLM Input for reasoning after failures:", llm_input)
+                print("Loading config after failure")
+                llm                 = LLMInterface(config_file="config_failure.json")
+                llm_input           = llm_input + "\ntask_description : " + task_description
+                response            = llm.call_model(llm_input)
+                print(" --------- Output after failure: --------- \n", response)
+                queue               = behavior_list_to_planqueue(response)
+                print("Queue after failure:", queue)
+
+                # add this queue to infront of the existing plan_queue
+                if queue:
+                    #print("Plan queue before failure:", plan_queue)
+                    plan_queue = queue + plan_queue
+                    print("Plan queue after failure:", plan_queue)
+                    waiting_for_command  = True
+                else:
+                    print("No behaviors found in the LLM plan after failure. Exiting.")
+                    return
+        print("Queue after failure:", queue)
+        failure_info["Queue"] = queue        
+            # Append new entry
+        data.append(failure_info)
+        # Write updated data
+        with open(json_filename, 'w') as json_file:
+            json.dump(data, json_file, indent=4)            
 
    
     # print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
@@ -366,6 +426,33 @@ def behavior_message_callback(msg):
         #time.sleep(10)  # Sleep for a second to allow the command to be processed
 
 
+# Function to check for duplicates
+def find_duplicate_user_input(existing_entries, new_entry):
+    keys_to_ignore = {"Queue"}
+    
+    for entry in existing_entries:
+        # Compare only relevant keys
+        is_duplicate = True
+        for key in new_entry:
+            if key in keys_to_ignore:
+                continue
+            # Normalize "Position error" vs "Position Error" casing
+            existing_key = key
+            # If any key mismatches, it's not a duplicate
+            if entry.get(existing_key) != new_entry.get(key):
+                is_duplicate = False
+                break
+        
+        if is_duplicate:
+            return entry["Queue"]  # Duplicate found
+    
+    return None  # No duplicate found
+
+
+
+
+
+
 def behavior_list_to_planqueue(response):
     # Extract behavior list from the LLM plan
     match = re.search(r'behavior_list\s*=\s*\[(.*?)\]', response, re.DOTALL)
@@ -464,6 +551,8 @@ def select_target_object(
 
     # Handle DEFAULT relation
     if spatial_relation == "DEFAULT" or spatial_relation == "-":
+        print("Distance : ", np.linalg.norm(point_to_numpy(candidates[0][1]) - point_to_numpy(ref_pose)))
+        print("Distance : ", np.linalg.norm(point_to_numpy(candidates[1][1]) - point_to_numpy(ref_pose)))
         if class_discriminator == "CLOSE":
             return min(candidates, key=lambda x: np.linalg.norm(point_to_numpy(x[1]) - point_to_numpy(ref_pose)))[0]
         else:
