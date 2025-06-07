@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.foundationPose.FoundationPoseManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 
@@ -120,6 +121,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
       statusMessage.setBehaviorInProgress("-");
       statusMessage.setCompletedBehavior("-");
       statusMessage.setFailedBehavior("-");
+      statusMessage.setGraspSide(RobotSide.RIGHT.toByte());
       statusMessage.getFailure().setActionName("-");
       statusMessage.getFailure().setActionType("-");
       statusMessage.getFailure().setCollisionName("-");
@@ -292,6 +294,23 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          if (leaf.getParent().getDefinition().getName().contains("ReceiveObject"))
          {
                trackingObjectsInProgress |= leaf.getIsExecuting();
+               if (leaf.getDefinition().getName().contains("Grasp") && leaf.getIsExecuting())
+               {
+                  String objectGrasped = skillEditor.getObjectGrasped();
+                  RobotSide graspSide = skillEditor.getGraspSide();
+                  statusMessage.setObjectGrasped(objectGrasped);
+                  statusMessage.setGraspSide(graspSide.toByte());
+                  statusMessage.getTransformGraspedObjectHand().set(sceneGraph.getNamesToNodesMap().get(objectGrasped).getNodeFrame()
+                                                                              .getTransformToDesiredFrame(syncedRobot.getFullRobotModel().getHandControlFrame(graspSide)));
+               }
+         }
+
+         if (leaf.getParent().getDefinition().getName().contains("Place"))
+         {
+            if (leaf.getDefinition().getName().contains("Release") && leaf.getIsExecuting())
+            {
+               statusMessage.setObjectGrasped("");
+            }
          }
 
          // Check if we are executing Scan action and active/de-active foundationPose tracking

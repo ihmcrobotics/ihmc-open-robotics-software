@@ -31,6 +31,8 @@ public class AI2RSkillEditor
       public static final AI2RSkillEditor.SpatialRelationType[] values = values();
    }
    private StringBuilderHolder objectsToScan;
+   private String objectGrasped = "";
+   private RobotSide graspSide = RobotSide.RIGHT;
    private String objectToTrack;
    private int commandedBehaviorIndex;
 
@@ -161,23 +163,27 @@ public class AI2RSkillEditor
 
    private void updateReceiveObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
    {
-      if (behaviorToExecuteName.contains("RECEIVE") && message.getAdaptingBehavior())
+      if (behaviorToExecuteName.contains("RECEIVE")) //&& message.getAdaptingBehavior())
       {
+         //               AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
+         //               String receiveObject = receiveMessage.getObjectNameAsString();
+         //               if (!receiveObject.isEmpty())
+         //               {
+         //                  objectToTrack = receiveObject;
+         //               }
+         objectGrasped = "Charge1";
+         objectToTrack = "Charge";
          for (var leaf : state.getActionSequence().getOrderedLeaves())
          {
-            if (leaf instanceof ConditionNodeState conditionNodeState && conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
+            if (leaf instanceof ConditionNodeState conditionNodeState)
             {
-//               AI2RReceiveObjectMessage receiveMessage = message.getReceiveObject();
-//               String receiveObject = receiveMessage.getObjectNameAsString();
-//               if (!receiveObject.isEmpty())
-//               {
-//                  objectToTrack = receiveObject;
-//               }
-               objectToTrack = "Charge";
-               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(objectToTrack);
-               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName("rightHandZUp");
-//               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveObject);
-//               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
+               if (conditionNodeState.getParent().getDefinition().getName().contains("ReceiveObject"))
+               {
+                  conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(objectGrasped);
+                  conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName("rightHandZUp");
+                  //               conditionNodeState.getDefinition().getProximityCheck().setObjectFrameName(receiveObject);
+                  //               conditionNodeState.getDefinition().getProximityCheck().setReferenceFrameName(RobotSide.fromByte(receiveMessage.getSide())==RobotSide.LEFT ? "leftHandZUp" : "rightHandZUp");
+               }
             }
          }
       }
@@ -238,6 +244,16 @@ public class AI2RSkillEditor
    public String getObjectToTrack()
    {
       return objectToTrack;
+   }
+
+   public String getObjectGrasped()
+   {
+      return objectGrasped;
+   }
+
+   public RobotSide getGraspSide()
+   {
+      return graspSide;
    }
 
    public StringBuilderHolder getObjectsToScan()

@@ -1,6 +1,10 @@
 package us.ihmc.rdx.simulation.environment;
 
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.AutonomyAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -11,6 +15,7 @@ import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.perception.sceneGraph.RDXSceneGraphUI;
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +34,8 @@ public class RDXCustomSceneLoader
    }
    private final RDXSceneGraphUI sceneGraphUI;
    private final RDXPredefinedRigidBodySceneNodeBuilder predefinedRigidBodySceneNodeBuilder;
-   private final Map<String, RigidBodyTransform> initialSceneNodeTransforms = new HashMap<>();
+   private ROS2SyncedRobotModel syncedRobot;
+   private ROS2Helper ros2;
 
    public RDXCustomSceneLoader(RDXSceneGraphUI sceneGraphUI)
    {
@@ -37,42 +43,19 @@ public class RDXCustomSceneLoader
       this.predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraphUI.getSceneGraph());
    }
 
+   public RDXCustomSceneLoader(RDXSceneGraphUI sceneGraphUI, ROS2Helper ros2, ROS2SyncedRobotModel syncedRobot)
+   {
+      this.sceneGraphUI = sceneGraphUI;
+      this.predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraphUI.getSceneGraph());
+      this.syncedRobot = syncedRobot;
+      this.ros2 = ros2;
+   }
+
    public void loadCustomScene(RDXDemoScene demoScene)
    {
       switch (demoScene)
       {
          case EXPLOSIVE_BREACHING_A:
-            // Addition of custom nodes in custom locations
-            addNode("DoorPullHandle");
-            setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
-                                                             new Point3D(1.83381, 2.47637+0.97246, 1.33200)));
-
-            addNode("DoorPanel");
-            setNodePose("DoorPanel1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(85.34664), 0.0, 0.0),
-                                                             new Point3D(1.58971, 2.53624+0.97246, 0.00)));
-
-            addNode("Person");
-            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(146.30856), 0.0, 0.0),
-                                                          new Point3D(3.01918, -2.78028+0.97246, 0.00)));
-
-            addNode("Person");
-            setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-95.59758), 0.0, 0.0),
-                                                          new Point3D(-0.58502, 1.95796+0.97246, 0.00)));
-
-            addNode("Charge");
-            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.79404), Math.toRadians(0.02114), Math.toRadians(1.52525)),
-                                                          new Point3D(-1.00602, 1.67525+0.97246, 0.93665)));
-
-            addNode("Barrier");
-            setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
-                                                          new Point3D(1.77185, 0.97246+0.97246, 0.00000)));
-
-            addNode("Barrier");
-            setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
-            break;
-
-         case EXPLOSIVE_BREACHING_B:
             // Addition of custom nodes in custom locations
             addNode("DoorPullHandle");
             setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
@@ -93,6 +76,37 @@ public class RDXCustomSceneLoader
             addNode("Charge");
             setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-173.50519), Math.toRadians(1.51561), Math.toRadians(0.17252)),
                                                           new Point3D(1.53540, -0.48509+0.97246, 1.00433)));
+
+            addNode("Barrier");
+            setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
+                                                           new Point3D(1.77185, 0.97246, 0.00000)));
+
+            addNode("Barrier");
+            setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
+                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
+            break;
+
+         case EXPLOSIVE_BREACHING_B:
+            // Addition of custom nodes in custom locations
+            addNode("DoorPullHandle");
+            setNodePose("DoorPullHandle1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.89080), 0.0, 0.0),
+                                                                  new Point3D(1.63098, 3.23158, 1.33200)));
+
+            addNode("DoorPanel");
+            setNodePose("DoorPanel1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(85.34664), 0.0, 0.0),
+                                                             new Point3D(1.83915, 2.30509+0.97246, 0.00)));
+
+            addNode("Person");
+            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(171.83577), 0.0, 0.0),
+                                                          new Point3D(1.98502, 0.18705, 0.00)));
+
+            addNode("Person");
+            setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(133.77302), 0.0, 0.0),
+                                                          new Point3D(2.64078, -2.69888, 0.00)));
+
+            addNode("Charge");
+            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(178.98256), Math.toRadians(1.51561), Math.toRadians(-0.02709)),
+                                                          new Point3D(1.59870, -0.15700, 1.00433)));
 
             addNode("Barrier");
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
@@ -190,10 +204,13 @@ public class RDXCustomSceneLoader
 
    private void setNodePose(String nodeName, RigidBodyTransform  rigidBodyTransform)
    {
-      sceneGraphUI.getSceneGraph()
-                  .getNamesToNodesMap()
-                  .get(nodeName)
-                  .setNodeToParentFrameTransformAndUpdate(rigidBodyTransform);
+      if (sceneGraphUI.getSceneGraph().getNamesToNodesMap().get(nodeName) != null)
+      {
+         sceneGraphUI.getSceneGraph()
+                     .getNamesToNodesMap()
+                     .get(nodeName)
+                     .setNodeToParentFrameTransformAndUpdate(rigidBodyTransform);
+      }
    }
 
    public String getEnvironmentName(RDXDemoScene demoScene)
@@ -218,5 +235,21 @@ public class RDXCustomSceneLoader
             object.setTransformToWorld(sceneNode.getNodeFrame().getTransformToWorldFrame());
          }
       }
+   }
+
+   public void moveManipulatedObject()
+   {
+      ros2.subscribeViaCallback(AutonomyAPI.AI2R_STATUS, message ->
+      {
+         String objectGrasped = message.getObjectGraspedAsString();
+         if (objectGrasped != null && !objectGrasped.isEmpty())
+         {
+            ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.fromByte(message.getGraspSide()));
+            FramePose3D objectTransform = new FramePose3D(handFrame, message.getTransformGraspedObjectHand());
+            objectTransform.changeFrame(ReferenceFrame.getWorldFrame());
+            setNodePose(objectGrasped, new RigidBodyTransform(objectTransform.getOrientation(), objectTransform.getTranslation()));
+         }
+      });
+
    }
 }

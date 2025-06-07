@@ -20,3 +20,15 @@ string completed_behavior
 # Name of the behavior that has failed (name of the checkpoint in the pre-loaded behavior collection)
 string failed_behavior
 behavior_msgs/AI2RActionFailureMessage failure
+
+# Name of the object that the robot is handling
+string object_grasped
+
+# Which hand is handling the object
+byte grasp_side 255
+
+# Relative transform of the grasped object in hand frame
+geometry_msgs/Pose transform_grasped_object_hand
+
+# Name of the object that the robot has released
+string object_placed

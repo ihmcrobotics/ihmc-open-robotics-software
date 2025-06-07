@@ -64,19 +64,16 @@ def behavior_message_callback(msg):
                 print(behavior)
         else:
             print("-")
-
+        print("\n")
      # --------- Coordination -----------
     waiting_for_command = False
 
     # --------- Monitoring -----------
-    #print("Behavior in Progress: " + msg.behavior_in_progress)
-    #if (msg.completed_behavior != "-"):
-    #print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
     failed_behavior = msg.failed_behavior
     failure = msg.failure
     if failed_behavior != "-" and loggedFailure == False:
         print("[FAILURE] -----------")
-        print("Failed behavior: " + failed_behavior)
+        print("Failed behavior: ")
 
         failure_info = {
             "Failed Behavior": failed_behavior,
@@ -100,11 +97,9 @@ def behavior_message_callback(msg):
         error_vector = np.array([position_error.x, position_error.y, position_error.z])
         norm = np.linalg.norm(error_vector)
         if norm > failure.position_tolerance:
-            #failure_info["Position Error"] = norm
             failure_info["Position Error"] = "true"
 
         # Pretty-print the failure_info dictionary for the user
-        print("A failure has occurred. Details:")
         print(json.dumps(failure_info, indent=4))
 
 
@@ -169,7 +164,6 @@ def behavior_message_callback(msg):
                 queue = [[next_behavior, task_description]]
                 plan_queue = queue + plan_queue
                 # Add next_behavior and task_description to front of plan_queue
-                #plan_queue.insert(0, [next_behavior, task_description])
                 print("Plan queue after rerun:", plan_queue)
                 waiting_for_command  = True
             else:
@@ -184,7 +178,6 @@ def behavior_message_callback(msg):
                         scene_objects_names = [obj.object_name for obj in scene_objects]
                 else:
                     print("No scene objects detected.")
-                print("Scene Objects:", scene_objects_names)
                 
                 # Get all available behaviors
                 available_behaviors = msg.available_behaviors
@@ -202,9 +195,8 @@ def behavior_message_callback(msg):
                 
                 # Convert the input to a string for LLM processing
                 llm_input       = str(llm_input)
-                print("LLM Input for reasoning after failures:", llm_input)
                 print("Loading config after failure")
-                llm                 = LLMInterface(config_file="config_failure.json")
+                llm                 = LLMInterface(config_file="config.json")
                 llm_input           = llm_input + "\ntask_description : " + task_description
                 response            = llm.call_model(llm_input)
                 print(" --------- Output after failure: --------- \n", response)
@@ -228,10 +220,7 @@ def behavior_message_callback(msg):
         with open(json_filename, 'w') as json_file:
             json.dump(data, json_file, indent=4)            
 
-   
-    # print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
     if msg.behavior_in_progress == "-" and msg.completed_behavior == next_behavior:
-       print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Past Behavior: " + next_behavior)
        waiting_for_command  = True
 
     if waiting_for_command or not initialized:
@@ -249,11 +238,6 @@ def behavior_message_callback(msg):
         scene_objects_poses = [obj.object_pose_in_world for obj in msg.objects]
         scene_objects_positions = [pose.position for pose in scene_objects_poses]
         robot_position = msg.robot_mid_feet_under_pelvis_pose_in_world.position
-
-        # If calling llm for the first time, we can initialize the scene_objects_names as empty
-        # if llm_call_counter == 0:
-        #     scene_objects_names = ''
-        print("Scene Objects:", scene_objects_names)
         
         # Get all available behaviors
         available_behaviors = msg.available_behaviors
@@ -274,7 +258,6 @@ def behavior_message_callback(msg):
         
         # Convert the input to a string for LLM processing
         llm_input       = str(llm_input)
-        print("LLM Input for reasoning:", llm_input)
 
         # Check if it is first time calling the LLM
         if llm_plan == []:
@@ -282,10 +265,13 @@ def behavior_message_callback(msg):
             llm.first_log_interaction(llm_input)
 
             print(" --------- Calling the LLM for the first time --------- ")
+            print("LLM Input for reasoning:", llm_input)
+            print("\n")
 
             # Get the plan from the LLM
             response        = llm.call_model(llm_input)
             print(" --------- Output of LLM Planner: --------- \n", response)
+            print("\n")
             llm_call_counter += 1
 
             plan_queue = behavior_list_to_planqueue(response)
@@ -302,10 +288,8 @@ def behavior_message_callback(msg):
                 # Step 3: Clean up whitespace
                 llm_plan = [b.strip().rstrip(',') for b in behaviors]
 
-                print('llm_plan : ', llm_plan)
                 # Create list of [action, full_step]
                 plan_queue = [[re.match(r'^([A-Z ]+)', step).group(1).strip(), step] for step in llm_plan]
-                print("Plan Queue:", plan_queue)
             else:
                 print("No behavior_list found.")
 
@@ -315,11 +299,7 @@ def behavior_message_callback(msg):
         else:
             # Get the next behavior from the plan queue
             if plan_queue:
-                #print("plan_queue before:", plan_queue)
                 next_behavior, task_description = plan_queue.pop(0)
-                print("Next behavior from plan queue:", next_behavior)
-                print("task_description:", task_description)
-                #print("plan_queue after:", plan_queue)
             else:
                 print("Plan queue is empty. No next behavior to execute.")
                 sys.exit(0)
@@ -394,9 +374,7 @@ def behavior_message_callback(msg):
                 robot_pose=robot_position,
                 spatial_context_object="")
             
-            print("selected_object: ", selected_object)
-            #selected_object = 'Person1'
-            #print("setting selected object to selected_object: ", selected_object)
+            print("Selected action target: ", selected_object)
 
             # Set the reference frame name - can copy from scene_objects.obj_name
             new_goto_behavior.target_object = selected_object
@@ -417,14 +395,11 @@ def behavior_message_callback(msg):
 
         
         print("Commanded Behavior: " + behavior_command.behavior_to_execute)
+        print("\n")
         ros2["behavior_publisher"].publish(behavior_command)
         initialized = True
-        loggedFailure = False  
-        print("Behavior in Progress: " + msg.behavior_in_progress, " Completed Behavior: " + msg.completed_behavior, " Next Behavior: " + next_behavior)
+        loggedFailure = False
         time.sleep(1)
-        #print("Completed Behavior: " , msg.completed_behavior, " behavior_in_progress: " , msg.behavior_in_progress)
-        #time.sleep(10)  # Sleep for a second to allow the command to be processed
-
 
 # Function to check for duplicates
 def find_duplicate_user_input(existing_entries, new_entry):
@@ -449,10 +424,6 @@ def find_duplicate_user_input(existing_entries, new_entry):
     return None  # No duplicate found
 
 
-
-
-
-
 def behavior_list_to_planqueue(response):
     # Extract behavior list from the LLM plan
     match = re.search(r'behavior_list\s*=\s*\[(.*?)\]', response, re.DOTALL)
@@ -466,7 +437,6 @@ def behavior_list_to_planqueue(response):
         # Step 3: Clean up whitespace
         plan = [b.strip().rstrip(',') for b in behaviors]
 
-        print('plan : ', plan)
         # Create list of [action, full_step]
         queue = [[re.match(r'^([A-Z ]+)', step).group(1).strip(), step] for step in plan]
         return queue
@@ -525,7 +495,7 @@ def select_target_object(
         (name, pose) for name, pose in zip(scene_object_names, scene_object_positions)
         if name.startswith(base_name) and name[len(base_name):].isdigit()
     ]
-    print("candidates : ", candidates)
+#     print("candidates : ", candidates)
     if not candidates:
         print(f"No {base_name} objects found")
         return None
@@ -535,7 +505,7 @@ def select_target_object(
     # Get reference positions
     if spatially_related_object == "-" or  spatially_related_object == "":
             spatially_related_object = "Robot"
-    print("ref_pose_object", spatially_related_object)
+
     ref_pose = get_pose_by_name(spatially_related_object, scene_object_names, scene_object_positions, robot_pose)
     if not ref_pose:
         print(f"Spatially related object '{spatially_related_object}' not found")
@@ -543,7 +513,7 @@ def select_target_object(
 
     if spatial_context_object == "-" or  spatial_context_object == "":
         spatial_context_object = "Robot"
-    print("ctx_pose_object", spatial_context_object)
+
     ctx_pose = get_pose_by_name(spatial_context_object, scene_object_names, scene_object_positions, robot_pose) if spatial_context_object else None
     if not ctx_pose:
         print(f"POV object '{spatial_context_object}' not found")
@@ -573,7 +543,7 @@ def select_target_object(
 
     # Evaluate candidates
     qualified = []
-    print("spatial_relation", spatial_relation)
+
     for name, pose in candidates:
         candidate_pos = point_to_numpy(pose)
         offset = candidate_pos - ref_pos
@@ -589,7 +559,7 @@ def select_target_object(
         elif spatial_relation == "LEFT":
             if np.dot(offset, left_vec) < -0.5:
                 qualified.append((name, np.linalg.norm(offset)))
-    print("qualified ", qualified)
+#     print("qualified ", qualified)
 
     if class_discriminator == "CLOSE":
         return min(qualified, key=lambda x: x[1])[0] if qualified else None

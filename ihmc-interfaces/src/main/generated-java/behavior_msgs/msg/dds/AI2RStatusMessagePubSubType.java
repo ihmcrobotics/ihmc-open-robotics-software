@@ -15,7 +15,7 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e7ddc1cef36a99f3a48f6706fbfbec74f4f26297ccbff60179edcb5ef5af157b";
+   		return "7a282ad31cee5473f5bd4b80c9fd6a4c985514e2bd6eed3f9910f01bd1e63c2d";
    }
    
    @Override
@@ -66,6 +66,12 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +105,15 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.getCdrSerializedSize(data.getFailure(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectGrasped().length() + 1;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getTransformGraspedObjectHand(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectPlaced().length() + 1;
+
 
       return current_alignment - initial_alignment;
    }
@@ -127,6 +142,17 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
           throw new RuntimeException("failed_behavior field exceeds the maximum length: %d > %d".formatted(data.getFailedBehavior().length(), 255));
 
       behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.write(data.getFailure(), cdr);
+      if(data.getObjectGrasped().length() <= 255)
+      cdr.write_type_d(data.getObjectGrasped());else
+          throw new RuntimeException("object_grasped field exceeds the maximum length: %d > %d".formatted(data.getObjectGrasped().length(), 255));
+
+      cdr.write_type_9(data.getGraspSide());
+
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getTransformGraspedObjectHand(), cdr);
+      if(data.getObjectPlaced().length() <= 255)
+      cdr.write_type_d(data.getObjectPlaced());else
+          throw new RuntimeException("object_placed field exceeds the maximum length: %d > %d".formatted(data.getObjectPlaced().length(), 255));
+
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -138,6 +164,11 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_d(data.getCompletedBehavior());	
       cdr.read_type_d(data.getFailedBehavior());	
       behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.read(data.getFailure(), cdr);	
+      cdr.read_type_d(data.getObjectGrasped());	
+      data.setGraspSide(cdr.read_type_9());
+      	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getTransformGraspedObjectHand(), cdr);	
+      cdr.read_type_d(data.getObjectPlaced());	
 
    }
 
@@ -153,6 +184,11 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_d("failed_behavior", data.getFailedBehavior());
       ser.write_type_a("failure", new behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType(), data.getFailure());
 
+      ser.write_type_d("object_grasped", data.getObjectGrasped());
+      ser.write_type_9("grasp_side", data.getGraspSide());
+      ser.write_type_a("transform_grasped_object_hand", new geometry_msgs.msg.dds.PosePubSubType(), data.getTransformGraspedObjectHand());
+
+      ser.write_type_d("object_placed", data.getObjectPlaced());
    }
 
    @Override
@@ -167,6 +203,11 @@ public class AI2RStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_d("failed_behavior", data.getFailedBehavior());
       ser.read_type_a("failure", new behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType(), data.getFailure());
 
+      ser.read_type_d("object_grasped", data.getObjectGrasped());
+      data.setGraspSide(ser.read_type_9("grasp_side"));
+      ser.read_type_a("transform_grasped_object_hand", new geometry_msgs.msg.dds.PosePubSubType(), data.getTransformGraspedObjectHand());
+
+      ser.read_type_d("object_placed", data.getObjectPlaced());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AI2RStatusMessage src, behavior_msgs.msg.dds.AI2RStatusMessage dest)
