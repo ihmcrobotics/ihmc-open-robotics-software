@@ -87,12 +87,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (deltaChildren > 0 && deltaChildren < 5)
          treeWidgetExpanded = true;
 
-      while (!state.getLogger().getRecentMessages().isEmpty())
-      {
-         LogMessage message = state.getLogger().getRecentMessages().poll();
-         logArea.submitEntry(message.instant(), message.level(), message.message());
-         RDXBaseUI.pushNotification(message.message());
-      }
+//      while (!state.getLogger().getRecentMessages().isEmpty())
+//      {
+//         LogMessage message = state.getLogger().getRecentMessages().poll();
+//         logArea.submitEntry(message.instant(), message.level(), message.message());
+//         RDXBaseUI.pushNotification(message.message());
+//      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
