@@ -164,11 +164,14 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          {
             continue;
          }
-         AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
-         objectMessage.setObjectName(nodeName);
-         ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
-         objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
-         objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
+         if (sceneGraph.getNamesToNodesMap().get(nodeName) != null)
+         {
+            AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
+            objectMessage.setObjectName(nodeName);
+            ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
+            objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
+            objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
+         }
       }
    }
 
@@ -332,7 +335,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   Point3DReadOnly positionNextNextStep = footsteps.get(footsteps.size()-1 - stepsLeft + 2).getLocation();
                   for (var object : statusMessage.getObjects())
                   {
-                     if (!object.getObjectNameAsString().contains("Charge"))
+                     if (!object.getObjectNameAsString().contains("Charge") && !object.getObjectNameAsString().contains("Barrier") && !object.getObjectNameAsString().contains("Door"))
                      {
                         Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
                         if (positionNextNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)

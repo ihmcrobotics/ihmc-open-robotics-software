@@ -66,24 +66,28 @@ public class RDXCustomSceneLoader
                                                              new Point3D(1.83915, 2.30509+0.97246, 0.00)));
 
             addNode("Person");
-            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(91.27057), 0.0, 0.0),
-                                                          new Point3D(2.01548, -0.57308+0.97246, 0.00)));
+            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(176.92345), 0.0, 0.0),
+                                                          new Point3D(2.57299, 0.13116, 0.00)));
 
             addNode("Person");
-            setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.24428), 0.0, 0.0),
-                                                          new Point3D(1.97584, -1.22519+0.97246, 0.00)));
+            setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(133.77302), 0.0, 0.0),
+                                                          new Point3D(2.64078, -2.69888, 0.00)));
 
             addNode("Charge");
-            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-173.50519), Math.toRadians(1.51561), Math.toRadians(0.17252)),
-                                                          new Point3D(1.53540, -0.48509+0.97246, 1.00433)));
+            setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(83.11072), Math.toRadians(-0.18205), Math.toRadians(-1.50489)),
+                                                          new Point3D(2.28759, -2.37839, 1.17361)));
 
             addNode("Barrier");
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
-                                                           new Point3D(1.77185, 0.97246, 0.00000)));
+                                                           new Point3D(1.53626, 0.98736, 0.00000)));
 
             addNode("Barrier");
             setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
+                                                           new Point3D(1.75723, 0.96312, 0.79907)));
+
+            addNode("Barrier");
+            setNodePose("Barrier3", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
+                                                           new Point3D(2.46589, 0.91928, 0.00000)));
             break;
 
          case EXPLOSIVE_BREACHING_B:
@@ -97,8 +101,8 @@ public class RDXCustomSceneLoader
                                                              new Point3D(1.83915, 2.30509+0.97246, 0.00)));
 
             addNode("Person");
-            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(171.83577), 0.0, 0.0),
-                                                          new Point3D(1.98502, 0.18705, 0.00)));
+            setNodePose("Person1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-166.60696), 0.0, 0.0),
+                                                          new Point3D(2.57299, 0.13116, 0.00)));
 
             addNode("Person");
             setNodePose("Person2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(133.77302), 0.0, 0.0),
@@ -106,15 +110,19 @@ public class RDXCustomSceneLoader
 
             addNode("Charge");
             setNodePose("Charge1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(178.98256), Math.toRadians(1.51561), Math.toRadians(-0.02709)),
-                                                          new Point3D(1.59870, -0.15700, 1.00433)));
+                                                          new Point3D(2.24179, 0.13933, 0.93677)));
 
             addNode("Barrier");
             setNodePose("Barrier1", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(86.38002), 0.0, 0.0),
-                                                           new Point3D(1.77185, 0.97246, 0.00000)));
+                                                           new Point3D(1.53626, 0.98736, 0.00000)));
 
             addNode("Barrier");
             setNodePose("Barrier2", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
-                                                           new Point3D(1.83069, -0.01199+0.97246, 0.79907)));
+                                                           new Point3D(1.75723, 0.96312, 0.79907)));
+
+            addNode("Barrier");
+            setNodePose("Barrier3", new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-92.06846), 0.0, 0.0),
+                                                           new Point3D(2.46589, 0.91928, 0.00000)));
             break;
 
          case EXPLOSIVE_BREACHING_C:
@@ -244,10 +252,17 @@ public class RDXCustomSceneLoader
          String objectGrasped = message.getObjectGraspedAsString();
          if (objectGrasped != null && !objectGrasped.isEmpty())
          {
-            ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.fromByte(message.getGraspSide()));
-            FramePose3D objectTransform = new FramePose3D(handFrame, message.getTransformGraspedObjectHand());
-            objectTransform.changeFrame(ReferenceFrame.getWorldFrame());
-            setNodePose(objectGrasped, new RigidBodyTransform(objectTransform.getOrientation(), objectTransform.getTranslation()));
+            try
+            {
+               ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.fromByte(message.getGraspSide()));
+               FramePose3D objectTransform = new FramePose3D(handFrame, message.getTransformGraspedObjectHand());
+               objectTransform.changeFrame(ReferenceFrame.getWorldFrame());
+               setNodePose(objectGrasped, new RigidBodyTransform(objectTransform.getOrientation(), objectTransform.getTranslation()));
+            }
+            catch (Exception e)
+            {
+               // Exception is caught and ignored, so execution continues
+            }
          }
       });
 
