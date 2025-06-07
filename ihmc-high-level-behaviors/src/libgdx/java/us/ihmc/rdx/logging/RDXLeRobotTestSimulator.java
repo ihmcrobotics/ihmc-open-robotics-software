@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.perception.lerobot.LeRobotManager;
+import us.ihmc.perception.lerobot.LeRobotInferenceManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
@@ -61,7 +61,7 @@ public class RDXLeRobotTestSimulator
    private final ROS2Node ros2Node;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXROS2RobotVisualizer robotVisualizer;
-   private LeRobotManager inferenceManager;
+   private LeRobotInferenceManager inferenceManager;
    private boolean simulationStarted = false;
    private SCS2AvatarSimulation avatarSimulation;
    private YoEnum<HighLevelControllerName> controllerState;
@@ -242,7 +242,7 @@ public class RDXLeRobotTestSimulator
                if (inferenceManager != null)
                   inferenceManager.destroy();
 
-               inferenceManager = new LeRobotManager(dataset.getName());
+               inferenceManager = new LeRobotInferenceManager(dataset.getName());
             }
 
             if (ImGui.checkbox(labels.get("Run model"), runInference))

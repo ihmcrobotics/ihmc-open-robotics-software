@@ -21,7 +21,7 @@ import us.ihmc.ros2.ROS2Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class LeRobotManager
+public class LeRobotInferenceManager
 {
    private static final ROS2Topic<?> LEROBOT = new ROS2Topic<>().withPrefix("lerobot");
    private static final ROS2Topic<std_msgs.msg.dds.String> CONNECT = LEROBOT.withSuffix("connect").withType(std_msgs.msg.dds.String.class);
@@ -44,7 +44,7 @@ public class LeRobotManager
    private final SideDependentList<Image> zedImages = new SideDependentList<>(new Image(), new Image());
    private boolean running = false;
 
-   public LeRobotManager(String modelName)
+   public LeRobotInferenceManager(String modelName)
    {
       this.modelName = modelName;
 
