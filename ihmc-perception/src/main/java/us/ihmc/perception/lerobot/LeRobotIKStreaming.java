@@ -1,23 +1,52 @@
 package us.ihmc.perception.lerobot;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 
 public class LeRobotIKStreaming
 {
-   private final KinematicsStreamingToolboxInputMessage ikInputMessage = new KinematicsStreamingToolboxInputMessage();
+   private final SideDependentList<Pose3D> actionHandPoses;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
    private final Vector3D positionWeight = new Vector3D(-1.0, -1.0, -1.0); // default values are used
    private final Vector3D orientationWeight = new Vector3D(-1.0, -1.0, -1.0); // default values are used
+   private final ROS2Publisher<KinematicsToolboxConfigurationMessage> configurationPublisher;
+   private final ROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
 
-   public LeRobotIKStreaming()
+   public LeRobotIKStreaming(SideDependentList<Pose3D> actionHandPoses, String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
+      this.actionHandPoses = actionHandPoses;
+      this.fullRobotModel = fullRobotModel;
+
+      if (robotName.toLowerCase().contains("nadia"))
+      {
+         ikSolverConfigurationMessage.getJointsToDeactivate().add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
+         ikSolverConfigurationMessage.getJointsToDeactivate().add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
+      }
+
+      configurationPublisher = ros2Node.createPublisher(ToolboxAPIs.getInputToolboxConfigurationTopic(robotName));
+      inputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotName));
+   }
+
+   public void update(long actionTimestampNanos)
+   {
+      configurationPublisher.publish(ikSolverConfigurationMessage);
+
+      KinematicsStreamingToolboxInputMessage ikInputMessage = prepareInputMessage(actionTimestampNanos);
+      inputPublisher.publish(ikInputMessage);
    }
 
    /**
@@ -25,11 +54,13 @@ public class LeRobotIKStreaming
     *                               coming from the policy. I don't think it has to be corresponding with
     *                               controller time at all.
     */
-   public void prepareInputMessage(long actionTimestampNanos, SideDependentList<Pose3D> actionHandPoses)
+   public KinematicsStreamingToolboxInputMessage prepareInputMessage(long actionTimestampNanos)
    {
+      KinematicsStreamingToolboxInputMessage ikInputMessage = new KinematicsStreamingToolboxInputMessage();
+
       for (RobotSide side : RobotSide.values)
       {
-         int endEffectorHashCode = 0; // ghostFullRobotModel.getHand(side);
+         int endEffectorHashCode = fullRobotModel.getHand(side).hashCode();
 
          Pose3DReadOnly handControlPose = actionHandPoses.get(side);
 
@@ -77,10 +108,7 @@ public class LeRobotIKStreaming
       }
 
       ikInputMessage.setTimestamp(actionTimestampNanos);
-   }
 
-   public KinematicsStreamingToolboxInputMessage getIkInputMessage()
-   {
       return ikInputMessage;
    }
 }

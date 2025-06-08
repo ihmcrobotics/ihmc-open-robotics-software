@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -43,10 +44,15 @@ public class LeRobotInferenceManager
    private final SideDependentList<Pose3D> actionHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
    private final SideDependentList<Image> zedImages = new SideDependentList<>(new Image(), new Image());
    private boolean running = false;
+   private final LeRobotIKStreaming ikStreaming;
+   private long actionTimestampNanos = 0L;
 
-   public LeRobotInferenceManager(String modelName)
+   public LeRobotInferenceManager(String modelName, String robotName, FullHumanoidRobotModel fullRobotModel)
    {
       this.modelName = modelName;
+
+      actionHandPoses.forEach(Pose3D::setToNaN);
+      ikStreaming = new LeRobotIKStreaming(actionHandPoses, robotName, ros2Node, fullRobotModel);
 
       ros2.subscribeViaVolatileCallback(STATUS, message ->
       {
@@ -55,6 +61,10 @@ public class LeRobotInferenceManager
       });
       ros2.subscribeViaVolatileCallback(ACTION_HAND_POSES, message ->
       {
+         // TODO: Add timestamp to /lerobot/action/hand_poses topic or something
+         //   This should be calculated according to the policy output
+         actionTimestampNanos = System.nanoTime();
+
          IDLSequence.Float data = message.getData();
          int i = 0;
          for (RobotSide side : RobotSide.values)
@@ -113,11 +123,7 @@ public class LeRobotInferenceManager
       command.setData(running ? "diffusion" : ""); // TODO: In future, possibly request model name
       ros2.publish(COMMAND, command);
 
-      // Send IK streaming hand pose commands
-      for (RobotSide side : RobotSide.values)
-      {
-
-      }
+      ikStreaming.update(actionTimestampNanos);
    }
 
    public void setRunning(boolean running)
