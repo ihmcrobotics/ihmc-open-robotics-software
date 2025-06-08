@@ -4,11 +4,16 @@ import us.ihmc.alexander.AlexanderJointMap;
 import us.ihmc.alexander.AlexanderSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +28,15 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
 
    private final SideDependentList<String> footForceSensorNames;
 
+   private final double spineJointPositionFrequency;
+   private final double spineJointVelocityFrequency;
+   private final double lowerBodyJointPositionFrequency;
+   private final double lowerBodyJointVelocityFrequency;
+
+   private final double orientationFrequency;
+   private final double angularVelocityFrequency;
+   private final double linearAccelerationFrequency;
+
    private final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
 
    private final AlexanderSensorInformation sensorInformation;
@@ -36,6 +50,16 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
 
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
 
+      spineJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
+      spineJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
+
+      lowerBodyJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
+
+      orientationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
+      angularVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
+
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
 
       String pelvisIMU = sensorInformation.getPrimaryBodyImu();
@@ -47,22 +71,84 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
 
          String torsoIMU = sensorInformation.getTorsoIMUName();
 
-         if (torsoIMU != null)
-         {
-            imuBasedJointStateEstimatorParameters.add(new IMUBasedJointStateEstimatorParameters("Spine",
-                                                                                                true,
-                                                                                                pelvisIMU,
-                                                                                                torsoIMU,
-                                                                                                breakFrequencyForVelocityEstimation,
-                                                                                                breakFrequencyForPositionEstimation));
-         }
+//         if (torsoIMU != null)
+//         {
+//            imuBasedJointStateEstimatorParameters.add(new IMUBasedJointStateEstimatorParameters("Spine",
+//                                                                                                true,
+//                                                                                                pelvisIMU,
+//                                                                                                torsoIMU,
+//                                                                                                breakFrequencyForVelocityEstimation,
+//                                                                                                breakFrequencyForPositionEstimation));
+//         }
       }
+   }
+
+   @Override
+   public boolean requestFrozenModeAtStart()
+   {
+      return true;
    }
 
    @Override
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
+      // 1 - Backlash compensation on joints.
+      // TODO maybe we don't need this?
 
+      // 2 - Low pass filters on position and velocity
+      DoubleProvider lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionFrequency", lowerBodyJointPositionFrequency);
+      DoubleProvider lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityFrequency", lowerBodyJointVelocityFrequency);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(lowerBodyJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, lowerBodyJoints());
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(lowerBodyJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, lowerBodyJoints());
+
+      DoubleProvider spineJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("spineJointPositionFrequency", spineJointPositionFrequency);
+      DoubleProvider spineJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("spineJointVelocityFrequency", spineJointVelocityFrequency);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(spineJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, spineJoints());
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(spineJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, spineJoints());
+
+      // IMU
+      DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationBreakFrequency", orientationFrequency);
+      DoubleProvider angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityBreakFrequency", angularVelocityFrequency);
+      DoubleProvider linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationBreakFrequency", linearAccelerationFrequency);
+
+      sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, SensorType.IMU_ORIENTATION);
+      sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, SensorType.IMU_ANGULAR_VELOCITY);
+      sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, SensorType.IMU_LINEAR_ACCELERATION);
+   }
+
+
+
+   private String[] lowerBodyJoints()
+   {
+      return toJointNameStrings(LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL);
+   }
+
+   private String[] spineJoints()
+   {
+      return toJointNameStrings(SpineJointName.SPINE_YAW);
+   }
+
+   private String[] toJointNameStrings(LegJointName... legJointNames)
+   {
+      List<String> names = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (LegJointName legJointName : legJointNames)
+            names.add(jointMap.getLegJointName(robotSide, legJointName));
+      }
+
+      return names.toArray(new String[0]);
+   }
+
+   private String[] toJointNameStrings(SpineJointName... spineJointNames)
+   {
+      List<String> names = new ArrayList<>();
+
+      for (SpineJointName spineJointName : spineJointNames)
+         names.add(jointMap.getSpineJointName(spineJointName));
+
+      return names.toArray(new String[0]);
    }
 
    @Override
@@ -104,8 +190,7 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getIMUBiasVelocityThreshold()
    {
-      // TODO Tune me
-      return 0.015;
+      return 0.03;
    }
 
    @Override
