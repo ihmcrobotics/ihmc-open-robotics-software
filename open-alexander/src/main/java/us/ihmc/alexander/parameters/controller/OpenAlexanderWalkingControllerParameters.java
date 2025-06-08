@@ -195,11 +195,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       return target == RobotTarget.REAL_ROBOT ? 0.45 : 0.35;
    }
 
-   public boolean isNeckPositionControlled()
-   {
-      return false;
-   }
-
    @Override
    public boolean resubmitStepsInSwingEveryTick()
    {
@@ -524,12 +519,10 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
    private PID3DGains createHandPositionControlGains()
    {
-      double kp, zeta, maximumPositionError, maximumVelocityError;
-
-         kp = 80.0;
-         zeta = 0.9;
-         maximumPositionError = 0.08;
-         maximumVelocityError = 0.6;
+      double kp = 80.0;
+      double zeta = 0.9;
+      double maximumPositionError = 0.08;
+      double maximumVelocityError = 0.6;
 
       DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
@@ -565,8 +558,8 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.3);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.5);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.2);
@@ -731,15 +724,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    public String[] getJointsToIgnoreInController()
    {
       return new String[0];
-   }
-
-   @Override
-   public String[] getInactiveJoints()
-   {
-      if (target == RobotTarget.REAL_ROBOT)
-         return new String[] {"SPINE_Y", "SPINE_X"};
-      else
-         return super.getInactiveJoints();
    }
 
    @Override

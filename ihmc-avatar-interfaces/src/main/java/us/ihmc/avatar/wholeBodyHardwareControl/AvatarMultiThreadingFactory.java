@@ -65,7 +65,7 @@ public class AvatarMultiThreadingFactory
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final boolean DISABLE_STEP_GENERATOR_THREAD = false;
 
-   private final YoRegistry registry;
+   private final YoRegistry rootRegistry;
 
    // Robot model
    private final DRCRobotModel robotModel;
@@ -127,7 +127,7 @@ public class AvatarMultiThreadingFactory
       this.affinity = affinity;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
-      this.registry = registry;
+      this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
 
       // Estimator and controller ROS2 nodes
@@ -142,7 +142,7 @@ public class AvatarMultiThreadingFactory
       lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), schedulerDt, registry);
 
       // Setup state estimator factory
-      estimatorThreadFactory = createStateEstimatorFactory(robotModel, sensorReaderFactory);
+      estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
 
       // Setup state controller factory
       controllerFactory = createHighLevelControllerFactory(robotModel,
@@ -150,6 +150,9 @@ public class AvatarMultiThreadingFactory
                                                            lowLevelOutputProcessor,
                                                            standPrepStateFactory,
                                                            freezeStateFactory);
+
+      // Add shutdown hook to kill the ROS nodes and various threads
+      Runtime.getRuntime().addShutdownHook(new Thread(AvatarMultiThreadingFactory.this::destroy));
    }
 
    public void start()
@@ -176,10 +179,11 @@ public class AvatarMultiThreadingFactory
 
    public void destroy()
    {
+      this.stop();
       estimatorRealtimeROS2Node.destroy();
       controllerRealtimeROS2Node.destroy();
       hardwareCommunicationInterface.destroy();
-      threadingManager.get().stop();
+      threadingManager.get().destroy();
    }
 
    public void buildThreads()
@@ -187,15 +191,15 @@ public class AvatarMultiThreadingFactory
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
 
+
       // Create controller thread
       HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
       Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
       stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
       stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
       stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
-      stateModeMap.put(QUICKSTER, StateEstimatorMode.NORMAL);
-      stateModeMap.put(CUSTOM1, StateEstimatorMode.NORMAL);
       estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
+
       HumanoidRobotContextDataFactory controllerContextFactory = new HumanoidRobotContextDataFactory();
       controllerThread.set(new AvatarControllerThread(robotModel.getSimpleRobotName().toLowerCase(),
                                                       robotModel,
@@ -210,6 +214,16 @@ public class AvatarMultiThreadingFactory
 
       // Create step generator thread
       stepGeneratorThread.set(createStepGeneratorThread(robotModel, controllerThread.get(), controllerContextFactory, controllerFactory));
+
+      // Do some YoVariable stuff
+      rootRegistry.addChild(estimatorThread.get().getYoRegistry());
+      yoVariableServer.setMainRegistry(rootRegistry,
+                                       estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
+                                       estimatorThread.get().getSCS1YoGraphicsListRegistry());
+//      yoVariableServer.addRegistry(estimatorThread.get().getYoRegistry(), estimatorThread.get().getSCS1YoGraphicsListRegistry());
+      yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
+      if (!DISABLE_STEP_GENERATOR_THREAD)
+         yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
 
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
@@ -228,33 +242,24 @@ public class AvatarMultiThreadingFactory
                                                            useRealtimeThreads,
                                                            useMultiThreading,
                                                            yoVariableServer,
-                                                           registry));
-
-      // Do some YoVariable stuff
-      if (yoVariableServer != null)
-      {
-         List<JointBasics> yoVariableServerJointList = createYoVariableServerJointList(estimatorThread.get().getFullRobotModel().getElevator());
-         yoVariableServer.setMainRegistry(registry, yoVariableServerJointList, estimatorThread.get().getSCS1YoGraphicsListRegistry());
-         yoVariableServer.addRegistry(estimatorThread.get().getYoRegistry(), estimatorThread.get().getSCS1YoGraphicsListRegistry());
-         yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
-         if (!DISABLE_STEP_GENERATOR_THREAD)
-            yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
-      }
+                                                           rootRegistry));
    }
 
    /**
     * Create Estimator Factory
     */
-   private AvatarEstimatorThreadFactory createStateEstimatorFactory(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory)
+   private AvatarEstimatorThreadFactory createStateEstimatorFactory(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, SensorReaderFactory sensorReaderFactory)
    {
       LogTools.info("The Squirrel estimates the number of acorns he needs for winter. Not many in Florida he thinks");
       HumanoidRobotContextDataFactory estimatorContextDataFactory = new HumanoidRobotContextDataFactory();
 
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
       avatarEstimatorThreadFactory.setROS2Info(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName());
-      avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
+
+      avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
+      avatarEstimatorThreadFactory.setEstimatorFullRobotModel(fullRobotModel);
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
-      //avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
+//      avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
@@ -458,8 +463,6 @@ public class AvatarMultiThreadingFactory
             YoEnum<HighLevelControllerName> requestedState = controllerFactory.getRequestedControlStateEnum();
             ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
-
-            YoBoolean ignoreHasRobotBeenCalibratedCheck = new YoBoolean("ignoreHasRobotBeenCalibratedCheck", parentRegistry);
 
             StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(STAND_TRANSITION_STATE,
                                                                                                    requestedState,

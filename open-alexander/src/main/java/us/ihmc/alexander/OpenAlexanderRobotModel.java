@@ -70,7 +70,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    static final boolean ENFORCE_UNIQUE_REFERENCE_FRAMES = false;
 
    private static final double DEFAULT_SIMULATE_DT = 0.0001;
-   private static final double DEFAULT_ESTIMATE_DT = 0.001;
+   private static final double DEFAULT_ESTIMATE_DT = 0.0005;
    private static final double DEFAULT_CONTROL_DT = 0.003;
    private static final double DEFAULT_PERCEPTION_DT = 0.003;
    private static final double ETHERCAT_DT = 0.001;
