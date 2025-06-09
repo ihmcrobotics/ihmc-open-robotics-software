@@ -108,7 +108,7 @@ public class YOLOv8DetectionExecutor
       updateThread.setDaemon(true);
       updateThread.startRepeating();
 
-      taskQueue = new ArrayBlockingQueue<>(2 * availableModels.size());
+      taskQueue = new ArrayBlockingQueue<>(4);
       taskExecutorThread.setDaemon(true);
       taskExecutorThread.startRepeating();
 
