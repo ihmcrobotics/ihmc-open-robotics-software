@@ -335,7 +335,7 @@ public class AvatarMultiThreadingManager
 
          // Write desired commands to robot
          lowLevelOutputProcessor.update(masterContext.getJointDesiredOutputList());
-         hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput());
+         hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
       }
 
       // Update YoVariable server

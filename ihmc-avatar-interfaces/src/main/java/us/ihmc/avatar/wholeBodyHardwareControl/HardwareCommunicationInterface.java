@@ -15,7 +15,7 @@ public interface HardwareCommunicationInterface
 {
    void read(SensorDataContext sensorDataContext);
 
-   void write(JointDesiredOutputListReadOnly jointDesireds);
+   void write(JointDesiredOutputListReadOnly jointDesireds, double masterGain);
 
    void start();
 
