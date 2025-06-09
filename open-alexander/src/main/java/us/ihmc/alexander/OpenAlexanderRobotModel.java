@@ -72,12 +72,14 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    private static final double DEFAULT_SIMULATE_DT = 0.0001;
    private static final double DEFAULT_ESTIMATE_DT = 0.001;
    private static final double DEFAULT_CONTROL_DT = 0.003;
+   private static final double DEFAULT_FEEDBACK_CONTROLLER_DT = 0.002;
    private static final double DEFAULT_PERCEPTION_DT = 0.003;
    private static final double ETHERCAT_DT = 0.001;
 
    private double simulateDT = DEFAULT_SIMULATE_DT;
    private double estimatorDT = DEFAULT_ESTIMATE_DT;
    private double controllerDT = DEFAULT_CONTROL_DT;
+   private double feedbackControllerDT = DEFAULT_FEEDBACK_CONTROLLER_DT;
    private double perceptionDT = DEFAULT_PERCEPTION_DT;
    private double stepGeneratorDT = 10 * controllerDT;
 
@@ -304,6 +306,12 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
+   public double getFeedbackControllerDT()
+   {
+      return feedbackControllerDT;
+   }
+
+   @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return null;
@@ -493,5 +501,10 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public void setControllerDT(double controllerDT)
    {
       this.controllerDT = controllerDT;
+   }
+
+   public void setFeedbackControllerDT(double feedbackControllerDT)
+   {
+      this.feedbackControllerDT = feedbackControllerDT;
    }
 }

@@ -16,7 +16,10 @@ import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
+import java.util.Collection;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -83,11 +86,12 @@ public class StandAloneRealsenseProcess
       d455PublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
+      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>();
+      d455Sensor.registerImageCollector(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       rapidHeightMapThread = new RapidHeightMapThread(ros2Helper.getROS2Node(),
                                                       syncedRobot,
                                                       robotCollisionModel,
-                                                      d455Sensor,
-                                                      RealSenseImageSensor.DEPTH_IMAGE_KEY,
+                                                      rawImageCollection,
                                                       controllerFootstepQueueMonitor,
                                                       heightMapParameters,
                                                       depthImageFilteringParameters);

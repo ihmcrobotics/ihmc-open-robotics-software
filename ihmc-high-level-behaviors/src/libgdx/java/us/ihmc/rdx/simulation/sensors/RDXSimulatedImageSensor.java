@@ -2,6 +2,7 @@ package us.ihmc.rdx.simulation.sensors;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,6 +27,7 @@ public class RDXSimulatedImageSensor extends ImageSensor
 
    private final Map<Integer, RawImage> grabbedImages = new HashMap<>();
    private final Map<Integer, RDXSimulatedCamera> imageKeyToCameraMap = new HashMap<>();
+   private int[] imageKeys;
 
    private final Throttler grabThrottler = new Throttler();
 
@@ -97,6 +99,11 @@ public class RDXSimulatedImageSensor extends ImageSensor
          imageKeyToCameraMap.put(colorImageKey, camera);
       if (hasDepth)
          imageKeyToCameraMap.put(depthImageKey, camera);
+
+      imageKeys = new int[imageKeyToCameraMap.size()];
+      int i = 0;
+      for (Integer key : imageKeyToCameraMap.keySet())
+         imageKeys[i++] = key;
    }
 
    public void create(RDX3DScene scene)
@@ -176,6 +183,12 @@ public class RDXSimulatedImageSensor extends ImageSensor
    }
 
    @Override
+   public int[] getImageKeys()
+   {
+      return imageKeys;
+   }
+
+   @Override
    public void close()
    {
       super.close();
@@ -190,12 +203,19 @@ public class RDXSimulatedImageSensor extends ImageSensor
       if (!isRunning || !grabThrottler.run())
          return;
 
-      RigidBodyTransform sensorTransformToRoot = sensorFrame.getTransformToRoot();
-
-      for (RDXSimulatedCamera camera : cameras)
+      try // Something throws NotARotationMatrixExceptions. Race condition?
       {
-         // Render the camera's view
-         camera.render(sensorTransformToRoot);
+         RigidBodyTransform sensorTransformToRoot = sensorFrame.getTransformToRoot();
+
+         for (RDXSimulatedCamera camera : cameras)
+         {
+            // Render the camera's view
+            camera.render(sensorTransformToRoot);
+         }
+      }
+      catch (NotARotationMatrixException notARotationMatrixException)
+      {
+         LogTools.error(notARotationMatrixException);
       }
 
       synchronized (renderedNotification)
@@ -279,18 +299,11 @@ public class RDXSimulatedImageSensor extends ImageSensor
       public void render(RigidBodyTransform sensorTransformToWorld)
       {
          // Find the world to part transform
-         try // Something throws NotARotationMatrixExceptions. Race condition?
-         {
-            cameraFrame.update();
-            RigidBodyTransform cameraToWorldTransform = cameraFrame.getTransformToRoot();
+         cameraFrame.update();
+         RigidBodyTransform cameraToWorldTransform = cameraFrame.getTransformToRoot();
 
-            // Render
-            super.render(cameraToWorldTransform);
-         }
-         catch (Exception exception)
-         {
-            LogTools.error(exception);
-         }
+         // Render
+         super.render(cameraToWorldTransform);
       }
 
       public int getColorImageKey()

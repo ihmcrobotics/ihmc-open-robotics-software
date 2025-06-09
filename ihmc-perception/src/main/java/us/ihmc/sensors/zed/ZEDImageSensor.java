@@ -364,6 +364,12 @@ public class ZEDImageSensor extends ImageSensor
    }
 
    @Override
+   public int[] getImageKeys()
+   {
+      return new int[] {LEFT_COLOR_IMAGE_KEY, RIGHT_COLOR_IMAGE_KEY, DEPTH_IMAGE_KEY};
+   }
+
+   @Override
    public RawImage getImage(int imageKey)
    {
       synchronized (grabbedImages)
