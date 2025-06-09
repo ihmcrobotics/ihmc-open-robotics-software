@@ -96,7 +96,6 @@ public class ROS2SceneGraphTools
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
                                     subscriptionNode.getYOLONodeMessage().getConfidence(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose(),
                                     crdtInfo);
