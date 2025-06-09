@@ -198,13 +198,13 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
 
       if (target == RobotTarget.REAL_ROBOT)
       {
-         double maxPosError = 0.2;
+         double maxPosError = 0.4;
          double maxVelError = 2.0;
          double velScale = 1.0;
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 125.0, 10.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 50.0, 5.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 300, 8.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 300.0, 2.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 250.0, 3.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 250.0, 2.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 175.0, 5.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 40.0, 5.0, maxPosError, maxVelError, velScale);
 
