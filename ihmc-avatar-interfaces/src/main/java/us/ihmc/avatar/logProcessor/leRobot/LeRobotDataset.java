@@ -11,7 +11,12 @@ import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -123,6 +128,59 @@ public class LeRobotDataset
       episodes.add(episode);
    }
 
+   public void calculateEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   {
+      if (!taskNames.contains(taskName))
+      {
+         taskNames.add(taskName);
+         writeTaskJsonlLine(taskName);
+      }
+
+      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
+      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
+      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
+      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
+      String timestampVarName = "root.LogDataReader.robotTime";
+
+      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
+      YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
+
+      LogDataReader reader = session.getLogDataReader();
+      long totalFrames = reader.getNumberOfEntries();
+
+      boolean currentlyRecording = false;
+      int episodeStart = -1;
+
+      for (long frame = 0; frame < totalFrames; frame++)
+      {
+         session.runTick();
+
+         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
+
+         if (flagValue && !currentlyRecording)
+         {
+            episodeStart = (int) frame;
+            currentlyRecording = true;
+         }
+         else if (!flagValue && currentlyRecording)
+         {
+            int episodeEnd = (int) frame;
+            int episodeLength = episodeEnd - episodeStart;
+            System.out.println(episodeLength);
+            currentlyRecording = false;
+            episodeStart = -1;
+         }
+      }
+
+      if (currentlyRecording)
+      {
+         int episodeEnd = (int) totalFrames;
+         int episodeLength = episodeEnd - episodeStart;
+         System.out.println(episodeLength);
+      }
+   }
+
+
    public void removeEpisode(int index) throws IOException
    {
       if (episodes.isEmpty())
@@ -197,7 +255,6 @@ public class LeRobotDataset
 
    private void shiftEpisodeIndicesInJsonl(Path jsonlPath, int removedIndex) throws IOException
    {
-      // Read all JSONL lines
       List<String> allLines = Files.readAllLines(jsonlPath);
       if (allLines.isEmpty())
       {
@@ -219,10 +276,10 @@ public class LeRobotDataset
 
          JsonNode root = mapper.readTree(line);
 
-         JsonNode episdoeIndexNode = root.get("episode_index");
-         if (episdoeIndexNode != null && episdoeIndexNode.isInt())
+         JsonNode episodeIndexNode = root.get("episode_index");
+         if (episodeIndexNode != null && episodeIndexNode.isInt())
          {
-            int oldIndex = episdoeIndexNode.intValue();
+            int oldIndex = episodeIndexNode.intValue();
             if (oldIndex > removedIndex)
             {
                ((ObjectNode) root).put("episode_index", oldIndex - 1);

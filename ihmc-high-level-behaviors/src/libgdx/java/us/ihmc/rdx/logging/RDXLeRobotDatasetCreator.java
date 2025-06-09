@@ -164,6 +164,10 @@ public class RDXLeRobotDatasetCreator
          {
             dataset.addEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add); // Use queue to maintain framerate
          }
+         if (ImGui.button(labels.get("Add Episodes from Boolean")))
+         {
+            dataset.calculateEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add);
+         }
          if (ImGui.button(labels.get("Remove Episode")))
          {
             ImGui.openPopup("Choose Episode to Remove");
