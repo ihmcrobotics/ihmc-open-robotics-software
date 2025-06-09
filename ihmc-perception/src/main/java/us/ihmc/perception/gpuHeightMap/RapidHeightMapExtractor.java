@@ -186,7 +186,7 @@ public class RapidHeightMapExtractor
                       RigidBodyTransform sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
-                      Point3D sensorOrigin,
+                      Point3D heightMapFrameToWorldFrame,
                       double footHeight)
    {
       int error;
@@ -269,8 +269,8 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the translate kernel ---------
       {
-         int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-         int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSizeInMeters());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
