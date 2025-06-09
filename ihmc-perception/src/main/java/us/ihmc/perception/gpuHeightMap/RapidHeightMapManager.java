@@ -5,7 +5,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -21,6 +21,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -29,15 +30,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class takes care of managing the {@link RapidHeightMapExtractorCUDA}. This class can be used in a remote process, or locally as well.
+ * This class takes care of managing the {@link RapidHeightMapExtractor}. This class can be used in a remote process, or locally as well.
  */
 public class RapidHeightMapManager
 {
    private final HeightMapParameters heightMapParameters;
-   private final RapidHeightMapExtractorCUDA rapidHeightMapExtractor;
+   private final RapidHeightMapExtractor rapidHeightMapExtractor;
 
    private final Point3D sensorOrigin = new Point3D();
-   private final FramePose3D cameraPose = new FramePose3D();
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
 
    private final Notification resetHeightMapRequested = new Notification();
@@ -45,87 +45,93 @@ public class RapidHeightMapManager
 
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
-   private final ROS2Publisher<ImageMessage> heightMapPublisher;
-   private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
-   private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
-   private final GpuMat deviceCroppedHeightMap;
+   private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
+   private final BytePointer compressedHeightMapPointer = new BytePointer();
+   private final HeightMapData latestHeightMapData;
+   private final HeightMapData latestTerrainHeightMapData;
+   private final Point3D gridCellLocation = new Point3D();
+   private long sequenceId = 0;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
-                                FullHumanoidRobotModel robotModel,
-                                String robotName,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                                 HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
+      latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                              (float) heightMapParameters.getGlobalWidthInMeters(),
+                                              0.0,
+                                              0.0);
+      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                     0.0,
+                                                     0.0);
 
       footSoleFrames.add(leftFootSoleFrame);
       footSoleFrames.add(rightFootSoleFrame);
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
 
-      int centerIndexPublished = HeightMapTools.computeCenterIndex(heightMapParameters.getPublishedWidthInMeters(), heightMapParameters.getCellSizeInMeters());
-      int cellsPerAxisPublished = 2 * centerIndexPublished + 1;
-      deviceCroppedHeightMap = new GpuMat(cellsPerAxisPublished, cellsPerAxisPublished, opencv_core.CV_16UC1);
-      rapidHeightMapExtractor = new RapidHeightMapExtractorCUDA(1, heightMapParameters);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
-      heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_CROPPED);
+      heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
-
-      if (robotModel != null)
-      {
-         ros2Node.createSubscription(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), message ->
-         {
-            if (message.takeNextData().getEndHighLevelControllerName() == HighLevelStateChangeStatusMessage.WALKING)
-            {
-               resetHeightMapRequested.set();
-            }
-         });
-      }
    }
 
-   public void updateAndPublishHeightMap(GpuMat latestDepthImage,
-                                         Instant acquisitionTime,
-                                         CameraIntrinsics depthIntrinsics,
-                                         ReferenceFrame cameraFrame,
-                                         ReferenceFrame cameraZUpFrame)
+   public void updateAndPublishHeightMap(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
-      updateInternal(latestDepthImage, deviceCroppedHeightMap, depthIntrinsics, cameraFrame, cameraZUpFrame);
+      updateInternal(latestDepthImage, depthIntrinsics, cameraFrame, cameraZUpFrame);
 
       // Publish the height map to anyone who is subscribing
-      Mat hostCroppedHeightMap = new Mat();
-      deviceCroppedHeightMap.download(hostCroppedHeightMap);
-      OpenCVTools.compressImagePNG(hostCroppedHeightMap, compressedCroppedHeightMapPointer);
-      PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
-                                                         croppedHeightMapImageMessage,
-                                                         heightMapPublisher,
-                                                         cameraPose,
-                                                         acquisitionTime,
-                                                         rapidHeightMapExtractor.getSequenceNumber(),
-                                                         hostCroppedHeightMap.rows(),
-                                                         hostCroppedHeightMap.cols(),
-                                                         (float) heightMapParameters.getHeightScaleFactor());
+      Mat hostGlobalHeightMap = new Mat();
 
-      hostCroppedHeightMap.close();
+      // Don't close this mat as its being used in the extractor till that finish's
+      GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
+      deviceGlobalHeightMap.download(hostGlobalHeightMap);
+
+      publishHeightMap(hostGlobalHeightMap);
+
+      hostGlobalHeightMap.close();
+      deviceGlobalHeightMap.close();
+   }
+
+   private void publishHeightMap(Mat hostGlobalHeightMap)
+   {
+      // The center of this map should be centered in the world grid
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
+      int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
+      int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+      gridCellLocation.set(currentCellX * 0.02, currentCellY * 0.02, 0.0);
+      FramePose3D cameraPose = new FramePose3D();
+      cameraPose.getTranslation().set(gridCellLocation);
+
+      PerceptionMessageTools.convertToHeightMapData(hostGlobalHeightMap,
+                                                    latestHeightMapData,
+                                                    gridCellLocation,
+                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                    (float) heightMapParameters.getCellSizeInMeters(),
+                                                    heightMapParameters);
+
+      HeightMapMessage heightMapMessage = new HeightMapMessage();
+      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
+      sequenceId++;
+      heightMapMessage.setSequenceId(sequenceId);
+      heightMapMessagePublisher.publish(heightMapMessage);
    }
 
    /**
     * Update the Height Map with the latest depth image from the sensor
     */
-   private void updateInternal(GpuMat latestDepthImage,
-                               GpuMat deviceHeightMapToPack,
-                               CameraIntrinsics depthIntrinsicsCopy,
-                               ReferenceFrame cameraFrame,
-                               ReferenceFrame cameraZUpFrame)
+   private void updateInternal(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
       {
          double footHeight = computeFootHeight();
-         int loweredFootHeight = 10000;
+         float loweredFootHeight = 1.0f;
          rapidHeightMapExtractor.reset(footHeight, loweredFootHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
@@ -144,6 +150,17 @@ public class RapidHeightMapManager
          }
       }
 
+      // -------- Update the Height Map with the latest depth image from the sensor --------------
+      // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
+      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
+      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
+      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
+
+      // Update the Z translation of the sensor to match the world transform (to handle the sensor's vertical position)
+      sensorToGround.getTranslation().setZ(sensorToWorld.getTranslation().getZ());
+
+      sensorOrigin.set(sensorToWorld.getTranslation());
+
       // The controller can publish a status letting anyone listening know that the controller is aware of some amount of drift in the Z direction
       // If we have that parameter set to true, we update the heights of the height map to account for that drift
       if (heightMapParameters.getDriftOffsetFilter())
@@ -151,47 +168,27 @@ public class RapidHeightMapManager
          float driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
          if (!Float.isNaN(driftOffsetInZ))
          {
-            rapidHeightMapExtractor.updateHeightOffset(driftOffsetInZ, depthIntrinsicsCopy, sensorOrigin, computeFootHeight());
+            rapidHeightMapExtractor.updateHeightOffset(groundToWorld, driftOffsetInZ, depthIntrinsicsCopy, computeFootHeight());
          }
       }
 
-      // -------- Update the Height Map with the latest depth image from the sensor --------------
-      // We expect to have knowledge of where the camera is in relation to the world so we can accurately display the height map
-      RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
-      RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
-      RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
-      sensorOrigin.set(sensorToWorld.getTranslation());
-      cameraPose.setToZero(cameraFrame);
-      cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
       // Perform update, this actually creates the height map
       rapidHeightMapExtractor.update(latestDepthImage, depthIntrinsicsCopy, sensorToWorld, sensorToGround, groundToWorld, sensorOrigin, computeFootHeight());
-      GpuMat deviceCroppedHeightMap = rapidHeightMapExtractor.getPublishedHeightMap();
-
-      // Don't close this mat as its being used in the extractor till that finish's
-      deviceCroppedHeightMap.convertTo(deviceHeightMapToPack, deviceCroppedHeightMap.type());
    }
 
    public HeightMapData getLatestHeightMapData()
    {
-      HeightMapData latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                                            (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                            sensorOrigin.getX(),
-                                                            sensorOrigin.getY());
+      GpuMat terrainCroppedHeightMap = rapidHeightMapExtractor.getTerrainCroppedHeightMap();
+      Mat terrainHeightMap = new Mat();
+      terrainCroppedHeightMap.download(terrainHeightMap);
 
-      GpuMat terrainHeightMap = rapidHeightMapExtractor.getTerrainHeightMap();
-      Mat heightMap = new Mat();
-      terrainHeightMap.download(heightMap);
-      PerceptionMessageTools.convertToHeightMapData(heightMap,
-                                                    latestHeightMapData,
-                                                    sensorOrigin,
+      PerceptionMessageTools.convertToHeightMapData(terrainHeightMap,
+                                                    latestTerrainHeightMapData,
+                                                    gridCellLocation,
                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
                                                     (float) heightMapParameters.getCellSizeInMeters(),
                                                     heightMapParameters);
-      heightMap.close();
-      terrainHeightMap.close();
-
-      return latestHeightMapData;
+      return latestTerrainHeightMapData;
    }
 
    private double computeFootHeight()
@@ -213,8 +210,8 @@ public class RapidHeightMapManager
 
    public void destroy()
    {
+      compressedHeightMapPointer.close();
+      heightMapMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
-      deviceCroppedHeightMap.close();
-      compressedCroppedHeightMapPointer.close();
    }
 }

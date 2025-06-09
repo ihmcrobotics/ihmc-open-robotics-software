@@ -20,11 +20,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(flyingPointsFilter);
    }
 
-   default boolean getEnableAlphaFilter()
-   {
-      return get(enableAlphaFilter);
-   }
-
    default boolean getEnableVerticalFilter()
    {
       return get(enableVerticalFilter);
@@ -65,14 +60,29 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxHeightDifference);
    }
 
-   default double getHeightFilterAlpha()
+   default double getKalmanFilterPredictionNoise()
    {
-      return get(heightFilterAlpha);
+      return get(kalmanFilterPredictionNoise);
    }
 
-   default double getSpatialAlpha()
+   default double getAdditionalTranslationalVarianceAdded()
    {
-      return get(spatialAlpha);
+      return get(additionalTranslationalVarianceAdded);
+   }
+
+   default double getVariancePerMeter()
+   {
+      return get(variancePerMeter);
+   }
+
+   default double getVariancePerTranslationSpeed()
+   {
+      return get(variancePerTranslationSpeed);
+   }
+
+   default double getVariancePerRotationSpeed()
+   {
+      return get(variancePerRotationSpeed);
    }
 
    default double getHeightOffset()
@@ -100,11 +110,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(localWidthInMeters);
    }
 
-   default double getPublishedWidthInMeters()
-   {
-      return get(publishedWidthInMeters);
-   }
-
    default double getTerrainWidthInMeters()
    {
       return get(terrainWidthInMeters);
@@ -113,11 +118,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getGlobalWidthInMeters()
    {
       return get(globalWidthInMeters);
-   }
-
-   default double getRobotCollisionCylinderRadius()
-   {
-      return get(robotCollisionCylinderRadius);
    }
 
    default double getHeightScaleFactor()

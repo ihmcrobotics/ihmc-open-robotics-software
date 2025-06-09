@@ -242,14 +242,10 @@ public final class PerceptionAPI
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_OUTPUT = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
    public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
 
-   public static final ROS2Topic<ImageMessage> OCCUPANCY_GRID_MESSAGE = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("occupancy_grid");
-   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_CROPPED = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_cropped_global");
+   public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
 
    public static final ROS2Topic<GlobalMapMessage> GLOBAL_HEIGHT_MAP = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapMessage.class).withSuffix("global_height_map");
    public static final ROS2Topic<GlobalMapTileMessage> GLOBAL_HEIGHT_MAP_TILE = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapTileMessage.class).withSuffix("global_height_map_tile");
-
-   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_GLOBAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_global");
-   public static final ROS2Topic<ImageMessage> HEIGHT_MAP_LOCAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_local");
 
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
