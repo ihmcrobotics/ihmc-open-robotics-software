@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.log.LogTools;
@@ -151,6 +152,15 @@ public class AvatarMultiThreadingManager
          masterThread = new RepeatingTaskThread(prefix + "-master-thread", this::run, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       }
 
+      // Add fault listener to unservo robot quickly in the event of a fault
+      hardwareCommunicationInterface.addFaultListener(change ->
+                                                      {
+                                                         if (hardwareCommunicationInterface.hasRobotFaulted())
+                                                            lowLevelOutputProcessor.unservoRobotQuickly();
+                                                      });
+
+      hardwareCommunicationInterface.addSoftEStopListener(change -> lowLevelOutputProcessor.unservoRobotQuickly());
+
       registry.addChild(threadScheduler.getYoRegistry());
       rootRegistry.addChild(registry);
    }
@@ -258,12 +268,13 @@ public class AvatarMultiThreadingManager
    public void stop()
    {
       hardwareCommunicationInterface.stop();
-
    }
 
    public void destroy()
    {
       hardwareCommunicationInterface.destroy();
+
+      ThreadTools.sleep(500L);
 
       threadScheduler.dispose();
 
@@ -274,11 +285,14 @@ public class AvatarMultiThreadingManager
 
       if (useRealtimeThreads)
       {
-         masterThread.run();
          ((RealtimeThread) masterThread).join();
       }
       else
          ((RepeatingTaskThread) masterThread).stopRepeating();
+
+      ThreadTools.sleep(1000L);
+
+      System.out.println("MASTER THREAD SHUTDOWN COMPLETE -- EXITING");
    }
 
    public void pause()
@@ -363,9 +377,5 @@ public class AvatarMultiThreadingManager
          return;
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), rootRegistry);
-
-//      long timestamp = estimatorThread.getHumanoidRobotContextData().getTimestamp();
-//      if (timestamp != Long.MIN_VALUE)
-//         yoVariableServer.update(timestamp);
    }
 }
