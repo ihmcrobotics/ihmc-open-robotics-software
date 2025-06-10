@@ -150,9 +150,6 @@ public class AvatarMultiThreadingFactory
                                                            lowLevelOutputProcessor,
                                                            standPrepStateFactory,
                                                            freezeStateFactory);
-
-      // Add shutdown hook to kill the ROS nodes and various threads
-      Runtime.getRuntime().addShutdownHook(new Thread(AvatarMultiThreadingFactory.this::destroy));
    }
 
    public void start()
@@ -170,7 +167,7 @@ public class AvatarMultiThreadingFactory
 
    public void stop()
    {
-      LogTools.info("Calling shutdown in the controller factory");
+      System.out.println("Calling stop in the multi-threading factory");
       estimatorRealtimeROS2Node.stopSpinning();
       controllerRealtimeROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
@@ -180,6 +177,7 @@ public class AvatarMultiThreadingFactory
    public void destroy()
    {
       this.stop();
+      System.out.println("Calling destroy in the multi-threading factory");
       estimatorRealtimeROS2Node.destroy();
       controllerRealtimeROS2Node.destroy();
       hardwareCommunicationInterface.destroy();
@@ -345,27 +343,30 @@ public class AvatarMultiThreadingFactory
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
          }
 
+         for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
+         {
+            if (highLevelControllerName == DO_NOTHING_BEHAVIOR)
+               continue;
+
+            controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
+         }
+
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
          controllerFactory.addCustomStateTransition(createStandTransitionState(controllerFactory, feetForceSensorNames));
 
-         // Transition to Freeze state if we are unservoing
-         HighLevelControllerStateCommand transitionToFreezeCommand = new HighLevelControllerStateCommand();
+         // Transition to DO_NOTHING in the event of a fault
+         HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
          CommandInputManager controllerCommandInputManager = controllerFactory.getCommandInputManager();
-         lowLevelOutputProcessor.addServoListener(value ->
-                                                  {
-                                                     transitionToFreezeCommand.setHighLevelControllerName(FREEZE_STATE);
-                                                     if (value.getValueAsDouble() == 0.0)
-                                                        controllerCommandInputManager.submitMessage(transitionToFreezeCommand);
-                                                  });
-
-         // Transition to Freeze state if we are toggling E-Stop on or off
-         hardwareCommunicationInterface.addSoftEStopListener(value ->
-                                                             {
-                                                                transitionToFreezeCommand.setHighLevelControllerName(FREEZE_STATE);
-                                                                controllerCommandInputManager.submitMessage(transitionToFreezeCommand);
-                                                             });
+         hardwareCommunicationInterface.addFaultListener(change ->
+                                                         {
+                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
+                                                            {
+                                                               transitionToDoNothingCommand.setHighLevelControllerName(DO_NOTHING_BEHAVIOR);
+                                                               controllerCommandInputManager.submitCommand(transitionToDoNothingCommand);
+                                                            }
+                                                         });
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);
