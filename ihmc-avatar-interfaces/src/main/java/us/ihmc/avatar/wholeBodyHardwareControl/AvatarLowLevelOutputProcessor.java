@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -156,5 +157,10 @@ public class AvatarLowLevelOutputProcessor
    public JointDesiredOutputListReadOnly getProcessedDesiredOutput()
    {
       return processedDesireds;
+   }
+
+   public DoubleProvider getMasterGain()
+   {
+      return masterGain;
    }
 }
