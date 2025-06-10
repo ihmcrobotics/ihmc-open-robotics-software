@@ -78,7 +78,7 @@ public class SteppableRegionMessageConverter
 
       if (message.getLocalHeightMap().getHeights().size() > 0)
       {
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap());
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message.getLocalHeightMap());
          steppableRegion.setLocalHeightMap(heightMapData);
       }
 
@@ -182,7 +182,7 @@ public class SteppableRegionMessageConverter
 
          if (message.getLocalHeightMap().get(regionIndex).getHeights().size() > 0)
          {
-            HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap().get(regionIndex));
+            HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message.getLocalHeightMap().get(regionIndex));
             steppableRegion.setLocalHeightMap(heightMapData);
          }
       }
@@ -309,7 +309,7 @@ public class SteppableRegionMessageConverter
 
             if (message.getLocalHeightMap().get(regionIndex).getHeights().size() > 0)
             {
-               HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap().get(regionIndex));
+               HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message.getLocalHeightMap().get(regionIndex));
                steppableRegion.setLocalHeightMap(heightMapData);
             }
          }

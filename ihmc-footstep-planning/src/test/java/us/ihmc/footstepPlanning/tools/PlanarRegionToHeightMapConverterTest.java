@@ -56,9 +56,9 @@ public class PlanarRegionToHeightMapConverterTest
          planarRegion.set(transformToWorld, polygons);
 
          // get the planar region as a height map
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
-                                                                                                                                                PlanarRegionToHeightMapConverter.defaultResolution,
-                                                                                                                                                Double.NaN));
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
+                                                                                                                                                               PlanarRegionToHeightMapConverter.defaultResolution,
+                                                                                                                                                               Double.NaN));
 
 
 
