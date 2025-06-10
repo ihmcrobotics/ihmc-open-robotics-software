@@ -39,10 +39,12 @@ public class RapidHeightMapManager
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
-   private final HeightMapData latestHeightMapData;
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D gridCellLocation = new Point3D();
    private long sequenceId = 0;
+
+   // This is created globally cause it takes compute time to create it in the update loop
+   private final HeightMapMessage heightMapMessage = new HeightMapMessage();
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -53,10 +55,6 @@ public class RapidHeightMapManager
    {
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
-      latestHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
-                                              (float) heightMapParameters.getGlobalWidthInMeters(),
-                                              0.0,
-                                              0.0);
       latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
                                                      0.0,
@@ -78,9 +76,7 @@ public class RapidHeightMapManager
    public void updateAndPublishHeightMap(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       // Update the sensor origin here with the latest reference frame
-      RigidBodyTransform transformToWorldFrame = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform heightMapFrameToWorldFrame = heightMapCenter.getTransformToWorldFrame();
-      Point3D sensorOrigin = new Point3D(transformToWorldFrame.getTranslation());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
       updateInternal(latestDepthImage, depthIntrinsics, cameraFrame, cameraZUpFrame, heightMapCenterOrigin);
@@ -95,7 +91,6 @@ public class RapidHeightMapManager
       publishHeightMap(hostGlobalHeightMap, heightMapCenterOrigin);
 
       hostGlobalHeightMap.close();
-      deviceGlobalHeightMap.close();
    }
 
    private void publishHeightMap(Mat hostGlobalHeightMap, Point3D heightMapCenterOrigin)
@@ -108,15 +103,13 @@ public class RapidHeightMapManager
       FramePose3D cameraPose = new FramePose3D();
       cameraPose.getTranslation().set(gridCellLocation);
 
-      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
-                                                   latestHeightMapData,
-                                                   gridCellLocation,
-                                                   (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                   (float) heightMapParameters.getCellSizeInMeters(),
-                                                   heightMapParameters);
+      HeightMapMessageTools.toMessage(hostGlobalHeightMap,
+                                      heightMapParameters,
+                                      gridCellLocation,
+                                      (float) heightMapParameters.getGlobalWidthInMeters(),
+                                      (float) heightMapParameters.getCellSizeInMeters(),
+                                      heightMapMessage);
 
-      HeightMapMessage heightMapMessage = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
