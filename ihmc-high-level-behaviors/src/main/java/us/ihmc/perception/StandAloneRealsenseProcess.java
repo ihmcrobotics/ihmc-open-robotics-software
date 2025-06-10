@@ -16,7 +16,6 @@ import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.sensors.realsense.RealSenseConfiguration;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 
-import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -82,7 +81,7 @@ public class StandAloneRealsenseProcess
       loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
 
       d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor);
-      d455PublishThread.addTopic(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS, RealSenseImageSensor.COLOR_IMAGE_KEY);
+      d455PublishThread.addTopic(PerceptionAPI.SRT_D455_COLOR_STREAM_STATUS, RealSenseImageSensor.COLOR_IMAGE_KEY);
       d455PublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 

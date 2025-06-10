@@ -304,6 +304,17 @@ public final class PerceptionAPI
    public static final ROS2Topic<Image> ROS2_ZED_DEPTH_IMAGE = ROS2_ZED_DEPTH.withSuffix("image").withType(Image.class);
    public static final ROS2Topic<CameraInfo> ROS2_ZED_DEPTH_CAMERA_INFO = ROS2_ZED_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
 
+   // D435 topics
+   private static final ROS2Topic<?> ROS2_D435 = new ROS2Topic<>().withPrefix("d435").withQoS(ROS2QosProfile.RELIABLE());
+
+   private static final ROS2Topic<?> ROS2_D435_COLOR = ROS2_D435.withModule("color");
+   public static final ROS2Topic<Image> ROS2_D435_COLOR_IMAGE = ROS2_D435_COLOR.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_D435_COLOR_CAMERA_INFO = ROS2_D435_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+
+   private static final ROS2Topic<?> ROS2_D435_DEPTH = ROS2_D435.withModule("depth");
+   public static final ROS2Topic<Image> ROS2_D435_DEPTH_IMAGE = ROS2_D435_DEPTH.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_D435_DEPTH_CAMERA_INFO = ROS2_D435_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
+
    // D455 topics
    private static final ROS2Topic<?> ROS2_D455 = new ROS2Topic<>().withPrefix("d455").withQoS(ROS2QosProfile.RELIABLE());
 
@@ -326,9 +337,16 @@ public final class PerceptionAPI
    public static final ROS2Topic<SRTStreamStatus> SRT_STREAM_STATUS = STREAMING_MODULE.withType(SRTStreamStatus.class);
 
    // Realsense
-   private static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
-   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_COLOR_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("color");
-   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_DEPTH_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("depth");
+
+   private static final ROS2Topic<SRTStreamStatus> SRT_D435_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D435_NAME);
+   public static final ROS2Topic<SRTStreamStatus> SRT_D435_COLOR_STREAM_STATUS = SRT_D435_STREAM_STATUS.withSuffix("color");
+   public static final ROS2Topic<SRTStreamStatus> SRT_D435_DEPTH_STREAM_STATUS = SRT_D435_STREAM_STATUS.withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE_SRT = D435_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
+   public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE_SRT = D435_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
+
+   private static final ROS2Topic<SRTStreamStatus> SRT_D455_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
+   public static final ROS2Topic<SRTStreamStatus> SRT_D455_COLOR_STREAM_STATUS = SRT_D455_STREAM_STATUS.withSuffix("color");
+   public static final ROS2Topic<SRTStreamStatus> SRT_D455_DEPTH_STREAM_STATUS = SRT_D455_STREAM_STATUS.withSuffix("depth");
    public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE_SRT = D455_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
    public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE_SRT = D455_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
 
@@ -346,7 +364,8 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> ZED2_DEPTH_SRT = ZED2_DEPTH.withSuffix("depth/" + SRT_RELAY_INSTANCE_ID);
 
    public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
-         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, D455_COLOR_IMAGE_SRT, false),
+         = Set.of(new ROS2SRTStreamTopicPair(SRT_D435_COLOR_STREAM_STATUS, D435_COLOR_IMAGE_SRT, false),
+                  new ROS2SRTStreamTopicPair(SRT_D455_COLOR_STREAM_STATUS, D455_COLOR_IMAGE_SRT, false),
                   new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
                   new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false));
 }
