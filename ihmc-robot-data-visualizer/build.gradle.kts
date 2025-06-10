@@ -19,7 +19,7 @@ mainDependencies {
    api("us.ihmc:simulation-construction-set:0.25.3")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.33.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.34.0")
 }
 
 testDependencies {
