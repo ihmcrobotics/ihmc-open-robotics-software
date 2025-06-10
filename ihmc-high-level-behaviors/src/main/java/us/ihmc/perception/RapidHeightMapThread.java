@@ -53,8 +53,10 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
 
+      // At the highest level pass in the reference frames for the specific robot
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
+      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
 
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.D455_DEPTH_FILTERED_IMAGE);
 
@@ -63,6 +65,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       heightMapManager = new RapidHeightMapManager(ros2Node,
                                                    leftFootFrame,
                                                    rightFootFrame,
+                                                   heightMapCenterFrame,
                                                    controllerFootstepQueueMonitor,
                                                    heightMapParameters);
    }
