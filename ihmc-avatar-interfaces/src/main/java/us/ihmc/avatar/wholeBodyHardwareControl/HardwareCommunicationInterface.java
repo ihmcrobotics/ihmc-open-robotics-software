@@ -17,6 +17,8 @@ public interface HardwareCommunicationInterface
 
    void write(JointDesiredOutputListReadOnly jointDesireds);
 
+   void write(JointDesiredOutputListReadOnly jointDesireds, double masterGain);
+
    void start();
 
    void stop();
