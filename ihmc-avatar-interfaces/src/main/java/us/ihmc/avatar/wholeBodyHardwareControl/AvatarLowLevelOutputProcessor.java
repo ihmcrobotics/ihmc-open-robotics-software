@@ -157,4 +157,6 @@ public class AvatarLowLevelOutputProcessor
    {
       return processedDesireds;
    }
+   
+   public YoDouble getMasterGain() { return masterGain;}
 }
