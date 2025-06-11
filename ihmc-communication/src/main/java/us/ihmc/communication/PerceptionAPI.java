@@ -48,6 +48,7 @@ public final class PerceptionAPI
    public static final String ZED2_NAME = "zed2";
    public static final String L515_NAME = "l515";
    public static final String D455_NAME = "d455";
+   public static final String REALSENSE_NAME = "realsense";
    public static final String BLACKFLY_NAME = "blackfly";
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
@@ -90,20 +91,20 @@ public final class PerceptionAPI
                                                                                                  .withType(PolygonizerParametersStringMessage.class)
                                                                                                  .withSuffix("polygonizer_parameters");
    public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
-   public static final ROS2Topic<VideoPacket> VIDEO = BEST_EFFORT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = BEST_EFFORT.withTypeName(BigVideoPacket.class).withQoS(ROS2QosProfile.BEST_EFFORT());
-   public static final ROS2Topic<VideoPacket> D435_VIDEO = BEST_EFFORT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE = BEST_EFFORT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE = BEST_EFFORT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> D435_DEPTH = BEST_EFFORT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> L515_VIDEO = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> L515_COLOR_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = BEST_EFFORT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> L515_DEPTH = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = BEST_EFFORT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<VideoPacket> VIDEO = BEST_EFFORT.withTypeName(VideoPacket.class);
+   @Deprecated public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = BEST_EFFORT.withTypeName(BigVideoPacket.class).withQoS(ROS2QosProfile.BEST_EFFORT());
+   @Deprecated public static final ROS2Topic<VideoPacket> D435_VIDEO = BEST_EFFORT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
+   @Deprecated public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE = BEST_EFFORT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("video");
+   @Deprecated public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE = BEST_EFFORT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<VideoPacket> D435_DEPTH = BEST_EFFORT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<VideoPacket> L515_VIDEO = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
+   @Deprecated public static final ROS2Topic<ImageMessage> L515_COLOR_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("color");
+   @Deprecated public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = BEST_EFFORT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<VideoPacket> L515_DEPTH = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
+   @Deprecated public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = BEST_EFFORT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
 
    public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
          = BEST_EFFORT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
@@ -112,13 +113,14 @@ public final class PerceptionAPI
                                                                                   .withSuffix("debug_extraction");
    public static final ROS2Topic<Empty> REQUEST_REALSENSE = PERCEPTION_MODULE.withSuffix("request_realsense").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_REALSENSE_PUBLICATION = PERCEPTION_MODULE.withSuffix("request_realsense_publication").withType(Empty.class);
-   public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "left")
-                                                                                                                        .withType(BigVideoPacket.class)
-                                                                                                                        .withSuffix("video"),
-                                                                                                             BEST_EFFORT.withModule(BLACKFLY_NAME + "right")
-                                                                                                                        .withType(BigVideoPacket.class)
-                                                                                                                        .withSuffix("video"));
-   public static final SideDependentList<ROS2Topic<ImageMessage>> BLACKFLY_FISHEYE_COLOR_IMAGE
+   @Deprecated public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO
+         = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "left")
+                                              .withType(BigVideoPacket.class)
+                                              .withSuffix("video"),
+                                   BEST_EFFORT.withModule(BLACKFLY_NAME + "right")
+                                              .withType(BigVideoPacket.class)
+                                              .withSuffix("video"));
+   @Deprecated public static final SideDependentList<ROS2Topic<ImageMessage>> BLACKFLY_FISHEYE_COLOR_IMAGE
          = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "_fisheye")
                                               .withType(ImageMessage.class)
                                               .withSuffix("left"),
@@ -129,13 +131,13 @@ public final class PerceptionAPI
          = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("request_left_blackfly_color").withType(Empty.class),
                                    PERCEPTION_MODULE.withSuffix("request_right_blackfly_color").withType(Empty.class));
 
-   public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = BEST_EFFORT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = BEST_EFFORT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = BEST_EFFORT.withModule("ouster")
-                                                                               .withTypeName(ImageMessage.class)
-                                                                               .withSuffix("depth")
-                                                                               .withQoS(ROS2QosProfile.BEST_EFFORT());
-   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = BEST_EFFORT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
+   @Deprecated public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = BEST_EFFORT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = BEST_EFFORT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
+   @Deprecated public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = BEST_EFFORT.withModule("ouster")
+                                                                                           .withTypeName(ImageMessage.class)
+                                                                                           .withSuffix("depth")
+                                                                                           .withQoS(ROS2QosProfile.BEST_EFFORT());
+   @Deprecated public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = BEST_EFFORT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
    public static final ROS2Topic<Empty> REQUEST_OUSTER_DEPTH = PERCEPTION_MODULE.withSuffix("request_ouster_depth").withType(Empty.class);
 
    public static final ROS2Topic<ZEDSVOCurrentFileMessage> ZED_SVO_CURRENT_FILE = PERCEPTION_MODULE.withSuffix("zed_svo_current_file").withType(ZEDSVOCurrentFileMessage.class);
@@ -191,10 +193,10 @@ public final class PerceptionAPI
    public static final ROS2Topic<LidarScanMessage> OUSTER_LIDAR_SCAN = BEST_EFFORT.withType(LidarScanMessage.class).withSuffix("ouster");
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = BEST_EFFORT.withTypeName(StereoVisionPointCloudMessage.class);
 
-   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = BEST_EFFORT.withSuffix(D435_NAME)
-                                                                                              .withTypeName(StereoVisionPointCloudMessage.class);
-   public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = BEST_EFFORT.withSuffix(L515_NAME)
-                                                                                              .withTypeName(StereoVisionPointCloudMessage.class);
+   @Deprecated public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = BEST_EFFORT.withSuffix(D435_NAME)
+                                                                                                          .withTypeName(StereoVisionPointCloudMessage.class);
+   @Deprecated public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = BEST_EFFORT.withSuffix(L515_NAME)
+                                                                                                          .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    public static final ROS2IOTopicPair<SceneGraphMessage> SCENE_GRAPH = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(SceneGraphMessage.class));
@@ -304,28 +306,16 @@ public final class PerceptionAPI
    public static final ROS2Topic<Image> ROS2_ZED_DEPTH_IMAGE = ROS2_ZED_DEPTH.withSuffix("image").withType(Image.class);
    public static final ROS2Topic<CameraInfo> ROS2_ZED_DEPTH_CAMERA_INFO = ROS2_ZED_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
 
-   // D435 topics
-   private static final ROS2Topic<?> ROS2_D435 = new ROS2Topic<>().withPrefix("d435").withQoS(ROS2QosProfile.RELIABLE());
+   // Realsense topics
+   private static final ROS2Topic<?> ROS2_REALSENSE = new ROS2Topic<>().withPrefix(REALSENSE_NAME).withQoS(ROS2QosProfile.RELIABLE());
 
-   private static final ROS2Topic<?> ROS2_D435_COLOR = ROS2_D435.withModule("color");
-   public static final ROS2Topic<Image> ROS2_D435_COLOR_IMAGE = ROS2_D435_COLOR.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_D435_COLOR_CAMERA_INFO = ROS2_D435_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<?> ROS2_REALSENSE_COLOR = ROS2_REALSENSE.withModule("color");
+   public static final ROS2Topic<Image> ROS2_REALSENSE_COLOR_IMAGE = ROS2_REALSENSE_COLOR.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_REALSENSE_COLOR_CAMERA_INFO = ROS2_REALSENSE_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
 
-   private static final ROS2Topic<?> ROS2_D435_DEPTH = ROS2_D435.withModule("depth");
-   public static final ROS2Topic<Image> ROS2_D435_DEPTH_IMAGE = ROS2_D435_DEPTH.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_D435_DEPTH_CAMERA_INFO = ROS2_D435_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
-
-   // D455 topics
-   private static final ROS2Topic<?> ROS2_D455 = new ROS2Topic<>().withPrefix("d455").withQoS(ROS2QosProfile.RELIABLE());
-
-   private static final ROS2Topic<?> ROS2_D455_COLOR = ROS2_D455.withModule("color");
-   public static final ROS2Topic<Image> ROS2_D455_COLOR_IMAGE = ROS2_D455_COLOR.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_D455_COLOR_CAMERA_INFO = ROS2_D455_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
-
-   private static final ROS2Topic<?> ROS2_D455_DEPTH = ROS2_D455.withModule("depth");
-   public static final ROS2Topic<Image> ROS2_D455_DEPTH_IMAGE = ROS2_D455_DEPTH.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_D455_DEPTH_CAMERA_INFO = ROS2_D455_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
-
+   private static final ROS2Topic<?> ROS2_REALSENSE_DEPTH = ROS2_REALSENSE.withModule("depth");
+   public static final ROS2Topic<Image> ROS2_REALSENSE_DEPTH_IMAGE = ROS2_REALSENSE_DEPTH.withSuffix("image").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> ROS2_REALSENSE_DEPTH_CAMERA_INFO = ROS2_REALSENSE_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
 
    /* VIDEO STREAMING STUFF */
    /**
@@ -337,22 +327,15 @@ public final class PerceptionAPI
    public static final ROS2Topic<SRTStreamStatus> SRT_STREAM_STATUS = STREAMING_MODULE.withType(SRTStreamStatus.class);
 
    // Realsense
+   private static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(REALSENSE_NAME);
+   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_COLOR_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("color");
+   public static final ROS2Topic<SRTStreamStatus> SRT_REALSENSE_DEPTH_STREAM_STATUS = SRT_REALSENSE_STREAM_STATUS.withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> REALSENSE_COLOR_IMAGE_SRT = D455_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
+   public static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_IMAGE_SRT = D455_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
 
-   private static final ROS2Topic<SRTStreamStatus> SRT_D435_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D435_NAME);
-   public static final ROS2Topic<SRTStreamStatus> SRT_D435_COLOR_STREAM_STATUS = SRT_D435_STREAM_STATUS.withSuffix("color");
-   public static final ROS2Topic<SRTStreamStatus> SRT_D435_DEPTH_STREAM_STATUS = SRT_D435_STREAM_STATUS.withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE_SRT = D435_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
-   public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE_SRT = D435_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
-
-   private static final ROS2Topic<SRTStreamStatus> SRT_D455_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(D455_NAME);
-   public static final ROS2Topic<SRTStreamStatus> SRT_D455_COLOR_STREAM_STATUS = SRT_D455_STREAM_STATUS.withSuffix("color");
-   public static final ROS2Topic<SRTStreamStatus> SRT_D455_DEPTH_STREAM_STATUS = SRT_D455_STREAM_STATUS.withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE_SRT = D455_COLOR_IMAGE.withSuffix("color/srt/" + SRT_RELAY_INSTANCE_ID);
-   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE_SRT = D455_DEPTH_IMAGE.withSuffix("depth/srt/" + SRT_RELAY_INSTANCE_ID);
-
-   public static final ROS2Topic<ImageMessage> D455_DEPTH_FILTERED_IMAGE = BEST_EFFORT.withModule(D455_NAME)
-                                                                                      .withTypeName(ImageMessage.class)
-                                                                                      .withSuffix("depth_filtered");
+   public static final ROS2Topic<ImageMessage> REALSENSE_DEPTH_FILTERED_IMAGE = BEST_EFFORT.withModule(REALSENSE_NAME)
+                                                                                           .withTypeName(ImageMessage.class)
+                                                                                           .withSuffix("depth_filtered");
 
    // ZED
    private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
@@ -364,8 +347,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> ZED2_DEPTH_SRT = ZED2_DEPTH.withSuffix("depth/" + SRT_RELAY_INSTANCE_ID);
 
    public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
-         = Set.of(new ROS2SRTStreamTopicPair(SRT_D435_COLOR_STREAM_STATUS, D435_COLOR_IMAGE_SRT, false),
-                  new ROS2SRTStreamTopicPair(SRT_D455_COLOR_STREAM_STATUS, D455_COLOR_IMAGE_SRT, false),
+         = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, REALSENSE_COLOR_IMAGE_SRT, false),
                   new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
                   new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false));
 }

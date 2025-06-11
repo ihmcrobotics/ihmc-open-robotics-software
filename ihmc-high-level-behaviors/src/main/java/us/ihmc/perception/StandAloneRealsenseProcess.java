@@ -81,7 +81,7 @@ public class StandAloneRealsenseProcess
       loopOnDemand(d455Sensor.getGrabThread(), realsenseDemandNode);
 
       d455PublishThread = new ImageSensorPublishThread(ros2Node, d455Sensor);
-      d455PublishThread.addTopic(PerceptionAPI.SRT_D455_COLOR_STREAM_STATUS, RealSenseImageSensor.COLOR_IMAGE_KEY);
+      d455PublishThread.addTopic(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS, RealSenseImageSensor.COLOR_IMAGE_KEY);
       d455PublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
