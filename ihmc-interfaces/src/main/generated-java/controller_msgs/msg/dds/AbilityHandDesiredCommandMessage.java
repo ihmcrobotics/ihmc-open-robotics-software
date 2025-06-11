@@ -4,8 +4,8 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredCommandMessage> implements Settable<AbilityHandDesiredCommandMessage>,
-      EpsilonComparable<AbilityHandDesiredCommandMessage>
+public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredCommandMessage>
+      implements Settable<AbilityHandDesiredCommandMessage>, EpsilonComparable<AbilityHandDesiredCommandMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -36,6 +36,7 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
    {
       robot_side_ = robot_side;
    }
+
    /**
     * Specifies the side of the robot of the hand being referred to
     */
@@ -43,7 +44,8 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
    {
       return robot_side_;
    }
-//Remove when class is not an error
+
+   //Remove when class is not an error
    @Override
    public boolean epsilonEquals(AbilityHandDesiredCommandMessage other, double epsilon)
    {
