@@ -19,6 +19,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -36,6 +37,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.interactable.RDXInteractableSensor;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2DefinitionMissingTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -54,6 +56,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -64,6 +67,7 @@ public class RDXRobotModelViewer
 {
    private final RDXBaseUI baseUI;
    private final DRCRobotModel robotModel;
+   private HumanoidReferenceFrames humanoidReferenceFrames;
    private RDXMultiBodyGraphic robotModelGraphic;
    private RDXMultiBodyGraphic ghostRobotModelGraphic;
    private RDXRobotCollisionModel simulationCollisionModelGraphic;
@@ -84,8 +88,11 @@ public class RDXRobotModelViewer
    private record RigidBodyVertexAnalysis(RDXRigidBody rdxRigidBody, long numberOfVisualVertices, long numberOfCollisionVertices) { };
    private boolean generatingGraphviz = false;
    private boolean generatedGraphviz = false;
+   private final ArrayList<RDXInteractableSensor> interactableSensors = new ArrayList<>();
 
-   public RDXRobotModelViewer(DRCRobotModel robotModel, RobotCollisionModel simulationCollisionModel)
+   public RDXRobotModelViewer(DRCRobotModel robotModel,
+                              RobotCollisionModel simulationCollisionModel,
+                              RDXRobotModelViewerSensorSupplier... interactableSensorSuppliers)
    {
       this.robotModel = robotModel;
 
@@ -102,7 +109,8 @@ public class RDXRobotModelViewer
             RigidBodyBasics rootBody = fullRobotModel.getElevator();
 
             robotModel.getDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0).initializeFullRobotModel(fullRobotModel);
-            fullRobotModel.updateFrames();
+            humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
+            humanoidReferenceFrames.updateFrames();
 
             // This block is to test to see if create models with other materials modifies the next model
             {
@@ -122,6 +130,9 @@ public class RDXRobotModelViewer
             robotModelGraphic = new RDXMultiBodyGraphic(robotModel.getSimpleRobotName());
             robotModelGraphic.setActive(true);
             robotModelGraphic.loadRobotModelAndGraphics(robotModel.getRobotDefinition(), rootBody, RDXVisualTools.NO_SCALING, true);
+
+            for (RDXRobotModelViewerSensorSupplier interactableSensorSupplier : interactableSensorSuppliers)
+               interactableSensors.add(interactableSensorSupplier.build(baseUI, humanoidReferenceFrames, robotModel.getSensorInformation()));
 
             simulationCollisionModel.setCollidableHelper(new CollidableHelper(), robotModel.getJointMap().getModelName(), "ground");
             simulationCollisionModelGraphic = new RDXRobotCollisionModel(simulationCollisionModel);
@@ -175,6 +186,7 @@ public class RDXRobotModelViewer
          @Override
          public void render()
          {
+            humanoidReferenceFrames.updateFrames();
             robotModelGraphic.update();
             ghostRobotModelGraphic.update();
             simulationCollisionModelGraphic.update();
