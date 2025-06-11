@@ -29,9 +29,9 @@ public class RDXGLTFDemo
 
             baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(RDXModelLoader.load("environmentObjects/flatGround/FlatGround.g3dj")));
 
-            FileHandle fileHandle = Gdx.files.internal("models/BoomBox.gltf");
-            SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
-            ModelInstance modelInstance = new ModelInstance(sceneAsset.scene.model);
+//            FileHandle fileHandle = Gdx.files.internal("models/BoomBox.gltf");
+//            SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
+            ModelInstance modelInstance = new ModelInstance(RDXModelLoader.load("models/BoomBox.gltf"));
             modelInstance.transform.setToRotationRad(1.0f, 0.0f, 0.0f, (float) Math.PI / 2.0f);
             modelInstance.transform.translate(0.2f, 0.2f, 0.2f);
             modelInstance.transform.scale(20.0f, 20.0f, 20.0f);

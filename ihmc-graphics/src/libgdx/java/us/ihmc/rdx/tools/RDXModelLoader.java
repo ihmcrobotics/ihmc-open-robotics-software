@@ -46,8 +46,6 @@ public class RDXModelLoader
 
    /**
     * No synchronization and will load data from file every time.
-    *
-    * FIXME: Cannot load GLTF/GLB to ModelData
     */
    public static ModelData loadModelData(String modelFileName)
    {
@@ -73,59 +71,29 @@ public class RDXModelLoader
          model = loadedModels.get(modelFileName);
          if (model == null)
          {
+            ModelData modelData = loadModelDataInternal(requestedModelFileName);
+            if (modelData != null)
             {
-               String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-               FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".glb");
-               if (potentialFileHandle.exists())
-               {
-                  LogTools.debug("Found GLB file as an alternative for {}", modelFileName);
-                  modelFileName = modelFileNameWithoutExtension + ".glb";
+               model = new Model(modelData);
+               ensureModelHasDiffuseTextureAttribute(modelFileName, model);
+               loadedModels.put(modelFileName, model);
+            }
+         }
+         else
+         {
+            boolean shouldPrintWarnings = !printedWarnings.contains(requestedModelFileName);
 
-                  SceneAsset sceneAsset = new GLBLoader().load(potentialFileHandle, true);
-                  model = sceneAsset.scene.model;
-               }
+            long numberOfVertices = LibGDXTools.countVertices(model);
+            LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
+
+            if (shouldPrintWarnings && numberOfVertices > 15000)
+            {
+               LogTools.warn("{} has {} vertices, which is a lot! This will begin to affect frame rate.", modelFileName, numberOfVertices);
             }
 
-            if (model == null)
-            {
-               String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
-               FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
-               if (potentialFileHandle.exists())
-               {
-                  LogTools.debug("Found GLTF file as an alternative for {}", modelFileName);
-                  modelFileName = modelFileNameWithoutExtension + ".gltf";
+            printedWarnings.add(requestedModelFileName);
 
-                  SceneAsset sceneAsset = new GLTFLoader().load(potentialFileHandle, true);
-                  model = sceneAsset.scene.model;
-               }
-            }
-
-            if (model != null)
-            {
-               boolean shouldPrintWarnings = !printedWarnings.contains(requestedModelFileName);
-
-               long numberOfVertices = LibGDXTools.countVertices(model);
-               LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
-
-               if (shouldPrintWarnings && numberOfVertices > 15000)
-               {
-                  LogTools.warn("{} has {} vertices, which is a lot! This will begin to affect frame rate.", modelFileName, numberOfVertices);
-               }
-
-               printedWarnings.add(requestedModelFileName);
-
-               return model;
-            }
-            else
-            {
-               ModelData modelData = loadModelDataInternal(requestedModelFileName);
-               if (modelData != null)
-               {
-                  model = new Model(modelData);
-                  ensureModelHasDiffuseTextureAttribute(modelFileName, model);
-                  loadedModels.put(modelFileName, model);
-               }
-            }
+            return model;
          }
       }
 
@@ -144,7 +112,19 @@ public class RDXModelLoader
       {
          modelFileName = useABetterFormatIfAvailable(modelFileName);
 
-         if (modelFileName.endsWith(".g3dj"))
+         if (modelFileName.endsWith(".glb"))
+         {
+            FileHandle fileHandle = Gdx.files.internal(modelFileName);
+            SceneAsset sceneAsset = new GLBLoader().load(fileHandle, true);
+            modelData = new ModelToModelDataConverter(sceneAsset.scene.model).getModelData();
+         }
+         else if (modelFileName.endsWith(".gltf"))
+         {
+            FileHandle fileHandle = Gdx.files.internal(modelFileName);
+            SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
+            modelData = new ModelToModelDataConverter(sceneAsset.scene.model).getModelData();
+         }
+         else if (modelFileName.endsWith(".g3dj"))
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
             modelData = new G3dModelLoader(new JsonReader()).loadModelData(fileHandle);
@@ -203,8 +183,35 @@ public class RDXModelLoader
 
    private String useABetterFormatIfAvailable(String modelFileName)
    {
-      boolean g3dbExists = false;
-      if (!modelFileName.endsWith(".g3db"))
+      boolean foundOne = false;
+
+      // Most preferable first
+
+      if (!foundOne && !modelFileName.endsWith(".glb"))
+      {
+         String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+         FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".glb");
+         if (potentialFileHandle.exists())
+         {
+            LogTools.debug("Found GLB file as an alternative for {}", modelFileName);
+            modelFileName = modelFileNameWithoutExtension + ".glb";
+            foundOne = true;
+         }
+      }
+
+      if (!foundOne && !modelFileName.endsWith(".gltf"))
+      {
+         String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+         FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
+         if (potentialFileHandle.exists())
+         {
+            LogTools.debug("Found GLTF file as an alternative for {}", modelFileName);
+            modelFileName = modelFileNameWithoutExtension + ".gltf";
+            foundOne = true;
+         }
+      }
+
+      if (!foundOne && !modelFileName.endsWith(".g3db"))
       {
          String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
          FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3db");
@@ -212,11 +219,11 @@ public class RDXModelLoader
          {
             LogTools.debug("Found G3DB file as an alternative for {}", modelFileName);
             modelFileName = modelFileNameWithoutExtension + ".g3db";
-            g3dbExists = true;
+            foundOne = true;
          }
       }
 
-      if (!g3dbExists && !modelFileName.endsWith(".g3dj"))
+      if (!foundOne && !modelFileName.endsWith(".g3dj"))
       {
          String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
          FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
