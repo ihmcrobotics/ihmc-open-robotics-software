@@ -6,7 +6,9 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.ejml.equation.ManagerTempVariables;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -20,6 +22,7 @@ import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -329,6 +332,9 @@ public class RapidHeightMapExtractor
          int scalingKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 scalingKernelGridDim = new dim3(scalingKernelGridSizeXY, scalingKernelGridSizeXY, 1);
 
+         Mat test = new Mat();
+         globalMeanMap.download(test);
+
          scalingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          scalingKernel.withPointer(scaledHeightMap.data()).withLong(scaledHeightMap.step());
          scalingKernel.withPointer(parametersDevicePointer);
@@ -542,7 +548,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap;
+      return globalMeanMap;
    }
 
    public GpuMat getTerrainCroppedHeightMap()
