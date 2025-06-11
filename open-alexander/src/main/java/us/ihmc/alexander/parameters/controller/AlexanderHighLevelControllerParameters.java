@@ -108,7 +108,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 3.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
 
@@ -201,8 +201,8 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          double maxPosError = 0.4;
          double maxVelError = 2.0;
          double velScale = 1.0;
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 175.0, 10.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 80.0, 2.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 175.0, 0.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 80.0, 0.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 250.0, 3.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 250.0, 5.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 250.0, 5.0, maxPosError, maxVelError, velScale);
