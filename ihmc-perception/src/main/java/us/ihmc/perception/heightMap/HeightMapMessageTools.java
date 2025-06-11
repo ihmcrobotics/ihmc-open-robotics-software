@@ -5,6 +5,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.nio.FloatBuffer;
+
 public class HeightMapMessageTools
 {
    public static void convertToHeightMapData(Mat heightMapPointer,
@@ -102,18 +104,29 @@ public class HeightMapMessageTools
 
       Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
 
+      int width = cellsPerAxis;
+      int column = cellsPerAxis;
+      byte[] dataArray = new byte[width * column * Short.BYTES];
+
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
-
          double height = heightMapMessage.getHeights().get(i);
          int key = heightMapMessage.getKeys().get(i);
 
-         int xIndex = key % cellsPerAxis;
-         int yIndex = key / cellsPerAxis;
+         int xIndex = key % width;
+         int yIndex = key / width;
 
-         int cellHeight = (int) ((height + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-         heightMap.ptr(yIndex, xIndex).putShort((short) cellHeight);
+         int index = (yIndex * width + xIndex) * Short.BYTES;
+
+         int cellHeight = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+
+         // Convert short to bytes (little-endian)
+         dataArray[index]     = (byte) (cellHeight & 0xFF);
+         dataArray[index + 1] = (byte) ((cellHeight >> 8) & 0xFF);
       }
+
+      // Put it all at once
+      heightMap.data().put(dataArray);
 
       return heightMap;
    }
@@ -144,12 +157,7 @@ public class HeightMapMessageTools
       }
    }
 
-   public static void toMessage(Mat heightMapMat,
-                                HeightMapParameters heightMapParameters,
-                                Point3D heightMapCenter,
-                                float widthInMeters,
-                                float cellSizeInMeters,
-                                HeightMapMessage messageToPack)
+   public static void toMessage(Mat heightMapMat, Point3D heightMapCenter, float widthInMeters, float cellSizeInMeters, HeightMapMessage messageToPack)
    {
       clear(messageToPack);
 
@@ -163,27 +171,18 @@ public class HeightMapMessageTools
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
-      // Read data into byte[]
-      byte[] data = new byte[Short.BYTES * totalCells];
-      heightMapMat.data().get(data);
+      // Make sure Mat type is correct
+      if (heightMapMat.type() != opencv_core.CV_32FC1)
+         throw new IllegalArgumentException("Expected CV_32FC1 Mat");
 
-      // Put height values into HeightMapData object
+      FloatBuffer floatBuffer = heightMapMat.createBuffer(); // or ByteBuffer -> FloatBuffer
+
       for (int i = 0; i < totalCells; ++i)
       {
-         // Get the start index of the bytes for a short
-         int dataIndex = Short.BYTES * i;
+         float height = floatBuffer.get(i);
 
-         // Get the most and least significant bits, combine into integer
-         int major = (data[dataIndex + 1] << 8) & 0xFF00;
-         int minor = data[dataIndex] & 0x00FF;
-         int height = major | minor;
-
-         // Calculate cell height
-         float cellHeight = (float) (((float) height / heightMapParameters.getHeightScaleFactor()) - heightMapParameters.getHeightOffset());
-
-         // The key is associated with the height so these have to be added together so they match correctly
          messageToPack.getKeys().add(i);
-         messageToPack.getHeights().add(cellHeight);
+         messageToPack.getHeights().add(height);
       }
    }
 

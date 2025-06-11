@@ -41,10 +41,9 @@ public class RapidHeightMapManager
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D gridCellLocation = new Point3D();
-   private long sequenceId = 0;
-
    // This is created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
+   private long sequenceId = 0;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -104,7 +103,6 @@ public class RapidHeightMapManager
       cameraPose.getTranslation().set(gridCellLocation);
 
       HeightMapMessageTools.toMessage(hostGlobalHeightMap,
-                                      heightMapParameters,
                                       gridCellLocation,
                                       (float) heightMapParameters.getGlobalWidthInMeters(),
                                       (float) heightMapParameters.getCellSizeInMeters(),
