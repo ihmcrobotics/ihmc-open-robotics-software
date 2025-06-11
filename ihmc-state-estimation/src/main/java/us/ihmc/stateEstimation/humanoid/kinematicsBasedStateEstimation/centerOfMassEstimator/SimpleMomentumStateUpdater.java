@@ -70,7 +70,6 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
 
    private final FrameVector3D comVelocityGRFPart = new FrameVector3D();
    private final FrameVector3D comVelocityPelvisAndKinPart = new FrameVector3D();
-   private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final FrameVector3D tempCoMAcceleration = new FrameVector3D(worldFrame);
    private final FrameVector3D tempFootForce = new FrameVector3D(worldFrame);
 
@@ -154,7 +153,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
          comVelocityGRFPart.add(comAcceleration);
          comAcceleration.scale(1.0 / estimatorDT);
 
-         comVelocityPelvisAndKinPart.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
+         comVelocityPelvisAndKinPart.set(yoCenterOfMassVelocityUsingPelvisAndKinematics);
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(grfAgainstIMUAndKinematicsForVelocityBreakFrequency.getValue(),
                                                                                         estimatorDT);
@@ -165,7 +164,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       }
       else
       {
-         yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
+         yoCenterOfMassVelocity.set(yoCenterOfMassVelocityUsingPelvisAndKinematics);
       }
 
       if (estimatorCenterOfMassDataHolderToUpdate != null)

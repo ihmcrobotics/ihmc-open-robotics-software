@@ -27,9 +27,9 @@ public class AlexanderStandPrepSetPoints implements WholeBodySetpointParameters
          setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
          setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), robotSide.negateIfRightSide(0.15));
          setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.63);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.0);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.4);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0.0);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.95);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.35);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), robotSide.negateIfLeftSide(0.10));
 
          setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), 0.0);
          setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.0);

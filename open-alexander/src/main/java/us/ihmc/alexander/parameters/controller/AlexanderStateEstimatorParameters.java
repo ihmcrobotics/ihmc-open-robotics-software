@@ -296,4 +296,11 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
    {
       return imuBasedJointStateEstimatorParameters;
    }
+
+   @Override
+   public MomentumEstimatorMode getMomentumEstimatorMode()
+   {
+      return MomentumEstimatorMode.SIMPLE;
+   }
+
 }
