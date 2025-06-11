@@ -1,5 +1,8 @@
 package us.ihmc.alexander.parameters.simulation;
 
+import us.ihmc.alexander.AlexanderVersionInterface;
+import us.ihmc.alexander.parameters.AlexanderPresetArmConfigurations;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -11,7 +14,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class AlexanderInitialSetup extends HumanoidRobotInitialSetup
 {
-   public AlexanderInitialSetup(RobotDefinition robotDefinition, HumanoidJointNameMap jointMap)
+   public AlexanderInitialSetup(AlexanderVersionInterface version, RobotDefinition robotDefinition, HumanoidJointNameMap jointMap)
    {
       super(jointMap);
 
@@ -31,6 +34,12 @@ public class AlexanderInitialSetup extends HumanoidRobotInitialSetup
          setJoint(robotSide, ArmJointName.ELBOW_YAW, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_ROLL, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_YAW, 0.0);
+
+         double[] jointAngles = AlexanderPresetArmConfigurations.getPresetArmConfiguration(version, robotSide, PresetArmConfiguration.INITIAL_SETUP);
+         for (int i = 0; i < jointMap.getArmJointNamesAsStrings(robotSide).size(); i++)
+         {
+            setJoint(robotSide, jointMap.getArmJointNames()[i], jointAngles[i]);
+         }
       }
 
       setJoint(SpineJointName.SPINE_YAW, 0.0);
