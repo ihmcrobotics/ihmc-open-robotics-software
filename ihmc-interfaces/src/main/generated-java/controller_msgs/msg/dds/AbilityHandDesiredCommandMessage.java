@@ -14,6 +14,8 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
     */
    public byte robot_side_ = (byte) 255;
 
+   public double[] gripper_desired_position_ = new double[3];
+
    public AbilityHandDesiredCommandMessage()
    {
    }
@@ -43,6 +45,14 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
    public byte getRobotSide()
    {
       return robot_side_;
+   }
+   public void setDesiredPosition(double[] gripper_desired_position)
+   {
+      gripper_desired_position_ = gripper_desired_position;
+   }
+   public double[] getDesiredPosition()
+   {
+      return gripper_desired_position_;
    }
 
    //Remove when class is not an error

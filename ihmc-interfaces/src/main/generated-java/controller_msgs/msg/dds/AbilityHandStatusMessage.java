@@ -16,59 +16,20 @@ public class AbilityHandStatusMessage extends Packet<AbilityHandStatusMessage>
     * Specifies the side of the robot of the hand being referred to
     */
    public byte robot_side_ = (byte) 255;
-   /**
-    * Angle at which the hand is closed, in radians
-    */
-   public double position_upper_limit_;
-   /**
-    * Angle at which the hand is fully open, in radians
-    */
-   public double position_lower_limit_;
-   /**
-    * Temperature of the Dynamixel in Celsius
-    */
-   public int temperature_;
-   /**
-    * The current dynamixel position, in radians
-    */
-   public double current_position_;
-   /**
-    * The current dynamixel torque
-    * 0: dynamixel will not apply any force and will not achieve desired position
-    * 300: A reasonable normal value
-    * 1023: dynamixel max torque which will quickly overheat the motor
-    */
-   public int raw_current_torque_;
-   /**
-    * The position the Dynamixel is trying to achieve, in radians
-    */
-   public double desired_position_status_;
-   /**
-    * Torque limit set on the Dynamixel
-    */
-   public double raw_torque_limit_status_;
-   public boolean torque_on_status_;
-   /**
-    * Rotation velocity of the Dynamixel, in rad/s
-    * Positive = opening hand (CCW rotation)
-    * Negative = closing hand (CW rotation)
-    */
-   public double current_velocity_;
-   /**
-    * Dynamixel's error codes
-    * See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
-    */
-   public int error_codes_;
-   /**
-    * Realtime tick of the Dynamixel
-    * If this value isn't changing, communication with the hand is broken
-    */
-   public int realtime_tick_;
-   public boolean is_calibrated_;
-   public boolean needs_reset_;
-   public boolean is_calibrating_;
-   public boolean is_cooling_down_;
-   public boolean automatic_cooldown_enabled_;
+
+   public double current_position_index_;
+   public double current_position_middle_;
+   public double current_position_ring_;
+   public double current_position_pinky_;
+   public double current_position_thumb_rotator_;
+   public double current_position_thumb_flexor_;
+
+   public double current_velocity_index_;
+   public double current_velocity_middle_;
+   public double current_velocity_ring_;
+   public double current_velocity_pinky_;
+   public double current_velocity_thumb_rotator_;
+   public double current_velocity_thumb_flexor_;
 
    public AbilityHandStatusMessage()
    {
@@ -84,37 +45,19 @@ public class AbilityHandStatusMessage extends Packet<AbilityHandStatusMessage>
    {
       robot_side_ = other.robot_side_;
 
-      position_upper_limit_ = other.position_upper_limit_;
+      current_position_index_ = other.current_position_index_;
+      current_position_middle_ = other.current_position_middle_;
+      current_position_ring_ = other.current_position_ring_;
+      current_position_pinky_ = other.current_position_pinky_;
+      current_position_thumb_rotator_ = other.current_position_thumb_rotator_;
+      current_position_thumb_flexor_ = other.current_position_thumb_flexor_;
 
-      position_lower_limit_ = other.position_lower_limit_;
-
-      temperature_ = other.temperature_;
-
-      current_position_ = other.current_position_;
-
-      raw_current_torque_ = other.raw_current_torque_;
-
-      desired_position_status_ = other.desired_position_status_;
-
-      raw_torque_limit_status_ = other.raw_torque_limit_status_;
-
-      torque_on_status_ = other.torque_on_status_;
-
-      current_velocity_ = other.current_velocity_;
-
-      error_codes_ = other.error_codes_;
-
-      realtime_tick_ = other.realtime_tick_;
-
-      is_calibrated_ = other.is_calibrated_;
-
-      needs_reset_ = other.needs_reset_;
-
-      is_calibrating_ = other.is_calibrating_;
-
-      is_cooling_down_ = other.is_cooling_down_;
-
-      automatic_cooldown_enabled_ = other.automatic_cooldown_enabled_;
+      current_velocity_index_ = other.current_velocity_index_;
+      current_velocity_middle_ = other.current_velocity_middle_;
+      current_velocity_ring_ = other.current_velocity_ring_;
+      current_velocity_pinky_ = other.current_velocity_pinky_;
+      current_velocity_thumb_rotator_ = other.current_velocity_thumb_rotator_;
+      current_velocity_thumb_flexor_ = other.current_velocity_thumb_flexor_;
    }
 
    /**
@@ -133,250 +76,88 @@ public class AbilityHandStatusMessage extends Packet<AbilityHandStatusMessage>
       return robot_side_;
    }
 
-   /**
-    * Angle at which the hand is closed, in radians
-    */
-   public void setPositionUpperLimit(double position_upper_limit)
-   {
-      position_upper_limit_ = position_upper_limit;
+   public void setCurrent_position_index_(double index) {
+      current_position_index_ = index;
    }
 
-   /**
-    * Angle at which the hand is closed, in radians
-    */
-   public double getPositionUpperLimit()
+
+   public double getCurrent_position_index_()
    {
-      return position_upper_limit_;
+      return current_position_index_;
    }
 
-   /**
-    * Angle at which the hand is fully open, in radians
-    */
-   public void setPositionLowerLimit(double position_lower_limit)
+   public void setCurrent_position_middle_(double middle)
    {
-      position_lower_limit_ = position_lower_limit;
+      current_position_middle_ = middle;
+   }
+   public double getCurrent_position_middle_()
+   {
+      return current_position_middle_;
+   }
+   public void setCurrent_position_ring_(double ring)
+   {
+      current_position_ring_ = ring;
+   }
+   public double getCurrent_position_ring_()
+   {
+      return current_position_ring_;
+   }
+   public void setCurrent_position_pinky_(double pinky)
+   {
+      current_position_pinky_ = pinky;
+   }
+   public double getCurrent_position_pinky_()
+   {
+      return current_position_pinky_;
    }
 
-   /**
-    * Angle at which the hand is fully open, in radians
-    */
-   public double getPositionLowerLimit()
+   public void setCurrent_position_thumb_rotator(double thumb_rotator)
    {
-      return position_lower_limit_;
+      current_position_thumb_rotator_ = thumb_rotator;
+   }
+   public double getCurrent_position_thumb_rotator_()
+   {
+      return current_position_thumb_rotator_;
    }
 
-   /**
-    * Temperature of the Dynamixel in Celsius
-    */
-   public void setTemperature(int temperature)
+   public void setCurrent_position_thumb_flexor(double thumb_flexor)
    {
-      temperature_ = temperature;
+      current_position_thumb_flexor_ = thumb_flexor;
+   }
+   public double getCurrent_position_thumb_flexor_()
+   {
+      return current_position_thumb_flexor_;
    }
 
-   /**
-    * Temperature of the Dynamixel in Celsius
-    */
-   public int getTemperature()
+   public double getCurrent_velocity_index_()
    {
-      return temperature_;
+      return current_velocity_index_;
    }
 
-   /**
-    * The current dynamixel position, in radians
-    */
-   public void setCurrentPosition(double current_position)
+   public double getCurrent_velocity_middle_()
    {
-      current_position_ = current_position;
+      return current_velocity_middle_;
    }
 
-   /**
-    * The current dynamixel position, in radians
-    */
-   public double getCurrentPosition()
+   public double getCurrent_velocity_ring_()
    {
-      return current_position_;
+      return current_velocity_ring_;
    }
 
-   /**
-    * The current dynamixel torque
-    * 0: dynamixel will not apply any force and will not achieve desired position
-    * 300: A reasonable normal value
-    * 1023: dynamixel max torque which will quickly overheat the motor
-    */
-   public void setRawCurrentTorque(int raw_current_torque)
+   public double getCurrent_velocity_pinky_()
    {
-      raw_current_torque_ = raw_current_torque;
+      return current_velocity_pinky_;
    }
 
-   /**
-    * The current dynamixel torque
-    * 0: dynamixel will not apply any force and will not achieve desired position
-    * 300: A reasonable normal value
-    * 1023: dynamixel max torque which will quickly overheat the motor
-    */
-   public int getRawCurrentTorque()
+   public double getCurrent_velocity_thumb_rotator_()
    {
-      return raw_current_torque_;
+      return current_velocity_thumb_rotator_;
    }
 
-   /**
-    * The position the Dynamixel is trying to achieve, in radians
-    */
-   public void setDesiredPositionStatus(double desired_position_status)
+   public double getCurrent_velocity_thumb_flexor_()
    {
-      desired_position_status_ = desired_position_status;
+      return current_velocity_thumb_flexor_;
    }
-
-   /**
-    * The position the Dynamixel is trying to achieve, in radians
-    */
-   public double getDesiredPositionStatus()
-   {
-      return desired_position_status_;
-   }
-
-   /**
-    * Torque limit set on the Dynamixel
-    */
-   public void setRawTorqueLimitStatus(double raw_torque_limit_status)
-   {
-      raw_torque_limit_status_ = raw_torque_limit_status;
-   }
-
-   /**
-    * Torque limit set on the Dynamixel
-    */
-   public double getRawTorqueLimitStatus()
-   {
-      return raw_torque_limit_status_;
-   }
-
-   public void setTorqueOnStatus(boolean torque_on_status)
-   {
-      torque_on_status_ = torque_on_status;
-   }
-
-   public boolean getTorqueOnStatus()
-   {
-      return torque_on_status_;
-   }
-
-   /**
-    * Rotation velocity of the Dynamixel, in rad/s
-    * Positive = opening hand (CCW rotation)
-    * Negative = closing hand (CW rotation)
-    */
-   public void setCurrentVelocity(double current_velocity)
-   {
-      current_velocity_ = current_velocity;
-   }
-
-   /**
-    * Rotation velocity of the Dynamixel, in rad/s
-    * Positive = opening hand (CCW rotation)
-    * Negative = closing hand (CW rotation)
-    */
-   public double getCurrentVelocity()
-   {
-      return current_velocity_;
-   }
-
-   /**
-    * Dynamixel's error codes
-    * See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
-    */
-   public void setErrorCodes(int error_codes)
-   {
-      error_codes_ = error_codes;
-   }
-
-   /**
-    * Dynamixel's error codes
-    * See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
-    */
-   public int getErrorCodes()
-   {
-      return error_codes_;
-   }
-
-   /**
-    * Realtime tick of the Dynamixel
-    * If this value isn't changing, communication with the hand is broken
-    */
-   public void setRealtimeTick(int realtime_tick)
-   {
-      realtime_tick_ = realtime_tick;
-   }
-
-   /**
-    * Realtime tick of the Dynamixel
-    * If this value isn't changing, communication with the hand is broken
-    */
-   public int getRealtimeTick()
-   {
-      return realtime_tick_;
-   }
-
-   public void setIsCalibrated(boolean is_calibrated)
-   {
-      is_calibrated_ = is_calibrated;
-   }
-
-   public boolean getIsCalibrated()
-   {
-      return is_calibrated_;
-   }
-
-   public void setNeedsReset(boolean needs_reset)
-   {
-      needs_reset_ = needs_reset;
-   }
-
-   public boolean getNeedsReset()
-   {
-      return needs_reset_;
-   }
-
-   public void setIsCalibrating(boolean is_calibrating)
-   {
-      is_calibrating_ = is_calibrating;
-   }
-
-   public boolean getIsCalibrating()
-   {
-      return is_calibrating_;
-   }
-
-   public void setIsCoolingDown(boolean is_cooling_down)
-   {
-      is_cooling_down_ = is_cooling_down;
-   }
-
-   public boolean getIsCoolingDown()
-   {
-      return is_cooling_down_;
-   }
-
-   public void setAutomaticCooldownEnabled(boolean automatic_cooldown_enabled)
-   {
-      automatic_cooldown_enabled_ = automatic_cooldown_enabled;
-   }
-
-   public boolean getAutomaticCooldownEnabled()
-   {
-      return automatic_cooldown_enabled_;
-   }
-
-   //   public static Supplier<AbilityHandStatusMessagePubSubType> getPubSubType()
-   //   {
-   //      return AbilityHandStatusMessagePubSubType::new;
-   //   }
-   //
-   //   @Override
-   //   public Supplier<TopicDataType> getPubSubTypePacket()
-   //   {
-   //      return AbilityHandStatusMessagePubSubType::new;
-   //   }
 
    @Override
    public boolean epsilonEquals(AbilityHandStatusMessage other, double epsilon)
@@ -389,54 +170,30 @@ public class AbilityHandStatusMessage extends Packet<AbilityHandStatusMessage>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_upper_limit_, other.position_upper_limit_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_index_, other.current_position_index_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_lower_limit_, other.position_lower_limit_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_middle_, other.current_position_middle_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.temperature_, other.temperature_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_ring_, other.current_position_ring_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_, other.current_position_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_pinky_, other.current_position_pinky_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_current_torque_, other.raw_current_torque_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_thumb_rotator_, other.current_position_thumb_rotator_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_position_status_, other.desired_position_status_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_thumb_flexor_, other.current_position_thumb_flexor_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_torque_limit_status_, other.raw_torque_limit_status_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_index_, other.current_velocity_index_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.torque_on_status_, other.torque_on_status_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_middle_, other.current_velocity_middle_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_, other.current_velocity_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_ring_, other.current_velocity_ring_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.error_codes_, other.error_codes_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_pinky_, other.current_velocity_pinky_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.realtime_tick_, other.realtime_tick_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_thumb_rotator_, other.current_velocity_thumb_rotator_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_calibrated_, other.is_calibrated_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_thumb_flexor_, other.current_velocity_thumb_flexor_, epsilon))
          return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon))
-         return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_calibrating_, other.is_calibrating_, epsilon))
-         return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_cooling_down_, other.is_cooling_down_, epsilon))
-         return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.automatic_cooldown_enabled_, other.automatic_cooldown_enabled_, epsilon))
-         return false;
-
       return true;
    }
 
@@ -454,55 +211,30 @@ public class AbilityHandStatusMessage extends Packet<AbilityHandStatusMessage>
 
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
-
-      if (this.position_upper_limit_ != otherMyClass.position_upper_limit_)
+      if (this.current_position_index_ != otherMyClass.current_position_index_)
          return false;
-
-      if (this.position_lower_limit_ != otherMyClass.position_lower_limit_)
+      if (this.current_position_middle_ != otherMyClass.current_position_middle_)
          return false;
-
-      if (this.temperature_ != otherMyClass.temperature_)
+      if (this.current_position_ring_ != otherMyClass.current_position_ring_)
          return false;
-
-      if (this.current_position_ != otherMyClass.current_position_)
+      if (this.current_position_pinky_ != otherMyClass.current_position_pinky_)
          return false;
-
-      if (this.raw_current_torque_ != otherMyClass.raw_current_torque_)
+      if (this.current_position_thumb_rotator_ != otherMyClass.current_position_thumb_rotator_)
          return false;
-
-      if (this.desired_position_status_ != otherMyClass.desired_position_status_)
+      if (this.current_position_thumb_flexor_ != otherMyClass.current_position_thumb_flexor_)
          return false;
-
-      if (this.raw_torque_limit_status_ != otherMyClass.raw_torque_limit_status_)
+      if (this.current_velocity_index_ != otherMyClass.current_velocity_index_)
          return false;
-
-      if (this.torque_on_status_ != otherMyClass.torque_on_status_)
+      if (this.current_velocity_middle_ != otherMyClass.current_velocity_middle_)
          return false;
-
-      if (this.current_velocity_ != otherMyClass.current_velocity_)
+      if (this.current_velocity_ring_ != otherMyClass.current_velocity_ring_)
          return false;
-
-      if (this.error_codes_ != otherMyClass.error_codes_)
+      if (this.current_velocity_pinky_ != otherMyClass.current_velocity_pinky_)
          return false;
-
-      if (this.realtime_tick_ != otherMyClass.realtime_tick_)
+      if (this.current_velocity_thumb_rotator_ != otherMyClass.current_velocity_thumb_rotator_)
          return false;
-
-      if (this.is_calibrated_ != otherMyClass.is_calibrated_)
+      if (this.current_velocity_thumb_flexor_ != otherMyClass.current_velocity_thumb_flexor_)
          return false;
-
-      if (this.needs_reset_ != otherMyClass.needs_reset_)
-         return false;
-
-      if (this.is_calibrating_ != otherMyClass.is_calibrating_)
-         return false;
-
-      if (this.is_cooling_down_ != otherMyClass.is_cooling_down_)
-         return false;
-
-      if (this.automatic_cooldown_enabled_ != otherMyClass.automatic_cooldown_enabled_)
-         return false;
-
       return true;
    }
 
@@ -515,53 +247,41 @@ public class AbilityHandStatusMessage extends Packet<AbilityHandStatusMessage>
       builder.append("robot_side=");
       builder.append(this.robot_side_);
       builder.append(", ");
-      builder.append("position_upper_limit=");
-      builder.append(this.position_upper_limit_);
+      builder.append("current_position_index=");
+      builder.append(this.current_position_index_);
       builder.append(", ");
-      builder.append("position_lower_limit=");
-      builder.append(this.position_lower_limit_);
+      builder.append("current_position_middle=");
+      builder.append(this.current_position_middle_);
       builder.append(", ");
-      builder.append("temperature=");
-      builder.append(this.temperature_);
+      builder.append("current_position_ring=");
+      builder.append(this.current_position_ring_);
       builder.append(", ");
-      builder.append("current_position=");
-      builder.append(this.current_position_);
+      builder.append("current_position_pinky=");
+      builder.append(this.current_position_pinky_);
       builder.append(", ");
-      builder.append("raw_current_torque=");
-      builder.append(this.raw_current_torque_);
+      builder.append("current_position_thumb_rotator=");
+      builder.append(this.current_position_thumb_rotator_);
       builder.append(", ");
-      builder.append("desired_position_status=");
-      builder.append(this.desired_position_status_);
+      builder.append("current_position_thumb_flexor=");
+      builder.append(this.current_position_thumb_flexor_);
       builder.append(", ");
-      builder.append("raw_torque_limit_status=");
-      builder.append(this.raw_torque_limit_status_);
+      builder.append("current_velocity_index=");
+      builder.append(this.current_velocity_index_);
       builder.append(", ");
-      builder.append("torque_on_status=");
-      builder.append(this.torque_on_status_);
+      builder.append("current_velocity_middle=");
+      builder.append(this.current_velocity_middle_);
       builder.append(", ");
-      builder.append("current_velocity=");
-      builder.append(this.current_velocity_);
+      builder.append("current_velocity_ring=");
+      builder.append(this.current_velocity_ring_);
       builder.append(", ");
-      builder.append("error_codes=");
-      builder.append(this.error_codes_);
+      builder.append("current_velocity_pinky=");
+      builder.append(this.current_velocity_pinky_);
       builder.append(", ");
-      builder.append("realtime_tick=");
-      builder.append(this.realtime_tick_);
+      builder.append("current_velocity_thumb_rotator=");
+      builder.append(this.current_velocity_thumb_rotator_);
       builder.append(", ");
-      builder.append("is_calibrated=");
-      builder.append(this.is_calibrated_);
-      builder.append(", ");
-      builder.append("needs_reset=");
-      builder.append(this.needs_reset_);
-      builder.append(", ");
-      builder.append("is_calibrating=");
-      builder.append(this.is_calibrating_);
-      builder.append(", ");
-      builder.append("is_cooling_down=");
-      builder.append(this.is_cooling_down_);
-      builder.append(", ");
-      builder.append("automatic_cooldown_enabled=");
-      builder.append(this.automatic_cooldown_enabled_);
+      builder.append("current_velocity_thumb_flexor=");
+      builder.append(this.current_velocity_thumb_flexor_);
       builder.append("}");
       return builder.toString();
    }
