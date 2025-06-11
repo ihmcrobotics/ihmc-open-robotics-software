@@ -247,7 +247,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public double[] getPresetArmConfiguration(RobotSide side, PresetArmConfiguration presetArmConfiguration)
    {
-      return null;
+      return AlexanderPresetArmConfigurations.getPresetArmConfiguration(robotVersion, side, presetArmConfiguration);
    }
 
    @Override
