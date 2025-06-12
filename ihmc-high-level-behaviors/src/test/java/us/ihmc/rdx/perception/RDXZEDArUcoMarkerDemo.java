@@ -62,14 +62,14 @@ public class RDXZEDArUcoMarkerDemo
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "_ROS2Node");
 
       imageRetriever = new ZEDColorDepthImageRetriever(0, ReferenceFrame::getWorldFrame, () -> true, () -> true, true);
-      imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+      imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED_COLOR_IMAGES, PerceptionAPI.ZED_DEPTH, PerceptionAPI.ZED_CUT_OUT_DEPTH);
       sensorFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
 
       baseUI = new RDXBaseUI("ArUco Marker Demo");
       pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED Point Cloud",
                                                                     ros2Node,
-                                                                    PerceptionAPI.ZED2_DEPTH,
-                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+                                                                    PerceptionAPI.ZED_DEPTH,
+                                                                    PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT));
       perceptionVisualizersPanel = new RDXPerceptionVisualizersPanel();
 
       arUcoDetector = new OpenCVArUcoMarkerDetector();
