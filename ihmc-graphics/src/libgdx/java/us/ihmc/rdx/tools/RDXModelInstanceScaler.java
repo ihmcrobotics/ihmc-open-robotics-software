@@ -1,9 +1,12 @@
 package us.ihmc.rdx.tools;
 
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.model.data.*;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -17,6 +20,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 /**
@@ -33,12 +37,11 @@ import java.util.ArrayList;
  */
 public class RDXModelInstanceScaler
 {
-   private final ModelData modelData;
-   private final Point3D32 wholeModelCentroid;
+   private final Model model;
+   private final Point3D32 wholeModelCentroid = new Point3D32();
 
-   private record OriginalVertexRecord(Point3D32 originalVertex, short index) { }
-   private record PartRecord(ModelMeshPart modelMeshPart,
-                             ModelMesh modelMesh,
+   private record OriginalVertexRecord(Point3D32 originalVertex, int index) { }
+   private record PartRecord(MeshPart meshPart,
                              RigidBodyTransform transform,
                              int floatsPerVertex,
                              int numberOfVertices,
@@ -52,58 +55,65 @@ public class RDXModelInstanceScaler
 
    public RDXModelInstanceScaler(String modelFileName)
    {
-      this(RDXModelLoader.loadModelData(modelFileName));
+      this(RDXModelLoader.load(modelFileName));
    }
 
-   public RDXModelInstanceScaler(ModelData modelData)
+   public RDXModelInstanceScaler(Model model)
    {
-      this.modelData = modelData;
+      this.model = LibGDXModelCopier.deepCopy(model);
 
       stopwatch.start();
-      wholeModelCentroid = new Point3D32();
+
       int totalNumberOfVertices = 0;
-      for (int nodeIndex = 0; nodeIndex < modelData.nodes.size; nodeIndex++)
+
+      for (int nodeIndex = 0; nodeIndex < model.nodes.size; nodeIndex++)
       {
-         ModelNode node = modelData.nodes.get(nodeIndex);
+         Node node = model.nodes.get(nodeIndex);
 
-         if (node.parts != null)
+         // Store the node transform for scaling calculations
+         RigidBodyTransform transform = new RigidBodyTransform();
+         Quaternion quaternion = new Quaternion();
+         if (node.translation != null)
+            LibGDXTools.toEuclid(node.translation, transform.getTranslation());
+         if (node.rotation != null)
+            LibGDXTools.toEuclid(node.rotation, quaternion);
+         transform.getRotation().set(quaternion);
+
+         for (int partIndex = 0; partIndex < node.parts.size; partIndex++)
          {
-            for (ModelNodePart part : node.parts)
+            NodePart part = node.parts.get(partIndex);
+
+            MeshPart meshPart = part.meshPart;
+            Mesh mesh = meshPart.mesh;
+
+            // Iterate over all vertices, creating a Point3D32 for each in the loop
+            // Each vertex is usually something like 8 floats: x,y,z,nx,ny,nz,u,v
+            int floatsPerVertex = LibGDXTools.calculateFloatsPerVertex(meshPart);
+
+            // Iterate over all vertices, creating a Point3D32 for each in the loop
+            ArrayList<OriginalVertexRecord> originalPartVertices = new ArrayList<>();
+            for (int vertexIndex = 0; vertexIndex < meshPart.size; vertexIndex++)
             {
-               String meshPartId = part.meshPartId;
-               ModelMeshPart modelMeshPart = LibGDXTools.findModelMeshPart(modelData, meshPartId);
-               ModelMesh modelMesh = LibGDXTools.findMeshContainingPart(modelData, meshPartId);
+               int actualIndex = meshPart.offset + vertexIndex;
 
-               // Each vertex is usually something like 8 floats: x,y,z,nx,ny,nz,u,v
-               int floatsPerVertex = LibGDXTools.calculateFloatsPerVertex(modelMesh);
-               int numberOfVertices = modelMeshPart.indices.length;
-               totalNumberOfVertices += numberOfVertices;
+               // Extract x, y, z coordinates from the vertex data
+               float x = mesh.getVerticesBuffer().get(actualIndex * floatsPerVertex);
+               float y = mesh.getVerticesBuffer().get(actualIndex * floatsPerVertex + 1);
+               float z = mesh.getVerticesBuffer().get(actualIndex * floatsPerVertex + 2);
 
-               RigidBodyTransform transform = new RigidBodyTransform();
-               Quaternion quaternion = new Quaternion();
-               if (node.translation != null)
-                  LibGDXTools.toEuclid(node.translation, transform.getTranslation());
-               if (node.rotation != null)
-                  LibGDXTools.toEuclid(node.rotation, quaternion);
-               transform.getRotation().set(quaternion);
+               Point3D32 originalVertex = new Point3D32(x, y, z);
+               transform.transform(originalVertex);
 
-               ArrayList<OriginalVertexRecord> originalPartVertices = new ArrayList<>();
-
-               for (short index : modelMeshPart.indices)
-               {
-                  Point3D32 originalVertex = new Point3D32(modelMesh.vertices[floatsPerVertex * index],
-                                                           modelMesh.vertices[floatsPerVertex * index + 1],
-                                                           modelMesh.vertices[floatsPerVertex * index + 2]);
-                  transform.transform(originalVertex);
-
-                  originalPartVertices.add(new OriginalVertexRecord(originalVertex, index));
-                  wholeModelCentroid.add(originalVertex);
-               }
-
-               partRecords.add(new PartRecord(modelMeshPart, modelMesh, transform, floatsPerVertex, numberOfVertices, originalPartVertices));
+               // Add to total count and do centroid calculation
+               totalNumberOfVertices++;
+               wholeModelCentroid.add(originalVertex);
+               originalPartVertices.add(new OriginalVertexRecord(originalVertex, vertexIndex));
             }
+
+            partRecords.add(new PartRecord(meshPart, transform, floatsPerVertex, meshPart.size, originalPartVertices));
          }
       }
+
       if (stopwatch.totalElapsed() > 0.5)
          LogTools.warn("Took {} s to initialize, which is a little long.", stopwatch.lapElapsed());
 
@@ -111,19 +121,17 @@ public class RDXModelInstanceScaler
       centroidFrame.update(transformToParent -> transformToParent.getTranslation().set(wholeModelCentroid));
    }
 
-   public void scale(double scaleFactor)
-   {
-      Model model = scaleForModel(scaleFactor);
-      modelInstance = new RDXModelInstance(model);
-   }
-
-   public Model scaleForModel(double scaleFactor)
+   private void scaleInternal(Model model, double scaleFactor)
    {
       stopwatch.start();
       float scaleFactorFloat = (float) scaleFactor;
 
-      for (PartRecord partRecord : partRecords)
+      for (int j = 0; j < partRecords.size(); j++)
       {
+         PartRecord partRecord = partRecords.get(j);
+         FloatBuffer verticesBuffer = model.meshParts.get(j).mesh.getVerticesBuffer(true);
+         verticesBuffer.clear();
+
          for (int i = 0; i < partRecord.numberOfVertices(); i++)
          {
             OriginalVertexRecord originalVertexRecord = partRecord.originalVertices().get(i);
@@ -137,16 +145,31 @@ public class RDXModelInstanceScaler
 
             partRecord.transform().inverseTransform(scaledVertex);
 
-            LibGDXTools.setFloatVertexPosition(partRecord.modelMesh().vertices, partRecord.floatsPerVertex(), originalVertexRecord.index(), scaledVertex);
+            verticesBuffer.position(i * partRecord.floatsPerVertex);
+            verticesBuffer.put(scaledVertex.getX32());
+            verticesBuffer.put(scaledVertex.getY32());
+            verticesBuffer.put(scaledVertex.getZ32());
          }
       }
 
-      Model model = new Model(modelData);
-
       if (stopwatch.totalElapsed() > 0.1)
          LogTools.warn("Took {} s to scale, which is a little long.", stopwatch.lapElapsed());
+   }
 
-      return model;
+   public void scale(double scaleFactor)
+   {
+      scaleInternal(model, scaleFactor);
+      modelInstance = new RDXModelInstance(model);
+   }
+
+   /**
+    * Scales this Model and returns a deep copy.
+    */
+   public Model scaleForModel(double scaleFactor)
+   {
+      Model copiedModel = LibGDXModelCopier.deepCopy(model);
+      scaleInternal(copiedModel, scaleFactor);
+      return copiedModel;
    }
 
    public Point3D32 getWholeModelCentroid()
