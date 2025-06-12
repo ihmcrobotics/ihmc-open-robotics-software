@@ -99,29 +99,27 @@ public class HeightMapMessageTools
       if (heightMapMessage == null)
          return null;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(4.0, 0.02);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
       int cellsPerAxis = 2 * centerIndex + 1;
 
       Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
 
-      int width = cellsPerAxis;
-      int column = cellsPerAxis;
-      byte[] dataArray = new byte[width * column * Short.BYTES];
+      byte[] dataArray = new byte[cellsPerAxis * cellsPerAxis * Short.BYTES];
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
          double height = heightMapMessage.getHeights().get(i);
          int key = heightMapMessage.getKeys().get(i);
 
-         int xIndex = key % width;
-         int yIndex = key / width;
+         int xIndex = key % cellsPerAxis;
+         int yIndex = key / cellsPerAxis;
 
-         int index = (yIndex * width + xIndex) * Short.BYTES;
+         int index = (yIndex * cellsPerAxis + xIndex) * Short.BYTES;
 
          int cellHeight = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
 
          // Convert short to bytes (little-endian)
-         dataArray[index]     = (byte) (cellHeight & 0xFF);
+         dataArray[index] = (byte) (cellHeight & 0xFF);
          dataArray[index + 1] = (byte) ((cellHeight >> 8) & 0xFF);
       }
 
@@ -157,7 +155,11 @@ public class HeightMapMessageTools
       }
    }
 
-   public static void toMessage(Mat heightMapMat, Point3D heightMapCenter, float widthInMeters, float cellSizeInMeters, HeightMapMessage messageToPack)
+   public static void toMessage(Mat heightMapDataForMessage,
+                                HeightMapMessage messageToPack,
+                                Point3D heightMapCenter,
+                                double widthInMeters,
+                                double cellSizeInMeters)
    {
       clear(messageToPack);
 
@@ -166,21 +168,21 @@ public class HeightMapMessageTools
       messageToPack.setGridCenterX(heightMapCenter.getX());
       messageToPack.setGridCenterY(heightMapCenter.getY());
 
+      // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       // Make sure Mat type is correct
-      if (heightMapMat.type() != opencv_core.CV_32FC1)
+      if (heightMapDataForMessage.type() != opencv_core.CV_32FC1)
          throw new IllegalArgumentException("Expected CV_32FC1 Mat");
 
-      FloatBuffer floatBuffer = heightMapMat.createBuffer(); // or ByteBuffer -> FloatBuffer
+      FloatBuffer floatBuffer = heightMapDataForMessage.createBuffer(); // or ByteBuffer -> FloatBuffer
 
       for (int i = 0; i < totalCells; ++i)
       {
          float height = floatBuffer.get(i);
-
          messageToPack.getKeys().add(i);
          messageToPack.getHeights().add(height);
       }
