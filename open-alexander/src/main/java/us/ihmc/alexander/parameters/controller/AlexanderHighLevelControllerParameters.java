@@ -105,12 +105,12 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          double upperBodyStiffness = 5.0;
          double upperBodyDamping = 8.0;
 
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, EFFORT, 0.0, 2.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, EFFORT, 0.0, 7.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, EFFORT, 0.0, 7.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, EFFORT, 0.0, 7.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 3.0, maxPosError, maxVelError, velScale);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 3.0, maxPosError, maxVelError, velScale);
 
          if (alexanderVersion.hasArm(RobotSide.LEFT) || alexanderVersion.hasArm(RobotSide.RIGHT))
          {
@@ -504,7 +504,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
    public double getTimeToMoveInStandPrep()
    {
       // TODO (20250608 rgriffin) we can decrease this, 10 seconds is really slow.
-      return 10.0;
+      return 6.0;
    }
 
    @Override

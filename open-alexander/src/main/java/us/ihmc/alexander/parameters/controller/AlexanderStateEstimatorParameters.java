@@ -54,7 +54,7 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
       spineJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 30.0 : Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 50.0 : Double.POSITIVE_INFINITY;
 
       orientationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
@@ -248,7 +248,7 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
-      return 0.1;
+      return 0.2;
    }
 
    @Override
