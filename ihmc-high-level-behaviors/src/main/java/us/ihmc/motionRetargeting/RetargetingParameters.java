@@ -29,9 +29,12 @@ public abstract class RetargetingParameters
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         FramePose3D handControlFrameOffset = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
-         handControlFrameOffset.changeFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
-         handControlFrameOffsetsInBodyFrame.put(robotSide, handControlFrameOffset);
+         if (fullRobotModel.getHand(robotSide) != null)
+         {
+            FramePose3D handControlFrameOffset = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
+            handControlFrameOffset.changeFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
+            handControlFrameOffsetsInBodyFrame.put(robotSide, handControlFrameOffset);
+         }
       }
    }
 

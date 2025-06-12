@@ -490,11 +490,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
    {
       RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
-      handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
-      // 0.168 from models/GFE/alexander_unplugged_v5_dual_robotiq_with_head.urdf
-      // 0.126 from debugger on GDXGraphicsObject
-      // Where does the 0.042 come from?
-      handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
+      handGraphicToHandTransform.getRotation().setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
       return handGraphicToHandTransform;
    }
 
