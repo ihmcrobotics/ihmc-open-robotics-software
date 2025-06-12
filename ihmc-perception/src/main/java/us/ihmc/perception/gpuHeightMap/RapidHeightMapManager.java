@@ -103,10 +103,10 @@ public class RapidHeightMapManager
       cameraPose.getTranslation().set(gridCellLocation);
 
       HeightMapMessageTools.toMessage(hostGlobalHeightMap,
+                                      heightMapMessage,
                                       gridCellLocation,
-                                      (float) heightMapParameters.getGlobalWidthInMeters(),
-                                      (float) heightMapParameters.getCellSizeInMeters(),
-                                      heightMapMessage);
+                                      heightMapParameters.getGlobalWidthInMeters(),
+                                      heightMapParameters.getCellSizeInMeters());
 
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
