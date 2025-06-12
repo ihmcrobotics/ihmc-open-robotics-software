@@ -294,7 +294,7 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
          byteArrays.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         var zed2StereoSubscription = ros2Helper.subscribe(PerceptionAPI.ZED2_STEREO_COLOR);
+         var zed2StereoSubscription = ros2Helper.subscribe(PerceptionAPI.ZED_STEREO_COLOR);
          zed2StereoSubscription.addCallback(this::logColorZED2);
       }
 

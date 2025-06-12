@@ -45,7 +45,7 @@ public final class PerceptionAPI
 
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
-   public static final String ZED2_NAME = "zed2";
+   public static final String ZED_NAME = "zed";
    public static final String L515_NAME = "l515";
    public static final String D455_NAME = "d455";
    public static final String REALSENSE_NAME = "realsense";
@@ -152,15 +152,15 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_image").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo").withType(ImageMessage.class).withSuffix("annotated_image");
-   public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
-   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(BEST_EFFORT.withModule(ZED2_NAME)
-                                                                                                                         .withType(ImageMessage.class)
-                                                                                                                         .withSuffix("left_color"),
-                                                                                                              BEST_EFFORT.withModule(ZED2_NAME)
+   public static final ROS2Topic<ImageMessage> ZED_STEREO_COLOR = IHMC_ROOT.withModule(ZED_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED_COLOR_IMAGES = new SideDependentList<>(BEST_EFFORT.withModule(ZED_NAME)
+                                                                                                                        .withType(ImageMessage.class)
+                                                                                                                        .withSuffix("left_color"),
+                                                                                                             BEST_EFFORT.withModule(ZED_NAME)
                                                                                                                          .withType(ImageMessage.class)
                                                                                                                          .withSuffix("right_color"));
-   public static final ROS2Topic<ImageMessage> ZED2_DEPTH = BEST_EFFORT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> ZED2_CUT_OUT_DEPTH = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("cut_out_depth");
+   public static final ROS2Topic<ImageMessage> ZED_DEPTH = BEST_EFFORT.withModule(ZED_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> ZED_CUT_OUT_DEPTH = IHMC_ROOT.withModule(ZED_NAME).withType(ImageMessage.class).withSuffix("cut_out_depth");
    public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
                                                                                       .withSuffix("request")
                                                                                       .withType(IterativeClosestPointRequest.class);
@@ -338,16 +338,16 @@ public final class PerceptionAPI
                                                                                            .withSuffix("depth_filtered");
 
    // ZED
-   private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED2_NAME);
+   private static final ROS2Topic<SRTStreamStatus> SRT_ZED_STREAM_STATUS = SRT_STREAM_STATUS.withPrefix(ZED_NAME);
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_LEFT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_left");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_RIGHT_COLOR_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("color_right");
    public static final ROS2Topic<SRTStreamStatus> SRT_ZED_DEPTH_STREAM_STATUS = SRT_ZED_STREAM_STATUS.withSuffix("depth");
-   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES_SRT = new SideDependentList<>(ZED2_COLOR_IMAGES.get(RobotSide.LEFT).withSuffix("color_left/srt/" + SRT_RELAY_INSTANCE_ID),
-                                                                                                                  ZED2_COLOR_IMAGES.get(RobotSide.RIGHT).withSuffix("color_right/srt/" + SRT_RELAY_INSTANCE_ID));
-   public static final ROS2Topic<ImageMessage> ZED2_DEPTH_SRT = ZED2_DEPTH.withSuffix("depth/" + SRT_RELAY_INSTANCE_ID);
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED_COLOR_IMAGES_SRT = new SideDependentList<>(ZED_COLOR_IMAGES.get(RobotSide.LEFT).withSuffix("color_left/srt/" + SRT_RELAY_INSTANCE_ID),
+                                                                                                                 ZED_COLOR_IMAGES.get(RobotSide.RIGHT).withSuffix("color_right/srt/" + SRT_RELAY_INSTANCE_ID));
+   public static final ROS2Topic<ImageMessage> ZED_DEPTH_SRT = ZED_DEPTH.withSuffix("depth/" + SRT_RELAY_INSTANCE_ID);
 
    public static final Set<ROS2SRTStreamTopicPair> SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS
          = Set.of(new ROS2SRTStreamTopicPair(SRT_REALSENSE_COLOR_STREAM_STATUS, REALSENSE_COLOR_IMAGE_SRT, false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
-                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED2_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false));
+                  new ROS2SRTStreamTopicPair(SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZED_COLOR_IMAGES_SRT.get(RobotSide.LEFT), false),
+                  new ROS2SRTStreamTopicPair(SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZED_COLOR_IMAGES_SRT.get(RobotSide.RIGHT), false));
 }
