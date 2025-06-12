@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,13 +21,13 @@ public class RDXInteractableHighlightModel implements RenderableProvider
 
    public RDXInteractableHighlightModel(String modelFileName)
    {
-      this(RDXModelLoader.loadModelData(modelFileName));
+      this(RDXModelLoader.load(modelFileName));
    }
 
-   public RDXInteractableHighlightModel(ModelData modelData)
+   public RDXInteractableHighlightModel(Model model)
    {
       double startingScaleFactor = 1.01;
-      scaledModelInstance = new RDXModelInstanceScaler(modelData);
+      scaledModelInstance = new RDXModelInstanceScaler(model);
       scaledModelInstance.scale(startingScaleFactor);
       setTransparency(0.5);
    }

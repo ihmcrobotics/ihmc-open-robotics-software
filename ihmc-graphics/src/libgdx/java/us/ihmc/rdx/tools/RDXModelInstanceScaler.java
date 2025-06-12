@@ -1,6 +1,7 @@
 package us.ihmc.rdx.tools;
 
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -21,6 +22,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 import java.util.ArrayList;
 
 /**
@@ -43,8 +45,7 @@ public class RDXModelInstanceScaler
    private record OriginalVertexRecord(Point3D32 originalVertex, int index) { }
    private record PartRecord(MeshPart meshPart,
                              RigidBodyTransform transform,
-                             int floatsPerVertex,
-                             int numberOfVertices,
+                             int vertexSize,
                              ArrayList<OriginalVertexRecord> originalVertices) { }
    private final ArrayList<PartRecord> partRecords = new ArrayList<>();
    private ModelInstance modelInstance;
@@ -60,7 +61,12 @@ public class RDXModelInstanceScaler
 
    public RDXModelInstanceScaler(Model model)
    {
-      this.model = LibGDXModelCopier.deepCopy(model);
+      // Deep copy the model so we can modify it without affecting the original model,
+      // which we only load one of each to save resources.
+//      this.model = LibGDXModelCopier.deepCopy(model);
+      this.model = model;
+
+      modelInstance = new RDXModelInstance(model);
 
       stopwatch.start();
 
@@ -88,29 +94,38 @@ public class RDXModelInstanceScaler
 
             // Iterate over all vertices, creating a Point3D32 for each in the loop
             // Each vertex is usually something like 8 floats: x,y,z,nx,ny,nz,u,v
-            int floatsPerVertex = LibGDXTools.calculateFloatsPerVertex(meshPart);
+            int vertexSize = 0;
+            for (VertexAttribute attribute : meshPart.mesh.getVertexAttributes())
+            {
+               vertexSize += attribute.getSizeInBytes();
+            }
+            vertexSize /= Float.BYTES;
+            FloatBuffer verticesBuffer = mesh.getVerticesBuffer(false);
 
             // Iterate over all vertices, creating a Point3D32 for each in the loop
             ArrayList<OriginalVertexRecord> originalPartVertices = new ArrayList<>();
-            for (int vertexIndex = 0; vertexIndex < meshPart.size; vertexIndex++)
+            int numVertices = mesh.getNumVertices();
+            for (int i = 0; i < numVertices; i++)
             {
-               int actualIndex = meshPart.offset + vertexIndex;
-
                // Extract x, y, z coordinates from the vertex data
-               float x = mesh.getVerticesBuffer().get(actualIndex * floatsPerVertex);
-               float y = mesh.getVerticesBuffer().get(actualIndex * floatsPerVertex + 1);
-               float z = mesh.getVerticesBuffer().get(actualIndex * floatsPerVertex + 2);
+               float x = verticesBuffer.get(i * vertexSize);
+               float y = verticesBuffer.get(i * vertexSize + 1);
+               float z = verticesBuffer.get(i * vertexSize + 2);
 
                Point3D32 originalVertex = new Point3D32(x, y, z);
+
+               if (System.nanoTime() % 10 == 0)
+                  LogTools.info("Original vertex: {}", originalVertex.toString());
+
                transform.transform(originalVertex);
 
                // Add to total count and do centroid calculation
                totalNumberOfVertices++;
                wholeModelCentroid.add(originalVertex);
-               originalPartVertices.add(new OriginalVertexRecord(originalVertex, vertexIndex));
+               originalPartVertices.add(new OriginalVertexRecord(originalVertex, i));
             }
 
-            partRecords.add(new PartRecord(meshPart, transform, floatsPerVertex, meshPart.size, originalPartVertices));
+            partRecords.add(new PartRecord(meshPart, transform, vertexSize, originalPartVertices));
          }
       }
 
@@ -129,10 +144,16 @@ public class RDXModelInstanceScaler
       for (int j = 0; j < partRecords.size(); j++)
       {
          PartRecord partRecord = partRecords.get(j);
-         FloatBuffer verticesBuffer = model.meshParts.get(j).mesh.getVerticesBuffer(true);
+         MeshPart meshPart = model.meshParts.get(j);
+         Mesh mesh = meshPart.mesh; // To allow scaling a clone
+//         ShortBuffer indicesBuffer = mesh.getIndicesBuffer(false);
+         FloatBuffer verticesBuffer = mesh.getVerticesBuffer(true);
          verticesBuffer.clear();
 
-         for (int i = 0; i < partRecord.numberOfVertices(); i++)
+         float[] updatedVertices = new float[mesh.getNumVertices() * partRecord.vertexSize];
+         updatedVertices = mesh.getVertices(updatedVertices);
+
+         for (int i = 0; i < mesh.getNumVertices(); i++)
          {
             OriginalVertexRecord originalVertexRecord = partRecord.originalVertices().get(i);
 
@@ -145,11 +166,21 @@ public class RDXModelInstanceScaler
 
             partRecord.transform().inverseTransform(scaledVertex);
 
-            verticesBuffer.position(i * partRecord.floatsPerVertex);
-            verticesBuffer.put(scaledVertex.getX32());
-            verticesBuffer.put(scaledVertex.getY32());
-            verticesBuffer.put(scaledVertex.getZ32());
+            if (System.nanoTime() % 10 == 0)
+               LogTools.info("Scaled vertex: {}", scaledVertex.toString());
+
+//            short index = indicesBuffer.get(meshPart.offset + i);
+
+            updatedVertices[i * partRecord.vertexSize] = scaledVertex.getX32();
+            updatedVertices[i * partRecord.vertexSize + 1] = scaledVertex.getX32();
+            updatedVertices[i * partRecord.vertexSize + 1] = scaledVertex.getX32();
+//            verticesBuffer.position(i * partRecord.vertexSize);
+//            verticesBuffer.put(scaledVertex.getX32());
+//            verticesBuffer.put(scaledVertex.getY32());
+//            verticesBuffer.put(scaledVertex.getZ32());
          }
+
+         mesh.updateVertices(0, updatedVertices);
       }
 
       if (stopwatch.totalElapsed() > 0.1)
@@ -163,9 +194,10 @@ public class RDXModelInstanceScaler
    }
 
    /**
-    * Scales this Model and returns a deep copy.
+    * First deep copies the held model, then scales and returns it,
+    * so nothing else is affected.
     */
-   public Model scaleForModel(double scaleFactor)
+   public Model getScaledDeepCopy(double scaleFactor)
    {
       Model copiedModel = LibGDXModelCopier.deepCopy(model);
       scaleInternal(copiedModel, scaleFactor);

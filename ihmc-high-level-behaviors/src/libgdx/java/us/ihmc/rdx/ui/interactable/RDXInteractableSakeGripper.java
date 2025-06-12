@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.interactable;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
@@ -79,11 +78,11 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
    {
       this.referenceFrameHand = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                        transformToParentToModify);
-      ModelData handModel = RDXModelLoader.loadModelData("environmentObjects/sakeGripper/sakePalm.g3dj");
+      Model handModel = RDXModelLoader.load("environmentObjects/sakeGripper/sakePalm.g3dj");
       interactableHandFrameModel.create(referenceFrameHand, transformToParentToModify, panel3D, handModel, this::calculateClosestCollision);
       interactableHandFrameModel.getModelInstance().setColor(color);
 
-      ModelData fingerModel = RDXModelLoader.loadModelData("environmentObjects/sakeGripper/sakeFinger.g3dj");
+      Model fingerModel = RDXModelLoader.load("environmentObjects/sakeGripper/sakeFinger.g3dj");
 
       this.fingersModel = new Model[NUMBER_OF_FINGERS];
       this.fingersModelInstances = new RDXModelInstance[NUMBER_OF_FINGERS];
@@ -91,7 +90,7 @@ public class RDXInteractableSakeGripper implements RDXInteractableAffordanceTemp
       this.fingersTransforms = new RigidBodyTransform[NUMBER_OF_FINGERS];
       for (int i = 0; i < NUMBER_OF_FINGERS; i++)
       {
-         fingersModel[i] = new Model(fingerModel);
+         fingersModel[i] = fingerModel;
          fingersModelInstances[i] = new RDXModelInstance(fingersModel[i]);
          fingersModelInstances[i].setColor(color);
          fingersTransforms[i] = new RigidBodyTransform(FINGERS_TO_PALM_CLOSE[i]);

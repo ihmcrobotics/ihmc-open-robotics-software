@@ -130,7 +130,7 @@ public class RDXVisualTools
                if (model == null)
                {
                   RDXModelInstanceScaler scaler = new RDXModelInstanceScaler(modelFileName);
-                  model = scaler.scaleForModel(scaleFactor);
+                  model = scaler.getScaledDeepCopy(scaleFactor);
                   scaleToModelMap.put(scaleFactor, model);
                }
             }

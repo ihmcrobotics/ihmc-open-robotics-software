@@ -527,16 +527,6 @@ public class LibGDXTools
       return vertexSize / Float.BYTES;
    }
 
-   public static int calculateFloatsPerVertex(MeshPart meshPart)
-   {
-      int vertexSize = 0;
-      for (VertexAttribute attribute : meshPart.mesh.getVertexAttributes())
-      {
-         vertexSize += attribute.getSizeInBytes();
-      }
-      return vertexSize / Float.BYTES;
-   }
-
    public static void setFloatVertexPosition(float[] vertices, int floatsPerVertex, int vertexIndex, Tuple3DReadOnly position)
    {
       vertices[floatsPerVertex * vertexIndex]     = position.getX32();

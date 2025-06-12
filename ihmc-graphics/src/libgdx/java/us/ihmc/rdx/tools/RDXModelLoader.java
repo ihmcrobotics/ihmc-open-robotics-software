@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.UBJsonReader;
@@ -47,9 +46,9 @@ public class RDXModelLoader
    /**
     * No synchronization and will load data from file every time.
     */
-   public static ModelData loadModelData(String modelFileName)
+   public static Model loadForce(String modelFileName)
    {
-      return modelLoader.loadModelDataInternal(modelFileName);
+      return modelLoader.loadModelInternal(modelFileName);
    }
 
    public static void destroy()
@@ -71,13 +70,9 @@ public class RDXModelLoader
          model = loadedModels.get(modelFileName);
          if (model == null)
          {
-            ModelData modelData = loadModelDataInternal(requestedModelFileName);
-            if (modelData != null)
-            {
-               model = new Model(modelData);
-               ensureModelHasDiffuseTextureAttribute(modelFileName, model);
-               loadedModels.put(modelFileName, model);
-            }
+            model = loadModelInternal(requestedModelFileName);
+            ensureModelHasDiffuseTextureAttribute(modelFileName, model);
+            loadedModels.put(modelFileName, model);
          }
          else
          {
@@ -100,14 +95,14 @@ public class RDXModelLoader
       return model;
    }
 
-   private ModelData loadModelDataInternal(String modelFileName)
+   private Model loadModelInternal(String modelFileName)
    {
       LogTools.debug("Loading {}", modelFileName);
 
       String requestedModelFileName = modelFileName;
       boolean shouldPrintWarnings = !printedWarnings.contains(requestedModelFileName);
      
-      ModelData modelData = null;
+      Model model = null;
       try
       {
          modelFileName = useABetterFormatIfAvailable(modelFileName);
@@ -116,32 +111,33 @@ public class RDXModelLoader
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
             SceneAsset sceneAsset = new GLBLoader().load(fileHandle, true);
-            modelData = new ModelToModelDataConverter(sceneAsset.scene.model).getModelData();
+            model = sceneAsset.scene.model;
          }
          else if (modelFileName.endsWith(".gltf"))
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
             SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
-            modelData = new ModelToModelDataConverter(sceneAsset.scene.model).getModelData();
+            model = sceneAsset.scene.model;
          }
          else if (modelFileName.endsWith(".g3dj"))
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
-            modelData = new G3dModelLoader(new JsonReader()).loadModelData(fileHandle);
+            model = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
          }
          else if (modelFileName.endsWith(".g3db"))
          {
             FileHandle fileHandle = Gdx.files.internal(modelFileName);
-            modelData = new G3dModelLoader(new UBJsonReader()).loadModelData(fileHandle);
+            model = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
          }
          else
          {
             if (shouldPrintWarnings)
-               LogTools.warn("Using Assimp to load {}. It is recommended to convert to G3DJ for more reliable and faster loading.", modelFileName);
-            modelData = new RDXAssimpModelLoader(modelFileName).loadModelData();
+               LogTools.warn("Using Assimp to load {}. It is recommended to convert to glTF binary (*.glb) for "
+                             + "better rendering and more reliable and faster loading.", modelFileName);
+            model = new RDXAssimpModelLoader(modelFileName).load();
          }
 
-         long numberOfVertices = LibGDXTools.countVertices(modelData);
+         long numberOfVertices = LibGDXTools.countVertices(model);
          LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
 
          if (shouldPrintWarnings && numberOfVertices > 15000)
@@ -158,7 +154,7 @@ public class RDXModelLoader
 
       printedWarnings.add(requestedModelFileName);
 
-      return modelData;
+      return model;
    }
 
    public static void ensureModelHasDiffuseTextureAttribute(String modelFileName, Model model)
