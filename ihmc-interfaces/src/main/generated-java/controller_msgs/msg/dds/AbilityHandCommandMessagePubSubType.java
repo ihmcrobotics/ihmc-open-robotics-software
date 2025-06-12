@@ -2,20 +2,20 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "AbilityHandStatusMessage" defined in "AbilityHandStatusMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "AbilityHandCommandMessage" defined in "AbilityHandCommandMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from AbilityHandStatusMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit AbilityHandStatusMessage_.idl instead.
+* This file was automatically generated from AbilityHandCommandMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit AbilityHandCommandMessage_.idl instead.
 *
 */
-public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AbilityHandStatusMessage>
+public class AbilityHandCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AbilityHandCommandMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::AbilityHandStatusMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::AbilityHandCommandMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "27cec22403c0ca01442b3302dc0318d6b10fb82a09c8558266af43c66083b818";
+   		return "0fe1b49534b2ee8af989ac2e7430877fc3c225bee0816563abb63886aa34e529";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.AbilityHandStatusMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.AbilityHandCommandMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AbilityHandStatusMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AbilityHandCommandMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -60,12 +60,12 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AbilityHandStatusMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AbilityHandCommandMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AbilityHandStatusMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AbilityHandCommandMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -77,7 +77,7 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.AbilityHandStatusMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.AbilityHandCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_9(data.getRobotSide());
 
@@ -88,7 +88,7 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    }
 
-   public static void read(controller_msgs.msg.dds.AbilityHandStatusMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.AbilityHandCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setRobotSide(cdr.read_type_9());
       	
@@ -102,28 +102,28 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.AbilityHandStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.AbilityHandCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_f("finger_positions_degrees", data.getFingerPositionsDegrees());
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AbilityHandStatusMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AbilityHandCommandMessage data)
    {
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_f("finger_positions_degrees", data.getFingerPositionsDegrees());
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.AbilityHandStatusMessage src, controller_msgs.msg.dds.AbilityHandStatusMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.AbilityHandCommandMessage src, controller_msgs.msg.dds.AbilityHandCommandMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.AbilityHandStatusMessage createData()
+   public controller_msgs.msg.dds.AbilityHandCommandMessage createData()
    {
-      return new controller_msgs.msg.dds.AbilityHandStatusMessage();
+      return new controller_msgs.msg.dds.AbilityHandCommandMessage();
    }
    @Override
    public int getTypeSize()
@@ -137,24 +137,24 @@ public class AbilityHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicD
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.AbilityHandStatusMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.AbilityHandCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.AbilityHandStatusMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.AbilityHandCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.AbilityHandStatusMessage src, controller_msgs.msg.dds.AbilityHandStatusMessage dest)
+   public void copy(controller_msgs.msg.dds.AbilityHandCommandMessage src, controller_msgs.msg.dds.AbilityHandCommandMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public AbilityHandStatusMessagePubSubType newInstance()
+   public AbilityHandCommandMessagePubSubType newInstance()
    {
-      return new AbilityHandStatusMessagePubSubType();
+      return new AbilityHandCommandMessagePubSubType();
    }
 }

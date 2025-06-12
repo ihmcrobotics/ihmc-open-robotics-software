@@ -7,6 +7,6 @@ int8 ROBOT_SIDE_RIGHT=1
 # Field default value 255
 int8 robot_side
 
-float64[] desired_finger_positions
+float32[] finger_positions_degrees
 
 

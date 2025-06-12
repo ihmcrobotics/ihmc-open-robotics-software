@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredCommandMessage> implements Settable<AbilityHandDesiredCommandMessage>, EpsilonComparable<AbilityHandDesiredCommandMessage>
+public class AbilityHandCommandMessage extends Packet<AbilityHandCommandMessage> implements Settable<AbilityHandCommandMessage>, EpsilonComparable<AbilityHandCommandMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -14,27 +14,27 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
             * Specifies the side of the robot of the hand being referred to
             */
    public byte robot_side_ = (byte) 255;
-   public double[] desired_finger_positions_;
+   public float[] finger_positions_degrees_;
 
-   public AbilityHandDesiredCommandMessage()
+   public AbilityHandCommandMessage()
    {
-      desired_finger_positions_ = new double[6];
+      finger_positions_degrees_ = new float[6];
 
    }
 
-   public AbilityHandDesiredCommandMessage(AbilityHandDesiredCommandMessage other)
+   public AbilityHandCommandMessage(AbilityHandCommandMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(AbilityHandDesiredCommandMessage other)
+   public void set(AbilityHandCommandMessage other)
    {
       robot_side_ = other.robot_side_;
 
-      for(int i1 = 0; i1 < desired_finger_positions_.length; ++i1)
+      for(int i1 = 0; i1 < finger_positions_degrees_.length; ++i1)
       {
-            desired_finger_positions_[i1] = other.desired_finger_positions_[i1];
+            finger_positions_degrees_[i1] = other.finger_positions_degrees_[i1];
 
       }
 
@@ -56,34 +56,34 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
    }
 
 
-   public double[] getDesiredFingerPositions()
+   public float[] getFingerPositionsDegrees()
    {
-      return desired_finger_positions_;
+      return finger_positions_degrees_;
    }
 
 
-   public static Supplier<AbilityHandDesiredCommandMessagePubSubType> getPubSubType()
+   public static Supplier<AbilityHandCommandMessagePubSubType> getPubSubType()
    {
-      return AbilityHandDesiredCommandMessagePubSubType::new;
+      return AbilityHandCommandMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return AbilityHandDesiredCommandMessagePubSubType::new;
+      return AbilityHandCommandMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(AbilityHandDesiredCommandMessage other, double epsilon)
+   public boolean epsilonEquals(AbilityHandCommandMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
-      for(int i3 = 0; i3 < desired_finger_positions_.length; ++i3)
+      for(int i3 = 0; i3 < finger_positions_degrees_.length; ++i3)
       {
-                if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_finger_positions_[i3], other.desired_finger_positions_[i3], epsilon)) return false;
+                if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.finger_positions_degrees_[i3], other.finger_positions_degrees_[i3], epsilon)) return false;
       }
 
 
@@ -95,15 +95,15 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof AbilityHandDesiredCommandMessage)) return false;
+      if(!(other instanceof AbilityHandCommandMessage)) return false;
 
-      AbilityHandDesiredCommandMessage otherMyClass = (AbilityHandDesiredCommandMessage) other;
+      AbilityHandCommandMessage otherMyClass = (AbilityHandCommandMessage) other;
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
-      for(int i5 = 0; i5 < desired_finger_positions_.length; ++i5)
+      for(int i5 = 0; i5 < finger_positions_degrees_.length; ++i5)
       {
-                if(this.desired_finger_positions_[i5] != otherMyClass.desired_finger_positions_[i5]) return false;
+                if(this.finger_positions_degrees_[i5] != otherMyClass.finger_positions_degrees_[i5]) return false;
 
       }
 
@@ -115,11 +115,11 @@ public class AbilityHandDesiredCommandMessage extends Packet<AbilityHandDesiredC
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("AbilityHandDesiredCommandMessage {");
+      builder.append("AbilityHandCommandMessage {");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
-      builder.append("desired_finger_positions=");
-      builder.append(java.util.Arrays.toString(this.desired_finger_positions_));
+      builder.append("finger_positions_degrees=");
+      builder.append(java.util.Arrays.toString(this.finger_positions_degrees_));
       builder.append("}");
       return builder.toString();
    }

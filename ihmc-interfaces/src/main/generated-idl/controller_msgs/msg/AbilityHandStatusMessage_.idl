@@ -22,7 +22,7 @@ module controller_msgs
          */
         @defaultValue(value=255)
         octet robot_side;
-        double finger_positions[6];
+        float finger_positions_degrees[6];
       };
     };
   };

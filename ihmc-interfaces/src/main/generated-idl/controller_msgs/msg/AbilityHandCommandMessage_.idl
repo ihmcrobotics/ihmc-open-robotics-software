@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__AbilityHandDesiredCommandMessage__idl__
-#define __controller_msgs__msg__AbilityHandDesiredCommandMessage__idl__
+#ifndef __controller_msgs__msg__AbilityHandCommandMessage__idl__
+#define __controller_msgs__msg__AbilityHandCommandMessage__idl__
 
 module controller_msgs
 {
@@ -14,15 +14,15 @@ module controller_msgs
       1;
 
 
-      @TypeCode(type="controller_msgs::msg::dds_::AbilityHandDesiredCommandMessage_")
-      struct AbilityHandDesiredCommandMessage
+      @TypeCode(type="controller_msgs::msg::dds_::AbilityHandCommandMessage_")
+      struct AbilityHandCommandMessage
       {
         /**
          * Specifies the side of the robot of the hand being referred to
          */
         @defaultValue(value=255)
         octet robot_side;
-        double desired_finger_positions[6];
+        float finger_positions_degrees[6];
       };
     };
   };
