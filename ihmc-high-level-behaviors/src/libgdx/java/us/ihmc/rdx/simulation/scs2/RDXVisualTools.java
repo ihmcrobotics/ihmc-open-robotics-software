@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import gnu.trove.map.hash.TDoubleObjectHashMap;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
@@ -170,9 +171,25 @@ public class RDXVisualTools
       {
          for (Material material : modelInstance.materials)
          {
-            Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
-            material.set(PBRColorAttribute.createBaseColorFactor(color));
-            if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+            boolean definitionSpecifiesColor = materialDefinition.getDiffuseColor() != null;
+            boolean definitionSpecifiesAlpha = materialDefinition.getDiffuseColor().getAlpha() < 1.0;
+            boolean isABlenderExport = material.has(PBRFloatAttribute.Metallic) || material.has(PBRFloatAttribute.Roughness);
+            boolean materialHasPBRColor = material.has(PBRColorAttribute.BaseColorFactor);
+
+            if (!materialHasPBRColor) // To start, fix material if needed
+            {
+               Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
+               material.set(PBRColorAttribute.createBaseColorFactor(color));
+            }
+
+            boolean useDefinitionColor = definitionSpecifiesAlpha || !isABlenderExport; // Keep color if we are opaque and from Blender
+            if (definitionSpecifiesColor && useDefinitionColor)
+            {
+               PBRColorAttribute pbrColorAttribute = material.get(PBRColorAttribute.class, PBRColorAttribute.BaseColorFactor);
+               pbrColorAttribute.color.set(toColor(materialDefinition.getDiffuseColor()));
+            }
+
+            if (definitionSpecifiesAlpha)
             {
                material.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
             }
@@ -206,7 +223,7 @@ public class RDXVisualTools
 
    public static Color toColor(ColorDefinition colorDefinition)
    {
-      return toColor(colorDefinition, DEFAULT_COLOR);
+      return LibGDXTools.toLibGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
    }
 
    public static Color toColor(ColorDefinition colorDefinition, Color defaultValue)
@@ -214,7 +231,7 @@ public class RDXVisualTools
       if (colorDefinition == null)
          return defaultValue;
       else
-         return LibGDXTools.toLibGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
+         return toColor(colorDefinition);
    }
 
    // TODO: Figure out how to make this general to all things that extend RigidBody

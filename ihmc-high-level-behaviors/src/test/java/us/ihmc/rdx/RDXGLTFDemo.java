@@ -45,6 +45,9 @@ public class RDXGLTFDemo
             load = LibGDXModelCopier.deepCopy(load);
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(load));
 
+            Model torsoModel = RDXModelLoader.load("models/torso_link.glb");
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(torsoModel));
+
             FileHandle fileHandle = Gdx.files.internal("models/BoomBox.gltf");
             SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
             model = sceneAsset.scene.model;
