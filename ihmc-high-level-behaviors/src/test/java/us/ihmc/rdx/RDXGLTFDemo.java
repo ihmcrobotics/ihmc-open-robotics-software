@@ -2,8 +2,10 @@ package us.ihmc.rdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import imgui.ImGui;
 import imgui.type.ImFloat;
@@ -22,6 +24,7 @@ public class RDXGLTFDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat currentScale = new ImFloat(10.0f);
+   private final ImFloat opacity = new ImFloat(1.0f);
    private Model model;
    ModelInstance modelInstance;
 
@@ -82,6 +85,17 @@ public class RDXGLTFDemo
          Matrix4 transform = modelInstance.transform;
          modelInstance = new ModelInstance(model);
          modelInstance.transform.set(transform);
+      }
+
+      if (ImGui.sliderFloat(labels.get("Opacity"), opacity.getData(), 0.0f, 1.0f))
+      {
+         for (Material material : modelInstance.materials)
+         {
+            if (opacity.get() < 1.0f)
+               material.set(new BlendingAttribute(true, opacity.get()));
+            else
+               material.remove(BlendingAttribute.Type);
+         }
       }
    }
 
