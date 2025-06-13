@@ -6,17 +6,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
 public class HeightMapMessageToolsTest
 {
+   private final int iterations = 10000;
+   private final HeightMapParameters heightMapParameters = new HeightMapParameters();
+
    @Test
    public void testSpeedUnpackingHeightMapMessage()
    {
       HeightMapMessage heightMapMessage = new HeightMapMessage();
-      HeightMapParameters heightMapParameters = new HeightMapParameters();
 
       float widthInMeters = 10.0f;
       float cellResolution = 0.02f;
@@ -34,11 +37,11 @@ public class HeightMapMessageToolsTest
 
       HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution);
 
-      int iterations = 1000;
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
+         // Inside the try-with-resouce to avoid memory leak
          try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, heightMapParameters))
          {
             // Do nothing
@@ -55,6 +58,47 @@ public class HeightMapMessageToolsTest
       float expectedTimeTakenToPackHeightMapMessageFromAMat = 2.0f;
       Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
                             "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
+   }
+
+   /**
+    * The reason this test is deprecated is because the method {@link HeightMapMessageTools#toMessage(HeightMapData)} should not be used
+    * This test shows how slow it takes to convert to a message with that method. We wnat this to happen as fast as possible
+    */
+   @Deprecated
+   @Test
+   public void testSpeedOfPackingHeightMapMessageWithHeightMapData()
+   {
+      float widthInMeters = 10.0f;
+      float cellResolution = 0.02f;
+
+      HeightMapData heightMapData = new HeightMapData(cellResolution, widthInMeters, 0.0, 0.0);
+
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      for (int i = 0; i < totalCells; i++)
+      {
+         heightMapData.setHeightAt(i, 1.0f);
+      }
+
+      long startTime = System.nanoTime();
+
+      for (int i = 0; i < iterations; i++)
+      {
+         HeightMapMessageTools.toMessage(heightMapData);
+      }
+
+      long endTime = System.nanoTime();
+      double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
+      double averageTimePerIteration = totalTimeMillis / iterations;
+
+      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+
+      // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
+//      float expectedTimeTakenToPackHeightMapMessageFromAMat = 5.0f;
+//      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
+//                            "Actual was: " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
    }
 
    /**
@@ -79,7 +123,6 @@ public class HeightMapMessageToolsTest
          }
       }
 
-      int iterations = 500;
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
@@ -96,6 +139,6 @@ public class HeightMapMessageToolsTest
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
       float expectedTimeTakenToPackHeightMapMessageFromAMat = 3.0f;
       Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
-                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
+                            "Actual was: " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
    }
 }

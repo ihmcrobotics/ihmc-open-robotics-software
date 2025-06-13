@@ -1,6 +1,9 @@
 package us.ihmc.perception.heightMap;
 
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
@@ -135,5 +138,69 @@ public class HeightMapTools
          throw new RuntimeException("Shouldn't return black.)");
 
       return new double[] {r, g, b};
+   }
+
+   public static void convertToHeightMapData(Mat heightMapPointer,
+                                             HeightMapData heightMapDataToPack,
+                                             Point3D gridCenter,
+                                             float widthInMeters,
+                                             float cellSizeInMeters,
+                                             HeightMapParameters heightMapParameters)
+   {
+      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
+
+      // Read data into byte[]
+      byte[] data = new byte[Short.BYTES * totalCells];
+      heightMapPointer.data().get(data);
+
+      // Put height values into HeightMapData object
+      for (int i = 0; i < totalCells; ++i)
+      {
+         // Get the start index of the bytes for a short
+         int dataIndex = Short.BYTES * i;
+
+         // Get the most and least significant bits, combine into integer
+         int major = (data[dataIndex + 1] << 8) & 0xFF00;
+         int minor = data[dataIndex] & 0x00FF;
+         int height = major | minor;
+
+         // Calculate cell height
+         float cellHeight = (float) (((float) height / heightMapParameters.getHeightScaleFactor()) - heightMapParameters.getHeightOffset());
+
+         // Put it into the HeightMapData object
+         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
+         heightMapDataToPack.setHeightAt(key, cellHeight);
+      }
+   }
+
+   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   {
+      int cellsPerAxis = heightMapData.getCellsPerAxis();
+      int centerIndex = heightMapData.getCenterIndex();
+
+      // Create a new Mat object to hold the height map data
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            double cellHeight = heightMapData.getHeightAt(key);
+
+            // Reverse the height calculation to get the raw height value
+            int height = (int) ((cellHeight + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+
+            // Store the height value in the Mat object
+            heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
+         }
+      }
+
+      return heightMapMat;
    }
 }
