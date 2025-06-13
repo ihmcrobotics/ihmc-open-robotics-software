@@ -190,7 +190,7 @@ public class RDXVRModeManager
 
    public void update()
    {
-      vrManager.getTeleporter().setEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      vrManager.getTeleporter().setBButtonEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
 
       if (kinematicsStreamingMode != null)
       {
