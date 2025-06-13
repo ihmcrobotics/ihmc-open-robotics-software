@@ -12,10 +12,12 @@ import imgui.type.ImFloat;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.LibGDXModelCopier;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
@@ -57,6 +59,20 @@ public class RDXGLTFDemo
             LibGDXTools.toLibGDX(transform, modelInstance.transform);
 
             baseUI.getPrimaryScene().addRenderableProvider((renderables, pool) -> modelInstance.getRenderables(renderables, pool));
+
+            Model zedModel = RDXModelLoader.load("environmentObjects/ZEDMini/ZEDMini.glb");
+            float zedScale = 1.0f;
+            zedModel.nodes.get(0).scale.set(zedScale, zedScale, zedScale);
+            RDXModelInstance zedInstance = new RDXModelInstance(zedModel);
+            zedInstance.setPositionInWorldFrame(new Point3D(1.0, 1.0, 1.0));
+            baseUI.getPrimaryScene().addModelInstance(zedInstance);
+
+            Model rsModel = RDXModelLoader.load("environmentObjects/d435Sensor/D435.g3dj");
+            float rsScale = 5.0f;
+            rsModel.nodes.get(0).scale.set(rsScale, rsScale, rsScale);
+            RDXModelInstance rsInstance = new RDXModelInstance(rsModel);
+            rsInstance.setPositionInWorldFrame(new Point3D(-1.0, 1.0, 1.0));
+            baseUI.getPrimaryScene().addModelInstance(rsInstance);
 
             baseUI.getImGuiPanelManager().addPanel("Settings", RDXGLTFDemo.this::renderImGuiWidgets);
          }
