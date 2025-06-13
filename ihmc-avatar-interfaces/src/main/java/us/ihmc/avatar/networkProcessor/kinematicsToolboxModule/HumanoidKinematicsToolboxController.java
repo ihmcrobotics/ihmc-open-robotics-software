@@ -170,7 +170,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
+   private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -231,12 +231,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
 
-      stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
-                                                                            multiContactRegionCalculator,
-                                                                            desiredFullRobotModel,
-                                                                            isUpperBodyLoadBearing,
-                                                                            getCenterOfMassSafeMargin(),
-                                                                            registry);
+      if (desiredFullRobotModel.getChest() != null &&
+          desiredFullRobotModel.getHand(RobotSide.LEFT) != null &&
+          desiredFullRobotModel.getHand(RobotSide.RIGHT) != null)
+      {
+         stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
+                                                                               multiContactRegionCalculator,
+                                                                               desiredFullRobotModel,
+                                                                               isUpperBodyLoadBearing,
+                                                                               getCenterOfMassSafeMargin(),
+                                                                               registry);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -496,7 +501,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
+         if (stabilityCostCalculator != null)
+            stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -816,7 +822,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
-      stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
+      if (stabilityCostCalculator != null)
+         stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
    }
 
    @Override
