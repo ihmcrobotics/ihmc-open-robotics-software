@@ -13,7 +13,7 @@ public class RDXInteractableZEDMini extends RDXInteractableSensor
    private static final double LENGTH = 0.124;
    private static final double RADIUS = 0.0157;
    private final CylinderRayIntersection cylinderRayIntersection = new CylinderRayIntersection();
-   private final Point3D offset = new Point3D(RADIUS, 0.0, 0.0);
+   private final Point3D offset = new Point3D(0.0, 0.0, 0.0);
 
    public RDXInteractableZEDMini(RDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
