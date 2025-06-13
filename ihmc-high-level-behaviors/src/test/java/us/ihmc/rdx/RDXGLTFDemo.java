@@ -4,15 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.math.Matrix4;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.LibGDXModelCopier;
-import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.tools.RDXModelInstanceScaler;
+import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
@@ -20,10 +21,9 @@ public class RDXGLTFDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXModelInstanceScaler scaler;
-   private ModelInstance modelInstance2;
-//   private float currentScale = 10.0f;
-   private ImFloat currentScale = new ImFloat(10.0f);
+   private final ImFloat currentScale = new ImFloat(10.0f);
+   private Model model;
+   ModelInstance modelInstance;
 
    public RDXGLTFDemo()
    {
@@ -38,43 +38,29 @@ public class RDXGLTFDemo
 
             Model load = RDXModelLoader.load("environmentObjects/flatGround/FlatGround.g3dj");
             load = LibGDXModelCopier.deepCopy(load);
-            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(load));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(load));
 
             FileHandle fileHandle = Gdx.files.internal("models/BoomBox.gltf");
             SceneAsset sceneAsset = new GLTFLoader().load(fileHandle, true);
-            //            ModelInstance modelInstance = new ModelInstance(LibGDXModelCopier.deepCopy(sceneAsset.scene.model));
-            ////            ModelInstance modelInstance = new ModelInstance(RDXModelLoader.load("models/BoomBox.gltf"));
-            //            modelInstance.transform.setToRotationRad(1.0f, 0.0f, 0.0f, (float) Math.PI / 2.0f);
-            //            modelInstance.transform.translate(0.2f, 0.2f, 0.2f);
-            //            modelInstance.transform.scale(20.0f, 20.0f, 20.0f);
-            //            baseUI.getPrimaryScene().addModelInstance(modelInstance);
+            model = sceneAsset.scene.model;
 
-            scaler = new RDXModelInstanceScaler(sceneAsset.scene.model);
+            model.nodes.get(0).scale.set(currentScale.get(), currentScale.get(), currentScale.get());
 
-            //            scaler.scale(10.5f);
-            //            ModelInstance modelInstance2 = scaler.getModelInstance();
-            modelInstance2 = new ModelInstance(scaler.getScaledDeepCopy(10.0));
-            //            ModelInstance modelInstance = new ModelInstance(RDXModelLoader.load("models/BoomBox.gltf"));
-//            modelInstance2.transform.setToRotationRad(1.0f, 0.0f, 0.0f, (float) Math.PI / 2.0f);
-//            modelInstance2.transform.translate(1.2f, 0.2f, 0.2f);
-//            float scale = currentScale.get();
-//            modelInstance2.transform.scale(scale, scale, scale);
-            baseUI.getPrimaryScene().addModelInstance(modelInstance2);
-            //            baseUI.getPrimaryScene().addRenderableProvider(scaler::getRenderables);
+            modelInstance = new ModelInstance(model);
+
+            RigidBodyTransform transform = new RigidBodyTransform();
+            transform.getRotation().setYawPitchRoll(0.0, 0.0, (float) Math.PI / 2.0);
+            transform.getTranslation().set(0.2, 0.2, 0.2);
+            LibGDXTools.toLibGDX(transform, modelInstance.transform);
+
+            baseUI.getPrimaryScene().addRenderableProvider((renderables, pool) -> modelInstance.getRenderables(renderables, pool));
 
             baseUI.getImGuiPanelManager().addPanel("Settings", RDXGLTFDemo.this::renderImGuiWidgets);
          }
 
-         int i = 0;
-
          @Override
          public void render()
          {
-            //            i++;
-            //
-            //            if (i == 5)
-            //               scaler.scale(20.0f);
-
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -87,12 +73,15 @@ public class RDXGLTFDemo
       });
    }
 
-
    private void renderImGuiWidgets()
    {
       if (ImGui.sliderFloat(labels.get("Scale"), currentScale.getData(), 1.0f, 50.0f))
       {
-         modelInstance2.transform.setToScaling(currentScale.get(), currentScale.get(), currentScale.get());
+         model.nodes.get(0).scale.set(currentScale.get(), currentScale.get(), currentScale.get());
+
+         Matrix4 transform = modelInstance.transform;
+         modelInstance = new ModelInstance(model);
+         modelInstance.transform.set(transform);
       }
    }
 

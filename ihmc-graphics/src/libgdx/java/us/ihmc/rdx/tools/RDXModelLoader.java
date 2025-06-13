@@ -2,8 +2,6 @@ package us.ihmc.rdx.tools;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -14,6 +12,7 @@ import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.UBJsonReader;
 import net.mgsx.gltf.loaders.glb.GLBLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFLoader;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 import us.ihmc.rdx.tools.assimp.RDXAssimpModelLoader;
@@ -71,7 +70,7 @@ public class RDXModelLoader
          if (model == null)
          {
             model = loadModelInternal(requestedModelFileName);
-            ensureModelHasDiffuseTextureAttribute(modelFileName, model);
+            ensureModelIsPBRShaderCompatible(model);
             loadedModels.put(modelFileName, model);
          }
          else
@@ -157,22 +156,28 @@ public class RDXModelLoader
       return model;
    }
 
-   public static void ensureModelHasDiffuseTextureAttribute(String modelFileName, Model model)
+   public static void ensureModelIsPBRShaderCompatible(Model model)
    {
       for (Material material : model.materials)
       {
-         if (!material.has(TextureAttribute.Diffuse))
+         ColorAttribute diffuseColor = material.get(ColorAttribute.class, ColorAttribute.Diffuse);
+         TextureAttribute diffuseTexture = material.get(TextureAttribute.class, TextureAttribute.Diffuse);
+
+         boolean diffuseColorNeedsReplacement = diffuseColor != null && !(diffuseColor instanceof PBRColorAttribute);
+         boolean diffuseTextureNeedsReplacement = diffuseTexture != null && !(diffuseTexture instanceof PBRTextureAttribute);
+
+         if (diffuseColorNeedsReplacement || diffuseTextureNeedsReplacement)
          {
-            LogTools.debug(
-                  "Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
+            material.clear();
 
-            Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
-            map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
-            map.drawRectangle(0, 0, 100, 100);
-
-            material.set(PBRTextureAttribute.createBaseColorTexture(new Texture(map)));
-
-            map.dispose();
+            if (diffuseTextureNeedsReplacement)
+            {
+               material.set(PBRTextureAttribute.createBaseColorTexture(diffuseTexture.textureDescription.texture));
+            }
+            if (diffuseColorNeedsReplacement)
+            {
+               material.set(PBRColorAttribute.createBaseColorFactor(diffuseColor.color));
+            }
          }
       }
    }
