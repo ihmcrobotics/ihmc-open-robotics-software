@@ -1,14 +1,87 @@
 package us.ihmc.perception.heightmap;
 
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Random;
 
 public class HeightMapToolsTest
 {
+   private final int iterations = 1000;
+   private final HeightMapParameters heightMapParameters = new HeightMapParameters();
+
+   @Test
+   public void testSpeedConvertHeightMapDataToMat()
+   {
+      int cellsPerAxis = 500;
+      HeightMapData heightMapData = new HeightMapData(0.02, 10.0, 0.0, 0.0);
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            heightMapData.setHeightAt(i, 1.0f);
+         }
+      }
+
+      long startTime = System.nanoTime();
+
+      for (int i = 0; i < iterations; i++)
+      {
+         // Try with resources to avoid memory leak
+         try (Mat heightMapMat = HeightMapTools.convertHeightMapDataToMat(heightMapData, heightMapParameters))
+         {
+            // Do nothing
+         }
+      }
+
+      long endTime = System.nanoTime();
+      double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
+      double averageTimePerIteration = totalTimeMillis / iterations;
+
+      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+   }
+
+   @Test
+   public void testSpeedConvertMatToHeightMapData()
+   {
+      int cellsPerAxis = 500;
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            heightMapMat.ptr(i, j).putFloat(1.0f);
+         }
+      }
+
+      HeightMapData heightMapData = new HeightMapData(0.02, 10.0, 0.0, 0.0);
+
+      long startTime = System.nanoTime();
+
+      for (int i = 0; i < iterations; i++)
+      {
+         HeightMapTools.convertToHeightMapData(heightMapMat,
+                                               heightMapData,
+                                               new Point3D(0.0, 0.0, 0.0),
+                                               (float) heightMapParameters.getTerrainWidthInMeters(),
+                                               (float) heightMapParameters.getCellSizeInMeters(),
+                                               heightMapParameters);
+      }
+
+      long endTime = System.nanoTime();
+      double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
+      double averageTimePerIteration = totalTimeMillis / iterations;
+
+      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+   }
+
    @Test
    public void testIndexing()
    {

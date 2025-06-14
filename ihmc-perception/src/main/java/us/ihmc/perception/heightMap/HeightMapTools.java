@@ -5,12 +5,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
  * - A discretization value
  * - The grid size, i.e. side length of the square region it covers
- * - Grid center, an xy coordinate which is the middle of the grid
- *
+ * - Grid center, a xy coordinate which is the middle of the grid
  * Cells are indexed two ways:
  * - A unique integer key, which is zero-indexed and starts at the corner of the grid which is the negative-most x and y coordinates.
  * - An (x,y) integer index pair, which is zero at the negative-most cell along each axis
@@ -85,7 +87,7 @@ public class HeightMapTools
    public static double[] getRedGreenBlue(double height)
    {
       // Using interpolation between key color points
-      double r = 0, g = 0, b = 0;
+      double r, g, b;
       double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
       double orangeR = 1.0, orangeG = 200.0 / 255.0, orangeB = 0.0;
       double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
@@ -181,25 +183,24 @@ public class HeightMapTools
    public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
       int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int centerIndex = heightMapData.getCenterIndex();
+      int totalCells = cellsPerAxis * cellsPerAxis;
 
       // Create a new Mat object to hold the height map data
       Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
 
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      // This is done for speed optimization
+      double[] heightsAsDoubles = heightMapData.getHeights();
+      short[] heightsAsFloats = new short[totalCells];
+
+      for (int i = 0; i < totalCells; i++)
       {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
-         {
-            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            double cellHeight = heightMapData.getHeightAt(key);
-
-            // Reverse the height calculation to get the raw height value
-            int height = (int) ((cellHeight + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-
-            // Store the height value in the Mat object
-            heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
-         }
+         // Reverse the height calculation to get the raw height value
+         short height = (short) (((float) heightsAsDoubles[i] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+         heightsAsFloats[i] = height;
       }
+
+      ShortBuffer buffer = heightMapMat.createBuffer();
+      buffer.put(heightsAsFloats);
 
       return heightMapMat;
    }
