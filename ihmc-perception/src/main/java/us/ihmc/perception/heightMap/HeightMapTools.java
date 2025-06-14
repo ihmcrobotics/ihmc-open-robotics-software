@@ -1,11 +1,9 @@
 package us.ihmc.perception.heightMap;
 
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -180,13 +178,10 @@ public class HeightMapTools
       }
    }
 
-   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
       int cellsPerAxis = heightMapData.getCellsPerAxis();
       int totalCells = cellsPerAxis * cellsPerAxis;
-
-      // Create a new Mat object to hold the height map data
-      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
 
       // This is done for speed optimization
       double[] heightsAsDoubles = heightMapData.getHeights();
@@ -199,9 +194,7 @@ public class HeightMapTools
          heightsAsFloats[i] = height;
       }
 
-      ShortBuffer buffer = heightMapMat.createBuffer();
+      ShortBuffer buffer = heightMapToPack.createBuffer();
       buffer.put(heightsAsFloats);
-
-      return heightMapMat;
    }
 }
