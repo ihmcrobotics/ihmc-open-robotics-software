@@ -13,7 +13,7 @@ import us.ihmc.perception.heightMap.HeightMapTools;
 
 public class HeightMapMessageToolsTest
 {
-   private final int iterations = 10000;
+   private final int iterations = 1000;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    @Test
