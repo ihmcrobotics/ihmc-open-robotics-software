@@ -30,15 +30,13 @@ public class HeightMapToolsTest
          }
       }
 
+      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_16UC1);
+
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
-         // Try with resources to avoid memory leak
-         try (Mat heightMapMat = HeightMapTools.convertHeightMapDataToMat(heightMapData, heightMapParameters))
-         {
-            // Do nothing
-         }
+         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
       }
 
       long endTime = System.nanoTime();
