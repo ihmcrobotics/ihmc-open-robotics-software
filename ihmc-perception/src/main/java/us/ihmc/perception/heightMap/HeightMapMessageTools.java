@@ -71,6 +71,12 @@ public class HeightMapMessageTools
       return heightMap;
    }
 
+   /**
+    * This method is too slow, creating a new {@link HeightMapMessage} object is too slow when trying to
+    * use this in the update loop. Especially when we start sending larger maps.
+    * Please use {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double)}
+    */
+   @Deprecated
    public static HeightMapMessage toMessage(HeightMapData heightMapData)
    {
       HeightMapMessage message = new HeightMapMessage();
@@ -79,6 +85,11 @@ public class HeightMapMessageTools
       return message;
    }
 
+   /**
+    * This methos is slow, its ok to use this if necessary, but going forward we should be using the
+    * {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double)} as its faster
+    */
+   @Deprecated
    public static void toMessage(HeightMapData heightMapData, HeightMapMessage messageToPack)
    {
       clear(messageToPack);

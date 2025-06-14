@@ -140,6 +140,9 @@ public class HeightMapTools
       return new double[] {r, g, b};
    }
 
+   /**
+    * This method converts a {@link Mat} object into a {@link HeightMapData} object.
+    */
    public static void convertToHeightMapData(Mat heightMapPointer,
                                              HeightMapData heightMapDataToPack,
                                              Point3D gridCenter,
