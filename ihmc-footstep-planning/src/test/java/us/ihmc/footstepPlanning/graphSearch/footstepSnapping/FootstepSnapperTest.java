@@ -36,7 +36,7 @@ public class FootstepSnapperTest
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendTranslation(0.0, 0.0, 0.10);
       planarRegionsList.getPlanarRegion(0).applyTransform(transform);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
       environmentHandler.setHeightMapData(heightMapData);
 
       for (int i = 0; i < xIndices.length; i++)

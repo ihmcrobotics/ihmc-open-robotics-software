@@ -19,7 +19,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -108,27 +107,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(4.0, 0.02);
-                                                 cellsPerAxis = 2 * centerIndex + 1;
+                                                 cellsPerAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
                                               }
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, heightMapParameters);
-
-                                              if (latestHeightMapData == null)
-                                              {
-                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
-                                                                                         heightMapMessage.getGridSizeXy(),
-                                                                                         heightMapMessage.getGridCenterX(),
-                                                                                         heightMapMessage.getGridCenterY());
-                                              }
-                                              HeightMapTools.convertToHeightMapData(heightMap,
-                                                                                           latestHeightMapData,
-                                                                                           heightMapCenter,
-                                                                                           (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                                                           (float) heightMapParameters.getCellSizeInMeters(),
-                                                                                           heightMapParameters);
+                                              latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+                                              heightMap = HeightMapMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)

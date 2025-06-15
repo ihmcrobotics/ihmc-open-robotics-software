@@ -297,7 +297,7 @@ public class HeightMapUpdater
 
    public HeightMapData getLatestHeightMap()
    {
-      return HeightMapMessageTools.unpackMessageToHeightMapData(buildMessage());
+      return HeightMapMessageTools.unpackMessage(buildMessage());
    }
 
    private HeightMapMessage buildMessage()
