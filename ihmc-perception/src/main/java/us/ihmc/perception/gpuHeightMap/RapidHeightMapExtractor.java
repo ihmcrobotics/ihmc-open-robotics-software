@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -542,7 +543,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap.clone();
+      return globalMeanMap;
    }
 
    public GpuMat getTerrainCroppedHeightMap()
