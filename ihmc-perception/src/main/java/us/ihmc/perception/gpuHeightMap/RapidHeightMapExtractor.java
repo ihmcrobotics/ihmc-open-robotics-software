@@ -330,9 +330,6 @@ public class RapidHeightMapExtractor
          int scalingKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 scalingKernelGridDim = new dim3(scalingKernelGridSizeXY, scalingKernelGridSizeXY, 1);
 
-         Mat test = new Mat();
-         globalMeanMap.download(test);
-
          scalingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          scalingKernel.withPointer(scaledHeightMap.data()).withLong(scaledHeightMap.step());
          scalingKernel.withPointer(parametersDevicePointer);
