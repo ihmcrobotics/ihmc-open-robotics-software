@@ -156,7 +156,7 @@ public class FootstepPlannerLogVisualizerController
       AtomicReference<HeightMapMessage> heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
       AtomicReference<TerrainMapMessage> terrainMapMessage = messager.createInput(FootstepPlannerMessagerAPI.TerrainMapData);
       messager.addTopicListener(FootstepPlannerMessagerAPI.GraphData,
-                                     graphData -> Platform.runLater(() -> updateGraphData(HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage.get()),
+                                     graphData -> Platform.runLater(() -> updateGraphData(HeightMapMessageTools.unpackMessage(heightMapMessage.get()),
                                                                                           convertToTerrainMapData(terrainMapMessage.get()),
                                                                                           graphData.getLeft(),
                                                                                           graphData.getMiddle(),
@@ -352,7 +352,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(footstepPlannerLog.getRequestPacket().getHeightMapMessage());
 
       if (!heightMapData.isEmpty())
       {

@@ -56,7 +56,7 @@ public class SteppableRegionsUpdater
          return;
 
       SteppableRegionCalculatorParametersReadOnly latestParameters = this.latestParameters.getAndSet(null);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       if (latestParameters != null)
          steppableRegionsCalculationModule.setSteppableRegionsCalculatorParameters(latestParameters);
 

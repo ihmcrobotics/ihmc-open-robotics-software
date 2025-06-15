@@ -231,7 +231,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          // Plan body path
          setStartFootPosesToCurrent();
 
-         heightMapUsedForPlanning = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage.get());
+         heightMapUsedForPlanning = HeightMapMessageTools.unpackMessage(heightMapMessage.get());
          request.setHeightMapData(heightMapUsedForPlanning);
 
          Pose3D goalPose = new Pose3D(goalPosition.get(), goalOrientation.get());
@@ -289,7 +289,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          request.setPlanBodyPath(false);
          request.setPerformAStarSearch(true);
-         request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
+         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
          request.setRequestedInitialStanceSide(lastStepSide);
 
          LogTools.info("Planning step");

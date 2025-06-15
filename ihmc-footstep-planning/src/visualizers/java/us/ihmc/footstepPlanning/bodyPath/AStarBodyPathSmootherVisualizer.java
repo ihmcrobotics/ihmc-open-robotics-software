@@ -251,7 +251,7 @@ public class AStarBodyPathSmootherVisualizer
       List<Pose3D> bodyPathPoseWaypoints = statusPacket.getBodyPath();
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       List<Point3D> bodyPath = bodyPathPoseWaypoints.stream().map(Pose3D::getPosition).collect(Collectors.toList());
 
       try

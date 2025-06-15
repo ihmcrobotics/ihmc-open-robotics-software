@@ -158,7 +158,7 @@ public class PlannerToolsTest
 
       request.setStartFootPoses(footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), startPose);
       request.setGoalFootPoses(footstepPlanningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(debrisDataSet.getPlanarRegionsList())));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(debrisDataSet.getPlanarRegionsList())));
 
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(request);
       boolean collisionDetected = PlannerTools.doesPathContainBodyCollisions(startPose,

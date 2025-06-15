@@ -229,7 +229,7 @@ public class AStarBodyPathFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
       HeightMapMessage heightMap = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMap);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMap);
 
       PlannerInput plannerInput = dataset.getPlannerInput();
       Point3D start = plannerInput.getStartPosition();
@@ -246,7 +246,7 @@ public class AStarBodyPathFrameworkTest
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
          pointsInRegions.put(planarRegion, new ArrayList<>());

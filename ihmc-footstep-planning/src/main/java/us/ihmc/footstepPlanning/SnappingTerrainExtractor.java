@@ -12,6 +12,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -62,7 +63,6 @@ public class SnappingTerrainExtractor
    private final GpuMat snappedAreaFractionMat;
    private final GpuMat steppabilityMat;
    private final GpuMat steppabilityConnectionsMat;
-   private Mat heightMap;
 
    /**
     * This class extracts terrain data from a height map.
@@ -142,14 +142,7 @@ public class SnappingTerrainExtractor
 
       Point2D gridCenter = heightMapData.getGridCenter();
 
-      // For speed optimization, we try to create the Mat globally once to avoid going over the JNI barrier
-      if (heightMap == null)
-      {
-         int cellsPerAxis = heightMapData.getCellsPerAxis();
-         heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
-      }
-
-      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
+      Mat heightMap = HeightMapMessageTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
       GpuMat gpuHeightMap = new GpuMat();
       gpuHeightMap.upload(heightMap);
 
