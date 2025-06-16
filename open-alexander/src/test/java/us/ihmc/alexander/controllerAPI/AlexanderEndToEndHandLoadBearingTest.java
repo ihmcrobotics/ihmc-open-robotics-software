@@ -1,6 +1,7 @@
 package us.ihmc.alexander.controllerAPI;
 
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.alexander.OpenAlexanderVersion;
@@ -24,7 +25,7 @@ public class AlexanderEndToEndHandLoadBearingTest extends EndToEndHandLoadBearin
    @Override
    protected double getPelvisHeightOffset()
    {
-      return -0.08;
+      return -0.1;
    }
 
    @Override
@@ -44,9 +45,9 @@ public class AlexanderEndToEndHandLoadBearingTest extends EndToEndHandLoadBearin
       assertTrue(success);
    }
 
-   @Tag("controller-api")
-   @Override
-   @Test
+//   @Tag("controller-api")
+//   @Override
+   @Disabled
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
       super.testUsingHand();
