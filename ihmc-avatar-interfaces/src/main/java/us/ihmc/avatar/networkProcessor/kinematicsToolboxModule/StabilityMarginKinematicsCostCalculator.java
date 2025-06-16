@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactSta
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.SpatialVector;
@@ -48,6 +49,7 @@ public class StabilityMarginKinematicsCostCalculator
                                                   FullHumanoidRobotModel fullRobotModel,
                                                   BooleanProvider isUpperBodyLoadBearing,
                                                   DoubleProvider minStabilityMargin,
+                                                  CentroidalMomentumCalculator centroidalMomentumCalculator,
                                                   YoRegistry parentRegistry)
    {
       this.wholeBodyContactState = wholeBodyContactState;
@@ -65,7 +67,7 @@ public class StabilityMarginKinematicsCostCalculator
       pelvisControlFramePose.setToZero(afterRootJointFrame);
       pelvisControlFramePose.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
 
-      this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel, wholeBodyContactState, multiContactRegionCalculator, registry);
+      this.stabilityGradientCalculator = new SensitivityBasedStabilityGradientCalculator(fullRobotModel, wholeBodyContactState, multiContactRegionCalculator, centroidalMomentumCalculator, registry);
       parentRegistry.addChild(registry);
    }
 

@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -231,15 +232,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
 
-      if (desiredFullRobotModel.getChest() != null &&
-          desiredFullRobotModel.getHand(RobotSide.LEFT) != null &&
-          desiredFullRobotModel.getHand(RobotSide.RIGHT) != null)
+      if (desiredFullRobotModel.getChest() != null && desiredFullRobotModel.getHand(RobotSide.LEFT) != null
+          && desiredFullRobotModel.getHand(RobotSide.RIGHT) != null)
       {
+         CentroidalMomentumCalculator centroidalMomentumCalculator = controllerCore.getToolbox().getCentroidalMomentumCalculator();
          stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
                                                                                multiContactRegionCalculator,
                                                                                desiredFullRobotModel,
                                                                                isUpperBodyLoadBearing,
                                                                                getCenterOfMassSafeMargin(),
+                                                                               centroidalMomentumCalculator,
                                                                                registry);
       }
 
