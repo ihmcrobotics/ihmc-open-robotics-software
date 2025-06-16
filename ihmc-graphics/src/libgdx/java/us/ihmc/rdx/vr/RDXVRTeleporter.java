@@ -69,7 +69,8 @@ public class RDXVRTeleporter
          InputDigitalActionData bButton = controller.getBButtonActionData();
 
          // Only enable teleportation when nothing is pick selected
-         if ((bButtonEnabled || joysticButtonEnabled || touchpadHeightEnabled) && controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
+         if ((bButtonEnabled || joysticButtonEnabled || touchpadHeightEnabled)
+             && controller.getSelectedPick() == null && !controller.anythingElseBeingDragged(this))
          {
             controller.setBButtonText("Teleport");
             InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
@@ -83,20 +84,20 @@ public class RDXVRTeleporter
                else if (preparingToTeleport && bButton.bChanged() && !bButton.bState())
                {
                   vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-                                     {
-                                        xyYawHeadsetToTeleportTransform.setIdentity();
-                                        vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
-                                                                              {
-                                                                                 headset.getXForwardZUpHeadsetFrame()
-                                                                                        .getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                                                                                 xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-                                                                                 xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                                                                              });
-                                        teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-                                        teleportIHMCZUpToIHMCZUpWorld.invert();
-                                        proposedTeleportPose.get(tempTransform);
-                                        tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-                                     });
+                  {
+                     xyYawHeadsetToTeleportTransform.setIdentity();
+                     vrContext.getHeadset().runIfConnected(headset -> // Teleport such that your headset ends up where you're trying to go
+                     {
+                        headset.getXForwardZUpHeadsetFrame()
+                               .getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                        xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                        xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                     });
+                     teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+                     teleportIHMCZUpToIHMCZUpWorld.invert();
+                     proposedTeleportPose.get(tempTransform);
+                     tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+                  });
                }
             }
 
@@ -164,7 +165,9 @@ public class RDXVRTeleporter
       // Shift frame a bit forward to avoid having the camera model in sight
       leftToMidCamerasFrameTransform.getTranslation().addX(0.1);
       // Create robot camera frame as point in between cameras
-      ReferenceFrame robotCameraReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotCameraReferenceFrames.get(RobotSide.LEFT).getParent(), leftToMidCamerasFrameTransform);
+      ReferenceFrame robotCameraReferenceFrame
+            = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotCameraReferenceFrames.get(RobotSide.LEFT).getParent(),
+                                                                                       leftToMidCamerasFrameTransform);
 
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
        {
@@ -191,10 +194,10 @@ public class RDXVRTeleporter
       {
          xyYawHeadsetToTeleportTransform.setIdentity();
          vrContext.getHeadset().runIfConnected(headset ->
-                                             {
-                                                headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                                                xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                                             });
+         {
+            headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+            xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+         });
          teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
          teleportIHMCZUpToIHMCZUpWorld.invert();
 
