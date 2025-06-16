@@ -1,7 +1,7 @@
 package us.ihmc.alexander.parameters.simulation;
 
 import us.ihmc.alexander.AlexanderVersionInterface;
-import us.ihmc.alexander.parameters.AlexanderPresetArmConfigurations;
+import us.ihmc.alexander.AlexanderPresetArmConfigurations;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.robotics.partNames.ArmJointName;
