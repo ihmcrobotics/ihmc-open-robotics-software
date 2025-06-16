@@ -9,6 +9,12 @@ public class ROS2AbilityHand implements AbilityHand
 {
    private final RobotSide handSide;
    private AHWrapper wrapperHand;
+   private float indexFingerPosition;
+   private float middleFingerPosition;
+   private float ringFingerPosition;
+   private float pinkyFingerPosition;
+   private float thumbFlexorPosition;
+   private float thumbRotatorPosition;
 
    private final FloatArray6 command = new FloatArray6();
 
@@ -21,7 +27,7 @@ public class ROS2AbilityHand implements AbilityHand
    {
       if (handSide == RobotSide.LEFT)
       {
-         wrapperHand = new AHWrapper((byte) 0x50, 460800);
+         wrapperHand = new AHWrapper((byte) 0x50, 1000000);
          wrapperHand.connect();
       }
       else
@@ -33,12 +39,12 @@ public class ROS2AbilityHand implements AbilityHand
    @Override
    public void update()
    {
-      command.put(0, getIndexFingerPositionStatus());
-      command.put(1, getMiddleFingerPositionStatus());
-      command.put(2, getRingFingerPositionStatus());
-      command.put(3, getPinkyFingerPositionStatus());
-      command.put(4, getThumbFlexorPositionStatus());
-      command.put(5, getThumbRotatorPositionStatus());
+      command.put(0, indexFingerPosition);
+      command.put(1, middleFingerPosition);
+      command.put(2, ringFingerPosition);
+      command.put(3, pinkyFingerPosition);
+      command.put(4, thumbFlexorPosition);
+      command.put(5, thumbRotatorPosition);
       wrapperHand.read_write_once(command, abilityhand.POSITION, (byte) 0);
    }
 
@@ -46,71 +52,77 @@ public class ROS2AbilityHand implements AbilityHand
    public void setIndexFingerPositionCommand(float indexFingerPositionCommand)
    {
       command.put(0, indexFingerPositionCommand);
+      indexFingerPosition = indexFingerPositionCommand;
    }
 
    @Override
    public void setMiddleFingerPositionCommand(float middleFingerPositionCommand)
    {
       command.put(1, middleFingerPositionCommand);
+      middleFingerPosition = middleFingerPositionCommand;
    }
 
    @Override
    public void setRingFingerPositionCommand(float ringFingerPositionCommand)
    {
       command.put(2, ringFingerPositionCommand);
+      ringFingerPosition = ringFingerPositionCommand;
    }
 
    @Override
    public void setPinkyFingerPositionCommand(float pinkyFingerPositionCommand)
    {
       command.put(3, pinkyFingerPositionCommand);
+      pinkyFingerPosition = pinkyFingerPositionCommand;
    }
 
    @Override
    public void setThumbFlexorPositionCommand(float thumbFlexorPositionCommand)
    {
       command.put(4, thumbFlexorPositionCommand);
+      thumbFlexorPosition = thumbFlexorPositionCommand;
    }
 
    @Override
    public void setThumbRotatorPositionCommand(float thumbRotatorPositionCommand)
    {
       command.put(5, thumbRotatorPositionCommand);
+      thumbRotatorPosition = thumbRotatorPositionCommand;
    }
 
    @Override
    public float getIndexFingerPositionStatus()
    {
-      return command.get(0);
+      return indexFingerPosition;
    }
 
    @Override
    public float getMiddleFingerPositionStatus()
    {
-      return command.get(1);
+      return middleFingerPosition;
    }
 
    @Override
    public float getRingFingerPositionStatus()
    {
-      return command.get(2);
+      return ringFingerPosition;
    }
 
    @Override
    public float getPinkyFingerPositionStatus()
    {
-      return command.get(3);
+      return pinkyFingerPosition;
    }
 
    @Override
    public float getThumbFlexorPositionStatus()
    {
-      return command.get(4);
+      return thumbFlexorPosition;
    }
 
    @Override
    public float getThumbRotatorPositionStatus()
    {
-      return command.get(5);
+      return thumbRotatorPosition;
    }
 }
