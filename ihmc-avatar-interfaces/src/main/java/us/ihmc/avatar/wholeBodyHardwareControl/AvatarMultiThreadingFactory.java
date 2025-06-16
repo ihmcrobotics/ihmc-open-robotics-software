@@ -24,11 +24,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelCon
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.realtime.MonotonicTime;
-import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -94,7 +90,7 @@ public class AvatarMultiThreadingFactory
 
    // The remaining constructor arguments
    private final MonotonicTime period;
-   private final double schedulerDt;
+   private final double masterThreadDt;
    private final TimestampProvider monotonicTimeProvider;
    private final AvatarAffinityInterface affinity;
    private final boolean createStepGeneratorThread;
@@ -115,14 +111,14 @@ public class AvatarMultiThreadingFactory
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       MonotonicTime period,
-                                      double schedulerDt,
+                                      double masterThreadDt,
                                       TimestampProvider monotonicTimeProvider,
                                       YoRegistry registry,
                                       YoVariableServer yoVariableServer)
    {
       this.robotModel = robotModel;
       this.period = period;
-      this.schedulerDt = schedulerDt;
+      this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.affinity = affinity;
@@ -141,7 +137,7 @@ public class AvatarMultiThreadingFactory
       controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2RealtimeThreadFactory);
 
       // Set up low-level output processor
-      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), schedulerDt, registry);
+      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), masterThreadDt, registry);
 
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
@@ -214,7 +210,7 @@ public class AvatarMultiThreadingFactory
       // Create step generator thread
       stepGeneratorThread.set(createStepGeneratorThread(robotModel, controllerThread.get(), controllerContextFactory, controllerFactory));
 
-      // Add estimator thread registry as child to the root registry (since estimator thread is essentially our master/scheduler thread)
+      // Add estimator thread registry as child to the root registry (since estimator thread is essentially our master thread)
       rootRegistry.addChild(estimatorThread.get().getYoRegistry());
 
       // Set the root registry as the YoVariableServer's main registry
@@ -239,8 +235,7 @@ public class AvatarMultiThreadingFactory
                                                            estimatorThread.get(),
                                                            controllerThread.get(),
                                                            stepGeneratorThread.get(),
-                                                           affinity,
-                                                           schedulerDt,
+                                                           affinity, masterThreadDt,
                                                            period,
                                                            monotonicTimeProvider,
                                                            useRealtimeThreads,

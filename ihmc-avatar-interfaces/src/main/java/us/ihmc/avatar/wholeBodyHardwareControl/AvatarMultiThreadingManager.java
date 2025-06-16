@@ -14,7 +14,6 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
-import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.RealtimeThread;
@@ -46,7 +45,7 @@ public class AvatarMultiThreadingManager
 
    private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
 
-   private final double schedulerDt;
+   private final double masterThreadDt;
 
    private final YoLong threadSchedulerComputeTime = new YoLong("threadSchedulerComputeTime", registry);
 
@@ -69,7 +68,7 @@ public class AvatarMultiThreadingManager
 
    private final Runnable masterThread;
    private final AvatarEstimatorThread estimatorThread;
-   private final List<Runnable> estimatorSchedulerThreadRunnables = new ArrayList<>();
+   private final List<Runnable> masterThreadRunnables = new ArrayList<>();
 
    private ControllerTask controllerTask;
    private StepGeneratorTask stepGeneratorTask;
@@ -98,7 +97,7 @@ public class AvatarMultiThreadingManager
                                       AvatarControllerThread controllerThread,
                                       AvatarStepGeneratorThread stepGeneratorThread,
                                       AvatarAffinityInterface affinity,
-                                      double schedulerDt,
+                                      double masterThreadDt,
                                       MonotonicTime period,
                                       TimestampProvider monotonicTimeProvider,
                                       boolean useRealtimeThreads,
@@ -111,7 +110,7 @@ public class AvatarMultiThreadingManager
       this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.estimatorThread = estimatorThread;
       this.affinity = affinity;
-      this.schedulerDt = schedulerDt;
+      this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
@@ -129,13 +128,12 @@ public class AvatarMultiThreadingManager
 
       // Set up the thread manager
       if (useMultiThreading)
-         threadScheduler = new BarrierScheduledRobotController(prefix + "ThreadManager",
+         threadScheduler = new BarrierScheduledRobotController(prefix + "ThreadScheduler",
                                                                tasks,
                                                                masterContext,
-                                                               BarrierScheduler.TaskOverrunBehavior.BUSY_WAIT,
-                                                               schedulerDt);
+                                                               BarrierScheduler.TaskOverrunBehavior.BUSY_WAIT, masterThreadDt);
       else
-         threadScheduler = new SingleThreadedRobotController<>(prefix + "ThreadManager", tasks, masterContext);
+         threadScheduler = new SingleThreadedRobotController<>(prefix + "ThreadScheduler", tasks, masterContext);
 
       threadScheduler.initialize();
 
@@ -144,8 +142,8 @@ public class AvatarMultiThreadingManager
       // Set up the master thread
       if (useRealtimeThreads)
       {
-         masterThread = new RealtimeThread(affinity.getSchedulerPriority(), periodicParameters, this::runRealtime, prefix + "-master-thread");
-         ((RealtimeThread) masterThread).setAffinity(affinity.getSchedulerThreadProcessor());
+         masterThread = new RealtimeThread(affinity.getMasterThreadPriority(), periodicParameters, this::runRealtime, prefix + "-master-thread");
+         ((RealtimeThread) masterThread).setAffinity(affinity.getMasterThreadProcessor());
       }
       else
       {
@@ -171,11 +169,11 @@ public class AvatarMultiThreadingManager
                                                                  YoVariableServer yoVariableServer)
    {
       // Set up Controller Task
-      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / schedulerDt);
-      if (!Precision.equals(robotModel.getControllerDT() / schedulerDt, controllerDivisor))
-         throw new RuntimeException("Controller DT must be multiple of scheduler DT.");
+      int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / masterThreadDt);
+      if (!Precision.equals(robotModel.getControllerDT() / masterThreadDt, controllerDivisor))
+         throw new RuntimeException("Controller DT must be multiple of master thread DT.");
 
-      controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, schedulerDt, masterFullRobotModel);
+      controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, masterThreadDt, masterFullRobotModel);
 
       if (yoVariableServer != null)
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
@@ -190,10 +188,10 @@ public class AvatarMultiThreadingManager
       // Set up Controller Thread
       if (useRealtimeThreads && useMultiThreading)
       {
-         RealtimeThread controllerRealtimeThread = new RealtimeThread(affinity.getControllerPriority(),
+         RealtimeThread controllerRealtimeThread = new RealtimeThread(affinity.getControllerThreadPriority(),
                                                                       controllerTask,
                                                                       controllerTask.getClass().getSimpleName() + "Thread");
-         controllerRealtimeThread.setAffinity(affinity.getControlThreadProcessor());
+         controllerRealtimeThread.setAffinity(affinity.getControllerThreadProcessor());
          controllerRealtimeThread.start();
       }
       else if (!useRealtimeThreads && useMultiThreading)
@@ -211,11 +209,11 @@ public class AvatarMultiThreadingManager
                                                                     YoVariableServer yoVariableServer)
    {
       // Set up Step Generator Task
-      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / schedulerDt);
-      if (!Precision.equals(robotModel.getStepGeneratorDT() / schedulerDt, stepGeneratorDivisor))
-         throw new RuntimeException("Step generator DT must be multiple of scheduler DT.");
+      int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / masterThreadDt);
+      if (!Precision.equals(robotModel.getStepGeneratorDT() / masterThreadDt, stepGeneratorDivisor))
+         throw new RuntimeException("Step generator DT must be multiple of master thread DT.");
 
-      stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, schedulerDt, masterFullRobotModel);
+      stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, masterThreadDt, masterFullRobotModel);
 
       if (yoVariableServer != null)
          stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
@@ -230,7 +228,7 @@ public class AvatarMultiThreadingManager
       // Set up Step Generator Thread
       if (useRealtimeThreads && useMultiThreading)
       {
-         RealtimeThread stepGeneratorRealtimeThread = new RealtimeThread(affinity.getStepGeneratorPriority(),
+         RealtimeThread stepGeneratorRealtimeThread = new RealtimeThread(affinity.getStepGeneratorThreadPriority(),
                                                                          stepGeneratorTask,
                                                                          stepGeneratorTask.getClass().getSimpleName() + "Thread");
          stepGeneratorRealtimeThread.setAffinity(affinity.getStepGeneratorThreadProcessor());
@@ -254,7 +252,7 @@ public class AvatarMultiThreadingManager
       }
       else
       {
-         ((RepeatingTaskThread) masterThread).setFrequencyLimit(Conversions.secondsToHertz(schedulerDt));
+         ((RepeatingTaskThread) masterThread).setFrequencyLimit(Conversions.secondsToHertz(masterThreadDt));
          ((RepeatingTaskThread) masterThread).startRepeating();
       }
    }
@@ -338,9 +336,9 @@ public class AvatarMultiThreadingManager
          estimatorThreadFrequencyCalculator.ping();
          estimatorThreadUpdateRate.set(estimatorThreadFrequencyCalculator.getFrequency());
 
-         // Update all scheduler thread runnables
-         for (int i = 0; i < estimatorSchedulerThreadRunnables.size(); i++)
-            estimatorSchedulerThreadRunnables.get(i).run();
+         // Update all master thread runnables
+         for (int i = 0; i < masterThreadRunnables.size(); i++)
+            masterThreadRunnables.get(i).run();
 
          // Run the thread scheduler
          long barrierSchedulerStartTime = System.nanoTime();
@@ -366,9 +364,9 @@ public class AvatarMultiThreadingManager
       stepGeneratorTask.addRunnableOnSchedulerThread(runnable);
    }
 
-   public void addRunnableOnEstimatorThread(Runnable runnable)
+   public void addRunnableOnMasterThread(Runnable runnable)
    {
-      estimatorSchedulerThreadRunnables.add(runnable);
+      masterThreadRunnables.add(runnable);
    }
 
    private void updateYoVariableServer()
