@@ -104,8 +104,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
 
-      if (!MathTools.epsilonEquals(getPelvisHeightOffset(), 0.0, 1e-4))
-         sendPelvisHeightOffset(getPelvisHeightOffset());
+      sendPelvisHeightOffset(getPelvisHeightOffset());
 
       // pitch the chest forward towards the table.
       applyPitch(pelvisZUpFrame);
@@ -123,7 +122,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory1.getTaskspaceTrajectoryPoints()
                     .add()
                     .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0,
-                                                                              new Point3D(getHandForwardPositionInChest(), 0.4, 0.3),
+                                                                              new Point3D(getHandForwardPositionInChest(), 0.4, 0.5),
                                                                               handOrientation,
                                                                               new Vector3D(),
                                                                               new Vector3D()));
@@ -158,7 +157,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       // Now push the robot
-      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 0.0, -1.0);
       double percentWeight = 0.05;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 2.0;
@@ -166,9 +165,6 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
       success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
-
-      // TODO GITHUB WORKFLOWS
-      //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
