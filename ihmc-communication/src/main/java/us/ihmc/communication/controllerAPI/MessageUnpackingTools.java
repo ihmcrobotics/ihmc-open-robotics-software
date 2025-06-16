@@ -126,6 +126,7 @@ public final class MessageUnpackingTools
          private final ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
          private final PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
          private final NeckTrajectoryMessage neckTrajectoryMessage = new NeckTrajectoryMessage();
+         private final CenterOfMassTrajectoryMessage centerOfMassTrajectoryMessage = new CenterOfMassTrajectoryMessage();
 
          @Override
          public void unpackMessage(WholeBodyStreamingMessage message, List<Settable<?>> messagesToPack)
@@ -173,6 +174,19 @@ public final class MessageUnpackingTools
                                              streamIntegrationDuration,
                                              sourceTimestamp);
                messagesToPack.add(neckTrajectoryMessage);
+            }
+
+            if (message.getHasCenterOfMassTrajectoryMessage())
+            {
+               centerOfMassTrajectoryMessage.setSequenceId(sequenceId);
+               centerOfMassTrajectoryMessage.setUniqueId(uniqueId);
+               toEuclideanTrajectoryMessage(message.getCenterOfMassTrajectoryMessage(),
+                                            centerOfMassTrajectoryMessage.getEuclideanTrajectory(),
+                                            sequenceId,
+                                            uniqueId,
+                                            streamIntegrationDuration,
+                                            sourceTimestamp);
+               messagesToPack.add(centerOfMassTrajectoryMessage);
             }
 
             for (RobotSide robotSide : RobotSide.values)
@@ -414,6 +428,56 @@ public final class MessageUnpackingTools
             }
 
             configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
+         }
+
+
+         private void toEuclideanTrajectoryMessage(EuclideanStreamingMessage source,
+                                                   EuclideanTrajectoryMessage destination,
+                                                   long sequenceId,
+                                                   long uniqueId,
+                                                   double streamIntegrationDuration,
+                                                   long sourceTimestamp)
+         {
+            destination.setSequenceId(sequenceId);
+            destination.setUniqueId(uniqueId);
+            destination.getTaskspaceTrajectoryPoints().clear();
+
+            EuclideanTrajectoryPointMessage firstPoint = destination.getTaskspaceTrajectoryPoints().add();
+            firstPoint.setSequenceId(sequenceId);
+            firstPoint.setUniqueId(uniqueId);
+            firstPoint.setTime(0.0);
+            firstPoint.getPosition().set(source.getPosition());
+            firstPoint.getLinearVelocity().set(source.getLinearVelocity());
+
+            EuclideanTrajectoryPointMessage secondPoint = destination.getTaskspaceTrajectoryPoints().add();
+            secondPoint.setSequenceId(sequenceId);
+            secondPoint.setUniqueId(uniqueId);
+            secondPoint.setTime(streamIntegrationDuration);
+            integrate(source.getPosition(),
+                      source.getLinearVelocity(),
+                      source.getLinearAcceleration(),
+                      streamIntegrationDuration,
+                      secondPoint.getPosition(),
+                      secondPoint.getLinearVelocity());
+
+            MessageTools.packSelectionMatrix3DMessage(true, destination.getSelectionMatrix());
+            destination.getFrameInformation().set(source.getFrameInformation());
+            MessageTools.packWeightMatrix3DMessage(-1.0, destination.getWeightMatrix());
+            destination.setUseCustomControlFrame(source.getUseCustomControlFrame());
+            destination.getControlFramePose().set(source.getControlFramePose());
+            configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
+         }
+
+         private void integrate(Point3DReadOnly initialPosition,
+                                Vector3DReadOnly initialLinearVelocity,
+                                Vector3DReadOnly linearAcceleration,
+                                double integrationTime,
+                                Point3DBasics finalPosition,
+                                Vector3DBasics finalLinearVelocity)
+         {
+            finalPosition.scaleAdd(integrationTime, initialLinearVelocity, initialPosition);
+            finalPosition.scaleAdd(0.5 * integrationTime * integrationTime, linearAcceleration, finalPosition);
+            finalLinearVelocity.scaleAdd(integrationTime, linearAcceleration, initialLinearVelocity);
          }
 
          private void configureQueueableMessage(QueueableMessage messageToModify,

@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -15,7 +15,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 public class RDXInteractableNub implements RDXInteractableAffordanceTemplateHand
 {
-   private RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
+   private final RDXInteractableFrameModel interactableHandFrameModel = new RDXInteractableFrameModel();
    private final ReferenceFrame referenceFrameHand;
    private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
 
@@ -23,7 +23,7 @@ public class RDXInteractableNub implements RDXInteractableAffordanceTemplateHand
    {
       this.referenceFrameHand = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                        transformToParentToModify);
-      ModelData handModel = RDXModelLoader.loadModelData("environmentObjects/nubCycloidalArms/nub.g3dj");
+      Model handModel = RDXModelLoader.load("environmentObjects/nubCycloidalArms/nub.g3dj");
       interactableHandFrameModel.create(referenceFrameHand, transformToParentToModify, panel3D, handModel, this::calculateClosestCollision);
       interactableHandFrameModel.getModelInstance().setColor(color);
    }

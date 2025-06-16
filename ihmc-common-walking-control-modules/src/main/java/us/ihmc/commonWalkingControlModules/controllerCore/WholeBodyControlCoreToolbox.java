@@ -698,6 +698,11 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       return inactiveOneDoFJoints;
    }
 
+   public CentroidalMomentumCalculator getCentroidalMomentumCalculator()
+   {
+      return centroidalMomentumCalculator;
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {

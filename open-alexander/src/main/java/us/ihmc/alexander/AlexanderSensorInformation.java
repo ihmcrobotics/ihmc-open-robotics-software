@@ -1,5 +1,7 @@
 package us.ihmc.alexander;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -9,6 +11,13 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AlexanderSensorInformation implements HumanoidRobotSensorInformation
 {
+   private static final RigidBodyTransform ZED_2I_TO_CHEST_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      ZED_2I_TO_CHEST_TRANSFORM.getTranslation().set(0.13251,  -0.00116,  0.18667 );
+      EuclidCoreMissingTools.setYawPitchRollDegrees(ZED_2I_TO_CHEST_TRANSFORM.getRotation(), 0.0, 42.76840, 0.0);
+   }
+
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
 
    private final String pelvisIMUSTIMSensor = "pelvis_stim_imu";
@@ -105,5 +114,11 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public String getTorsoIMUName()
    {
       return torsoIMUSensor;
+   }
+
+   @Override
+   public RigidBodyTransform getExperimentalCameraTransform()
+   {
+      return ZED_2I_TO_CHEST_TRANSFORM;
    }
 }

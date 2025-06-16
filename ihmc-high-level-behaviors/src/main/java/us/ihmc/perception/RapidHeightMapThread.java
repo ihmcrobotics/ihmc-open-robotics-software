@@ -58,7 +58,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
 
-      filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.D455_DEPTH_FILTERED_IMAGE);
+      filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_DEPTH_FILTERED_IMAGE);
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
       flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
