@@ -56,9 +56,8 @@ public class ROS2AbilityHand implements AbilityHand
       {
          command.put(5, -command.get(5));
       }
-      wrapperHand.read_write_once(command, abilityhand.POSITION, (byte) 0);
-//      wrapperHand.write_once(command, abilityhand.POSITION, (byte) 0);
-//      wrapperHand.read_once((byte) 0);
+      wrapperHand.write_once(command, abilityhand.POSITION, (byte) 0);
+      wrapperHand.read_once((byte) 0);
    }
 
    @Override
