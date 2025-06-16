@@ -123,9 +123,10 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       kneeJointLimitParameters.setVelocityControlGain(600.0);
       kneeJointLimitParameters.setVelocityDeadbandSize(0.3);
 
-      minimumHeightAboveGround = 0.477;
-      nominalHeightAboveGround = 0.925;
-      maximumHeightAboveGround = 0.944;
+      // TODO Needs tune up
+      minimumHeightAboveGround = 0.6 * jointMap.getModelScale();
+      nominalHeightAboveGround = 0.88 * jointMap.getModelScale();
+      maximumHeightAboveGround = 0.91 * jointMap.getModelScale();
    }
 
    @Override
