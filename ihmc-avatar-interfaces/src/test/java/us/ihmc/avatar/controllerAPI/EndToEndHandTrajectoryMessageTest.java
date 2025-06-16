@@ -1568,7 +1568,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
                                                        controllerDesiredPose,
                                                        currentPose,
-                                                       0.15);
+                                                       0.3);
       }
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);

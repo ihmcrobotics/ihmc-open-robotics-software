@@ -24,7 +24,7 @@ public class AlexanderEndToEndHandLoadBearingTest extends EndToEndHandLoadBearin
    @Override
    protected double getPelvisHeightOffset()
    {
-      return -0.1;
+      return -0.15;
    }
 
    @Override
