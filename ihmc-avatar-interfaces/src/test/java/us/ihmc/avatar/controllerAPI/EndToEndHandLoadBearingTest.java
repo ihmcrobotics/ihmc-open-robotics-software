@@ -77,7 +77,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
    }
 
-   @Disabled
+   @Test
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters.setKeepSCSUp(true);
