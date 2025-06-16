@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -122,10 +123,9 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       kneeJointLimitParameters.setVelocityControlGain(600.0);
       kneeJointLimitParameters.setVelocityDeadbandSize(0.3);
 
-      // TODO Needs tune up
-      minimumHeightAboveGround = 0.6 * jointMap.getModelScale();
-      nominalHeightAboveGround = 0.88 * jointMap.getModelScale();
-      maximumHeightAboveGround = 0.91 * jointMap.getModelScale();
+      minimumHeightAboveGround = 0.477;
+      nominalHeightAboveGround = 0.925;
+      maximumHeightAboveGround = 0.944;
    }
 
    @Override
@@ -567,18 +567,18 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       {
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.3);
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.5);
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.2);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.175);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.433);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.211);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0.0);
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.6);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.3));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfLeftSide(0.6));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -1.3);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.018);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.146));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(-0.202));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -0.312);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_YAW), 0.0);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_YAW), 0.0);
@@ -605,15 +605,15 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
          if (version.getJointMap().hasCycloidForearm(robotSide))
          { // Cycloid forearm home pose
-            handPoseInChestBodyFrame.getPosition().set(0.304, robotSide.negateIfRightSide(0.397), -0.553);
+            handPoseInChestBodyFrame.getPosition().set(0.111, robotSide.negateIfRightSide(0.338), -0.641);
             handPoseInChestBodyFrame.getOrientation()
-                                    .set(robotSide.negateIfRightSide(0.051), robotSide.negateIfRightSide(-0.446), robotSide.negateIfRightSide(-0.103), 0.887);
+                                    .set(robotSide.negateIfRightSide(0.056), -0.140, robotSide.negateIfRightSide(-0.105), 0.983);
          }
          else
          { // 4-dof cycloid home pose
-            handPoseInChestBodyFrame.getPosition().set(0.323, robotSide.negateIfRightSide(0.396), -0.565);
+            handPoseInChestBodyFrame.getPosition().set(0.125, robotSide.negateIfRightSide(0.342), -0.695);
             handPoseInChestBodyFrame.getOrientation()
-                                    .set(robotSide.negateIfRightSide(0.051), robotSide.negateIfRightSide(0.446), robotSide.negateIfRightSide(-0.103), 0.887);
+                                    .set(robotSide.negateIfRightSide(0.056), -0.140, robotSide.negateIfRightSide(-0.105), 0.983);
          }
 
          bodyHomeConfiguration.put(jointMap.getHandName(robotSide), handPoseInChestBodyFrame);
