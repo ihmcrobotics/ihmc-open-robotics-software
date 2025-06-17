@@ -257,7 +257,7 @@ public class RDXVRKinematicsStreamingMode
       {
          armStreaming = new RDXVRArmStreaming(syncedRobot, ros2ControllerHelper, handDesiredControlFrames, trackerReferenceFrames, ikControlFramePoses);
       }
-
+      
       if (createToolbox)
       {
          toolbox = new KinematicsStreamingToolboxModule(robotModel, kstParameters, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
@@ -455,7 +455,7 @@ public class RDXVRKinematicsStreamingMode
 
       if (streamToController.get() && leftTriggerPressed)
       {
-         performHandAction(RobotSide.LEFT);
+
       }
 
       leftForwardJoystick = joystickY;
@@ -476,7 +476,7 @@ public class RDXVRKinematicsStreamingMode
 
       if (rightTriggerPressed)
       { // do not want to close grippers while interacting with the panel
-         performHandAction(RobotSide.RIGHT);
+         reinitializeToolboxRobotConfiguration();
       }
 
       if (enableDemonstrationButton.get())
@@ -1094,6 +1094,7 @@ public class RDXVRKinematicsStreamingMode
                                    initialConfigMessage);
       reinitializeToolbox();
       wakeUpToolbox();
+      LogTools.warn("Reinitializing KSt configuration");
    }
 
    private void reinitializeToolbox()
