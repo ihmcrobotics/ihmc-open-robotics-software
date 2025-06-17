@@ -262,6 +262,16 @@ public class RDXVRKinematicsStreamingMode
          ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
          ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
       }
+      else if (syncedRobot.getRobotModel().getSimpleRobotName().toLowerCase().contains("h1"))
+      {
+         for (RobotSide side : RobotSide.values) {
+            // Message for deactivating the wrist joints
+            ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.WRIST_YAW).hashCode());
+            ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.WRIST_ROLL).hashCode());
+            ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.FIRST_WRIST_PITCH).hashCode());
+         }
+      }
+
       if (createToolbox)
       {
          toolbox = new KinematicsStreamingToolboxModule(robotModel, kstParameters, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
@@ -452,7 +462,7 @@ public class RDXVRKinematicsStreamingMode
 
       if (streamToController.get() && leftTriggerPressed)
       {
-         performHandAction(RobotSide.LEFT);
+
       }
 
       leftForwardJoystick = joystickY;
@@ -472,7 +482,7 @@ public class RDXVRKinematicsStreamingMode
 
       if (rightTriggerPressed)
       { // do not want to close grippers while interacting with the panel
-         performHandAction(RobotSide.RIGHT);
+         reinitializeToolboxRobotConfiguration();
       }
 
       if (rightBButtonPressed)
@@ -1082,6 +1092,7 @@ public class RDXVRKinematicsStreamingMode
                                    initialConfigMessage);
       reinitializeToolbox();
       wakeUpToolbox();
+      LogTools.warn("Reinitializing KSt configuration");
    }
 
    private void reinitializeToolbox()

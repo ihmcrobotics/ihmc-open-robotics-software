@@ -266,6 +266,7 @@ public class KSTTools
             initialConfigurationMap.put(jointName, q);
          }
          ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
+         ikController.initialize();
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
