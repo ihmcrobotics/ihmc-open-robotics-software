@@ -68,7 +68,8 @@ public class AvatarMultiThreadingManager
 
    private final Runnable masterThread;
    private final AvatarEstimatorThread estimatorThread;
-   private final List<Runnable> masterThreadRunnables = new ArrayList<>();
+   private final List<Runnable> preEstimatorThreadRunnables = new ArrayList<>();
+   private final List<Runnable> postEstimatorThreadRunnables = new ArrayList<>();
 
    private ControllerTask controllerTask;
    private StepGeneratorTask stepGeneratorTask;
@@ -282,9 +283,7 @@ public class AvatarMultiThreadingManager
       running = false;
 
       if (useRealtimeThreads)
-      {
          ((RealtimeThread) masterThread).join();
-      }
       else
          ((RepeatingTaskThread) masterThread).stopRepeating();
 
@@ -329,6 +328,10 @@ public class AvatarMultiThreadingManager
       {
          masterContext.setTimestamp(monotonicTimeProvider.getTimestamp());
 
+         // Update all pre-estimator thread runnables
+         for (int i = 0; i < preEstimatorThreadRunnables.size(); i++)
+            preEstimatorThreadRunnables.get(i).run();
+
          // Update estimator thread
          long estimatorThreadStartTime = System.nanoTime();
          estimatorThread.run();
@@ -336,11 +339,11 @@ public class AvatarMultiThreadingManager
          estimatorThreadFrequencyCalculator.ping();
          estimatorThreadUpdateRate.set(estimatorThreadFrequencyCalculator.getFrequency());
 
-         // Update all master thread runnables
-         for (int i = 0; i < masterThreadRunnables.size(); i++)
-            masterThreadRunnables.get(i).run();
+         // Update all post-estimator thread runnables
+         for (int i = 0; i < postEstimatorThreadRunnables.size(); i++)
+            postEstimatorThreadRunnables.get(i).run();
 
-         // Run the thread scheduler
+         // Run the thread scheduler. This will update the controller, step generator, and IK streaming threads (if they exist)
          long barrierSchedulerStartTime = System.nanoTime();
          threadScheduler.doControl();
          threadSchedulerComputeTime.set(System.nanoTime() - barrierSchedulerStartTime);
@@ -354,19 +357,34 @@ public class AvatarMultiThreadingManager
       updateYoVariableServer();
    }
 
-   public void addRunnableOnControllerThread(Runnable runnable)
+   public void addPreEstimatorThreadRunnable(Runnable runnable)
    {
-      controllerTask.addRunnableOnSchedulerThread(runnable);
+      preEstimatorThreadRunnables.add(runnable);
    }
 
-   public void addRunnableOnStepGeneratorThread(Runnable runnable)
+   public void addPostEstimatorThreadRunnable(Runnable runnable)
    {
-      stepGeneratorTask.addRunnableOnSchedulerThread(runnable);
+      postEstimatorThreadRunnables.add(runnable);
    }
 
-   public void addRunnableOnMasterThread(Runnable runnable)
+   public void addPreControllerThreadRunnable(Runnable runnable)
    {
-      masterThreadRunnables.add(runnable);
+      controllerTask.addCallbackPreTask(runnable);
+   }
+
+   public void addPostControllerThreadRunnable(Runnable runnable)
+   {
+      controllerTask.addCallbackPostTask(runnable);
+   }
+
+   public void addPreStepGeneratorThreadRunnable(Runnable runnable)
+   {
+      stepGeneratorTask.addCallbackPreTask(runnable);
+   }
+
+   public void addPostStepGeneratorThreadRunnable(Runnable runnable)
+   {
+      stepGeneratorTask.addCallbackPostTask(runnable);
    }
 
    private void updateYoVariableServer()

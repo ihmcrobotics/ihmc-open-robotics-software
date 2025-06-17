@@ -14,7 +14,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
@@ -38,7 +37,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 {
    private final YoRegistry estimatorRegistry;
    private final YoBoolean firstTick;
-   private final YoLong updateIteration;
 
    private final SensorReader sensorReader;
    private final FullHumanoidRobotModel estimatorFullRobotModel;
@@ -88,7 +86,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
       estimatorThreadTimer = new ExecutionTimer("estimatorThreadTimer", super.getYoRegistry());
 
-      updateIteration = new YoLong("updateIteration", super.getYoRegistry());
       firstTick = new YoBoolean("firstTick", estimatorRegistry);
       firstTick.set(true);
    }
@@ -99,7 +96,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
       try
       {
-         updateIteration.increment();
          // In the case the SensorReader.compute() does fill the sensor data, it has to be called before initialize of the state estimator.
          sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
 
@@ -126,7 +122,6 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
 
          HumanoidRobotContextTools.updateContext(estimatorFullRobotModel, humanoidRobotContextData.getProcessedJointData());
          humanoidRobotContextData.setEstimatorRan(!firstTick.getValue());
-
       }
       catch (Throwable e)
       {

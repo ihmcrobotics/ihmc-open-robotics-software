@@ -182,7 +182,7 @@ public class AvatarMultiThreadingFactory
       threadingManager.get().destroy();
    }
 
-   public void buildThreads()
+   public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
@@ -242,6 +242,8 @@ public class AvatarMultiThreadingFactory
                                                            useMultiThreading,
                                                            yoVariableServer,
                                                            rootRegistry));
+
+      return threadingManager.get();
    }
 
    /**

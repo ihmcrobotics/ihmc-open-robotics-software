@@ -300,7 +300,6 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public MomentumEstimatorMode getMomentumEstimatorMode()
    {
-      return MomentumEstimatorMode.SIMPLE;
+      return MomentumEstimatorMode.SIMPLE; //TODO eventually want to move to DISTRIBUTED_IMUS
    }
-
 }

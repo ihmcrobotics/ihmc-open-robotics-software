@@ -47,11 +47,10 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       this.finalControllerState = finalControllerState;
       this.commandInputManager = commandInputManager;
 
-      // FIXME (20250608 rgriffin) this can be true, but we want it to be false for alexander
       enableTimeBasedTransition = new BooleanParameter(namePrefix + "EnableTimeBasedTransition",
                                                        "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
                                                        registry,
-                                                       false);
+                                                       true);
       standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration", registry, highLevelControllerParameters.getTimeInStandTransition(controllerState));
       standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
