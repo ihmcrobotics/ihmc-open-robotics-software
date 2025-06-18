@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
+public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParameters
 {
    private final double estimatorDT;
    private final RobotTarget target;
@@ -41,7 +41,7 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
 
    private final AlexanderSensorInformation sensorInformation;
 
-   public AlexanderStateEstimatorParameters(double estimatorDT, RobotTarget target, AlexanderSensorInformation sensorInformation, AlexanderJointMap jointMap)
+   public OpenAlexanderStateEstimatorParameters(double estimatorDT, RobotTarget target, AlexanderSensorInformation sensorInformation, AlexanderJointMap jointMap)
    {
       this.target = target;
       this.estimatorDT = estimatorDT;
@@ -81,12 +81,6 @@ public class AlexanderStateEstimatorParameters extends StateEstimatorParameters
 //                                                                                                breakFrequencyForPositionEstimation));
 //         }
       }
-   }
-
-   @Override
-   public boolean requestFrozenModeAtStart()
-   {
-      return true;
    }
 
    @Override

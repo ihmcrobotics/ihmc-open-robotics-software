@@ -46,7 +46,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 {
    private final AlexanderVersionInterface version;
    private final RobotTarget target;
-   private final AlexanderJointMap jointMap;
+   protected final AlexanderJointMap jointMap;
    private final AlexanderPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
@@ -57,7 +57,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
 
-   private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   protected TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
    private final AlexanderMomentumOptimizationSettings momentumOptimizationSettings;
@@ -559,11 +559,11 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.3);
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.5);
-         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.2);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.175);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.433);
+         jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.211);
          jointHomeConfiguration.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0.0);
       }
 
