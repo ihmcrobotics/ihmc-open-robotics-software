@@ -25,10 +25,11 @@ public interface HardwareCommunicationInterface
 
    boolean hasReceivedFirstState();
 
+   default void addSoftEStopListener(YoVariableChangedListener listener)
+   {
+   }
+
    boolean hasRobotFaulted();
 
    void addFaultListener(YoVariableChangedListener listener);
-
-   default void addSoftEStopListener(YoVariableChangedListener listener)
-   {};
 }

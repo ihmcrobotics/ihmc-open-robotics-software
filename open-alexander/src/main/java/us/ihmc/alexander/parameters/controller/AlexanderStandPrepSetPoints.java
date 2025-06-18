@@ -24,12 +24,12 @@ public class AlexanderStandPrepSetPoints implements WholeBodySetpointParameters
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.513);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.064);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.502);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0.0);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), robotSide.negateIfRightSide(0.1));
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), robotSide.negateIfRightSide(0.15));
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.7);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.95);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.375);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), robotSide.negateIfLeftSide(0.05));
 
          setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.146));
          setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(-0.202));

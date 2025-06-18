@@ -101,10 +101,12 @@ public class AlexanderModelFactory
    private void addForceSensors(RobotDefinition robotDefinition, AlexanderSensorInformation alexanderSensorInformation)
    {
       SideDependentList<String> feetForceSensorNames = alexanderSensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> feetForceSensorParentJointNames = alexanderSensorInformation.getFeetForceSensorParentJointNames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String forceSensorName = feetForceSensorNames.get(robotSide);
+         String forceSensorParentJointName = feetForceSensorParentJointNames.get(robotSide);
 
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.getTranslation().setX(0.053);//from cad
@@ -114,7 +116,7 @@ public class AlexanderModelFactory
          transform.appendYawRotation(robotSide == RobotSide.LEFT ? Math.PI : -1.0 / 3.0 * Math.PI);
          transform.appendRollRotation(Math.PI);
 
-         robotDefinition.getJointDefinition(forceSensorName).addSensorDefinition(new WrenchSensorDefinition(forceSensorName, transform));
+         robotDefinition.getJointDefinition(forceSensorParentJointName).addSensorDefinition(new WrenchSensorDefinition(forceSensorName, transform));
       }
    }
 
