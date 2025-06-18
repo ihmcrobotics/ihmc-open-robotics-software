@@ -850,7 +850,7 @@ public class KinematicsToolboxController extends ToolboxController
       previousUserFBCommands.clear();
       isUserProvidingSupportPolygon.set(false);
       // By default, always constrain the center of mass according to the current support polygon (if defined).
-      enableSupportPolygonConstraint.set(false);
+      enableSupportPolygonConstraint.set(true);
       inverseKinematicsSolution.getSupportRegion().clear();
    }
 
