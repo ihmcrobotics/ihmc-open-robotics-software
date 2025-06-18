@@ -34,7 +34,9 @@ public enum HighLevelControllerName
    @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC fast walking algorithms")
    QUICKSTER,
    EXTERNAL_TRANSITION_STATE,
-   EXTERNAL;
+   EXTERNAL,
+   @RosEnumValueDocumentation(documentation = "Accepts controller API commands, manages the trajectories, but passes the desired positions directly to the joint desired output list.")
+   POSITION_PASSTHROUGH;
 
 
    public static final HighLevelControllerName[] values = values();
