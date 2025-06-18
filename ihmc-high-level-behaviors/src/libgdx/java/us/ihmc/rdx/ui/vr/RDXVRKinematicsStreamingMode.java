@@ -113,6 +113,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private final ImBoolean performingDemonstration = new ImBoolean(false);
    private final AtomicBoolean requestRecordReplay = new AtomicBoolean(false);
 
    @Nullable
@@ -272,6 +273,7 @@ public class RDXVRKinematicsStreamingMode
          RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Left B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Demonstration (hold)", "Right B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Footstep Streaming - Control robot stepping (ankle trackers required)", "Hold both handle grippers");
       }
    }
@@ -312,6 +314,20 @@ public class RDXVRKinematicsStreamingMode
             InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
             InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
             boolean leftJoystickButtonClicked = leftJoystickButton.bChanged() && !leftJoystickButton.bState();
+            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+            {
+               performHandAction(RobotSide.RIGHT);
+            }
+
+            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+            {
+               performingDemonstration.set(controller.getBButtonActionData().bState());
+            }
+            else
+            {
+               performingDemonstration.set(false);
+            }
+            controller.setBButtonText("Demonstration (hold)");
 
             float joystickX = controller.getJoystickActionData().x();
             float joystickY = controller.getJoystickActionData().y();
@@ -403,6 +419,7 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
+         toolboxInputMessage.setRecordEpisode(performingDemonstration.get());
 
          toolboxInputMessage.setTimestamp(kinematicsRecorder.isReplaying() ? System.nanoTime() : controllerLastPollTimeNanos);
 
