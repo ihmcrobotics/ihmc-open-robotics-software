@@ -7,7 +7,6 @@ import java.util.List;
 
 import us.ihmc.alexander.AlexanderJointMap;
 import us.ihmc.alexander.AlexanderVersionInterface;
-import us.ihmc.alexander.OpenAlexanderVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -24,17 +23,18 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 
+import static us.ihmc.alexander.parameters.controller.HighLevelParametersTools.*;
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT;
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.POSITION;
 
-public class AlexanderHighLevelControllerParameters implements HighLevelControllerParameters
+public class OpenAlexanderHighLevelControllerParameters implements HighLevelControllerParameters
 {
-   private final AlexanderVersionInterface alexanderVersion;
-   private final AlexanderJointMap jointMap;
-   private final RobotTarget target;
+   protected final AlexanderVersionInterface alexanderVersion;
+   protected final AlexanderJointMap jointMap;
+   protected final RobotTarget target;
    private final AlexanderStandPrepSetPoints standPrepSetPoints;
 
-   public AlexanderHighLevelControllerParameters(AlexanderVersionInterface alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
+   public OpenAlexanderHighLevelControllerParameters(AlexanderVersionInterface alexanderVersion, AlexanderJointMap jointMap, RobotTarget target)
    {
       this.alexanderVersion = alexanderVersion;
       this.jointMap = jointMap;
@@ -55,6 +55,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
       {
          case WALKING:
          case CUSTOM1:
+         case QUICKSTER:
             return getDesiredJointBehaviorForWalkingNotLoaded();
          case DO_NOTHING_BEHAVIOR:
             return getDesiredJointBehaviorForDoNothing();
@@ -74,13 +75,13 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
    @Override
    public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
    {
-      if (state == HighLevelControllerName.WALKING || state == HighLevelControllerName.CUSTOM1)
+      if (state == HighLevelControllerName.WALKING || state == HighLevelControllerName.CUSTOM1 || state == HighLevelControllerName.QUICKSTER)
          return getDesiredJointBehaviorForWalkingUnderLoad();
       else
          return null;
    }
 
-   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
+   protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
    {
       if (target != RobotTarget.SCS)
          return getDesiredJointBehaviorForHangingAround();
@@ -97,7 +98,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
       return behaviors;
    }
 
-   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingUnderLoad()
+   protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingUnderLoad()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
@@ -140,7 +141,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
       return behaviors;
    }
 
-   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingNotLoaded()
+   protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForWalkingNotLoaded()
    {
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
@@ -344,6 +345,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
          case WALKING:
             return getJointAccelerationIntegrationParametersForWalkingNotLoaded();
          case CUSTOM1:
+         case QUICKSTER:
             return getJointAccelerationIntegrationParametersForFastWalkingNotLoaded();
          case DO_NOTHING_BEHAVIOR:
          case STAND_PREP_STATE:
@@ -361,13 +363,13 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
    @Override
    public List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersUnderLoad(HighLevelControllerName state)
    {
-      if (state == HighLevelControllerName.WALKING || state == HighLevelControllerName.CUSTOM1)
+      if (state == HighLevelControllerName.WALKING || state == HighLevelControllerName.CUSTOM1 || state == HighLevelControllerName.QUICKSTER)
          return getJointAccelerationIntegrationParametersForWalkingUnderLoad();
       else
          return null;
    }
 
-   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingNotLoaded()
+   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingNotLoaded()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -475,7 +477,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
       return ret;
    }
 
-   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForFastWalkingNotLoaded()
+   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForFastWalkingNotLoaded()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -581,7 +583,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
       return ret;
    }
 
-   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingUnderLoad()
+   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForWalkingUnderLoad()
    {
       List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> ret = new ArrayList<>();
 
@@ -640,79 +642,10 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
       return ret;
    }
 
-   private List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForHangingAround()
+   protected List<GroupParameter<JointAccelerationIntegrationParametersReadOnly>> getJointAccelerationIntegrationParametersForHangingAround()
    {
       // Possible add a single parameter that is shared between all joints here.
       return null;
-   }
-
-   public static JointDesiredBehavior configureNeckBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
-                                                        HumanoidJointNameMap jointMap,
-                                                        NeckJointName jointName,
-                                                        JointDesiredControlMode controlMode,
-                                                        double stiffness,
-                                                        double damping)
-   {
-      JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
-      behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
-      return jointBehavior;
-   }
-
-
-   public static JointDesiredBehavior configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
-                                                        HumanoidJointNameMap jointMap,
-                                                        SpineJointName jointName,
-                                                        JointDesiredControlMode controlMode,
-                                                        double stiffness,
-                                                        double damping,
-                                                        double maxPositionError,
-                                                        double maxVelocityError,
-                                                        double velocityScaling)
-   {
-      JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      jointBehavior.setMaxPositionError(maxPositionError);
-      jointBehavior.setMaxVelocityError(maxVelocityError);
-      jointBehavior.setVelocityScaling(velocityScaling);
-      List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
-      behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
-      return jointBehavior;
-   }
-
-   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
-                                                                 HumanoidJointNameMap jointMap,
-                                                                 LegJointName jointName,
-                                                                 JointDesiredControlMode controlMode,
-                                                                 double stiffness,
-                                                                 double damping,
-                                                                 double maxPositionError,
-                                                                 double maxVelocityError,
-                                                                 double velocityScaling)
-   {
-      JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      jointBehavior.setMaxPositionError(maxPositionError);
-      jointBehavior.setMaxVelocityError(maxVelocityError);
-      jointBehavior.setVelocityScaling(velocityScaling);
-      behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
-      return jointBehavior;
-   }
-
-   public static JointDesiredBehavior configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
-                                                                 HumanoidJointNameMap jointMap,
-                                                                 ArmJointName jointName,
-                                                                 JointDesiredControlMode controlMode,
-                                                                 double stiffness,
-                                                                 double damping,
-                                                                 double maxPositionError,
-                                                                 double maxVelocityError,
-                                                                 double velocityScaling)
-   {
-      JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
-      jointBehavior.setMaxPositionError(maxPositionError);
-      jointBehavior.setMaxVelocityError(maxVelocityError);
-      jointBehavior.setVelocityScaling(velocityScaling);
-      behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
-      return jointBehavior;
    }
 
    public static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, LegJointName legJointName)
@@ -772,6 +705,7 @@ public class AlexanderHighLevelControllerParameters implements HighLevelControll
    {
       return 1.5;
    }
+
    @Override
    public double getTimeInStandTransition(HighLevelControllerName controllerName)
    {

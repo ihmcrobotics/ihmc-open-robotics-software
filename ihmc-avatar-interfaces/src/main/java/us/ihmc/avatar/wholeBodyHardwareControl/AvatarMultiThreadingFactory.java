@@ -24,11 +24,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelCon
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.realtime.MonotonicTime;
-import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -48,7 +44,6 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import java.util.*;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
@@ -63,9 +58,8 @@ public class AvatarMultiThreadingFactory
 {
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
-   private static final boolean DISABLE_STEP_GENERATOR_THREAD = false;
 
-   private final YoRegistry registry;
+   private final YoRegistry rootRegistry;
 
    // Robot model
    private final DRCRobotModel robotModel;
@@ -74,7 +68,6 @@ public class AvatarMultiThreadingFactory
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
 
    // ROS stuff
-   public static final PriorityParameters ros2Priority = new PriorityParameters(25);
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
    public final String IHMC_ROS_CONTROLLER_NODE_NAME;
    private final RealtimeROS2Node estimatorRealtimeROS2Node;
@@ -97,9 +90,11 @@ public class AvatarMultiThreadingFactory
 
    // The remaining constructor arguments
    private final MonotonicTime period;
-   private final double schedulerDt;
+   private final double masterThreadDt;
    private final TimestampProvider monotonicTimeProvider;
    private final AvatarAffinityInterface affinity;
+   private final boolean createStepGeneratorThread;
+   private final boolean createIKStreamingThread;
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
@@ -111,38 +106,41 @@ public class AvatarMultiThreadingFactory
                                       HighLevelControllerStateFactory standPrepStateFactory,
                                       HighLevelControllerStateFactory freezeStateFactory,
                                       AvatarAffinityInterface affinity,
+                                      boolean createStepGeneratorThread,
+                                      boolean createIKStreamingThread,
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       MonotonicTime period,
-                                      double schedulerDt,
+                                      double masterThreadDt,
                                       TimestampProvider monotonicTimeProvider,
                                       YoRegistry registry,
                                       YoVariableServer yoVariableServer)
    {
       this.robotModel = robotModel;
       this.period = period;
-      this.schedulerDt = schedulerDt;
+      this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.affinity = affinity;
+      this.createStepGeneratorThread = createStepGeneratorThread;
+      this.createIKStreamingThread = createIKStreamingThread;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
-      this.registry = registry;
+      this.rootRegistry = registry;
       this.yoVariableServer = yoVariableServer;
 
       // Estimator and controller ROS2 nodes
-      // PeriodicRealtimeThreadSchedulerFactory ros2RealtimeThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(ros2Priority);
       IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_state_estimator";
-      IHMC_ROS_CONTROLLER_NODE_NAME =robotModel.getSimpleRobotName().toLowerCase() + "_" + HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME;
+      IHMC_ROS_CONTROLLER_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_" + HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME;
       PeriodicNonRealtimeThreadSchedulerFactory ros2RealtimeThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
       estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2RealtimeThreadFactory);
       controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2RealtimeThreadFactory);
 
       // Set up low-level output processor
-      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), schedulerDt, registry);
+      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), masterThreadDt, registry);
 
       // Setup state estimator factory
-      estimatorThreadFactory = createStateEstimatorFactory(robotModel, sensorReaderFactory);
+      estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
 
       // Setup state controller factory
       controllerFactory = createHighLevelControllerFactory(robotModel,
@@ -167,7 +165,7 @@ public class AvatarMultiThreadingFactory
 
    public void stop()
    {
-      LogTools.info("Calling shutdown in the controller factory");
+      System.out.println("Calling stop in the multi-threading factory");
       estimatorRealtimeROS2Node.stopSpinning();
       controllerRealtimeROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
@@ -176,13 +174,15 @@ public class AvatarMultiThreadingFactory
 
    public void destroy()
    {
+      this.stop();
+      System.out.println("Calling destroy in the multi-threading factory");
       estimatorRealtimeROS2Node.destroy();
       controllerRealtimeROS2Node.destroy();
       hardwareCommunicationInterface.destroy();
-      threadingManager.get().stop();
+      threadingManager.get().destroy();
    }
 
-   public void buildThreads()
+   public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
@@ -193,9 +193,8 @@ public class AvatarMultiThreadingFactory
       stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
       stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
       stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
-      stateModeMap.put(QUICKSTER, StateEstimatorMode.NORMAL);
-      stateModeMap.put(CUSTOM1, StateEstimatorMode.NORMAL);
       estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
+
       HumanoidRobotContextDataFactory controllerContextFactory = new HumanoidRobotContextDataFactory();
       controllerThread.set(new AvatarControllerThread(robotModel.getSimpleRobotName().toLowerCase(),
                                                       robotModel,
@@ -211,6 +210,21 @@ public class AvatarMultiThreadingFactory
       // Create step generator thread
       stepGeneratorThread.set(createStepGeneratorThread(robotModel, controllerThread.get(), controllerContextFactory, controllerFactory));
 
+      // Add estimator thread registry as child to the root registry (since estimator thread is essentially our master thread)
+      rootRegistry.addChild(estimatorThread.get().getYoRegistry());
+
+      // Set the root registry as the YoVariableServer's main registry
+      yoVariableServer.setMainRegistry(rootRegistry,
+                                       estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
+                                       estimatorThread.get().getSCS1YoGraphicsListRegistry());
+
+      // Add controller thread registry directly to the YoVariableServer (since it is in a separate thread)
+      yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
+
+      // Add step generator thread registry directly to the YoVariableServer (since it is in a separate thread)
+      if (createStepGeneratorThread)
+         yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
+
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
@@ -221,40 +235,32 @@ public class AvatarMultiThreadingFactory
                                                            estimatorThread.get(),
                                                            controllerThread.get(),
                                                            stepGeneratorThread.get(),
-                                                           affinity,
-                                                           schedulerDt,
+                                                           affinity, masterThreadDt,
                                                            period,
                                                            monotonicTimeProvider,
                                                            useRealtimeThreads,
                                                            useMultiThreading,
                                                            yoVariableServer,
-                                                           registry));
+                                                           rootRegistry));
 
-      // Do some YoVariable stuff
-      if (yoVariableServer != null)
-      {
-         List<JointBasics> yoVariableServerJointList = createYoVariableServerJointList(estimatorThread.get().getFullRobotModel().getElevator());
-         yoVariableServer.setMainRegistry(registry, yoVariableServerJointList, estimatorThread.get().getSCS1YoGraphicsListRegistry());
-         yoVariableServer.addRegistry(estimatorThread.get().getYoRegistry(), estimatorThread.get().getSCS1YoGraphicsListRegistry());
-         yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
-         if (!DISABLE_STEP_GENERATOR_THREAD)
-            yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
-      }
+      return threadingManager.get();
    }
 
    /**
     * Create Estimator Factory
     */
-   private AvatarEstimatorThreadFactory createStateEstimatorFactory(DRCRobotModel robotModel, SensorReaderFactory sensorReaderFactory)
+   private AvatarEstimatorThreadFactory createStateEstimatorFactory(DRCRobotModel robotModel, FullHumanoidRobotModel fullRobotModel, SensorReaderFactory sensorReaderFactory)
    {
       LogTools.info("The Squirrel estimates the number of acorns he needs for winter. Not many in Florida he thinks");
       HumanoidRobotContextDataFactory estimatorContextDataFactory = new HumanoidRobotContextDataFactory();
 
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
       avatarEstimatorThreadFactory.setROS2Info(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName());
-      avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel);
+
+      avatarEstimatorThreadFactory.configureWithWholeBodyControllerParameters(robotModel);
+      avatarEstimatorThreadFactory.setEstimatorFullRobotModel(fullRobotModel);
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
-      //avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
+//      avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
@@ -340,27 +346,30 @@ public class AvatarMultiThreadingFactory
             controllerFactory.addControllerFailureTransition(highLevelControllerName, fallbackControllerState);
          }
 
+         for (HighLevelControllerName highLevelControllerName : HighLevelControllerName.values)
+         {
+            if (highLevelControllerName == DO_NOTHING_BEHAVIOR)
+               continue;
+
+            controllerFactory.addRequestableTransition(highLevelControllerName, DO_NOTHING_BEHAVIOR);
+         }
+
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
          controllerFactory.addCustomStateTransition(createStandTransitionState(controllerFactory, feetForceSensorNames));
 
-         // Transition to Freeze state if we are unservoing
-         HighLevelControllerStateCommand transitionToFreezeCommand = new HighLevelControllerStateCommand();
+         // Transition to DO_NOTHING in the event of a fault
+         HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
          CommandInputManager controllerCommandInputManager = controllerFactory.getCommandInputManager();
-         lowLevelOutputProcessor.addServoListener(value ->
-                                                  {
-                                                     transitionToFreezeCommand.setHighLevelControllerName(FREEZE_STATE);
-                                                     if (value.getValueAsDouble() == 0.0)
-                                                        controllerCommandInputManager.submitMessage(transitionToFreezeCommand);
-                                                  });
-
-         // Transition to Freeze state if we are toggling E-Stop on or off
-         hardwareCommunicationInterface.addSoftEStopListener(value ->
-                                                             {
-                                                                transitionToFreezeCommand.setHighLevelControllerName(FREEZE_STATE);
-                                                                controllerCommandInputManager.submitMessage(transitionToFreezeCommand);
-                                                             });
+         hardwareCommunicationInterface.addFaultListener(change ->
+                                                         {
+                                                            if (hardwareCommunicationInterface.hasRobotFaulted())
+                                                            {
+                                                               transitionToDoNothingCommand.setHighLevelControllerName(DO_NOTHING_BEHAVIOR);
+                                                               controllerCommandInputManager.submitCommand(transitionToDoNothingCommand);
+                                                            }
+                                                         });
       }
 
       controllerFactory.setListenToHighLevelStatePackets(true);
@@ -379,7 +388,7 @@ public class AvatarMultiThreadingFactory
       AvatarStepGeneratorThread stepGeneratorThread = null;
       YoGraphicsListRegistry stepGeneratorGraphics = null;
 
-      LogTools.info("create step generator = " + !DISABLE_STEP_GENERATOR_THREAD);
+      LogTools.info("create step generator = " + createStepGeneratorThread);
 
       HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
                                                                                                                                    robotModel.getWalkingControllerParameters()
@@ -390,7 +399,19 @@ public class AvatarMultiThreadingFactory
 
       JoystickBasedSteppingPluginFactory pluginFactory = new JoystickBasedSteppingPluginFactory();
 
-      if (DISABLE_STEP_GENERATOR_THREAD)
+      if (createStepGeneratorThread)
+      {
+         stepGeneratorGraphics = new YoGraphicsListRegistry();
+
+         stepGeneratorThread = new AvatarStepGeneratorThread(pluginFactory,
+                                                             controllerContextFactory,
+                                                             controllerFactory.getStatusOutputManager(),
+                                                             controllerFactory.getCommandInputManager(),
+                                                             robotModel,
+                                                             environmentalConstraints,
+                                                             controllerRealtimeROS2Node);
+      }
+      else
       {
          // sets up the environmental constraint manager as a planar region consumer in the input manager
          pluginFactory.addPlanarRegionsListCommandConsumer(environmentalConstraints);
@@ -413,18 +434,6 @@ public class AvatarMultiThreadingFactory
          environmentalConstraints.getGraphicsListRegistry().getRegisteredArtifactLists(artifactLists);
          controllerThread.getSCS1YoGraphicsListRegistry().registerYoGraphicsLists(environmentalConstraints.getGraphicsListRegistry().getYoGraphicsLists());
          controllerThread.getSCS1YoGraphicsListRegistry().registerArtifactLists(artifactLists);
-      }
-      else
-      {
-         stepGeneratorGraphics = new YoGraphicsListRegistry();
-
-         stepGeneratorThread = new AvatarStepGeneratorThread(pluginFactory,
-                                                             controllerContextFactory,
-                                                             controllerFactory.getStatusOutputManager(),
-                                                             controllerFactory.getCommandInputManager(),
-                                                             robotModel,
-                                                             environmentalConstraints,
-                                                             controllerRealtimeROS2Node);
       }
 
       return stepGeneratorThread;
@@ -458,8 +467,6 @@ public class AvatarMultiThreadingFactory
             YoEnum<HighLevelControllerName> requestedState = controllerFactory.getRequestedControlStateEnum();
             ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
-
-            YoBoolean ignoreHasRobotBeenCalibratedCheck = new YoBoolean("ignoreHasRobotBeenCalibratedCheck", parentRegistry);
 
             StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(STAND_TRANSITION_STATE,
                                                                                                    requestedState,
@@ -501,23 +508,9 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addCustomControlState(customControllerStateFactory);
    }
 
-   public static List<JointBasics> createYoVariableServerJointList(RigidBodyBasics rootBody)
+   public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      List<JointBasics> joints = new ArrayList<>();
-
-      for (JointBasics joint : rootBody.childrenSubtreeIterable())
-      {
-         if (joint instanceof CrossFourBarJoint)
-         {
-            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
-         }
-         else
-         {
-            joints.add(joint);
-         }
-      }
-
-      return joints;
+      controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
    public YoRegistry getEstimatorRegistry()

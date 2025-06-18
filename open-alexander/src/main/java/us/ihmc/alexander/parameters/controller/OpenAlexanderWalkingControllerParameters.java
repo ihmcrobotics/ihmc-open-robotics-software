@@ -46,7 +46,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 {
    private final AlexanderVersionInterface version;
    private final RobotTarget target;
-   private final AlexanderJointMap jointMap;
+   protected final AlexanderJointMap jointMap;
    private final AlexanderPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
@@ -57,7 +57,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
    private final JointLimitParameters kneeJointLimitParameters;
 
-   private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   protected TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
    private final AlexanderMomentumOptimizationSettings momentumOptimizationSettings;
@@ -194,11 +194,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       return target == RobotTarget.REAL_ROBOT ? 0.45 : 0.35;
-   }
-
-   public boolean isNeckPositionControlled()
-   {
-      return false;
    }
 
    @Override
@@ -525,12 +520,10 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
 
    private PID3DGains createHandPositionControlGains()
    {
-      double kp, zeta, maximumPositionError, maximumVelocityError;
-
-         kp = 80.0;
-         zeta = 0.9;
-         maximumPositionError = 0.08;
-         maximumVelocityError = 0.6;
+      double kp = 80.0;
+      double zeta = 0.9;
+      double maximumPositionError = 0.08;
+      double maximumVelocityError = 0.6;
 
       DefaultPID3DGains gains = new DefaultPID3DGains();
       gains.setProportionalGains(kp);
@@ -732,15 +725,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    public String[] getJointsToIgnoreInController()
    {
       return new String[0];
-   }
-
-   @Override
-   public String[] getInactiveJoints()
-   {
-      if (target == RobotTarget.REAL_ROBOT)
-         return new String[] {"SPINE_Y", "SPINE_X"};
-      else
-         return super.getInactiveJoints();
    }
 
    @Override

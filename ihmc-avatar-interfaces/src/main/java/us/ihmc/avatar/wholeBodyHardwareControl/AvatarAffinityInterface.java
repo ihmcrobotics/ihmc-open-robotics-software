@@ -11,19 +11,19 @@ import us.ihmc.realtime.PriorityParameters;
  */
 public interface AvatarAffinityInterface
 {
-   Processor getSchedulerThreadProcessor();
+   Processor getMasterThreadProcessor();
 
    Processor getEstimatorThreadProcessor();
 
-   Processor getControlThreadProcessor();
+   Processor getControllerThreadProcessor();
 
    Processor getStepGeneratorThreadProcessor();
 
-   PriorityParameters getSchedulerPriority();
+   PriorityParameters getMasterThreadPriority();
 
-   PriorityParameters getEstimatorPriority();
+   PriorityParameters getEstimatorThreadPriority();
 
-   PriorityParameters getControllerPriority();
+   PriorityParameters getControllerThreadPriority();
 
-   PriorityParameters getStepGeneratorPriority();
+   PriorityParameters getStepGeneratorThreadPriority();
 }
