@@ -508,6 +508,11 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addCustomControlState(customControllerStateFactory);
    }
 
+   public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
+   {
+      controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
+   }
+
    public YoRegistry getEstimatorRegistry()
    {
       return estimatorThread.get().getYoRegistry();
