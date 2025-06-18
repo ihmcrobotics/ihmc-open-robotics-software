@@ -140,8 +140,6 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
    {
       qpSolver.reset();
       motionQPInputCalculator.initialize();
-      hasNotConvergedInPast.set(false);
-      hasNotConvergedCounts.set(0);
    }
 
    public InverseKinematicsSolution compute() throws InverseKinematicsOptimizationException
