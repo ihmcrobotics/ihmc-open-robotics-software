@@ -26,16 +26,16 @@ public class AlexanderStandPrepSetPoints implements WholeBodySetpointParameters
       {
          setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
          setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.525);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.0);
-         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.45);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.513);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.064);
+         setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.502);
          setPoints.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0.0);
 
-         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), 0.0);
-         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.0);
-         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), -0.525);
-         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), 1.0);
-         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_YAW), -0.45);
+         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.146));
+         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(-0.202));
+         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.018);
+         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -0.312);
+         setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_YAW), 0.0);
          setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
          setPoints.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_YAW), 0.0);
       }

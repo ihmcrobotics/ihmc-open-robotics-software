@@ -22,15 +22,15 @@ public class AlexanderInitialSetup extends HumanoidRobotInitialSetup
       {
          setJoint(robotSide, LegJointName.HIP_ROLL, 0.0);
          setJoint(robotSide, LegJointName.HIP_YAW, 0.0);
-         setJoint(robotSide, LegJointName.HIP_PITCH, -0.25);
-         setJoint(robotSide, LegJointName.KNEE_PITCH, 0.5);
-         setJoint(robotSide, LegJointName.ANKLE_PITCH, -0.2);
+         setJoint(robotSide, LegJointName.HIP_PITCH, -0.175);
+         setJoint(robotSide, LegJointName.KNEE_PITCH, 0.433);
+         setJoint(robotSide, LegJointName.ANKLE_PITCH, -0.211);
          setJoint(robotSide, LegJointName.ANKLE_ROLL, 0.0);
 
-         setJoint(robotSide, ArmJointName.SHOULDER_YAW, robotSide.negateIfLeftSide(0.6));
-         setJoint(robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(0.3));
-         setJoint(robotSide, ArmJointName.SHOULDER_PITCH, 0.6);
-         setJoint(robotSide, ArmJointName.ELBOW_PITCH, -1.3);
+         setJoint(robotSide, ArmJointName.SHOULDER_YAW, robotSide.negateIfLeftSide(0.202));
+         setJoint(robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(0.146));
+         setJoint(robotSide, ArmJointName.SHOULDER_PITCH, 0.018);
+         setJoint(robotSide, ArmJointName.ELBOW_PITCH, -0.312);
          setJoint(robotSide, ArmJointName.ELBOW_YAW, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_ROLL, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_YAW, 0.0);
