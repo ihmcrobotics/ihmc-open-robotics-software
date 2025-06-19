@@ -9,6 +9,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
+/**
+ * Assorted tools.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ */
 public class LeRobotDatasetTools
 {
    public static List<Path> findLeRobotDatasetSubdirectories(Path startDirectory)

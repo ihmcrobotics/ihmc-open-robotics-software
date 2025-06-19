@@ -2,6 +2,8 @@ package us.ihmc.avatar.logProcessor.leRobot;
 
 /**
  * Utility class to calculate statistics (mean and standard deviation) for integer record fields.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
  */
 public class LeRobotIntegerStatisticsCalculator
 {

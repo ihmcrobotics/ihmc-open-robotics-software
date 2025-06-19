@@ -10,6 +10,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Calculates data statistics, which are used to normalize the machine learning data
+ * before training.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ */
 public class LeRobotDatasetEpisodeStatistics
 {
    private class RGBL

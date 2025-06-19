@@ -1,7 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
 import gnu.trove.list.array.TIntArrayList;
-import org.apache.commons.lang3.SystemUtils;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -11,7 +10,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -23,6 +21,11 @@ import java.nio.file.Path;
 import static us.ihmc.zed.global.zed.*;
 import static us.ihmc.zed.global.zed.SL_MEM_CPU;
 
+/**
+ * Handles writing the video files for the episodes.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ */
 public class LeRobotDatasetVideoWriter
 {
    private final RobotSide side;
@@ -32,7 +35,6 @@ public class LeRobotDatasetVideoWriter
 
    // Stats
    private final TIntArrayList redMeans = new TIntArrayList();
-
 
    public LeRobotDatasetVideoWriter(RobotSide side, Path mp4Path, ZEDSVOScrubber zedSVOScrubber)
    {

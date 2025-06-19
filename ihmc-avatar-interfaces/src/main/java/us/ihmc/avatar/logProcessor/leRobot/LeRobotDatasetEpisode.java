@@ -21,6 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Represents a single task demonstration.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ */
 public class LeRobotDatasetEpisode
 {
    private final int episodeIndex;

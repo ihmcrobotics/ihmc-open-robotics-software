@@ -16,6 +16,9 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
+/**
+ * Handles streaming the output of visuomotor policy inference to the IK streaming toolbox.
+ */
 public class LeRobotIKStreaming
 {
    private final SideDependentList<Pose3D> actionHandPoses;

@@ -15,8 +15,6 @@ import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Represents a LeRobot dataset (a huggingface format) in our system for generating datasets from IHMC logs.
+ */
 public class LeRobotDataset
 {
    private final String name;
@@ -179,7 +180,6 @@ public class LeRobotDataset
          System.out.println(episodeLength);
       }
    }
-
 
    public void removeEpisode(int index) throws IOException
    {

@@ -22,6 +22,10 @@ import us.ihmc.ros2.ROS2Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Manages communication with the Python side, which is running the LeRobot code
+ * with pytorch inference of the visuomotor policy. We use a ROS 2 API to interface with it.
+ */
 public class LeRobotInferenceManager
 {
    private static final ROS2Topic<?> LEROBOT = new ROS2Topic<>().withPrefix("lerobot");

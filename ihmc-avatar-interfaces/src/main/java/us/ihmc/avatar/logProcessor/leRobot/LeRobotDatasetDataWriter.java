@@ -17,7 +17,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Transform the end effector poses to walking frame or something
+/**
+ * Handles writing the non-visual robot data from YoVariables into Apache Parquet files.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ * <p>
+ * TODO: Transform the end effector poses to walking frame or something
+ */
 public class LeRobotDatasetDataWriter
 {
    private final List<LeRobotEpisodeRecord> records = new ArrayList<>();

@@ -9,6 +9,13 @@ import us.ihmc.commons.exception.ExceptionTools;
 
 import java.nio.file.Path;
 
+/**
+ * Used for regenerating dataset data, this is useful for re-reading the
+ * video files that we already generated. Can be used to tweak statistic
+ * calculation code.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ */
 public class LeRobotDatasetVideoReader
 {
    private final FFmpegFrameGrabber grabber;

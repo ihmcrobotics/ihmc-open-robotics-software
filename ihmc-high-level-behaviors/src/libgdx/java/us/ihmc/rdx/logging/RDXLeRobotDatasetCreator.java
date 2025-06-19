@@ -30,6 +30,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * UI to be used alongside a {@link RDXSCS2LogSession} in an RDX application to
+ * generate LeRobot datasets from IHMC log data.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ */
 public class RDXLeRobotDatasetCreator
 {
    private final RDXSCS2LogSession logSession;

@@ -8,6 +8,8 @@ import java.util.List;
  * Represents a record structure for writing and reading data from the LeRobot parquet files
  * using {@link com.jerolba.carpet.CarpetWriter} and {@link com.jerolba.carpet.CarpetReader}.
  * The fields match the columns in the *.parquet file.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
  */
 public record LeRobotEpisodeRecord
 (

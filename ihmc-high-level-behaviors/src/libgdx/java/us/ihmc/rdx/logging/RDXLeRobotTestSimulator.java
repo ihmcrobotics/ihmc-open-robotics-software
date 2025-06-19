@@ -49,6 +49,14 @@ import java.util.function.Supplier;
 import static us.ihmc.zed.global.zed.*;
 import static us.ihmc.zed.global.zed.SL_MEM_CPU;
 
+/**
+ * This helps test the trained visuomotor policy models by running the log data
+ * through the model and viewing the output.
+ * <p>
+ * Part of the {@link LeRobotDataset} generation system from IHMC logs.
+ * <p>
+ * TODO: Pass the output actions through the IK preview for a more complete visualization.
+ */
 public class RDXLeRobotTestSimulator
 {
    private final Function<Pose3DReadOnly, SCS2AvatarSimulation> simulationStarter;

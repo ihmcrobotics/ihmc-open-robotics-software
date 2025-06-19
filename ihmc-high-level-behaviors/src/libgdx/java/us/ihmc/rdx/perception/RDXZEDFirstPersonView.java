@@ -13,6 +13,10 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
+/**
+ * Helps overlay robot kinematic ghost data over the first person sensor camera view.
+ * It does this by creating a scene camera with the same camera parameters as the sensor.
+ */
 public class RDXZEDFirstPersonView
 {
    private final RDX3DScene scene3D;
