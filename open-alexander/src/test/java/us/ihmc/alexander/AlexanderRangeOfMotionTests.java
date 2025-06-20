@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarRangeOfMotionTests;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AlexanderRangeOfMotionTests extends AvatarRangeOfMotionTests

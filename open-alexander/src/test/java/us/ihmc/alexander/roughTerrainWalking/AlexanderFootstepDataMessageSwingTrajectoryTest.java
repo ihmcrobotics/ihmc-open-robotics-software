@@ -2,10 +2,10 @@ package us.ihmc.alexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.OpenAlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
-import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
-import us.ihmc.alexander.parameters.model.AlexanderPhysicalPropertiesV0;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
+import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalPropertiesV0;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarFootstepDataMessageSwingTrajectoryTest;

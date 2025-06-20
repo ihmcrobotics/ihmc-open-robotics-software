@@ -4,6 +4,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.warmup.HumanoidControllerWarumupTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.openAlexander.AlexanderControllerWarmup;
 import us.ihmc.robotics.Assert;
 import us.ihmc.yoVariables.variable.YoEnum;
 

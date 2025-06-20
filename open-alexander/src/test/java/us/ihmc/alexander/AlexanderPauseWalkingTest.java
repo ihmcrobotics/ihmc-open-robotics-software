@@ -2,7 +2,9 @@ package us.ihmc.alexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;

@@ -2,8 +2,8 @@ package us.ihmc.alexander.communication.producers;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.OpenAlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBufferTest;

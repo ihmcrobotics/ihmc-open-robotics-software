@@ -2,9 +2,8 @@ package us.ihmc.alexander.obstacleCourseTests;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.OpenAlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
-import us.ihmc.alexander.parameters.controller.*;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
@@ -13,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjus
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.openAlexander.parameters.controller.*;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-obstacle-slow-3")

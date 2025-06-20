@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarFootstepQueueingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-2")

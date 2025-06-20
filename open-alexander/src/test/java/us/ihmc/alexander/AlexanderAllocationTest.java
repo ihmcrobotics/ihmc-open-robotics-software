@@ -42,6 +42,8 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;

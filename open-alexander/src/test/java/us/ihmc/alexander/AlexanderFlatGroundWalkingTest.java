@@ -8,6 +8,8 @@ import org.opentest4j.TestAbortedException;
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)

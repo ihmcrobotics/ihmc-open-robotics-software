@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarDoubleStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 
 public class AlexanderDoubleStepTest extends AvatarDoubleStepTest
 {

@@ -1,7 +1,7 @@
 package us.ihmc.alexander.controllerAPI;
 
-import us.ihmc.alexander.OpenAlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxEndToEndTest;

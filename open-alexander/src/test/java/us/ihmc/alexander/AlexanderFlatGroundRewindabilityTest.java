@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 @Tag("humanoid-flat-ground")

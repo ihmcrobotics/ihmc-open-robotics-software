@@ -3,6 +3,8 @@ package us.ihmc.alexander;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 

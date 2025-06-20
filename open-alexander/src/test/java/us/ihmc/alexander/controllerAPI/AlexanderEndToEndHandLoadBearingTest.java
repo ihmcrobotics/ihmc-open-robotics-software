@@ -2,10 +2,8 @@ package us.ihmc.alexander.controllerAPI;
 
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import us.ihmc.alexander.OpenAlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.openAlexander.OpenAlexanderVersion;
+import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.avatar.controllerAPI.EndToEndHandLoadBearingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
