@@ -86,6 +86,18 @@ public class ZEDImageSensor extends ImageSensor
       this(cameraID, zedModel, slInputType, slDepthMode, DEFAULT_RESOLUTION, DEFAULT_FPS);
    }
 
+   /**
+    * See the documentation for the available resolutions and frame rates:
+    * <ul>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_QHDPLUS}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD2K}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1080}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD1200}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_HD720}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_SVGA}</li>
+    *    <li>{@link us.ihmc.zed.global.zed#SL_RESOLUTION_VGA}</li>
+    * </ul>
+    */
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
    {
       super(zedModel.name());
