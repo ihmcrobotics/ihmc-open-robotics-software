@@ -16,6 +16,7 @@ mainDependencies {
    api("com.hierynomus:sshj:0.32.0")
    api("org.jfree:org.jfree.svg:5.0.6")
    api("com.github.sh0nk:matplotlib4j:0.5.0")
+   api("com.jerolba:carpet-record:0.3.0") // Used for huggingface data exports
 
    api("us.ihmc:mecano-graphviz:17-0.19.2")
    api("us.ihmc:scs2-bullet-simulation:17-0.30.0")
