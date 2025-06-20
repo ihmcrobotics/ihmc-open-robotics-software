@@ -1124,23 +1124,35 @@ public class KinematicsStreamingToolboxParameters
       double positionLowerLimit = joint.getPositionLowerLimit();
       double positionUpperLimit = joint.getPositionUpperLimit();
 
-      /* No zero cross-over */
-      if (positionLowerLimit * positionUpperLimit > 0.0)
-         return;
+//      /* No zero cross-over */
+//      if (positionLowerLimit * positionUpperLimit > 0.0)
+//         return;
 
-      double tolerance = 0.1;
-      boolean adjustLowerLimit = Math.abs(positionLowerLimit) < Math.abs(positionUpperLimit);
-      if (adjustLowerLimit)
-      {
-         if (jointCustomPositionLowerLimits == null)
-            jointCustomPositionLowerLimits = new HashMap<>();
-         jointCustomPositionLowerLimits.put(jointName, tolerance);
-      }
-      else
+//      double tolerance = 0.1;
+//      boolean adjustLowerLimit = Math.abs(positionLowerLimit) < Math.abs(positionUpperLimit);
+//      if (adjustLowerLimit)
+//      {
+//         if (jointCustomPositionLowerLimits == null)
+//            jointCustomPositionLowerLimits = new HashMap<>();
+//         jointCustomPositionLowerLimits.put(jointName, tolerance);
+//      }
+//      else
+//      {
+//         if (jointCustomPositionUpperLimits == null)
+//            jointCustomPositionUpperLimits = new HashMap<>();
+//         jointCustomPositionUpperLimits.put(jointName, -tolerance);
+//      }
+      if (jointName.toLowerCase().contains("elbow"))
       {
          if (jointCustomPositionUpperLimits == null)
             jointCustomPositionUpperLimits = new HashMap<>();
-         jointCustomPositionUpperLimits.put(jointName, -tolerance);
+         jointCustomPositionUpperLimits.put(jointName, 1.422);
+      }
+      else if (jointName.toLowerCase().contains("knee"))
+      {
+         if (jointCustomPositionLowerLimits == null)
+            jointCustomPositionLowerLimits = new HashMap<>();
+         jointCustomPositionLowerLimits.put(jointName, 0.152);
       }
    }
 

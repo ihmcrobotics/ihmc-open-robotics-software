@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -58,6 +59,7 @@ public class RDXVRMotionRetargeting
    private boolean armScaling = false;
    private boolean comTracking = false;
    private double armLengthScaleFactor = 1.0;
+   private double previousOffsetValue = 0.5;
    private final SideDependentList<RDXReferenceFrameGraphic> shoulderFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> scaledHandsFrameGraphics = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> shoulderFrames = new SideDependentList<>();
@@ -139,7 +141,7 @@ public class RDXVRMotionRetargeting
          newPelvisFramePose.set(combinedTransformToWorld);
          // Zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
          newPelvisFramePose.changeFrame(initialPelvisFrame);
-         newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), 0.0,0.0);
+         newPelvisFramePose.getRotation().setYawPitchRoll(0.0, 0.0,0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          scaledPelvisFrame.update();
 
@@ -189,18 +191,28 @@ public class RDXVRMotionRetargeting
 
             // Calculate normalized offset along the line connecting the feet
             double normalizedOffset = dotProduct / normSqFeetVector;
+            if (normalizedOffset >= 1.0)
+               normalizedOffset = 1.0;
+            else if (normalizedOffset <= 0.0)
+            {
+               normalizedOffset = 0.0;
+            }
             // Filter value
-            double filteredNormalizedOffset = normalizedOffset;
+            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
             if (filteredNormalizedOffset >= 1.0)
                filteredNormalizedOffset = 1.0;
             else if (filteredNormalizedOffset <= 0.0)
             {
                filteredNormalizedOffset = 0.0;
             }
-            //         else
-            //         { //logit function
-            //            filteredNormalizedOffset = 0.5- 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
-            //         }
+            if (Double.isNaN(filteredNormalizedOffset))
+            {
+               filteredNormalizedOffset = previousOffsetValue;
+            }
+            else
+            {
+               previousOffsetValue = normalizedOffset;
+            }
 
             Point3D leftFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
             Point3D rightFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
@@ -312,6 +324,7 @@ public class RDXVRMotionRetargeting
          initialHandPositionsInWorld.put(side, null);
       retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;
+      previousOffsetValue = 0.5;
    }
 
    public Set<VRTrackedSegmentType> getRetargetedSegments()
