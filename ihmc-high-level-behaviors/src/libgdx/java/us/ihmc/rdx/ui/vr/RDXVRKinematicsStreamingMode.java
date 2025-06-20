@@ -412,7 +412,7 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processTrackers(toolboxInputMessage);
          processControllers(toolboxInputMessage);
-         doCoMControl(toolboxInputMessage);
+//         doCoMControl(toolboxInputMessage);
          retargetMotion(toolboxInputMessage);
 
          if (isKSTEnabled.get())
@@ -456,8 +456,6 @@ public class RDXVRKinematicsStreamingMode
       {
          if (streamToController.get())
             showGhosts.set(!showGhosts.get());
-         else
-            relaxHands();
       }
 
       if (streamToController.get() && leftTriggerPressed)
@@ -501,11 +499,6 @@ public class RDXVRKinematicsStreamingMode
       {
          if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
          {
-            RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
-
-            if (controlledSegment == null)
-               continue;
-
             FramePose3D desiredPose = new FramePose3D();
             FrameVector3D desiredAngularVelocity = new FrameVector3D();
             FrameVector3D desiredLinearVelocity = new FrameVector3D();
@@ -563,15 +556,20 @@ public class RDXVRKinematicsStreamingMode
             }
             if (motionRetargeting.isRetargetingNotNeeded(segmentType))
             {
-               KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                                  desiredPose,
-                                                                                  desiredAngularVelocity,
-                                                                                  desiredLinearVelocity,
-                                                                                  retargetingParameters.getPositionWeight(segmentType),
-                                                                                  retargetingParameters.getOrientationWeight(segmentType),
-                                                                                  retargetingParameters.getLinearRateLimitation(segmentType),
-                                                                                  retargetingParameters.getAngularRateLimitation(segmentType));
-               messageToPack.getInputs().add().set(message);
+               RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
+
+               if (controlledSegment != null)
+               {
+                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                          desiredPose,
+                          desiredAngularVelocity,
+                          desiredLinearVelocity,
+                          retargetingParameters.getPositionWeight(segmentType),
+                          retargetingParameters.getOrientationWeight(segmentType),
+                          retargetingParameters.getLinearRateLimitation(segmentType),
+                          retargetingParameters.getAngularRateLimitation(segmentType));
+                  messageToPack.getInputs().add().set(message);
+               }
             }
          }
       }
@@ -748,7 +746,7 @@ public class RDXVRKinematicsStreamingMode
          case LEFT_WRIST, RIGHT_WRIST -> ghostFullRobotModel.getForearm(segmentType.getSegmentSide());
          case CHEST -> ghostFullRobotModel.getChest();
          case WAIST -> ghostFullRobotModel.getPelvis();
-         default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
+         default -> null;
       };
    }
 
