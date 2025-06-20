@@ -10,6 +10,7 @@ import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.FrequencyCalculator;
@@ -262,6 +263,8 @@ public class AvatarMultiThreadingManager
    {
       if (useRealtimeThreads)
          ((RealtimeThread) masterThread).join();
+      else
+         ExceptionTools.handle(() -> ((RepeatingTaskThread) masterThread).join(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public void stop()
