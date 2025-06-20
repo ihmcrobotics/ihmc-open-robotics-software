@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7ec6150a0e882b7fcd57a9af52d50e69a7b50892b3cb1e2a13b58e97d6b1f6ff";
+   		return "72bdad3904591ea26ef444aa065a1f3ee22faa5eb065e728930fee4a7ca844c8";
    }
    
    @Override
@@ -71,8 +71,6 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
       current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -114,9 +112,6 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
       current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassInput(), current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -142,8 +137,6 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       cdr.write_type_7(data.getUseCenterOfMassInput());
 
       toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.write(data.getCenterOfMassInput(), cdr);
-      cdr.write_type_7(data.getRecordEpisode());
-
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
@@ -164,8 +157,6 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       data.setUseCenterOfMassInput(cdr.read_type_7());
       	
       toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.read(data.getCenterOfMassInput(), cdr);	
-      data.setRecordEpisode(cdr.read_type_7());
-      	
 
    }
 
@@ -182,7 +173,6 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       ser.write_type_7("use_center_of_mass_input", data.getUseCenterOfMassInput());
       ser.write_type_a("center_of_mass_input", new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassInput());
 
-      ser.write_type_7("record_episode", data.getRecordEpisode());
    }
 
    @Override
@@ -198,7 +188,6 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       data.setUseCenterOfMassInput(ser.read_type_7("use_center_of_mass_input"));
       ser.read_type_a("center_of_mass_input", new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassInput());
 
-      data.setRecordEpisode(ser.read_type_7("record_episode"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage src, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage dest)

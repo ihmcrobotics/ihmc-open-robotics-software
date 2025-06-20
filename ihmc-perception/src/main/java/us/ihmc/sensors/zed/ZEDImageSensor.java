@@ -43,17 +43,13 @@ public class ZEDImageSensor extends ImageSensor
 
    public static final int OUTPUT_IMAGE_COUNT = 3;
 
-   private static final int DEFAULT_RESOLUTION = SL_RESOLUTION_HD720;
-   private static final int DEFAULT_FPS = 15;
+   protected static final int CAMERA_FPS = 15;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
-   private int resolution;
-   private int fps;
-   private int bitrate;
    private String remoteStreamingAddress;
    private int remoteStreamingPort;
    private final int localStreamingPort = nextStreamingPort++;
@@ -83,19 +79,12 @@ public class ZEDImageSensor extends ImageSensor
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
    {
-      this(cameraID, zedModel, slInputType, slDepthMode, DEFAULT_RESOLUTION, DEFAULT_FPS);
-   }
-
-   public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode, int resolution, int fps)
-   {
       super(zedModel.name());
 
       this.cameraID = cameraID;
       this.zedModel = zedModel;
       this.slInputType = slInputType;
       this.slDepthMode = slDepthMode;
-      this.resolution = resolution;
-      this.fps = fps;
 
       trackedSensorFrame = new MutableReferenceFrame(getSensorName() + "_tracked", ReferenceFrameTools.getWorldFrame());
 
@@ -168,16 +157,16 @@ public class ZEDImageSensor extends ImageSensor
          SL_CalibrationParameters sensorIntrinsics = sl_get_calibration_parameters(cameraID, false);
          imageWidth = sl_get_width(cameraID);
          imageHeight = sl_get_height(cameraID);
-         fps = (int) sl_get_camera_fps(cameraID);
-         bitrate = calculateBitrate(imageWidth, imageHeight, fps);
 
          if (slInputType != SL_INPUT_TYPE_STREAM)
-         {
-            int gopSize = -1;
-            int adaptativeBitrate = 0;
-            int chunkSize = 16084;
-            sl_enable_streaming(cameraID, SL_STREAMING_CODEC_H264, bitrate, (short) localStreamingPort, gopSize, adaptativeBitrate, chunkSize, fps);
-         }
+            sl_enable_streaming(cameraID,
+                                SL_STREAMING_CODEC_H264,
+                                calculateBitrate(imageWidth, imageHeight, CAMERA_FPS),
+                                (short) localStreamingPort,
+                                -1,
+                                0,
+                                16084,
+                                CAMERA_FPS);
 
          leftSensorIntrinsics.setWidth(imageWidth);
          leftSensorIntrinsics.setHeight(imageHeight);
@@ -223,8 +212,8 @@ public class ZEDImageSensor extends ImageSensor
 
    protected void setInitParameters(SL_InitParameters parametersToSet)
    {
-      parametersToSet.camera_fps(fps);
-      parametersToSet.resolution(resolution);
+      parametersToSet.camera_fps(CAMERA_FPS);
+      parametersToSet.resolution(SL_RESOLUTION_HD720);
       parametersToSet.input_type(slInputType);
       parametersToSet.camera_device_id(cameraID);
       parametersToSet.camera_image_flip(SL_FLIP_MODE_OFF);
@@ -524,16 +513,5 @@ public class ZEDImageSensor extends ImageSensor
    {
       double bpp = 0.128; // Derived from 8000 kbps for 1080p30
       return (int) ((width * height * fps * bpp) / 1000);
-   }
-
-   public int getFps()
-   {
-      return fps;
-   }
-
-   /** In the case we are streaming */
-   public int getStreamingBitrate()
-   {
-      return bitrate;
    }
 }

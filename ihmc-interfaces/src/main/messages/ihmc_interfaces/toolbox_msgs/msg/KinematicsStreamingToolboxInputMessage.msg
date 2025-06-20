@@ -34,6 +34,3 @@ bool use_center_of_mass_input false
 # The (optional) input for controlling the center of mass of the robot.
 # If use_center_of_mass_input is false, this message is ignored.
 KinematicsToolboxCenterOfMassMessage center_of_mass_input
-# When false, episode is not being recorded for lerobot diffusion
-# When true, episode is being recorded for lerobot diffusion
-bool record_episode false
