@@ -320,17 +320,17 @@ public class ZEDImageSensor extends ImageSensor
 
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
-         returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight);
+         returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
          // Retrieve the grabbed left color image
          Pointer leftColorImagePointer = slMatPointers[LEFT_COLOR_IMAGE_KEY];
-         returnCode = sl_retrieve_image(cameraID, leftColorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight);
+         returnCode = sl_retrieve_image(cameraID, leftColorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
          // Retrieve the grabbed right color image
          Pointer rightColorImagePointer = slMatPointers[RIGHT_COLOR_IMAGE_KEY];
-         returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight);
+         returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
          synchronized (grabbedImages)

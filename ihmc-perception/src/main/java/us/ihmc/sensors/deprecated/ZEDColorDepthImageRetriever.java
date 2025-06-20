@@ -184,7 +184,7 @@ public class ZEDColorDepthImageRetriever
    {
       int slViewSide = side == RobotSide.LEFT ? SL_VIEW_LEFT : SL_VIEW_RIGHT;
       // Retrieve color image
-      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, slViewSide, SL_MEM_GPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_image", sl_retrieve_image(cameraID, colorImagePointer, slViewSide, SL_MEM_GPU, imageWidth, imageHeight, null));
       colorImageAcquisitionTime.set(Instant.now());
 
       // Convert to BGR and encode to jpeg
@@ -228,7 +228,7 @@ public class ZEDColorDepthImageRetriever
       // Retrieve depth image
       // There is a bug where retrieving the depth image using SL_MEM_CPU causes the depth image to be misaligned and very dark.
       // Thus, the image is retrieved onto a GpuMat then downloaded onto the CPU for further processing.
-      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight));
+      checkError("sl_retrieve_measure", sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, null));
       depthImageAcquisitionTime.set(Instant.now());
 
       if (depthGpuMat != null)
