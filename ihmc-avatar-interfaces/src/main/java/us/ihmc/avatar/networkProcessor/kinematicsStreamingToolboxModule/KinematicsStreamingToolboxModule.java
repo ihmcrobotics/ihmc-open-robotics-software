@@ -127,7 +127,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          s.takeNextData(robotConfigurationData, null);
-         robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
+         if (robotStateUpdater != null) // In some apps this can get called before robotStateUpdater is created
+            robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
       });
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
