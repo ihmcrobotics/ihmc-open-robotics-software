@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.steppableRegions.SnapResult;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.nio.ByteBuffer;
 
@@ -43,7 +44,7 @@ public class TerrainMapData
    {
       setHeightScaleParameters(heightScaleFactor, heightScaleOffset);
 
-      heightMap = new Mat(height, width, opencv_core.CV_16UC1);
+      heightMap = new Mat(height, width, opencv_core.CV_32FC1);
       localGridSize = height;
    }
 
@@ -197,8 +198,9 @@ public class TerrainMapData
          return 0.0f;
 
       // This mask is necessary because the height is stored as a short, and it discards all the additional information past those two bytes.
-      float height = ((int) heightMap.ptr(rIndex, cIndex).getShort() & 0xFFFF);
-      return TerrainMapTools.convertScaledAndOffsetValue((float) heightScaleFactor, (float) heightScaleOffset, height);
+      float height = (int) heightMap.ptr(rIndex, cIndex).getFloat();
+      return height;
+//      return TerrainMapTools.convertScaledAndOffsetValue((float) heightScaleFactor, (float) heightScaleOffset, height);
    }
 
    public float getSnappedAreaLocal(int rIndex, int cIndex)
@@ -213,15 +215,16 @@ public class TerrainMapData
 
    public float getSnappedHeightLocal(int rIndex, int cIndex)
    {
-      if (snapHeightImage == null)
+      if (heightMap == null)
          return getHeightLocal(rIndex, cIndex);
 
       if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
          return 0.0f;
 
       // This mask is necessary because the height is stored as a short, and it discards all the additional information past those two bytes.
-      int height = ((int) snapHeightImage.ptr(rIndex, cIndex).getShort() & 0xFFFF);
-      return TerrainMapTools.convertScaledAndOffsetValue((float) heightScaleFactor, (float) heightScaleOffset, height);
+      float height = (int) heightMap.ptr(rIndex, cIndex).getFloat();
+      return height;
+//      return TerrainMapTools.convertScaledAndOffsetValue((float) heightScaleFactor, (float) heightScaleOffset, height);
    }
 
    public UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)

@@ -39,7 +39,8 @@ extern "C"
    should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 */
 extern "C"
-__global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeightMap,
+__global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
+                                   unsigned short *heightMapAsShorts, size_t pitchHeightMapAsShorts,
                                    unsigned short *steppabilityMap, size_t pitchSteppability,
                                    unsigned short *snapHeightMap, size_t pitchSnapHeight,
                                    unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
@@ -96,8 +97,10 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
 
             int2 query_key = make_int2(x_query, y_query);
 
-            unsigned short *query_height_int = (unsigned short *)((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-            max_height_int = max(*query_height_int, max_height_int);
+            float *query_height_int = (float *)((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+            float height_int = *query_height_int + params[HEIGHT_OFFSET];
+            height_int *= params[HEIGHT_SCALING_FACTOR];
+            max_height_int = max(static_cast<int>(height_int), max_height_int);
         }
     }
 
@@ -144,8 +147,8 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
             // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
             max_points_possible_under_support++;
 
-            unsigned short *heightValue = (unsigned short *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-            float query_height = (float) *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+            float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+            float query_height = (float) *heightValue;
 
             if (isnan(query_height))
                 continue;
@@ -247,8 +250,10 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
 
                 int2 query_key = make_int2(x_query, y_query);
 
-                unsigned short *heightValue = (unsigned short *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-                int query_height_int = (int) *heightValue;
+                float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+                float height = *heightValue + params[HEIGHT_OFFSET];
+                height *= params[HEIGHT_SCALING_FACTOR];
+                int query_height_int = static_cast<int>(height);
 
                 // compute the relative height at this point, compared to the height contained in the current cell.
                 int relative_height_of_query_int = query_height_int - snap_height_int;
@@ -294,6 +299,13 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
     int normal_y_int = static_cast<int>(255 * (normal.x + 1.0f) / 2.0f);
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = make_int2(x_index, y_index);
+
+    float *heightAsFloat = (float *)((char *)heightMap + storage_key.y * pitchHeightMap) + storage_key.x;
+    float height_int = (float) *heightAsFloat + params[HEIGHT_OFFSET];
+    height_int *= params[HEIGHT_SCALING_FACTOR];
+
+    unsigned short *heightAsShort = (unsigned short *)((char *)heightMapAsShorts + storage_key.y * pitchHeightMapAsShorts) + storage_key.x;
+    *heightAsShort = static_cast<unsigned short>(height_int);
 
     unsigned char *steppabilityMapElement = (unsigned char *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
     *steppabilityMapElement = static_cast<unsigned char>(snap_result);

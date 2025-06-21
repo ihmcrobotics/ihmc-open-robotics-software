@@ -9,11 +9,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.Random;
 
 public class HeightMapToolsTest
 {
+   private static final boolean DEBUGGING = false;
    private final int iterations = 1000;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
@@ -21,23 +23,32 @@ public class HeightMapToolsTest
    public void testSpeedConvertHeightMapDataToMat()
    {
       int cellsPerAxis = 500;
-      HeightMapData heightMapData = new HeightMapData(0.02, 10.0, 0.0, 0.0);
-      for (int i = 0; i < cellsPerAxis; i++)
+      double gridSizeXY = cellsPerAxis * 0.02;
+
+      HeightMapData heightMapData = new HeightMapData(0.02, gridSizeXY, 0.0, 0.0);
+      int cellsPerAxisAdjustedForHeightMapData = cellsPerAxis + 1;
+      for (int i = 0; i < cellsPerAxisAdjustedForHeightMapData; i++)
       {
-         for (int j = 0; j < cellsPerAxis; j++)
+         for (int j = 0; j < cellsPerAxisAdjustedForHeightMapData; j++)
          {
-            heightMapData.setHeightAt(i, 1.0f);
+            int key = j * cellsPerAxisAdjustedForHeightMapData + i;
+            heightMapData.setHeightAt(key, 1.0f);
          }
       }
 
-      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_16UC1);
+      if (DEBUGGING)
+         PerceptionDebugTools.printMat("Input Mat (HeightMapData)", heightMapData.getHeightMat(), 1);
 
+      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), heightMapData.getHeightMat().type());
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
-         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
+         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
       }
+
+      if (DEBUGGING)
+         PerceptionDebugTools.printMat("Result", heightMap, 1);
 
       long endTime = System.nanoTime();
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;

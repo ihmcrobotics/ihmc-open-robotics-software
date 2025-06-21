@@ -114,7 +114,7 @@ public class TerrainMapTools
       if (terrainMapData.hasHeightMap())
       {
          message.setHasHeightMapData(true);
-         PerceptionMessageTools.packShortDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
+         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
       }
       if (terrainMapData.hasSnapHeight())
       {

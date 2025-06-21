@@ -4,8 +4,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-import java.nio.ShortBuffer;
-
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
  * - A discretization value
@@ -181,23 +179,9 @@ public class HeightMapTools
       }
    }
 
-   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData)
    {
-      int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
-      // This is done for speed optimization
-      double[] heightsAsDoubles = heightMapData.getHeights();
-      short[] heightsAsFloats = new short[totalCells];
-
-      for (int i = 0; i < totalCells; i++)
-      {
-         // Reverse the height calculation to get the raw height value
-         short height = (short) (((float) heightsAsDoubles[i] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-         heightsAsFloats[i] = height;
-      }
-
-      ShortBuffer buffer = heightMapToPack.createBuffer();
-      buffer.put(heightsAsFloats);
+      int type = heightMapData.getHeightMat().type();
+      heightMapData.getHeightMat().convertTo(heightMapToPack, type);
    }
 }

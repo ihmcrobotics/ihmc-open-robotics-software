@@ -1,6 +1,9 @@
 package us.ihmc.perception.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -13,8 +16,10 @@ public class HeightMapData
    /* Unordered list of the keys of all occupied cells */
    private final TIntArrayList occupiedCells = new TIntArrayList();
    /* List of heights indexed by key */
-   private double[] heights;
    private Vector3D[] normals;
+
+   private FloatIndexer heightsIndexer;
+   private Mat heights;
 
    private int centerIndex;
    private int cellsPerAxis;
@@ -31,7 +36,17 @@ public class HeightMapData
       this.gridSizeXY = gridSizeXY;
       this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
       this.cellsPerAxis = 2 * centerIndex + 1;
-      this.heights = new double[cellsPerAxis * cellsPerAxis];
+
+      heights = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1); // OpenCV uses row-major
+      heightsIndexer = heights.createIndexer();
+      for (int y = 0; y < cellsPerAxis; y++)
+      {
+         for (int x = 0; x < cellsPerAxis; x++)
+         {
+            heightsIndexer.put(x, y, Float.NaN);
+         }
+      }
+
       this.normals = new Vector3D[cellsPerAxis * cellsPerAxis];
       this.gridCenter.set(gridCenterX, gridCenterY);
 
@@ -58,13 +73,22 @@ public class HeightMapData
       this.cellsPerAxis = 2 * latestHeightMapData.getCenterIndex() + 1;
       this.estimatedGroundHeight = latestHeightMapData.getEstimatedGroundHeight();
 
-      this.heights = new double[latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis()];
+      this.heights = new Mat(latestHeightMapData.getCellsPerAxis(), latestHeightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
+      heightsIndexer = heights.createIndexer();
+
       this.normals = new Vector3D[latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis()];
 
-      for (int i = 0; i < latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis(); i++)
+      for (int y = 0; y < latestHeightMapData.getCellsPerAxis(); y++)
       {
-         this.heights[i] = latestHeightMapData.heights[i];
-         this.normals[i] = latestHeightMapData.normals[i] != null ? new Vector3D(latestHeightMapData.normals[i]) : null;
+         for (int x = 0; x < latestHeightMapData.getCellsPerAxis(); x++)
+         {
+            float height = latestHeightMapData.getHeightsIndexer().get(y, x);
+            heightsIndexer.put(x, y, height);
+
+            int key = y * cellsPerAxis + x;
+            Vector3D normal = latestHeightMapData.normals[key];
+            normals[key] = (normal != null) ? new Vector3D(normal) : null;
+         }
       }
 
       this.gridCenter.set(latestHeightMapData.getGridCenter());
@@ -82,7 +106,14 @@ public class HeightMapData
    public void reset()
    {
       occupiedCells.clear();
-      Arrays.fill(heights, Double.NaN);
+      for (int y = 0; y < cellsPerAxis; y++)
+      {
+         for (int x = 0; x < cellsPerAxis; x++)
+         {
+            heightsIndexer.put(x, y, Float.NaN);
+         }
+      }
+
       Arrays.fill(normals, null);
       estimatedGroundHeight = Double.NaN;
    }
@@ -102,6 +133,16 @@ public class HeightMapData
       return gridSizeXY;
    }
 
+   public FloatIndexer getHeightsIndexer()
+   {
+      return heightsIndexer;
+   }
+
+   public Mat getHeightMat()
+   {
+      return heights;
+   }
+
    public int getNumberOfOccupiedCells()
    {
       return occupiedCells.size();
@@ -109,7 +150,10 @@ public class HeightMapData
 
    public double getHeight(int i)
    {
-      return heights[occupiedCells.get(i)];
+      int key = occupiedCells.get(i);
+      int x = HeightMapTools.keyToXIndex(key, centerIndex);
+      int y = HeightMapTools.keyToYIndex(key, centerIndex);
+      return heightsIndexer.get(x, y);
    }
 
    public Point2D getCellPosition(int i)
@@ -126,12 +170,14 @@ public class HeightMapData
    {
       if (!MathTools.intervalContains(x, minX, maxX) || !MathTools.intervalContains(y, minY, maxY))
       {
-         //LogTools.debug(String.format("Outside height map bounds: %.2f, %.2f, %.2f, %.2f", minX, maxX, minY, maxY));
          return Double.NaN;
       }
 
-      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
-      return Double.isNaN(heights[key]) ? estimatedGroundHeight : heights[key];
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenter.getX(), gridResolutionXY, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenter.getY(), gridResolutionXY, centerIndex);
+
+      float height = heightsIndexer.get(xIndex, yIndex);
+      return Float.isNaN(height) ? estimatedGroundHeight : height;
    }
 
    public void setHeightAt(int key, double height)
@@ -141,16 +187,20 @@ public class HeightMapData
 
    public void setHeightAt(int key, double height, Vector3DReadOnly normal)
    {
-      if (key >= 0 && key < heights.length)
-      {
-         if (Double.isNaN(heights[key]))
-         {
-            occupiedCells.add(key);
-         }
+      int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+      int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
 
-         heights[key] = height;
-         if (normal != null)
-            normals[key] = new Vector3D(normal);
+      float currentHeight = heightsIndexer.get(xIndex, yIndex);
+      if (Float.isNaN(currentHeight))
+      {
+         occupiedCells.add(key);
+      }
+
+      heightsIndexer.put(xIndex, yIndex, (float) height);
+
+      if (normal != null)
+      {
+         normals[key] = new Vector3D(normal);
       }
    }
 
@@ -166,21 +216,30 @@ public class HeightMapData
          return;
       }
 
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenter.getX(), gridResolutionXY, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenter.getY(), gridResolutionXY, centerIndex);
       int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
-      if (Double.isNaN(heights[key]))
+
+      float currentHeight = heightsIndexer.get(xIndex, yIndex);
+      if (Float.isNaN(currentHeight))
       {
          occupiedCells.add(key);
       }
 
-      heights[key] = z;
+      heightsIndexer.put(xIndex, yIndex, (float) z);
+
       if (normal != null)
+      {
          normals[key] = new Vector3D(normal);
+      }
    }
 
    public double getHeightAt(int key)
    {
-      double height = heights[key];
-      return Double.isNaN(height) ? estimatedGroundHeight : height;
+      int x = HeightMapTools.keyToXIndex(key, centerIndex);
+      int y = HeightMapTools.keyToYIndex(key, centerIndex);
+      float height = heightsIndexer.get(x, y);
+      return Float.isNaN(height) ? estimatedGroundHeight : height;
    }
 
    public double getHeightAt(int xIndex, int yIndex)
@@ -190,13 +249,17 @@ public class HeightMapData
          return Double.NaN;
       }
 
-      double height = heights[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)];
-      return Double.isNaN(height) ? estimatedGroundHeight : height;
+      float height = heightsIndexer.get(xIndex, yIndex);
+      return Float.isNaN(height) ? estimatedGroundHeight : height;
    }
 
    public boolean isCellAtGroundPlane(int xIndex, int yIndex)
    {
-      return Double.isNaN(heights[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)]);
+      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+         return true; // or false, depending on how you want to treat out-of-bounds
+
+      float height = heightsIndexer.get(xIndex, yIndex);
+      return Float.isNaN(height);
    }
 
    public void setEstimatedGroundHeight(double estimatedGroundHeight)
@@ -226,14 +289,21 @@ public class HeightMapData
 
    public double getMinHeight()
    {
-      double minValue = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < heights.length; i++)
+      float minValue = Float.POSITIVE_INFINITY;
+
+      for (int y = 0; y < cellsPerAxis; y++)
       {
-         if (!Double.isNaN(heights[i]) && heights[i] < minValue)
-            minValue = heights[i];
+         for (int x = 0; x < cellsPerAxis; x++)
+         {
+            float height = heightsIndexer.get(x, y);
+            if (!Float.isNaN(height) && height < minValue)
+            {
+               minValue = height;
+            }
+         }
       }
 
-      return minValue;
+      return minValue == Float.POSITIVE_INFINITY ? Double.NaN : minValue;
    }
 
    public int getKey(int i)
@@ -243,8 +313,12 @@ public class HeightMapData
 
    public void markGroundCell(int i)
    {
-      heights[occupiedCells.get(i)] = Double.NaN;
-      normals[occupiedCells.get(i)] = null;
+      int key = occupiedCells.get(i);
+      int x = HeightMapTools.keyToXIndex(key, centerIndex);
+      int y = HeightMapTools.keyToYIndex(key, centerIndex);
+
+      heightsIndexer.put(x, y, Float.NaN);
+      normals[key] = null;
       occupiedCells.remove(i);
    }
 
@@ -262,6 +336,14 @@ public class HeightMapData
 
    public double[] getHeights()
    {
-      return heights;
+      double[] data = new double[cellsPerAxis * cellsPerAxis];
+      for (int y = 0; y < cellsPerAxis; y++)
+      {
+         for (int x = 0; x < cellsPerAxis; x++)
+         {
+            data[y * cellsPerAxis + x] = heightsIndexer.get(x, y);
+         }
+      }
+      return data;
    }
 }

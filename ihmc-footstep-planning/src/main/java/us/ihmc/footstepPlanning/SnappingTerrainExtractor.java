@@ -20,8 +20,7 @@ import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.net.URL;
 
-import static org.bytedeco.cuda.global.cudart.cudaFree;
-import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
+import static org.bytedeco.cuda.global.cudart.*;
 
 public class SnappingTerrainExtractor
 {
@@ -53,6 +52,7 @@ public class SnappingTerrainExtractor
     * The types of these mats depend on the data we are trying to store.
     * Check the {@link perception_msgs.msg.dds.TerrainMapMessage} to ensure these are the same
     */
+   private final GpuMat heightMapAsShorts;
    private final GpuMat terrainCostMat;
    private final GpuMat contactMat;
    private final GpuMat snapHeightMat;
@@ -115,6 +115,7 @@ public class SnappingTerrainExtractor
                                           heightMapParameters.getHeightOffset());
 
       // Initialize matrices and images
+      heightMapAsShorts = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
       terrainCostMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       contactMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapHeightMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
@@ -146,12 +147,12 @@ public class SnappingTerrainExtractor
       if (heightMap == null)
       {
          int cellsPerAxis = heightMapData.getCellsPerAxis();
-         heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+         heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       }
 
-      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
-      GpuMat gpuHeightMap = new GpuMat();
-      gpuHeightMap.upload(heightMap);
+      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
+      GpuMat gpuHeightMapAsFloats = new GpuMat();
+      gpuHeightMapAsFloats.upload(heightMap);
 
       // Populate parameters buffer for the snapping kernel
       float[] snappingParametersArray = populateSnappingParametersArray(gridCenter);
@@ -163,7 +164,8 @@ public class SnappingTerrainExtractor
       checkCUDAError();
 
       // Pass all the parameters to the kernel so that its setup to run correctly
-      snappingTerrainKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
+      snappingTerrainKernel.withPointer(gpuHeightMapAsFloats.data()).withLong(gpuHeightMapAsFloats.step());
+      snappingTerrainKernel.withPointer(heightMapAsShorts.data()).withLong(heightMapAsShorts.step());
       snappingTerrainKernel.withPointer(steppabilityMat.data()).withLong(steppabilityMat.step());
       snappingTerrainKernel.withPointer(snapHeightMat.data()).withLong(snapHeightMat.step());
       snappingTerrainKernel.withPointer(snapNormalXMat.data()).withLong(snapNormalXMat.step());
@@ -183,7 +185,7 @@ public class SnappingTerrainExtractor
 
       // --------------------- Run additional kernels for even more data to be used with the terrain map ------------------
 
-      terrainCostKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
+      terrainCostKernel.withPointer(gpuHeightMapAsFloats.data()).withLong(gpuHeightMapAsFloats.step());
       terrainCostKernel.withPointer(terrainCostMat.data()).withLong(terrainCostMat.step());
       terrainCostKernel.withPointer(snappingParametersDevicePointer);
 
@@ -239,9 +241,12 @@ public class SnappingTerrainExtractor
          cpuContactMap.close();
 
          Mat cpuHeightMap = new Mat();
-         gpuHeightMap.download(cpuHeightMap);
+         heightMapAsShorts.download(cpuHeightMap);
          terrainMapData.setHeightMap(cpuHeightMap);
+         cudaFreeAsync(gpuHeightMapAsFloats, stream);
+         gpuHeightMapAsFloats.close();
          cpuHeightMap.close();
+
 
          Mat cpuSnapHeightMap = new Mat();
          snapHeightMat.download(cpuSnapHeightMap);
@@ -337,6 +342,9 @@ public class SnappingTerrainExtractor
       steppableConnectionsKernelGridDim.close();
       blockSize.close();
 
+      heightMapAsShorts.close();
+      terrainCostMat.close();
+      contactMat.close();
       snapHeightMat.close();
       snapNormalXMat.close();
       snapNormalYMat.close();
