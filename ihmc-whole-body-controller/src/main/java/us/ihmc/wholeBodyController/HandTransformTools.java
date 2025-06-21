@@ -17,7 +17,7 @@ public class HandTransformTools
       ReferenceFrame controlFrame = fullRobotModel.getHandControlFrame(side);
 
       FramePose3D graphicPose = new FramePose3D(handFrame);
-      graphicPose.applyInverseTransform(graphicToHandFrameTransform);
+      graphicPose.applyTransform(graphicToHandFrameTransform);
       graphicPose.changeFrame(controlFrame);
 
       return graphicPose;

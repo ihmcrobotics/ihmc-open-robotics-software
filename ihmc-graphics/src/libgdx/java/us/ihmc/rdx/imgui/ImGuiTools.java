@@ -317,6 +317,18 @@ public class ImGuiTools
     * Renders a multiline widget that dynamically resizes to the necessary height
     * and the width of the available area.
     *
+    * @return If user modified
+    */
+   public static boolean inputTextMultiline(String widgetName, ImString imString)
+   {
+      float height = ImGuiTools.calcTextSizeY("A") * (Math.max(imString.get().lines().count() + 1, 2));
+      return ImGui.inputTextMultiline(widgetName, imString, ImGui.getColumnWidth(), height);
+   }
+
+   /**
+    * Renders a multiline widget that dynamically resizes to the necessary height
+    * and the width of the available area.
+    *
     * @return If user modified, the text
     *         If user did not modify, returns null
     */

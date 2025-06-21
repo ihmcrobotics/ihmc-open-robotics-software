@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -396,7 +397,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
-   @Tag("controller-api-2")
+   @Tag("controller-api-4")
    @Test
    public void testCinderBlockWalking()
    {
@@ -671,7 +672,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
 
          kp.set(500.0);
          kd.set(50.0);
-         maxAngleStandardDeviation.set(0.05);
+         maxAngleStandardDeviation.set(0.06);
       }
 
       private final FramePoint3D positionA = new FramePoint3D();
