@@ -1,9 +1,9 @@
 package us.ihmc.openAlexander.parameters.simulation;
 
-import us.ihmc.alexander.AlexanderVersionInterface;
-import us.ihmc.alexander.AlexanderPresetArmConfigurations;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
+import us.ihmc.openAlexander.AlexanderPresetArmConfigurations;
+import us.ihmc.openAlexander.AlexanderVersionInterface;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;

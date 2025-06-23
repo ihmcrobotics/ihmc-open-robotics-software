@@ -2,16 +2,10 @@ package us.ihmc.openAlexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-<<<<<<< HEAD:open-alexander/src/test/java/us/ihmc/openAlexander/roughTerrainWalking/AlexanderAbsoluteStepTimingsTest.java
+import us.ihmc.openAlexander.AlexanderVersionInterface;
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
-=======
-import us.ihmc.alexander.AlexanderVersionInterface;
-import us.ihmc.alexander.OpenAlexanderVersion;
-import us.ihmc.alexander.OpenAlexanderRobotModel;
-import us.ihmc.alexander.parameters.simulation.AlexanderInitialSetup;
->>>>>>> develop:open-alexander/src/test/java/us/ihmc/alexander/roughTerrainWalking/AlexanderAbsoluteStepTimingsTest.java
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
