@@ -2,9 +2,16 @@ package us.ihmc.openAlexander.roughTerrainWalking;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+<<<<<<< HEAD:open-alexander/src/test/java/us/ihmc/openAlexander/roughTerrainWalking/AlexanderAbsoluteStepTimingsTest.java
 import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.OpenAlexanderRobotModel;
 import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
+=======
+import us.ihmc.alexander.AlexanderVersionInterface;
+import us.ihmc.alexander.OpenAlexanderVersion;
+import us.ihmc.alexander.OpenAlexanderRobotModel;
+import us.ihmc.alexander.parameters.simulation.AlexanderInitialSetup;
+>>>>>>> develop:open-alexander/src/test/java/us/ihmc/alexander/roughTerrainWalking/AlexanderAbsoluteStepTimingsTest.java
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
@@ -46,7 +53,8 @@ public class AlexanderAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+      AlexanderVersionInterface robotVersion = OpenAlexanderVersion.V0_FULL_ROBOT;
+      return new OpenAlexanderRobotModel(robotVersion, RobotTarget.SCS)
       {
          @Override
          public InputStream getParameterOverwrites()
@@ -59,7 +67,7 @@ public class AlexanderAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsT
          @Override
          public HumanoidRobotInitialSetup getDefaultRobotInitialSetup()
          {
-            AlexanderInitialSetup initialSetup = new AlexanderInitialSetup(getRobotDefinition(), getJointMap());
+            AlexanderInitialSetup initialSetup = new AlexanderInitialSetup(robotVersion, getRobotDefinition(), getJointMap());
             initialSetup.setOffset(new Vector3D(-0.05, 0.0, 0.0));
             return initialSetup;
          }

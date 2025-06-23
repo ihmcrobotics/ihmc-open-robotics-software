@@ -33,12 +33,16 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
    private final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<>();
 
+   public AlexanderPhysicalPropertiesV0(boolean hasArms)
+   {
+      this(1.0, 1.0, hasArms);
+   }
    public AlexanderPhysicalPropertiesV0()
    {
-      this(1.0, 1.0);
+      this(1.0, 1.0, true);
    }
 
-   public AlexanderPhysicalPropertiesV0(double modelSizeScale, double modelMassScale)
+   public AlexanderPhysicalPropertiesV0(double modelSizeScale, double modelMassScale, boolean hasArms)
    {
       this.modelSizeScale = modelSizeScale;
       modelMassScalePower = modelSizeScale != 1.0 ? Math.log(modelMassScale) / Math.log(modelSizeScale) : 1.0;
@@ -63,12 +67,15 @@ public class AlexanderPhysicalPropertiesV0 implements AlexanderPhysicalPropertie
          soleToAnkleFrameTransforms.put(side, soleToAnkleFrame);
       }
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (hasArms)
       {
-         RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
-         controlFrameToWristTransform.getTranslation().set(0.0, 0.0, -0.075);
-         controlFrameToWristTransform.getTranslation().scale(modelSizeScale);
-         handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            RigidBodyTransform controlFrameToWristTransform = new RigidBodyTransform();
+            controlFrameToWristTransform.getTranslation().set(0.0, 0.0, -0.075);
+            controlFrameToWristTransform.getTranslation().scale(modelSizeScale);
+            handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
+         }
       }
    }
 

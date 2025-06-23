@@ -24,6 +24,7 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
    private static final String[] LOGGED_RESOURCES = {"models/alexander_V0/"};
 
    public static final String URDF_LOWER_BODY = "models/alexander_v0/urdf/alexander_v0.lowerBody.urdf";
+   public static final String URDF_ONLY_LEGS = "models/alexander_v0/urdf/alexander_v0.onlyLegs.urdf";
    public static final String URDF_LEFT_ARM = "models/alexander_v0/urdf/alexander_v0.leftArm.urdf";
    public static final String URDF_RIGHT_ARM = "models/alexander_v0/urdf/alexander_v0.rightArm.urdf";
 

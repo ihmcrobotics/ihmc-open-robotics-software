@@ -18,7 +18,8 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
                                OpenAlexanderURDFParameters.URDF_RIGHT_ARM), null),
    V0_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
                                  OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
-                                 OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null);
+                                 OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null),
+   V0_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_ONLY_LEGS), null);
 
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
@@ -100,6 +101,11 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
                                              true,
                                              true);
             break;
+         case V0_LEGS_ROBOT:
+            jointMap = new AlexanderJointMap(getPhysicalProperties(),
+                                             new SideDependentList<>(AlexanderArmConfiguration.NONE, AlexanderArmConfiguration.NONE),
+                                             false,
+                                             false);
       }
       return jointMap;
    }
@@ -153,7 +159,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
 
       switch (this)
       {
-         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+         case V0_FULL_ROBOT, V0_NUB_FOREARMS, V0_LEGS_ROBOT:
             sensorInformation = new AlexanderSensorInformation(this);
             break;
          default:
@@ -176,6 +182,8 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
          case V0_FULL_ROBOT, V0_NUB_FOREARMS:
             physicalProperties = new AlexanderPhysicalPropertiesV0();
             break;
+         case V0_LEGS_ROBOT:
+            physicalProperties = new AlexanderPhysicalPropertiesV0(false);
          default:
             break;
       }
