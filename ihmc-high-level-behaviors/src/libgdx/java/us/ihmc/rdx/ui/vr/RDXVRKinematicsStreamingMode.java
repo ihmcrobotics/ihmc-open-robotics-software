@@ -54,6 +54,7 @@ import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -113,6 +114,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private final ImBoolean enableDemonstrationButton = new ImBoolean(false);
    private final ImBoolean performingDemonstration = new ImBoolean(false);
    private final AtomicBoolean requestRecordReplay = new AtomicBoolean(false);
 
@@ -264,17 +266,19 @@ public class RDXVRKinematicsStreamingMode
 
       if (vrContext.getVRModel() == RDXVRHardwareModel.FOCUS3)
       {
-         RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Y button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Enable IK preview (toggle)", "A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Control robot (toggle)", "X button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Show/hide ghosts (while streaming)", "Y button");
       }
       else
       {
-         RDXBaseUI.getInstance().getKeyBindings().register("Show/Hide ghosts", "Left B button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Demonstration (hold)", "Right B button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Footstep Streaming - Control robot stepping (ankle trackers required)", "Hold both handle grippers");
+         RDXBaseUI.getInstance().getKeyBindings().register("Enable IK preview (toggle)", "Right A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Control robot (toggle)", "Left A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Show/hide ghosts (while streaming)", "Left B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Relax hands (not streaming)", "Left B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Start/stop record replay", "Right B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Footstep Streaming: Control robot stepping (ankle trackers required)", "Hold both handle grippers");
       }
    }
 
@@ -314,20 +318,6 @@ public class RDXVRKinematicsStreamingMode
             InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
             InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
             boolean leftJoystickButtonClicked = leftJoystickButton.bChanged() && !leftJoystickButton.bState();
-            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-            {
-               performHandAction(RobotSide.RIGHT);
-            }
-
-            if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
-            {
-               performingDemonstration.set(controller.getBButtonActionData().bState());
-            }
-            else
-            {
-               performingDemonstration.set(false);
-            }
-            controller.setBButtonText("Demonstration (hold)");
 
             float joystickX = controller.getJoystickActionData().x();
             float joystickY = controller.getJoystickActionData().y();
@@ -376,8 +366,8 @@ public class RDXVRKinematicsStreamingMode
 
             if (kinematicsRecorder.isRecording())
                controller.setBButtonText("Stop recording");
-            else if (kinematicsRecorder.isReplaying())
-               controller.setBButtonText("Stop replay");
+            else if (enableDemonstrationButton.get())
+               controller.setBButtonText("Mark demonstration (hold)");
             else
                controller.setBButtonText("Record/Replay");
 
@@ -390,8 +380,9 @@ public class RDXVRKinematicsStreamingMode
 
             boolean rightAButtonPressed = aButton.bChanged() && !aButton.bState();
             boolean rightBButtonPressed = bButton.bChanged() && !bButton.bState();
+            boolean rightBButtonState = bButton.bState();
             boolean rightTriggerPressed = clickTriggerButton.bChanged() && !clickTriggerButton.bState();
-            handleRightControllerJoystickInput(rightAButtonPressed, rightBButtonPressed, rightTriggerPressed, joystickX, joystickY);
+            handleRightControllerJoystickInput(rightAButtonPressed, rightBButtonPressed, rightBButtonState, rightTriggerPressed, joystickX, joystickY);
 
             gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
             kinematicsRecorder.recordControllerData(RobotSide.RIGHT,
@@ -472,6 +463,7 @@ public class RDXVRKinematicsStreamingMode
 
    private void handleRightControllerJoystickInput(boolean rightAButtonPressed,
                                                    boolean rightBButtonPressed,
+                                                   boolean rightBButtonState,
                                                    boolean rightTriggerPressed,
                                                    double joystickX,
                                                    double joystickY)
@@ -486,7 +478,11 @@ public class RDXVRKinematicsStreamingMode
          performHandAction(RobotSide.RIGHT);
       }
 
-      if (rightBButtonPressed)
+      if (enableDemonstrationButton.get())
+      {
+         performingDemonstration.set(rightBButtonState);
+      }
+      else if (rightBButtonPressed)
       {
          kinematicsRecorder.requestRecordReplay();
       }
@@ -984,11 +980,13 @@ public class RDXVRKinematicsStreamingMode
          comTracking.set(false);
       }
 
-      ghostRobotGraphic.renderImGuiWidgets();
-      // add widgets for recording/replaying motion in VR
-      ImGui.text("Press Left Joystick - Start/Stop recording");
+      ghostRobotGraphic.renderImGuiWidgets(); // FIXME: Does nothing?
+
+      ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
+      ImGui.checkbox(labels.get("Enable demonstration button"), enableDemonstrationButton);
+
+      ImGuiTools.separatorText("Record/Replay");
       kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Press Left Joystick - Start/Stop replay");
       kinematicsRecorder.renderReplayWidgets(labels);
       ImGui.text("Output:");
       ImGui.sameLine();
@@ -996,8 +994,6 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Status:");
       ImGui.sameLine();
       statusFrequencyPlot.renderImGuiWidgets();
-
-      ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
    }
 
    public void setKSTEnabled(boolean enabled)
