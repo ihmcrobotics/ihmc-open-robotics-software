@@ -1,6 +1,5 @@
 package us.ihmc.openAlexander.parameters.controller;
 
-import us.ihmc.alexander.*;
 import us.ihmc.openAlexander.*;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
