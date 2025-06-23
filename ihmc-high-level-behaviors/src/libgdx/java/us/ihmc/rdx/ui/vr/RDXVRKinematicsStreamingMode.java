@@ -349,6 +349,7 @@ public class RDXVRKinematicsStreamingMode
       }
 
       // Handle right joystick input
+      performingDemonstration.set(false); // add robustness to the hold function
       if (kinematicsRecorder.isReplaying())
       {
          boolean rightAButtonPressed = kinematicsRecorder.getAButtonPressed(RobotSide.RIGHT);
