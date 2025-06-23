@@ -249,7 +249,7 @@ public class RDXVRKinematicsStreamingMode
       kinematicsRecorder.setRecordCallback(this::onPlaybackChanged);
       kinematicsRecorder.setReplayCallback(this::onPlaybackChanged);
 
-      motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
+      motionRetargeting = new RDXVRMotionRetargeting(ghostFullRobotModel, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
       footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
       if(ENABLE_ARM_CONTROL_DURING_STEPPING)
       {
@@ -264,7 +264,8 @@ public class RDXVRKinematicsStreamingMode
       }
       else if (syncedRobot.getRobotModel().getSimpleRobotName().toLowerCase().contains("h1"))
       {
-         for (RobotSide side : RobotSide.values) {
+         for (RobotSide side : RobotSide.values)
+         {
             // Message for deactivating the wrist joints
             ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.WRIST_YAW).hashCode());
             ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.WRIST_ROLL).hashCode());
@@ -709,9 +710,9 @@ public class RDXVRKinematicsStreamingMode
                                                                                retargetingParameters.getOrientationWeight(segmentType),
                                                                                retargetingParameters.getLinearRateLimitation(segmentType),
                                                                                retargetingParameters.getAngularRateLimitation(segmentType));
-            // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
             if (segmentType.isHandRelated())
             {
+               // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
                // Check arm scaling state not changed -> disabled
                if (!isKSTEnabled.get())
                   return;
@@ -743,6 +744,7 @@ public class RDXVRKinematicsStreamingMode
       return switch (segmentType)
       {
          case LEFT_HAND, RIGHT_HAND -> ghostFullRobotModel.getHand(segmentType.getSegmentSide());
+         case LEFT_ANKLE, RIGHT_ANKLE -> ghostFullRobotModel.getFoot(segmentType.getSegmentSide());
          case LEFT_WRIST, RIGHT_WRIST -> ghostFullRobotModel.getForearm(segmentType.getSegmentSide());
          case CHEST -> ghostFullRobotModel.getChest();
          case WAIST -> ghostFullRobotModel.getPelvis();
