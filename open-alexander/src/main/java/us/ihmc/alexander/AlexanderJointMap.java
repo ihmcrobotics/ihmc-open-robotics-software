@@ -1,15 +1,23 @@
 package us.ihmc.alexander;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.alexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.*;
 
 public class AlexanderJointMap implements HumanoidJointNameMap
 {
@@ -59,10 +67,31 @@ public class AlexanderJointMap implements HumanoidJointNameMap
       this.hasArms = hasArms;
 
       List<String> jointNameList = new ArrayList<>();
-      for (Joints joint : Joints.values())
+
+      for (Joints joint : Joints.getLegJoints())
       {
-         if (joint.isPresent(armConfigurations))
-            jointNameList.add(joint.name);
+         jointNameList.add(joint.getName());
+      }
+      for (Joints joint : Joints.getSpineJoints())
+      {
+         jointNameList.add(joint.getName());
+      }
+      if (hasHead)
+      {
+         for (Joints joint : Joints.getNeckJoints())
+         {
+            jointNameList.add(joint.getName());
+         }  
+      }
+      if (hasArms)
+      {
+         for (Joints joint : Joints.getArmJoints())
+         {
+            if (joint.isPresent(armConfigurations))
+            {
+               jointNameList.add(joint.getName());
+            }
+         }
       }
 
       jointNames = jointNameList.toArray(new String[0]);
@@ -141,120 +170,6 @@ public class AlexanderJointMap implements HumanoidJointNameMap
                lastSimulatedJoints.add(lastSimulatedJoint.name);
             }
          }
-      }
-   }
-
-   public enum Joints
-   {
-      /* Left leg joints */
-      LEFT_HIP_Z,
-      LEFT_HIP_X,
-      LEFT_HIP_Y,
-      LEFT_KNEE_Y,
-      LEFT_ANKLE_Y,
-      LEFT_ANKLE_X,
-
-      /* Right leg joints */
-      RIGHT_HIP_Z,
-      RIGHT_HIP_X,
-      RIGHT_HIP_Y,
-      RIGHT_KNEE_Y,
-      RIGHT_ANKLE_Y,
-      RIGHT_ANKLE_X,
-
-      /* Spine joints */
-      SPINE_Z,
-//      SPINE_Y,
-
-      NECK_Z,
-      NECK_Y,
-      /* Left shoulder joints */
-      LEFT_SHOULDER_Y(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-      LEFT_SHOULDER_X(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-      LEFT_SHOULDER_Z(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-      LEFT_ELBOW_Y(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
-
-      /* Left forearm + gripper joints */
-      LEFT_WRIST_Z(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_WRIST_X(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_GRIPPER_Z(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_GRIPPER_X1(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-      LEFT_GRIPPER_X2(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
-
-      /* Left shoulder joints */
-      RIGHT_SHOULDER_Y(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-      RIGHT_SHOULDER_X(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-      RIGHT_SHOULDER_Z(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-      RIGHT_ELBOW_Y(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
-
-      /* Right forearm + gripper joints */
-      RIGHT_WRIST_Z(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_WRIST_X(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_GRIPPER_Z(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_GRIPPER_X1(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      RIGHT_GRIPPER_X2(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
-      ;
-
-      private final String name = toString();
-      private final RobotSide armJointSide;
-      private final AlexanderArmConfiguration armConfiguration;
-
-      Joints()
-      {
-         this(null, null);
-      }
-
-      Joints(RobotSide armJointSide, AlexanderArmConfiguration armConfiguration)
-      {
-         this.armJointSide = armJointSide;
-         this.armConfiguration = armConfiguration;
-      }
-
-      public boolean isPresent(SideDependentList<AlexanderArmConfiguration> armConfigurations)
-      {
-         if (this.armConfiguration == null || armConfigurations == null)
-            return true;
-         else
-            return armConfigurations.get(armJointSide).ordinal() >= this.armConfiguration.ordinal();
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-   }
-
-   public enum Links
-   {
-      HEAD_LINK,
-
-      /* Left leg links */
-      LEFT_HIP_YAW_LINK, LEFT_HIP_ROLL_LINK, LEFT_THIGH, LEFT_SHIN, LEFT_ANKLE_LINK, LEFT_FOOT,
-
-      /* Right leg links */
-      RIGHT_HIP_YAW_LINK, RIGHT_HIP_ROLL_LINK, RIGHT_THIGH, RIGHT_SHIN, RIGHT_ANKLE_LINK, RIGHT_FOOT,
-
-      /* Spine links */
-      PELVIS_LINK, SPINE_YAW_LINK, TORSO_LINK,
-
-      /* Left shoulder links */
-      LEFT_SHOULDER_PITCH_LINK, LEFT_SHOULDER_ROLL_LINK, LEFT_SHOULDER_YAW_LINK, LEFT_ELBOW_PITCH_LINK,
-
-      /* Left forearm links */
-      LEFT_WRIST_YAW_LINK, LEFT_WRIST_ROLL_LINK, LEFT_GRIPPER_Z_LINK, LEFT_GRIPPER_ROLL1_LINK, LEFT_GRIPPER_ROLL2_LINK,
-
-      /* Right shoulder links */
-      RIGHT_SHOULDER_PITCH_LINK, RIGHT_SHOULDER_ROLL_LINK, RIGHT_SHOULDER_YAW_LINK, RIGHT_ELBOW_PITCH_LINK,
-
-      /* Right forearm links */
-      RIGHT_WRIST_YAW_LINK, RIGHT_WRIST_ROLL_LINK, RIGHT_GRIPPER_Z_LINK, RIGHT_GRIPPER_ROLL1_LINK, RIGHT_GRIPPER_ROLL2_LINK,
-      ;
-
-      private final String name = toString();
-
-      public String getName()
-      {
-         return name;
       }
    }
 
@@ -573,6 +488,169 @@ public class AlexanderJointMap implements HumanoidJointNameMap
       if (armConfigurations == null)
          return false;
       return armConfigurations.get(RobotSide.RIGHT) == AlexanderArmConfiguration.FOREARM;
+   }
+
+   public enum Joints
+   {
+      /* Left leg joints */
+      LEFT_HIP_Z,
+      LEFT_HIP_X,
+      LEFT_HIP_Y,
+      LEFT_KNEE_Y,
+      LEFT_ANKLE_Y,
+      LEFT_ANKLE_X,
+
+      /* Right leg joints */
+      RIGHT_HIP_Z,
+      RIGHT_HIP_X,
+      RIGHT_HIP_Y,
+      RIGHT_KNEE_Y,
+      RIGHT_ANKLE_Y,
+      RIGHT_ANKLE_X,
+
+      /* Spine joints */
+      SPINE_Z,
+      //      SPINE_Y,
+
+      NECK_Z,
+      NECK_Y,
+      /* Left shoulder joints */
+      LEFT_SHOULDER_Y(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
+      LEFT_SHOULDER_X(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
+      LEFT_SHOULDER_Z(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
+      LEFT_ELBOW_Y(RobotSide.LEFT, AlexanderArmConfiguration.NUB),
+
+      /* Left forearm + gripper joints */
+      LEFT_WRIST_Z(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
+      LEFT_WRIST_X(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
+      LEFT_GRIPPER_Z(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
+      LEFT_GRIPPER_X1(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
+      LEFT_GRIPPER_X2(RobotSide.LEFT, AlexanderArmConfiguration.FOREARM),
+
+      /* Left shoulder joints */
+      RIGHT_SHOULDER_Y(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
+      RIGHT_SHOULDER_X(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
+      RIGHT_SHOULDER_Z(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
+      RIGHT_ELBOW_Y(RobotSide.RIGHT, AlexanderArmConfiguration.NUB),
+
+      /* Right forearm + gripper joints */
+      RIGHT_WRIST_Z(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
+      RIGHT_WRIST_X(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
+      RIGHT_GRIPPER_Z(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
+      RIGHT_GRIPPER_X1(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
+      RIGHT_GRIPPER_X2(RobotSide.RIGHT, AlexanderArmConfiguration.FOREARM),
+      ;
+
+      private final String name = toString();
+      private final RobotSide armJointSide;
+      private final AlexanderArmConfiguration armConfiguration;
+
+      Joints()
+      {
+         this(null, null);
+      }
+
+      Joints(RobotSide armJointSide, AlexanderArmConfiguration armConfiguration)
+      {
+         this.armJointSide = armJointSide;
+         this.armConfiguration = armConfiguration;
+      }
+
+      public boolean isPresent(SideDependentList<AlexanderArmConfiguration> armConfigurations)
+      {
+         if (armConfigurations.get(armJointSide) != AlexanderArmConfiguration.NONE)
+            return true;
+         else
+            return false;
+         //            return armConfigurations.get(armJointSide).ordinal() >= this.armConfiguration.ordinal();
+      }
+
+      public String getName()
+      {
+         return name;
+      }
+
+      public static List<Joints> getLegJoints()
+      {
+         return List.of(LEFT_HIP_Z,
+                        LEFT_HIP_X,
+                        LEFT_HIP_Y,
+                        LEFT_KNEE_Y,
+                        LEFT_ANKLE_Y,
+                        LEFT_ANKLE_X,
+                        RIGHT_HIP_Z,
+                        RIGHT_HIP_X,
+                        RIGHT_HIP_Y,
+                        RIGHT_KNEE_Y,
+                        RIGHT_ANKLE_Y,
+                        RIGHT_ANKLE_X);
+      }
+      
+      public static List<Joints> getSpineJoints()
+      {
+         return List.of(SPINE_Z);
+      }
+      
+      public static List<Joints> getNeckJoints()
+      {
+         return List.of(NECK_Z, NECK_Y);
+      }
+
+      public static List<Joints> getArmJoints()
+      {
+         return List.of(LEFT_SHOULDER_Y,
+                        LEFT_SHOULDER_X,
+                        LEFT_SHOULDER_Z,
+                        LEFT_ELBOW_Y,
+                        LEFT_WRIST_Z,
+                        LEFT_WRIST_X,
+                        LEFT_GRIPPER_Z,
+                        LEFT_GRIPPER_X1,
+                        LEFT_GRIPPER_X2,
+                        RIGHT_SHOULDER_Y,
+                        RIGHT_SHOULDER_X,
+                        RIGHT_SHOULDER_Z,
+                        RIGHT_ELBOW_Y,
+                        RIGHT_WRIST_Z,
+                        RIGHT_WRIST_X,
+                        RIGHT_GRIPPER_Z,
+                        RIGHT_GRIPPER_X1,
+                        RIGHT_GRIPPER_X2);
+      }
+   }
+
+   public enum Links
+   {
+      HEAD_LINK,
+
+      /* Left leg links */
+      LEFT_HIP_YAW_LINK, LEFT_HIP_ROLL_LINK, LEFT_THIGH, LEFT_SHIN, LEFT_ANKLE_LINK, LEFT_FOOT,
+
+      /* Right leg links */
+      RIGHT_HIP_YAW_LINK, RIGHT_HIP_ROLL_LINK, RIGHT_THIGH, RIGHT_SHIN, RIGHT_ANKLE_LINK, RIGHT_FOOT,
+
+      /* Spine links */
+      PELVIS_LINK, SPINE_YAW_LINK, TORSO_LINK,
+
+      /* Left shoulder links */
+      LEFT_SHOULDER_PITCH_LINK, LEFT_SHOULDER_ROLL_LINK, LEFT_SHOULDER_YAW_LINK, LEFT_ELBOW_PITCH_LINK,
+
+      /* Left forearm links */
+      LEFT_WRIST_YAW_LINK, LEFT_WRIST_ROLL_LINK, LEFT_GRIPPER_Z_LINK, LEFT_GRIPPER_ROLL1_LINK, LEFT_GRIPPER_ROLL2_LINK,
+
+      /* Right shoulder links */
+      RIGHT_SHOULDER_PITCH_LINK, RIGHT_SHOULDER_ROLL_LINK, RIGHT_SHOULDER_YAW_LINK, RIGHT_ELBOW_PITCH_LINK,
+
+      /* Right forearm links */
+      RIGHT_WRIST_YAW_LINK, RIGHT_WRIST_ROLL_LINK, RIGHT_GRIPPER_Z_LINK, RIGHT_GRIPPER_ROLL1_LINK, RIGHT_GRIPPER_ROLL2_LINK,
+      ;
+
+      private final String name = toString();
+
+      public String getName()
+      {
+         return name;
+      }
    }
 }
 
