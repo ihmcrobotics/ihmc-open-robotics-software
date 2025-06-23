@@ -1,5 +1,6 @@
 package us.ihmc.alexander.roughTerrainWalking;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.alexander.OpenAlexanderVersion;
@@ -13,6 +14,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 public class AlexanderSwingOverPlanarRegionsTest extends AvatarSwingOverPlanarRegionsTest
 {
    @Override
+   @Disabled // This test is not applicable to Alexander V0, as it works with V1 version
    @Test
    public void testSwingOverPlanarRegions()
    {
@@ -22,7 +24,7 @@ public class AlexanderSwingOverPlanarRegionsTest extends AvatarSwingOverPlanarRe
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override

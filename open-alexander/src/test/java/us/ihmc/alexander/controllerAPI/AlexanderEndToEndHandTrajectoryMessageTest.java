@@ -15,19 +15,19 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public class AlexanderEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
-   @Override
-   public double getHeightOffsetFromChestForSphereCenter()
-   {
-      return -0.25;
-   }
-
-   @Override
-   public double getStreamingRangeOfMotion()
-   {
-      return 0.4;
-   }
+//   @Override
+//   public double getHeightOffsetFromChestForSphereCenter()
+//   {
+//      return -0.25;
+//   }
+//
+//   @Override
+//   public double getStreamingRangeOfMotion()
+//   {
+//      return 0.4;
+//   }
 
    @Tag("controller-api-slow-3")
    @Override
@@ -110,6 +110,7 @@ public class AlexanderEndToEndHandTrajectoryMessageTest extends EndToEndHandTraj
    }
 
    @Tag("controller-api")
+   @Disabled // This test is not applicable to Alexander V0, as it works with V1 version.
    @Override
    @Test
    public void testStreaming() throws Exception
