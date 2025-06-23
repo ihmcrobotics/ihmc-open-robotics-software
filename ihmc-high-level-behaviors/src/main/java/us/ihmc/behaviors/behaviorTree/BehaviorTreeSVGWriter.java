@@ -4,6 +4,8 @@ import org.jfree.svg.SVGGraphics2D;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
 
 import java.io.FileWriter;
@@ -75,6 +77,8 @@ public class BehaviorTreeSVGWriter
 
       Path svgPath = Paths.get("%s.svg".formatted(node.getDefinition().getName()));
       LogTools.info("Saving SVG to {}", svgPath);
+
+      FileTools.ensureFileExists(svgPath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
       try (FileWriter writer = new FileWriter(svgPath.toFile()))
       {
