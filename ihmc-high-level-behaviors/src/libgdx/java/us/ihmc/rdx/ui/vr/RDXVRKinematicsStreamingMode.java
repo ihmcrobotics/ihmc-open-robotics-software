@@ -356,7 +356,8 @@ public class RDXVRKinematicsStreamingMode
          boolean rightTriggerPressed = kinematicsRecorder.getTriggerPressed(RobotSide.RIGHT);
          double joystickX = kinematicsRecorder.getJoystickX(RobotSide.RIGHT);
          double joystickY = kinematicsRecorder.getJoystickY(RobotSide.RIGHT);
-         handleRightControllerJoystickInput(rightAButtonPressed, rightBButtonPressed, rightTriggerPressed, joystickX, joystickY);
+         boolean notUsed = false;
+         handleRightControllerJoystickInput(rightAButtonPressed, rightBButtonPressed, notUsed, rightTriggerPressed, joystickX, joystickY);
       }
       else
       {
