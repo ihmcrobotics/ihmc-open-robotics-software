@@ -6,6 +6,12 @@
 
 ![develop, fast](https://github.com/ihmcrobotics/ihmc-open-robotics-software/actions/workflows/gradle-test-fast.yml/badge.svg?branch=0.14.0-240126) Current release status
 
+## Setup Guides
+
+These links take users to the setup guides to use the IHMC Open Robotics Software stack.
+- [Ubuntu (22.04/24.04)](https://ihmcrobotics.atlassian.net/wiki/external/ZTE1Y2NkMzA2MTUyNGIzOGI0NjkyZTMwYzgwZDY3MGU)
+- [Windows (10/11)](https://ihmcrobotics.atlassian.net/wiki/external/NDQ2ZDE2MWRkOGYxNDY4OTk3N2M5NWRiNDU2MGNkMTI)
+
 ## Robots
 
 This software has been used to power a wide variety of humanoid robots. This includes
