@@ -30,6 +30,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
+import us.ihmc.rdx.ui.teleoperation.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -72,7 +73,8 @@ public class RDXArmManager
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
-   private final RDXHandConfigurationManager handManager;
+   private final RDXHandConfigurationManager handConfigurationManager;
+   private final RDXHandManager handManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -120,18 +122,21 @@ public class RDXArmManager
          armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
-      handManager = new RDXHandConfigurationManager();
+      handConfigurationManager = new RDXHandConfigurationManager();
+      handManager = new RDXHandManager();
    }
 
    public void create(RDXBaseUI baseUI)
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
+      handConfigurationManager.create(baseUI, communicationHelper, syncedRobot);
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
    public void update(boolean interactablesEnabled)
    {
+      handConfigurationManager.update();
       handManager.update();
 
       boolean showWrench = indicateWrenchOnScreen.get();
@@ -216,6 +221,7 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
+      handConfigurationManager.renderImGuiWidgets();
       handManager.renderImGuiWidgets();
 
       ImGui.text("Arm Presets:");
@@ -362,11 +368,15 @@ public class RDXArmManager
       }
    }
 
-   public RDXHandConfigurationManager getHandManager()
+   public RDXHandConfigurationManager getHandConfigurationManager()
+   {
+      return handConfigurationManager;
+   }
+
+   public RDXHandManager getHandManager()
    {
       return handManager;
    }
-
    public RDXArmControlMode getArmControlMode()
    {
       return armControlMode;
