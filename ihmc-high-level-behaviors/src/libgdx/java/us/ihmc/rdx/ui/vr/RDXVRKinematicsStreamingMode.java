@@ -251,25 +251,9 @@ public class RDXVRKinematicsStreamingMode
 
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
       footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
-      if(ENABLE_ARM_CONTROL_DURING_STEPPING)
+      if (ENABLE_ARM_CONTROL_DURING_STEPPING)
       {
          armStreaming = new RDXVRArmStreaming(syncedRobot, ros2ControllerHelper, handDesiredControlFrames, trackerReferenceFrames, ikControlFramePoses);
-      }
-
-      if (syncedRobot.getRobotModel().getSimpleRobotName().contains("Nadia"))
-      {
-         // Message for deactivating the spine pitch and roll joints
-         ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
-         ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
-      }
-      else if (syncedRobot.getRobotModel().getSimpleRobotName().toLowerCase().contains("h1"))
-      {
-         for (RobotSide side : RobotSide.values)
-         {
-            ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.WRIST_YAW).hashCode());
-            ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.WRIST_ROLL).hashCode());
-            ikSolverConfigurationMessage.getJointsToDeactivate().add(syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.FIRST_WRIST_PITCH).hashCode());
-         }
       }
 
       if (createToolbox)
