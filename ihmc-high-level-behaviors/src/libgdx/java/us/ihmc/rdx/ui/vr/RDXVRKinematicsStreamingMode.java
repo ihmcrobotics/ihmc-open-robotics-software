@@ -249,7 +249,7 @@ public class RDXVRKinematicsStreamingMode
       kinematicsRecorder.setRecordCallback(this::onPlaybackChanged);
       kinematicsRecorder.setReplayCallback(this::onPlaybackChanged);
 
-      motionRetargeting = new RDXVRMotionRetargeting(ghostFullRobotModel, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
+      motionRetargeting = new RDXVRMotionRetargeting(syncedRobot.getFullRobotModel(), ghostFullRobotModel, handDesiredControlFrames, trackerReferenceFrames, headsetReferenceFrame, retargetingParameters);
       footstepStreaming = new RDXVRFootstepStreaming(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker, ENABLE_YO_VARIABLE_TOOLBOX_SERVERS);
       if(ENABLE_ARM_CONTROL_DURING_STEPPING)
       {
@@ -1005,9 +1005,9 @@ public class RDXVRKinematicsStreamingMode
       {
          if (!isKSTEnabled.get())
          {
+            initialize();
             wakeUpToolbox();
             ghostRobotGraphic.setActive(true);
-            initialize();
 
             comPositionInitial.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
             comPositionInitial.changeFrame(ReferenceFrame.getWorldFrame());
