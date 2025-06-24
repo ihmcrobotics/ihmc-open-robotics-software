@@ -325,8 +325,8 @@ public class RDXTeleoperationManager extends RDXPanel
                    armManager.executeDesiredArmCommand(side);
                 }
                });
-               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.OPEN, false, false));
-               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.CLOSE, false, false));
+               interactableHands.get(side).setOpenHand(() -> armManager.getHandConfigurationManager().publishHandCommand(side, SakeHandPreset.OPEN, false, false));
+               interactableHands.get(side).setCloseHand(() -> armManager.getHandConfigurationManager().publishHandCommand(side, SakeHandPreset.CLOSE, false, false));
                interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }
          }
