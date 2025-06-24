@@ -448,7 +448,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             isFootInSupport.get(robotSide).set(true);
             isHandInSupport.get(robotSide).set(false);
          }
-         isFootInSupport.get(RobotSide.LEFT).set(false);
          isUpperBodyLoadBearing.set(false);
       }
    }
