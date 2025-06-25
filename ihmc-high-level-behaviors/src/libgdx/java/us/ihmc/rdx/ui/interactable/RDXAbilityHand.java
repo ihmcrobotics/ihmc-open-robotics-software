@@ -29,9 +29,9 @@ public class RDXAbilityHand implements AbilityHandInterface
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
-         commandValues[i] = 0.0f;
-         actuatorPositions[i] = 0.0f;
-         controlFingerSliders[i] = 0.0f;
+         commandValues[i] = 30.0f;
+         actuatorPositions[i] = 30.0f;
+         controlFingerSliders[i] = 30.0f;
       }
    }
 
@@ -133,7 +133,7 @@ public class RDXAbilityHand implements AbilityHandInterface
 
       ImGui.popID();
       ImGui.separator();
-
+      ImGui.pushID(handSide.ordinal());
       if (ImGui.collapsingHeader("Individual Finger Control"))
       {
          ImGui.pushID("individual" + handSide.ordinal());
@@ -157,6 +157,7 @@ public class RDXAbilityHand implements AbilityHandInterface
          }
          ImGui.popID();
       }
+      ImGui.popID();
    }
 
    private void setAllFingers(float position)
