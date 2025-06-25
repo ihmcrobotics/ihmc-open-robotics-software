@@ -55,6 +55,21 @@ module controller_msgs
         boolean has_right_arm_streaming_message;
         controller_msgs::msg::dds::JointspaceStreamingMessage right_arm_streaming_message;
         /**
+         * Information for the spine joints
+         */
+        boolean has_spine_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage spine_streaming_message;
+        /**
+         * Information for the left leg joints
+         */
+        boolean has_left_leg_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage left_leg_streaming_message;
+        /**
+         * Information for the right leg joints
+         */
+        boolean has_right_leg_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage right_leg_streaming_message;
+        /**
          * Information for the chest
          */
         boolean has_chest_streaming_message;
