@@ -46,7 +46,7 @@ public enum HeightMapDataSetName
       try
       {
          message = serializer.deserialize(inputStream);
-         heightMapData = HeightMapMessageTools.unpackMessage(message);
+         heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message);
       }
       catch (IOException e)
       {

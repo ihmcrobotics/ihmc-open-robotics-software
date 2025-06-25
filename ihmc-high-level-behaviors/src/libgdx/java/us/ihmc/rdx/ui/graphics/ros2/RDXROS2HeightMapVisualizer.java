@@ -113,7 +113,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+                                              latestHeightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
                                               heightMap = HeightMapTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions

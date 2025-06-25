@@ -226,7 +226,7 @@ public class SimpleOcclusionTests
          }
 
          request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
-         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(visiblePlanarRegions)));
+         request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(visiblePlanarRegions)));
          request.setRequestedInitialStanceSide(stanceSide);
          request.setStartFootPoses(parameters.getIdealFootstepWidth(), stancePose);
          request.setTimeout(maxAllowedSolveTime + 5.0);

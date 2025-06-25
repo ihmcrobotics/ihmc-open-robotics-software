@@ -15,7 +15,7 @@ public class HeightMapMessageTools
     * This method is deprecated because it's slow. Sending and receiving messages should be done with the {@link Mat} objects to increase efficiency.
     */
    @Deprecated
-   public static HeightMapData unpackMessage(HeightMapMessage heightMapMessage)
+   public static HeightMapData unpackMessageToHeightMapData(HeightMapMessage heightMapMessage)
    {
       if (heightMapMessage == null)
          return null;
