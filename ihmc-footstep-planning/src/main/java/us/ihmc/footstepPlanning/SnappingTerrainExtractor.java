@@ -185,7 +185,7 @@ public class SnappingTerrainExtractor
 
       // --------------------- Run additional kernels for even more data to be used with the terrain map ------------------
 
-      terrainCostKernel.withPointer(gpuHeightMapAsFloats.data()).withLong(gpuHeightMapAsFloats.step());
+      terrainCostKernel.withPointer(heightMapAsShorts.data()).withLong(heightMapAsShorts.step());
       terrainCostKernel.withPointer(terrainCostMat.data()).withLong(terrainCostMat.step());
       terrainCostKernel.withPointer(snappingParametersDevicePointer);
 
