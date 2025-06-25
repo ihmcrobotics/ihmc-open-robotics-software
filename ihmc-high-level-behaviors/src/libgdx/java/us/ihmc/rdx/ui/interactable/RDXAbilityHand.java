@@ -8,8 +8,8 @@ public class RDXAbilityHand implements AbilityHandInterface
 {
    private final RobotSide handSide;
    private AbilityHandCommandType commandType;
-   private float[] commandValues = new float[ACTUATOR_COUNT];
-   private float[] actuatorPositions = new float[ACTUATOR_COUNT];
+   private final float[] commandValues = new float[ACTUATOR_COUNT];
+   private final float[] actuatorPositions = new float[ACTUATOR_COUNT];
 
    public RDXAbilityHand(RobotSide handSide)
    {
