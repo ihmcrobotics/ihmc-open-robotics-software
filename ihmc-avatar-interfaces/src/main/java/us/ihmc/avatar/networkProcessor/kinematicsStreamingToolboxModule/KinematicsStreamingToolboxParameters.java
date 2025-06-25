@@ -13,9 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import java.util.HashMap;
@@ -283,7 +281,7 @@ public class KinematicsStreamingToolboxParameters
    protected double solverPrivilegedDefaultWeight;
    protected double solverPrivilegedDefaultGain;
 
-   private final List<String> inactiveJoints = new ArrayList<>();
+   protected final List<String> inactiveJoints = new ArrayList<>();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
