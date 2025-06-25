@@ -222,7 +222,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
       {
          // An additional check here to make sure that we have data in the image
-         if (heightMap.ptr(0) != null)
+         if (heightMap != null && heightMap.ptr(0) != null)
          {
             float pixelScalingFactor = 10000.0f;
             heightMapRenderer.update(heightMap,

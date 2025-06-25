@@ -140,9 +140,33 @@ public class HeightMapTools
       return new double[] {r, g, b};
    }
 
-   /**
-    * This method converts a {@link Mat} object into a {@link HeightMapData} object.
-    */
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   {
+      int cellsPerAxis = heightMapData.getCellsPerAxis();
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      // This is done for speed optimization
+      double[] heightsAsDoubles = heightMapData.getHeights();
+      short[] heightsAsFloats = new short[totalCells];
+
+      for (int col = 0; col < cellsPerAxis; col++)
+      {
+         for (int row = 0; row < cellsPerAxis; row++)
+         {
+            // This is happening for a reason, the current implementation expects column major for the Mat objects, but the HeightMapData object is row major
+            int rowMajorIndex = row * cellsPerAxis + col;
+            int colMajorIndex = col * cellsPerAxis + row;
+
+            // Get the height as for row major, and save it as column major
+            short height = (short) (((float) heightsAsDoubles[rowMajorIndex] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+            heightsAsFloats[colMajorIndex] = height;
+         }
+      }
+
+      ShortBuffer buffer = heightMapToPack.createBuffer();
+      buffer.put(heightsAsFloats);
+   }
+
    public static void convertToHeightMapData(Mat heightMapPointer,
                                              HeightMapData heightMapDataToPack,
                                              Point3D gridCenter,
@@ -179,25 +203,5 @@ public class HeightMapTools
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
          heightMapDataToPack.setHeightAt(key, cellHeight);
       }
-   }
-
-   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
-   {
-      int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
-      // This is done for speed optimization
-      double[] heightsAsDoubles = heightMapData.getHeights();
-      short[] heightsAsFloats = new short[totalCells];
-
-      for (int i = 0; i < totalCells; i++)
-      {
-         // Reverse the height calculation to get the raw height value
-         short height = (short) (((float) heightsAsDoubles[i] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-         heightsAsFloats[i] = height;
-      }
-
-      ShortBuffer buffer = heightMapToPack.createBuffer();
-      buffer.put(heightsAsFloats);
    }
 }
