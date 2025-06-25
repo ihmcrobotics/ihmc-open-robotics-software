@@ -150,7 +150,7 @@ public class SnappingTerrainExtractor
          heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       }
 
-      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
+      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
       GpuMat gpuHeightMapAsFloats = new GpuMat();
       gpuHeightMapAsFloats.upload(heightMap);
 
@@ -246,7 +246,6 @@ public class SnappingTerrainExtractor
          cudaFreeAsync(gpuHeightMapAsFloats, stream);
          gpuHeightMapAsFloats.close();
          cpuHeightMap.close();
-
 
          Mat cpuSnapHeightMap = new Mat();
          snapHeightMat.download(cpuSnapHeightMap);
