@@ -5,7 +5,6 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
@@ -149,7 +148,7 @@ public class HeightMapTools
 
       // This is done for speed optimization
       double[] heightsAsDoubles = heightMapData.getHeights();
-      short[] heightsAsFloats = new short[totalCells];
+      float[] heightsAsFloats = new float[totalCells];
 
       for (int col = 0; col < cellsPerAxis; col++)
       {
@@ -160,7 +159,7 @@ public class HeightMapTools
             int colMajorIndex = col * cellsPerAxis + row;
 
             // Get the height as for row major, and save it as column major
-            short height = (short) (((float) heightsAsDoubles[rowMajorIndex] + (float) heightMapParameters.getHeightOffset())
+            float height = (float) (((float) heightsAsDoubles[rowMajorIndex] + (float) heightMapParameters.getHeightOffset())
                                     * heightMapParameters.getHeightScaleFactor());
             heightsAsFloats[colMajorIndex] = height;
          }
