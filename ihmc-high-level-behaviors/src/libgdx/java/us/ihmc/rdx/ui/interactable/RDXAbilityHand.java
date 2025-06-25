@@ -89,14 +89,30 @@ public class RDXAbilityHand implements AbilityHandInterface
 
       if (ImGui.button("Open"))
       {
-         setAllFingers(OPEN_POSITION);
-         communication.publishCommand(this);
+         publishOnly(4, 20);
+         try
+         {
+            Thread.sleep(400);
+         }
+         catch (InterruptedException e)
+         {
+            throw new RuntimeException(e);
+         }
+         publishExcept(4, 20);
       }
       ImGui.sameLine();
       if (ImGui.button("Close"))
       {
-         setAllFingers(CLOSED_POSITION);
-         communication.publishCommand(this);
+         publishExcept(4, CLOSED_POSITION);
+         try
+         {
+            Thread.sleep(1000);
+         }
+         catch (InterruptedException e)
+         {
+            throw new RuntimeException(e);
+         }
+         publishOnly(4,  60);
       }
       ImGui.sameLine();
       if(ImGui.button("Grip"))
@@ -154,5 +170,28 @@ public class RDXAbilityHand implements AbilityHandInterface
             setCommandValue(i, position);
          }
       }
+   }
+
+   private void publishExcept(int excludedIndex, float position)
+   {
+      setCommandType(AbilityHandCommandType.POSITION);
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+      {
+         if (i != excludedIndex)
+         {
+            float value = (i == 5) ? -position : position;
+            controlFingerSliders[i] = position;
+            setCommandValue(i, value);
+         }
+      }
+      communication.publishCommand(this);
+   }
+
+   private void publishOnly(int index, float position)
+   {
+      setCommandType(AbilityHandCommandType.POSITION);
+      controlFingerSliders[index] = position;
+      setCommandValue(index, index == 5 ? -position : position);
+      communication.publishCommand(this);
    }
 }
