@@ -124,11 +124,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                          heightMapMessage.getGridCenterY());
                                               }
                                               HeightMapTools.convertToHeightMapData(heightMap,
-                                                                                           latestHeightMapData,
-                                                                                           heightMapCenter,
-                                                                                           (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                                                           (float) heightMapParameters.getCellSizeInMeters(),
-                                                                                           heightMapParameters);
+                                                                                    latestHeightMapData,
+                                                                                    heightMapCenter,
+                                                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                                                    (float) heightMapParameters.getCellSizeInMeters(),
+                                                                                    heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)

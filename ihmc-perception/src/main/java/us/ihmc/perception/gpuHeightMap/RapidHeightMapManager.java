@@ -55,6 +55,7 @@ public class RapidHeightMapManager
    {
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
+
       latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
                                                      0.0,
