@@ -46,7 +46,7 @@ public class CollisionFreeSwingCalculatorLogViewer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 

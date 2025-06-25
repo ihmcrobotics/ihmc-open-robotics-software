@@ -64,7 +64,7 @@ public class RDXRemoteHeightMapPanel
       if (heightMapMessage == null || !heightMapPanel.getImagePanel().getIsShowing().get())
          return;
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
       int size = heightMapData.getCellsPerAxis();
       if (heightMapPanel.getImage().arrayHeight() != size)
       {
