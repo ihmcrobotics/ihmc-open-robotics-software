@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
@@ -15,10 +16,12 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFilter;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataBasics;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -27,6 +30,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
@@ -36,6 +40,8 @@ import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.Kine
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -47,11 +53,13 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -72,7 +80,7 @@ public class KSTTools
    private final StatusMessageOutputManager statusOutputManager;
    private final KinematicsStreamingToolboxParameters parameters;
    private final FullHumanoidRobotModel desiredFullRobotModel;
-   private final FullHumanoidRobotModelFactory fullRobotModelFactory;
+   private final DRCRobotModel robotModel;
    private final DoubleProvider time;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoRegistry registry;
@@ -124,7 +132,7 @@ public class KSTTools
                    StatusMessageOutputManager statusOutputManager,
                    KinematicsStreamingToolboxParameters parameters,
                    FullHumanoidRobotModel desiredFullRobotModel,
-                   FullHumanoidRobotModelFactory fullRobotModelFactory,
+                   DRCRobotModel robotModel,
                    DoubleProvider time,
                    YoGraphicsListRegistry yoGraphicsListRegistry,
                    YoRegistry registry)
@@ -133,7 +141,7 @@ public class KSTTools
       this.statusOutputManager = statusOutputManager;
       this.parameters = parameters;
       this.desiredFullRobotModel = desiredFullRobotModel;
-      this.fullRobotModelFactory = fullRobotModelFactory;
+      this.robotModel = robotModel;
       this.toolboxControllerPeriod = parameters.getToolboxUpdatePeriod();
       this.time = time;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -142,7 +150,7 @@ public class KSTTools
       walkingControllerMonotonicTime = new YoDouble("walkingControllerMonotonicTime", registry);
       walkingControllerWallTime = new YoDouble("walkingControllerWallTime", registry);
 
-      currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      currentFullRobotModel = robotModel.createFullRobotModel();
       currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
 
@@ -200,10 +208,10 @@ public class KSTTools
 
       currentMessageId = new YoLong("currentMessageId", registry);
       currentMessageId.set(1L);
-      streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory, registry);
+      streamingMessageFactory = new KSTStreamingMessageFactory(robotModel, registry);
       streamingMessageFactory.setEnableVelocity(true);
       streamingMessageFactory.setEnableAcceleration(true);
-      trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
+      trajectoryMessageFactory = new KinematicsToolboxOutputConverter(robotModel);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
       streamIntegrationDuration.set(parameters.getStreamIntegrationDuration());
@@ -277,9 +285,12 @@ public class KSTTools
 
          for (RobotSide side : RobotSide.values)
          {
-            ikController.getIsFootInSupport().get(side).set(contactCommand.getIsFootInContact(side));
+            ikController.setIsFootInSupport(side, contactCommand.getIsFootInContact(side));
          }
-         // TODO update initial foot pose and active contacts
+
+         CapturabilityBasedStatus desiredStatus = createCapturabilityBasedStatus(desiredFullRobotModel, robotModel.getContactPointParameters(),
+                 contactCommand.getIsFootInContact(RobotSide.LEFT),  contactCommand.getIsFootInContact(RobotSide.RIGHT));
+         ikController.updateFootContacts(desiredStatus.getLeftFootSupportPolygon3d(), desiredStatus.getRightFootSupportPolygon3d());
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
@@ -612,7 +623,7 @@ public class KSTTools
 
    public FullHumanoidRobotModelFactory getFullRobotModelFactory()
    {
-      return fullRobotModelFactory;
+      return robotModel;
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
@@ -895,5 +906,41 @@ public class KSTTools
          return 2.0 * (qDotMax - qDot) / dt;
       else
          return Double.POSITIVE_INFINITY;
+   }
+
+   private CapturabilityBasedStatus createCapturabilityBasedStatus(FullHumanoidRobotModel currentRobotModel,
+                                                                   RobotContactPointParameters<RobotSide> contactPointParameters,
+                                                                   boolean isLeftFootInSupport,
+                                                                   boolean isRightFootInSupport)
+   {
+      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+
+      SideDependentList<ContactablePlaneBody> contactableFeet = extractContactableFeet(currentRobotModel, contactPointParameters);
+
+      IDLSequence.Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      IDLSequence.Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
+      if (isLeftFootInSupport)
+         contactableFeet.get(RobotSide.LEFT)
+                 .getContactPointsCopy()
+                 .stream()
+                 .peek(cp -> cp.changeFrame(ReferenceFrame.getWorldFrame()))
+                 .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), cp.getZ()));
+      if (isRightFootInSupport)
+         contactableFeet.get(RobotSide.RIGHT)
+                 .getContactPointsCopy()
+                 .stream()
+                 .peek(cp -> cp.changeFrame(ReferenceFrame.getWorldFrame()))
+                 .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), cp.getZ()));
+      return capturabilityBasedStatus;
+   }
+
+   private SideDependentList<ContactablePlaneBody> extractContactableFeet(FullHumanoidRobotModel robotModel,
+                                                                                RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      ContactableBodiesFactory<RobotSide> factory = new ContactableBodiesFactory<>();
+      factory.setFullRobotModel(robotModel);
+      factory.setReferenceFrames(new HumanoidReferenceFrames(robotModel));
+      factory.setFootContactPoints(contactPointParameters.getControllerFootGroundContactPoints());
+      return new SideDependentList<>(factory.createFootContactablePlaneBodies());
    }
 }

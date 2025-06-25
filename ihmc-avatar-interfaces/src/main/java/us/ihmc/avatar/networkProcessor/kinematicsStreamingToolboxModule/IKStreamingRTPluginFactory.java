@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.AvatarControllerThreadInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
@@ -67,7 +68,7 @@ public class IKStreamingRTPluginFactory
                                              ROS2Node ros2Node,
                                              CommandInputManager walkingInputManager,
                                              StatusMessageOutputManager walkingOutputManager,
-                                             FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                             DRCRobotModel robotModel,
                                              HumanoidRobotContextDataFactory contextDataFactory,
                                              RobotCollisionModel collisionModel,
                                              KinematicsStreamingToolboxParameters parameters)
@@ -77,7 +78,7 @@ public class IKStreamingRTPluginFactory
                                                        ros2Node,
                                                        walkingInputManager,
                                                        walkingOutputManager,
-                                                       fullRobotModelFactory,
+                                                       robotModel,
                                                        contextDataFactory,
                                                        collisionModel,
                                                        parameters);
@@ -196,7 +197,7 @@ public class IKStreamingRTPluginFactory
                                  ROS2Node ros2Node,
                                  CommandInputManager walkingInputManager,
                                  StatusMessageOutputManager walkingOutputManager,
-                                 FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                 DRCRobotModel robotModel,
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  RobotCollisionModel collisionModel,
                                  KinematicsStreamingToolboxParameters parameters)
@@ -207,7 +208,7 @@ public class IKStreamingRTPluginFactory
          ROS2Topic<?> inputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
          ROS2Topic<?> outputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-         FullHumanoidRobotModel desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel(false);
+         FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel(false);
          this.commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
          this.statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
          ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
@@ -221,7 +222,7 @@ public class IKStreamingRTPluginFactory
                                                                                               statusOutputManager,
                                                                                               parameters,
                                                                                               desiredFullRobotModel,
-                                                                                              fullRobotModelFactory,
+                 robotModel,
                                                                                               yoGraphicsListRegistry,
                                                                                               registry);
 
