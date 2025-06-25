@@ -1,11 +1,13 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -35,6 +37,8 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
          return true;
       if (message instanceof KinematicsStreamingToolboxInitialConfigurationMessage)
          return true;
+      if (message instanceof KinematicsStreamingToolboxContactConfigurationMessage)
+         return true;
       if (message instanceof KinematicsToolboxConfigurationMessage)
          return true;
       return false;
@@ -52,6 +56,11 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
       {
          KinematicsStreamingToolboxInitialConfigurationCommand initialConfCommand = (KinematicsStreamingToolboxInitialConfigurationCommand) command;
          initialConfCommand.set(initialConfMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsStreamingToolboxContactConfigurationMessage contactConfMessage)
+      {
+         KinematicsStreamingToolboxContactConfigurationCommand contactConfCommand = (KinematicsStreamingToolboxContactConfigurationCommand) command;
+         contactConfCommand.setFromMessage(contactConfMessage);
       }
       else if (message instanceof KinematicsToolboxConfigurationMessage configurationMessage)
       {

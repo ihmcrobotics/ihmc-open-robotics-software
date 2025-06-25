@@ -29,6 +29,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
@@ -100,6 +101,7 @@ public class KSTTools
 
    private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
    private final KinematicsStreamingToolboxInitialConfigurationCommand initCommand = new KinematicsStreamingToolboxInitialConfigurationCommand();
+   private final KinematicsStreamingToolboxContactConfigurationCommand contactCommand = new KinematicsStreamingToolboxContactConfigurationCommand();
    private final YoBoolean isNeckJointspaceOutputEnabled;
    private final YoBoolean isChestTaskspaceOutputEnabled;
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
@@ -267,6 +269,17 @@ public class KSTTools
          }
          ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
          ikController.initialize();
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxContactConfigurationCommand.class))
+      {
+         contactCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxContactConfigurationCommand.class));
+
+         for (RobotSide side : RobotSide.values)
+         {
+            ikController.getIsFootInSupport().get(side).set(contactCommand.getIsFootInContact(side));
+         }
+         // TODO update initial foot pose and active contacts
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);

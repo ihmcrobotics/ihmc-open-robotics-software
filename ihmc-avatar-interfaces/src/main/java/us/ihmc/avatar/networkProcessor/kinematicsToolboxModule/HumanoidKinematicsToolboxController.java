@@ -51,6 +51,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -847,5 +848,20 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return desiredReferenceFrames;
+   }
+
+   public SideDependentList<YoBoolean> getIsFootInSupport()
+   {
+      return isFootInSupport;
+   }
+
+   public SideDependentList<YoFramePose3D> getInitialFootPoses()
+   {
+      return initialFootPoses;
+   }
+
+   public RecyclingArrayList<FramePoint3D> getActiveContactPointPositions()
+   {
+      return activeContactPointPositions;
    }
 }
