@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -148,7 +149,7 @@ public class HeightMapTools
 
       // This is done for speed optimization
       double[] heightsAsDoubles = heightMapData.getHeights();
-      short[] heightsAsFloats = new short[totalCells];
+      float[] heightsAsFloats = new float[totalCells];
 
       for (int col = 0; col < cellsPerAxis; col++)
       {
@@ -164,7 +165,7 @@ public class HeightMapTools
          }
       }
 
-      ShortBuffer buffer = heightMapToPack.createBuffer();
+      FloatBuffer buffer = heightMapToPack.createBuffer();
       buffer.put(heightsAsFloats);
    }
 
