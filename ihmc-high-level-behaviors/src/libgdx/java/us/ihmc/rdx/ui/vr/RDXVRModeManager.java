@@ -90,7 +90,7 @@ public class RDXVRModeManager
          if (panel instanceof RDXTeleoperationManager teleoperationPanel)
          {
             interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
-//            handManager = teleoperationPanel.getArmManager().getHandConfigurationManager();
+            handManager = teleoperationPanel.getArmManager().getHandConfigurationManager();
             break;
          }
       }
