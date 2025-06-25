@@ -109,7 +109,6 @@ public class RapidHeightMapManager
                                       gridCellLocation,
                                       heightMapParameters.getGlobalWidthInMeters(),
                                       heightMapParameters.getCellSizeInMeters());
-
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
