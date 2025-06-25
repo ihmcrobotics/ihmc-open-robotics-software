@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.Random;
 
