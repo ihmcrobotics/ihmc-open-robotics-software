@@ -1,4 +1,3 @@
-// RDXAbilityHand.java
 package us.ihmc.rdx.ui.interactable;
 
 import imgui.ImGui;
@@ -11,14 +10,15 @@ public class RDXAbilityHand implements AbilityHandInterface
 {
    private static final float OPEN_POSITION = 20.0f;
    private static final float CLOSED_POSITION = 80.0f;
+   private static final float GRIP_POSITION = 90.0f;
    private static final float SLIDER_MIN = 0.0f;
-   private static final float SLIDER_MAX = 90.0f;
+   private static final float SLIDER_MAX = 120.0f;
 
    private final RobotSide handSide;
    private final AbilityHandHardwareCommunication communication;
    private final float[] commandValues = new float[ACTUATOR_COUNT];
    private final float[] actuatorPositions = new float[ACTUATOR_COUNT];
-   private final float[] sliderValue = new float[] {0.0f};
+   private final float[] controlFingerSliders = new float[ACTUATOR_COUNT];
 
    private AbilityHandCommandType commandType = AbilityHandCommandType.POSITION;
 
@@ -31,6 +31,7 @@ public class RDXAbilityHand implements AbilityHandInterface
       {
          commandValues[i] = 0.0f;
          actuatorPositions[i] = 0.0f;
+         controlFingerSliders[i] = 0.0f;
       }
    }
 
@@ -97,15 +98,49 @@ public class RDXAbilityHand implements AbilityHandInterface
          setAllFingers(CLOSED_POSITION);
          communication.publishCommand(this);
       }
-
-      if (ImGui.sliderFloat("Control Fingers", sliderValue, SLIDER_MIN, SLIDER_MAX))
+      ImGui.sameLine();
+      if(ImGui.button("Grip"))
       {
-         setAllFingers(sliderValue[0]);
+         setAllFingers(GRIP_POSITION);
          communication.publishCommand(this);
       }
 
+      if (ImGui.sliderFloat("Control Fingers", controlFingerSliders, SLIDER_MIN, SLIDER_MAX, "%.1f°"))
+      {
+         setAllFingers(controlFingerSliders[0]);
+         communication.publishCommand(this);
+      }
+
+      ImGui.beginDisabled();
+      ImGui.sliderFloat("Current Angle", new float[] {actuatorPositions[0]}, SLIDER_MIN, SLIDER_MAX, "%.1f°");
+      ImGui.endDisabled();
+
       ImGui.popID();
       ImGui.separator();
+
+      if (ImGui.collapsingHeader("Individual Finger Control"))
+      {
+         ImGui.pushID("individual" + handSide.ordinal());
+         for (int i = 0; i < ACTUATOR_COUNT; i++)
+         {
+            ImGui.pushID(i);
+            float[] sliderVal = {controlFingerSliders[i]};
+            if (ImGui.sliderFloat("Finger " + i, sliderVal, SLIDER_MIN, SLIDER_MAX, "%.1f°"))
+            {
+               controlFingerSliders[i] = sliderVal[0];
+               float value = controlFingerSliders[i];
+               setCommandType(AbilityHandCommandType.POSITION);
+               if (i == 5)
+               {
+                  value = -value;
+               }
+               setCommandValue(i, value);
+               communication.publishCommand(this);
+            }
+            ImGui.popID();
+         }
+         ImGui.popID();
+      }
    }
 
    private void setAllFingers(float position)
@@ -114,7 +149,10 @@ public class RDXAbilityHand implements AbilityHandInterface
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
          if (i != 4 && i != 5)
+         {
+            controlFingerSliders[i] = position;
             setCommandValue(i, position);
+         }
       }
    }
 }
