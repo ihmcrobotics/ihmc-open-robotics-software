@@ -18,8 +18,8 @@ public class RDXHandManager
    private final SideDependentList<float[]> fingerSliders = new SideDependentList<>();
    private final int actuatorCount = AbilityHandInterface.ACTUATOR_COUNT;
 
-   private static final float OPEN_POSITION   = 45.0f;
-   private static final float CLOSED_POSITION = -45.0f;
+   private static final float OPEN_POSITION = 20.0f;
+   private static final float CLOSED_POSITION = 80.0f;
 
    public void create(RDXBaseUI baseUI, CommunicationHelper helper, ROS2SyncedRobotModel syncedRobotModel)
    {
@@ -27,7 +27,7 @@ public class RDXHandManager
       for (RobotSide side : RobotSide.values)
       {
          hands.put(side, new RDXAbilityHand(side));
-         fingerSliders.put(side, new float[]{0.0f});
+         fingerSliders.put(side, new float[] {0.0f});
       }
    }
 
@@ -45,21 +45,22 @@ public class RDXHandManager
 
       for (RobotSide side : RobotSide.values)
       {
+         ImGui.pushID(side.ordinal());
          ImGui.text(side.toString() + ":");
          if (ImGui.button("Open"))
          {
-            setAllActuators(side, OPEN_POSITION);
+            setSelectedFingers(side, OPEN_POSITION);
             communication.publishCommand(hands.get(side));
          }
          ImGui.sameLine();
          if (ImGui.button("Close"))
          {
-            setAllActuators(side, CLOSED_POSITION);
+            setSelectedFingers(side, CLOSED_POSITION);
             communication.publishCommand(hands.get(side));
          }
 
          float[] slider = fingerSliders.get(side);
-         ImGui.pushID(side.ordinal());
+
          if (ImGui.sliderFloat("Control Fingers", slider, 0.0f, 90.0f))
          {
             setSelectedFingers(side, slider[0]);
@@ -71,16 +72,6 @@ public class RDXHandManager
       }
    }
 
-   private void setAllActuators(RobotSide side, float position)
-   {
-      RDXAbilityHand hand = hands.get(side);
-      hand.setCommandType(AbilityHandCommandType.POSITION);
-      for (int i = 0; i < actuatorCount - 1; i++)
-      {
-         hand.setCommandValue(i, position);
-      }
-      hand.setCommandValue(actuatorCount - 1, -position);
-   }
    private void setSelectedFingers(RobotSide side, float position)
    {
       RDXAbilityHand hand = hands.get(side);
