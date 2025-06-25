@@ -17,6 +17,9 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
    private boolean enableLeftArmJointspace = true;
    private boolean enableRightArmJointspace = true;
+   private boolean enableLeftLegJointspace = true;
+   private boolean enableRightLegJointspace = true;
+   private boolean enableSpineJointspace = true;
    private boolean enableNeckJointspace = true;
 
    private boolean enableLeftHandTaskspace = true;
@@ -43,6 +46,9 @@ public class KinematicsStreamingToolboxConfigurationCommand
       lockChest = false;
       enableLeftArmJointspace = true;
       enableRightArmJointspace = true;
+      enableLeftLegJointspace = true;
+      enableRightLegJointspace = true;
+      enableSpineJointspace = true;
       enableNeckJointspace = true;
 
       enableLeftHandTaskspace = true;
@@ -66,6 +72,9 @@ public class KinematicsStreamingToolboxConfigurationCommand
       lockChest = other.lockChest;
       enableLeftArmJointspace = other.enableLeftArmJointspace;
       enableRightArmJointspace = other.enableRightArmJointspace;
+      enableLeftLegJointspace = other.enableLeftLegJointspace;
+      enableRightLegJointspace = other.enableRightLegJointspace;
+      enableSpineJointspace = other.enableSpineJointspace;
       enableNeckJointspace = other.enableNeckJointspace;
 
       enableLeftHandTaskspace = other.enableLeftHandTaskspace;
@@ -92,6 +101,9 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       enableLeftArmJointspace = message.getEnableLeftArmJointspace();
       enableRightArmJointspace = message.getEnableRightArmJointspace();
+      enableLeftLegJointspace = message.getEnableLeftLegJointspace();
+      enableRightLegJointspace = message.getEnableRightLegJointspace();
+      enableSpineJointspace = message.getEnableSpineJointspace();
       enableNeckJointspace = message.getEnableNeckJointspace();
 
       enableLeftHandTaskspace = message.getEnableLeftHandTaskspace();
@@ -135,6 +147,26 @@ public class KinematicsStreamingToolboxConfigurationCommand
    public boolean isRightArmJointspaceEnabled()
    {
       return enableRightArmJointspace;
+   }
+
+   public boolean isEnableLeftLegJointspaceEnabled()
+   {
+      return enableLeftLegJointspace;
+   }
+
+   public boolean isEnableRightLegJointspaceEnabled()
+   {
+      return enableRightLegJointspace;
+   }
+
+   public boolean isLegJointspaceEnabled(RobotSide robotSide)
+   {
+      return robotSide == RobotSide.LEFT ? isEnableLeftLegJointspaceEnabled() : isEnableRightLegJointspaceEnabled();
+   }
+
+   public boolean isSpineJointspaceEnabled()
+   {
+      return enableSpineJointspace;
    }
 
    public boolean isNeckJointspaceEnabled()
