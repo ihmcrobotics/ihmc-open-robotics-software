@@ -123,6 +123,8 @@ public final class MessageUnpackingTools
          private final SideDependentList<HandHybridJointspaceTaskspaceTrajectoryMessage> handHybridJointspaceTaskspaceTrajectoryMessages = new SideDependentList<>(
                new HandHybridJointspaceTaskspaceTrajectoryMessage(),
                new HandHybridJointspaceTaskspaceTrajectoryMessage());
+         private final SideDependentList<LegTrajectoryMessage> legTrajectoryMessages = new SideDependentList<>(new LegTrajectoryMessage(), new LegTrajectoryMessage());
+         private final SpineTrajectoryMessage spineTrajectoryMessage = new SpineTrajectoryMessage();
          private final ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
          private final PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
          private final NeckTrajectoryMessage neckTrajectoryMessage = new NeckTrajectoryMessage();
@@ -161,6 +163,22 @@ public final class MessageUnpackingTools
                                       streamIntegrationDuration,
                                       sourceTimestamp);
                messagesToPack.add(pelvisTrajectoryMessage);
+            }
+
+            if (message.getHasSpineStreamingMessage())
+            {
+               spineTrajectoryMessage.setSequenceId(sequenceId);
+               spineTrajectoryMessage.setUniqueId(uniqueId);
+               toJointspaceTrajectoryMessage(message.getSpineStreamingMessage(),
+                                             spineTrajectoryMessage.getJointspaceTrajectory(),
+                                             sequenceId,
+                                             uniqueId,
+                                             streamIntegrationDuration,
+                                             sourceTimestamp);
+               messagesToPack.add(spineTrajectoryMessage);
+
+               // Disable pelvis taskspace orientation trajectory if spine trajectory is present
+               MessageTools.packSelectionMatrix3DMessage(false, pelvisTrajectoryMessage.getSe3Trajectory().getAngularSelectionMatrix());
             }
 
             if (message.getHasNeckStreamingMessage())
@@ -249,6 +267,24 @@ public final class MessageUnpackingTools
                                          streamIntegrationDuration,
                                          sourceTimestamp);
                   messagesToPack.add(handTrajectoryMessage);
+               }
+
+               boolean hasLegStreamingMessage = select(robotSide, message.getHasLeftLegStreamingMessage(), message.getHasRightLegStreamingMessage());
+               JointspaceStreamingMessage legStreamingMessage = select(robotSide, message.getLeftLegStreamingMessage(), message.getRightLegStreamingMessage());
+
+               if (hasLegStreamingMessage)
+               {
+                  LegTrajectoryMessage legTrajectoryMessage = legTrajectoryMessages.get(robotSide);
+                  legTrajectoryMessage.setSequenceId(sequenceId);
+                  legTrajectoryMessage.setUniqueId(uniqueId);
+                  legTrajectoryMessage.setRobotSide(robotSide.toByte());
+                  toJointspaceTrajectoryMessage(legStreamingMessage,
+                                                legTrajectoryMessage.getJointspaceTrajectory(),
+                                                sequenceId,
+                                                uniqueId,
+                                                streamIntegrationDuration,
+                                                sourceTimestamp);
+                  messagesToPack.add(legTrajectoryMessage);
                }
             }
          }

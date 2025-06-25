@@ -44,17 +44,18 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       lockPelvis = false;
       lockChest = false;
+
       enableLeftArmJointspace = true;
       enableRightArmJointspace = true;
-      enableLeftLegJointspace = true;
-      enableRightLegJointspace = true;
-      enableSpineJointspace = true;
-      enableNeckJointspace = true;
-
       enableLeftHandTaskspace = true;
       enableRightHandTaskspace = true;
+      enableNeckJointspace = true;
       enableChestTaskspace = true;
       enablePelvisTaskspace = true;
+
+      enableLeftLegJointspace = false;
+      enableRightLegJointspace = false;
+      enableSpineJointspace = false;
       enableCenterOfMassTrajectory = false;
 
       leftHandTrajectoryFrameId = WORLD_FRAME_ID;
