@@ -19,6 +19,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -113,7 +114,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-                                              heightMap = HeightMapMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
+                                              heightMap = HeightMapTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)

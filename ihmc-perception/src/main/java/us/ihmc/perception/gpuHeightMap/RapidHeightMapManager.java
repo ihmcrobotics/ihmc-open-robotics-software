@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -108,12 +109,12 @@ public class RapidHeightMapManager
       FramePose3D cameraPose = new FramePose3D();
       cameraPose.getTranslation().set(gridCellLocation);
 
-      HeightMapMessageTools.convertToHeightMapData(hostGlobalHeightMap,
-                                                   latestHeightMapData,
-                                                   gridCellLocation,
-                                                   (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                   (float) heightMapParameters.getCellSizeInMeters(),
-                                                   heightMapParameters);
+      HeightMapTools.convertToHeightMapData(hostGlobalHeightMap,
+                                            latestHeightMapData,
+                                            gridCellLocation,
+                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                            (float) heightMapParameters.getCellSizeInMeters(),
+                                            heightMapParameters);
 
       HeightMapMessage heightMapMessage = new HeightMapMessage();
       HeightMapMessageTools.toMessage(latestHeightMapData, heightMapMessage);
@@ -190,12 +191,12 @@ public class RapidHeightMapManager
       Mat terrainHeightMap = new Mat();
       terrainCroppedHeightMap.download(terrainHeightMap);
 
-      HeightMapMessageTools.convertToHeightMapData(terrainHeightMap,
-                                                   latestTerrainHeightMapData,
-                                                   gridCellLocation,
-                                                   (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                   (float) heightMapParameters.getCellSizeInMeters(),
-                                                   heightMapParameters);
+      HeightMapTools.convertToHeightMapData(terrainHeightMap,
+                                            latestTerrainHeightMapData,
+                                            gridCellLocation,
+                                            (float) heightMapParameters.getTerrainWidthInMeters(),
+                                            (float) heightMapParameters.getCellSizeInMeters(),
+                                            heightMapParameters);
       return latestTerrainHeightMapData;
    }
 

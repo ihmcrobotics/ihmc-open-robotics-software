@@ -142,7 +142,7 @@ public class SnappingTerrainExtractor
 
       Point2D gridCenter = heightMapData.getGridCenter();
 
-      Mat heightMap = HeightMapMessageTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
+      Mat heightMap = HeightMapTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
       GpuMat gpuHeightMap = new GpuMat();
       gpuHeightMap.upload(heightMap);
 
