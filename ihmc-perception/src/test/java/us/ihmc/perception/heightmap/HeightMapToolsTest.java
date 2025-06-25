@@ -79,7 +79,7 @@ public class HeightMapToolsTest
 
       System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
    }
-   
+
    @Test
    public void testIndexing()
    {
