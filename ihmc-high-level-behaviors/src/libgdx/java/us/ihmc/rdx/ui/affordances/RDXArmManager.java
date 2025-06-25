@@ -131,7 +131,7 @@ public class RDXArmManager
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
       handConfigurationManager.create(baseUI, communicationHelper, syncedRobot);
-      handManager.create();
+      handManager.create(baseUI);
    }
 
    public void update(boolean interactablesEnabled)

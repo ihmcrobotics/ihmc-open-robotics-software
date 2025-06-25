@@ -4,6 +4,7 @@ import imgui.ImGui;
 import us.ihmc.psyonicros2.AbilityHandCommandType;
 import us.ihmc.psyonicros2.AbilityHandInterface;
 import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXAbilityHand implements AbilityHandInterface
@@ -22,7 +23,7 @@ public class RDXAbilityHand implements AbilityHandInterface
 
    private AbilityHandCommandType commandType = AbilityHandCommandType.POSITION;
 
-   public RDXAbilityHand(RobotSide handSide, AbilityHandHardwareCommunication communication)
+   public RDXAbilityHand(RobotSide handSide, AbilityHandHardwareCommunication communication, RDXBaseUI baseUI)
    {
       this.handSide = handSide;
       this.communication = communication;
@@ -133,31 +134,21 @@ public class RDXAbilityHand implements AbilityHandInterface
 
       ImGui.popID();
       ImGui.separator();
-      ImGui.pushID(handSide.ordinal());
-      if (ImGui.collapsingHeader("Individual Finger Control"))
-      {
-         ImGui.pushID("individual" + handSide.ordinal());
-         for (int i = 0; i < ACTUATOR_COUNT; i++)
-         {
-            ImGui.pushID(i);
-            float[] sliderVal = {controlFingerSliders[i]};
-            if (ImGui.sliderFloat("Finger " + i, sliderVal, SLIDER_MIN, SLIDER_MAX, "%.1f°"))
-            {
-               controlFingerSliders[i] = sliderVal[0];
-               float value = controlFingerSliders[i];
-               setCommandType(AbilityHandCommandType.POSITION);
-               if (i == 5)
-               {
-                  value = -value;
-               }
-               setCommandValue(i, value);
-               communication.publishCommand(this);
-            }
-            ImGui.popID();
+   }
+
+   public void renderIndividualFingerControls() {
+      for (int i = 0; i < ACTUATOR_COUNT; i++) {
+         ImGui.pushID(i);
+         float[] sliderVal = { controlFingerSliders[i] };
+         if (ImGui.sliderFloat("Finger " + i, sliderVal, SLIDER_MIN, SLIDER_MAX, "%.1f°")) {
+            controlFingerSliders[i] = sliderVal[0];
+            float value = (i == 5) ? -sliderVal[0] : sliderVal[0];
+            setCommandType(AbilityHandCommandType.POSITION);
+            setCommandValue(i, value);
+            communication.publishCommand(this);
          }
          ImGui.popID();
       }
-      ImGui.popID();
    }
 
    private void setAllFingers(float position)
