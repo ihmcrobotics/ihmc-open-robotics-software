@@ -21,6 +21,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -855,18 +856,25 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return desiredReferenceFrames;
    }
 
-   public SideDependentList<YoBoolean> getIsFootInSupport()
+   public void setIsFootInSupport(RobotSide side, boolean value)
    {
-      return isFootInSupport;
+         isFootInSupport.get(side).set(value);
    }
 
-   public SideDependentList<YoFramePose3D> getInitialFootPoses()
+   public void updateFootContacts(Object<Point3D> leftFootSupportPolygon2d, Object<Point3D> rightFootSupportPolygon2d)
    {
-      return initialFootPoses;
-   }
+      activeContactPointPositions.clear();
 
-   public RecyclingArrayList<FramePoint3D> getActiveContactPointPositions()
-   {
-      return activeContactPointPositions;
+      // CoM constraint polygon is the convex hull of the feet contact points.
+      for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
+         activeContactPointPositions.add().setIncludingFrame(worldFrame, leftFootSupportPolygon2d.get(i));
+      for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
+         activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i));
+
+      updateSupportPolygonConstraint(activeContactPointPositions);
+
+      // update the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
+      updateCoMPositionAndFootPoses();
+      updateCoMPositionToHold();
    }
 }
