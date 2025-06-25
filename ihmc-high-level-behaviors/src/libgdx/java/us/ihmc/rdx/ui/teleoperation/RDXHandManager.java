@@ -3,9 +3,6 @@ package us.ihmc.rdx.ui.teleoperation;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.commons.UnitConversions;
-import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.psyonicros2.AbilityHandCommandType;
 import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
 import us.ihmc.psyonicros2.AbilityHandInterface;
@@ -16,9 +13,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXHandManager
 {
-   private final SideDependentList<AbilityHandHardwareCommunication> communicationList = new SideDependentList<>();
+   private final AbilityHandHardwareCommunication communication = new AbilityHandHardwareCommunication("H1ROSHandManager");
    private final SideDependentList<RDXAbilityHand> hands = new SideDependentList<>();
-   // new: store one slider value per side
    private final SideDependentList<float[]> fingerSliders = new SideDependentList<>();
    private final int actuatorCount = AbilityHandInterface.ACTUATOR_COUNT;
 
@@ -27,9 +23,9 @@ public class RDXHandManager
 
    public void create(RDXBaseUI baseUI, CommunicationHelper helper, ROS2SyncedRobotModel syncedRobotModel)
    {
+      communication.start();
       for (RobotSide side : RobotSide.values)
       {
-         communicationList.put(side, new AbilityHandHardwareCommunication(side.toString()));
          hands.put(side, new RDXAbilityHand(side));
          fingerSliders.put(side, new float[]{0.0f});
       }
@@ -39,7 +35,7 @@ public class RDXHandManager
    {
       for (RobotSide side : RobotSide.values)
       {
-         communicationList.get(side).readState(hands.get(side));
+         communication.readState(hands.get(side));
       }
    }
 
@@ -53,21 +49,23 @@ public class RDXHandManager
          if (ImGui.button("Open"))
          {
             setAllActuators(side, OPEN_POSITION);
-            communicationList.get(side).publishCommand(hands.get(side));
+            communication.publishCommand(hands.get(side));
          }
          ImGui.sameLine();
          if (ImGui.button("Close"))
          {
             setAllActuators(side, CLOSED_POSITION);
-            communicationList.get(side).publishCommand(hands.get(side));
+            communication.publishCommand(hands.get(side));
          }
 
          float[] slider = fingerSliders.get(side);
+         ImGui.pushID(side.ordinal());
          if (ImGui.sliderFloat("Control Fingers", slider, 0.0f, 90.0f))
          {
             setSelectedFingers(side, slider[0]);
-            communicationList.get(side).publishCommand(hands.get(side));
+            communication.publishCommand(hands.get(side));
          }
+         ImGui.popID();
 
          ImGui.separator();
       }
