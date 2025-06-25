@@ -5,12 +5,7 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -237,6 +232,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static ROS2Topic<KinematicsStreamingToolboxInitialConfigurationMessage> getInputStreamingInitialConfigurationTopic(String robotName)
    {
       return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsStreamingToolboxInitialConfigurationMessage.class);
+   }
+
+   public static ROS2Topic<KinematicsStreamingToolboxContactConfigurationMessage> getInputStreamingContactConfigurationTopic(String robotName)
+   {
+      return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsStreamingToolboxContactConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)

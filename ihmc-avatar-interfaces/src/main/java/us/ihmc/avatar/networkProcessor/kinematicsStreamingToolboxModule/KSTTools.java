@@ -30,6 +30,7 @@ import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
@@ -101,10 +102,11 @@ public class KSTTools
 
    private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
    private final KinematicsStreamingToolboxInitialConfigurationCommand initCommand = new KinematicsStreamingToolboxInitialConfigurationCommand();
-   private final YoBoolean isSpineJointspaceOutputEnabled;
+   private final KinematicsStreamingToolboxContactConfigurationCommand contactCommand = new KinematicsStreamingToolboxContactConfigurationCommand();
    private final YoBoolean isNeckJointspaceOutputEnabled;
    private final YoBoolean isChestTaskspaceOutputEnabled;
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
+   private final YoBoolean isSpineJointspaceOutputEnabled;
    private final YoBoolean isCenterOfMassOutputEnabled;
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
@@ -275,6 +277,17 @@ public class KSTTools
          }
          ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
          ikController.initialize();
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxContactConfigurationCommand.class))
+      {
+         contactCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxContactConfigurationCommand.class));
+
+         for (RobotSide side : RobotSide.values)
+         {
+            ikController.getIsFootInSupport().get(side).set(contactCommand.getIsFootInContact(side));
+         }
+         // TODO update initial foot pose and active contacts
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
