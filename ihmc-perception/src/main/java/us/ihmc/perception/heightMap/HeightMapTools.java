@@ -5,6 +5,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.nio.ShortBuffer;
+
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
  * - A discretization value
@@ -140,30 +142,31 @@ public class HeightMapTools
       return new double[] {r, g, b};
    }
 
-   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
    {
       int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int centerIndex = heightMapData.getCenterIndex();
+      int totalCells = cellsPerAxis * cellsPerAxis;
 
-      // Create a new Mat object to hold the height map data
-      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      // This is done for speed optimization
+      double[] heightsAsDoubles = heightMapData.getHeights();
+      short[] heightsAsFloats = new short[totalCells];
 
-      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      for (int col = 0; col < cellsPerAxis; col++)
       {
-         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         for (int row = 0; row < cellsPerAxis; row++)
          {
-            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            double cellHeight = heightMapData.getHeightAt(key);
+            // This is happening for a reason, the current implementation expects column major for the Mat objects, but the HeightMapData object is row major
+            int rowMajorIndex = row * cellsPerAxis + col;
+            int colMajorIndex = col * cellsPerAxis + row;
 
-            // Reverse the height calculation to get the raw height value
-            int height = (int) ((cellHeight + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-
-            // Store the height value in the Mat object
-            heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
+            // Get the height as for row major, and save it as column major
+            short height = (short) (((float) heightsAsDoubles[rowMajorIndex] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+            heightsAsFloats[colMajorIndex] = height;
          }
       }
 
-      return heightMapMat;
+      ShortBuffer buffer = heightMapToPack.createBuffer();
+      buffer.put(heightsAsFloats);
    }
 
    public static void convertToHeightMapData(Mat heightMapPointer,

@@ -114,7 +114,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestHeightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
-                                              heightMap = HeightMapTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
+                                              if (heightMap == null)
+                                              {
+                                                 heightMap = new Mat(latestHeightMapData.getCellsPerAxis(),
+                                                                     latestHeightMapData.getCellsPerAxis(),
+                                                                     opencv_core.CV_16UC1);
+                                              }
+                                              HeightMapTools.convertHeightMapDataToMat(heightMap, latestHeightMapData, heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)
@@ -208,7 +214,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
       {
          // An additional check here to make sure that we have data in the image
-         if (heightMap.ptr(0) != null)
+         if (heightMap != null && heightMap.ptr(0) != null)
          {
             float pixelScalingFactor = 10000.0f;
             heightMapRenderer.update(heightMap,
