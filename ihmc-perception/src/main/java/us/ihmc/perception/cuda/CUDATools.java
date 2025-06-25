@@ -6,7 +6,6 @@ import org.bytedeco.cuda.global.cudart;
 import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
@@ -204,6 +203,13 @@ public class CUDATools
               BytePointer errorString = cudaGetErrorString(errorCode))
          {
             String errorMessage = String.format("CUDA Error (%s): %s", errorName.getString(), errorString.getString());
+
+            // Attempt to hint a solution
+            if (errorCode == CUDA_ERROR_UNSUPPORTED_PTX_VERSION)
+            {
+               errorMessage += " [Tip] Your locally installed CUDA Toolkit version should match the NVIDIA Driver version. It is most likely that you need to update the NVIDIA Driver to resolve this error.";
+            }
+
             throw new Exception("CUDA Error code: " + errorMessage);
          }
       }

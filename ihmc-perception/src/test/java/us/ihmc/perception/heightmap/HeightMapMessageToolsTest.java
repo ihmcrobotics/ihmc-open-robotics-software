@@ -52,10 +52,10 @@ public class HeightMapMessageToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per unpack of Message -> Mat: %.3f ms%n", averageTimePerIteration);
 
-      // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
-      float expectedTimeTakenToPackHeightMapMessageFromAMat = 2.0f;
+      // This will be machine-dependent, the benchmark for this value came from the cpu on the CI machine.
+      float expectedTimeTakenToPackHeightMapMessageFromAMat = 4.0f;
       Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
                             "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
    }
@@ -93,12 +93,12 @@ public class HeightMapMessageToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack of Message -> Height Map Data: %.3f ms%n", averageTimePerIteration);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
-//      float expectedTimeTakenToPackHeightMapMessageFromAMat = 5.0f;
-//      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
-//                            "Actual was: " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
+      //      float expectedTimeTakenToPackHeightMapMessageFromAMat = 5.0f;
+      //      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
+      //                            "Actual was: " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
    }
 
    /**
@@ -134,10 +134,10 @@ public class HeightMapMessageToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack Message -> Mat: %.3f ms%n", averageTimePerIteration);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
-      float expectedTimeTakenToPackHeightMapMessageFromAMat = 3.0f;
+      float expectedTimeTakenToPackHeightMapMessageFromAMat = 4.0f;
       Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMat,
                             "Actual was: " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMat);
    }
