@@ -9,8 +9,8 @@ import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.Random;
 
@@ -36,7 +36,7 @@ public class FootstepSnapperTest
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendTranslation(0.0, 0.0, 0.10);
       planarRegionsList.getPlanarRegion(0).applyTransform(transform);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList));
       environmentHandler.setHeightMapData(heightMapData);
 
       for (int i = 0; i < xIndices.length; i++)

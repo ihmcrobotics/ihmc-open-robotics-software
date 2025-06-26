@@ -8,6 +8,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.scs2.simulation.collision.CollidableHelper;
 
 /**
  * Defines a factory for creating the collision shapes of a humanoid robot.
@@ -50,5 +51,11 @@ public interface RobotCollisionModel
    public static RobotCollisionModel singleBodyCollisionModel(String bodyName, Function<RigidBodyBasics, Collidable> collidableBuilder)
    {
       return multiBodySystem -> Collections.singletonList(collidableBuilder.apply(findRigidBody(bodyName, multiBodySystem)));
+   }
+
+   /** Used for full contact collision physics simulations. */
+   default void setCollidableHelper(CollidableHelper helper, String robotCollisionMask, String... otherCollisionMasks)
+   {
+
    }
 }

@@ -26,7 +26,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -135,7 +135,7 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
       request.setStartFootPoses(defaultStepWidth, initialStanceFootPose);
       request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setGoalFootPoses(defaultStepWidth, goalPose);

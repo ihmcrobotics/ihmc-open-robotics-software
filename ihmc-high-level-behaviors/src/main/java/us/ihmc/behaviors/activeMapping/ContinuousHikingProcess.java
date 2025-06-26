@@ -76,7 +76,7 @@ public class ContinuousHikingProcess
       if (standAloneRealsenseProcess.getLatestHeightMapData() != null)
       {
          environmentHandler.setHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());
-         snappingTerrainManager.updateAndPublish(standAloneRealsenseProcess.getLatestHeightMapData());
+         snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
          environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
       }
 

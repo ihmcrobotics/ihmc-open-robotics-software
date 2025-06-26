@@ -183,7 +183,7 @@ public class KinematicsToolboxController extends ToolboxController
     * to update the state of the {@link #desiredOneDoFJoints} such that it progresses towards the desired user
     * inputs over time.
     */
-   private final WholeBodyControllerCore controllerCore;
+   protected final WholeBodyControllerCore controllerCore;
    /**
     * This holds onto the data from the feedback controllers running inside the controller core.
     * {@link #feedbackControllerDataHolder} is used here to compute the solution quality every tick

@@ -4,7 +4,6 @@
 perception_msgs/DetectableSceneNodeMessage detectable_scene_node
 
 float64 confidence
-geometry_msgs/Point32[<=511] object_point_cloud
 
 # YOLOv8Node data
 geometry_msgs/Transform centroid_to_object_transform

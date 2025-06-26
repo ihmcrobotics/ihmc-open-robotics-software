@@ -50,8 +50,8 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,7 +218,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
       int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startLeftFootPose);
@@ -262,7 +262,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(plannerRequestId, packet.getPlannerRequestId(), epsilon, "Planner Request Ids aren't equal.");
       assertEquals(horizonLength, packet.getHorizonLength(), epsilon, "Planner horizon lengths aren't equal.");
 
-      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessage(packet.getHeightMapMessage()));
+      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessageToHeightMapData(packet.getHeightMapMessage()));
    }
 
    private void runPlannerRequestToUI()

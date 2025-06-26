@@ -12,9 +12,9 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,9 +56,9 @@ public class PlanarRegionToHeightMapConverterTest
          planarRegion.set(transformToWorld, polygons);
 
          // get the planar region as a height map
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
-                                                                                                                                                PlanarRegionToHeightMapConverter.defaultResolution,
-                                                                                                                                                Double.NaN));
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
+                                                                                                                                                               PlanarRegionToHeightMapConverter.defaultResolution,
+                                                                                                                                                               Double.NaN));
 
 
 

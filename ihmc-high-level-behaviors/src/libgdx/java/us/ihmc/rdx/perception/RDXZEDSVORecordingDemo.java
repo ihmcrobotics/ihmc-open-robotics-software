@@ -51,9 +51,9 @@ public class RDXZEDSVORecordingDemo
       zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, () -> true, () -> true, ros2Helper, RECORD_MODE, SVO_FILE_NAME);
       zedColorDepthImageRetrieverSVO.start();
 
-      zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
-                                                                    PerceptionAPI.ZED2_DEPTH,
-                                                                    PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+      zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED_COLOR_IMAGES,
+                                                                    PerceptionAPI.ZED_DEPTH,
+                                                                    PerceptionAPI.ZED_CUT_OUT_DEPTH);
 
       perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, () ->
       {
@@ -116,8 +116,8 @@ public class RDXZEDSVORecordingDemo
       {
          RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                      ros2Node,
-                                                                                                                     PerceptionAPI.ZED2_DEPTH,
-                                                                                                                     PerceptionAPI.ZED2_COLOR_IMAGES.get(
+                                                                                                                     PerceptionAPI.ZED_DEPTH,
+                                                                                                                     PerceptionAPI.ZED_COLOR_IMAGES.get(
                                                                                                                            RobotSide.LEFT))
          {
             private final ImBoolean removeOverlap = new ImBoolean(false);
@@ -131,8 +131,8 @@ public class RDXZEDSVORecordingDemo
                if (ImGui.checkbox("Remove Overlap", removeOverlap))
                {
                   overlapRemovalHeartbeat.setAlive(removeOverlap.get());
-                  changeTopics(PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT),
-                               removeOverlap.get() ? PerceptionAPI.ZED2_CUT_OUT_DEPTH : PerceptionAPI.ZED2_DEPTH);
+                  changeTopics(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT),
+                               removeOverlap.get() ? PerceptionAPI.ZED_CUT_OUT_DEPTH : PerceptionAPI.ZED_DEPTH);
                }
             }
          };
@@ -145,7 +145,7 @@ public class RDXZEDSVORecordingDemo
       {
          RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                                                                        ros2Node,
-                                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+                                                                                                       PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT));
          zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedLeftColorImageVisualizer);
       }
@@ -154,7 +154,7 @@ public class RDXZEDSVORecordingDemo
       {
          RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                         ros2Node,
-                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
+                                                                                                        PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT));
          zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zedRightColorImageVisualizer);
       }
@@ -163,7 +163,7 @@ public class RDXZEDSVORecordingDemo
       {
          RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
                                                                                                     ros2Node,
-                                                                                                    PerceptionAPI.ZED2_DEPTH);
+                                                                                                    PerceptionAPI.ZED_DEPTH);
          zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
       }

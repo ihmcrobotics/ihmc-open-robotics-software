@@ -7,19 +7,24 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.ObjLongConsumer;
 
 class ReplayTopicManager<T>
 {
-   private final ROS2Publisher<T> publisher;
+   private final String topicName;
+   private final Consumer<T> messageConsumer;
    private final List<T> messages = new ArrayList<>();
    private final TLongArrayList timestamps = new TLongArrayList();
 
    private int lastSentIndex = -1;
    private boolean isDone = false;
+   private ObjLongConsumer<T> mutator = (m, t) -> {};
 
-   ReplayTopicManager(ROS2Topic<T> ros2Topic, ROS2Node ros2Node)
+   ReplayTopicManager(ROS2Topic<T> ros2Topic, Consumer<T> messageConsumer)
    {
-      this.publisher = ros2Node.createPublisher(ros2Topic);
+      this.topicName = ros2Topic.getName();
+      this.messageConsumer = messageConsumer;
    }
 
    boolean update(long currentTime)
@@ -35,7 +40,8 @@ class ReplayTopicManager<T>
 
       if (latestIndex != lastSentIndex)
       {
-         publisher.publish(messages.get(latestIndex));
+         mutator.accept(messages.get(latestIndex), currentTime);
+         messageConsumer.accept(messages.get(latestIndex));
          lastSentIndex = latestIndex;
       }
       isDone = latestIndex == timestamps.size() - 1;
@@ -52,6 +58,16 @@ class ReplayTopicManager<T>
          indexToCheck++;
       }
       return indexToCheck - 1;
+   }
+
+   public String getTopicName()
+   {
+      return topicName;
+   }
+
+   public void setMutator(ObjLongConsumer<?> mutator)
+   {
+      this.mutator = (ObjLongConsumer<T>) mutator;
    }
 
    List<T> getMessages()

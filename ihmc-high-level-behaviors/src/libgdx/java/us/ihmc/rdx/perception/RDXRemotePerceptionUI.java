@@ -19,7 +19,7 @@ import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class RDXRemotePerceptionUI
 {
@@ -28,7 +28,7 @@ public class RDXRemotePerceptionUI
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
    private final ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
-   private final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
+   private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    private SwingPlannerParametersBasics swingPlannerParameters;
    private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;

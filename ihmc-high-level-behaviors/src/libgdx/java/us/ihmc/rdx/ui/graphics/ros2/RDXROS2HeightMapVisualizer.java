@@ -18,18 +18,18 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.globalHeightMap.GlobalLattice;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -108,13 +108,27 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 cellsPerAxis = (int) (heightMapMessage.getGridSizeXy() / heightMapMessage.getXyResolution()) + 1;
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(4.0, 0.02);
+                                                 cellsPerAxis = 2 * centerIndex + 1;
                                               }
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              latestHeightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
-                                              heightMap = PerceptionMessageTools.convertHeightMapDataToMat(latestHeightMapData, heightMapParameters);
+                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, heightMapParameters);
+
+                                              if (latestHeightMapData == null)
+                                              {
+                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
+                                                                                         heightMapMessage.getGridSizeXy(),
+                                                                                         heightMapMessage.getGridCenterX(),
+                                                                                         heightMapMessage.getGridCenterY());
+                                              }
+                                              HeightMapTools.convertToHeightMapData(heightMap,
+                                                                                    latestHeightMapData,
+                                                                                    heightMapCenter,
+                                                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                                                    (float) heightMapParameters.getCellSizeInMeters(),
+                                                                                    heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)
@@ -208,7 +222,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
       {
          // An additional check here to make sure that we have data in the image
-         if (heightMap.ptr(0) != null)
+         if (heightMap != null && heightMap.ptr(0) != null)
          {
             float pixelScalingFactor = 10000.0f;
             heightMapRenderer.update(heightMap,

@@ -167,7 +167,6 @@ public class TerrainPerceptionProcessWithDriver
                                   realsense.getDepthPrincipalOffsetYPixels()));
 
       humanoidPerception = new HumanoidPerceptionModule(openCLManager);
-      humanoidPerception.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
       humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
       humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
