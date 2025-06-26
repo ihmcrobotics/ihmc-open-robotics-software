@@ -7,7 +7,6 @@ import us.ihmc.psyonicros2.AbilityHandInterface;
 import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -19,7 +18,7 @@ public class RDXAbilityHand implements AbilityHandInterface
    private static final float GRIP_POSITION = 90.0f;
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
-
+   private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
    private final RobotSide handSide;
    private final AbilityHandHardwareCommunication communication;
    private final float[] commandValues = new float[ACTUATOR_COUNT];
@@ -28,7 +27,6 @@ public class RDXAbilityHand implements AbilityHandInterface
 
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
 
-   // control-fingers slider
    private final String controlFingersSliderLabel;
    private final ImGuiSliderFloat controlFingersSlider;
 
@@ -50,10 +48,9 @@ public class RDXAbilityHand implements AbilityHandInterface
          actuatorPositions[i] = 30.0f;
          controlFinger[i] = 30.0f;
 
-         String label = "Finger " + i;
+         String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
-         // seed its UI value to whatever your array holds
          fingerSliders[i].setFloatValue(controlFinger[i]);
       }
    }
@@ -160,7 +157,9 @@ public class RDXAbilityHand implements AbilityHandInterface
       {
          for (int i = 0; i < ACTUATOR_COUNT; i++)
          {
-            float notchNorm = (actuatorPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+            float notchNorm = (i != 5) ?
+                  (actuatorPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN) :
+                  (-actuatorPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
             float startX = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
             float width = ImGui.getColumnWidth() - startX;
             ImGuiTools.renderSliderOrProgressNotch(startX + notchNorm * width, ImGui.getColorU32(ImGuiCol.Text));
