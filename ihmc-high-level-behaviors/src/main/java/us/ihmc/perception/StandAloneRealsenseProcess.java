@@ -85,7 +85,7 @@ public class StandAloneRealsenseProcess
       d455PublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(d455PublishThread, realsensePublishDemandNode);
 
-      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>();
+      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(10);
       d455Sensor.registerImageCollector(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       rapidHeightMapThread = new RapidHeightMapThread(ros2Helper.getROS2Node(),
                                                       syncedRobot,
