@@ -241,7 +241,7 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
                 float2 vector_to_point_from_foot = make_float2((float)(x_query - terrain_map_index.x) * map_resolution, (float)(y_query - terrain_map_index.y) * map_resolution);
                 float distance_to_point_squared = dot2D(vector_to_point_from_foot, vector_to_point_from_foot);
 
-                // skip this cell if it's too far away from the foot // , but also skip it if it's within the foot.
+                // skip this cell if it's too far away from the foot, but also skip it if it's within the foot.
                 if (distance_to_point_squared > cliff_search_offset_squared)
                     continue;
 

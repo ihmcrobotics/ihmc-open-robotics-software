@@ -15,7 +15,7 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +152,7 @@ public abstract class FootstepPlannerDataSetTest
       request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
       request.setPlanBodyPath(getPlanBodyPath());
       request.setPerformAStarSearch(getPerformAStarSearch());
-      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataset.getPlanarRegionsList())));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataset.getPlanarRegionsList())));
       request.setMaximumIterations(300);
       request.setTimeout(Double.MAX_VALUE);
       request.setHorizonLength(Double.MAX_VALUE);

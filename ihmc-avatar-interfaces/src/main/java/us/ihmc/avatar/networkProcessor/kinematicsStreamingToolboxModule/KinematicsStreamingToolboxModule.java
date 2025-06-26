@@ -33,6 +33,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +66,14 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                            KinematicsStreamingToolboxParameters parameters,
                                            boolean startYoVariableServer)
    {
+      this(robotModel, parameters, startYoVariableServer, null);
+   }
+
+   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel,
+                                           KinematicsStreamingToolboxParameters parameters,
+                                           boolean startYoVariableServer,
+                                           YoRegistry childRegistry) // optional child registry to share the server
+   {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
@@ -91,6 +100,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
       controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
       controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
+      if (childRegistry != null)
+         registry.addChild(childRegistry);
       startYoVariableServer();
       if (yoVariableServer != null)
       {
@@ -127,7 +138,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          s.takeNextData(robotConfigurationData, null);
-         robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
+         if (robotStateUpdater != null) // In some apps this can get called before robotStateUpdater is created
+            robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
       });
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();

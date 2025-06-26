@@ -13,6 +13,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -26,6 +27,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -593,7 +595,8 @@ public class RDXHumanoidDoFsWidgets
 
    private void buildAndPublishHeadTrajectoryMessage()
    {
-      FrameYawPitchRoll frameHeadYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+      FrameYawPitchRoll frameHeadYawPitchRoll = new FrameYawPitchRoll();
+
       for (int i = 0; i < neckJointNamesArray.length; i++)
       {
          switch (neckJointNamesArray[i])
@@ -601,31 +604,37 @@ public class RDXHumanoidDoFsWidgets
             case PROXIMAL_NECK_PITCH ->
             {
                frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+               frameHeadYawPitchRoll.setToZero();
                frameHeadYawPitchRoll.setPitch(neckJointWidgetValues[i]);
             }
             case PROXIMAL_NECK_YAW ->
             {
                frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_YAW));
+               frameHeadYawPitchRoll.setToZero();
                frameHeadYawPitchRoll.setYaw(neckJointWidgetValues[i]);
             }
             case PROXIMAL_NECK_ROLL ->
             {
                frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
+               frameHeadYawPitchRoll.setToZero();
                frameHeadYawPitchRoll.setRoll(neckJointWidgetValues[i]);
             }
             case DISTAL_NECK_PITCH ->
             {
                frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.DISTAL_NECK_PITCH));
+               frameHeadYawPitchRoll.setToZero();
                frameHeadYawPitchRoll.setPitch(neckJointWidgetValues[i]);
             }
             case DISTAL_NECK_YAW ->
             {
                frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.DISTAL_NECK_YAW));
+               frameHeadYawPitchRoll.setToZero();
                frameHeadYawPitchRoll.setYaw(neckJointWidgetValues[i]);
             }
             case DISTAL_NECK_ROLL ->
             {
                frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.DISTAL_NECK_ROLL));
+               frameHeadYawPitchRoll.setToZero();
                frameHeadYawPitchRoll.setRoll(neckJointWidgetValues[i]);
             }
          }

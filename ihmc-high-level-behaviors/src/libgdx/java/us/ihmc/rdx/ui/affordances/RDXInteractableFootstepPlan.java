@@ -28,7 +28,7 @@ import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

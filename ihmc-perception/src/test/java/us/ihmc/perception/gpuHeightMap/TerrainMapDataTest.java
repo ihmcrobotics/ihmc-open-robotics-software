@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
-   private final HeightMapParameters parameters = new HeightMapParameters("GPU");
+   private final HeightMapParameters parameters = new HeightMapParameters();
    private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset());
 
    @Test

@@ -2,15 +2,11 @@ package us.ihmc.perception.tools;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_highgui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.ejml.data.FMatrixRMaj;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint3f;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,7 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -280,7 +276,7 @@ public class PerceptionDebugTools
             if (image.type() == opencv_core.CV_64FC1)
                matString.append("%.5f\t".formatted(image.ptr(i, j).getDouble()));
             if (image.type() == opencv_core.CV_32FC1)
-               matString.append("%.2f\t".formatted(image.ptr(i, j).getFloat()));
+               matString.append("%.6f\t".formatted(image.ptr(i, j).getFloat()));
             if (image.type() == opencv_core.CV_32FC2)
                matString.append("%.5f\t%.5f\t\t".formatted(image.ptr(i, j).getFloat(), image.ptr(i, j).getFloat(Float.BYTES)));
          }

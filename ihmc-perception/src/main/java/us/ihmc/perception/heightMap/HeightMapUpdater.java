@@ -18,8 +18,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
-import us.ihmc.sensorProcessing.heightMap.*;
 import us.ihmc.tools.property.StoredPropertySet;
 
 import java.io.*;
@@ -299,7 +297,7 @@ public class HeightMapUpdater
 
    public HeightMapData getLatestHeightMap()
    {
-      return HeightMapMessageTools.unpackMessage(buildMessage());
+      return HeightMapMessageTools.unpackMessageToHeightMapData(buildMessage());
    }
 
    private HeightMapMessage buildMessage()

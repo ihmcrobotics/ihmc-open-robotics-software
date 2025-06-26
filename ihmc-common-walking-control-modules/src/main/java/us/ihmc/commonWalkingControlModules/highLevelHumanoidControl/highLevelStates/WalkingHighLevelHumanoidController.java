@@ -855,8 +855,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)
    {
-      packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), capturabilityBasedStatus.getLeftHandContactPoints(), capturabilityBasedStatus.getLeftHandContactNormal());
-      packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), capturabilityBasedStatus.getRightHandContactPoints(), capturabilityBasedStatus.getRightHandContactNormal());
+      if (fullRobotModel.getHand(RobotSide.LEFT) != null)
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), capturabilityBasedStatus.getLeftHandContactPoints(), capturabilityBasedStatus.getLeftHandContactNormal());
+      if (fullRobotModel.getHand(RobotSide.RIGHT) != null)
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), capturabilityBasedStatus.getRightHandContactPoints(), capturabilityBasedStatus.getRightHandContactNormal());
    }
 
    private void packBodyLoadStatus(RigidBodyBasics rigidBody, RecyclingArrayList<Point3D> contactPointList, Vector3D contactNormalToPack)

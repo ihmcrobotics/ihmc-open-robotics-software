@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingF
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 public class PlanThenSnapPlanner
 {

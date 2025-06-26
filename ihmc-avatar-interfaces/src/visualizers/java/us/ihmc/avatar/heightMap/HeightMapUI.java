@@ -26,8 +26,8 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapFilterParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public abstract class HeightMapUI extends ApplicationNoModule
 {

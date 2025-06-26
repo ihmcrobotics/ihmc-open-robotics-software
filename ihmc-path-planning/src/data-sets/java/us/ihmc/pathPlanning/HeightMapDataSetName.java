@@ -4,8 +4,8 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.io.*;
 
@@ -52,7 +52,7 @@ public enum HeightMapDataSetName
       try
       {
          message = serializer.deserialize(inputStream);
-         heightMapData = HeightMapMessageTools.unpackMessage(message);
+         heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message);
       }
       catch (IOException e)
       {

@@ -5,7 +5,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.HashMap;

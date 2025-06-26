@@ -10,6 +10,7 @@ import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
@@ -94,6 +95,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ */
 public class HumanoidKinematicsSimulation
 {
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT

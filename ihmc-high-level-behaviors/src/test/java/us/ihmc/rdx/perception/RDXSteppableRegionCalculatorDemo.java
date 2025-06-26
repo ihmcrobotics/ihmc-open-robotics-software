@@ -22,7 +22,7 @@ import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class RDXSteppableRegionCalculatorDemo
 {
@@ -59,7 +59,7 @@ public class RDXSteppableRegionCalculatorDemo
       // Configure the height map visualizer
       perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
-      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map", new HeightMapParameters("GPU"));
+      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map", new HeightMapParameters());
       heightMapVisualizer.setActive(true);
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);

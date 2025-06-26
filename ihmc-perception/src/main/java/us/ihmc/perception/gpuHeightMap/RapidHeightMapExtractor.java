@@ -18,8 +18,8 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.net.URL;
 
@@ -186,7 +186,7 @@ public class RapidHeightMapExtractor
                       RigidBodyTransform sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
-                      Point3D sensorOrigin,
+                      Point3D heightMapFrameToWorldFrame,
                       double footHeight)
    {
       int error;
@@ -269,8 +269,8 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the translate kernel ---------
       {
-         int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-         int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSizeInMeters());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
@@ -542,7 +542,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap.clone();
+      return globalMeanMap;
    }
 
    public GpuMat getTerrainCroppedHeightMap()
