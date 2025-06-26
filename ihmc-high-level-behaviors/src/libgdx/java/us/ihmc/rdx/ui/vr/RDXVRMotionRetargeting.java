@@ -74,6 +74,8 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<FramePose3D> newFootFramePoses = new SideDependentList<>();
 
    private final RDXVRSteppingTracker steppingTracker = new RDXVRSteppingTracker();
+   private final SideDependentList<Boolean> isFootInContact = new SideDependentList<>();
+   private boolean controllingFeet = false;
 
    /**
     * Constructor for the motion retargeting class.
@@ -106,6 +108,7 @@ public class RDXVRMotionRetargeting
          initialFootTrackersTransformToWorld.put(side, new RigidBodyTransform());
          initialFeetTransformToWorld.put(side, new RigidBodyTransform());
          newFootFramePoses.put(side, new FramePose3D());
+         isFootInContact.put(side, true);
       }
    }
 
@@ -341,6 +344,7 @@ public class RDXVRMotionRetargeting
               && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName())
               && !controlArmsOnly)
       {
+         controllingFeet = true;
          for (RobotSide side : RobotSide.values())
          {
             String footName = side == RobotSide.LEFT ? LEFT_ANKLE.getSegmentName() : RIGHT_ANKLE.getSegmentName();
@@ -373,8 +377,12 @@ public class RDXVRMotionRetargeting
             retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, retargetedFootFrames.get(side));
 
             steppingTracker.processVRInput(side, trackerReferenceFrames.get(footName).getReferenceFrame().getTransformToWorldFrame());
+            isFootInContact.put(side, steppingTracker.isFootInContact(side));
          }
-         //TODO
+      }
+      else
+      {
+         controllingFeet = false;
       }
    }
 
@@ -400,10 +408,12 @@ public class RDXVRMotionRetargeting
       {
          initialHandPositionsInWorld.put(side, null);
          initialFeetFrame.put(side, null);
+         isFootInContact.put(side, true);
       }
       retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;
       previousOffsetValue = 0.5;
+      controllingFeet = false;
    }
 
    public Set<VRTrackedSegmentType> getRetargetedSegments()
@@ -439,5 +449,15 @@ public class RDXVRMotionRetargeting
    public RDXReferenceFrameGraphic getScaledHandGraphic(RobotSide side)
    {
       return scaledHandsFrameGraphics.get(side);
+   }
+
+   public boolean isFootInContact(RobotSide side)
+   {
+      return isFootInContact.get(side);
+   }
+
+   public boolean isControllingFeet()
+   {
+      return controllingFeet;
    }
 }
