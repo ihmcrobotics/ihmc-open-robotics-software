@@ -14,6 +14,7 @@ import java.util.concurrent.BlockingQueue;
 
 public abstract class ImageSensor implements AutoCloseable
 {
+   public static final int DEFAULT_IMAGE_QUEUE_CAPACITY = 8;
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
 
    private final String sensorName;
@@ -108,17 +109,18 @@ public abstract class ImageSensor implements AutoCloseable
     * Register an image queue for images of a particular key.
     * <p>
     * Every image grabbed by the sensor will be added to the passed in queue.
-    * The code accessing the collection must call {@link RawImage#release()} on each image,
+    * The code taking from the queue must call {@link RawImage#release()} on each image,
     * once it's done using the image.
     * <p>
     * If the queue becomes full (i.e. when {@code BlockingQueue#remainingCapacity() == 0})
     * the oldest image will be removed so the new image can be added.
     * Ensure a reasonable queue capacity is set to prevent memory leaks.
+    * {@link #DEFAULT_IMAGE_QUEUE_CAPACITY} can be used as a good default value.
     *
     * @param imageQueue Blocking queue into which the images will be added.
     * @param imageKey The key for images to be collected.
     */
-   public void registerImageCollector(BlockingQueue<RawImage> imageQueue, int imageKey)
+   public void registerImageQueue(BlockingQueue<RawImage> imageQueue, int imageKey)
    {
       if (imageQueues.containsKey(imageKey))
          imageQueues.get(imageKey).add(imageQueue);
