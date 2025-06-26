@@ -19,13 +19,6 @@ public class RDXHandManager
       for (RobotSide side : RobotSide.values)
       {
          hands.put(side, new RDXAbilityHand(side, communication, baseUI));
-         baseUI.getImGuiPanelManager().addPanel(
-               "Individual Finger Control " + side.toString(), () -> {
-                  ImGui.begin("Individual Finger Control " + side.toString());
-                  hands.get(side).renderIndividualFingerControls();
-                  ImGui.end();
-               }
-         );
       }
 
 

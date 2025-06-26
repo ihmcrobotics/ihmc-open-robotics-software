@@ -113,10 +113,10 @@ public class RDXAbilityHand implements AbilityHandInterface
          {
             throw new RuntimeException(e);
          }
-         publishOnly(4,  60);
+         publishOnly(4, 60);
       }
       ImGui.sameLine();
-      if(ImGui.button("Grip"))
+      if (ImGui.button("Grip"))
       {
          setAllFingers(GRIP_POSITION);
          communication.publishCommand(this);
@@ -128,27 +128,38 @@ public class RDXAbilityHand implements AbilityHandInterface
          communication.publishCommand(this);
       }
 
-      ImGui.beginDisabled();
-      ImGui.sliderFloat("Current Angle", new float[] {actuatorPositions[0]}, SLIDER_MIN, SLIDER_MAX, "%.1f°");
-      ImGui.endDisabled();
-
-      ImGui.popID();
       ImGui.separator();
-   }
-
-   public void renderIndividualFingerControls() {
-      for (int i = 0; i < ACTUATOR_COUNT; i++) {
-         ImGui.pushID(i);
-         float[] sliderVal = { controlFingerSliders[i] };
-         if (ImGui.sliderFloat("Finger " + i, sliderVal, SLIDER_MIN, SLIDER_MAX, "%.1f°")) {
-            controlFingerSliders[i] = sliderVal[0];
-            float value = (i == 5) ? -sliderVal[0] : sliderVal[0];
-            setCommandType(AbilityHandCommandType.POSITION);
-            setCommandValue(i, value);
-            communication.publishCommand(this);
+      if (ImGui.collapsingHeader("Individual Finger Control"))
+      {
+         for (int i = 0; i < ACTUATOR_COUNT; i++)
+         {
+            float[] sliderVal = {controlFingerSliders[i]};
+            if (ImGui.sliderFloat("Finger " + i, sliderVal, SLIDER_MIN, SLIDER_MAX, "%.1f°"))
+            {
+               controlFingerSliders[i] = sliderVal[0];
+               float value = controlFingerSliders[i];
+               setCommandType(AbilityHandCommandType.POSITION);
+               if (i == 5)
+               {
+                  value = -value;
+               }
+               setCommandValue(i, value);
+               communication.publishCommand(this);
+            }
          }
-         ImGui.popID();
       }
+      ImGui.separator();
+      if (ImGui.collapsingHeader("Actual Positions"))
+      {
+         ImGui.beginDisabled();
+         for(int i = 0; i < ACTUATOR_COUNT; i++)
+         {
+
+            ImGui.sliderFloat("Current Angle " + i, new float[] {actuatorPositions[i]}, SLIDER_MIN, SLIDER_MAX, "%.1f°");
+         }
+         ImGui.endDisabled();
+      }
+      ImGui.popID();
    }
 
    private void setAllFingers(float position)
