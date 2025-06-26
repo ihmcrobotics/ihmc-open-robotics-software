@@ -1,11 +1,16 @@
 package us.ihmc.rdx.ui.interactable;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import us.ihmc.psyonicros2.AbilityHandCommandType;
 import us.ihmc.psyonicros2.AbilityHandInterface;
 import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
+import us.ihmc.rdx.imgui.ImGuiSliderFloat;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.rdx.imgui.ImGuiTools;
 
 public class RDXAbilityHand implements AbilityHandInterface
 {
@@ -19,7 +24,15 @@ public class RDXAbilityHand implements AbilityHandInterface
    private final AbilityHandHardwareCommunication communication;
    private final float[] commandValues = new float[ACTUATOR_COUNT];
    private final float[] actuatorPositions = new float[ACTUATOR_COUNT];
-   private final float[] controlFingerSliders = new float[ACTUATOR_COUNT];
+   private final float[] controlFinger = new float[ACTUATOR_COUNT];
+
+   private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
+
+   // control-fingers slider
+   private final String controlFingersSliderLabel;
+   private final ImGuiSliderFloat controlFingersSlider;
+
+   private final ImGuiSliderFloat[] fingerSliders = new ImGuiSliderFloat[ACTUATOR_COUNT];
 
    private AbilityHandCommandType commandType = AbilityHandCommandType.POSITION;
 
@@ -27,12 +40,21 @@ public class RDXAbilityHand implements AbilityHandInterface
    {
       this.handSide = handSide;
       this.communication = communication;
+      controlFingersSliderLabel = "Control Fingers";
+      controlFingersSlider = new ImGuiSliderFloat(controlFingersSliderLabel, "%.1f°", Float.NaN);
+      controlFingersSlider.addWidgetAligner(widgetAligner);
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
          commandValues[i] = 30.0f;
          actuatorPositions[i] = 30.0f;
-         controlFingerSliders[i] = 30.0f;
+         controlFinger[i] = 30.0f;
+
+         String label = "Finger " + i;
+         fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
+         fingerSliders[i].addWidgetAligner(widgetAligner);
+         // seed its UI value to whatever your array holds
+         fingerSliders[i].setFloatValue(controlFinger[i]);
       }
    }
 
@@ -87,10 +109,10 @@ public class RDXAbilityHand implements AbilityHandInterface
    {
       ImGui.pushID(handSide.ordinal());
       ImGui.text(handSide + ":");
-
+      ImGui.sameLine();
       if (ImGui.button("Open"))
       {
-         publishOnly(4, 20);
+         publishOnly(4, OPEN_POSITION);
          try
          {
             Thread.sleep(400);
@@ -99,7 +121,7 @@ public class RDXAbilityHand implements AbilityHandInterface
          {
             throw new RuntimeException(e);
          }
-         publishExcept(4, 20);
+         publishExcept(4, OPEN_POSITION);
       }
       ImGui.sameLine();
       if (ImGui.button("Close"))
@@ -113,7 +135,7 @@ public class RDXAbilityHand implements AbilityHandInterface
          {
             throw new RuntimeException(e);
          }
-         publishOnly(4, 60);
+         publishOnly(4, CLOSED_POSITION);
       }
       ImGui.sameLine();
       if (ImGui.button("Grip"))
@@ -122,42 +144,37 @@ public class RDXAbilityHand implements AbilityHandInterface
          communication.publishCommand(this);
       }
 
-      if (ImGui.sliderFloat("Control Fingers", controlFingerSliders, SLIDER_MIN, SLIDER_MAX, "%.1f°"))
+      float currentNotch = (actuatorPositions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+      float sliderStart = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
+      float sliderWidth = ImGui.getColumnWidth() - sliderStart;
+      ImGuiTools.renderSliderOrProgressNotch(sliderStart + currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
+
+      if (controlFingersSlider.render(SLIDER_MIN, SLIDER_MAX))
       {
-         setAllFingers(controlFingerSliders[0]);
+         float newPos = controlFingersSlider.getFloatValue();
+         setAllFingers(newPos);
          communication.publishCommand(this);
       }
 
-      ImGui.separator();
       if (ImGui.collapsingHeader("Individual Finger Control"))
       {
          for (int i = 0; i < ACTUATOR_COUNT; i++)
          {
-            float[] sliderVal = {controlFingerSliders[i]};
-            if (ImGui.sliderFloat("Finger " + i, sliderVal, SLIDER_MIN, SLIDER_MAX, "%.1f°"))
+            float notchNorm = (actuatorPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+            float startX = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
+            float width = ImGui.getColumnWidth() - startX;
+            ImGuiTools.renderSliderOrProgressNotch(startX + notchNorm * width, ImGui.getColorU32(ImGuiCol.Text));
+
+            if (fingerSliders[i].render(SLIDER_MIN, SLIDER_MAX))
             {
-               controlFingerSliders[i] = sliderVal[0];
-               float value = controlFingerSliders[i];
+               float val = fingerSliders[i].getFloatValue();
+               controlFinger[i] = val;
                setCommandType(AbilityHandCommandType.POSITION);
-               if (i == 5)
-               {
-                  value = -value;
-               }
-               setCommandValue(i, value);
+               float f = (i == 5) ? -val : val;
+               setCommandValue(i, f);
                communication.publishCommand(this);
             }
          }
-      }
-      ImGui.separator();
-      if (ImGui.collapsingHeader("Actual Positions"))
-      {
-         ImGui.beginDisabled();
-         for(int i = 0; i < ACTUATOR_COUNT; i++)
-         {
-
-            ImGui.sliderFloat("Current Angle " + i, new float[] {actuatorPositions[i]}, SLIDER_MIN, SLIDER_MAX, "%.1f°");
-         }
-         ImGui.endDisabled();
       }
       ImGui.popID();
    }
@@ -169,7 +186,7 @@ public class RDXAbilityHand implements AbilityHandInterface
       {
          if (i != 4 && i != 5)
          {
-            controlFingerSliders[i] = position;
+            controlFinger[i] = position;
             setCommandValue(i, position);
          }
       }
@@ -183,7 +200,7 @@ public class RDXAbilityHand implements AbilityHandInterface
          if (i != excludedIndex)
          {
             float value = (i == 5) ? -position : position;
-            controlFingerSliders[i] = position;
+            controlFinger[i] = position;
             setCommandValue(i, value);
          }
       }
@@ -193,8 +210,8 @@ public class RDXAbilityHand implements AbilityHandInterface
    private void publishOnly(int index, float position)
    {
       setCommandType(AbilityHandCommandType.POSITION);
-      controlFingerSliders[index] = position;
-      setCommandValue(index, index == 5 ? -position : position);
+      controlFinger[index] = position;
+      setCommandValue(index, (index == 5 ? -position : position));
       communication.publishCommand(this);
    }
 }
