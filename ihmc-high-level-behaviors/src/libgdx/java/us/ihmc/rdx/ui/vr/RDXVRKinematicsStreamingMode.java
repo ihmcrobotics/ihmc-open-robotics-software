@@ -10,16 +10,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ROS2LogMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -694,6 +685,15 @@ public class RDXVRKinematicsStreamingMode
       }
       // Correct values from trackers/controllers using retargeting techniques
       motionRetargeting.computeDesiredValues();
+      // Update contact state
+      if (motionRetargeting.isControllingFeet())
+      {
+         KinematicsStreamingToolboxContactConfigurationMessage contactConfigMessage = new KinematicsStreamingToolboxContactConfigurationMessage();
+         contactConfigMessage.setLeftFootInContact(motionRetargeting.isFootInContact(RobotSide.LEFT));
+         contactConfigMessage.setRightFootInContact(motionRetargeting.isFootInContact(RobotSide.RIGHT));
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingContactConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), contactConfigMessage);
+      }
+
       for (VRTrackedSegmentType segmentType : motionRetargeting.getRetargetedSegments())
       {
          RigidBodyBasics controlledSegment = getControlledSegment(segmentType);

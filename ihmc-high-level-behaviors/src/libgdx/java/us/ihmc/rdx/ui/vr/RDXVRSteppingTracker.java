@@ -102,8 +102,8 @@ public class RDXVRSteppingTracker
         stableIterationCounts.put(side, 0);
     }
 
-    public SideDependentList<Boolean> getIsUserStepping()
+    public boolean isFootInContact(RobotSide side)
     {
-        return isUserStepping;
+        return !isUserStepping.get(side);
     }
 }
