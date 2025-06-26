@@ -5,6 +5,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -571,6 +572,12 @@ public class KinematicsToolboxController extends ToolboxController
       this.initialRobotConfigurationMap = new TObjectDoubleHashMap<>();
       initialRobotConfigurationMap.forEach((key, value) -> this.initialRobotConfigurationMap.put(key, value));
    }
+   public HumanoidKinematicsToolboxController getHumanoidIKController()
+   {
+      // Assuming the internal KSTools object is named 'tools'
+      return KSTTools.();
+   }
+
 
    /**
     * Sets up the robot configuration this IK should start from when initializing.

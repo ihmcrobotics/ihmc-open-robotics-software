@@ -73,6 +73,7 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<ReferenceFrame> retargetedFootFrames =  new SideDependentList<>();
    private final SideDependentList<FramePose3D> newFootFramePoses = new SideDependentList<>();
 
+
    /**
     * Constructor for the motion retargeting class.
     *

@@ -138,6 +138,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * {@link HumanoidKinematicsToolboxConfigurationMessage}.
     */
    private final YoBoolean holdCenterOfMassXYPosition = new YoBoolean("holdCenterOfMassXYPosition", registry);
+
+   private final SideDependentList<YoBoolean> isUserFootInContact = new SideDependentList<>();
    /**
     * Default weight used when holding a support rigid-body in place. It is rather high such that they
     * do not deviate much from their initial position/pose.
@@ -254,6 +256,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         isUserFootInContact.put(robotSide, new YoBoolean("isUser" + robotSide.getPascalCaseName() + "FootInContact", registry));
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
@@ -342,7 +349,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       setInitialRobotConfiguration(privilegedConfiguration);
    }
-
+   public void setUserFootContactState(boolean leftFootInContact, boolean rightFootInContact)
+   {
+      if (isUserFootInContact.get(RobotSide.LEFT) != null)
+         isUserFootInContact.get(RobotSide.LEFT).set(leftFootInContact);
+      if (isUserFootInContact.get(RobotSide.RIGHT) != null)
+         isUserFootInContact.get(RobotSide.RIGHT).set(rightFootInContact);
+   }
    public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       if (collisionModel != null)
@@ -629,7 +642,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
 
          // Do not hold the foot position if the user is already controlling it.
-         if (isFootInSupport.get(robotSide).getBooleanValue() && !isUserControllingRigidBody(foot))
+         if (isFootInSupport.get(robotSide).getBooleanValue() && !isUserControllingRigidBody(foot) && isUserFootInContact.get(RobotSide.LEFT).getValue() && isUserFootInContact.get(RobotSide.RIGHT).getValue() )
          {
             SpatialFeedbackControlCommand feedbackControlCommand = bufferToPack.addSpatialFeedbackControlCommand();
             feedbackControlCommand.set(rootBody, foot);

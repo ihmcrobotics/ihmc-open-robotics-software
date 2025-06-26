@@ -5,13 +5,9 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -129,6 +125,22 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          s.takeNextData(robotConfigurationData, null);
          robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
       });
+      // NEW: Subscribe to the user foot contact status message.
+      UserFootContactStatusMessage userFootContactStatus = new UserFootContactStatusMessage();
+      ros2Node.createSubscription(getInputTopic().withTypeName(UserFootContactStatusMessage.class), s ->
+      {
+         // Get the internal IK solver via the new getter method.
+         HumanoidKinematicsToolboxController ikController = controller.getTools().getIKController();
+
+         if (ikController != null)
+         {
+            s.takeNextData(userFootContactStatus, null);
+            // Directly call the setter on the IK controller.
+            ikController.setUserFootContactState(userFootContactStatus.getLeftFootInContact(),
+                    userFootContactStatus.getRightFootInContact());
+         }
+      });
+
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 

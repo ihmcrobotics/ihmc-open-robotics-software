@@ -10,18 +10,10 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ROS2LogMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxParameters;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -42,6 +34,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
@@ -76,6 +69,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -100,6 +94,9 @@ public class RDXVRKinematicsStreamingMode
 
    private static final double COM_CONTROL_JOYSTICK_THRESHOLD = 0.7;
    private static final double COM_JOYSTICK_INCREMENT = 6.0e-4;
+
+   private static final double LIFT_THRESHOLD = 0.02;
+   private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -179,6 +176,9 @@ public class RDXVRKinematicsStreamingMode
    private SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
    private final SideDependentList<Boolean> handsAreLoaded = new SideDependentList<>(false, false);
    private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.GRIPPER, RDXHandControlMode.GRIPPER);
+
+   private final ImBoolean leftFootInContact = new ImBoolean(false);
+   private final ImBoolean rightFootInContact = new ImBoolean(false);
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -303,6 +303,35 @@ public class RDXVRKinematicsStreamingMode
    public void processVRInput()
    {
       kinematicsRecorder.onUpdateStart();
+
+      if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod))
+      {
+         KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
+         processTrackers(toolboxInputMessage);
+
+
+
+         // Create the message to be published.
+         UserFootContactStatusMessage contactMessage = new UserFootContactStatusMessage();
+
+         // Get the left foot tracker.
+         ReferenceFrame leftAnkleTracker = trackerReferenceFrames.get(VRTrackedSegmentType.LEFT_ANKLE.getSegmentName()).getReferenceFrame();
+         // Set the contact status directly. If the tracker is null, it's considered in contact.
+         contactMessage.setLeftFootInContact(leftAnkleTracker == null || leftAnkleTracker.getTransformToWorldFrame().getTranslationZ() < LIFT_THRESHOLD);
+
+         // Get the right foot tracker.
+         MutableReferenceFrame rightMutableFrame = trackerReferenceFrames.get(VRTrackedSegmentType.RIGHT_ANKLE.getSegmentName());
+         // Set the contact status directly.
+         contactMessage.setRightFootInContact(rightMutableFrame == null || rightMutableFrame.getReferenceFrame().getTransformToWorldFrame().getTranslationZ() < LIFT_THRESHOLD);
+
+         // CORRECTED PUBLISH CALL:
+         // Create a strongly-typed topic from the generic input topic.
+         ROS2Topic<UserFootContactStatusMessage> topic = KinematicsStreamingToolboxModule.getInputTopic(robotModel.getSimpleRobotName())
+                 .withTypeName(UserFootContactStatusMessage.class);
+         ros2ControllerHelper.publish(topic, contactMessage);
+
+         processControllers(toolboxInputMessage);
+      }
 
       // Handle left joystick input
       if (kinematicsRecorder.isReplaying())

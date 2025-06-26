@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.UserFootContactStatusMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
@@ -18,6 +19,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.K
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
@@ -50,6 +52,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -92,6 +95,9 @@ public class KSTTools
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
 
    private final YoLong currentMessageId;
+
+   private final ConcurrentCopier<UserFootContactStatusMessage> userFootContactCopier = new ConcurrentCopier<>(UserFootContactStatusMessage::new);
+   private final ROS2Input<UserFootContactStatusMessage> userFootContactStatusSubscription;
 
    private final YoBoolean hasNewInputCommand, hasPreviousInput;
    private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
@@ -252,6 +258,22 @@ public class KSTTools
          areHandTaskspaceOutputsEnabled.get(robotSide).set(configurationCommand.isHandTaskspaceEnabled(robotSide));
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
       }
+
+      if (userFootContactStatusSubscription.getMessageNotification().poll())
+      {
+         // Copy the message to a thread-safe location.
+         userFootContactCopier.getCopyForWriting().set(userFootContactStatusSubscription.getLatest());
+         userFootContactCopier.commit();
+      }
+      // Use the thread-safe copy in the main update loop.
+      UserFootContactStatusMessage message = userFootContactCopier.getCopyForReading();
+      if (message != null)
+      {
+         ikController.setUserFootContactState(message.getLeftFootInContact(), message.getRightFootInContact());
+      }
+
+
+
 
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInitialConfigurationCommand.class))
       {
