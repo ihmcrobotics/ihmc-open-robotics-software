@@ -13,7 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 
 public class RDXAbilityHand implements AbilityHandInterface
 {
-   private static final float OPEN_POSITION = 0.0f;
+   private static final float OPEN_POSITION = 30.0f;
    private static final float CLOSED_POSITION = 90.0f;
    private static final float GRIP_POSITION = 100.0f;
    private static final float SLIDER_MIN = 0.0f;
@@ -117,17 +117,17 @@ public class RDXAbilityHand implements AbilityHandInterface
       ImGui.sameLine();
       if (ImGui.button("Open"))
       {
-         startVelToPos(OPEN_POSITION, -10.0f);
+         startVelToPos(OPEN_POSITION, -30.0f);
       }
       ImGui.sameLine();
       if (ImGui.button("Close"))
       {
-         startVelToPos(CLOSED_POSITION, 10.0f);
+         startVelToPos(CLOSED_POSITION, 30.0f);
       }
       ImGui.sameLine();
       if (ImGui.button("Grip"))
       {
-         startVelToPos(GRIP_POSITION, 10.0f);
+         startVelToPos(GRIP_POSITION, 30.0f);
       }
 
       float currentNotch = (actuatorPositions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
@@ -180,29 +180,6 @@ public class RDXAbilityHand implements AbilityHandInterface
       }
    }
 
-   private void publishExcept(int excludedIndex, float position)
-   {
-      setCommandType(AbilityHandCommandType.POSITION);
-      for (int i = 0; i < ACTUATOR_COUNT; i++)
-      {
-         if (i != excludedIndex)
-         {
-            float value = (i == 5) ? -position : position;
-            controlFinger[i] = position;
-            setCommandValue(i, value);
-         }
-      }
-      communication.publishCommand(this);
-   }
-
-   private void publishOnly(int index, float position)
-   {
-      setCommandType(AbilityHandCommandType.POSITION);
-      controlFinger[index] = position;
-      setCommandValue(index, (index == 5 ? -position : position));
-      communication.publishCommand(this);
-   }
-
    private void startVelToPos(float targetPosition, float velocity)
    {
       velToPosTarget = targetPosition;
@@ -210,15 +187,95 @@ public class RDXAbilityHand implements AbilityHandInterface
       controlMode = ControlMode.VEL_TO_POS;
    }
 
-   private void processVelToPos(int excluedIndex)
+   private void processVelToPos(int excludedIndex)
    {
       if (controlMode != ControlMode.VEL_TO_POS)
          return;
 
+      if (velToPosSpeed < 0.0f)
+      {
+         if (moveSkipped(excludedIndex))
+         {
+            setCommandType(AbilityHandCommandType.VELOCITY);
+            for (int i = 0; i < ACTUATOR_COUNT; i++)
+            {
+               if (i != excludedIndex)
+               {
+                  float v = (i == 5) ? -velToPosSpeed : velToPosSpeed;
+                  setCommandValue(i, v);
+               }
+               else
+               {
+                  setCommandValue(i, 0.0f);
+               }
+            }
+            communication.publishCommand(this);
+            update();
+
+            boolean allOthersReached = true;
+            for (int i = 0; i < ACTUATOR_COUNT; i++)
+            {
+               if (i == excludedIndex)
+                  continue;
+               float pos = getActuatorPosition(i);
+               if (i == 5)
+                  pos = -pos;
+               if ((velToPosSpeed < 0 && pos > velToPosTarget) || (velToPosSpeed > 0 && pos < velToPosTarget))
+               {
+                  allOthersReached = false;
+                  break;
+               }
+            }
+            if (allOthersReached)
+               controlMode = ControlMode.IDLE;
+         }
+      }
+      else
+      {
+         setCommandType(AbilityHandCommandType.VELOCITY);
+         for (int i = 0; i < ACTUATOR_COUNT; i++)
+         {
+            if (i != excludedIndex)
+            {
+               float v = (i == 5) ? -velToPosSpeed : velToPosSpeed;
+               setCommandValue(i, v);
+            }
+            else
+            {
+               setCommandValue(i, 0.0f);
+            }
+         }
+         communication.publishCommand(this);
+         update();
+
+         boolean reached = true;
+         for (int i = 0; i < ACTUATOR_COUNT; i++)
+         {
+            if (i == excludedIndex)
+               continue;
+            float pos = getActuatorPosition(i);
+            if (i == 5)
+               pos = -pos;
+            if ((velToPosSpeed > 0 && pos < velToPosTarget) || (velToPosSpeed < 0 && pos > velToPosTarget))
+            {
+               reached = false;
+               break;
+            }
+         }
+         if (reached)
+         {
+            if (moveSkipped(excludedIndex))
+               controlMode = ControlMode.IDLE;
+         }
+      }
+   }
+
+   private boolean moveSkipped(int index)
+   {
       setCommandType(AbilityHandCommandType.VELOCITY);
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
-         if (i != excluedIndex)
+         if (i == index)
          {
             float v = (i == 5) ? -velToPosSpeed : velToPosSpeed;
             setCommandValue(i, v);
@@ -233,18 +290,20 @@ public class RDXAbilityHand implements AbilityHandInterface
       boolean reached = true;
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
-         float pos = getActuatorPosition(i);
-         if (i == 5)
-            pos = -pos;
-         if ((velToPosSpeed > 0 && pos < velToPosTarget) || (velToPosSpeed < 0 && pos > velToPosTarget))
+         if (i == index)
          {
-            reached = false;
-            break;
+            float pos = getActuatorPosition(i);
+            if ((velToPosSpeed > 0 && pos < velToPosTarget / 2) || (velToPosSpeed < 0 && pos > velToPosTarget))
+            {
+               reached = false;
+               break;
+            }
          }
       }
       if (reached)
       {
-         controlMode = ControlMode.IDLE;
+         return true;
       }
+      return false;
    }
 }
