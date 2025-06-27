@@ -137,13 +137,10 @@ public class LeRobotDataset
          writeTaskJsonlLine(taskName);
       }
 
-      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
-      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
       String timestampVarName = "root.LogDataReader.robotTime";
 
-      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
+//      Actual boolean that we want
+//      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
       YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
 
       LogDataReader reader = session.getLogDataReader();
@@ -156,7 +153,7 @@ public class LeRobotDataset
       {
          session.runTick();
 
-         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
+         boolean flagValue = (int) timestamp.getValue()%1000 <= 300;
 
          if (flagValue && !currentlyRecording)
          {
@@ -166,8 +163,9 @@ public class LeRobotDataset
          else if (!flagValue && currentlyRecording)
          {
             int episodeEnd = (int) frame;
-            int episodeLength = episodeEnd - episodeStart;
-            System.out.println(episodeLength);
+            session.submitBufferInPointIndexRequestAndWait(episodeStart);
+            session.submitBufferOutPointIndexRequestAndWait(episodeEnd);
+            addEpisode(taskName, session, frameProcessingQueue);
             currentlyRecording = false;
             episodeStart = -1;
          }
@@ -176,8 +174,9 @@ public class LeRobotDataset
       if (currentlyRecording)
       {
          int episodeEnd = (int) totalFrames;
-         int episodeLength = episodeEnd - episodeStart;
-         System.out.println(episodeLength);
+         session.submitBufferInPointIndexRequestAndWait(episodeStart);
+         session.submitBufferOutPointIndexRequestAndWait(episodeEnd);
+         addEpisode(taskName, session, frameProcessingQueue);
       }
    }
 
