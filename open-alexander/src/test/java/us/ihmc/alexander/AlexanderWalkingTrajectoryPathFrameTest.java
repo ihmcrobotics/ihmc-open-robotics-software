@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.*;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -62,6 +61,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockField
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockType;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
+import us.ihmc.simulationToolkit.controllers.SlipFeetPerturber;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -336,6 +336,25 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
+   @Tag("controller-api-2")
+   @Test
+   public void testStandingWithDrift()
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                         simulationTestingParameters);
+      simulationTestHelper = factory.createAvatarTestingSimulation();
+
+      createTranslationFeetPerturber(simulationTestHelper);
+
+      simulationTestHelper.start();
+
+      assertWalkingFrameMatchMidFeetZUpFrame();
+      assertTrue(simulationTestHelper.simulateNow(3.0));
+      assertWalkingFrameMatchMidFeetZUpFrame();
+      // need to assert hte pelvis is still in the midfeet.
+   }
+
    @Tag("controller-api-4")
    @Test
    public void testLargeStepForward()
@@ -551,10 +570,10 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       //      diff.sub(midFeetZUpFrameTransform.getTranslation(), walkingTrajectoryPathFrameTransform.getTranslation());
       //      LogTools.info("Difference w.r.t. mid feet zup frame: angle= "
       //            + midFeetZUpFrameTransform.getRotation().distance(walkingTrajectoryPathFrameTransform.getRotation()) + ", distance= " + diff.length());
-      // It doesn't match the mid feet zup yaw.
-      //      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
-      //                                                                  walkingTrajectoryPathFrameTransform.getRotation(),
-      //                                                                  1.0e-3);
+//       It doesn't match the mid feet zup yaw.
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(midFeetZUpFrameTransform.getRotation(),
+                                                                  walkingTrajectoryPathFrameTransform.getRotation(),
+                                                                  1.0e-3);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(midFeetZUpFrameTransform.getTranslation(),
                                                             walkingTrajectoryPathFrameTransform.getTranslation(),
                                                             1.0e-2);
@@ -800,5 +819,25 @@ public class AlexanderWalkingTrajectoryPathFrameTest
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] {0., 0, 1.11});
 
       robot.addThrottledController(oscillateFeetPerturber, scs.getDT() * ticksPerPerturbation);
+   }
+
+   private static void createTranslationFeetPerturber(SCS2AvatarTestingSimulation avatarSimulation)
+   {
+      Robot robot = avatarSimulation.getRobot();
+      SimulationConstructionSet2 scs = avatarSimulation.getSimulationConstructionSet();
+      SideDependentList<String> footNames = new SideDependentList<>(side -> avatarSimulation.getRobotModel().getJointMap().getFootName(side));
+
+      int ticksPerPerturbation = 10;
+      SlipFeetPerturber slipFeetPerturber = new SlipFeetPerturber(robot, footNames, scs.getDT() * ticksPerPerturbation);
+      slipFeetPerturber.setTranslationMagnitude(new double[] {0.02, 0.04, 0.0});
+      slipFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] { Math.toRadians(25.0), 0.00, 0.0});
+
+      slipFeetPerturber.setTranslationDuration(RobotSide.LEFT, new double[] {0.05, 0.02, 3.3});
+      slipFeetPerturber.setTranslationDuration(RobotSide.RIGHT, new double[] {0.03, 0.04, 1.3});
+
+      slipFeetPerturber.setRotationDurationYawPitchRoll(RobotSide.LEFT, new double[] {0.5, 0.0, 0.0});
+      slipFeetPerturber.setRotationDurationYawPitchRoll(RobotSide.RIGHT, new double[] {0.75, 0.0, 0.0});
+
+      robot.addThrottledController(slipFeetPerturber, scs.getDT() * ticksPerPerturbation);
    }
 }
