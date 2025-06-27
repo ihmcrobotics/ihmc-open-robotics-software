@@ -454,7 +454,7 @@ public class FootstepPlannerRequest
          bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(requestPacket.getHeightMapMessage());
       if (!heightMapData.isEmpty())
          setHeightMapData(heightMapData);
       else

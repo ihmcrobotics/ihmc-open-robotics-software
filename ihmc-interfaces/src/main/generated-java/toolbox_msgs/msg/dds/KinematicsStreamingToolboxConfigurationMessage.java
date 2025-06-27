@@ -27,21 +27,39 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
             */
    public boolean lock_chest_;
    /**
-            * Whether the left arm should be controller in joint-space.
+            * Whether the left arm should be controlled in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
    public boolean enable_left_arm_jointspace_ = true;
    /**
-            * Whether the right arm should be controller in joint-space.
+            * Whether the right arm should be controlled in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
    public boolean enable_right_arm_jointspace_ = true;
    /**
-            * Whether the neck should be controller in joint-space.
+            * Whether the spine should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public boolean enable_spine_jointspace_;
+   /**
+            * Whether the left leg should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public boolean enable_left_leg_jointspace_;
+   /**
+            * Whether the right leg should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public boolean enable_right_leg_jointspace_;
+   /**
+            * Whether the neck should be controlled in joint-space.
             * Default value is true.
-            * Whether the neck should be controller in joint-space.
+            * Whether the neck should be controlled in joint-space.
             */
    public boolean enable_neck_jointspace_ = true;
    /**
@@ -113,6 +131,12 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       enable_left_arm_jointspace_ = other.enable_left_arm_jointspace_;
 
       enable_right_arm_jointspace_ = other.enable_right_arm_jointspace_;
+
+      enable_spine_jointspace_ = other.enable_spine_jointspace_;
+
+      enable_left_leg_jointspace_ = other.enable_left_leg_jointspace_;
+
+      enable_right_leg_jointspace_ = other.enable_right_leg_jointspace_;
 
       enable_neck_jointspace_ = other.enable_neck_jointspace_;
 
@@ -186,7 +210,7 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
    }
 
    /**
-            * Whether the left arm should be controller in joint-space.
+            * Whether the left arm should be controlled in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
@@ -195,7 +219,7 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       enable_left_arm_jointspace_ = enable_left_arm_jointspace;
    }
    /**
-            * Whether the left arm should be controller in joint-space.
+            * Whether the left arm should be controlled in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
@@ -205,7 +229,7 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
    }
 
    /**
-            * Whether the right arm should be controller in joint-space.
+            * Whether the right arm should be controlled in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
@@ -214,7 +238,7 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       enable_right_arm_jointspace_ = enable_right_arm_jointspace;
    }
    /**
-            * Whether the right arm should be controller in joint-space.
+            * Whether the right arm should be controlled in joint-space.
             * This is compatible with the hand task-space control.
             * Default value is true.
             */
@@ -224,18 +248,75 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
    }
 
    /**
-            * Whether the neck should be controller in joint-space.
+            * Whether the spine should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public void setEnableSpineJointspace(boolean enable_spine_jointspace)
+   {
+      enable_spine_jointspace_ = enable_spine_jointspace;
+   }
+   /**
+            * Whether the spine should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public boolean getEnableSpineJointspace()
+   {
+      return enable_spine_jointspace_;
+   }
+
+   /**
+            * Whether the left leg should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public void setEnableLeftLegJointspace(boolean enable_left_leg_jointspace)
+   {
+      enable_left_leg_jointspace_ = enable_left_leg_jointspace;
+   }
+   /**
+            * Whether the left leg should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public boolean getEnableLeftLegJointspace()
+   {
+      return enable_left_leg_jointspace_;
+   }
+
+   /**
+            * Whether the right leg should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public void setEnableRightLegJointspace(boolean enable_right_leg_jointspace)
+   {
+      enable_right_leg_jointspace_ = enable_right_leg_jointspace;
+   }
+   /**
+            * Whether the right leg should be controlled in joint-space.
+            * This is useful when streaming position control directly to the robot.
+            * Default value is false.
+            */
+   public boolean getEnableRightLegJointspace()
+   {
+      return enable_right_leg_jointspace_;
+   }
+
+   /**
+            * Whether the neck should be controlled in joint-space.
             * Default value is true.
-            * Whether the neck should be controller in joint-space.
+            * Whether the neck should be controlled in joint-space.
             */
    public void setEnableNeckJointspace(boolean enable_neck_jointspace)
    {
       enable_neck_jointspace_ = enable_neck_jointspace;
    }
    /**
-            * Whether the neck should be controller in joint-space.
+            * Whether the neck should be controlled in joint-space.
             * Default value is true.
-            * Whether the neck should be controller in joint-space.
+            * Whether the neck should be controlled in joint-space.
             */
    public boolean getEnableNeckJointspace()
    {
@@ -427,6 +508,12 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_right_arm_jointspace_, other.enable_right_arm_jointspace_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_spine_jointspace_, other.enable_spine_jointspace_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_left_leg_jointspace_, other.enable_left_leg_jointspace_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_right_leg_jointspace_, other.enable_right_leg_jointspace_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_neck_jointspace_, other.enable_neck_jointspace_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_left_hand_taskspace_, other.enable_left_hand_taskspace_, epsilon)) return false;
@@ -470,6 +557,12 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if(this.enable_right_arm_jointspace_ != otherMyClass.enable_right_arm_jointspace_) return false;
 
+      if(this.enable_spine_jointspace_ != otherMyClass.enable_spine_jointspace_) return false;
+
+      if(this.enable_left_leg_jointspace_ != otherMyClass.enable_left_leg_jointspace_) return false;
+
+      if(this.enable_right_leg_jointspace_ != otherMyClass.enable_right_leg_jointspace_) return false;
+
       if(this.enable_neck_jointspace_ != otherMyClass.enable_neck_jointspace_) return false;
 
       if(this.enable_left_hand_taskspace_ != otherMyClass.enable_left_hand_taskspace_) return false;
@@ -510,6 +603,12 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       builder.append(this.enable_left_arm_jointspace_);      builder.append(", ");
       builder.append("enable_right_arm_jointspace=");
       builder.append(this.enable_right_arm_jointspace_);      builder.append(", ");
+      builder.append("enable_spine_jointspace=");
+      builder.append(this.enable_spine_jointspace_);      builder.append(", ");
+      builder.append("enable_left_leg_jointspace=");
+      builder.append(this.enable_left_leg_jointspace_);      builder.append(", ");
+      builder.append("enable_right_leg_jointspace=");
+      builder.append(this.enable_right_leg_jointspace_);      builder.append(", ");
       builder.append("enable_neck_jointspace=");
       builder.append(this.enable_neck_jointspace_);      builder.append(", ");
       builder.append("enable_left_hand_taskspace=");

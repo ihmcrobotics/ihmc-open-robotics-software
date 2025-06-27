@@ -41,7 +41,7 @@ public class AdaptiveSwingTrajectoryLogViewer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(log.getRequestPacket().getHeightMapMessage());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(log.getRequestPacket().getHeightMapMessage());
 
       Graphics3DObject regionsGraphic = new Graphics3DObject();
       IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;

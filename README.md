@@ -22,9 +22,10 @@ All of the software in *IHMC Open Robotics Software* is licensed under the Apach
 *IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 17. 
 We recommend working in IntelliJ.
 
-Our developers are a mix of Windows and Linux users. We officially support:
-- Windows 10/11
-- Ubuntu 20.04+
+
+See the following tutorials for installing and using IHMC Open Robotics Software:
+- [Ubuntu (22.04, 24.04)](https://ihmcrobotics.atlassian.net/wiki/external/ZTE1Y2NkMzA2MTUyNGIzOGI0NjkyZTMwYzgwZDY3MGU)
+- [Windows (10, 11)](https://ihmcrobotics.atlassian.net/wiki/external/NDQ2ZDE2MWRkOGYxNDY4OTk3N2M5NWRiNDU2MGNkMTI)
 
 Arch Linux will work fine for development.
 Other GNU/Linux distros will likely work, however largely untested.

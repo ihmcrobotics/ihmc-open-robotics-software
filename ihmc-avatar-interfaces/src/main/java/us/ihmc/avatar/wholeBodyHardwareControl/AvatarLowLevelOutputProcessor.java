@@ -23,7 +23,7 @@ public class AvatarLowLevelOutputProcessor
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private static final double DEFAULT_SERVO_DURATION = 6.0; // In units of seconds
+   private static final double DEFAULT_SERVO_DURATION = 5.0; // In units of seconds
    private static final double LOW_MASTER_GAIN = 0.0;
    private static final double HIGH_MASTER_GAIN = 1.00;
 
@@ -140,6 +140,11 @@ public class AvatarLowLevelOutputProcessor
    public void unservoRobot()
    {
       servo.set(false);
+   }
+
+   public void unservoRobotQuickly()
+   {
+      unservoQuickly.set(true);
    }
 
    public void addServoListener(YoVariableChangedListener listener)

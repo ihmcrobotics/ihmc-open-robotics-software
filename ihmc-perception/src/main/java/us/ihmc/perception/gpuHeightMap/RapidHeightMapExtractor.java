@@ -85,8 +85,6 @@ public class RapidHeightMapExtractor
    private int previousCellY;
    private float resetOffset;
 
-   private final FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor;
-
    public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
@@ -151,8 +149,6 @@ public class RapidHeightMapExtractor
       {
          throw new RuntimeException(e);
       }
-
-      filteredVerticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, cellsPerAxisGlobal, cellsPerAxisGlobal);
    }
 
    private void computeDerivedParameters()
@@ -339,12 +335,6 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      // Apply the vertical surfaces filter
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         filteredVerticalSurfacesExtractor.update(scaledHeightMap);
-      }
-
       // ---------- Run the Terrain cropping kernel ----------
       {
          int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -512,8 +502,6 @@ public class RapidHeightMapExtractor
       scaledHeightMap.close();
       emptyGlobalHeightMap.close();
 
-      filteredVerticalSurfacesExtractor.destroy();
-
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
    }
@@ -542,7 +530,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap.clone();
+      return globalMeanMap;
    }
 
    public GpuMat getTerrainCroppedHeightMap()

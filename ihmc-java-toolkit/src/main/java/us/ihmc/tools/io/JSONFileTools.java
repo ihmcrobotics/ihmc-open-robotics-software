@@ -1,6 +1,7 @@
 package us.ihmc.tools.io;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -158,11 +159,36 @@ public class JSONFileTools
       }
    }
 
+   /** Loads a .jsonl file where each line is a json document. */
+   public static void loadLines(Path filePath, Consumer<JsonNode> jsonNodeConsumer)
+   {
+      try
+      {
+         for (String line : FileTools.readAllLines(filePath, DefaultExceptionHandler.PRINT_MESSAGE))
+         {
+            loadInternal(line, jsonNodeConsumer);
+         }
+      }
+      catch (IOException e)
+      {
+         LogTools.error("Could not load JSON.");
+         e.printStackTrace();
+      }
+   }
+
    private static void loadInternal(URL fileURL, Consumer<JsonNode> jsonNodeConsumer) throws IOException
    {
       JsonFactory jsonFactory = new JsonFactory();
       ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
       JsonNode jsonNode = objectMapper.readTree(fileURL);
+      jsonNodeConsumer.accept(jsonNode);
+   }
+
+   private static void loadInternal(String content, Consumer<JsonNode> jsonNodeConsumer) throws IOException
+   {
+      JsonFactory jsonFactory = new JsonFactory();
+      ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+      JsonNode jsonNode = objectMapper.readTree(content);
       jsonNodeConsumer.accept(jsonNode);
    }
 
@@ -192,14 +218,14 @@ public class JSONFileTools
       return save(workspaceFile.getFilesystemFile(), rootConsumer);
    }
 
-   public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)
+   public static boolean save(Path filePath, Consumer<ObjectNode> rootConsumer)
    {
-      if (settingsPath.getParent() != null)
+      if (filePath.getParent() != null)
       {
-         FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
+         FileTools.ensureDirectoryExists(filePath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       }
 
-      try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
+      try (PrintStream printStream = new PrintStream(filePath.toFile()))
       {
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
@@ -215,5 +241,19 @@ public class JSONFileTools
       }
    }
 
-
+   public static String getAsSingleLine(Consumer<ObjectNode> rootConsumer)
+   {
+      JsonFactory jsonFactory = new JsonFactory();
+      ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+      ObjectNode root = objectMapper.createObjectNode();
+      rootConsumer.accept(root);
+      try
+      {
+         return objectMapper.writeValueAsString(root);
+      }
+      catch (JsonProcessingException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 }
