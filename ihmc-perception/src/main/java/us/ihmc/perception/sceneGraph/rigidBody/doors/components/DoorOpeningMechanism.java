@@ -107,8 +107,7 @@ public class DoorOpeningMechanism
 
    public String getColloquialName()
    {
-      // E.g. pushLeverHandle, pullKnob, pushPushBar?, pullPullHandle?
-      return doorSide.name().toLowerCase() + CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, type.name());
+      return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, type.name());
    }
 
    @Nullable

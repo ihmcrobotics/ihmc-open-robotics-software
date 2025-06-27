@@ -26,6 +26,10 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  available_behaviors_;
    /**
+            * Name of the behavior that is in progress
+            */
+   public java.lang.StringBuilder behavior_in_progress_;
+   /**
             * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
             */
    public java.lang.StringBuilder completed_behavior_;
@@ -34,15 +38,35 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
             */
    public java.lang.StringBuilder failed_behavior_;
    public behavior_msgs.msg.dds.AI2RActionFailureMessage failure_;
+   /**
+            * Name of the object that the robot is handling
+            */
+   public java.lang.StringBuilder object_grasped_;
+   /**
+            * Which hand is handling the object
+            */
+   public byte grasp_side_ = (byte) 255;
+   /**
+            * Relative transform of the grasped object in hand frame
+            */
+   public us.ihmc.euclid.geometry.Pose3D transform_grasped_object_hand_;
+   /**
+            * Name of the object that the robot has released
+            */
+   public java.lang.StringBuilder object_placed_;
 
    public AI2RStatusMessage()
    {
       robot_mid_feet_under_pelvis_pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
       objects_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.AI2RObjectMessage> (200, new behavior_msgs.msg.dds.AI2RObjectMessagePubSubType());
       available_behaviors_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (200, "type_d");
+      behavior_in_progress_ = new java.lang.StringBuilder(255);
       completed_behavior_ = new java.lang.StringBuilder(255);
       failed_behavior_ = new java.lang.StringBuilder(255);
       failure_ = new behavior_msgs.msg.dds.AI2RActionFailureMessage();
+      object_grasped_ = new java.lang.StringBuilder(255);
+      transform_grasped_object_hand_ = new us.ihmc.euclid.geometry.Pose3D();
+      object_placed_ = new java.lang.StringBuilder(255);
 
    }
 
@@ -57,6 +81,9 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.robot_mid_feet_under_pelvis_pose_in_world_, robot_mid_feet_under_pelvis_pose_in_world_);
       objects_.set(other.objects_);
       available_behaviors_.set(other.available_behaviors_);
+      behavior_in_progress_.setLength(0);
+      behavior_in_progress_.append(other.behavior_in_progress_);
+
       completed_behavior_.setLength(0);
       completed_behavior_.append(other.completed_behavior_);
 
@@ -64,6 +91,15 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       failed_behavior_.append(other.failed_behavior_);
 
       behavior_msgs.msg.dds.AI2RActionFailureMessagePubSubType.staticCopy(other.failure_, failure_);
+      object_grasped_.setLength(0);
+      object_grasped_.append(other.object_grasped_);
+
+      grasp_side_ = other.grasp_side_;
+
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.transform_grasped_object_hand_, transform_grasped_object_hand_);
+      object_placed_.setLength(0);
+      object_placed_.append(other.object_placed_);
+
    }
 
 
@@ -93,6 +129,30 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getAvailableBehaviors()
    {
       return available_behaviors_;
+   }
+
+   /**
+            * Name of the behavior that is in progress
+            */
+   public void setBehaviorInProgress(java.lang.String behavior_in_progress)
+   {
+      behavior_in_progress_.setLength(0);
+      behavior_in_progress_.append(behavior_in_progress);
+   }
+
+   /**
+            * Name of the behavior that is in progress
+            */
+   public java.lang.String getBehaviorInProgressAsString()
+   {
+      return getBehaviorInProgress().toString();
+   }
+   /**
+            * Name of the behavior that is in progress
+            */
+   public java.lang.StringBuilder getBehaviorInProgress()
+   {
+      return behavior_in_progress_;
    }
 
    /**
@@ -149,6 +209,78 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       return failure_;
    }
 
+   /**
+            * Name of the object that the robot is handling
+            */
+   public void setObjectGrasped(java.lang.String object_grasped)
+   {
+      object_grasped_.setLength(0);
+      object_grasped_.append(object_grasped);
+   }
+
+   /**
+            * Name of the object that the robot is handling
+            */
+   public java.lang.String getObjectGraspedAsString()
+   {
+      return getObjectGrasped().toString();
+   }
+   /**
+            * Name of the object that the robot is handling
+            */
+   public java.lang.StringBuilder getObjectGrasped()
+   {
+      return object_grasped_;
+   }
+
+   /**
+            * Which hand is handling the object
+            */
+   public void setGraspSide(byte grasp_side)
+   {
+      grasp_side_ = grasp_side;
+   }
+   /**
+            * Which hand is handling the object
+            */
+   public byte getGraspSide()
+   {
+      return grasp_side_;
+   }
+
+
+   /**
+            * Relative transform of the grasped object in hand frame
+            */
+   public us.ihmc.euclid.geometry.Pose3D getTransformGraspedObjectHand()
+   {
+      return transform_grasped_object_hand_;
+   }
+
+   /**
+            * Name of the object that the robot has released
+            */
+   public void setObjectPlaced(java.lang.String object_placed)
+   {
+      object_placed_.setLength(0);
+      object_placed_.append(object_placed);
+   }
+
+   /**
+            * Name of the object that the robot has released
+            */
+   public java.lang.String getObjectPlacedAsString()
+   {
+      return getObjectPlaced().toString();
+   }
+   /**
+            * Name of the object that the robot has released
+            */
+   public java.lang.StringBuilder getObjectPlaced()
+   {
+      return object_placed_;
+   }
+
 
    public static Supplier<AI2RStatusMessagePubSubType> getPubSubType()
    {
@@ -177,11 +309,20 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.available_behaviors_, other.available_behaviors_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.behavior_in_progress_, other.behavior_in_progress_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.completed_behavior_, other.completed_behavior_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.failed_behavior_, other.failed_behavior_, epsilon)) return false;
 
       if (!this.failure_.epsilonEquals(other.failure_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_grasped_, other.object_grasped_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grasp_side_, other.grasp_side_, epsilon)) return false;
+
+      if (!this.transform_grasped_object_hand_.epsilonEquals(other.transform_grasped_object_hand_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_placed_, other.object_placed_, epsilon)) return false;
+
 
       return true;
    }
@@ -198,11 +339,20 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       if (!this.robot_mid_feet_under_pelvis_pose_in_world_.equals(otherMyClass.robot_mid_feet_under_pelvis_pose_in_world_)) return false;
       if (!this.objects_.equals(otherMyClass.objects_)) return false;
       if (!this.available_behaviors_.equals(otherMyClass.available_behaviors_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.behavior_in_progress_, otherMyClass.behavior_in_progress_)) return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.completed_behavior_, otherMyClass.completed_behavior_)) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.failed_behavior_, otherMyClass.failed_behavior_)) return false;
 
       if (!this.failure_.equals(otherMyClass.failure_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.object_grasped_, otherMyClass.object_grasped_)) return false;
+
+      if(this.grasp_side_ != otherMyClass.grasp_side_) return false;
+
+      if (!this.transform_grasped_object_hand_.equals(otherMyClass.transform_grasped_object_hand_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.object_placed_, otherMyClass.object_placed_)) return false;
+
 
       return true;
    }
@@ -219,12 +369,22 @@ public class AI2RStatusMessage extends Packet<AI2RStatusMessage> implements Sett
       builder.append(this.objects_);      builder.append(", ");
       builder.append("available_behaviors=");
       builder.append(this.available_behaviors_);      builder.append(", ");
+      builder.append("behavior_in_progress=");
+      builder.append(this.behavior_in_progress_);      builder.append(", ");
       builder.append("completed_behavior=");
       builder.append(this.completed_behavior_);      builder.append(", ");
       builder.append("failed_behavior=");
       builder.append(this.failed_behavior_);      builder.append(", ");
       builder.append("failure=");
-      builder.append(this.failure_);
+      builder.append(this.failure_);      builder.append(", ");
+      builder.append("object_grasped=");
+      builder.append(this.object_grasped_);      builder.append(", ");
+      builder.append("grasp_side=");
+      builder.append(this.grasp_side_);      builder.append(", ");
+      builder.append("transform_grasped_object_hand=");
+      builder.append(this.transform_grasped_object_hand_);      builder.append(", ");
+      builder.append("object_placed=");
+      builder.append(this.object_placed_);
       builder.append("}");
       return builder.toString();
    }

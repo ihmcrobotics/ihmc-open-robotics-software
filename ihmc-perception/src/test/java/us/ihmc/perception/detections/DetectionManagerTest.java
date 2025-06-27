@@ -4,6 +4,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -302,6 +303,7 @@ public class DetectionManagerTest
                                                                            createRawImage(now),
                                                                            createRawImage(now),
                                                                            createRawImage(now),
+                                                                           new BoundingBox2D(0.0, 0.0, 1.0, 1.0),
                                                                            new ArrayList<>());
          testDetections.add(testDetection);
       }

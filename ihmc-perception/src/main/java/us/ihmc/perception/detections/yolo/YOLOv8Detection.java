@@ -2,6 +2,7 @@ package us.ihmc.perception.detections.yolo;
 
 import org.bytedeco.opencv.opencv_core.Rect;
 import us.ihmc.perception.RawImage;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 
 public record YOLOv8Detection(String objectClass, int objectClassID, float confidence, int boundingBoxX, int boundingBoxY, int boundingBoxWidth,
                               int boundingBoxHeight, RawImage mask)
@@ -31,9 +32,17 @@ public record YOLOv8Detection(String objectClass, int objectClassID, float confi
    }
 
    /**
+    * @return A new {@link BoundingBox2D} representing the detection's bounding box in pixel coordinates.
+    */
+   public BoundingBox2D boundingBox()
+   {
+      return new BoundingBox2D(boundingBoxX, boundingBoxY, boundingBoxX + boundingBoxWidth, boundingBoxY + boundingBoxHeight);
+   }
+
+   /**
     * @return A new {@link Rect} of the bounding box dimensions.
     */
-   public Rect boundingBox()
+   public Rect boundingBoxRect()
    {
       return new Rect(boundingBoxX, boundingBoxY, boundingBoxWidth, boundingBoxHeight);
    }
