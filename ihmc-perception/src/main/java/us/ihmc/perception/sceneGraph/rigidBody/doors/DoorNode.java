@@ -69,7 +69,7 @@ public class DoorNode extends DetectableSceneNode
 
    public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
    {
-      super(id, "Door" + id, crdtInfo);
+      super(id, "IgnoreDoor" + id, crdtInfo);
 
       doorCornerFrame = new MutableReferenceFrame("doorCorner_" + super.getID(), ReferenceFrame.getWorldFrame(), NAN_POSE);
 

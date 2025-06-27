@@ -351,7 +351,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       meetsDesiredCompletionCriteria &= incompleteFootsteps == 0;
       meetsDesiredCompletionCriteria &= !isWalking;
 
-      if (meetsDesiredCompletionCriteria || hitTimeLimit)
+      if (meetsDesiredCompletionCriteria || hitTimeLimit || state.getFailed())
       {
          state.setIsExecuting(false);
       }

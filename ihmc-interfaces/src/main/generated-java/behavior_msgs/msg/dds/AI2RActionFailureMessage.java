@@ -24,6 +24,14 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
             */
    public java.lang.StringBuilder action_frame_;
    /**
+            * Whether the reference frame of the failed action was missing
+            */
+   public boolean missing_frame_;
+   /**
+            * Name of the object the action would collide with in not interrupted (marked as failed)
+            */
+   public java.lang.StringBuilder collision_name_;
+   /**
             * Position tolerance for the action [m]
             */
    public double position_tolerance_;
@@ -45,6 +53,7 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
       action_name_ = new java.lang.StringBuilder(255);
       action_type_ = new java.lang.StringBuilder(255);
       action_frame_ = new java.lang.StringBuilder(255);
+      collision_name_ = new java.lang.StringBuilder(255);
       position_error_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_error_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
@@ -65,6 +74,11 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
 
       action_frame_.setLength(0);
       action_frame_.append(other.action_frame_);
+
+      missing_frame_ = other.missing_frame_;
+
+      collision_name_.setLength(0);
+      collision_name_.append(other.collision_name_);
 
       position_tolerance_ = other.position_tolerance_;
 
@@ -147,6 +161,45 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
    }
 
    /**
+            * Whether the reference frame of the failed action was missing
+            */
+   public void setMissingFrame(boolean missing_frame)
+   {
+      missing_frame_ = missing_frame;
+   }
+   /**
+            * Whether the reference frame of the failed action was missing
+            */
+   public boolean getMissingFrame()
+   {
+      return missing_frame_;
+   }
+
+   /**
+            * Name of the object the action would collide with in not interrupted (marked as failed)
+            */
+   public void setCollisionName(java.lang.String collision_name)
+   {
+      collision_name_.setLength(0);
+      collision_name_.append(collision_name);
+   }
+
+   /**
+            * Name of the object the action would collide with in not interrupted (marked as failed)
+            */
+   public java.lang.String getCollisionNameAsString()
+   {
+      return getCollisionName().toString();
+   }
+   /**
+            * Name of the object the action would collide with in not interrupted (marked as failed)
+            */
+   public java.lang.StringBuilder getCollisionName()
+   {
+      return collision_name_;
+   }
+
+   /**
             * Position tolerance for the action [m]
             */
    public void setPositionTolerance(double position_tolerance)
@@ -218,6 +271,10 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.action_frame_, other.action_frame_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.missing_frame_, other.missing_frame_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.collision_name_, other.collision_name_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_tolerance_, other.position_tolerance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_tolerance_, other.orientation_tolerance_, epsilon)) return false;
@@ -243,6 +300,10 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
 
       if (!us.ihmc.idl.IDLTools.equals(this.action_frame_, otherMyClass.action_frame_)) return false;
 
+      if(this.missing_frame_ != otherMyClass.missing_frame_) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.collision_name_, otherMyClass.collision_name_)) return false;
+
       if(this.position_tolerance_ != otherMyClass.position_tolerance_) return false;
 
       if(this.orientation_tolerance_ != otherMyClass.orientation_tolerance_) return false;
@@ -265,6 +326,10 @@ public class AI2RActionFailureMessage extends Packet<AI2RActionFailureMessage> i
       builder.append(this.action_type_);      builder.append(", ");
       builder.append("action_frame=");
       builder.append(this.action_frame_);      builder.append(", ");
+      builder.append("missing_frame=");
+      builder.append(this.missing_frame_);      builder.append(", ");
+      builder.append("collision_name=");
+      builder.append(this.collision_name_);      builder.append(", ");
       builder.append("position_tolerance=");
       builder.append(this.position_tolerance_);      builder.append(", ");
       builder.append("orientation_tolerance=");

@@ -242,6 +242,7 @@ public class YOLOv8DetectionExecutor
                                                                                     bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
+                                                                                    detection.boundingBox(),
                                                                                     pointCloud);
                yoloInstantDetections.add(instantDetection);
                erodedObjectMask.release();

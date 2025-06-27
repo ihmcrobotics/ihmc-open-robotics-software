@@ -47,7 +47,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    /**
     * Should only happen on the robot, not the UI.
     */
-   public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
+   public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       SceneNode initialParentNode = getSceneGraphIDToNodeMap().get(initialParentID);
       if (initialParentNode != null && initialParentID != SceneGraph.ROOT_NODE_ID)
@@ -61,7 +61,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
       if (currentDistance <= getDistanceToDisableTracking() && getTrackingInitialParent())
       {
          LogTools.info("{}: Disabling tracking initial parent", getName());
-         setTrackInitialParent(false, modificationQueue);
+         setTrackInitialParent(false, sceneGraph, modificationQueue);
       }
 //      else if (currentDistance > getDistanceToDisableTracking() && !getTrackingInitialParent())
 //      {

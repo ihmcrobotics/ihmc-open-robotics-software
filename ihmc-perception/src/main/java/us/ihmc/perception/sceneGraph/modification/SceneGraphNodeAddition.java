@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.modification;
 
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 
 /**
@@ -12,16 +13,21 @@ public class SceneGraphNodeAddition implements SceneGraphTreeModification
 {
    private final SceneNode nodeToAdd;
    private final SceneNode parent;
+   private final SceneGraph sceneGraph;
 
-   public SceneGraphNodeAddition(SceneNode nodeToAdd, SceneNode parent)
+   public SceneGraphNodeAddition(SceneNode nodeToAdd, SceneNode parent, SceneGraph sceneGraph)
    {
       this.nodeToAdd = nodeToAdd;
       this.parent = parent;
+      this.sceneGraph = sceneGraph;
    }
 
    @Override
    public void performOperation()
    {
+      if (nodeToAdd.getName().equals(nodeToAdd.getNonUniqueName()))
+         nodeToAdd.createUniqueName(sceneGraph);
+
       parent.getChildren().add(nodeToAdd);
       ensureParentFramesAreConsistent(nodeToAdd, parent);
       parent.freeze();

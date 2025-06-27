@@ -1,0 +1,297 @@
+package us.ihmc.rdx.perception;
+
+import imgui.ImGui;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.FoundationPoseRequest;
+import perception_msgs.msg.dds.FoundationPoseResult;
+import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionThread;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+import us.ihmc.sensors.zed.ZEDModelData;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static us.ihmc.zed.global.zed.*;
+
+class RDXFoundationPoseDemo
+{
+   private static final String OBJECT_ID = "mustard_bottle";
+   private static final String OBJECT_NAME = "bottle";
+
+   private static final BytePointer JPG = new BytePointer(".jpg");
+   private static final BytePointer PNG = new BytePointer(".png");
+
+   private static final ROS2Topic<?> RELIABLE_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
+   private static final ROS2Topic<ImageMessage> COLOR_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/color_rgb8").withType(ImageMessage.class);
+   private static final ROS2Topic<ImageMessage> DEPTH_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/depth_mono16").withType(ImageMessage.class);
+   private static final ROS2Topic<FoundationPoseRequest> REQUEST_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/request").withType(FoundationPoseRequest.class);
+   private static final ROS2Topic<std_msgs.msg.dds.String> REMOVE_TOPIC = RELIABLE_TOPIC.withModule("foundation_pose/remove").withType(std_msgs.msg.dds.String.class);
+   private static final ROS2Topic<FoundationPoseResult> RESULT_TOPIC = new ROS2Topic<>().withModule("foundation_pose/result").withType(FoundationPoseResult.class);
+
+   private final ROS2Node ros2Node;
+   private final ROS2PeerClockOffsetEstimator robotClockOffsetEstimator;
+   private final ROS2PeerClockOffsetEstimator uiClockOffsetEstimator;
+
+   private final ROS2Publisher<FoundationPoseRequest> requestPublisher;
+   private final FoundationPoseRequest requestMessage;
+   private boolean sendRequest;
+
+   private final ROS2Publisher<std_msgs.msg.dds.String> removePublisher;
+   private final std_msgs.msg.dds.String removeMessage;
+
+   private final ROS2Publisher<ImageMessage> colorPublisher;
+   private final ROS2Publisher<ImageMessage> depthPublisher;
+   private final ImageMessage colorMessage;
+   private final ImageMessage depthMessage;
+
+   private final ImageSensor zed;
+   private final YOLOv8DetectionThread yoloThread;
+   private final RepeatingTaskThread zedImageConsumerThread;
+
+
+   // UI Stuff
+   private final RDXBaseUI baseUI;
+   private final RDXRawImagePointCloudVisualizer pointCloudVisualizer;
+   private final RDXROS2YOLOv8Visualizer yoloSettings;
+   private RDXPose3DGizmo zedPoseGizmo;
+   private RDXReferenceFrameGraphic objectPoseGraphic;
+
+   private final AtomicBoolean destroyed;
+
+   private RDXFoundationPoseDemo()
+   {
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
+
+      ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName());
+      robotClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+      uiClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+      requestPublisher = ros2Node.createPublisher(REQUEST_TOPIC);
+      requestMessage = new FoundationPoseRequest();
+      sendRequest = false;
+      removePublisher = ros2Node.createPublisher(REMOVE_TOPIC);
+      removeMessage = new std_msgs.msg.dds.String();
+
+      ros2Node.createSubscription2(RESULT_TOPIC, this::receivePose);
+
+      boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
+      zed = new ZEDImageSensor(0, ZEDModelData.ZED_2, SL_INPUT_TYPE_USB, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE);
+
+      colorPublisher = ros2Node.createPublisher(COLOR_TOPIC);
+      depthPublisher = ros2Node.createPublisher(DEPTH_TOPIC);
+      colorMessage = new ImageMessage();
+      depthMessage = new ImageMessage();
+
+      yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
+      yoloThread.setImageSensor(zed, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      yoloThread.addDetectionConsumerCallback(this::publishRequest);
+
+      zedImageConsumerThread = new RepeatingTaskThread("ZEDImageConsumer", this::consumeZEDImage);
+
+      baseUI = new RDXBaseUI();
+      pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
+      yoloSettings = new RDXROS2YOLOv8Visualizer("YOLO Results", ros2Node, uiClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+
+      destroyed = new AtomicBoolean(false);
+
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
+      {
+         @Override
+         public void create()
+         {
+            yoloSettings.create();
+            yoloSettings.setActive(true);
+            zedPoseGizmo = new RDXPose3DGizmo();
+            objectPoseGraphic = new RDXReferenceFrameGraphic(0.2);
+
+            baseUI.getImGuiPanelManager().addPanel(yoloSettings.getPanel());
+            baseUI.getImGuiPanelManager().addPanel("YOLO Settings", yoloSettings::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel("Options", this::renderOptions);
+            baseUI.getPrimaryScene().addRenderableProvider(yoloSettings);
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(zedPoseGizmo);
+            baseUI.getPrimaryScene().addRenderableProvider(objectPoseGraphic);
+            baseUI.create();
+
+            zedPoseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+
+            zed.setSensorFrame(zedPoseGizmo.getGizmoFrame());
+            zed.run(true);
+            yoloThread.startRepeating();
+            zedImageConsumerThread.startRepeating();
+         }
+
+         private void renderOptions()
+         {
+            if (ImGui.button("Send request"))
+               sendRequest = true;
+
+            if (ImGui.button("Stop tracking"))
+            {
+               removeMessage.setData(OBJECT_ID);
+               removePublisher.publish(removeMessage);
+            }
+         }
+
+         @Override
+         public void render()
+         {
+            pointCloudVisualizer.update();
+            yoloSettings.update();
+            yoloSettings.updateHeartbeat();
+
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
+         }
+
+         @Override
+         public void dispose()
+         {
+            pointCloudVisualizer.destroy();
+            yoloSettings.destroy();
+            baseUI.dispose();
+
+            destroy();
+         }
+      });
+
+   }
+
+   private void receivePose(FoundationPoseResult result)
+   {
+      objectPoseGraphic.setPoseInWorldFrame(result.getObjectPose());
+   }
+
+   private void consumeZEDImage()
+   {
+      try
+      {
+         zed.waitForGrab();
+
+         RawImage color = zed.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+         RawImage depth = zed.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+         // Get color in RGB
+         Mat rgbColor = new Mat();
+         color.getPixelFormat().convertToPixelFormat(color.getCpuImageMat(), rgbColor, PixelFormat.RGB8);
+
+         // Compress images
+         BytePointer encodedColor = new BytePointer();
+         BytePointer encodedDepth = new BytePointer();
+
+         opencv_imgcodecs.imencode(JPG, rgbColor, encodedColor);
+         opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
+
+         // Publish compressed images
+         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, colorMessage);
+         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, depthMessage);
+
+         colorPublisher.publish(colorMessage);
+         depthPublisher.publish(depthMessage);
+
+         // Update visualizer
+         pointCloudVisualizer.setColorImage(color);
+         pointCloudVisualizer.setDepthImage(depth);
+
+         rgbColor.close();
+         encodedColor.close();
+         encodedDepth.close();
+         color.release();
+         depth.release();
+      }
+      catch (InterruptedException ignored) {}
+   }
+
+   private void publishRequest(List<InstantDetection> yoloDetections)
+   {
+      if (!sendRequest)
+         return;
+
+      for (InstantDetection detection : yoloDetections)
+      {
+         if (!detection.getDetectedObjectClass().equals(OBJECT_NAME))
+            continue;
+
+         if (detection instanceof YOLOv8InstantDetection yoloDetection)
+         {
+            System.out.println("Sending request");
+
+            RawImage color = yoloDetection.getColorImage();
+            RawImage depth = yoloDetection.getDepthImage();
+            RawImage mask = yoloDetection.getObjectMask();
+
+            // Get color in rgb
+            Mat rgbColor = new Mat();
+            color.getPixelFormat().convertToPixelFormat(color.getCpuImageMat(), rgbColor, PixelFormat.RGB8);
+
+            // Compress images
+            BytePointer encodedColor = new BytePointer();
+            BytePointer encodedDepth = new BytePointer();
+            BytePointer encodedMask = new BytePointer();
+
+            opencv_imgcodecs.imencode(JPG, rgbColor, encodedColor);
+            opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
+            opencv_imgcodecs.imencode(PNG, mask.getCpuImageMat(), encodedMask);
+
+            // Pack and publish request
+            requestMessage.setObjectId(OBJECT_ID);
+            requestMessage.setMeshFile("mustard0.obj");
+            PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, requestMessage.getColor());
+            PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, requestMessage.getDepth());
+            PerceptionMessageTools.packImageMessage(mask, encodedMask, CompressionType.PNG, requestMessage.getObjectMask());
+            requestPublisher.publish(requestMessage);
+
+            // Release pointers
+            rgbColor.close();
+            encodedColor.close();
+            encodedDepth.close();
+            encodedMask.close();
+
+            sendRequest = false;
+         }
+      }
+   }
+
+   private void destroy()
+   {
+      if (destroyed.getAndSet(true))
+         return;
+
+      yoloThread.blockingKill();
+      zedImageConsumerThread.blockingKill();
+      zed.close();
+
+      robotClockOffsetEstimator.destroy();
+      uiClockOffsetEstimator.destroy();
+      ros2Node.destroy();
+   }
+
+   public static void main(String[] args)
+   {
+      new RDXFoundationPoseDemo();
+   }
+}

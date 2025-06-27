@@ -54,7 +54,7 @@ public class ArUcoSceneTools
                         CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
                         arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(), nodeName, detectedID, markerSize, crdtInfo);
                         LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
-                        modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode()));
+                        modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode(), sceneGraph));
                         sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode); // Prevent it getting added twice
                      }
                   }
