@@ -15,6 +15,14 @@ from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
 
 import cv2
 import numpy as np
+from llm.llm_interface import LLMInterface
+
+# Example usage:
+print(" Calling the LLM")
+llm = LLMInterface(config_file="llm/config.json")
+
+
+
 
 ros2 = {}
 
@@ -45,17 +53,34 @@ def behavior_message_callback(msg):
 
    # --------- Reasoning -----------
    # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
+   behaviors_str = str(behaviors)
+#    messages = [
+#    {
+#        "role": "assistant",
+#        "content": behaviors_str
+#    },
+#    {
+#        "role": "user",
+#        "content": "Summarize all the behaviors in one paragraph"
+#    }
+#    ]
+#    answer = llama32(messages)
+   response = llm.call_model(behaviors_str)
+   print("Summarized behaviors: ",response)
 
    # --------- Monitoring -----------
    completed_behavior = msg.completed_behavior
+   print("Completed Behavior: " + completed_behavior)
    failed_behavior = msg.failed_behavior
    if failed_behavior:
-       print("[FAILURE] Failed behavior: " + failure_behavior)
+       print("[FAILURE] Failed behavior: " + failed_behavior)
        # Failure details
        failure = msg.failure
        print("Description: " + failure.action_name)
        print("Type: " + failure.action_type)
        print("Frame: " + failure.action_frame)
+       print("Missing Frame: " + failure.missing_frame)
+       print("Navigation Collision Frame Name: " + failure.collision_name)
 
        position_error = failure.position_error
        # Convert Point to numpy array
@@ -74,16 +99,14 @@ def behavior_message_callback(msg):
    # --------- Coordination / Adaptation -----------
    behavior_command = AI2RCommandMessage()
    # DECIDE what behavior to execute based on reasoning. For example can decide to navigate to a specific object
-   behavior_command.behavior_to_execute = "goto"
+   behavior_command.behavior_to_execute = "GOTO"
 
    # Update the go to behavior to navigate to whatever object or whenever in space according to reasoning
    new_goto_behavior = AI2RNavigationMessage()
    # Set the reference frame name - can copy from scene_objects.obj_name
-   new_goto_behavior.reference_frame_name = "your_reference_frame"
-   # Set the goal stance point - where the robot stance is positioned (position only, no orientation) wrt to the reference_frame_name
-   new_goto_behavior.goal_stance_point = Point(x=1.0, y=2.0, z=0.0)
-   # Set the goal focal point - where the stance is facing (how it is oriented) wrt to the reference_frame_name
-   new_goto_behavior.goal_focal_point = Point(x=3.0, y=4.0, z=0.0)
+   new_goto_behavior.reference_frame_name = "Charge1"
+   # Set the distance to the object
+   new_goto_behavior.distance_to_frame = 0.6
    behavior_command.navigation = new_goto_behavior
 
    # CAN EDIT HAND POSE ACTION, IF failed behavior has failed because of that action
@@ -91,7 +114,7 @@ def behavior_message_callback(msg):
    # Set the name of the action. COPY THAT from failed_behavior message
    new_hand_pose_action.action_name = "action_to_modify"
    # Set the reference frame name - can copy from scene_objects.obj_name
-   new_hand_pose_action.reference_frame_name = "your_reference_frame"
+   new_hand_pose_action.reference_frame_name = "Barrier1"
    # Set the new position
    new_hand_pose_action.new_position = Point(x=1.0, y=2.0, z=3.0)
    # Set the new orientation
@@ -105,7 +128,7 @@ def main(args=None):
     rclpy.init(args=args)
     
     qos_profile_reliable = QoSProfile(
-        reliability=QoSReliabilityPolicy.RELIABLE,
+        reliability=QoSReliabilityPolicy.BEST_EFFORT,
         history=QoSHistoryPolicy.KEEP_LAST,
         depth=1
     )
