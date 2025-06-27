@@ -946,6 +946,10 @@ public class RDXVRKinematicsStreamingMode
          setKSTEnabled(false);
       }
       ImGui.checkbox(labels.get("Show ghosts during control"), showGhosts);
+      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
+      {
+         reinitializeToolboxRobotConfiguration();
+      }
       if (ImGui.button(labels.get("Start record/replay")))
       {
          requestRecordReplay.set(true);
