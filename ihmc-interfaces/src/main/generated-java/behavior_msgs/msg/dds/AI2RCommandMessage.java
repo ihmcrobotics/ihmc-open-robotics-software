@@ -16,6 +16,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    public behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage hand_pose_adaptation_;
    public behavior_msgs.msg.dds.AI2RNavigationMessage navigation_;
    public behavior_msgs.msg.dds.AI2RReceiveObjectMessage receive_object_;
+   public behavior_msgs.msg.dds.AI2RPickUpObjectMessage pickup_object_;
 
    public AI2RCommandMessage()
    {
@@ -23,6 +24,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       hand_pose_adaptation_ = new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage();
       navigation_ = new behavior_msgs.msg.dds.AI2RNavigationMessage();
       receive_object_ = new behavior_msgs.msg.dds.AI2RReceiveObjectMessage();
+      pickup_object_ = new behavior_msgs.msg.dds.AI2RPickUpObjectMessage();
    }
 
    public AI2RCommandMessage(AI2RCommandMessage other)
@@ -41,6 +43,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.staticCopy(other.hand_pose_adaptation_, hand_pose_adaptation_);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.staticCopy(other.navigation_, navigation_);
       behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.staticCopy(other.receive_object_, receive_object_);
+      behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType.staticCopy(other.pickup_object_, pickup_object_);
    }
 
    /**
@@ -95,6 +98,12 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
    }
 
 
+   public behavior_msgs.msg.dds.AI2RPickUpObjectMessage getPickupObject()
+   {
+      return pickup_object_;
+   }
+
+
    public static Supplier<AI2RCommandMessagePubSubType> getPubSubType()
    {
       return AI2RCommandMessagePubSubType::new;
@@ -119,6 +128,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       if (!this.hand_pose_adaptation_.epsilonEquals(other.hand_pose_adaptation_, epsilon)) return false;
       if (!this.navigation_.epsilonEquals(other.navigation_, epsilon)) return false;
       if (!this.receive_object_.epsilonEquals(other.receive_object_, epsilon)) return false;
+      if (!this.pickup_object_.epsilonEquals(other.pickup_object_, epsilon)) return false;
 
       return true;
    }
@@ -139,6 +149,7 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       if (!this.hand_pose_adaptation_.equals(otherMyClass.hand_pose_adaptation_)) return false;
       if (!this.navigation_.equals(otherMyClass.navigation_)) return false;
       if (!this.receive_object_.equals(otherMyClass.receive_object_)) return false;
+      if (!this.pickup_object_.equals(otherMyClass.pickup_object_)) return false;
 
       return true;
    }
@@ -158,7 +169,9 @@ public class AI2RCommandMessage extends Packet<AI2RCommandMessage> implements Se
       builder.append("navigation=");
       builder.append(this.navigation_);      builder.append(", ");
       builder.append("receive_object=");
-      builder.append(this.receive_object_);
+      builder.append(this.receive_object_);      builder.append(", ");
+      builder.append("pickup_object=");
+      builder.append(this.pickup_object_);
       builder.append("}");
       return builder.toString();
    }

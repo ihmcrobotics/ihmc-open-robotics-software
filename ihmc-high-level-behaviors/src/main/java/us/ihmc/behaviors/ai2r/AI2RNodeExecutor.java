@@ -49,7 +49,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final ROS2ControllerHelper ros2;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
-   private final Throttler statusThrottler = new Throttler().setFrequency(30.0);
+   private final Throttler statusThrottler = new Throttler().setFrequency(10.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
    private final ControllerStatusTracker controllerStatusTracker;

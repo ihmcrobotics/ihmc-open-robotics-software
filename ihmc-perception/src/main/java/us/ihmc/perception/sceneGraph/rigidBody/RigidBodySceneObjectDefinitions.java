@@ -138,21 +138,10 @@ public class RigidBodySceneObjectDefinitions
    public static final String DRILL_NAME = "Drill";
    public static final String DRILL_VISUAL_MODEL_FILE_PATH = "environmentObjects/drill/drill.g3dj";
    public static final RigidBodyTransform DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, 90, -90);
-      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.05);
-   }
 
    public static final String COUCH_NAME = "Couch";
    public static final String COUCH_VISUAL_MODEL_FILE_PATH = "environmentObjects/couch/Couch.g3dj";
    public static final RigidBodyTransform COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 0, 0);
-      COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-1);
-      COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(-0.5);
-   }
 
    public static final String TRASHCAN_NAME = "TrashCan";
    public static final String TRASHCAN_VISUAL_MODEL_FILE_PATH = "environmentObjects/trashCan/TrashCan.g3dj";
@@ -173,12 +162,6 @@ public class RigidBodySceneObjectDefinitions
    public static final String TABLE_NAME = "Table";
    public static final String TABLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/table/Table.g3dj";
    public static final RigidBodyTransform TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(-1.0);
-      TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.35);
-      TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(0.85);
-   }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {

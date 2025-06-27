@@ -26,6 +26,11 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXCenteredJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXChargeObject.FACTORY);
+      objectFactories.add(RDXCouchObject.FACTORY);
+      objectFactories.add(RDXTableObject.FACTORY);
+      objectFactories.add(RDXTrashCanObject.FACTORY);
+      objectFactories.add(RDXDrillObject.FACTORY);
+      objectFactories.add(RDXShoeObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

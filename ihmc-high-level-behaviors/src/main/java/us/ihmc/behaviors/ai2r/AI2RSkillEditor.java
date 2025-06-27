@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.ai2r;
 
 import behavior_msgs.msg.dds.AI2RCommandMessage;
-import behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
+import behavior_msgs.msg.dds.AI2RPickUpObjectMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
@@ -11,7 +11,6 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,7 +36,8 @@ public class AI2RSkillEditor
       this.commandedBehaviorIndex = commandedBehaviorIndex;
       updateGoTo(behaviorToExecuteName, state, message);
       updateReceiveObject(behaviorToExecuteName, state, message);
-      updatePickAndPlace(behaviorToExecuteName, state, message);
+      updatePickUpObject(behaviorToExecuteName, state, message);
+//      updatePickAndPlace(behaviorToExecuteName, state, message);
    }
 
    private void updateGoTo(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
@@ -159,6 +159,29 @@ public class AI2RSkillEditor
       }
    }
 
+   private void updatePickUpObject(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
+   {
+      if (behaviorToExecuteName.contains("PICK") && message.getAdaptingBehavior())
+      {
+         AI2RPickUpObjectMessage pickUpMessage = message.getPickupObject();
+         String targetObject = pickUpMessage.getObjectNameAsString();
+         if (!targetObject.isEmpty())
+         {
+            objectGrasped = targetObject;
+         }
+         for (var leaf : state.getActionSequence().getOrderedLeaves())
+         {
+            if (leaf instanceof HandPoseActionState handPoseActionStateNodeState)
+            {
+               if (handPoseActionStateNodeState.getDefinition().getName().contains("Grasp"))
+               {
+                  handPoseActionStateNodeState.getDefinition().setPalmParentFrameName(targetObject);
+               }
+            }
+         }
+      }
+   }
+
    private void changeParentFrameGoToNode(FootstepPlanActionDefinition definition, FootstepPlanActionState state, String newParentFrameName)
    {
       definition.setParentFrameName(newParentFrameName);
@@ -191,25 +214,25 @@ public class AI2RSkillEditor
       }
    }
 
-   private void updatePickAndPlace(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
-   {
-      if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
-      {
-         AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
-         for (var leaf : state.getActionSequence().getOrderedLeaves())
-         {
-            if (leaf.getLeafIndex() > commandedBehaviorIndex &&
-                leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
-                leaf instanceof HandPoseActionState handPoseActionState)
-            {
-               handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
-               RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
-               handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
-               break;
-            }
-         }
-      }
-   }
+//   private void updatePickAndPlace(String behaviorToExecuteName, AI2RNodeState state, AI2RCommandMessage message)
+//   {
+//      if (behaviorToExecuteName.contains("PICKUP") || behaviorToExecuteName.contains("PLACE") && message.getAdaptingBehavior())
+//      {
+//         AI2RHandPoseAdaptationMessage handMessage = message.getHandPoseAdaptation();
+//         for (var leaf : state.getActionSequence().getOrderedLeaves())
+//         {
+//            if (leaf.getLeafIndex() > commandedBehaviorIndex &&
+//                leaf.getDefinition().getName().contains(handMessage.getActionName()) &&
+//                leaf instanceof HandPoseActionState handPoseActionState)
+//            {
+//               handPoseActionState.getDefinition().setPalmParentFrameName(handMessage.getReferenceFrameNameAsString());
+//               RigidBodyTransform adaptedPose = new RigidBodyTransform(handMessage.getNewOrientation(), handMessage.getNewPosition());
+//               handPoseActionState.getDefinition().getPalmTransformToParent().setValue(adaptedPose ,1e-5);
+//               break;
+//            }
+//         }
+//      }
+//   }
 
    public String getObjectGrasped()
    {
