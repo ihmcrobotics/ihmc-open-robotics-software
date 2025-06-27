@@ -264,13 +264,13 @@ public class RDXVRModeManager
             }
             case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
          }
+
+         if (stereoVision.isEnabled())
+            stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
+
+         if (vrModeControls.getRenderOnLeftHand().get())
+            vrModeControls3DPanel.getRenderables(renderables, pool);
       }
-
-      if (stereoVision.isEnabled())
-         stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
-
-      if (vrModeControls.getRenderOnLeftHand().get())
-         vrModeControls3DPanel.getRenderables(renderables, pool);
    }
 
    public void destroy()
