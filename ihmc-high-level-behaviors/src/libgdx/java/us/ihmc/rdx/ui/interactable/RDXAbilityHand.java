@@ -13,9 +13,9 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 
 public class RDXAbilityHand implements AbilityHandInterface
 {
-   private static final float OPEN_POSITION = 20.0f;
-   private static final float CLOSED_POSITION = 80.0f;
-   private static final float GRIP_POSITION = 90.0f;
+   private static final float OPEN_POSITION = 0.0f;
+   private static final float CLOSED_POSITION = 90.0f;
+   private static final float GRIP_POSITION = 100.0f;
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
    private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
@@ -24,6 +24,13 @@ public class RDXAbilityHand implements AbilityHandInterface
    private final float[] commandValues = new float[ACTUATOR_COUNT];
    private final float[] actuatorPositions = new float[ACTUATOR_COUNT];
    private final float[] controlFinger = new float[ACTUATOR_COUNT];
+
+   private enum ControlMode
+   {IDLE, VEL_TO_POS}
+
+   private ControlMode controlMode = ControlMode.IDLE;
+   private float velToPosTarget = Float.NaN;
+   private float velToPosSpeed = 0.0f;
 
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
 
@@ -104,41 +111,23 @@ public class RDXAbilityHand implements AbilityHandInterface
 
    public void renderImGuiWidgets()
    {
+      processVelToPos(4);
       ImGui.pushID(handSide.ordinal());
       ImGui.text(handSide + ":");
       ImGui.sameLine();
       if (ImGui.button("Open"))
       {
-         publishOnly(4, OPEN_POSITION);
-         try
-         {
-            Thread.sleep(400);
-         }
-         catch (InterruptedException e)
-         {
-            throw new RuntimeException(e);
-         }
-         publishExcept(4, OPEN_POSITION);
+         startVelToPos(OPEN_POSITION, -10.0f);
       }
       ImGui.sameLine();
       if (ImGui.button("Close"))
       {
-         publishExcept(4, CLOSED_POSITION);
-         try
-         {
-            Thread.sleep(1000);
-         }
-         catch (InterruptedException e)
-         {
-            throw new RuntimeException(e);
-         }
-         publishOnly(4, CLOSED_POSITION);
+         startVelToPos(CLOSED_POSITION, 10.0f);
       }
       ImGui.sameLine();
       if (ImGui.button("Grip"))
       {
-         setAllFingers(GRIP_POSITION);
-         communication.publishCommand(this);
+         startVelToPos(GRIP_POSITION, 10.0f);
       }
 
       float currentNotch = (actuatorPositions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
@@ -212,5 +201,50 @@ public class RDXAbilityHand implements AbilityHandInterface
       controlFinger[index] = position;
       setCommandValue(index, (index == 5 ? -position : position));
       communication.publishCommand(this);
+   }
+
+   private void startVelToPos(float targetPosition, float velocity)
+   {
+      velToPosTarget = targetPosition;
+      velToPosSpeed = velocity;
+      controlMode = ControlMode.VEL_TO_POS;
+   }
+
+   private void processVelToPos(int excluedIndex)
+   {
+      if (controlMode != ControlMode.VEL_TO_POS)
+         return;
+
+      setCommandType(AbilityHandCommandType.VELOCITY);
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+      {
+         if (i != excluedIndex)
+         {
+            float v = (i == 5) ? -velToPosSpeed : velToPosSpeed;
+            setCommandValue(i, v);
+         }
+         else
+         {
+            setCommandValue(i, 0);
+         }
+      }
+      communication.publishCommand(this);
+      update();
+      boolean reached = true;
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+      {
+         float pos = getActuatorPosition(i);
+         if (i == 5)
+            pos = -pos;
+         if ((velToPosSpeed > 0 && pos < velToPosTarget) || (velToPosSpeed < 0 && pos > velToPosTarget))
+         {
+            reached = false;
+            break;
+         }
+      }
+      if (reached)
+      {
+         controlMode = ControlMode.IDLE;
+      }
    }
 }
