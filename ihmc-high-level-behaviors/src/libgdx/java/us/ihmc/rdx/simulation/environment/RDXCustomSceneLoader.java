@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
@@ -23,6 +24,8 @@ public class RDXCustomSceneLoader
 {
    public enum RDXDemoScene
    {
+      FLAT_GROUND,
+      ROUGH_TERRAIN,
       EXPLOSIVE_BREACHING_A,
       EXPLOSIVE_BREACHING_B,
       EXPLOSIVE_BREACHING_C,
@@ -191,7 +194,7 @@ public class RDXCustomSceneLoader
             break;
 
          default:
-            throw new IllegalArgumentException("Unknown demo scene: " + demoScene);
+            break;
       }
    }
 
@@ -224,6 +227,7 @@ public class RDXCustomSceneLoader
       {
          case EXPLOSIVE_BREACHING_A -> "BreachingDemoA.json";
          case EXPLOSIVE_BREACHING_B -> "BreachingDemoB.json";
+         case ROUGH_TERRAIN -> "HarderTerrain.json";
          default -> "FlatGround.json";
       };
    }
@@ -237,7 +241,15 @@ public class RDXCustomSceneLoader
          SceneNode sceneNode = sceneNodesMap.get(object.getName() + nodeIndex);
          if (sceneNode != null)
          {
-            object.setTransformToWorld(sceneNode.getNodeFrame().getTransformToWorldFrame());
+            try
+            {
+               object.setTransformToWorld(sceneNode.getNodeFrame().getTransformToWorldFrame());
+            }
+               catch (Exception e)
+            {
+               // Exception is caught and ignored. We still get some "is not a Rotation matrix" errors
+               LogTools.warn("Not a Rotation Matrix tolerance not met");
+            }
          }
       }
    }
@@ -259,6 +271,7 @@ public class RDXCustomSceneLoader
             catch (Exception e)
             {
                // Exception is caught and ignored. We still get some "is not a Rotation matrix" errors
+               LogTools.warn("Not a Rotation Matrix tolerance not met");
             }
          }
       });
