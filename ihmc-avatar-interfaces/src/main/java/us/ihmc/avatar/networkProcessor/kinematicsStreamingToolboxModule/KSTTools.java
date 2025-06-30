@@ -126,6 +126,8 @@ public class KSTTools
    private final YoBoolean useStreamingPublisher;
    private final KSTInputFilter inputFilter;
 
+   private final SideDependentList<Boolean> isFootInSupport = new SideDependentList<>();
+
    private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
    {
    };
@@ -239,6 +241,7 @@ public class KSTTools
          areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
          YoBoolean isLegJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "LegJointspaceOutputEnabled", registry);
          areLegJointspaceOutputsEnabled.put(robotSide, isLegJointspaceOutputEnabled);
+         isFootInSupport.put(robotSide, true);
       }
 
       invalidUserInput = new YoBoolean("invalidUserInput", registry);
@@ -293,12 +296,18 @@ public class KSTTools
 
          for (RobotSide side : RobotSide.values)
          {
-            ikController.setIsFootInSupport(side, contactCommand.getIsFootInContact(side));
+            boolean isFootInContact = contactCommand.getIsFootInContact(side);
+            if (isFootInContact && !isFootInSupport.get(side))
+            {
+               ikController.updateInitialFoot(side);
+            }
+            isFootInSupport.put(side, isFootInContact);
+            ikController.setIsFootInSupport(side, isFootInSupport.get(side));
          }
 
-         CapturabilityBasedStatus desiredStatus = createCapturabilityBasedStatus(desiredFullRobotModel, robotModel.getContactPointParameters(),
-                 contactCommand.getIsFootInContact(RobotSide.LEFT),  contactCommand.getIsFootInContact(RobotSide.RIGHT));
-         ikController.updateFootContacts(desiredStatus.getLeftFootSupportPolygon3d(), desiredStatus.getRightFootSupportPolygon3d());
+//         CapturabilityBasedStatus desiredStatus = createCapturabilityBasedStatus(desiredFullRobotModel, robotModel.getContactPointParameters(),
+//                 contactCommand.getIsFootInContact(RobotSide.LEFT),  contactCommand.getIsFootInContact(RobotSide.RIGHT));
+//         ikController.updateSupportPolygon(desiredStatus.getLeftFootSupportPolygon3d(), desiredStatus.getRightFootSupportPolygon3d());
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
@@ -672,6 +681,11 @@ public class KSTTools
    public double getToolboxControllerPeriod()
    {
       return toolboxControllerPeriod;
+   }
+
+   public boolean isFootInSupport(RobotSide side)
+   {
+      return isFootInSupport.get(side);
    }
 
    /**
