@@ -2,14 +2,17 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
+import javafx.geometry.Side;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.SakeHandAPI;
+import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.interactable.RDXAbilityHand;
 import us.ihmc.rdx.ui.interactable.RDXSakeHandWidgets;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -23,6 +26,8 @@ public class RDXHandConfigurationManager
 {
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
+   private final SideDependentList<RDXAbilityHand> abilityHands = new SideDependentList<>();
+   private AbilityHandHardwareCommunication communication;
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private CommunicationHelper communicationHelper;
@@ -49,6 +54,14 @@ public class RDXHandConfigurationManager
             sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, syncedRobotModel, side));
             sakeHandStatus.put(side, syncedRobotModel.getSakeHandStatus().get(side));
          }
+         //TODO: Make the function actually be useful
+         else if (syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoins(side))
+         {
+            handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
+            abilityHands.put(side, new RDXAbilityHand(side, baseUI));
+            communication = new AbilityHandHardwareCommunication("H1ROSHandManager");
+            communication.start();
+         }
       }
    }
 
@@ -59,6 +72,10 @@ public class RDXHandConfigurationManager
          sakeHandWidgets.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandWidgets.get(side).getCalibrated(), sakeHandWidgets.get(side).getNeedsReset());
       }
+      for(RobotSide side : abilityHands.sides())
+      {
+         abilityHands.get(side).update(communication);
+      }
    }
 
    public void renderImGuiWidgets()
@@ -68,6 +85,12 @@ public class RDXHandConfigurationManager
          ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
          ImGui.sameLine();
          sakeHandWidgets.get(side).renderImGuiWidgets();
+      }
+      for(RobotSide side : abilityHands.sides())
+      {
+         ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
+         ImGui.sameLine();
+         abilityHands.get(side).renderImGuiWidgets();
       }
    }
 

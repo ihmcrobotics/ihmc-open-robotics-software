@@ -30,7 +30,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
-import us.ihmc.rdx.ui.teleoperation.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -74,7 +73,6 @@ public class RDXArmManager
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
    private final RDXHandConfigurationManager handConfigurationManager;
-   private final RDXHandManager handManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -123,7 +121,6 @@ public class RDXArmManager
       }
 
       handConfigurationManager = new RDXHandConfigurationManager();
-      handManager = new RDXHandManager();
    }
 
    public void create(RDXBaseUI baseUI)
@@ -131,13 +128,11 @@ public class RDXArmManager
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
       handConfigurationManager.create(baseUI, communicationHelper, syncedRobot);
-      handManager.create(baseUI);
    }
 
    public void update(boolean interactablesEnabled)
    {
       handConfigurationManager.update();
-      handManager.update();
 
       boolean showWrench = indicateWrenchOnScreen.get();
 
@@ -222,7 +217,6 @@ public class RDXArmManager
    public void renderImGuiWidgets()
    {
       handConfigurationManager.renderImGuiWidgets();
-      handManager.renderImGuiWidgets();
 
       ImGui.text("Arm Presets:");
       ImGui.pushItemWidth(140.0f);
@@ -373,10 +367,6 @@ public class RDXArmManager
       return handConfigurationManager;
    }
 
-   public RDXHandManager getHandManager()
-   {
-      return handManager;
-   }
    public RDXArmControlMode getArmControlMode()
    {
       return armControlMode;

@@ -51,7 +51,6 @@ public class RDXAbilityHand
    public void renderImGuiWidgets()
    {
       ImGui.pushID(controller.getHandSide().ordinal());
-      ImGui.text(controller.getHandSide() + ":");
       ImGui.sameLine();
       if (ImGui.button("Open"))
       {
