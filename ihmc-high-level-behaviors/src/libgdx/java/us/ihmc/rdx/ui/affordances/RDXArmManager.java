@@ -72,7 +72,7 @@ public class RDXArmManager
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
-   private final RDXHandConfigurationManager handConfigurationManager;
+   private final RDXHandConfigurationManager handManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -120,19 +120,19 @@ public class RDXArmManager
          armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
-      handConfigurationManager = new RDXHandConfigurationManager();
+      handManager = new RDXHandConfigurationManager();
    }
 
    public void create(RDXBaseUI baseUI)
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
-      handConfigurationManager.create(baseUI, communicationHelper, syncedRobot);
+      handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
    public void update(boolean interactablesEnabled)
    {
-      handConfigurationManager.update();
+      handManager.update();
 
       boolean showWrench = indicateWrenchOnScreen.get();
 
@@ -216,7 +216,7 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
-      handConfigurationManager.renderImGuiWidgets();
+      handManager.renderImGuiWidgets();
 
       ImGui.text("Arm Presets:");
       ImGui.pushItemWidth(140.0f);
@@ -362,9 +362,9 @@ public class RDXArmManager
       }
    }
 
-   public RDXHandConfigurationManager getHandConfigurationManager()
+   public RDXHandConfigurationManager getHandManager()
    {
-      return handConfigurationManager;
+      return handManager;
    }
 
    public RDXArmControlMode getArmControlMode()
