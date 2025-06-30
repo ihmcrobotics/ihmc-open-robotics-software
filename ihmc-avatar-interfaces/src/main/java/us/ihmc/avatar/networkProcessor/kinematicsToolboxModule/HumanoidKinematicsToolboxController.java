@@ -21,7 +21,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -52,7 +51,6 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -578,6 +576,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
    }
 
+   protected void updateFootPose(RobotSide robotSide)
+   {
+      RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
+      double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
+      initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+      initialFootPoses.get(robotSide).getTranslation().setZ(initialFootHeight);
+   }
+
    private final Point3D tempMidFeet = new Point3D();
    private final Vector2D tempOffset = new Vector2D();
 
@@ -856,7 +862,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          isFootInSupport.get(side).set(value);
    }
 
-   public void updateFootContacts(Object<Point3D> leftFootSupportPolygon2d, Object<Point3D> rightFootSupportPolygon2d)
+   public void updateSupportPolygon(Object<Point3D> leftFootSupportPolygon2d, Object<Point3D> rightFootSupportPolygon2d)
    {
       activeContactPointPositions.clear();
 
@@ -868,8 +874,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       updateSupportPolygonConstraint(activeContactPointPositions);
 
-      // update the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
-      updateCoMPositionAndFootPoses();
       updateCoMPositionToHold();
+   }
+
+   public void updateInitialFoot(RobotSide side)
+   {
+      updateFootPose(side);
    }
 }

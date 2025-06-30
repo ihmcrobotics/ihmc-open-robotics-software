@@ -1139,7 +1139,7 @@ public class KinematicsStreamingToolboxParameters
       {
          if (jointCustomPositionLowerLimits == null)
             jointCustomPositionLowerLimits = new HashMap<>();
-         jointCustomPositionLowerLimits.put(jointName, 0.152);
+         jointCustomPositionLowerLimits.put(jointName, 0.283);
       }
    }
 

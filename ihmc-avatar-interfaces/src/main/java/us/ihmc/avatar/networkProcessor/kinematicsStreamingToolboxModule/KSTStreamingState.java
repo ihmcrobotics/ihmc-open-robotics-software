@@ -93,6 +93,7 @@ public class KSTStreamingState implements State
    private final RigidBodyBasics pelvis;
    private final RigidBodyBasics chest;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
+   private final SideDependentList<RigidBodyBasics> feet = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
    // When locking pelvis/chest, that means that the user doesn't want the IK to use the legs.
    private final YoDouble lockPoseFilterBreakFrequency = new YoDouble("lockPoseFilterBreakFrequncy", registry);
@@ -214,6 +215,11 @@ public class KSTStreamingState implements State
                                      Stream.of(joints)
                                            .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
                                            .collect(Collectors.toList()));
+
+         RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
+         if (foot == null)
+            continue;
+         feet.put(robotSide, foot);
       }
 
       defaultJointVelocityWeight.set(parameters.getDefaultSolverConfiguration().getJointVelocityWeight());
@@ -464,7 +470,7 @@ public class KSTStreamingState implements State
       {
          lockChestPoseFiltered.reset();
       }
-
+      
       KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
 
       if (tools.hasUserSubmittedInvalidInput())
@@ -707,8 +713,18 @@ public class KSTStreamingState implements State
       for (int i = decayingInputs.size() - 1; i >= 0; i--)
       {
          KinematicsToolboxRigidBodyCommand decayingInput = decayingInputs.get(i);
-         if (latestInputs.hasInputFor(decayingInput.getEndEffector()))
+
+         String rigidBodyName = decayingInput.getEndEffector().getName();
+         // Check for feet input, we drop their control when they are in contact
+         boolean isLeftFoot = rigidBodyName.contains(feet.get(RobotSide.LEFT).getName());
+         boolean isRightFoot = rigidBodyName.contains(feet.get(RobotSide.RIGHT).getName());
+
+         if (latestInputs.hasInputFor(decayingInput.getEndEffector()) ||
+             (isLeftFoot && tools.isFootInSupport(RobotSide.LEFT)) ||
+             (isRightFoot && tools.isFootInSupport(RobotSide.RIGHT)))
+         {
             decayingInputs.remove(i);
+         }
       }
 
       // 2- Register inputs for end-effectors that stopped being controlled.

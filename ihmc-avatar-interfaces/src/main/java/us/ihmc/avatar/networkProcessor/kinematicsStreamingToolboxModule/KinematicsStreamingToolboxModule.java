@@ -18,6 +18,7 @@ import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
@@ -157,6 +158,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       commands.add(KinematicsToolboxConfigurationCommand.class);
       commands.add(KinematicsToolboxPrivilegedConfigurationCommand.class);
       commands.add(KinematicsStreamingToolboxInitialConfigurationCommand.class);
+      commands.add(KinematicsStreamingToolboxContactConfigurationCommand.class);
       return commands;
    }
 

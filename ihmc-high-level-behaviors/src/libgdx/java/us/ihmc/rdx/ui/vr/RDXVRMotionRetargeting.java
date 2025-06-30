@@ -226,17 +226,17 @@ public class RDXVRMotionRetargeting
             {
                normalizedOffset = 0.0;
             }
-//            // Filter value
-//            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
-//            if (filteredNormalizedOffset >= 1.0)
-//               filteredNormalizedOffset = 1.0;
-//            else if (filteredNormalizedOffset <= 0.0)
-//            {
-//               filteredNormalizedOffset = 0.0;
-//            }
-            if (Double.isNaN(normalizedOffset))
+            // Filter value
+            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
+            if (filteredNormalizedOffset >= 1.0)
+               filteredNormalizedOffset = 1.0;
+            else if (filteredNormalizedOffset <= 0.0)
             {
-               normalizedOffset = previousOffsetValue;
+               filteredNormalizedOffset = 0.0;
+            }
+            if (Double.isNaN(filteredNormalizedOffset))
+            {
+               filteredNormalizedOffset = previousOffsetValue;
             }
             else
             {
@@ -254,7 +254,7 @@ public class RDXVRMotionRetargeting
             feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
             centerOfMassDesiredXYInWorld.set(feetVector);
-            centerOfMassDesiredXYInWorld.scale(normalizedOffset);
+            centerOfMassDesiredXYInWorld.scale(filteredNormalizedOffset);
             centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
          }
       }
@@ -357,7 +357,6 @@ public class RDXVRMotionRetargeting
                initialFootTrackersTransformToWorld.get(side).set(footFrame.getTransformToWorldFrame());
 
                retargetedFootFrames.put(side, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newFootFramePoses.get(side)));
-
             }
             // Calculate the variation of the tracker's frame from its initial value
             RigidBodyTransform trackerVariationFromInitialValue = new RigidBodyTransform(trackerReferenceFrames.get(footName)
@@ -367,17 +366,23 @@ public class RDXVRMotionRetargeting
             initialFootTrackersTransformToWorld.get(side).inverseTransform(trackerVariationFromInitialValue);
 
             // Concatenate the initial foot transform with the variation
-            RigidBodyTransform combinedTransformToWorld = new RigidBodyTransform(initialFootTrackersTransformToWorld.get(side));
+            RigidBodyTransform combinedTransformToWorld = new RigidBodyTransform(initialFeetTransformToWorld.get(side));
             combinedTransformToWorld.multiply(trackerVariationFromInitialValue);
 
             newFootFramePoses.get(side).set(combinedTransformToWorld);
+            // Zero roll and pitch orientation variation as it can lead to unfeasible robot foot motions
+            newFootFramePoses.get(side).changeFrame(initialFeetFrame.get(side));
+            newFootFramePoses.get(side).getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
+            newFootFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
             retargetedFootFrames.get(side).update();
-
-            // Set desired frame for hand
-            retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, retargetedFootFrames.get(side));
 
             steppingTracker.processVRInput(side, trackerReferenceFrames.get(footName).getReferenceFrame().getTransformToWorldFrame());
             isFootInContact.put(side, steppingTracker.isFootInContact(side));
+
+            if (!steppingTracker.isFootInContact(side))
+            {
+               retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, retargetedFootFrames.get(side));
+            }
          }
       }
       else
@@ -414,6 +419,7 @@ public class RDXVRMotionRetargeting
       centerOfMassDesiredXYInWorld = null;
       previousOffsetValue = 0.5;
       controllingFeet = false;
+      steppingTracker.reset();
    }
 
    public Set<VRTrackedSegmentType> getRetargetedSegments()
