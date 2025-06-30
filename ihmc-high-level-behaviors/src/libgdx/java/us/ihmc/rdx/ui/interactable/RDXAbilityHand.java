@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.psyonicros2.AbilityHandCommandType;
 import us.ihmc.psyonicros2.AbilityHandController;
-import us.ihmc.psyonicros2.AbilityHandInterface;
 import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
@@ -29,15 +28,14 @@ public class RDXAbilityHand
 
    private final AbilityHandController controller;
 
-   public RDXAbilityHand(RobotSide handSide, AbilityHandHardwareCommunication communication, RDXBaseUI baseUI)
+   public RDXAbilityHand(RobotSide handSide, RDXBaseUI baseUI)
    {
-      controller = new AbilityHandController(handSide, communication);
+      controller = new AbilityHandController(handSide);
       controlFingersSlider = new ImGuiSliderFloat("Control Fingers", "%.1f°", Float.NaN);
       controlFingersSlider.addWidgetAligner(widgetAligner);
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
-
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
@@ -45,30 +43,35 @@ public class RDXAbilityHand
       }
    }
 
-   public void update()
+   public void update(AbilityHandHardwareCommunication communication)
    {
-      controller.update();
+      controller.update(communication);
    }
 
    public void renderImGuiWidgets()
    {
-      controller.processVelToPos(4);
       ImGui.pushID(controller.getHandSide().ordinal());
       ImGui.text(controller.getHandSide() + ":");
       ImGui.sameLine();
       if (ImGui.button("Open"))
       {
-         controller.startVelToPos(OPEN_POSITION, -30.0f);
+         controller.setGoalPosition(OPEN_POSITION);
+         controller.setGoalVelocity(-30.0f);
+         controller.setControlMode(1);
       }
       ImGui.sameLine();
       if (ImGui.button("Close"))
       {
-         controller.startVelToPos(CLOSED_POSITION, 30.0f);
+         controller.setGoalPosition(CLOSED_POSITION);
+         controller.setGoalVelocity(30.0f);
+         controller.setControlMode(1);
       }
       ImGui.sameLine();
       if (ImGui.button("Grip"))
       {
-         controller.startVelToPos(GRIP_POSITION, 30.0f);
+         controller.setGoalPosition(GRIP_POSITION);
+         controller.setGoalVelocity(30.0f);
+         controller.setControlMode(1);
       }
 
       float currentNotch = (controller.getActuatorPosition(0) - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
@@ -100,7 +103,6 @@ public class RDXAbilityHand
                controller.setCommandType(AbilityHandCommandType.POSITION);
                float f = (i == 5) ? -val : val;
                controller.setCommandValue(i, f);
-               controller.publish();
             }
          }
       }
