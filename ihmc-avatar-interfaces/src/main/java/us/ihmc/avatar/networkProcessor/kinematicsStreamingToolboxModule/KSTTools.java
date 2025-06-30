@@ -291,7 +291,7 @@ public class KSTTools
             boolean isFootInContact = contactCommand.getIsFootInContact(side);
             if (isFootInContact && !isFootInSupport.get(side))
             {
-               ikController.updateInitialFoot(side);
+               ikController.updateInitialFootPose(side);
             }
             isFootInSupport.put(side, isFootInContact);
             ikController.setIsFootInSupport(side, isFootInSupport.get(side));

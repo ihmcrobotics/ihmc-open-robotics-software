@@ -576,7 +576,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
    }
 
-   protected void updateFootPose(RobotSide robotSide)
+   public void updateInitialFootPose(RobotSide robotSide)
    {
       RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
       double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
@@ -875,10 +875,5 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateSupportPolygonConstraint(activeContactPointPositions);
 
       updateCoMPositionToHold();
-   }
-
-   public void updateInitialFoot(RobotSide side)
-   {
-      updateFootPose(side);
    }
 }
