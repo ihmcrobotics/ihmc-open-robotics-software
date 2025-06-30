@@ -58,6 +58,7 @@ public class RDXVRSteppingTracker
                     && translationTracker.getZ() >= LIFT_THRESHOLD)
             {
                 isUserStepping.put(side, true);
+                LogTools.error("User stepping with {}", side);
                 // Avoid false stepping detection when already in swing with one side
                 isUserStepping.put(side.getOppositeSide(), false);
             }
@@ -82,7 +83,7 @@ public class RDXVRSteppingTracker
                     if (stableCount >= STABILITY_ITERATIONS)
                     {
                         resetSide(side, currentTrackerTransform);
-                        LogTools.debug("User completed stepping with {}", side);
+                        LogTools.error("User completed stepping with {}", side);
                     }
                 }
                 else  // Still moving
