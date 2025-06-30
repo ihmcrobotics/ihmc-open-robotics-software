@@ -54,16 +54,16 @@ public class RDXAbilityHand
       ImGui.sameLine();
       if (ImGui.button("Open"))
       {
+         controller.setControlMode(1);
          controller.setGoalPosition(OPEN_POSITION);
          controller.setGoalVelocity(-30.0f);
-         controller.setControlMode(1);
       }
       ImGui.sameLine();
       if (ImGui.button("Close"))
       {
+         controller.setControlMode(1);
          controller.setGoalPosition(CLOSED_POSITION);
          controller.setGoalVelocity(30.0f);
-         controller.setControlMode(1);
       }
       ImGui.sameLine();
       if (ImGui.button("Grip"))
