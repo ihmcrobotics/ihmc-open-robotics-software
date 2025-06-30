@@ -11,18 +11,9 @@ from behavior_msgs.msg import AI2RCommandMessage
 from behavior_msgs.msg import AI2RObjectMessage
 from behavior_msgs.msg import AI2RStatusMessage
 from behavior_msgs.msg import AI2RNavigationMessage
-from behavior_msgs.msg import AI2RHandPoseAdaptationMessage
 
 import cv2
 import numpy as np
-from llm.llm_interface import LLMInterface
-
-# Example usage:
-print(" Calling the LLM")
-llm = LLMInterface(config_file="llm/config.json")
-
-
-
 
 ros2 = {}
 
@@ -51,23 +42,6 @@ def behavior_message_callback(msg):
    else:
        print("-")
 
-   # --------- Reasoning -----------
-   # CAN DO SOME REASONING HERE based on objects in the scene and available behaviors
-   behaviors_str = str(behaviors)
-#    messages = [
-#    {
-#        "role": "assistant",
-#        "content": behaviors_str
-#    },
-#    {
-#        "role": "user",
-#        "content": "Summarize all the behaviors in one paragraph"
-#    }
-#    ]
-#    answer = llama32(messages)
-   response = llm.call_model(behaviors_str)
-   print("Summarized behaviors: ",response)
-
    # --------- Monitoring -----------
    completed_behavior = msg.completed_behavior
    print("Completed Behavior: " + completed_behavior)
@@ -93,9 +67,6 @@ def behavior_message_callback(msg):
        position_tolerance = failure.position_tolerance
        orientation_tolerance = failure.orientation_tolerance
 
-   # --------- Reasoning -----------
-   # CAN DO SOME REASONING HERE based on failed behaviors
-
    # --------- Coordination / Adaptation -----------
    behavior_command = AI2RCommandMessage()
    # DECIDE what behavior to execute based on reasoning. For example can decide to navigate to a specific object
@@ -104,22 +75,10 @@ def behavior_message_callback(msg):
    # Update the go to behavior to navigate to whatever object or whenever in space according to reasoning
    new_goto_behavior = AI2RNavigationMessage()
    # Set the reference frame name - can copy from scene_objects.obj_name
-   new_goto_behavior.reference_frame_name = "Charge1"
+   new_goto_behavior.reference_frame_name = "Table1"
    # Set the distance to the object
    new_goto_behavior.distance_to_frame = 0.6
    behavior_command.navigation = new_goto_behavior
-
-   # CAN EDIT HAND POSE ACTION, IF failed behavior has failed because of that action
-   new_hand_pose_action = AI2RHandPoseAdaptationMessage()
-   # Set the name of the action. COPY THAT from failed_behavior message
-   new_hand_pose_action.action_name = "action_to_modify"
-   # Set the reference frame name - can copy from scene_objects.obj_name
-   new_hand_pose_action.reference_frame_name = "Barrier1"
-   # Set the new position
-   new_hand_pose_action.new_position = Point(x=1.0, y=2.0, z=3.0)
-   # Set the new orientation
-   new_hand_pose_action.new_orientation = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
-   behavior_command.hand_pose_adaptation = new_hand_pose_action
 
    ros2["behavior_publisher"].publish(behavior_command)
 
