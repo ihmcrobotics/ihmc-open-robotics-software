@@ -4,7 +4,7 @@ This directory can be treated as a colcon workspace.
 
 Use
 ```
-$ ./compile_interfaces.sh
+$ ./compile_interfaces.bash
 ```
 to compile the IHMC ROS2 interfaces into the current colcon workspace (this directory).
 

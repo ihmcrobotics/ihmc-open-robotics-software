@@ -17,7 +17,7 @@ public class RDXTrashCanObject extends RDXEnvironmentObject
    public RDXTrashCanObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = RDXModelLoader.load("environmentObjects/trashCan/trashCan.g3dj");
+      Model realisticModel = RDXModelLoader.load("environmentObjects/trashCan/TrashCan.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 0.2;

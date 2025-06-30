@@ -53,6 +53,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
    private final ControllerStatusTracker controllerStatusTracker;
+
+   private static final boolean CHECK_COLLISION_WITH_OBJECTS = false;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
    private boolean navigationFailureForObstacle = false;
    private String navigationFailureObstacleName;
@@ -288,8 +290,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             }
          }
 
-         // Check if we are executing Receive object action and active/de-active foundationPose tracking
-         if (leaf.getParent().getDefinition().getName().contains("ReceiveObject"))
+         // Check if we are executing Receive or pick up  object action
+         if (leaf.getParent().getDefinition().getName().contains("ReceiveObject") || leaf.getParent().getDefinition().getName().contains("PickUpObject"))
          {
             trackingObjectsInProgress |= leaf.getIsExecuting();
             if (leaf.getDefinition().getName().contains("Grasp") && leaf.getIsExecuting())
@@ -318,35 +320,38 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          }
 
          // Check if Goto action is executing and if next steps are colliding with objects in the scene
-         if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
+         if (CHECK_COLLISION_WITH_OBJECTS)
          {
-            if (gotoActionState.getIsExecuting())
+            if (leaf.getDefinition().getName().contains("Go to Action") && leaf instanceof FootstepPlanActionState gotoActionState)
             {
-               var footsteps = controllerStatusTracker.getFootstepTracker().getFootsteps();
-               // Check if the next step's pose is too close with any object in the scene
-               int stepsLeft = gotoActionState.getNumberOfIncompleteFootsteps();
-               if (stepsLeft > 3 && footsteps.size() > stepsLeft)
+               if (gotoActionState.getIsExecuting())
                {
-                  Point3DReadOnly positionNextNextStep = footsteps.get(footsteps.size()-1 - stepsLeft + 2).getLocation();
-                  for (var object : statusMessage.getObjects())
+                  var footsteps = controllerStatusTracker.getFootstepTracker().getFootsteps();
+                  // Check if the next step's pose is too close with any object in the scene
+                  int stepsLeft = gotoActionState.getNumberOfIncompleteFootsteps();
+                  if (stepsLeft > 3 && footsteps.size() > stepsLeft)
                   {
-                     Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
-                     if (positionNextNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
+                     Point3DReadOnly positionNextNextStep = footsteps.get(footsteps.size()-1 - stepsLeft + 2).getLocation();
+                     for (var object : statusMessage.getObjects())
                      {
-                        gotoActionState.setFailed(true);
-                        failedLeaves.add(gotoActionState);
-                        navigationFailureForObstacle = true;
-                        navigationFailureObstacleName = object.getObjectNameAsString();
-                        // Have the executor abort
-                        ros2.publishToController(new AbortWalkingMessage());
+                        Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
+                        if (positionNextNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
+                        {
+                           gotoActionState.setFailed(true);
+                           failedLeaves.add(gotoActionState);
+                           navigationFailureForObstacle = true;
+                           navigationFailureObstacleName = object.getObjectNameAsString();
+                           // Have the executor abort
+                           ros2.publishToController(new AbortWalkingMessage());
 
-                        break leavesLoop;
+                           break leavesLoop;
+                        }
                      }
                   }
-               }
-               else
-               {
-                  LogTools.warn("Cannot check collision of next step");
+                  else
+                  {
+                     LogTools.warn("Cannot check collision of next step");
+                  }
                }
             }
          }
