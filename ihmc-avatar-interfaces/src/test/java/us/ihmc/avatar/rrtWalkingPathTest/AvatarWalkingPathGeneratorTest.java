@@ -141,7 +141,6 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
                                                                                                                                              environment,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.setStartingLocationOffset(startingLocation.getStartingLocationOffset());
-      simulationTestHelperFactory.setKeepSCSUp(true);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
