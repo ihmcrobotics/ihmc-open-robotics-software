@@ -34,4 +34,10 @@ public interface RobotVersion
    {
       return false;
    }
+   /*TODO: should return false and should be implemented into Alexander
+   *  and Unitree*/
+   default boolean hasAbilityHandJoins(RobotSide side)
+   {
+      return true;
+   }
 }
