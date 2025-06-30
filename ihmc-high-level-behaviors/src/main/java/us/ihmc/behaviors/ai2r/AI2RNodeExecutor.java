@@ -330,22 +330,18 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                   Point3DReadOnly positionNextNextStep = footsteps.get(footsteps.size()-1 - stepsLeft + 2).getLocation();
                   for (var object : statusMessage.getObjects())
                   {
-                     if (!object.getObjectNameAsString().contains("Charge") && !object.getObjectNameAsString().contains("Barrier") && !object.getObjectNameAsString().contains("Door"))
+                     Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
+                     if (positionNextNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
                      {
-                        Point3DReadOnly objectPosition = object.getObjectPoseInWorld().getTranslation();
-                        if (positionNextNextStep.distanceXY(objectPosition) < DISTANCE_COLLISION_THRESHOLD)
-                        {
-                           gotoActionState.setFailed(true);
-                           failedLeaves.add(gotoActionState);
-                           navigationFailureForObstacle = true;
-                           navigationFailureObstacleName = object.getObjectNameAsString();
-                           // Have the executor abort
-                           ros2.publishToController(new AbortWalkingMessage());
+                        gotoActionState.setFailed(true);
+                        failedLeaves.add(gotoActionState);
+                        navigationFailureForObstacle = true;
+                        navigationFailureObstacleName = object.getObjectNameAsString();
+                        // Have the executor abort
+                        ros2.publishToController(new AbortWalkingMessage());
 
-                           break leavesLoop;
-                        }
+                        break leavesLoop;
                      }
-
                   }
                }
                else
