@@ -44,6 +44,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -195,7 +196,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
                                            registry,
                                            MAX_NUMBER_OF_FOOTSTEPS + 1);
 
-      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 0.0);
+      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, Double.POSITIVE_INFINITY);
 
       reset();
       clearWaypoints();
@@ -336,11 +337,17 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 
    public void updateTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
+      updateTrajectory(leftFootConstraintType, rightFootConstraintType, false);
+   }
+
+   public void updateTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType, boolean updateWaypoints)
+   {
       timer.startMeasurement();
 
       updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
       updateFootstepsInternal();
-//      updateWaypoints();
+      if (updateWaypoints)
+         updateWaypoints();
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
 
@@ -464,7 +471,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
       }
 
-      double filterAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+      double filterAlpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
 
       WaypointData firstWaypoint = waypoints.getFirst();
 
@@ -491,6 +498,12 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          WaypointData secondWaypoint = waypoints.get(1);
          updateFilteredWaypoint(secondWaypoint, newWaypointPosition, newYaw, filterAlpha);
          secondWaypoint.setYaw(firstWaypoint.getYaw() + AngleTools.computeAngleDifferenceMinusPiToPi(secondWaypoint.getYaw(), firstWaypoint.getYaw()));
+      }
+      else if (isInDoubleSupport.getBooleanValue())
+      {
+         WaypointData secondWaypoint = waypoints.get(1);
+         double newYaw = computeAverage(tempFootPoses, newWaypointPosition);
+         updateFilteredWaypoint(secondWaypoint, newWaypointPosition, newYaw, filterAlpha);
       }
    }
 
