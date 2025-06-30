@@ -18,17 +18,15 @@ public class RDXHandManager
       communication.start();
       for (RobotSide side : RobotSide.values)
       {
-         hands.put(side, new RDXAbilityHand(side, communication, baseUI));
+         hands.put(side, new RDXAbilityHand(side, baseUI));
       }
-
-
    }
 
    public void update()
    {
       for (RobotSide side : RobotSide.values)
       {
-         hands.get(side).update();
+         hands.get(side).update(communication);
       }
    }
 
