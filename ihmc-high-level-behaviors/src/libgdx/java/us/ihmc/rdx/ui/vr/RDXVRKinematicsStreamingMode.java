@@ -412,7 +412,7 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-         toolboxInputMessage.setRecordEpisode(performingDemonstration.get());
+         toolboxInputMessage.setIsDemonstrationEpisode(performingDemonstration.get());
 
          toolboxInputMessage.setTimestamp(kinematicsRecorder.isReplaying() ? System.nanoTime() : controllerLastPollTimeNanos);
 
