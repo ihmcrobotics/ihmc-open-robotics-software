@@ -137,7 +137,7 @@ public class AlexanderContactPointParameters extends RobotContactPointParameters
 
    public static FramePoint3DReadOnly computeNubPoseInBodyFrame(RobotSide robotSide)
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       fullRobotModel.updateFrames();
 

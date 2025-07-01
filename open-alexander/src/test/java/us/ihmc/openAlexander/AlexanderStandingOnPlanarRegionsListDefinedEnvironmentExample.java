@@ -3,8 +3,6 @@ package us.ihmc.openAlexander;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 
@@ -12,7 +10,7 @@ public class AlexanderStandingOnPlanarRegionsListDefinedEnvironmentExample
 {
    public static void main(String[] args)
    {
-      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 

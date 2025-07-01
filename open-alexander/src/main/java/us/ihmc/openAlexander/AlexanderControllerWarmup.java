@@ -13,7 +13,7 @@ public class AlexanderControllerWarmup extends HumanoidControllerWarmup
 {
    public AlexanderControllerWarmup()
    {
-      this(OpenAlexanderVersion.V0_FULL_ROBOT);
+      this(OpenAlexanderVersion.V1_FULL_ROBOT);
    }
 
    public AlexanderControllerWarmup(OpenAlexanderVersion version)

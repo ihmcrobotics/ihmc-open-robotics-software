@@ -11,7 +11,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 public class AlexanderEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()
