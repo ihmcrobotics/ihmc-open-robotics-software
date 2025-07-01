@@ -294,6 +294,11 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       hasBeenInitialized.set(value);
    }
 
+   public boolean hasBeenInitialized()
+   {
+      return hasBeenInitialized.getBooleanValue();
+   }
+
    private final Vector3D rotationUpdate = new Vector3D();
    private final Quaternion quaternionUpdate = new Quaternion();
    private final Vector3D angularVelocityUnbiased = new Vector3D();
@@ -352,10 +357,12 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                                                       inputAngularVelocity,
                                                       inputLinearAcceleration,
                                                       orientationError);
-         if (hasIntegralTerm)
-            angularVelocityTerm.add(angularVelocityBias);
+         angularVelocityBias.scale(-1.0);
 
-         angularVelocityUnbiased.add(inputAngularVelocity, angularVelocityBias);
+         if (hasIntegralTerm)
+            angularVelocityTerm.sub(angularVelocityBias);
+
+         angularVelocityUnbiased.sub(inputAngularVelocity, angularVelocityBias);
       }
       else
       {
@@ -389,12 +396,22 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    public void initialize(Orientation3DReadOnly initialOrientation)
    {
+      initialize(initialOrientation, 0.0, 0.0, 0.0);
+   }
+
+   public void initialize(Orientation3DReadOnly initialOrientation, double xBiasInitial, double yBiasInitial, double zBiasInitial)
+   {
       estimatedOrientation.set(initialOrientation);
-      angularVelocityBias.setToZero();
+      angularVelocityBias.set(xBiasInitial, yBiasInitial, zBiasInitial);
       hasBeenInitialized.set(true);
    }
 
-   private void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector)
+   public void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector)
+   {
+      initialize(acceleration, magneticVector, 0.0, 0.0, 0.0);
+   }
+
+   public void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector, double xBiasInitial, double yBiasInitial, double zBiasInitial)
    {
       if (magneticVector == null && hasDesiredInitialHeading)
       {
@@ -408,7 +425,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       else
          estimatedOrientation.invert();
 
-      angularVelocityBias.setToZero();
+      angularVelocityBias.set(xBiasInitial, yBiasInitial, zBiasInitial);
       hasBeenInitialized.set(true);
    }
 
@@ -424,7 +441,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    private final Vector3D tangentialPart = new Vector3D();
    // ------------------------------------------------ //
 
-   private boolean updateIntegralTerm(Vector3DBasics integralTerm,
+   private boolean updateIntegralTerm(Vector3DBasics integralTermToPack,
                                       boolean hasMagneticVector,
                                       Orientation3DReadOnly orientation,
                                       Vector3DReadOnly angularVelocity,
@@ -433,7 +450,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    {
       if (!Double.isFinite(integralGainProvider.getValue()) || integralGainProvider.getValue() <= 0.0)
       {
-         integralTerm.setToZero();
+         integralTermToPack.setToZero();
          return false;
       }
 
@@ -445,7 +462,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       if (zeroLinearAccelerationThreshold.getValue() > 0.0 && a.lengthSquared() > MathTools.square(zeroLinearAccelerationThreshold.getValue()))
          return true;
 
-      integralTerm.scaleAdd(integralGainProvider.getValue() * updateDT, errorTerm, integralTerm);
+      integralTermToPack.scaleAdd(integralGainProvider.getValue() * updateDT, errorTerm, integralTermToPack);
 
       if (hasMagneticVector)
          return true;
@@ -455,29 +472,29 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          if (angularVelocity.lengthSquared() > MathTools.square(zeroAngularVelocityThreshold.getValue()))
             return true;
 
-         double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
+         double normalPartMagnitude = TupleTools.dot(aRef, integralTermToPack);
 
          if (Double.isFinite(normalPartMagnitude) && normalPartMagnitude != 0.0)
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
-            tangentialPart.sub(integralTerm, normalPart);
+            tangentialPart.sub(integralTermToPack, normalPart);
             double yawRateError = -angularVelocity.dot(aRef);
             double ajustedNormalMagnitude = EuclidCoreTools.interpolate(normalPartMagnitude, yawRateError, yawRateBiasGain.getValue());
             normalPart.scale(ajustedNormalMagnitude / normalPartMagnitude);
-            integralTerm.add(normalPart, tangentialPart);
+            integralTermToPack.add(normalPart, tangentialPart);
          }
       }
       else
       {
          // If we don't have a magnetic vector, the error around the gravity vector cannot be estimated. So we slowly decay it.
-         double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
+         double normalPartMagnitude = TupleTools.dot(aRef, integralTermToPack);
 
          if (Double.isFinite(normalPartMagnitude) && normalPartMagnitude != 0.0)
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
-            tangentialPart.sub(integralTerm, normalPart);
+            tangentialPart.sub(integralTermToPack, normalPart);
             normalPart.scale(1.0 - integralGainProvider.getValue());
-            integralTerm.add(normalPart, tangentialPart);
+            integralTermToPack.add(normalPart, tangentialPart);
          }
       }
 
