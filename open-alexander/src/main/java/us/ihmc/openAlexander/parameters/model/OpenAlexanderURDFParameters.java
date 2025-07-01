@@ -20,16 +20,19 @@ import java.util.List;
 public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterface
 {
    public static final String URDF_MODEL_NAME = "Alexander";
-   private static final String[] RESOURCE_DIRECTORIES = new String[] {"models/", "models/gazebo/", "models/alexander_v0/", "models/alexander_v0/urdf/",};
-   private static final String[] LOGGED_RESOURCES = {"models/alexander_V0/"};
+   private static final String[] RESOURCE_DIRECTORIES = new String[] {"alexander_V1_description/",
+                                                                      "alexander_V1_description/urdf/",
+                                                                      "alexander_V1_description/meshes/"};
+   private static final String[] LOGGED_RESOURCES = {"alexander_V1_description/"};
 
-   public static final String URDF_LOWER_BODY = "models/alexander_v0/urdf/alexander_v0.lowerBody.urdf";
-   public static final String URDF_ONLY_LEGS = "models/alexander_v0/urdf/alexander_v0.onlyLegs.urdf";
-   public static final String URDF_LEFT_ARM = "models/alexander_v0/urdf/alexander_v0.leftArm.urdf";
-   public static final String URDF_RIGHT_ARM = "models/alexander_v0/urdf/alexander_v0.rightArm.urdf";
+   public static final String URDF_FULL_BODY = "alexander_V1_description/urdf/alexander_v1.fullBody.urdf";
+   public static final String URDF_LOWER_BODY = "alexander_V1_description/urdf/alexander_v1.lowerBody.urdf";
+   public static final String URDF_HEAD = "alexander_V1_description/urdf/alexander_v1.head.urdf";
 
-   public static final String URDF_LEFT_ARM_NUB_FOREARM = "models/alexander_v0/urdf/alexander_v0.leftArmFixedForearm.urdf";
-   public static final String URDF_RIGHT_ARM_NUB_FOREARM = "models/alexander_v0/urdf/alexander_v0.rightArmFixedForearm.urdf";
+   public static final String URDF_LOWER_BODY_ONLY = "alexander_V1_description/urdf/alexander_v1.lowerBodyOnly.urdf";
+   
+   public static final String URDF_LEFT_ARM_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v0.leftArmFixedForearm.urdf";
+   public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v0.rightArmFixedForearm.urdf";
 
    // Model paths are represented as Strings because resource paths should always be separated with "/" -- this is not platform dependent
    private final Collection<String> urdfModelPath;

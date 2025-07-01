@@ -13,13 +13,12 @@ import java.util.Collection;
 
 public enum OpenAlexanderVersion implements AlexanderVersionInterface
 {
-   V0_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
-                               OpenAlexanderURDFParameters.URDF_LEFT_ARM,
-                               OpenAlexanderURDFParameters.URDF_RIGHT_ARM), null),
-   V0_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+   V1_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_FULL_BODY), null),
+   V1_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
                                  OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
+                                 OpenAlexanderURDFParameters.URDF_HEAD,
                                  OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null),
-   V0_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_ONLY_LEGS), null);
+   V1_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
 
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
@@ -56,7 +55,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    {
       switch (this)
       {
-         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+         case V1_FULL_ROBOT, V1_NUB_FOREARMS:
             return true;
          default:
             return false;
@@ -68,7 +67,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    {
       switch (this)
       {
-         case V0_FULL_ROBOT:
+         case V1_FULL_ROBOT:
             return true;
          default:
             return false;
@@ -89,19 +88,19 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       }
       switch (this)
       {
-         case V0_FULL_ROBOT:
+         case V1_FULL_ROBOT:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
                                              new SideDependentList<>(AlexanderArmConfiguration.FOREARM, AlexanderArmConfiguration.FOREARM),
                                              true,
                                              true);
             break;
-         case V0_NUB_FOREARMS:
+         case V1_NUB_FOREARMS:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
                                              new SideDependentList<>(AlexanderArmConfiguration.NUB, AlexanderArmConfiguration.NUB),
                                              true,
                                              true);
             break;
-         case V0_LEGS_ROBOT:
+         case V1_LEGS_ROBOT:
             jointMap = new AlexanderJointMap(getPhysicalProperties(),
                                              new SideDependentList<>(AlexanderArmConfiguration.NONE, AlexanderArmConfiguration.NONE),
                                              false,
@@ -115,8 +114,8 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    {
       return switch (this)
       {
-         case V0_FULL_ROBOT -> true;
-         case V0_NUB_FOREARMS -> true;
+         case V1_FULL_ROBOT -> true;
+         case V1_NUB_FOREARMS -> true;
          default -> false;
       };
    }
@@ -126,7 +125,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    {
       switch (this)
       {
-         case V0_FULL_ROBOT ->
+         case V1_FULL_ROBOT ->
          {
             return true;
          }
@@ -142,7 +141,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    {
       switch (this)
       {
-         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+         case V1_FULL_ROBOT, V1_NUB_FOREARMS:
             return true;
          default:
             return false;
@@ -159,7 +158,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
 
       switch (this)
       {
-         case V0_FULL_ROBOT, V0_NUB_FOREARMS, V0_LEGS_ROBOT:
+         case V1_FULL_ROBOT, V1_NUB_FOREARMS, V1_LEGS_ROBOT:
             sensorInformation = new AlexanderSensorInformation(this);
             break;
          default:
@@ -179,10 +178,10 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
 
       switch (this)
       {
-         case V0_FULL_ROBOT, V0_NUB_FOREARMS:
+         case V1_FULL_ROBOT, V1_NUB_FOREARMS:
             physicalProperties = new AlexanderPhysicalPropertiesV0();
             break;
-         case V0_LEGS_ROBOT:
+         case V1_LEGS_ROBOT:
             physicalProperties = new AlexanderPhysicalPropertiesV0(false);
          default:
             break;

@@ -2,8 +2,6 @@ package us.ihmc.openAlexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.parameters.controller.AlexanderSwingTrajectoryParameters;
 import us.ihmc.openAlexander.parameters.controller.AlexanderToeOffParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
@@ -22,7 +20,7 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT)
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT)
       {
          @Override
          public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)

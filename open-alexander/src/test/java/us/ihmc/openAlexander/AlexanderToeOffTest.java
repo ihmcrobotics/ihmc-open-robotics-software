@@ -3,8 +3,6 @@ package us.ihmc.openAlexander;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.parameters.controller.AlexanderToeOffParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -89,7 +87,7 @@ public class AlexanderToeOffTest extends AvatarToeOffTest
     @Override
     public DRCRobotModel getRobotModel()
     {
-        OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+        OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
         {
             @Override
             public WalkingControllerParameters getWalkingControllerParameters()

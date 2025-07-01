@@ -2,8 +2,6 @@ package us.ihmc.openAlexander;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.openAlexander.parameters.controller.AlexanderStepAdjustmentParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.avatar.AvatarStepInPlaceTest;
@@ -14,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 
 public class AlexanderStepInPlaceTest extends AvatarStepInPlaceTest
 {
-   private final OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target)
    {

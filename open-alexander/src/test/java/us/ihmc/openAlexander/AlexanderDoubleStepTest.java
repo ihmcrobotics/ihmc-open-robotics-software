@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarDoubleStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 
 public class AlexanderDoubleStepTest extends AvatarDoubleStepTest
 {
    private final RobotTarget target = RobotTarget.SCS;
 
-   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, target);
+   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, target);
 
    @Tag("humanoid-flat-ground-slow-2")
    @Test

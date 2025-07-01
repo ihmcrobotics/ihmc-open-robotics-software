@@ -21,13 +21,13 @@ public class AlexanderObstacleCourseTrialsTerrainTest extends DRCObstacleCourseT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override
    protected DRCRobotModel getRobotModelWithAdditionalFootContactPoints()
    {
-      OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
+      OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 5, 3, true, false);
       AlexanderContactPointParameters contactPointParameters = new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       return new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters);

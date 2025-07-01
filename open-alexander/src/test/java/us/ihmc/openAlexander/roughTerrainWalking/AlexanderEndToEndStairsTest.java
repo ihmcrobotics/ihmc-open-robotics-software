@@ -11,7 +11,7 @@ import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndStairsTest;
 @Tag("humanoid-stairs-slow")
 public class AlexanderEndToEndStairsTest extends HumanoidEndToEndStairsTest
 {
-   private OpenAlexanderVersion selectedVersion = OpenAlexanderVersion.V0_FULL_ROBOT;
+   private OpenAlexanderVersion selectedVersion = OpenAlexanderVersion.V1_FULL_ROBOT;
 
    @Override
    public DRCRobotModel getRobotModel()

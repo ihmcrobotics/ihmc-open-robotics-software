@@ -42,7 +42,7 @@ public class AlexanderPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderRobotModel alexanderRobotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+      OpenAlexanderRobotModel alexanderRobotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
