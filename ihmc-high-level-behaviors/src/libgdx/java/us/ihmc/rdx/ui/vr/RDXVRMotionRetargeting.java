@@ -351,13 +351,24 @@ public class RDXVRMotionRetargeting
             String footName = side == RobotSide.LEFT ? LEFT_ANKLE.getSegmentName() : RIGHT_ANKLE.getSegmentName();
             if (initialFeetFrame.get(side) == null)
             {
-               ReferenceFrame footFrame = trackerReferenceFrames.get(footName).getReferenceFrame();
                initialFeetTransformToWorld.get(side).set(realRobotModel.getSoleFrame(side).getTransformToWorldFrame());
                initialFeetFrame.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                        initialFeetTransformToWorld.get(side)));
-               initialFootTrackersTransformToWorld.get(side).set(footFrame.getTransformToWorldFrame());
+
+               ReferenceFrame trackerFootFrame = trackerReferenceFrames.get(footName).getReferenceFrame();
+               initialFootTrackersTransformToWorld.get(side).set(trackerFootFrame.getTransformToWorldFrame());
 
                retargetedFootFrames.put(side, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newFootFramePoses.get(side)));
+            }
+            // Check when user foot landed and reset initial frames used for incremental retargeting
+            else if (steppingTracker.getLandedFootNotification(side).poll())
+            {
+               initialFeetTransformToWorld.get(side).set(ghostRobotModel.getSoleFrame(side).getTransformToWorldFrame());
+               initialFeetFrame.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                   initialFeetTransformToWorld.get(side)));
+
+               ReferenceFrame trackerFootFrame = trackerReferenceFrames.get(footName).getReferenceFrame();
+               initialFootTrackersTransformToWorld.get(side).set(trackerFootFrame.getTransformToWorldFrame());
             }
             // Calculate the variation of the tracker's frame from its initial value
             RigidBodyTransform trackerVariationFromInitialValue = new RigidBodyTransform(trackerReferenceFrames.get(footName)

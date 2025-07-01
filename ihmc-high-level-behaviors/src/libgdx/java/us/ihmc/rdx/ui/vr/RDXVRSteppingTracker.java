@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.vr;
 
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,6 +19,7 @@ public class RDXVRSteppingTracker
     private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
     private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
     private final SideDependentList<Integer> stableIterationCounts = new SideDependentList<>();
+    private final SideDependentList<Notification> landedFoot = new SideDependentList<>();
 
     public RDXVRSteppingTracker()
     {
@@ -32,6 +34,7 @@ public class RDXVRSteppingTracker
             stableIterationCounts.put(side, 0);
             previousTrackersTransform.put(side, new RigidBodyTransform());
             initialTrackersTransform.put(side, null);
+            landedFoot.put(side, new Notification());
         }
     }
 
@@ -58,7 +61,7 @@ public class RDXVRSteppingTracker
                     && translationTracker.getZ() >= LIFT_THRESHOLD)
             {
                 isUserStepping.put(side, true);
-                LogTools.error("User stepping with {}", side);
+                LogTools.info("User stepping with {}", side);
                 // Avoid false stepping detection when already in swing with one side
                 isUserStepping.put(side.getOppositeSide(), false);
             }
@@ -83,7 +86,8 @@ public class RDXVRSteppingTracker
                     if (stableCount >= STABILITY_ITERATIONS)
                     {
                         resetSide(side, currentTrackerTransform);
-                        LogTools.error("User completed stepping with {}", side);
+                        LogTools.info("User completed stepping with {}", side);
+                        landedFoot.get(side).set();
                     }
                 }
                 else  // Still moving
@@ -106,5 +110,10 @@ public class RDXVRSteppingTracker
     public boolean isFootInContact(RobotSide side)
     {
         return !isUserStepping.get(side);
+    }
+
+    public Notification getLandedFootNotification(RobotSide side)
+    {
+        return landedFoot.get(side);
     }
 }

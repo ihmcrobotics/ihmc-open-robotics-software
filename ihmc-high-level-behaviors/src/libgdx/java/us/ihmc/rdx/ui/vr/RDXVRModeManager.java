@@ -114,10 +114,6 @@ public class RDXVRModeManager
                                                                     controllerHelper,
                                                                     baseUI.getVRManager().getContext(),
                                                                     retargetingParameters,
-                                                                    sceneGraph,
-                                                                    controllerStatusTracker,
-                                                                    footstepPlacer,
-                                                                    handManager,
                                                                     robotVisualizer);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule, kstParameters);
       }
