@@ -24,6 +24,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
@@ -865,6 +866,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          isFootInSupport.get(side).set(value);
    }
 
+   private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
+
    public void updateSupportPolygon(SideDependentList<Boolean> isFootInSupport, double footLength, double footWidth)
    {
       activeContactPointPositions.clear();
@@ -883,20 +886,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide side : RobotSide.values)
       {
-         if (isFootInSupport.get(side))
-         {
+//         if (isFootInSupport.get(side))
+//         {
             // Get the foot pose in the world frame
             FramePose3D footPose = new FramePose3D(initialFootPoses.get(side));
+            desiredFootFrame.setPoseAndUpdate(footPose);
+
             for (Point2D corner : footCorners)
             {
                // Create the corner in the foot frame
-               FramePoint3D cornerInFoot = new FramePoint3D(footPose.getReferenceFrame(), corner.getX(), corner.getY(), initialFootPoses.get(side).getTranslationZ());
+               FramePoint3D cornerInFoot = new FramePoint3D(desiredFootFrame, corner.getX(), corner.getY(), initialFootPoses.get(side).getTranslationZ());
                // Transform to world frame
                cornerInFoot.changeFrame(worldFrame);
                // Add to the active contact points
                activeContactPointPositions.add().setIncludingFrame(cornerInFoot);
             }
-         }
+//         }
       }
 
       updateSupportPolygonConstraint(activeContactPointPositions);

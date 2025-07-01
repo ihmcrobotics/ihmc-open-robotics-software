@@ -141,7 +141,7 @@ public class RDXVRKinematicsStreamingMode
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private final ImBoolean armScaling = new ImBoolean(false);
-   private final ImBoolean comTracking = new ImBoolean(false);
+   private final ImBoolean comTracking = new ImBoolean(true);
    private RDXVRMotionRetargeting motionRetargeting;
 
    private RDXVRFootstepStreaming footstepStreaming;

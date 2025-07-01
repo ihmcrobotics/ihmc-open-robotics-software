@@ -54,7 +54,7 @@ public class RDXVRMotionRetargeting
    private ReferenceFrame scaledPelvisFrame;
    private final FramePose3D newPelvisFramePose = new FramePose3D();
 
-   private boolean comTracking = false;
+   private boolean comTracking = true;
    private Point3D centerOfMassDesiredXYInWorld;
    private double previousOffsetValue = 0.5;
    private final SideDependentList<Point3D> initialHandPositionsInWorld = new SideDependentList<>();
@@ -160,7 +160,8 @@ public class RDXVRMotionRetargeting
          newPelvisFramePose.set(combinedTransformToWorld);
          // Zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
          newPelvisFramePose.changeFrame(initialPelvisFrame);
-         newPelvisFramePose.getRotation().setYawPitchRoll(0.0, 0.0,0.0); //newPelvisFramePose.getRotation().getYaw()
+         double midFeetYaw = 0.5 * (ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation().getYaw() + ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation().getYaw());
+         newPelvisFramePose.getRotation().setYawPitchRoll(midFeetYaw, 0.0, 0.0); //newPelvisFramePose.getRotation().getYaw()
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          scaledPelvisFrame.update();
 
