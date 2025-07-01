@@ -479,7 +479,7 @@ public class KSTStreamingState implements State
          else
             streamingBlendingDuration.set(tools.getParameters().getDefaultStreamingBlendingDuration());
 
-         isDemonstrationEpisode.set(latestInput.getDemonstrationEpisode());
+         isDemonstrationEpisode.set(latestInput.getIsDemonstrationEpisode());
          // Reset the list to keep track of the bodies that are not controlled
          uncontrolledRigidBodies.clear();
          List<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();

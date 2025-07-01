@@ -177,7 +177,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       return linearRateLimitation;
    }
 
-   public boolean getDemonstrationEpisode()
+   public boolean getIsDemonstrationEpisode()
    {
       return isDemonstrationEpisode;
    }
