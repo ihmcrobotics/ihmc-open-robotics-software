@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -422,6 +423,11 @@ public class KSTTools
    public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher streamingMessagePublisher)
    {
       this.streamingMessagePublisher = streamingMessagePublisher;
+   }
+
+   public void setCenterOfMassOffset(Vector2DReadOnly offset)
+   {
+      ikController.setCenterOfMassOffset(offset);
    }
 
    public void streamToController(KSTOutputDataReadOnly outputToPublish, boolean finalizeTrajectory)

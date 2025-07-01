@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTFBOutputProcessor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -70,6 +71,10 @@ public class KinematicsStreamingToolboxParameters
     * Safety margin to keep the center of mass within the support polygon.
     */
    protected double centerOfMassSafeMargin;
+   /**
+    * Center of mass offset with respect to center of support region
+    */
+   protected Vector2D centerOfMassOffset;
    /**
     * Weight used to hold the center of mass in place.
     */
@@ -313,6 +318,7 @@ public class KinematicsStreamingToolboxParameters
 
       centerOfMassSafeMargin = 0.05;
       centerOfMassHoldWeight = 0.001;
+      centerOfMassOffset = new Vector2D();
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
 
       lockPelvisWeight = 1000.0;
@@ -728,6 +734,16 @@ public class KinematicsStreamingToolboxParameters
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
    {
       this.centerOfMassSafeMargin = centerOfMassSafeMargin;
+   }
+
+   public void setCenterOfMassOffset(Vector2D offset)
+   {
+      this.centerOfMassOffset = offset;
+   }
+
+   public Vector2D getCenterOfMassOffset()
+   {
+      return centerOfMassOffset;
    }
 
    public void setCenterOfMassHoldWeight(double centerOfMassHoldWeight)
