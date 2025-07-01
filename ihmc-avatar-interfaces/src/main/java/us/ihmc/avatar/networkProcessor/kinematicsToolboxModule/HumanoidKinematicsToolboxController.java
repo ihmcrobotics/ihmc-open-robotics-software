@@ -20,13 +20,16 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -862,18 +865,41 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          isFootInSupport.get(side).set(value);
    }
 
-   public void updateSupportPolygon(Object<Point3D> leftFootSupportPolygon2d, Object<Point3D> rightFootSupportPolygon2d)
+   public void updateSupportPolygon(SideDependentList<Boolean> isFootInSupport, double footLength, double footWidth)
    {
       activeContactPointPositions.clear();
 
-      // CoM constraint polygon is the convex hull of the feet contact points.
-      for (int i = 0; i < leftFootSupportPolygon2d.size(); i++)
-         activeContactPointPositions.add().setIncludingFrame(worldFrame, leftFootSupportPolygon2d.get(i));
-      for (int i = 0; i < rightFootSupportPolygon2d.size(); i++)
-         activeContactPointPositions.add().setIncludingFrame(worldFrame, rightFootSupportPolygon2d.get(i));
+      // Define the four corners of the foot in the local foot frame
+      double halfLength = footLength / 2.0;
+      double halfWidth = footWidth / 2.0;
+
+      // These are the four corners in the foot's local frame
+      Point2D[] footCorners = new Point2D[] {
+            new Point2D(-halfLength, -halfWidth),
+            new Point2D( halfLength, -halfWidth),
+            new Point2D( halfLength,  halfWidth),
+            new Point2D(-halfLength,  halfWidth)
+      };
+
+      for (RobotSide side : RobotSide.values)
+      {
+         if (isFootInSupport.get(side))
+         {
+            // Get the foot pose in the world frame
+            FramePose3D footPose = new FramePose3D(initialFootPoses.get(side));
+            for (Point2D corner : footCorners)
+            {
+               // Create the corner in the foot frame
+               FramePoint3D cornerInFoot = new FramePoint3D(footPose.getReferenceFrame(), corner.getX(), corner.getY(), initialFootPoses.get(side).getTranslationZ());
+               // Transform to world frame
+               cornerInFoot.changeFrame(worldFrame);
+               // Add to the active contact points
+               activeContactPointPositions.add().setIncludingFrame(cornerInFoot);
+            }
+         }
+      }
 
       updateSupportPolygonConstraint(activeContactPointPositions);
-
       updateCoMPositionToHold();
    }
 }

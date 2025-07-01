@@ -16,6 +16,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KSTInputFilter;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataBasics;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -296,10 +297,8 @@ public class KSTTools
             isFootInSupport.put(side, isFootInContact);
             ikController.setIsFootInSupport(side, isFootInSupport.get(side));
          }
-
-//         CapturabilityBasedStatus desiredStatus = createCapturabilityBasedStatus(desiredFullRobotModel, robotModel.getContactPointParameters(),
-//                 contactCommand.getIsFootInContact(RobotSide.LEFT),  contactCommand.getIsFootInContact(RobotSide.RIGHT));
-//         ikController.updateSupportPolygon(desiredStatus.getLeftFootSupportPolygon3d(), desiredStatus.getRightFootSupportPolygon3d());
+         SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
+         ikController.updateSupportPolygon(isFootInSupport, steppingParameters.getFootLength(), steppingParameters.getFootWidth());
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
