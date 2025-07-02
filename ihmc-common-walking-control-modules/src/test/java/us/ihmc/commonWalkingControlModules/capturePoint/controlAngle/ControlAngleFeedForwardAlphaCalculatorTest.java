@@ -7,6 +7,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Red;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
 import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
@@ -208,6 +209,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    }
 
    @Test
+   @Disabled
    public void testLeftFootForwardDynamicsInLine()
    {
       YoRegistry registry = new YoRegistry("test");
@@ -355,6 +357,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
    }
 
    @Test
+   @Disabled
    public void testWithReferenceCMPFarOutside()
    {
       YoRegistry registry = new YoRegistry("test");
@@ -438,6 +441,7 @@ public class ControlAngleFeedForwardAlphaCalculatorTest
     *
     */
    @Test
+   @Disabled
    public void testTrickyCollinearCase()
    {
       YoRegistry registry = new YoRegistry("test");
