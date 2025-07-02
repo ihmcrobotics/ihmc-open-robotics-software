@@ -182,6 +182,7 @@ public class RDXVRKinematicsStreamingMode
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
+
       headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
@@ -328,9 +329,8 @@ public class RDXVRKinematicsStreamingMode
       if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
-         processTrackers(toolboxInputMessage);
          processControllers(toolboxInputMessage);
-//         doCoMControl(toolboxInputMessage);
+         processTrackers(toolboxInputMessage);
          retargetMotion(toolboxInputMessage);
 
          if (isKSTEnabled.get())
@@ -398,77 +398,6 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
-   private void processTrackers(KinematicsStreamingToolboxInputMessage messageToPack)
-   {
-      additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
-      for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.TRACKER_TYPES)
-      {
-         if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
-         {
-            FramePose3D desiredPose = new FramePose3D();
-            FrameVector3D desiredAngularVelocity = new FrameVector3D();
-            FrameVector3D desiredLinearVelocity = new FrameVector3D();
-
-            if (kinematicsRecorder.isReplaying())
-            {
-               kinematicsRecorder.packLoggedData(segmentType, desiredPose, desiredAngularVelocity, desiredLinearVelocity);
-            }
-            else
-            {
-               vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
-               {
-                  if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
-                  {
-                     MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-                     trackerDesiredControlFrame.getTransformToParent()
-                                               .getRotation()
-                                               .appendInvertOther(retargetingParameters.getControlFrameOrientationInBodyFrame(segmentType));
-                     trackerDesiredControlFrame.getReferenceFrame().update();
-                     trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
-                     if (segmentType == CHEST)
-                        chestFrameGraphics.setToReferenceFrame(ghostFullRobotModel.getChest().getBodyFixedFrame());
-                  }
-
-                  if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
-                  {
-                     trackerFrameGraphics.put(segmentType.getSegmentName(), new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-                  }
-                  trackerFrameGraphics.get(segmentType.getSegmentName())
-                                      .setToReferenceFrame(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
-
-                  desiredPose.setToZero(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
-                  desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
-                  desiredAngularVelocity.set(tracker.getAngularVelocity());
-                  desiredLinearVelocity.set(tracker.getLinearVelocity());
-
-                  kinematicsRecorder.recordTrackerData(segmentType,
-                                                       trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame(),
-                                                       desiredAngularVelocity,
-                                                       desiredLinearVelocity,
-                                                       getTrajectoryRecordFrame());
-               });
-            }
-            if (motionRetargeting.isRetargetingNotNeeded(segmentType))
-            {
-               RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
-
-               if (controlledSegment != null)
-               {
-                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                          desiredPose,
-                          desiredAngularVelocity,
-                          desiredLinearVelocity,
-                          retargetingParameters.getPositionWeight(segmentType),
-                          retargetingParameters.getOrientationWeight(segmentType),
-                          retargetingParameters.getLinearRateLimitation(segmentType),
-                          retargetingParameters.getAngularRateLimitation(segmentType));
-                  messageToPack.getInputs().add().set(message);
-               }
-            }
-         }
-      }
-   }
-
    private void processControllers(KinematicsStreamingToolboxInputMessage messageToPack)
    {
       for (VRTrackedSegmentType segmentType : CONTROLLER_TYPES)
@@ -527,6 +456,78 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
+   private void processTrackers(KinematicsStreamingToolboxInputMessage messageToPack)
+   {
+      additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
+      for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.TRACKER_TYPES)
+      {
+         if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
+         {
+            FramePose3D desiredPose = new FramePose3D();
+            FrameVector3D desiredAngularVelocity = new FrameVector3D();
+            FrameVector3D desiredLinearVelocity = new FrameVector3D();
+
+            if (kinematicsRecorder.isReplaying())
+            {
+               kinematicsRecorder.packLoggedData(segmentType, desiredPose, desiredAngularVelocity, desiredLinearVelocity);
+            }
+            else
+            {
+               vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
+               {
+                  if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
+                  {
+                     MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
+                     trackerDesiredControlFrame.getTransformToParent()
+                                               .getRotation()
+                                               .appendInvertOther(retargetingParameters.getControlFrameOrientationInBodyFrame(segmentType));
+                     trackerDesiredControlFrame.getReferenceFrame().update();
+                     trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
+                     if (segmentType == CHEST)
+                        chestFrameGraphics.setToReferenceFrame(ghostFullRobotModel.getChest().getBodyFixedFrame());
+                  }
+
+                  if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
+                  {
+                     trackerFrameGraphics.put(segmentType.getSegmentName(), new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+                  }
+                  trackerFrameGraphics.get(segmentType.getSegmentName())
+                                      .setToReferenceFrame(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+
+                  desiredPose.setToZero(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+                  desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  desiredAngularVelocity.set(tracker.getAngularVelocity());
+                  desiredLinearVelocity.set(tracker.getLinearVelocity());
+                  motionRetargeting.setDesiredVelocities(segmentType, desiredAngularVelocity, desiredLinearVelocity);
+
+                  kinematicsRecorder.recordTrackerData(segmentType,
+                                                       trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame(),
+                                                       desiredAngularVelocity,
+                                                       desiredLinearVelocity,
+                                                       getTrajectoryRecordFrame());
+               });
+            }
+            if (motionRetargeting.isRetargetingNotNeeded(segmentType))
+            {
+               RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
+
+               if (controlledSegment != null)
+               {
+                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                                     desiredPose,
+                                                                                     desiredAngularVelocity,
+                                                                                     desiredLinearVelocity,
+                                                                                     retargetingParameters.getPositionWeight(segmentType),
+                                                                                     retargetingParameters.getOrientationWeight(segmentType),
+                                                                                     retargetingParameters.getLinearRateLimitation(segmentType),
+                                                                                     retargetingParameters.getAngularRateLimitation(segmentType));
+                  messageToPack.getInputs().add().set(message);
+               }
+            }
+         }
+      }
+   }
+
    private void retargetMotion(KinematicsStreamingToolboxInputMessage messageToPack)
    {
       if (armScaling.get())
@@ -554,20 +555,23 @@ public class RDXVRKinematicsStreamingMode
 
             KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                tempFramePose,
-                                                                               null,
-                                                                               null,
+                                                                               motionRetargeting.getDesiredAngularVelocity(segmentType),
+                                                                               motionRetargeting.getDesiredLinearVelocity(segmentType),
                                                                                retargetingParameters.getPositionWeight(segmentType),
                                                                                retargetingParameters.getOrientationWeight(segmentType),
                                                                                retargetingParameters.getLinearRateLimitation(segmentType),
                                                                                retargetingParameters.getAngularRateLimitation(segmentType));
             if (segmentType.isHandRelated())
             {
-               // TODO. Linear desired velocities from controller/trackers might be wrong now because of scaling
                // Check arm scaling state not changed -> disabled
                if (!isKSTEnabled.get())
                   return;
                message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
                message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
+            }
+            else
+            {
+               message.getControlFramePositionInEndEffector().set(motionRetargeting.getIKControlFramePosition(segmentType));
             }
             messageToPack.getInputs().add().set(message);
          }
