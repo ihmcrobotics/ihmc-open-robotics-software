@@ -506,8 +506,28 @@ public class KSTStreamingState implements State
             YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
             if (startTime.isNaN())
                startTime.set(timeInState);
+
             blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
 
+            RigidBodyBasics endEffector = rigidBodyInput.getEndEffector();
+            boolean isFoot = false;
+            boolean footInContact = false;
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               if (endEffector == feet.get(robotSide))
+               {
+                  isFoot = true;
+
+                  footInContact = tools.isFootInSupport(robotSide);
+                  break;
+               }
+            }
+
+            if (!isFoot || !footInContact)
+            {
+               blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
+            }
             // Update the list of bodies that are not controlled this tick
             uncontrolledRigidBodies.remove(rigidBodyInput.getEndEffector());
          }

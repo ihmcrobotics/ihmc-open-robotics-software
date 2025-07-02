@@ -52,6 +52,8 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
             streamingStartTime.set(time);
          }
 
+
+
          double timeInBlending = time - streamingStartTime.getValue();
 
          if (timeInBlending < streamingBlendingDuration.getValue())
