@@ -4,7 +4,7 @@ This directory can be treated as a colcon workspace.
 
 Use
 ```
-$ ./compile_interfaces.sh
+$ ./compile_interfaces.bash
 ```
 to compile the IHMC ROS2 interfaces into the current colcon workspace (this directory).
 
@@ -17,7 +17,7 @@ Ensure you've set `ROS_DOMAIN_ID` equal to `RTPSDomainID` in `~/.ihmc/IHMCNetwor
 you have not created or edited this file, run `NetworkParametersCreator` and set `RTPSDomainID` and
 `RTPSSubnet`.
 ```
-$ export ROS_DOMAIN_ID=99 # Change to the domain ID you've set in IHMCNetworkParameters.ini
+$ export ROS_DOMAIN_ID=32 # Change to the domain ID you've set in IHMCNetworkParameters.ini
 ```
 
 ## Running examples

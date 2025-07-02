@@ -119,7 +119,7 @@ public class RDXVRModeManager
                                                                     footstepPlacer,
                                                                     handManager,
                                                                     robotVisualizer);
-         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule,  kstParameters);
+         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule, kstParameters);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
