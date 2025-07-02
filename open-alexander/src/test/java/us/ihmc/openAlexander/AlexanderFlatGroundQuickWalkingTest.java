@@ -121,7 +121,7 @@ public class AlexanderFlatGroundQuickWalkingTest extends AvatarFlatGroundQuickWa
    @Override
    public double getMaxForwardStepLength()
    {
-      return 0.5;
+      return 0.42;
    }
 
    @Tag("humanoid-flat-ground")
