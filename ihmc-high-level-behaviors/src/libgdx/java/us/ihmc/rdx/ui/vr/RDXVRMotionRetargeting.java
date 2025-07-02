@@ -225,17 +225,17 @@ public class RDXVRMotionRetargeting
                normalizedOffset = 0.0;
             }
             // Filter value
-            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
-            if (filteredNormalizedOffset >= 1.0)
-               filteredNormalizedOffset = 1.0;
-            else if (filteredNormalizedOffset <= 0.0)
-            {
-               filteredNormalizedOffset = 0.0;
-            }
-            if (Double.isNaN(filteredNormalizedOffset))
-            {
-               filteredNormalizedOffset = previousOffsetValue;
-            }
+//            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
+//            if (filteredNormalizedOffset >= 1.0)
+//               filteredNormalizedOffset = 1.0;
+//            else if (filteredNormalizedOffset <= 0.0)
+//            {
+//               filteredNormalizedOffset = 0.0;
+//            }
+//            if (Double.isNaN(filteredNormalizedOffset))
+//            {
+//               filteredNormalizedOffset = previousOffsetValue;
+//            }
             else
             {
                previousOffsetValue = normalizedOffset;
@@ -243,8 +243,8 @@ public class RDXVRMotionRetargeting
 
             if (leftFootXYInWorld == null || rightFootXYInWorld == null)
             {
-               leftFootXYInWorld = new Point3D(ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
-               rightFootXYInWorld = new Point3D(ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
+               leftFootXYInWorld = new Point3D(leftAnkleTrackerXYInWorld);
+               rightFootXYInWorld = new Point3D(rightAnkleTrackerXYInWorld);
             }
 
             // Reconstruct robot CoM based on the normalized offset and its feet position
@@ -252,7 +252,7 @@ public class RDXVRMotionRetargeting
             feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
             centerOfMassDesiredXYInWorld.set(feetVector);
-            centerOfMassDesiredXYInWorld.scale(filteredNormalizedOffset);
+            centerOfMassDesiredXYInWorld.scale(normalizedOffset);
             centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
          }
       }

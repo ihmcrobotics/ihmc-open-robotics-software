@@ -1154,6 +1154,21 @@ public class KinematicsStreamingToolboxParameters
             jointCustomPositionLowerLimits = new HashMap<>();
          jointCustomPositionLowerLimits.put(jointName, 0.283);
       }
+      else if (jointName.toLowerCase().contains("hip") && jointName.toLowerCase().contains("roll"))
+      {
+         if (jointName.toLowerCase().contains("left"))
+         {
+            if (jointCustomPositionUpperLimits == null)
+               jointCustomPositionUpperLimits = new HashMap<>();
+            jointCustomPositionUpperLimits.put(jointName, 0.742);
+         }
+         else
+         {
+            if (jointCustomPositionLowerLimits == null)
+               jointCustomPositionLowerLimits = new HashMap<>();
+            jointCustomPositionLowerLimits.put(jointName, -0.742);
+         }
+      }
    }
 
    public List<String> getInactiveJoints()
