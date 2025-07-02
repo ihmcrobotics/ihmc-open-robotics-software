@@ -11,10 +11,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.perception.detections.foundationPose.FoundationPoseInstantDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
@@ -75,6 +77,8 @@ public class SceneGraph
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
    private int numberOfFrozenNodes = 0;
 
+   private final Map<String, Set<Integer>> minimumUniqueSuffixMap = new HashMap<>();
+
    /** Create without CRDT synchronization. */
    public SceneGraph()
    {
@@ -113,7 +117,7 @@ public class SceneGraph
 
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
-         staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
+         staticRelativeSceneNode.updateTrackingState(sensorFrame, this, modificationQueue);
       }
       else if (sceneNode instanceof YOLOv8Node yoloNode)
       {
@@ -154,6 +158,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
       numberOfFrozenNodes = 0;
+      minimumUniqueSuffixMap.clear();
       updateCaches(rootNode);
    }
 
@@ -198,6 +203,11 @@ public class SceneGraph
       if (node.isFrozen())
          ++numberOfFrozenNodes;
 
+      if (minimumUniqueSuffixMap.containsKey(node.getNonUniqueName()))
+         minimumUniqueSuffixMap.get(node.getNonUniqueName()).add(node.getNameSuffix());
+      else
+         minimumUniqueSuffixMap.put(node.getNonUniqueName(), new HashSet<>(Set.of(node.getNameSuffix())));
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
@@ -210,7 +220,7 @@ public class SceneGraph
 
       Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
 
-      // Update or add door nodes
+      //      // Update or add door nodes
       Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
                                                                               .filter(DoorNodeTools::detectionIsDoorComponent)
                                                                               .collect(Collectors.toSet());
@@ -218,17 +228,17 @@ public class SceneGraph
       {
          // Does this new detection correspond with an existing door node?
          modifyTree(modificationQueue ->
-         {
-            boolean matched = sceneNodesByID.stream()
-                                            .filter(sceneNode -> sceneNode instanceof DoorNode)
-                                            .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
-            if (!matched)
-            {
-               // Create new door node
-               DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
-               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode));
-            }
-         });
+                    {
+                       boolean matched = sceneNodesByID.stream()
+                                                       .filter(sceneNode -> sceneNode instanceof DoorNode)
+                                                       .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
+                       if (!matched)
+                       {
+                          // Create new door node
+                          DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
+                          modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode, this));
+                       }
+                    });
       }
 
       for (PersistentDetection newDetection : newlyValidDetections)
@@ -287,6 +297,11 @@ public class SceneGraph
       return numberOfFrozenNodes;
    }
 
+   public Map<String, Set<Integer>> getMinimumUniqueSuffixMap()
+   {
+      return minimumUniqueSuffixMap;
+   }
+
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
    {
       Function<String, ReferenceFrame> frameLookup = nodeName ->
@@ -301,13 +316,21 @@ public class SceneGraph
    {
       DetectableSceneNode detectableNode;
       long newNodeID = getNextID().getAndIncrement();
-      String newNodeName = detection.getDetectedObjectName() + newNodeID;
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, getCRDTInfo(), detection);
+      {
+         String nodeName = detection.getDetectedObjectName();
+         if (!nodeName.contains("person"))
+            nodeName = "Ignore_" + nodeName;
+         else
+            nodeName = "Person";
+         detectableNode = new YOLOv8Node(newNodeID, nodeName, getCRDTInfo(), detection);
+      }
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
-         detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
+         detectableNode = new CenterposeNode(newNodeID, detection.getDetectedObjectName(), detection, true, getCRDTInfo());
+      else if (detectionClass.equals(FoundationPoseInstantDetection.class))
+         detectableNode = new FoundationPoseNode(newNodeID, detection.getDetectedObjectClass().split("\\.")[0], getCRDTInfo(), detection);
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
@@ -316,7 +339,7 @@ public class SceneGraph
 
       if (detectableNode != null)
       {
-         modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode)));
+         modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode, this)));
       }
    }
 }

@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "242a3cc28174c1090456985661d7a33a0a422cc62434f334f1b719190c91ff4a";
+   		return "84c91f3387c44a82241c263391bedc5bca62cd0069c8b304ddb163b4b6bfb28d";
    }
    
    @Override
@@ -69,6 +69,16 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 10000 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -108,6 +118,22 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getResponseMatcher().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getProximityObjectFrameName().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getProximityReferenceFrameName().length() + 1;
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -139,6 +165,22 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       cdr.write_type_d(data.getResponseMatcher());else
           throw new RuntimeException("response_matcher field exceeds the maximum length: %d > %d".formatted(data.getResponseMatcher().length(), 10000));
 
+      cdr.write_type_9(data.getProximityDistanceType());
+
+      if(data.getProximityObjectFrameName().length() <= 255)
+      cdr.write_type_d(data.getProximityObjectFrameName());else
+          throw new RuntimeException("proximity_object_frame_name field exceeds the maximum length: %d > %d".formatted(data.getProximityObjectFrameName().length(), 255));
+
+      if(data.getProximityReferenceFrameName().length() <= 255)
+      cdr.write_type_d(data.getProximityReferenceFrameName());else
+          throw new RuntimeException("proximity_reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getProximityReferenceFrameName().length(), 255));
+
+      cdr.write_type_6(data.getProximityDistanceToObject());
+
+      cdr.write_type_6(data.getProximityEvaluationTime());
+
+      cdr.write_type_7(data.getManageMissingFrameInternally());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -159,6 +201,16 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       cdr.read_type_d(data.getSystem());	
       cdr.read_type_d(data.getPrompt());	
       cdr.read_type_d(data.getResponseMatcher());	
+      data.setProximityDistanceType(cdr.read_type_9());
+      	
+      cdr.read_type_d(data.getProximityObjectFrameName());	
+      cdr.read_type_d(data.getProximityReferenceFrameName());	
+      data.setProximityDistanceToObject(cdr.read_type_6());
+      	
+      data.setProximityEvaluationTime(cdr.read_type_6());
+      	
+      data.setManageMissingFrameInternally(cdr.read_type_7());
+      	
 
    }
 
@@ -176,6 +228,12 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_d("system", data.getSystem());
       ser.write_type_d("prompt", data.getPrompt());
       ser.write_type_d("response_matcher", data.getResponseMatcher());
+      ser.write_type_9("proximity_distance_type", data.getProximityDistanceType());
+      ser.write_type_d("proximity_object_frame_name", data.getProximityObjectFrameName());
+      ser.write_type_d("proximity_reference_frame_name", data.getProximityReferenceFrameName());
+      ser.write_type_6("proximity_distance_to_object", data.getProximityDistanceToObject());
+      ser.write_type_6("proximity_evaluation_time", data.getProximityEvaluationTime());
+      ser.write_type_7("manage_missing_frame_internally", data.getManageMissingFrameInternally());
    }
 
    @Override
@@ -192,6 +250,12 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_d("system", data.getSystem());
       ser.read_type_d("prompt", data.getPrompt());
       ser.read_type_d("response_matcher", data.getResponseMatcher());
+      data.setProximityDistanceType(ser.read_type_9("proximity_distance_type"));
+      ser.read_type_d("proximity_object_frame_name", data.getProximityObjectFrameName());
+      ser.read_type_d("proximity_reference_frame_name", data.getProximityReferenceFrameName());
+      data.setProximityDistanceToObject(ser.read_type_6("proximity_distance_to_object"));
+      data.setProximityEvaluationTime(ser.read_type_6("proximity_evaluation_time"));
+      data.setManageMissingFrameInternally(ser.read_type_7("manage_missing_frame_internally"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeDefinitionMessage src, behavior_msgs.msg.dds.ConditionNodeDefinitionMessage dest)

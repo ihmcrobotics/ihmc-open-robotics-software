@@ -32,6 +32,10 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
             * Allows the operator to disable concurrency during authoring
             */
    public boolean concurrency_enabled_;
+   /**
+            * Request failures reset
+            */
+   public boolean failure_reset_requested_;
 
    public BehaviorTreeRootNodeStateMessage()
    {
@@ -56,6 +60,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       manual_execution_requested_ = other.manual_execution_requested_;
 
       concurrency_enabled_ = other.concurrency_enabled_;
+
+      failure_reset_requested_ = other.failure_reset_requested_;
 
    }
 
@@ -137,6 +143,21 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       return concurrency_enabled_;
    }
 
+   /**
+            * Request failures reset
+            */
+   public void setFailureResetRequested(boolean failure_reset_requested)
+   {
+      failure_reset_requested_ = failure_reset_requested;
+   }
+   /**
+            * Request failures reset
+            */
+   public boolean getFailureResetRequested()
+   {
+      return failure_reset_requested_;
+   }
+
 
    public static Supplier<BehaviorTreeRootNodeStateMessagePubSubType> getPubSubType()
    {
@@ -165,6 +186,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.concurrency_enabled_, other.concurrency_enabled_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.failure_reset_requested_, other.failure_reset_requested_, epsilon)) return false;
+
 
       return true;
    }
@@ -188,6 +211,8 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
 
       if(this.concurrency_enabled_ != otherMyClass.concurrency_enabled_) return false;
 
+      if(this.failure_reset_requested_ != otherMyClass.failure_reset_requested_) return false;
+
 
       return true;
    }
@@ -209,7 +234,9 @@ public class BehaviorTreeRootNodeStateMessage extends Packet<BehaviorTreeRootNod
       builder.append("manual_execution_requested=");
       builder.append(this.manual_execution_requested_);      builder.append(", ");
       builder.append("concurrency_enabled=");
-      builder.append(this.concurrency_enabled_);
+      builder.append(this.concurrency_enabled_);      builder.append(", ");
+      builder.append("failure_reset_requested=");
+      builder.append(this.failure_reset_requested_);
       builder.append("}");
       return builder.toString();
    }

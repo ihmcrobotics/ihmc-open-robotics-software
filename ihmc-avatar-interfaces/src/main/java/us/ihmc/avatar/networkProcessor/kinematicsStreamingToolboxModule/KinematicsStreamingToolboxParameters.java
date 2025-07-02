@@ -74,7 +74,7 @@ public class KinematicsStreamingToolboxParameters
    /**
     * Center of mass offset with respect to center of support region
     */
-   protected Vector2D centerOfMassOffset;
+   protected final Vector2D centerOfMassOffset = new Vector2D();
    /**
     * Weight used to hold the center of mass in place.
     */
@@ -318,7 +318,6 @@ public class KinematicsStreamingToolboxParameters
 
       centerOfMassSafeMargin = 0.05;
       centerOfMassHoldWeight = 0.001;
-      centerOfMassOffset = new Vector2D();
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
 
       lockPelvisWeight = 1000.0;
@@ -738,7 +737,7 @@ public class KinematicsStreamingToolboxParameters
 
    public void setCenterOfMassOffset(Vector2D offset)
    {
-      this.centerOfMassOffset = offset;
+      this.centerOfMassOffset.set(offset);
    }
 
    public Vector2D getCenterOfMassOffset()

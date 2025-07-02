@@ -15,3 +15,6 @@ bool manual_execution_requested
 
 # Allows the operator to disable concurrency during authoring
 bool concurrency_enabled
+
+# Request failures reset
+bool failure_reset_requested
