@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
+import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
@@ -120,6 +121,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                String resultMessage = success ? "completed successfully" : "failed";
                LogTools.log(success ? Level.INFO : Level.ERROR, "Leaf %s: %s".formatted(resultMessage, name));
             }
+
+            if (currentlyExecutingLeaf.getState() instanceof ConditionNodeState conditionNodeState)
+            {
+               if (conditionNodeState.isConditionMet())
+               {
+                  state.setExecutionNextIndex(conditionNodeState.getLeafIndex() + 3); // TODO Fix fallback action instead of doing this
+                  conditionNodeState.setConditionValue(false);
+                  conditionNodeState.setEvaluatingConditionValue(false);
+               }
+            }
          }
       }
       currentlyExecutingLeaves.removeAll(failedLeaves);
@@ -202,6 +213,15 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             state.getLogger().info("Manually executing leaf: %s (%s)".formatted(nextLeaf.getDefinition().getName(),
                                                                                 nextLeaf.getClass().getSimpleName()));
             executeNextLeaf();
+         }
+      }
+
+      if (state.pollFailureResetRequested())
+      {
+         failedLeaves.clear();
+         for (int i = 0; i < state.getOrderedLeaves().size(); i++)
+         {
+            state.getOrderedLeaves().get(i).setFailed(false);
          }
       }
    }

@@ -236,4 +236,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    {
       return previewFootsteps;
    }
+
+   public ReferenceFrame getFrameByName(String frameName)
+   {
+      return referenceFrameLibrary.findFrameByName(frameName);
+   }
 }
