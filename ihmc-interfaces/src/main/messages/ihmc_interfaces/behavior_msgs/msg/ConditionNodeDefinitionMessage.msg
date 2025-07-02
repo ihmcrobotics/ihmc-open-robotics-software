@@ -38,24 +38,24 @@ string<=10000 response_matcher
 
 # PROXIMITY TYPE
 
-byte XYZ_TYPE = 0
-byte XY_TYPE = 1
-byte Z_TYPE = 2
+byte PROXIMITY_XYZ = 0
+byte PROXIMITY_XY = 1
+byte PROXIMITY_Z = 2
 
 # The type of distance condition as defined above
-byte distance_type
+byte proximity_distance_type
 
 # Name of the object frame
-string object_frame_name
+string proximity_object_frame_name
 
 # Name of the frame the distance is expressed in
-string reference_frame_name
+string proximity_reference_frame_name
 
 # The maximum distance between the object and the reference frame
-float64 distance_to_object
+float64 proximity_distance_to_object
 
 # The maximum time that is spent in evaluating the condition
-float64 evaluation_time
+float64 proximity_evaluation_time
 
-# Whether the failure of missing frame is handled internally by the ocndition node or not
+# Whether the failure of missing frame is handled internally by the condition node or not
 bool manage_missing_frame_internally

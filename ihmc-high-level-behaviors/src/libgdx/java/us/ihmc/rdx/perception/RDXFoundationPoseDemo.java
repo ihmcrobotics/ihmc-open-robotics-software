@@ -38,7 +38,44 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.zed.global.zed.*;
 
-class RDXFoundationPoseDemo
+/**
+ * <h1>RDXFoundationPoseDemo</h1>
+ *
+ * <p>
+ * This demo application showcases a real-time perception pipeline for object pose estimation
+ * using a ZED stereo camera, YOLOv8 object detection, and ROS2-based communication within the
+ * IHMC RDX (Robot Development eXperience) UI framework.
+ * </p>
+ *
+ * <p>
+ * The class integrates several perception and robotics components:
+ * <ul>
+ *   <li>Captures RGB and depth images from a ZED camera.</li>
+ *   <li>Runs YOLOv8 object detection on the incoming images.</li>
+ *   <li>Publishes and subscribes to ROS2 topics for image and pose data exchange.</li>
+ *   <li>Allows user interaction through an ImGui-based UI for sending pose requests and controlling tracking.</li>
+ *   <li>Visualizes point clouds, detected objects, and object poses in a 3D scene.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * The main purpose of this class is to demonstrate an end-to-end workflow for requesting and receiving
+ * 6-DoF object poses (e.g., for a "mustard bottle") in a robotics context. It can be used as a template
+ * for integrating perception, detection, and UI feedback in IHMC's RDX framework.
+ * </p>
+ *
+ * <p>
+ * Typical usage is as a standalone application: running the main method will launch the UI, start the
+ * ZED camera, begin object detection, and allow the user to interactively request object pose estimation
+ * results, which are visualized in real time.
+ * </p>
+ *
+ * <p>
+ * <b>Note:</b> This class is intended for demonstration and development purposes. It assumes a compatible
+ * CUDA device for neural depth, a connected ZED camera, and an appropriate ROS2 environment.
+ * </p>
+ */
+public class RDXFoundationPoseDemo
 {
    private static final String OBJECT_ID = "mustard_bottle";
    private static final String OBJECT_NAME = "bottle";

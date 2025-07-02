@@ -15,6 +15,32 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+/**
+ * AI2RSkillEditor is responsible for adapting and updating skill behaviors in the AI2R framework.
+ * <p>
+ * This class modifies behavior sequences dynamically based on incoming AI2R command messages, allowing for real-time adaptation of
+ * robot skills such as navigation ("Go To"), object reception, and object pickup.
+ * </p>
+ * <p>
+ * It processes commands by updating the relevant action states within a behavior tree or sequence, adjusting reference frames,
+ * spatial relations, and object grasp information accordingly.
+ * </p>
+ * <p>
+ * Key responsibilities include:
+ * <ul>
+ *     <li>Adapting navigation goals by changing parent frames and adjusting goal stance and focal points based on spatial relations.</li>
+ *     <li>Updating object reception behaviors by setting proximity checks relative to the grasped object and robot hand side.</li>
+ *     <li>Adjusting pickup behaviors by updating hand pose targets and grasped object names.</li>
+ * </ul>
+ * </p>
+ * <p>
+ * This class serves as a bridge between high-level AI2R command messages and low-level behavior execution states,
+ * facilitating flexible and context-aware robot skill execution.
+ * </p>
+ * <p>
+ * <b>Note:</b> Some functionality (e.g., pick-and-place adaptation) is currently commented out and may be implemented in future revisions.
+ * </p>
+ */
 public class AI2RSkillEditor
 {
    public enum SpatialRelationType

@@ -8,11 +8,11 @@ int8 LLM_TYPE=1
 
 int8 PROXIMITY_TYPE=2
 
-int8 XYZ_TYPE=0
+int8 PROXIMITY_XYZ=0
 
-int8 XY_TYPE=1
+int8 PROXIMITY_XY=1
 
-int8 Z_TYPE=2
+int8 PROXIMITY_Z=2
 
 # Parent definition fields
 behavior_msgs/LeafNodeDefinitionMessage definition
@@ -45,21 +45,21 @@ string prompt
 string response_matcher
 
 # The type of distance condition as defined above
-int8 distance_type
+int8 proximity_distance_type
 
 # Name of the object frame
-string object_frame_name
+string proximity_object_frame_name
 
 # Name of the frame the distance is expressed in
-string reference_frame_name
+string proximity_reference_frame_name
 
 # The maximum distance between the object and the reference frame
-float64 distance_to_object
+float64 proximity_distance_to_object
 
 # The maximum time that is spent in evaluating the condition
-float64 evaluation_time
+float64 proximity_evaluation_time
 
-# Whether the failure of missing frame is handled internally by the ocndition node or not
+# Whether the failure of missing frame is handled internally by the condition node or not
 bool manage_missing_frame_internally
 
 

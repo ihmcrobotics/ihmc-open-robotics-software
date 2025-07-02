@@ -49,7 +49,8 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    @Override
    public void destroy()
    {
-      //      llm.destroy();
+      if (llm != null)
+         llm.destroy();
    }
 
    public CounterConditionExecutor getCounter()

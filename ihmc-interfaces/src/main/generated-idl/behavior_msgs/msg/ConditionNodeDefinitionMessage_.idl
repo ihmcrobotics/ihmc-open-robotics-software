@@ -17,13 +17,13 @@ module behavior_msgs
       const octet PROXIMITY_TYPE =
       2;
 
-      const octet XYZ_TYPE =
+      const octet PROXIMITY_XYZ =
       0;
 
-      const octet XY_TYPE =
+      const octet PROXIMITY_XY =
       1;
 
-      const octet Z_TYPE =
+      const octet PROXIMITY_Z =
       2;
 
 
@@ -78,25 +78,25 @@ module behavior_msgs
         /**
          * The type of distance condition as defined above
          */
-        octet distance_type;
+        octet proximity_distance_type;
         /**
          * Name of the object frame
          */
-        string object_frame_name;
+        string proximity_object_frame_name;
         /**
          * Name of the frame the distance is expressed in
          */
-        string reference_frame_name;
+        string proximity_reference_frame_name;
         /**
          * The maximum distance between the object and the reference frame
          */
-        double distance_to_object;
+        double proximity_distance_to_object;
         /**
          * The maximum time that is spent in evaluating the condition
          */
-        double evaluation_time;
+        double proximity_evaluation_time;
         /**
-         * Whether the failure of missing frame is handled internally by the ocndition node or not
+         * Whether the failure of missing frame is handled internally by the condition node or not
          */
         boolean manage_missing_frame_internally;
       };

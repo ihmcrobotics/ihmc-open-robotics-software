@@ -123,8 +123,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          }
          catch (Exception e)
          {
-            // Exception is caught and ignored
-            LogTools.warn(e);
+            LogTools.warn(e.getMessage());
          }
          buildMeshAndCreateModelInstance = null;
       }

@@ -102,21 +102,21 @@ public class ProximityConditionDefinition
 
    public void toMessage(ConditionNodeDefinitionMessage message)
    {
-      message.setDistanceType((byte) type.toMessage().ordinal());
-      message.setObjectFrameName(objectFrameName.toMessage());
-      message.setReferenceFrameName(referenceFrameName.toMessage());
-      message.setDistanceToObject(maxDistanceToObject.toMessage());
-      message.setEvaluationTime(maxEvaluationTime.toMessage());
+      message.setProximityDistanceType((byte) type.toMessage().ordinal());
+      message.setProximityObjectFrameName(objectFrameName.toMessage());
+      message.setProximityReferenceFrameName(referenceFrameName.toMessage());
+      message.setProximityDistanceToObject(maxDistanceToObject.toMessage());
+      message.setProximityEvaluationTime(maxEvaluationTime.toMessage());
       message.setManageMissingFrameInternally(manageMissingFrameInternally.toMessage());
    }
 
    public void fromMessage(ConditionNodeDefinitionMessage message)
    {
-      type.fromMessage(DistanceType.values()[message.getDistanceType()]);
-      objectFrameName.fromMessage(message.getObjectFrameNameAsString());
-      referenceFrameName.fromMessage(message.getReferenceFrameNameAsString());
-      maxDistanceToObject.fromMessage(message.getDistanceToObject());
-      maxEvaluationTime.fromMessage(message.getEvaluationTime());
+      type.fromMessage(DistanceType.values()[message.getProximityDistanceType()]);
+      objectFrameName.fromMessage(message.getProximityObjectFrameNameAsString());
+      referenceFrameName.fromMessage(message.getProximityReferenceFrameNameAsString());
+      maxDistanceToObject.fromMessage(message.getProximityDistanceToObject());
+      maxEvaluationTime.fromMessage(message.getProximityEvaluationTime());
       manageMissingFrameInternally.fromMessage(message.getManageMissingFrameInternally());
    }
 

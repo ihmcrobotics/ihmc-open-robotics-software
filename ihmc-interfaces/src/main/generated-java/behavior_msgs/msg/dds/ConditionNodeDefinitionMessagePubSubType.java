@@ -15,7 +15,7 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5d7b0485e865119702ccc343d269d3e670361a286056a68d8bba9f9c3e3349fc";
+   		return "84c91f3387c44a82241c263391bedc5bca62cd0069c8b304ddb163b4b6bfb28d";
    }
    
    @Override
@@ -121,9 +121,9 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getObjectFrameName().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getProximityObjectFrameName().length() + 1;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getReferenceFrameName().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getProximityReferenceFrameName().length() + 1;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -165,19 +165,19 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       cdr.write_type_d(data.getResponseMatcher());else
           throw new RuntimeException("response_matcher field exceeds the maximum length: %d > %d".formatted(data.getResponseMatcher().length(), 10000));
 
-      cdr.write_type_9(data.getDistanceType());
+      cdr.write_type_9(data.getProximityDistanceType());
 
-      if(data.getObjectFrameName().length() <= 255)
-      cdr.write_type_d(data.getObjectFrameName());else
-          throw new RuntimeException("object_frame_name field exceeds the maximum length: %d > %d".formatted(data.getObjectFrameName().length(), 255));
+      if(data.getProximityObjectFrameName().length() <= 255)
+      cdr.write_type_d(data.getProximityObjectFrameName());else
+          throw new RuntimeException("proximity_object_frame_name field exceeds the maximum length: %d > %d".formatted(data.getProximityObjectFrameName().length(), 255));
 
-      if(data.getReferenceFrameName().length() <= 255)
-      cdr.write_type_d(data.getReferenceFrameName());else
-          throw new RuntimeException("reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getReferenceFrameName().length(), 255));
+      if(data.getProximityReferenceFrameName().length() <= 255)
+      cdr.write_type_d(data.getProximityReferenceFrameName());else
+          throw new RuntimeException("proximity_reference_frame_name field exceeds the maximum length: %d > %d".formatted(data.getProximityReferenceFrameName().length(), 255));
 
-      cdr.write_type_6(data.getDistanceToObject());
+      cdr.write_type_6(data.getProximityDistanceToObject());
 
-      cdr.write_type_6(data.getEvaluationTime());
+      cdr.write_type_6(data.getProximityEvaluationTime());
 
       cdr.write_type_7(data.getManageMissingFrameInternally());
 
@@ -201,13 +201,13 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       cdr.read_type_d(data.getSystem());	
       cdr.read_type_d(data.getPrompt());	
       cdr.read_type_d(data.getResponseMatcher());	
-      data.setDistanceType(cdr.read_type_9());
+      data.setProximityDistanceType(cdr.read_type_9());
       	
-      cdr.read_type_d(data.getObjectFrameName());	
-      cdr.read_type_d(data.getReferenceFrameName());	
-      data.setDistanceToObject(cdr.read_type_6());
+      cdr.read_type_d(data.getProximityObjectFrameName());	
+      cdr.read_type_d(data.getProximityReferenceFrameName());	
+      data.setProximityDistanceToObject(cdr.read_type_6());
       	
-      data.setEvaluationTime(cdr.read_type_6());
+      data.setProximityEvaluationTime(cdr.read_type_6());
       	
       data.setManageMissingFrameInternally(cdr.read_type_7());
       	
@@ -228,11 +228,11 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_d("system", data.getSystem());
       ser.write_type_d("prompt", data.getPrompt());
       ser.write_type_d("response_matcher", data.getResponseMatcher());
-      ser.write_type_9("distance_type", data.getDistanceType());
-      ser.write_type_d("object_frame_name", data.getObjectFrameName());
-      ser.write_type_d("reference_frame_name", data.getReferenceFrameName());
-      ser.write_type_6("distance_to_object", data.getDistanceToObject());
-      ser.write_type_6("evaluation_time", data.getEvaluationTime());
+      ser.write_type_9("proximity_distance_type", data.getProximityDistanceType());
+      ser.write_type_d("proximity_object_frame_name", data.getProximityObjectFrameName());
+      ser.write_type_d("proximity_reference_frame_name", data.getProximityReferenceFrameName());
+      ser.write_type_6("proximity_distance_to_object", data.getProximityDistanceToObject());
+      ser.write_type_6("proximity_evaluation_time", data.getProximityEvaluationTime());
       ser.write_type_7("manage_missing_frame_internally", data.getManageMissingFrameInternally());
    }
 
@@ -250,11 +250,11 @@ public class ConditionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_d("system", data.getSystem());
       ser.read_type_d("prompt", data.getPrompt());
       ser.read_type_d("response_matcher", data.getResponseMatcher());
-      data.setDistanceType(ser.read_type_9("distance_type"));
-      ser.read_type_d("object_frame_name", data.getObjectFrameName());
-      ser.read_type_d("reference_frame_name", data.getReferenceFrameName());
-      data.setDistanceToObject(ser.read_type_6("distance_to_object"));
-      data.setEvaluationTime(ser.read_type_6("evaluation_time"));
+      data.setProximityDistanceType(ser.read_type_9("proximity_distance_type"));
+      ser.read_type_d("proximity_object_frame_name", data.getProximityObjectFrameName());
+      ser.read_type_d("proximity_reference_frame_name", data.getProximityReferenceFrameName());
+      data.setProximityDistanceToObject(ser.read_type_6("proximity_distance_to_object"));
+      data.setProximityEvaluationTime(ser.read_type_6("proximity_evaluation_time"));
       data.setManageMissingFrameInternally(ser.read_type_7("manage_missing_frame_internally"));
    }
 
