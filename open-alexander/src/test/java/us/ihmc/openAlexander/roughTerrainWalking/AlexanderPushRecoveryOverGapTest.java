@@ -52,7 +52,7 @@ public class AlexanderPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapT
                @Override
                public double getMinimumSwingTimeForDisturbanceRecovery()
                {
-                  return 0.55;
+                  return 0.45;
                }
 
                @Override

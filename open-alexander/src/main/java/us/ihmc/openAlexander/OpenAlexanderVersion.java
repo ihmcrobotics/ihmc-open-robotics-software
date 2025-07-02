@@ -178,11 +178,9 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
 
       switch (this)
       {
-         case V1_FULL_ROBOT, V1_NUB_FOREARMS:
+         case V1_FULL_ROBOT, V1_NUB_FOREARMS, V1_LEGS_ROBOT:
             physicalProperties = new AlexanderPhysicalPropertiesV0();
             break;
-         case V1_LEGS_ROBOT:
-            physicalProperties = new AlexanderPhysicalPropertiesV0(false);
          default:
             break;
       }
