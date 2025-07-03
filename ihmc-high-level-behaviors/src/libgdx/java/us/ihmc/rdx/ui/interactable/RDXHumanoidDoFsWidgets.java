@@ -564,7 +564,7 @@ public class RDXHumanoidDoFsWidgets
       LegTrajectoryMessage legTrajectoryMessage = new LegTrajectoryMessage();
       legTrajectoryMessage.setRobotSide(side.toByte());
       legTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
-      LogTools.info("Publishing arm jointspace trajectory");
+      LogTools.info("Publishing leg jointspace trajectory");
       ros2ControllerHelper.publishToController(legTrajectoryMessage);
    }
 
