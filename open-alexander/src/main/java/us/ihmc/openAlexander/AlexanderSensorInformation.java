@@ -49,6 +49,12 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final String rightShinIMU = "right_shin_imu";
    private final String rightFootIMU = "right_foot_imu";
 
+   //
+   private final SideDependentList<String> hipIMUNames = new SideDependentList<>();
+   private final SideDependentList<String> thighIMUNames = new SideDependentList<>();
+   private final SideDependentList<String> shinIMUNames = new SideDependentList<>();
+   private final SideDependentList<String> footIMUNames = new SideDependentList<>();
+
    // IMUs to use
    private final String[] imuSensorsToUse = {pelvisIMU,
                                              leftHipXIMU,
@@ -70,6 +76,18 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
       feetForceSensorNames.put(RobotSide.RIGHT, "RightFootFTSensor");
       feetForceSensorParentJointNames.put(RobotSide.LEFT, "LEFT_ANKLE_X");
       feetForceSensorParentJointNames.put(RobotSide.RIGHT, "RIGHT_ANKLE_X");
+
+      hipIMUNames.put(RobotSide.LEFT, leftHipXIMU);
+      hipIMUNames.put(RobotSide.RIGHT, rightHipXIMU);
+
+      thighIMUNames.put(RobotSide.LEFT, leftThighIMU);
+      thighIMUNames.put(RobotSide.RIGHT, rightThighIMU);
+
+      shinIMUNames.put(RobotSide.LEFT, leftShinIMU);
+      shinIMUNames.put(RobotSide.RIGHT, rightShinIMU);
+
+      footIMUNames.put(RobotSide.LEFT, leftFootIMU);
+      footIMUNames.put(RobotSide.RIGHT, rightFootIMU);
    }
 
    @Override
@@ -146,6 +164,26 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public String getTorsoIMUName()
    {
       return torsoIMU;
+   }
+
+   public String getHipIMUName(RobotSide robotSide)
+   {
+      return hipIMUNames.get(robotSide);
+   }
+
+   public String getThighIMUName(RobotSide robotSide)
+   {
+      return thighIMUNames.get(robotSide);
+   }
+
+   public String getShinIMUName(RobotSide robotSide)
+   {
+      return shinIMUNames.get(robotSide);
+   }
+
+   public String getFootIMUName(RobotSide robotSide)
+   {
+      return footIMUNames.get(robotSide);
    }
 
    @Override
