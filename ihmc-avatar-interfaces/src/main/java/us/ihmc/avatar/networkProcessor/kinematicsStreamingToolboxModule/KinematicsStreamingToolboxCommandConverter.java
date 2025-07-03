@@ -1,11 +1,13 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -52,6 +54,11 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
       {
          KinematicsStreamingToolboxInitialConfigurationCommand initialConfCommand = (KinematicsStreamingToolboxInitialConfigurationCommand) command;
          initialConfCommand.set(initialConfMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsStreamingToolboxConfigurationMessage configurationMessage)
+      {
+         KinematicsStreamingToolboxConfigurationCommand configurationCommand = (KinematicsStreamingToolboxConfigurationCommand) command;
+         configurationCommand.setFromMessage(configurationMessage);
       }
       else if (message instanceof KinematicsToolboxConfigurationMessage configurationMessage)
       {
