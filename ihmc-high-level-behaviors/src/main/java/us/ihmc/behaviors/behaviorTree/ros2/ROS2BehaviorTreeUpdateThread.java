@@ -37,7 +37,8 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
       for (RobotSide side: RobotSide.values)
       {
-         referenceFrameLibrary.addAll(Collections.singleton(syncedRobot.getReferenceFrames().getHandZUpFrame(side)));
+         if (robotModel.getRobotVersion().hasArm(side))
+            referenceFrameLibrary.addAll(Collections.singleton(syncedRobot.getReferenceFrames().getHandZUpFrame(side)));
       }
 
       executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
