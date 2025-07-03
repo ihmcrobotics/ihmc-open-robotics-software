@@ -139,14 +139,16 @@ public class RDXVRMotionRetargeting
       {
          if (initialPelvisFrame == null)
          {
-            double initialWaistTrackerHeight = trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame().getTranslationZ();
+            RigidBodyTransform initialWaistTrackerTransform  = trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame();
             initialPelvisTransformToWorld.set(realRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
             initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                           initialPelvisTransformToWorld);
 
             constrainedPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
 
-            ikControlFrameOffsetPosition.put(WAIST, new Point3D(0.0, 0.0, initialWaistTrackerHeight - initialPelvisTransformToWorld.getTranslationZ()));
+            Vector3D offset = new Vector3D();
+            offset.sub(initialWaistTrackerTransform.getTranslation(), initialPelvisTransformToWorld.getTranslation());
+            ikControlFrameOffsetPosition.put(WAIST, new Point3D(offset));
          }
          // Calculate the variation of the tracker's frame from its initial value
          RigidBodyTransform waistTrackerTransform = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
