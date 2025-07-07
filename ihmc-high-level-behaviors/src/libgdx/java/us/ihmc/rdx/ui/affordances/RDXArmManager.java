@@ -216,6 +216,8 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
+      // TODO: Add some widgets here to manage the LeRobotInferenceUpdateThread over ROS 2
+
       handManager.renderImGuiWidgets();
 
       ImGui.text("Arm Presets:");
