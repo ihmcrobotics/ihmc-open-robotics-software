@@ -8,6 +8,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.SakeHandAPI;
+import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXAbilityHand;
@@ -16,6 +17,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Manages the UI for a humanoid robot's hands. A hand configuration is like "open", "closed", etc.
@@ -24,9 +27,10 @@ public class RDXHandConfigurationManager
 {
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
-   private final SideDependentList<RDXAbilityHand> abilityHands = new SideDependentList<>();
-   private final String leftSerialNumber = "24BH2434";
-   private final String rightSerialNumber = "24ABH374";
+   private final Map<String, RDXAbilityHand> abilityHands = new HashMap<>();
+   private final String[] serialNumbers = new String[]{"24BH2434", "24ABH374"};
+
+   private AbilityHandHardwareCommunication communication;
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private CommunicationHelper communicationHelper;
@@ -35,6 +39,8 @@ public class RDXHandConfigurationManager
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
       this.communicationHelper = communicationHelper;
+      communication = new AbilityHandHardwareCommunication("AbilityCommunication");
+      communication.start();
 
       robotName = syncedRobotModel.getRobotModel().getSimpleRobotName();
 
@@ -57,9 +63,11 @@ public class RDXHandConfigurationManager
          else if (syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoints(side))
          {
             handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
-            String serial = side == RobotSide.LEFT ? leftSerialNumber : rightSerialNumber;
-            abilityHands.put(side, new RDXAbilityHand(side, serial, baseUI));
          }
+      }
+      for(String serialNumber : serialNumbers)
+      {
+         abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, baseUI));
       }
    }
 
@@ -70,9 +78,12 @@ public class RDXHandConfigurationManager
          sakeHandWidgets.get(side).update();
          handQuickAccessButtons.get(side).update(sakeHandWidgets.get(side).getCalibrated(), sakeHandWidgets.get(side).getNeedsReset());
       }
-      for(RobotSide side : abilityHands.sides())
+
+      for(String serialNumber : communication.getAvailableHandSerialNumbers())
       {
-         abilityHands.get(side).update();
+         communication.publishCommand(serialNumber);
+         abilityHands.get(serialNumber).update(communication);
+         communication.readState(serialNumber);
       }
    }
 
@@ -84,11 +95,10 @@ public class RDXHandConfigurationManager
          ImGui.sameLine();
          sakeHandWidgets.get(side).renderImGuiWidgets();
       }
-      for(RobotSide side : abilityHands.sides())
+
+      for(String serialNumber : communication.getAvailableHandSerialNumbers())
       {
-         ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
-         ImGui.sameLine();
-         abilityHands.get(side).renderImGuiWidgets();
+         abilityHands.get(serialNumber).renderImGuiWidgets(communication);
       }
    }
 
