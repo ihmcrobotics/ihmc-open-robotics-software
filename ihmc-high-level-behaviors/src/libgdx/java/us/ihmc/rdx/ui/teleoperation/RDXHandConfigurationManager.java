@@ -2,14 +2,12 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
-import javafx.geometry.Side;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.SakeHandAPI;
-import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXAbilityHand;
@@ -27,7 +25,8 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
    private final SideDependentList<RDXAbilityHand> abilityHands = new SideDependentList<>();
-   private AbilityHandHardwareCommunication communication;
+   private final String leftSerialNumber = "24BH2434";
+   private final String rightSerialNumber = "24ABH374";
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private CommunicationHelper communicationHelper;
@@ -55,12 +54,11 @@ public class RDXHandConfigurationManager
             sakeHandStatus.put(side, syncedRobotModel.getSakeHandStatus().get(side));
          }
          //TODO: Make the function actually be useful
-         else if (syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoins(side))
+         else if (syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoints(side))
          {
             handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
-            abilityHands.put(side, new RDXAbilityHand(side, baseUI));
-            communication = new AbilityHandHardwareCommunication("H1ROSHandManager");
-            communication.start();
+            String serial = side == RobotSide.LEFT ? leftSerialNumber : rightSerialNumber;
+            abilityHands.put(side, new RDXAbilityHand(side, serial, baseUI));
          }
       }
    }
@@ -74,7 +72,7 @@ public class RDXHandConfigurationManager
       }
       for(RobotSide side : abilityHands.sides())
       {
-         abilityHands.get(side).update(communication);
+         abilityHands.get(side).update();
       }
    }
 
