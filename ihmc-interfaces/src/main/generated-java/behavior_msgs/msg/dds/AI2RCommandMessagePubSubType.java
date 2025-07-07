@@ -15,7 +15,7 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "da043020cd0ef7adf1d8169427586ab419179c23716aeb2a07a11f991174a756";
+   		return "1dc00187b707c6243df4b10625157701dd3c9df3b180dfa5d3925ef46016d107";
    }
    
    @Override
@@ -53,9 +53,15 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -72,9 +78,16 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getBehaviorToExecute().length() + 1;
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.getCdrSerializedSize(data.getHandPoseAdaptation(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.getCdrSerializedSize(data.getNavigation(), current_alignment);
+
+      current_alignment += behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.getCdrSerializedSize(data.getReceiveObject(), current_alignment);
+
+      current_alignment += behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType.getCdrSerializedSize(data.getPickupObject(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -86,15 +99,23 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       cdr.write_type_d(data.getBehaviorToExecute());else
           throw new RuntimeException("behavior_to_execute field exceeds the maximum length: %d > %d".formatted(data.getBehaviorToExecute().length(), 255));
 
+      cdr.write_type_7(data.getAdaptingBehavior());
+
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.write(data.getHandPoseAdaptation(), cdr);
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.write(data.getNavigation(), cdr);
+      behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.write(data.getReceiveObject(), cdr);
+      behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType.write(data.getPickupObject(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getBehaviorToExecute());	
+      data.setAdaptingBehavior(cdr.read_type_7());
+      	
       behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType.read(data.getHandPoseAdaptation(), cdr);	
       behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType.read(data.getNavigation(), cdr);	
+      behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType.read(data.getReceiveObject(), cdr);	
+      behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType.read(data.getPickupObject(), cdr);	
 
    }
 
@@ -102,9 +123,14 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void serialize(behavior_msgs.msg.dds.AI2RCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("behavior_to_execute", data.getBehaviorToExecute());
+      ser.write_type_7("adapting_behavior", data.getAdaptingBehavior());
       ser.write_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
       ser.write_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
+
+      ser.write_type_a("receive_object", new behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType(), data.getReceiveObject());
+
+      ser.write_type_a("pickup_object", new behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType(), data.getPickupObject());
 
    }
 
@@ -112,9 +138,14 @@ public class AI2RCommandMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.AI2RCommandMessage data)
    {
       ser.read_type_d("behavior_to_execute", data.getBehaviorToExecute());
+      data.setAdaptingBehavior(ser.read_type_7("adapting_behavior"));
       ser.read_type_a("hand_pose_adaptation", new behavior_msgs.msg.dds.AI2RHandPoseAdaptationMessagePubSubType(), data.getHandPoseAdaptation());
 
       ser.read_type_a("navigation", new behavior_msgs.msg.dds.AI2RNavigationMessagePubSubType(), data.getNavigation());
+
+      ser.read_type_a("receive_object", new behavior_msgs.msg.dds.AI2RReceiveObjectMessagePubSubType(), data.getReceiveObject());
+
+      ser.read_type_a("pickup_object", new behavior_msgs.msg.dds.AI2RPickUpObjectMessagePubSubType(), data.getPickupObject());
 
    }
 

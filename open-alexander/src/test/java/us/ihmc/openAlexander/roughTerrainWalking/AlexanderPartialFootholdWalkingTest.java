@@ -23,7 +23,7 @@ public class AlexanderPartialFootholdWalkingTest extends HumanoidPartialFoothold
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
+      OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 5, true, false);
       AlexanderContactPointParameters contactPointParameters=  new AlexanderContactPointParameters(version.getJointMap(), version.getPhysicalProperties(), simulationContactPoints, false);
       OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, RobotTarget.SCS, contactPointParameters)

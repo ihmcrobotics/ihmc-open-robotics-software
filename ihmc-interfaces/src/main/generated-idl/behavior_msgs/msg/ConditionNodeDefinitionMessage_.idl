@@ -14,10 +14,23 @@ module behavior_msgs
       const octet LLM_TYPE =
       1;
 
+      const octet PROXIMITY_TYPE =
+      2;
+
+      const octet PROXIMITY_XYZ =
+      0;
+
+      const octet PROXIMITY_XY =
+      1;
+
+      const octet PROXIMITY_Z =
+      2;
+
 
       /**
        * COUNTER TYPE
        * LLM TYPE
+       * PROXIMITY TYPE
        */
       @TypeCode(type="behavior_msgs::msg::dds_::ConditionNodeDefinitionMessage_")
       struct ConditionNodeDefinitionMessage
@@ -27,7 +40,7 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
         /**
-         * The type of condtion as defined above
+         * The type of condition as defined above
          */
         octet type;
         /**
@@ -62,6 +75,30 @@ module behavior_msgs
          * A regular expression, where if it matches, the execution failed
          */
         string<10000> response_matcher;
+        /**
+         * The type of distance condition as defined above
+         */
+        octet proximity_distance_type;
+        /**
+         * Name of the object frame
+         */
+        string proximity_object_frame_name;
+        /**
+         * Name of the frame the distance is expressed in
+         */
+        string proximity_reference_frame_name;
+        /**
+         * The maximum distance between the object and the reference frame
+         */
+        double proximity_distance_to_object;
+        /**
+         * The maximum time that is spent in evaluating the condition
+         */
+        double proximity_evaluation_time;
+        /**
+         * Whether the failure of missing frame is handled internally by the condition node or not
+         */
+        boolean manage_missing_frame_internally;
       };
     };
   };

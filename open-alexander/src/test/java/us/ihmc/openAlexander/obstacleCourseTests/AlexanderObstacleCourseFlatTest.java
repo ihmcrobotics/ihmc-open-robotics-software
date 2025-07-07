@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class AlexanderObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    public DRCRobotModel getRobotModel()

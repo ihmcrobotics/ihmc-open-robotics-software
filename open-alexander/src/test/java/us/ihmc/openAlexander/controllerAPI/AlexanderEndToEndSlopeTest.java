@@ -28,7 +28,7 @@ public class AlexanderEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @BeforeEach

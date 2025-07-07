@@ -85,7 +85,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       }
       if (nodeType == ConditionNodeDefinition.class)
       {
-         return new RDXConditionNode(id, crdtInfo, saveFileDirectory);
+         return new RDXConditionNode(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
       }
       if (nodeType == GotoNodeDefinition.class)
       {

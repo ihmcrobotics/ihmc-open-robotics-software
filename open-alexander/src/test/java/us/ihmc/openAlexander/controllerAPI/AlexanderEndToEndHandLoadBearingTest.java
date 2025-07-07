@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class AlexanderEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    protected double getPelvisHeightOffset()

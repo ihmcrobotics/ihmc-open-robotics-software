@@ -108,6 +108,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
          jvmStatisticsGenerator.start();
       }
+      controller.setCenterOfMassOffset(parameters.getCenterOfMassOffset());
    }
 
    private static Map<String, Double> fromStandPrep(DRCRobotModel robotModel)

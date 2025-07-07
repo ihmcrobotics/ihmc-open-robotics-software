@@ -28,6 +28,7 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -130,7 +131,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * It is added to the x and y coordinates of the {@link #centerOfMassPositionToHold}.
     * It is intended to be expressed in the local frame of the feet, i.e., it accounts for the robot yaw.
     */
-   // TODO Add API to set this offset. It was only set from the SCS2 visualizer.
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run. It
@@ -811,6 +811,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       concurrentCapturabilityBasedStatusCopier.getCopyForWriting().set(newStatus);
       concurrentCapturabilityBasedStatusCopier.commit();
+   }
+
+   public void setCenterOfMassOffset(Vector2DReadOnly offset)
+   {
+      centerOfMassOffset.set(offset);
    }
 
    @Override

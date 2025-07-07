@@ -1,5 +1,6 @@
 # COUNTER TYPE
 # LLM TYPE
+# PROXIMITY TYPE
 
 # Parent state fields
 behavior_msgs/LeafNodeStateMessage state
@@ -12,5 +13,11 @@ uint32 count
 
 # A request to reset the LLM's context now
 bool request_reset_context
+
+# The current distance of the object from the reference frame
+float64 current_distance
+
+# Whether frame to evaluate the proximity is missing
+bool missing_frame
 
 

@@ -15,7 +15,7 @@ public class AlexanderRobotConfigurationDataBufferTest extends RobotConfiguratio
    @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS).createFullRobotModel();
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS).createFullRobotModel();
    }
 
    @Override

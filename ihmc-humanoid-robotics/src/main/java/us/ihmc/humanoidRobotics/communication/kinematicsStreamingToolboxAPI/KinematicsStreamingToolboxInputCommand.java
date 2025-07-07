@@ -22,6 +22,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    private double streamInitialBlendDuration = -1.0;
    private double angularRateLimitation = -1.0;
    private double linearRateLimitation = -1.0;
+   private boolean isDemonstrationEpisode = false;
 
    @Override
    public void clear()
@@ -35,6 +36,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       streamInitialBlendDuration = -1.0;
       angularRateLimitation = -1.0;
       linearRateLimitation = -1.0;
+      isDemonstrationEpisode = false;
    }
 
    @Override
@@ -51,6 +53,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       streamInitialBlendDuration = other.streamInitialBlendDuration;
       angularRateLimitation = other.angularRateLimitation;
       linearRateLimitation = other.linearRateLimitation;
+      isDemonstrationEpisode = other.isDemonstrationEpisode;
    }
 
    @Override
@@ -74,6 +77,7 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       streamInitialBlendDuration = message.getStreamInitialBlendDuration();
       angularRateLimitation = message.getAngularRateLimitation();
       linearRateLimitation = message.getLinearRateLimitation();
+      isDemonstrationEpisode = message.getIsDemonstrationEpisode();
    }
 
    public void setTimestamp(long timestamp)
@@ -171,6 +175,11 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    public double getLinearRateLimitation()
    {
       return linearRateLimitation;
+   }
+
+   public boolean getIsDemonstrationEpisode()
+   {
+      return isDemonstrationEpisode;
    }
 
    @Override

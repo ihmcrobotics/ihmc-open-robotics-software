@@ -45,4 +45,9 @@ bool use_center_of_mass_input
 # If use_center_of_mass_input is false, this message is ignored.
 toolbox_msgs/KinematicsToolboxCenterOfMassMessage center_of_mass_input
 
+# Used to synchronize the marking of demonstration episodes to enable automatic dataset generation
+# True when this motion is part of a demonstration episode
+# False at all other times
+bool is_demonstration_episode
+
 

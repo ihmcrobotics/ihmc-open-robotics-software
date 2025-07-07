@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlexanderPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
    {
       // Disable joint damping to make sure that damping isn't causing the problem.
       private static final boolean enableJointDamping = false;

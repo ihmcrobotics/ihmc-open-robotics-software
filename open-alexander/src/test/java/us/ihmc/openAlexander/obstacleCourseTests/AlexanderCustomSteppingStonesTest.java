@@ -37,7 +37,7 @@ public class AlexanderCustomSteppingStonesTest extends AvatarCustomSteppingStone
    @Test
    public void testTakingBigStepUpAndStoppingThenSquaringUp(TestInfo testInfo)
    { // NOTE this passes but violates knee joint limits
-      changeWalkingParameters(0.3, 0.8);
+      changeWalkingParameters(0.3, 0.9);
       setNumberOfSteps(4);
       super.testTakingStepOneFootAtATime(testInfo, 0.22);
    }
@@ -66,7 +66,7 @@ public class AlexanderCustomSteppingStonesTest extends AvatarCustomSteppingStone
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override

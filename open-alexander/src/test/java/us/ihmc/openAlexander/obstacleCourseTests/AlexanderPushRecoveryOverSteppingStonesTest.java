@@ -21,7 +21,7 @@ public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecov
    @Override
    public DRCRobotModel getRobotModel()
    {
-      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS)
+      OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
