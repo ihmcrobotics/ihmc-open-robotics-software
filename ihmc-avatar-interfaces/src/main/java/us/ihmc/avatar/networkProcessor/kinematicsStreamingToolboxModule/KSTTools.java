@@ -306,7 +306,7 @@ public class KSTTools
             ikController.setIsFootInSupport(side, isFootInSupport.get(side));
          }
          SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
-         ikController.updateSupportPolygon(isFootInSupport, steppingParameters.getFootLength(), steppingParameters.getFootWidth());
+         ikController.updateSupportPolygon(isFootInSupport, steppingParameters.getFootLength(), steppingParameters.getFootWidth(), true);
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);

@@ -80,6 +80,11 @@ module toolbox_msgs
          * Support region used by the toolbox
          */
         sequence<geometry_msgs::msg::dds::Point, 32> support_region;
+        /**
+         * Legged robot-specific contact information (false if not a legged robot)
+         */
+        boolean left_foot_in_contact;
+        boolean right_foot_in_contact;
         @defaultValue(value=-1.0)
         double solution_quality;
       };

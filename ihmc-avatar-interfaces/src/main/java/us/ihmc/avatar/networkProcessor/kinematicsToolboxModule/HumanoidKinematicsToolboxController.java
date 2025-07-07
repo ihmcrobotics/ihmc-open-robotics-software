@@ -20,7 +20,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -421,6 +420,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
+      getSolution().setLeftFootInContact(true);
+      getSolution().setRightFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -869,11 +870,36 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
          isFootInSupport.get(side).set(value);
+         getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+         getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
 
-   public void updateSupportPolygon(SideDependentList<Boolean> isFootInSupport, double footLength, double footWidth)
+   /**
+    * Updates the support polygon based on the current foot contact states and foot dimensions.
+    * <p>
+    * The support polygon is constructed by considering each foot that is in contact with the ground
+    * (as indicated by {@code isFootInSupport}) or, if {@code overrideContactState} is {@code true},
+    * by including both feet regardless of their contact state. For each included foot, the four corners
+    * are computed in the local foot frame using the provided {@code footLength} and {@code footWidth},
+    * then transformed into the world frame and added to the set of active contact points.
+    * </p>
+    *
+    * <p>
+    * <b>Special behavior:</b> If {@code overrideContactState} is {@code true}, the support polygon is
+    * updated based solely on the nominal foot locations, ignoring the actual contact state. This is
+    * useful to avoid discrete jumps in the center of mass (CoM) control when foot contact states change,
+    * allowing the user to manually control the CoM position rather than relying on automatic updates
+    * triggered by contact transitions.
+    * </p>
+    *
+    * @param isFootInSupport       a {@link SideDependentList} indicating for each foot whether it is in support (contact with the ground)
+    * @param footLength            the length of the foot (used to define the support polygon corners)
+    * @param footWidth             the width of the foot (used to define the support polygon corners)
+    * @param overrideContactState  if {@code true}, the support polygon is updated based only on foot positions, not contact state
+    */
+   public void updateSupportPolygon(SideDependentList<Boolean> isFootInSupport, double footLength, double footWidth, boolean overrideContactState)
    {
       activeContactPointPositions.clear();
 
@@ -891,8 +917,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide side : RobotSide.values)
       {
-//         if (isFootInSupport.get(side))
-//         {
+         if (isFootInSupport.get(side) || overrideContactState)
+         {
             // Get the foot pose in the world frame
             FramePose3D footPose = new FramePose3D(initialFootPoses.get(side));
             desiredFootFrame.setPoseAndUpdate(footPose);
@@ -906,7 +932,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                // Add to the active contact points
                activeContactPointPositions.add().setIncludingFrame(cornerInFoot);
             }
-//         }
+         }
       }
 
       updateSupportPolygonConstraint(activeContactPointPositions);
