@@ -19,9 +19,7 @@ public class RDXAbilityHand
 {
    private final String serialNumber;
 
-   private static final float OPEN_POSITION = 30.0f;
-   private static final float CLOSED_POSITION = 90.0f;
-   private static final float GRIP_POSITION = 100.0f;
+   private static final float START_POSITION = 30.0f;
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
    private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
@@ -50,8 +48,8 @@ public class RDXAbilityHand
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
-         currentPosition[i] = OPEN_POSITION;
-         goalPosition[i] = OPEN_POSITION;
+         currentPosition[i] = START_POSITION;
+         goalPosition[i] = START_POSITION;
          goalVelocity[i] = 0;
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
