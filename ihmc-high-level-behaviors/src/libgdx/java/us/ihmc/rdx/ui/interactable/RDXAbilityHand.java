@@ -11,6 +11,8 @@ import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.imgui.ImGuiTools;
 
+import java.util.Arrays;
+
 import static us.ihmc.psyonicros2.AbilityHandInterface.ACTUATOR_COUNT;
 
 public class RDXAbilityHand
@@ -71,48 +73,35 @@ public class RDXAbilityHand
       communication.getCommand(serialNumber).setSerialNumber(serialNumber);
       if (ImGui.button("Open"))
       {
-         controlMode = ControlMode.VEL_TO_POS;
+         controlMode = ControlMode.GRIP;
+         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         for (int i = 0; i < ACTUATOR_COUNT; i++)
-         {
-            communication.getCommand(serialNumber).getGoalPositions()[i] = i==5 ? -OPEN_POSITION : OPEN_POSITION;
-            if(i!=4)
-            {
-               communication.getCommand(serialNumber).getGoalVelocities()[i] = i == 5 ? 30.0f : -30.0f;
-            }
-         }
+         communication.getCommand(serialNumber).setGrip(Grip.RELAX.toByte());
       }
       ImGui.sameLine();
-      if (ImGui.button("Close"))
+      if (ImGui.button("KEY"))
       {
-         for (int i = 0; i < ACTUATOR_COUNT; i++)
-         {
-            controlMode = ControlMode.VEL_TO_POS;
-            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-            communication.getCommand(serialNumber).getGoalPositions()[i] = i==5 ? -CLOSED_POSITION : CLOSED_POSITION;
-            if(i!=4)
-               communication.getCommand(serialNumber).getGoalVelocities()[i] = i==5 ? -30.0f : 30.0f;
-         }
+         controlMode = ControlMode.GRIP;
+         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+         communication.getCommand(serialNumber).setGrip(Grip.KEY.toByte());
       }
       ImGui.sameLine();
       if (ImGui.button("Grip"))
       {
-         controlMode = ControlMode.VEL_TO_POS;
+         controlMode = ControlMode.GRIP;
+         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         for (int i = 0; i < ACTUATOR_COUNT; i++)
-         {
-            communication.getCommand(serialNumber).getGoalPositions()[i] = i==5 ? -GRIP_POSITION : GRIP_POSITION;
-            if(i!=4)
-               communication.getCommand(serialNumber).getGoalVelocities()[i] = i==5 ? -30.0f : 30.0f;
-         }
+         communication.getCommand(serialNumber).setGrip(Grip.POWER.toByte());
       }
 
       ImGui.sameLine();
       if(ImGui.button("RUDE"))
       {
          controlMode = ControlMode.GRIP;
+         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.RUDE_GRIP.toByte());
+         communication.getCommand(serialNumber).setGrip(Grip.RUDE.toByte());
       }
 
       float currentNotch = (actuatorPostions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
