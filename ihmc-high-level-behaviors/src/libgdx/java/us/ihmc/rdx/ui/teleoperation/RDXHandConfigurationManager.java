@@ -28,7 +28,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
    private final Map<String, RDXAbilityHand> abilityHands = new HashMap<>();
-   private final String[] serialNumbers = new String[]{"24BH2434", "24ABH374"};
+   private final String[] serialNumbers = new String[]{"24ABH374"};
 
    private AbilityHandHardwareCommunication communication;
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
@@ -39,8 +39,6 @@ public class RDXHandConfigurationManager
    public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobotModel)
    {
       this.communicationHelper = communicationHelper;
-      communication = new AbilityHandHardwareCommunication("AbilityCommunication");
-      communication.start();
 
       robotName = syncedRobotModel.getRobotModel().getSimpleRobotName();
 
@@ -69,6 +67,8 @@ public class RDXHandConfigurationManager
       {
          abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, baseUI));
       }
+      communication = new AbilityHandHardwareCommunication("AbilityCommunication");
+      communication.start();
    }
 
    public void update()
