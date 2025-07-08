@@ -98,6 +98,7 @@ public class RDXHandConfigurationManager
 
       for(String serialNumber : communication.getAvailableHandSerialNumbers())
       {
+         ImGui.text(serialNumber);
          abilityHands.get(serialNumber).renderImGuiWidgets(communication);
       }
    }
