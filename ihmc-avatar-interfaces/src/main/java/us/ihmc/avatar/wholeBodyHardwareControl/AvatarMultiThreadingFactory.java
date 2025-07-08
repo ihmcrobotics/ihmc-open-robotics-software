@@ -176,9 +176,16 @@ public class AvatarMultiThreadingFactory
    {
       this.stop();
       System.out.println("Calling destroy in the multi-threading factory");
+
       estimatorRealtimeROS2Node.destroy();
+      System.out.println("Estimator node has been destroyed");
+
       controllerRealtimeROS2Node.destroy();
+      System.out.println("Controller node has been destroyed");
+
       hardwareCommunicationInterface.destroy();
+      System.out.println("Hardware communication node has been destroyed");
+
       threadingManager.get().destroy();
    }
 
