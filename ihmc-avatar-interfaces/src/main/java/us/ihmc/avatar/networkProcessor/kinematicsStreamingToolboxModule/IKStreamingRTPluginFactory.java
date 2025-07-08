@@ -222,7 +222,7 @@ public class IKStreamingRTPluginFactory
                                                                                               statusOutputManager,
                                                                                               parameters,
                                                                                               desiredFullRobotModel,
-                 robotModel,
+                                                                                              robotModel,
                                                                                               yoGraphicsListRegistry,
                                                                                               registry);
 
