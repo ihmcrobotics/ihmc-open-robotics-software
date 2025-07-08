@@ -41,6 +41,8 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
          return true;
       if (message instanceof KinematicsStreamingToolboxContactConfigurationMessage)
          return true;
+      if (message instanceof KinematicsStreamingToolboxConfigurationMessage)
+         return true;
       if (message instanceof KinematicsToolboxConfigurationMessage)
          return true;
       return false;

@@ -938,40 +938,4 @@ public class KSTTools
       else
          return Double.POSITIVE_INFINITY;
    }
-
-   private CapturabilityBasedStatus createCapturabilityBasedStatus(FullHumanoidRobotModel currentRobotModel,
-                                                                   RobotContactPointParameters<RobotSide> contactPointParameters,
-                                                                   boolean isLeftFootInSupport,
-                                                                   boolean isRightFootInSupport)
-   {
-      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-
-      SideDependentList<ContactablePlaneBody> contactableFeet = extractContactableFeet(currentRobotModel, contactPointParameters);
-
-      IDLSequence.Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
-      IDLSequence.Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
-      if (isLeftFootInSupport)
-         contactableFeet.get(RobotSide.LEFT)
-                 .getContactPointsCopy()
-                 .stream()
-                 .peek(cp -> cp.changeFrame(ReferenceFrame.getWorldFrame()))
-                 .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), cp.getZ()));
-      if (isRightFootInSupport)
-         contactableFeet.get(RobotSide.RIGHT)
-                 .getContactPointsCopy()
-                 .stream()
-                 .peek(cp -> cp.changeFrame(ReferenceFrame.getWorldFrame()))
-                 .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), cp.getZ()));
-      return capturabilityBasedStatus;
-   }
-
-   private SideDependentList<ContactablePlaneBody> extractContactableFeet(FullHumanoidRobotModel robotModel,
-                                                                                RobotContactPointParameters<RobotSide> contactPointParameters)
-   {
-      ContactableBodiesFactory<RobotSide> factory = new ContactableBodiesFactory<>();
-      factory.setFullRobotModel(robotModel);
-      factory.setReferenceFrames(new HumanoidReferenceFrames(robotModel));
-      factory.setFootContactPoints(contactPointParameters.getControllerFootGroundContactPoints());
-      return new SideDependentList<>(factory.createFootContactablePlaneBodies());
-   }
 }

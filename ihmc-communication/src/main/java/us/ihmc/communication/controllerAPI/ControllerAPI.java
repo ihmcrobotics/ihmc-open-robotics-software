@@ -171,6 +171,6 @@ public final class ControllerAPI
       else if (outputMessageClasses.contains(messageClass))
          return Objects.requireNonNullElse(outputMessageClassSpecificQoS.get(messageClass), ROS2QosProfile.RELIABLE());
       else
-         return ROS2QosProfile.BEST_EFFORT();
+         return ROS2QosProfile.DEFAULT();
    }
 }

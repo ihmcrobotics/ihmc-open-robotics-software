@@ -255,7 +255,7 @@ public class RDXBaseUI
 
    public void create()
    {
-      create(RDXSceneLevel.MODEL, RDXSceneLevel.VIRTUAL, RDXSceneLevel.GROUND_TRUTH);
+      create(RDXSceneLevel.MODEL, RDXSceneLevel.VIRTUAL);
    }
 
    public void create(RDXSceneLevel... sceneLevels)

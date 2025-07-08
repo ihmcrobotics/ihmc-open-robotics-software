@@ -202,7 +202,6 @@ public class RDXVRTeleporter
          teleportIHMCZUpToIHMCZUpWorld.invert();
 
          RigidBodyTransform vrHomeFramePlanarTransformToWorld = new RigidBodyTransform(robotVRHomeReferenceFrame.getTransformToWorldFrame());
-         vrHomeFramePlanarTransformToWorld.getTranslation().addZ(0.15);
          vrHomeFramePlanarTransformToWorld.getRotation().setYawPitchRoll(vrHomeFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
          tempTransform.set(vrHomeFramePlanarTransformToWorld);
          tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
