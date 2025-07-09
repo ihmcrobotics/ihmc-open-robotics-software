@@ -3,9 +3,9 @@ package us.ihmc.rdx.ui.interactable;
 import ihmc_psyonic_ros2.msg.dds.AbilityHandState;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.psyonicros2.AbilityHandController.ControlMode;
-import us.ihmc.psyonicros2.AbilityHandController.Grip;
-import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
+import us.ihmc.psyonicros2.AbilityHandManager.ControlMode;
+import us.ihmc.psyonicros2.AbilityHandManager.Grip;
+import us.ihmc.psyonicros2.AbilityHandROS2HardwareCommunication;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -38,7 +38,7 @@ public class RDXAbilityHand
    float[] actuatorPostions = new float[ACTUATOR_COUNT];
 
 
-   public RDXAbilityHand(String serialNumber, AbilityHandHardwareCommunication communication)
+   public RDXAbilityHand(String serialNumber, AbilityHandROS2HardwareCommunication communication)
    {
       this.serialNumber = serialNumber;
 
@@ -61,13 +61,13 @@ public class RDXAbilityHand
 
    }
 
-   public void update(AbilityHandHardwareCommunication communication)
+   public void update(AbilityHandROS2HardwareCommunication communication)
    {
       state = communication.readState(serialNumber);
       actuatorPostions = state.getActuatorPositions();
    }
 
-   public void renderImGuiWidgets(AbilityHandHardwareCommunication communication)
+   public void renderImGuiWidgets(AbilityHandROS2HardwareCommunication communication)
    {
       if(!communication.getAvailableHandSerialNumbers().contains(serialNumber))
          return;

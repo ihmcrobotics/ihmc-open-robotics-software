@@ -8,7 +8,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.SakeHandAPI;
-import us.ihmc.psyonicros2.AbilityHandHardwareCommunication;
+import us.ihmc.psyonicros2.AbilityHandROS2HardwareCommunication;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXAbilityHand;
@@ -30,7 +30,7 @@ public class RDXHandConfigurationManager
    private final Map<String, RDXAbilityHand> abilityHands = new HashMap<>();
    private final String[] serialNumbers = new String[]{"24ABH374"};
 
-   private AbilityHandHardwareCommunication communication;
+   private AbilityHandROS2HardwareCommunication communication;
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private CommunicationHelper communicationHelper;
@@ -61,7 +61,7 @@ public class RDXHandConfigurationManager
       //TODO: Make the function actually be useful
       if(syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoints())
       {
-         communication = new AbilityHandHardwareCommunication("AbilityCommunication");
+         communication = new AbilityHandROS2HardwareCommunication("AbilityCommunication");
          for (String serialNumber : serialNumbers)
          {
             abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
