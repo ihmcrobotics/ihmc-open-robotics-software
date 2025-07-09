@@ -85,8 +85,6 @@ public class RapidHeightMapExtractor
    private int previousCellY;
    private float resetOffset;
 
-   private final FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor;
-
    public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
@@ -151,8 +149,6 @@ public class RapidHeightMapExtractor
       {
          throw new RuntimeException(e);
       }
-
-      filteredVerticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, cellsPerAxisGlobal, cellsPerAxisGlobal);
    }
 
    private void computeDerivedParameters()
@@ -186,7 +182,7 @@ public class RapidHeightMapExtractor
                       RigidBodyTransform sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
-                      Point3D sensorOrigin,
+                      Point3D heightMapFrameToWorldFrame,
                       double footHeight)
    {
       int error;
@@ -269,8 +265,8 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the translate kernel ---------
       {
-         int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-         int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSizeInMeters());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
@@ -337,12 +333,6 @@ public class RapidHeightMapExtractor
 
          scalingKernelGridDim.close();
          checkCUDAError();
-      }
-
-      // Apply the vertical surfaces filter
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         filteredVerticalSurfacesExtractor.update(scaledHeightMap);
       }
 
       // ---------- Run the Terrain cropping kernel ----------
@@ -512,8 +502,6 @@ public class RapidHeightMapExtractor
       scaledHeightMap.close();
       emptyGlobalHeightMap.close();
 
-      filteredVerticalSurfacesExtractor.destroy();
-
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
    }
@@ -542,7 +530,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap.clone();
+      return globalMeanMap;
    }
 
    public GpuMat getTerrainCroppedHeightMap()

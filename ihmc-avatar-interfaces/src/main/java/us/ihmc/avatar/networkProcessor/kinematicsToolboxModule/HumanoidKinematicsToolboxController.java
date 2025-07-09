@@ -28,6 +28,7 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -36,6 +37,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -129,7 +131,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * It is added to the x and y coordinates of the {@link #centerOfMassPositionToHold}.
     * It is intended to be expressed in the local frame of the feet, i.e., it accounts for the robot yaw.
     */
-   // TODO Add API to set this offset. It was only set from the SCS2 visualizer.
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run. It
@@ -170,7 +171,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
+   private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -231,12 +232,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
 
-      stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
-                                                                            multiContactRegionCalculator,
-                                                                            desiredFullRobotModel,
-                                                                            isUpperBodyLoadBearing,
-                                                                            getCenterOfMassSafeMargin(),
-                                                                            registry);
+      if (desiredFullRobotModel.getChest() != null && desiredFullRobotModel.getHand(RobotSide.LEFT) != null
+          && desiredFullRobotModel.getHand(RobotSide.RIGHT) != null)
+      {
+         CentroidalMomentumCalculator centroidalMomentumCalculator = controllerCore.getToolbox().getCentroidalMomentumCalculator();
+         stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
+                                                                               multiContactRegionCalculator,
+                                                                               desiredFullRobotModel,
+                                                                               isUpperBodyLoadBearing,
+                                                                               getCenterOfMassSafeMargin(),
+                                                                               centroidalMomentumCalculator,
+                                                                               registry);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -496,7 +503,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
+         if (stabilityCostCalculator != null)
+            stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -805,6 +813,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       concurrentCapturabilityBasedStatusCopier.commit();
    }
 
+   public void setCenterOfMassOffset(Vector2DReadOnly offset)
+   {
+      centerOfMassOffset.set(offset);
+   }
+
    @Override
    protected RigidBodyBasics getEndEffectorPrimaryBase(RigidBodyBasics endEffector)
    {
@@ -816,7 +829,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
-      stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
+      if (stabilityCostCalculator != null)
+         stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
    }
 
    @Override

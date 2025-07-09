@@ -114,7 +114,7 @@ public class KSTStreamingState implements State
 
    private final YoDouble inputWeightDecayFactor;
    private final YoInteger numberOfDecayingInputs = new YoInteger("numberOfDecayingInputs", registry);
-
+   private final YoBoolean isDemonstrationEpisode = new YoBoolean("isDemonstrationEpisode", registry);
    /**
     * Storing when each rigid-body has started being controlled by the user. That allows to identify
     * newly controlled rigid-body for which the weight matrix will be slowly ramped up to smoothly
@@ -479,6 +479,7 @@ public class KSTStreamingState implements State
          else
             streamingBlendingDuration.set(tools.getParameters().getDefaultStreamingBlendingDuration());
 
+         isDemonstrationEpisode.set(latestInput.getIsDemonstrationEpisode());
          // Reset the list to keep track of the bodies that are not controlled
          uncontrolledRigidBodies.clear();
          List<? extends RigidBodyBasics> controllableRigidBodies = ikController.getControllableRigidBodies();

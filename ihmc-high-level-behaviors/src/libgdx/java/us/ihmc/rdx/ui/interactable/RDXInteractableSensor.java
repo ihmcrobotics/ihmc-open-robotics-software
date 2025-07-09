@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,7 +27,7 @@ public abstract class RDXInteractableSensor
 
    private void create(RDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify, String modelPath)
    {
-      ModelData sensorModel = RDXModelLoader.loadModelData(modelPath);
+      Model sensorModel = RDXModelLoader.load(modelPath);
       interactableFrameModel.create(referenceFrameToRepresent, transformToParentToModify, panel3D, sensorModel, this::calculateClosestCollision);
    }
 

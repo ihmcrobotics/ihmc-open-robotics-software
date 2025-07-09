@@ -119,7 +119,7 @@ public class RDXVRModeManager
                                                                     footstepPlacer,
                                                                     handManager,
                                                                     robotVisualizer);
-         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule,  kstParameters);
+         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule, kstParameters);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
@@ -190,7 +190,7 @@ public class RDXVRModeManager
 
    public void update()
    {
-      vrManager.getTeleporter().setEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      vrManager.getTeleporter().setBButtonEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
 
       if (kinematicsStreamingMode != null)
       {
@@ -213,14 +213,14 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.INPUTS_DISABLED;
          if (kinematicsStreamingMode != null)
-            kinematicsStreamingMode.setEnabled(false);
+            kinematicsStreamingMode.setKSTEnabled(false);
          footstepPlacer.reset();
       }
       if (ImGui.radioButton(labels.get(RDXVRMode.FOOTSTEP_PLACEMENT.getReadableName()), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
          if (kinematicsStreamingMode != null)
-            kinematicsStreamingMode.setEnabled(false);
+            kinematicsStreamingMode.setKSTEnabled(false);
       }
       if (kinematicsStreamingMode == null)
       {
@@ -239,7 +239,7 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.JOYSTICK_WALKING;
          if (kinematicsStreamingMode != null)
-            kinematicsStreamingMode.setEnabled(false);
+            kinematicsStreamingMode.setKSTEnabled(false);
          footstepPlacer.reset();
       }
    }
@@ -264,13 +264,13 @@ public class RDXVRModeManager
             }
             case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
          }
+
+         if (stereoVision.isEnabled())
+            stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
+
+         if (vrModeControls.getRenderOnLeftHand().get())
+            vrModeControls3DPanel.getRenderables(renderables, pool);
       }
-
-      if (stereoVision.isEnabled())
-         stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
-
-      if (vrModeControls.getRenderOnLeftHand().get())
-         vrModeControls3DPanel.getRenderables(renderables, pool);
    }
 
    public void destroy()

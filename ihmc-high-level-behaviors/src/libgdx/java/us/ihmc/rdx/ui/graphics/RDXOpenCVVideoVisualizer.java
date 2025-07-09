@@ -63,9 +63,14 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
 
    public void setImage(Mat mat)
    {
+      setImage(mat, opencv_imgproc.COLOR_RGB2RGBA);
+   }
+
+   public void setImage(Mat mat, int toRGBAConversion)
+   {
       hasRenderedOne = true;
       updateImageDimensions(mat.cols(), mat.rows());
-      opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+      opencv_imgproc.cvtColor(mat, rgba8Mat, toRGBAConversion);
    }
 
    @Override

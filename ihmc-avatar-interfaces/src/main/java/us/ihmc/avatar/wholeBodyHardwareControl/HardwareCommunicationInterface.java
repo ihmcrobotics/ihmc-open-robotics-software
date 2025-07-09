@@ -15,7 +15,7 @@ public interface HardwareCommunicationInterface
 {
    void read(SensorDataContext sensorDataContext);
 
-   void write(JointDesiredOutputListReadOnly jointDesireds);
+   void write(JointDesiredOutputListReadOnly jointDesireds, double masterGain);
 
    void start();
 
@@ -25,5 +25,11 @@ public interface HardwareCommunicationInterface
 
    boolean hasReceivedFirstState();
 
-   void addSoftEStopListener(YoVariableChangedListener listener);
+   default void addSoftEStopListener(YoVariableChangedListener listener)
+   {
+   }
+
+   boolean hasRobotFaulted();
+
+   void addFaultListener(YoVariableChangedListener listener);
 }

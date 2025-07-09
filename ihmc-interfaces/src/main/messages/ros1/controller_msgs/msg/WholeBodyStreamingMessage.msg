@@ -33,6 +33,21 @@ bool has_right_arm_streaming_message
 
 controller_msgs/JointspaceStreamingMessage right_arm_streaming_message
 
+# Information for the spine joints
+bool has_spine_streaming_message
+
+controller_msgs/JointspaceStreamingMessage spine_streaming_message
+
+# Information for the left leg joints
+bool has_left_leg_streaming_message
+
+controller_msgs/JointspaceStreamingMessage left_leg_streaming_message
+
+# Information for the right leg joints
+bool has_right_leg_streaming_message
+
+controller_msgs/JointspaceStreamingMessage right_leg_streaming_message
+
 # Information for the chest
 bool has_chest_streaming_message
 

@@ -168,6 +168,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       this.nominalDoubleSupportExchange.set(nominalDoubleSupportExchange);
 
+      this.nominalLegLength.addListener(v -> initializeToNominalHeight());
+
       parentRegistry.addChild(registry);
 
       if (yoGraphicsListRegistry == null)

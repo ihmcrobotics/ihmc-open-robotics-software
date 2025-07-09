@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -100,12 +101,14 @@ public class KSTTools
 
    private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
    private final KinematicsStreamingToolboxInitialConfigurationCommand initCommand = new KinematicsStreamingToolboxInitialConfigurationCommand();
+   private final YoBoolean isSpineJointspaceOutputEnabled;
    private final YoBoolean isNeckJointspaceOutputEnabled;
    private final YoBoolean isChestTaskspaceOutputEnabled;
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
    private final YoBoolean isCenterOfMassOutputEnabled;
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
+   private final SideDependentList<YoBoolean> areLegJointspaceOutputsEnabled = new SideDependentList<>();
 
    private final YoBoolean invalidUserInput;
    private final YoLong latestInputTimestampSource;
@@ -212,6 +215,7 @@ public class KSTTools
       previousInputReceivedTime = new YoDouble("previousInputReceivedTime", registry);
       flushInputCommands();
 
+      isSpineJointspaceOutputEnabled = new YoBoolean("isSpineJointspaceOutputEnabled", registry);
       isNeckJointspaceOutputEnabled = new YoBoolean("isNeckJointspaceOutputEnabled", registry);
       isChestTaskspaceOutputEnabled = new YoBoolean("isChestTaskspaceOutputEnabled", registry);
       isPelvisTaskspaceOutputEnabled = new YoBoolean("isPelvisTaskspaceOutputEnabled", registry);
@@ -223,6 +227,8 @@ public class KSTTools
          areHandTaskspaceOutputsEnabled.put(robotSide, isHandTaskspaceOutputEnabled);
          YoBoolean isArmJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "ArmJointspaceOutputEnabled", registry);
          areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
+         YoBoolean isLegJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "LegJointspaceOutputEnabled", registry);
+         areLegJointspaceOutputsEnabled.put(robotSide, isLegJointspaceOutputEnabled);
       }
 
       invalidUserInput = new YoBoolean("invalidUserInput", registry);
@@ -242,6 +248,7 @@ public class KSTTools
          configurationCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxConfigurationCommand.class));
       }
 
+      isSpineJointspaceOutputEnabled.set(configurationCommand.isSpineJointspaceEnabled());
       isNeckJointspaceOutputEnabled.set(configurationCommand.isNeckJointspaceEnabled());
       isChestTaskspaceOutputEnabled.set(configurationCommand.isChestTaskspaceEnabled());
       isPelvisTaskspaceOutputEnabled.set(configurationCommand.isPelvisTaskspaceEnabled());
@@ -251,6 +258,7 @@ public class KSTTools
       {
          areHandTaskspaceOutputsEnabled.get(robotSide).set(configurationCommand.isHandTaskspaceEnabled(robotSide));
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
+         areLegJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isLegJointspaceEnabled(robotSide));
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInitialConfigurationCommand.class))
@@ -417,6 +425,11 @@ public class KSTTools
       this.streamingMessagePublisher = streamingMessagePublisher;
    }
 
+   public void setCenterOfMassOffset(Vector2DReadOnly offset)
+   {
+      ikController.setCenterOfMassOffset(offset);
+   }
+
    public void streamToController(KSTOutputDataReadOnly outputToPublish, boolean finalizeTrajectory)
    {
       if (finalizeTrajectory)
@@ -441,8 +454,13 @@ public class KSTTools
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
+
+         if (areLegJointspaceOutputsEnabled.get(robotSide).getValue())
+            streamingMessageFactory.computeLegStreamingMessage(robotSide);
       }
 
+      if (isSpineJointspaceOutputEnabled.getValue())
+         streamingMessageFactory.computeSpineStreamingMessage();
       if (isNeckJointspaceOutputEnabled.getValue())
          streamingMessageFactory.computeNeckStreamingMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
@@ -451,6 +469,8 @@ public class KSTTools
          streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrameId());
       if (isCenterOfMassOutputEnabled.getValue())
          streamingMessageFactory.computeCenterOfMassStreamingMessage();
+
+      streamingMessageFactory.getOutput().setHasCenterOfMassTrajectoryMessage(isCenterOfMassOutputEnabled.getValue());
 
       currentMessageId.increment();
       return streamingMessageFactory.getOutput();

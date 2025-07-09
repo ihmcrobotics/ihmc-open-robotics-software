@@ -253,7 +253,7 @@ public class PerceptionMessageTools
       ByteBuffer dataBuffer = messageToPack.getData().getBuffer();
 
       // Set byte order
-      messageToPack.setIsBigendian((byte) (dataBuffer.order().equals(ByteOrder.BIG_ENDIAN) ? 1 : 0));
+      messageToPack.setIsBigendian((byte) 0);
 
       // Set step
       Mat cpuImage = image.getCpuImageMat();

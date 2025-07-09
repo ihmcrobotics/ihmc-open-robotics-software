@@ -55,7 +55,9 @@ public class KSTStreamingMessageFactory
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] oneDoFJoints;
    private final OneDoFJointBasics[] neckJoints;
+   private final OneDoFJointBasics[] spineJoints;
    private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
+   private final SideDependentList<OneDoFJointBasics[]> legJoints = new SideDependentList<>();
 
    private final YoBoolean enableVelocity = new YoBoolean("enableVelocity", registry);
    private final YoBoolean enableAcceleration = new YoBoolean("enableAcceleration", registry);
@@ -63,7 +65,9 @@ public class KSTStreamingMessageFactory
    private final WholeBodyStreamingMessage output = new WholeBodyStreamingMessage();
 
    private final YoJointspaceStreamingMessage yoNeckStreamingMessage;
+   private final YoJointspaceStreamingMessage yoSpineStreamingMessage;
    private final SideDependentList<YoJointspaceStreamingMessage> yoArmStreamingMessages = new SideDependentList<>();
+   private final SideDependentList<YoJointspaceStreamingMessage> yoLegStreamingMessages = new SideDependentList<>();
 
    private final YoEuclideanStreamingMessage yoCenterOfMassStreamingMessage;
    private final YoSE3StreamingMessage yoPelvisStreamingMessage;
@@ -80,6 +84,7 @@ public class KSTStreamingMessageFactory
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       if (head == null)
       {
@@ -92,8 +97,15 @@ public class KSTStreamingMessageFactory
          yoNeckStreamingMessage = new YoJointspaceStreamingMessage(neckJoints);
       }
 
+      spineJoints = MultiBodySystemTools.createOneDoFJointPath(pelvis, chest);
+      yoSpineStreamingMessage = new YoJointspaceStreamingMessage(spineJoints);
+
       for (RobotSide robotSide : RobotSide.values)
       {
+         RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
+         legJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(pelvis, foot));
+         yoLegStreamingMessages.put(robotSide, new YoJointspaceStreamingMessage(legJoints.get(robotSide)));
+
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          if (hand == null)
             continue;
@@ -104,7 +116,7 @@ public class KSTStreamingMessageFactory
       }
 
       yoCenterOfMassStreamingMessage = new YoEuclideanStreamingMessage("com", registry);
-      yoPelvisStreamingMessage = new YoSE3StreamingMessage(fullRobotModel.getPelvis(), registry);
+      yoPelvisStreamingMessage = new YoSE3StreamingMessage(pelvis, registry);
       yoChestStreamingMessage = new YoSO3StreamingMessage(chest, registry);
 
       parentRegistry.addChild(registry);
@@ -169,6 +181,27 @@ public class KSTStreamingMessageFactory
          output.setHasRightArmStreamingMessage(true);
    }
 
+   public void computeLegStreamingMessage(RobotSide robotSide)
+   {
+      checkIfDataHasBeenSet();
+
+      if (legJoints.get(robotSide) == null)
+         return;
+
+      JointspaceStreamingMessage streamingMessage = select(robotSide, output.getLeftLegStreamingMessage(), output.getRightLegStreamingMessage());
+      computeJointspaceMessage(legJoints.get(robotSide),
+                               enableVelocity.getValue(),
+                               enableAcceleration.getValue(),
+                               output.getStreamIntegrationDuration(),
+                               streamingMessage);
+      yoLegStreamingMessages.get(robotSide).setFromMessage(streamingMessage);
+
+      if (robotSide == RobotSide.LEFT)
+         output.setHasLeftLegStreamingMessage(true);
+      else
+         output.setHasRightLegStreamingMessage(true);
+   }
+
    public void computeHandStreamingMessages()
    {
       for (RobotSide robotSide : RobotSide.values)
@@ -222,6 +255,20 @@ public class KSTStreamingMessageFactory
          output.setHasLeftHandStreamingMessage(true);
       else
          output.setHasRightHandStreamingMessage(true);
+   }
+
+   public void computeSpineStreamingMessage()
+   {
+      checkIfDataHasBeenSet();
+
+      computeJointspaceMessage(spineJoints,
+                               enableVelocity.getValue(),
+                               enableAcceleration.getValue(),
+                               output.getStreamIntegrationDuration(),
+                               output.getSpineStreamingMessage());
+      yoSpineStreamingMessage.setFromMessage(output.getSpineStreamingMessage());
+
+      output.setHasSpineStreamingMessage(true);
    }
 
    public void computeNeckStreamingMessage()

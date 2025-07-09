@@ -6,6 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,7 +23,7 @@ public class AvatarLowLevelOutputProcessor
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private static final double DEFAULT_SERVO_DURATION = 6.0; // In units of seconds
+   private static final double DEFAULT_SERVO_DURATION = 5.0; // In units of seconds
    private static final double LOW_MASTER_GAIN = 0.0;
    private static final double HIGH_MASTER_GAIN = 1.00;
 
@@ -141,6 +142,11 @@ public class AvatarLowLevelOutputProcessor
       servo.set(false);
    }
 
+   public void unservoRobotQuickly()
+   {
+      unservoQuickly.set(true);
+   }
+
    public void addServoListener(YoVariableChangedListener listener)
    {
       servo.addListener(listener);
@@ -156,5 +162,10 @@ public class AvatarLowLevelOutputProcessor
    public JointDesiredOutputListReadOnly getProcessedDesiredOutput()
    {
       return processedDesireds;
+   }
+
+   public DoubleProvider getMasterGain()
+   {
+      return masterGain;
    }
 }

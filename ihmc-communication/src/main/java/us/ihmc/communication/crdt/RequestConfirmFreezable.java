@@ -25,8 +25,7 @@ import us.ihmc.log.LogTools;
  * A singleton CRDTInfo object exists for a node in the CRDT graph
  * which has an update number that is 0 for the first update and
  * monotonically increases on each subsequent update. This is different
- * than the request number. In this class
- * that update number is used to "timeout" the freeze if a confirmation
+ * than the request number and is used to "timeout" the freeze if a confirmation
  * is not recieved within the max freeze duration.
  * </p>
  *
@@ -86,7 +85,7 @@ public class RequestConfirmFreezable
 
       updateNumberToUnfreeze = crdtInfo.getUpdateNumber();
 
-      isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
+      isFrozen = false;
 
       if (wasFrozen != isFrozen)
          LogTools.debug("%s Update #%d: Frozen %b -> %b %s".formatted(crdtInfo.getActorDesignation(),

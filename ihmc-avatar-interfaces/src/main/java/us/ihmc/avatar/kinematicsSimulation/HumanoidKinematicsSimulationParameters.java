@@ -1,7 +1,11 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
+import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commons.UnitConversions;
 
+/**
+ * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ */
 public class HumanoidKinematicsSimulationParameters
 {
    private boolean createPeriodicThread = true;

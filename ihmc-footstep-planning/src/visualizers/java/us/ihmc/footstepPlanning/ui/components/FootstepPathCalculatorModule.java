@@ -130,7 +130,7 @@ public class FootstepPathCalculatorModule
          LogTools.info("Starting to compute path...");
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapReference.get());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapReference.get());
       TerrainMapData terrainMapData = null;
       if (terrainMapReference.get() != null)
          terrainMapData = new TerrainMapData(terrainMapReference.get());
