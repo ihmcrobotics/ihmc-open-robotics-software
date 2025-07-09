@@ -36,7 +36,7 @@ public interface RobotVersion
    }
    /*TODO: should return false and should be implemented into Alexander
    *  and Unitree*/
-   default boolean hasAbilityHandJoints(RobotSide side)
+   default boolean hasAbilityHandJoints()
    {
       return true;
    }

@@ -57,19 +57,18 @@ public class RDXHandConfigurationManager
             sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, syncedRobotModel, side));
             sakeHandStatus.put(side, syncedRobotModel.getSakeHandStatus().get(side));
          }
-         //TODO: Make the function actually be useful
-         else if (syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoints(side))
-         {
-            handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
-         }
       }
-      communication = new AbilityHandHardwareCommunication("AbilityCommunication");
-      for(String serialNumber : serialNumbers)
+      //TODO: Make the function actually be useful
+      if(syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoints())
       {
-         abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
-      }
+         communication = new AbilityHandHardwareCommunication("AbilityCommunication");
+         for (String serialNumber : serialNumbers)
+         {
+            abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
+         }
 
-      communication.start();
+         communication.start();
+      }
    }
 
    public void update()
