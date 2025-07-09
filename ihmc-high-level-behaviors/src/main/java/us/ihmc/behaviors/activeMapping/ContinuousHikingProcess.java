@@ -3,79 +3,129 @@ package us.ihmc.behaviors.activeMapping;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.perception.StandAloneRealsenseProcess;
+import us.ihmc.perception.PerceptionProcess;
+import us.ihmc.perception.RapidHeightMapThread;
+import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.sensors.realsense.RealSenseConfiguration;
+import us.ihmc.sensors.realsense.RealSenseImageSensor;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+import us.ihmc.sensors.zed.ZEDModelData;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+
+import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
+import static us.ihmc.zed.global.zed.SL_INPUT_TYPE_USB;
 
 public class ContinuousHikingProcess
 {
    public static final String CONTINUOUS_HIKING_THREAD = "ContinuousHikingThread";
    public static final String SYNCED_ROBOT_THREAD = "SyncedRobotThread";
+   public static final String SENSOR_TUNABLE_TRANSFORM_UPDATE_THREAD = "SensorTunableTransformUpdateThread";
 
-   private final EnvironmentHandler environmentHandler;
+   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
-   private final StandAloneRealsenseProcess standAloneRealsenseProcess;
 
    private final SnappingTerrainManager snappingTerrainManager;
 
+   private final RealSenseImageSensor d455Sensor;
+   private final ZEDImageSensor zedSensor;
+   private final RapidHeightMapThread rapidHeightMapThread;
+
    public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
    {
+      // Create a bunch of overhead for the ROS2 communication and the robot
       ROS2Node ros2Node = new ROS2NodeBuilder().build("nadia_terrain_perception_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
 
-      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
+      // This is all the parameters grouped into one place, so we can pass things around easier
+      activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
+
+      // These are the perception sensors that we expect to use in the process
+      d455Sensor = new RealSenseImageSensor(RealSenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ);
+      zedSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2I, SL_INPUT_TYPE_USB, SL_DEPTH_MODE_NEURAL);
+
+      // Creates the threading for the perception sensors
+      PerceptionProcess perceptionProcess = new PerceptionProcess(ros2Node, syncedRobot);
+      perceptionProcess.addD455Sensor(d455Sensor);
+      perceptionProcess.addZED2iSensor(zedSensor);
+      d455Sensor.run(true); // Start this now so the height map can be running as well by default
+
+      // This allows the sensor to be tuned via the user interface and the affect shows on hardware, needed for calibrating the sensor
+      ROS2TunedRigidBodyTransform realsenseTunableTransform = ROS2TunedRigidBodyTransform.toBeTuned(ros2Helper,
+                                                                                                    PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
+                                                                                                    syncedRobot.getRobotModel()
+                                                                                                               .getSensorInformation()
+                                                                                                               .getSteppingCameraTransform());
+
+      // This is for the height map, it expects the queue of images that we get from the sensors
+      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>();
+      d455Sensor.registerImageCollector(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      zedSensor.registerImageCollector(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+      // Class's that perform the real work of the process... the good stuff
+      {
+         rapidHeightMapThread = new RapidHeightMapThread(ros2Helper.getROS2Node(),
+                                                         syncedRobot,
+                                                         robotCollisionModel,
+                                                         rawImageCollection,
+                                                         controllerFootstepQueueMonitor,
+                                                         activeMappingParameterToolBox.getHeightMapParameters(),
+                                                         activeMappingParameterToolBox.getDepthImageFilteringParameters());
+
+         snappingTerrainManager = new SnappingTerrainManager(ros2Node, activeMappingParameterToolBox.getHeightMapParameters());
+         continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
+                                                                               ros2Node,
+                                                                               syncedRobot,
+                                                                               syncedRobot.getReferenceFrames(),
+                                                                               controllerFootstepQueueMonitor,
+                                                                               activeMappingParameterToolBox);
+      }
+
+      // Custom thread getting started
+      rapidHeightMapThread.startRepeating();
+
+      // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
       ThreadFactory threadFactorySyncedRobot = new ThreadFactoryBuilder().setNameFormat(SYNCED_ROBOT_THREAD).build();
       ScheduledExecutorService schedulerSyncedRobot = Executors.newScheduledThreadPool(1, threadFactorySyncedRobot);
       schedulerSyncedRobot.scheduleAtFixedRate(syncedRobot::update, 100, 10, TimeUnit.MILLISECONDS);
 
-      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
+      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat(SENSOR_TUNABLE_TRANSFORM_UPDATE_THREAD).build();
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
+      scheduler.scheduleAtFixedRate(realsenseTunableTransform::update, 0, 33, TimeUnit.MILLISECONDS);
 
-      activeMappingParameterToolBox = new ActiveMappingParameterToolBox(ros2Node, robotModel, "ForContinuousWalking");
-      environmentHandler = new EnvironmentHandler();
-      snappingTerrainManager = new SnappingTerrainManager(ros2Node, activeMappingParameterToolBox.getHeightMapParameters());
-      standAloneRealsenseProcess = new StandAloneRealsenseProcess(ros2Node,
-                                                                  ros2Helper,
-                                                                  syncedRobot,
-                                                                  robotCollisionModel,
-                                                                  activeMappingParameterToolBox.getHeightMapParameters(),
-                                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters(),
-                                                                  controllerFootstepQueueMonitor);
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
-                                                                            ros2Node,
-                                                                            syncedRobot,
-                                                                            syncedRobot.getReferenceFrames(),
-                                                                            controllerFootstepQueueMonitor,
-                                                                            activeMappingParameterToolBox);
-
-      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
-
-      // We create a ThreadFactory here so that when profiling the thread, there is a user-friendly name to identify it with
       ThreadFactory threadFactoryContinuousHiking = new ThreadFactoryBuilder().setNameFormat(CONTINUOUS_HIKING_THREAD).build();
       ScheduledExecutorService schedulerContinuousHiking = Executors.newScheduledThreadPool(1, threadFactoryContinuousHiking);
       schedulerContinuousHiking.scheduleWithFixedDelay(this::update, 500, 100, TimeUnit.MILLISECONDS);
+
+      // I've got to clean this mess up somehow :)
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
 
    public void update()
    {
       activeMappingParameterToolBox.update();
 
-      if (standAloneRealsenseProcess.getLatestHeightMapData() != null)
+      if (rapidHeightMapThread.getLatestHeightMapData() != null)
       {
-         environmentHandler.setHeightMapData(standAloneRealsenseProcess.getLatestHeightMapData());
+         environmentHandler.setHeightMapData(rapidHeightMapThread.getLatestHeightMapData());
          snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
          environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
       }
@@ -85,8 +135,10 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
+      d455Sensor.close();
+      zedSensor.close();
+      rapidHeightMapThread.blockingKill();
       continuousPlannerSchedulingTask.destroy();
       snappingTerrainManager.close();
-      standAloneRealsenseProcess.destroy();
    }
 }
