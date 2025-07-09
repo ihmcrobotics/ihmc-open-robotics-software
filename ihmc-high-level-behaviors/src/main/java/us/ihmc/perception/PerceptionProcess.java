@@ -47,7 +47,7 @@ public class PerceptionProcess
       ImageSensorPublishThread zed2iPublishThread = new ImageSensorPublishThread(ros2Node, zed2iSensor);
       zed2iPublishThread.addTopic(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
       zed2iPublishThread.addTopic(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
-      zed2iPublishThread.addTopic(PerceptionAPI.ZED2_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      zed2iPublishThread.addTopic(PerceptionAPI.ZED_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
       loopOnDemand(zed2iPublishThread, zedPublishDemandNode);
    }
 

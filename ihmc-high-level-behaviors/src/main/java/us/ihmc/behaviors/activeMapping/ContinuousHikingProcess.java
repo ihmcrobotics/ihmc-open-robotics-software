@@ -77,8 +77,8 @@ public class ContinuousHikingProcess
 
       // This is for the height map, it expects the queue of images that we get from the sensors
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>();
-      d455Sensor.registerImageCollector(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      zedSensor.registerImageCollector(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      d455Sensor.registerImageQueue(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      zedSensor.registerImageQueue(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       // Class's that perform the real work of the process... the good stuff
       {
