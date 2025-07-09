@@ -71,6 +71,42 @@ public class HeightMapMessageTools
       return heightMap;
    }
 
+   public static Mat unpackMessageToMatColumnMajor(HeightMapMessage heightMapMessage, HeightMapParameters heightMapParameters)
+   {
+      if (heightMapMessage == null)
+         return null;
+
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+      int cellsPerAxis = 2 * centerIndex + 1;
+
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+
+      byte[] dataArray = new byte[cellsPerAxis * cellsPerAxis * Short.BYTES];
+
+      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
+      {
+         double height = heightMapMessage.getHeights().get(i);
+         int key = heightMapMessage.getKeys().get(i);
+
+         int xIndex = key % cellsPerAxis;
+         int yIndex = key / cellsPerAxis;
+
+         // Swap x and y in indexing to get column-major layout
+         int index = (xIndex * cellsPerAxis + yIndex) * Short.BYTES;
+
+         int cellHeight = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+
+         // Convert short to bytes (little-endian)
+         dataArray[index] = (byte) (cellHeight & 0xFF);
+         dataArray[index + 1] = (byte) ((cellHeight >> 8) & 0xFF);
+      }
+
+      // Put it all at once
+      heightMap.data().put(dataArray);
+
+      return heightMap;
+   }
+
    /**
     * This method is too slow, creating a new {@link HeightMapMessage} object is too slow when trying to
     * use this in the update loop. Especially when we start sending larger maps.
