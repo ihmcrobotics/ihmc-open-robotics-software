@@ -63,11 +63,12 @@ public class RDXHandConfigurationManager
             handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
          }
       }
+      communication = new AbilityHandHardwareCommunication("AbilityCommunication");
       for(String serialNumber : serialNumbers)
       {
-         abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, baseUI));
+         abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
       }
-      communication = new AbilityHandHardwareCommunication("AbilityCommunication");
+
       communication.start();
    }
 
