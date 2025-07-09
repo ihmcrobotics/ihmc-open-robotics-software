@@ -38,7 +38,7 @@ public class RDXAbilityHand
    float[] actuatorPostions = new float[ACTUATOR_COUNT];
 
 
-   public RDXAbilityHand(String serialNumber, RDXBaseUI baseUI)
+   public RDXAbilityHand(String serialNumber, AbilityHandHardwareCommunication communication)
    {
       this.serialNumber = serialNumber;
 
@@ -49,13 +49,16 @@ public class RDXAbilityHand
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
          currentPosition[i] = START_POSITION;
-         goalPosition[i] = START_POSITION;
+         goalPosition[i] =(i==5) ? -START_POSITION : START_POSITION;
          goalVelocity[i] = 0;
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
          fingerSliders[i].setFloatValue(currentPosition[i]);
+         if(communication.getAvailableHandSerialNumbers().contains(serialNumber))
+            communication.getCommand(serialNumber).getGoalPositions()[i] = goalPosition[i];
       }
+
    }
 
    public void update(AbilityHandHardwareCommunication communication)
