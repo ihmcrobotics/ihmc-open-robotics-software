@@ -68,6 +68,8 @@ public class AvatarMultiThreadingManager
    private final PeriodicParameters periodicParameters;
 
    private final Runnable masterThread;
+   private final List<Runnable> childThreads = new ArrayList<>();
+
    private final AvatarEstimatorThread estimatorThread;
    private final List<Runnable> preEstimatorThreadRunnables = new ArrayList<>();
    private final List<Runnable> postEstimatorThreadRunnables = new ArrayList<>();
@@ -87,7 +89,7 @@ public class AvatarMultiThreadingManager
    private final boolean useMultiThreading;
 
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
-   private boolean running = false;
+   private volatile boolean running = false;
 
    public AvatarMultiThreadingManager(String prefix,
                                       DRCRobotModel robotModel,
@@ -133,7 +135,8 @@ public class AvatarMultiThreadingManager
          threadScheduler = new BarrierScheduledRobotController(prefix + "ThreadScheduler",
                                                                tasks,
                                                                masterContext,
-                                                               BarrierScheduler.TaskOverrunBehavior.BUSY_WAIT, masterThreadDt);
+                                                               BarrierScheduler.TaskOverrunBehavior.SKIP_SCHEDULER_TICK,
+                                                               masterThreadDt);
       else
          threadScheduler = new SingleThreadedRobotController<>(prefix + "ThreadScheduler", tasks, masterContext);
 
@@ -195,11 +198,15 @@ public class AvatarMultiThreadingManager
                                                                       controllerTask.getClass().getSimpleName() + "Thread");
          controllerRealtimeThread.setAffinity(affinity.getControllerThreadProcessor());
          controllerRealtimeThread.start();
+
+         childThreads.add(controllerRealtimeThread);
       }
       else if (!useRealtimeThreads && useMultiThreading)
       {
          Thread controllerNonRealtimeThread = new Thread(controllerTask, controllerTask.getClass().getSimpleName() + "Thread");
          controllerNonRealtimeThread.start();
+
+         childThreads.add(controllerNonRealtimeThread);
       }
 
       return controllerTask;
@@ -235,11 +242,15 @@ public class AvatarMultiThreadingManager
                                                                          stepGeneratorTask.getClass().getSimpleName() + "Thread");
          stepGeneratorRealtimeThread.setAffinity(affinity.getStepGeneratorThreadProcessor());
          stepGeneratorRealtimeThread.start();
+
+         childThreads.add(stepGeneratorRealtimeThread);
       }
       else if (!useRealtimeThreads && useMultiThreading)
       {
          Thread stepGeneratorNonRealtimeThread = new Thread(stepGeneratorTask, stepGeneratorTask.getClass().getSimpleName() + "Thread");
          stepGeneratorNonRealtimeThread.start();
+
+         childThreads.add(stepGeneratorNonRealtimeThread);
       }
 
       return stepGeneratorTask;
@@ -278,17 +289,26 @@ public class AvatarMultiThreadingManager
 
       ThreadTools.sleep(500L);
 
-      threadScheduler.dispose();
-
       if (yoVariableServer != null)
          yoVariableServer.close();
 
       running = false;
 
       if (useRealtimeThreads)
+      {
+         for (int i = 0; i < childThreads.size(); i++)
+            ((RealtimeThread) childThreads.get(i)).finalize();
+
          ((RealtimeThread) masterThread).join();
+         ((RealtimeThread) masterThread).finalize();
+      }
       else
+      {
+         for (int i = 0; i < childThreads.size(); i++)
+            ((RepeatingTaskThread) childThreads.get(i)).stopRepeating();
+
          ((RepeatingTaskThread) masterThread).stopRepeating();
+      }
 
       ThreadTools.sleep(1000L);
 
