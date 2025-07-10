@@ -28,6 +28,9 @@ public class RDXAbilityHand
    private final ImGuiSliderFloat controlFingersSlider;
    private final ImGuiSliderFloat[] fingerSliders = new ImGuiSliderFloat[ACTUATOR_COUNT];
 
+   private ControlMode lastSentMode = ControlMode.POSITION;
+   private boolean positionNeedsSync = false;
+
    private ControlMode controlMode;
    private AbilityHandState state;
 
@@ -74,75 +77,48 @@ public class RDXAbilityHand
       communication.getCommand(serialNumber).setSerialNumber(serialNumber);
       if (ImGui.button("OPEN"))
       {
-         controlMode = ControlMode.GRIP;
-         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.RELAX.toByte());
+         gripMode(Grip.RELAX, communication);
       }
       ImGui.sameLine();
       if (ImGui.button("GRIP"))
       {
-         controlMode = ControlMode.GRIP;
-         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.POWER.toByte());
+         gripMode(Grip.POWER, communication);
       }
 
       ImGui.sameLine();
       if(ImGui.button("TRIPOD CLOSED"))
       {
-         controlMode = ControlMode.GRIP;
-         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.TRIPOD_C.toByte());
+         gripMode(Grip.TRIPOD_C, communication);
       }
       ImGui.sameLine();
       if(ImGui.button("HOOK"))
       {
-         controlMode = ControlMode.GRIP;
-         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.HOOK.toByte());
+         gripMode(Grip.HOOK, communication);
       }
       if(ImGui.collapsingHeader("Other Grips"))
       {
          if(ImGui.button("TRIPOD OPEN"))
          {
-            controlMode = ControlMode.GRIP;
-            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-            communication.getCommand(serialNumber).setGrip(Grip.TRIPOD_O.toByte());
+            gripMode(Grip.TRIPOD_O, communication);
          }
          ImGui.sameLine();
          if(ImGui.button("PINCH OPEN"))
          {
-            controlMode = ControlMode.GRIP;
-            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-            communication.getCommand(serialNumber).setGrip(Grip.PINCH_O.toByte());
+            gripMode(Grip.PINCH_O, communication);
          }
          ImGui.sameLine();
          if(ImGui.button("PINCH CLOSED"))
          {
-            controlMode = ControlMode.GRIP;
-            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-            communication.getCommand(serialNumber).setGrip(Grip.PINCH_C.toByte());
+            gripMode(Grip.TRIPOD_C, communication);
          }
          if(ImGui.button("KEY"))
          {
-            controlMode = ControlMode.GRIP;
-            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-            communication.getCommand(serialNumber).setGrip(Grip.KEY.toByte());
+            gripMode(Grip.KEY, communication);
          }
          ImGui.sameLine();
          if(ImGui.button("RUDE"))
          {
-            controlMode = ControlMode.GRIP;
-            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-            communication.getCommand(serialNumber).setGrip(Grip.RUDE.toByte());
+            gripMode(Grip.RUDE, communication);
          }
       }
 
@@ -172,7 +148,14 @@ public class RDXAbilityHand
             float startX = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
             float width = ImGui.getColumnWidth() - startX;
             ImGuiTools.renderSliderOrProgressNotch(startX + notchNorm * width, ImGui.getColorU32(ImGuiCol.Text));
+            if (positionNeedsSync)
+            {
+               controlMode = ControlMode.POSITION;
+               communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+               syncPositionSliders(communication);
 
+               positionNeedsSync = false;
+            }
             if (fingerSliders[i].render(SLIDER_MIN, SLIDER_MAX))
             {
                float val = fingerSliders[i].getFloatValue();
@@ -183,5 +166,29 @@ public class RDXAbilityHand
             }
          }
       }
+   }
+
+   private void gripMode(Grip grip, AbilityHandROS2HardwareCommunication communication)
+   {
+      controlMode = ControlMode.GRIP;
+      Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+      communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+      communication.getCommand(serialNumber).setGrip(grip.toByte());
+
+      lastSentMode = controlMode;
+      positionNeedsSync = true;
+   }
+
+   private void syncPositionSliders(AbilityHandROS2HardwareCommunication comm)
+   {
+      float[] cmdPos = comm.getCommand(serialNumber).getGoalPositions();
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+      {
+         float live = actuatorPostions[i];
+         cmdPos[i] = live;
+         float uiVal = (i == 5) ? -live : live;
+         fingerSliders[i].setFloatValue(uiVal);
+      }
+      controlFingersSlider.setFloatValue(cmdPos[0]);
    }
 }
