@@ -70,7 +70,8 @@ public class HeightMapToolsTest
                                                new Point3D(0.0, 0.0, 0.0),
                                                (float) heightMapParameters.getTerrainWidthInMeters(),
                                                (float) heightMapParameters.getCellSizeInMeters(),
-                                               heightMapParameters);
+                                               (float) heightMapParameters.getHeightScaleFactor(),
+                                               (float) heightMapParameters.getHeightOffset());
       }
 
       long endTime = System.nanoTime();

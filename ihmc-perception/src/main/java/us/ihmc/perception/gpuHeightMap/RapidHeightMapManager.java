@@ -189,7 +189,8 @@ public class RapidHeightMapManager
                                             gridCellLocation,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
                                             (float) heightMapParameters.getCellSizeInMeters(),
-                                            heightMapParameters);
+                                            (float) heightMapParameters.getHeightScaleFactor(),
+                                            (float) heightMapParameters.getHeightOffset());
       return latestTerrainHeightMapData;
    }
 
