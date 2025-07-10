@@ -130,7 +130,6 @@ public class RapidHeightMapManager
 
       if (heightMapParameters.getLogHeightMap())
       {
-
          try
          {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
@@ -202,7 +201,10 @@ public class RapidHeightMapManager
       buffer.putDouble(timestamp);
 
       // Write packed float data
-      buffer.asFloatBuffer().put(packedArray);
+      for (float f : packedArray)
+      {
+         buffer.putFloat(f);
+      }
 
       // Write to file
       fos.write(buffer.array());
