@@ -72,7 +72,7 @@ public class RDXAbilityHand
       if(!communication.getAvailableHandSerialNumbers().contains(serialNumber))
          return;
       communication.getCommand(serialNumber).setSerialNumber(serialNumber);
-      if (ImGui.button("Open"))
+      if (ImGui.button("OPEN"))
       {
          controlMode = ControlMode.GRIP;
          Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
@@ -80,15 +80,7 @@ public class RDXAbilityHand
          communication.getCommand(serialNumber).setGrip(Grip.RELAX.toByte());
       }
       ImGui.sameLine();
-      if (ImGui.button("KEY"))
-      {
-         controlMode = ControlMode.GRIP;
-         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.KEY.toByte());
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Grip"))
+      if (ImGui.button("GRIP"))
       {
          controlMode = ControlMode.GRIP;
          Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
@@ -97,12 +89,61 @@ public class RDXAbilityHand
       }
 
       ImGui.sameLine();
-      if(ImGui.button("RUDE"))
+      if(ImGui.button("TRIPOD CLOSED"))
       {
          controlMode = ControlMode.GRIP;
          Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         communication.getCommand(serialNumber).setGrip(Grip.RUDE.toByte());
+         communication.getCommand(serialNumber).setGrip(Grip.TRIPOD_C.toByte());
+      }
+      ImGui.sameLine();
+      if(ImGui.button("HOOK"))
+      {
+         controlMode = ControlMode.GRIP;
+         Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+         communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+         communication.getCommand(serialNumber).setGrip(Grip.HOOK.toByte());
+      }
+      if(ImGui.collapsingHeader("Other Grips"))
+      {
+         if(ImGui.button("TRIPOD OPEN"))
+         {
+            controlMode = ControlMode.GRIP;
+            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+            communication.getCommand(serialNumber).setGrip(Grip.TRIPOD_O.toByte());
+         }
+         ImGui.sameLine();
+         if(ImGui.button("PINCH OPEN"))
+         {
+            controlMode = ControlMode.GRIP;
+            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+            communication.getCommand(serialNumber).setGrip(Grip.PINCH_O.toByte());
+         }
+         ImGui.sameLine();
+         if(ImGui.button("PINCH CLOSED"))
+         {
+            controlMode = ControlMode.GRIP;
+            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+            communication.getCommand(serialNumber).setGrip(Grip.PINCH_C.toByte());
+         }
+         if(ImGui.button("KEY"))
+         {
+            controlMode = ControlMode.GRIP;
+            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+            communication.getCommand(serialNumber).setGrip(Grip.KEY.toByte());
+         }
+         ImGui.sameLine();
+         if(ImGui.button("RUDE"))
+         {
+            controlMode = ControlMode.GRIP;
+            Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
+            communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+            communication.getCommand(serialNumber).setGrip(Grip.RUDE.toByte());
+         }
       }
 
       float currentNotch = (actuatorPostions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
