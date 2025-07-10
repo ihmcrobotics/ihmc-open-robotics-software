@@ -47,12 +47,12 @@ public class ReachabilitySphereMapSimulationHelper
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
       calculator = new ReachabilitySphereMapCalculator(robotInformation, robot.getControllerOutput(), 20);
-      calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
+      calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.025, 50, 3));
       calculator.setRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
 
-      previousVisualizationType.set(VisualizationType.RayReach);
-      currentVisualizationType.set(VisualizationType.RayReach);
+      previousVisualizationType.set(VisualizationType.PositionReach);
+      currentVisualizationType.set(VisualizationType.PositionReach);
    }
 
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)

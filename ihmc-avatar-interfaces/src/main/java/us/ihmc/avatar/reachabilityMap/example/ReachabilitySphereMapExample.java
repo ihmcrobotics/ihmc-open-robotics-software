@@ -13,7 +13,7 @@ public class ReachabilitySphereMapExample
                                                                                              robotDefinition.getRootBodyDefinition().getName(),
                                                                                              RobotArmLinkParameters.getEndEffector().getLinkName());
       ReachabilitySphereMapSimulationHelper simHelper = new ReachabilitySphereMapSimulationHelper(robotInformation);
-      simHelper.setGridParameters(25, 0.025, 50, 1);
+      simHelper.setGridParameters(25, 0.025, 50, 3);
 
       simHelper.start();
    }

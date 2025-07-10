@@ -18,7 +18,7 @@ public class ReachabilityMapRobotInformation
    private final RobotDefinition robotDefinition;
    private final String baseName;
    private final String endEffectorName;
-   private Pose3DReadOnly controlFramePoseInParentJoint;
+   private Pose3DReadOnly controlFramePoseInParentJoint = new Pose3D();
    private Axis3D orthogonalToPalm = Axis3D.X; // TODO Handle cases where this is not X
 
    public ReachabilityMapRobotInformation(RobotDefinition robotDefinition, String baseName, String endEffectorName)
