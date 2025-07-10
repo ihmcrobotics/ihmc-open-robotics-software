@@ -3,12 +3,13 @@ package us.ihmc.rdx.ui.interactable;
 import ihmc_psyonic_ros2.msg.dds.AbilityHandState;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.psyonicros2.AbilityHandManager.ControlMode;
 import us.ihmc.psyonicros2.AbilityHandManager.Grip;
 import us.ihmc.psyonicros2.AbilityHandROS2HardwareCommunication;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.imgui.ImGuiTools;
 
 import java.util.Arrays;
@@ -28,15 +29,16 @@ public class RDXAbilityHand
    private final ImGuiSliderFloat controlFingersSlider;
    private final ImGuiSliderFloat[] fingerSliders = new ImGuiSliderFloat[ACTUATOR_COUNT];
 
-   private ControlMode lastSentMode = ControlMode.POSITION;
-   private boolean positionNeedsSync = false;
+   private final Notification commandNotification = new Notification();
+   private final Throttler publishThrottler = new Throttler();
+
 
    private ControlMode controlMode;
    private AbilityHandState state;
 
-   float[] currentPosition = new float[ACTUATOR_COUNT];
-   float[] goalPosition = new float[ACTUATOR_COUNT];
-   float[] goalVelocity = new float[ACTUATOR_COUNT];
+   private final float[] currentPosition = new float[ACTUATOR_COUNT];
+   private final float[] goalPosition = new float[ACTUATOR_COUNT];
+   private final float[] goalVelocity = new float[ACTUATOR_COUNT];
 
    float[] actuatorPostions = new float[ACTUATOR_COUNT];
 
@@ -60,12 +62,18 @@ public class RDXAbilityHand
          if (communication.getAvailableHandSerialNumbers().contains(serialNumber))
             communication.getCommand(serialNumber).getGoalPositions()[i] = goalPosition[i];
       }
+      publishThrottler.setFrequency(30.0);
    }
 
    public void update(AbilityHandROS2HardwareCommunication communication)
    {
       state = communication.readState(serialNumber);
       actuatorPostions = state.getActuatorPositions();
+
+      if(publishThrottler.run() && commandNotification.poll())
+      {
+         communication.publishCommand(serialNumber);
+      }
    }
 
    public void renderImGuiWidgets(AbilityHandROS2HardwareCommunication communication)
@@ -134,6 +142,7 @@ public class RDXAbilityHand
          {
             communication.getCommand(serialNumber).getGoalPositions()[i] = newPos;
          }
+         commandNotification.set();
       }
 
       if (ImGui.collapsingHeader("Individual Finger Control"))
@@ -146,14 +155,6 @@ public class RDXAbilityHand
             float startX = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
             float width = ImGui.getColumnWidth() - startX;
             ImGuiTools.renderSliderOrProgressNotch(startX + notchNorm * width, ImGui.getColorU32(ImGuiCol.Text));
-            if (positionNeedsSync)
-            {
-               controlMode = ControlMode.POSITION;
-               communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-               syncPositionSliders(communication);
-
-               positionNeedsSync = false;
-            }
             if (fingerSliders[i].render(SLIDER_MIN, SLIDER_MAX))
             {
                float val = fingerSliders[i].getFloatValue();
@@ -161,6 +162,7 @@ public class RDXAbilityHand
                controlMode = ControlMode.POSITION;
                communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
                communication.getCommand(serialNumber).getGoalPositions()[i] = f;
+               commandNotification.set();
             }
          }
       }
@@ -173,20 +175,6 @@ public class RDXAbilityHand
       communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
       communication.getCommand(serialNumber).setGrip(grip.toByte());
 
-      lastSentMode = controlMode;
-      positionNeedsSync = true;
-   }
-
-   private void syncPositionSliders(AbilityHandROS2HardwareCommunication comm)
-   {
-      float[] cmdPos = comm.getCommand(serialNumber).getGoalPositions();
-      for (int i = 0; i < ACTUATOR_COUNT; i++)
-      {
-         float live = actuatorPostions[i];
-         cmdPos[i] = live;
-         float val = (i == 5) ? -live : live;
-         fingerSliders[i].setFloatValue(val);
-      }
-      controlFingersSlider.setFloatValue(cmdPos[0]);
+      commandNotification.set();
    }
 }

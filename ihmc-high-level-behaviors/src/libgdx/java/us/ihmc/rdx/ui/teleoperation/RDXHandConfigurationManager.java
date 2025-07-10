@@ -78,7 +78,6 @@ public class RDXHandConfigurationManager
          if (!abilityHands.containsKey(serialNumber))
             abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
 
-         communication.publishCommand(serialNumber);
          abilityHands.get(serialNumber).update(communication);
          communication.readState(serialNumber);
       }
