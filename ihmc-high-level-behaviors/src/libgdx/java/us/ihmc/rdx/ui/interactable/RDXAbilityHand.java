@@ -40,7 +40,6 @@ public class RDXAbilityHand
 
    float[] actuatorPostions = new float[ACTUATOR_COUNT];
 
-
    public RDXAbilityHand(String serialNumber, AbilityHandROS2HardwareCommunication communication)
    {
       this.serialNumber = serialNumber;
@@ -52,16 +51,15 @@ public class RDXAbilityHand
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
          currentPosition[i] = START_POSITION;
-         goalPosition[i] =(i==5) ? -START_POSITION : START_POSITION;
+         goalPosition[i] = (i == 5) ? -START_POSITION : START_POSITION;
          goalVelocity[i] = 0;
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
          fingerSliders[i].setFloatValue(currentPosition[i]);
-         if(communication.getAvailableHandSerialNumbers().contains(serialNumber))
+         if (communication.getAvailableHandSerialNumbers().contains(serialNumber))
             communication.getCommand(serialNumber).getGoalPositions()[i] = goalPosition[i];
       }
-
    }
 
    public void update(AbilityHandROS2HardwareCommunication communication)
@@ -72,7 +70,7 @@ public class RDXAbilityHand
 
    public void renderImGuiWidgets(AbilityHandROS2HardwareCommunication communication)
    {
-      if(!communication.getAvailableHandSerialNumbers().contains(serialNumber))
+      if (!communication.getAvailableHandSerialNumbers().contains(serialNumber))
          return;
       communication.getCommand(serialNumber).setSerialNumber(serialNumber);
       if (ImGui.button("OPEN"))
@@ -86,37 +84,37 @@ public class RDXAbilityHand
       }
 
       ImGui.sameLine();
-      if(ImGui.button("TRIPOD CLOSED"))
+      if (ImGui.button("TRIPOD CLOSED"))
       {
          gripMode(Grip.TRIPOD_C, communication);
       }
       ImGui.sameLine();
-      if(ImGui.button("HOOK"))
+      if (ImGui.button("HOOK"))
       {
          gripMode(Grip.HOOK, communication);
       }
-      if(ImGui.collapsingHeader("Other Grips"))
+      if (ImGui.collapsingHeader("Other Grips"))
       {
-         if(ImGui.button("TRIPOD OPEN"))
+         if (ImGui.button("TRIPOD OPEN"))
          {
             gripMode(Grip.TRIPOD_O, communication);
          }
          ImGui.sameLine();
-         if(ImGui.button("PINCH OPEN"))
+         if (ImGui.button("PINCH OPEN"))
          {
             gripMode(Grip.PINCH_O, communication);
          }
          ImGui.sameLine();
-         if(ImGui.button("PINCH CLOSED"))
+         if (ImGui.button("PINCH CLOSED"))
          {
             gripMode(Grip.TRIPOD_C, communication);
          }
-         if(ImGui.button("KEY"))
+         if (ImGui.button("KEY"))
          {
             gripMode(Grip.KEY, communication);
          }
          ImGui.sameLine();
-         if(ImGui.button("RUDE"))
+         if (ImGui.button("RUDE"))
          {
             gripMode(Grip.RUDE, communication);
          }
@@ -132,7 +130,7 @@ public class RDXAbilityHand
          float newPos = controlFingersSlider.getFloatValue();
          controlMode = ControlMode.POSITION;
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-         for (int i = 0; i < ACTUATOR_COUNT-2; i++)
+         for (int i = 0; i < ACTUATOR_COUNT - 2; i++)
          {
             communication.getCommand(serialNumber).getGoalPositions()[i] = newPos;
          }
@@ -186,8 +184,8 @@ public class RDXAbilityHand
       {
          float live = actuatorPostions[i];
          cmdPos[i] = live;
-         float uiVal = (i == 5) ? -live : live;
-         fingerSliders[i].setFloatValue(uiVal);
+         float val = (i == 5) ? -live : live;
+         fingerSliders[i].setFloatValue(val);
       }
       controlFingersSlider.setFloatValue(cmdPos[0]);
    }
