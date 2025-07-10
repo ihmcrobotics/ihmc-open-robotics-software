@@ -28,7 +28,6 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
    private final Map<String, RDXAbilityHand> abilityHands = new HashMap<>();
-   private final String[] serialNumbers = new String[]{"24ABH374"};
 
    private AbilityHandROS2HardwareCommunication communication;
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
@@ -62,11 +61,6 @@ public class RDXHandConfigurationManager
       if(syncedRobotModel.getRobotModel().getRobotVersion().hasAbilityHandJoints())
       {
          communication = new AbilityHandROS2HardwareCommunication("AbilityCommunication");
-         for (String serialNumber : serialNumbers)
-         {
-            abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
-         }
-
          communication.start();
       }
    }
@@ -81,6 +75,9 @@ public class RDXHandConfigurationManager
 
       for(String serialNumber : communication.getAvailableHandSerialNumbers())
       {
+         if (!abilityHands.containsKey(serialNumber))
+            abilityHands.put(serialNumber, new RDXAbilityHand(serialNumber, communication));
+
          communication.publishCommand(serialNumber);
          abilityHands.get(serialNumber).update(communication);
          communication.readState(serialNumber);
@@ -96,7 +93,7 @@ public class RDXHandConfigurationManager
          sakeHandWidgets.get(side).renderImGuiWidgets();
       }
 
-      for(String serialNumber : communication.getAvailableHandSerialNumbers())
+      for(String serialNumber : abilityHands.keySet())
       {
          ImGui.text(serialNumber);
          abilityHands.get(serialNumber).renderImGuiWidgets(communication);
