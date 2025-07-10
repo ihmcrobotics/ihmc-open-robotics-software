@@ -126,8 +126,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               HeightMapTools.convertToHeightMapData(heightMap,
                                                                                     latestHeightMapData,
                                                                                     heightMapCenter,
-                                                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                                                    (float) heightMapParameters.getCellSizeInMeters(),
+                                                                                    (float) heightMapMessage.getWidthInMeters(),
+                                                                                    (float) heightMapMessage.getCellSizeInMeters(),
                                                                                     heightMapParameters);
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
