@@ -47,7 +47,7 @@ public class ReachabilitySphereMapSimulationHelper
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
       calculator = new ReachabilitySphereMapCalculator(robotInformation, robot.getControllerOutput(), 20);
-      calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.025, 50, 3));
+      calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.025, 50, 10));
       calculator.setRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
 

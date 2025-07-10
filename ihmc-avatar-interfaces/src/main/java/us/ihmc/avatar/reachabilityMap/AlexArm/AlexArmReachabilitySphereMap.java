@@ -13,8 +13,20 @@ public class AlexArmReachabilitySphereMap
                 robotDefinition.getRootBodyDefinition().getName(),
                 AlexArmLinkParameters.getEndEffector().getLinkName());
         ReachabilitySphereMapSimulationHelper simHelper = new ReachabilitySphereMapSimulationHelper(robotInformation);
-        simHelper.setGridParameters(25, 0.025, 50, 3);
 
+        /* Voxel grid dimensions */
+        int gridSizeInNumberOfVoxels = 25;
+        double voxelSize = 0.025;
+
+        /* Set to true enables ray reachability, i.e. testing N rays per position, with each test having a free orientation dof around the ray */
+        int numberOfRays = 50;
+        simHelper.setEvaluateRReachability(true);
+
+        /* Set to true enables pose reachability, i.e. testing M orientations per ray, with each test specifying a full 6 dof pose */
+        simHelper.setEvaluateR2Reachability(true);
+        int numberOfRotationsAroundRay = 6;
+
+        simHelper.setGridParameters(gridSizeInNumberOfVoxels, voxelSize, numberOfRays, numberOfRotationsAroundRay);
         simHelper.start();
     }
 
