@@ -36,7 +36,7 @@ public class HeightMapMessageTools
       return heightMapData;
    }
 
-   public static Mat unpackMessageToMat(HeightMapMessage heightMapMessage, HeightMapParameters heightMapParameters)
+   public static Mat unpackMessageToMat(HeightMapMessage heightMapMessage, float heightOffset, float heightScaleFactor)
    {
       if (heightMapMessage == null)
          return null;
@@ -58,7 +58,7 @@ public class HeightMapMessageTools
 
          int index = (yIndex * cellsPerAxis + xIndex) * Short.BYTES;
 
-         int cellHeight = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
+         int cellHeight = (int) ((height + heightOffset) * heightScaleFactor);
 
          // Convert short to bytes (little-endian)
          dataArray[index] = (byte) (cellHeight & 0xFF);
@@ -120,6 +120,8 @@ public class HeightMapMessageTools
       messageToPack.setXyResolution(cellSizeInMeters);
       messageToPack.setGridCenterX(heightMapCenter.getX());
       messageToPack.setGridCenterY(heightMapCenter.getY());
+      messageToPack.setWidthInMeters(widthInMeters);
+      messageToPack.setCellSizeInMeters(cellSizeInMeters);
 
       // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);

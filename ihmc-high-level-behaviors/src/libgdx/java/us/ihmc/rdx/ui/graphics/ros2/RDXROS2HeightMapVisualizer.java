@@ -114,7 +114,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, heightMapParameters);
+                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage,
+                                                                                                   (float) heightMapMessage.getHeightOffset(),
+                                                                                                   (float) heightMapMessage.getHeightScaleFactor());
 
                                               if (latestHeightMapData == null)
                                               {
