@@ -20,6 +20,7 @@ public class HeightMapDebuggingUI
          public void create()
          {
             baseUI.create();
+            baseUI.getPrimaryScene().addRenderableProvider(heightMapPanel::getRenderablesFull);
          }
 
          @Override
@@ -33,6 +34,7 @@ public class HeightMapDebuggingUI
          public void dispose()
          {
             baseUI.dispose();
+            heightMapPanel.destroy();
          }
       });
    }

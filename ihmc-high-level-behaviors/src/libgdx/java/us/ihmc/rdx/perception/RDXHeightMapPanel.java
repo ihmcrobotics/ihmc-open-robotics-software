@@ -10,22 +10,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
 {
+   RDXROS2HeightMapVisualizer heightMapVisualizer;
 
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
 
@@ -33,12 +34,14 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
    {
       super("Height Map Panel");
       setRenderMethod(this::renderImGuiWidgets);
+
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
+      heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer", heightMapParameters);
+      heightMapVisualizer.setActive(true);
    }
 
    public void renderImGuiWidgets()
    {
-      // Need this stuff to be in a panel
-      ImGui.text("FUCK OFF");
       if (ImGui.button("Select Directory"))
       {
          String logPath = System.getProperty("user.home");
@@ -52,18 +55,15 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
                                     0);
       }
 
-      if (ImGuiFileDialog.display("chooseJsonFile", 0, 400, 200, 4000, 2000))
+      if (ImGuiFileDialog.display("chooseJsonFile", 0, 800, 800, 4000, 2000))
       {
          if (ImGuiFileDialog.isOk())
          {
             String selectedFile = ImGuiFileDialog.getFilePathName();
             System.out.println("Selected JSON file: " + selectedFile);
 
-
-
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-
 
             // Read JSON file
             try
@@ -79,18 +79,32 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
                e.printStackTrace();
             }
 
-            Mat heightMapMat = HeightMapMessageTools.unpackMessageToMatColumnMajor(heightMapMessage, new HeightMapParameters());
-
-            PerceptionDebugTools.printMat("s", heightMapMat, 5);
-            heightMapMat.close();
+            // Because the visualizer doesn't visualize the first one, increment the sequence ID
+            // Needs to be greater than 1
+            heightMapMessage.setSequenceId(2);
+            heightMapVisualizer.acceptHeightMapMessage(heightMapMessage);
          }
+
          ImGuiFileDialog.close();
       }
+
+      heightMapVisualizer.renderImGuiWidgets();
+      heightMapVisualizer.update();
+   }
+
+   public void getRenderablesFull(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      heightMapVisualizer.getRenderables(renderables, pool, sceneLevels);
+   }
+
+   public void destroy()
+   {
+      heightMapVisualizer.destroy();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-
+      // Nothing happening in here yet
    }
 }

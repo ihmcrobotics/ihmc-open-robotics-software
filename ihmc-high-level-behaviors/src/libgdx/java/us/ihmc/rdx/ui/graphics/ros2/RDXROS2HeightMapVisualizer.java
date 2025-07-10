@@ -105,6 +105,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       executorService.clearQueueAndExecute(() ->
                                            {
                                               long sequenceId = heightMapMessage.getSequenceId();
+                                              //TODO this shouldn't have to be the case, it cause's problems if you want to visualize one message
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
