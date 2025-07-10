@@ -3,6 +3,7 @@
   "Drift offset filter": true,
   "Flying points filter": true,
   "Enable vertical filter": true,
+  "Log height map" : false,
   "Search window height": {
     "value": 400,
     "lowerBound": 100,

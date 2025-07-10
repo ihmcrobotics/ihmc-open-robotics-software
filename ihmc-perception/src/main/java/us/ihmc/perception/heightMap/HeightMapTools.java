@@ -1,9 +1,11 @@
 package us.ihmc.perception.heightMap;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -205,5 +207,53 @@ public class HeightMapTools
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
          heightMapDataToPack.setHeightAt(key, cellHeight);
       }
+   }
+
+   public static float[] packArrayForFile(Mat heightMap,
+                                          Point3D gridCenter,
+                                          float widthInMeters,
+                                          float cellSizeInMeters,
+                                          HeightMapParameters heightMapParameters)
+   {
+
+      // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
+      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      // Check Mat type
+      if (heightMap.type() != opencv_core.CV_32FC1)
+         throw new IllegalArgumentException("Expected CV_32FC1 Mat");
+
+      FloatBuffer floatBuffer = heightMap.createBuffer(); // or ByteBuffer -> FloatBuffer
+      // This is done for speed optimization
+      float[] heightsArray = new float[totalCells];
+      floatBuffer.get(heightsArray);
+
+      // Define how many floats your header will have
+      // We'll store:
+      // [0] widthInMeters
+      // [1] cellSizeInMeters
+      // [2] centerX
+      // [3] centerY
+      // [4] heightOffset
+      // [5] heightScaleFactor
+      final int headerFloats = 6;
+
+      float[] packedArray = new float[headerFloats + totalCells];
+
+      // Write header
+      packedArray[0] = widthInMeters;
+      packedArray[1] = cellSizeInMeters;
+      packedArray[2] = (float) gridCenter.getX();
+      packedArray[3] = (float) gridCenter.getY();
+      packedArray[4] = (float) heightMapParameters.getHeightOffset();
+      packedArray[5] = (float) heightMapParameters.getHeightScaleFactor();
+
+      // Copy height data
+      System.arraycopy(heightsArray, 0, packedArray, headerFloats, totalCells);
+
+      return packedArray;
    }
 }

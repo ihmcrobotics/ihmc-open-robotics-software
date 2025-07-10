@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
@@ -18,7 +19,17 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +56,7 @@ public class RapidHeightMapManager
    // This is created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
    private long sequenceId = 0;
+   private FileOutputStream heightMapOutputStream;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -109,9 +121,91 @@ public class RapidHeightMapManager
                                       gridCellLocation,
                                       heightMapParameters.getGlobalWidthInMeters(),
                                       heightMapParameters.getCellSizeInMeters());
+
+      float[] floatsToLog = HeightMapTools.packArrayForFile(hostGlobalHeightMap,
+                                                            gridCellLocation,
+                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                            (float) heightMapParameters.getCellSizeInMeters(),
+                                                            heightMapParameters);
+
+      if (heightMapParameters.getLogHeightMap())
+      {
+
+         try
+         {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
+
+            Path heightMapDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
+
+            Path binaryLogPath = heightMapDirectory.resolve(timestamp + "_HeightMapLog.bin");
+            if (heightMapOutputStream == null)
+            {
+               heightMapOutputStream = new FileOutputStream(binaryLogPath.toFile(), true);
+               LogTools.info("Writing height map log to " + binaryLogPath);
+            }
+            if (!Files.exists(heightMapDirectory))
+            {
+               Files.createDirectory(heightMapDirectory);
+            }
+
+         }
+         catch (FileNotFoundException e)
+         {
+            throw new RuntimeException(e);
+         }
+         catch (IOException ignored)
+         {
+         }
+
+         try
+         {
+            logHeightMapToFile(heightMapOutputStream, floatsToLog, System.currentTimeMillis());
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+
+      if (!heightMapParameters.getLogHeightMap())
+      {
+         if (heightMapOutputStream != null)
+         {
+            try
+            {
+               heightMapOutputStream.close();
+               heightMapOutputStream = null;
+            }
+            catch (IOException e)
+            {
+               throw new RuntimeException(e);
+            }
+         }
+      }
+
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
+   }
+
+   public static void logHeightMapToFile(FileOutputStream fos, float[] packedArray, double timestamp) throws IOException
+   {
+      int frameSize = 8 + packedArray.length * Float.BYTES;
+
+      ByteBuffer buffer = ByteBuffer.allocate(4 + frameSize);
+      buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+      // Write frame size (int)
+      buffer.putInt(frameSize);
+
+      // Write timestamp (double)
+      buffer.putDouble(timestamp);
+
+      // Write packed float data
+      buffer.asFloatBuffer().put(packedArray);
+
+      // Write to file
+      fos.write(buffer.array());
    }
 
    /**
