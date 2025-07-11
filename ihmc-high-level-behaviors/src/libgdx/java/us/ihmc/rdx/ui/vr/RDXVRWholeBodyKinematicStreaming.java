@@ -740,8 +740,7 @@ public class RDXVRWholeBodyKinematicStreaming
             }
          }
       }
-      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
-                                                                                                                          .getSimpleRobotName()),
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                    initialConfigMessage);
       reinitializeToolbox();
       wakeUpToolbox();
