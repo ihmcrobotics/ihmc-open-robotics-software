@@ -9,7 +9,7 @@ import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.perception.PerceptionProcess;
+import us.ihmc.perception.PerceptionThreading;
 import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -63,9 +63,9 @@ public class ContinuousHikingProcess
       zedSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2I, SL_INPUT_TYPE_USB, SL_DEPTH_MODE_NEURAL);
 
       // Creates the threading for the perception sensors
-      PerceptionProcess perceptionProcess = new PerceptionProcess(ros2Node, syncedRobot);
-      perceptionProcess.addD455Sensor(d455Sensor);
-      perceptionProcess.addZED2iSensor(zedSensor);
+      PerceptionThreading perceptionProcess = new PerceptionThreading(ros2Node, syncedRobot);
+      perceptionProcess.addRealsenseSensor(d455Sensor);
+      perceptionProcess.addZEDSensor(zedSensor);
       d455Sensor.run(true); // Start this now so the height map can be running as well by default
 
       // This allows the sensor to be tuned via the user interface and the affect shows on hardware, needed for calibrating the sensor
