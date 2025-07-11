@@ -42,7 +42,7 @@ public class HeightMapMessageToolsTest
       for (int i = 0; i < iterations; i++)
       {
          // Inside the try-with-resouce to avoid memory leak
-         try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, heightMapParameters))
+         try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, 3.2768f, 10000f))
          {
             // Do nothing
          }
