@@ -728,13 +728,7 @@ public class RDXVRWholeBodyKinematicStreaming
       List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
       for (RobotSide robotSide : RobotSide.values)
       {
-         List<ArmJointName> armJointNames = Arrays.asList(ArmJointName.SHOULDER_PITCH,
-                                                          ArmJointName.SHOULDER_ROLL,
-                                                          ArmJointName.SHOULDER_YAW,
-                                                          ArmJointName.ELBOW_PITCH,
-                                                          ArmJointName.WRIST_YAW,
-                                                          ArmJointName.WRIST_ROLL,
-                                                          ArmJointName.GRIPPER_YAW);
+         List<ArmJointName> armJointNames = Arrays.asList(syncedRobot.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames());
          List<Integer> armIndices = armJointNames.stream()
                                                  .map(jointName -> oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, jointName)))
                                                  .toList();
