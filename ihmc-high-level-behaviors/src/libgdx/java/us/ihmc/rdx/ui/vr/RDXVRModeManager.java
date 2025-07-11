@@ -30,6 +30,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRManager;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -64,7 +65,8 @@ public class RDXVRModeManager
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
                       boolean createKinematicsStreamingToolboxModule,
-                      KinematicsStreamingToolboxParameters kstParameters)
+                      KinematicsStreamingToolboxParameters kstParameters,
+                      FullHumanoidRobotModel miniGhostFullRobotModel)
    {
       vrManager = baseUI.getVRManager();
 
@@ -91,7 +93,8 @@ public class RDXVRModeManager
                                                                     retargetingParameters,
                                                                     kstParameters,
                                                                     createKinematicsStreamingToolboxModule,
-                                                                    handManager);
+                                                                    handManager,
+                                                                    miniGhostFullRobotModel);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
