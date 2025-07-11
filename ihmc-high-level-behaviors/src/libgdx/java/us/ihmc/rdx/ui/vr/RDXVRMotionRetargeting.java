@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
-import static us.ihmc.rdx.ui.vr.RDXVRKinematicsStreamingMode.FRAME_AXIS_GRAPHICS_LENGTH;
+import static us.ihmc.rdx.ui.vr.RDXVRWholeBodyKinematicStreaming.FRAME_AXIS_GRAPHICS_LENGTH;
 
 /**
  * Class responsible for motion retargeting from VR tracked segments to a robot model.

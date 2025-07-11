@@ -2,10 +2,11 @@ package us.ihmc.rdx.ui.vr;
 
 public enum RDXVRMode
 {
-   INPUTS_DISABLED("Inputs disabled"),
-   FOOTSTEP_PLACEMENT("Footstep placement"),
-   JOYSTICK_WALKING("Joystick walking"),
-   WHOLE_BODY_IK_STREAMING("Whole body IK streaming");
+   INPUTS_DISABLED("Inputs Disabled"),
+   WHOLE_BODY_IK_STREAMING("Whole Body Kinematic Streaming"),
+   FOOTSTEP_PLACEMENT("Manual Footstep Placement"),
+   FOOTSTEP_STREAMING("Footstep Streaming"),
+   JOYSTICK_WALKING("Joystick Walking");
 
    private String readableName;
 

@@ -451,6 +451,9 @@ public class RDXTeleoperationManager extends RDXPanel
 
          if (interactablesAvailable && showContactCollisionMeshes.get())
             contactCollisionModel.calculateVRPick(vrContext);
+
+         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+            robotPartInteractable.calculateVRPick(vrContext);
       }
    }
 
