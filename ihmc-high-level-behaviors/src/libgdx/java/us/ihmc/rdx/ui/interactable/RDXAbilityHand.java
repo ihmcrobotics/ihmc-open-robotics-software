@@ -40,7 +40,9 @@ public class RDXAbilityHand
    private final float[] goalPosition = new float[ACTUATOR_COUNT];
    private final float[] goalVelocity = new float[ACTUATOR_COUNT];
 
-   float[] actuatorPostions = new float[ACTUATOR_COUNT];
+   private float[] actuatorPostions = new float[ACTUATOR_COUNT];
+
+   private ControlMode previousControl = null;
 
    public RDXAbilityHand(String serialNumber, AbilityHandROS2HardwareCommunication communication)
    {
@@ -137,6 +139,11 @@ public class RDXAbilityHand
       {
          float newPos = controlFingersSlider.getFloatValue();
          controlMode = ControlMode.POSITION;
+         if(previousControl != ControlMode.POSITION)
+         {
+            syncPositionSliders(communication);
+            previousControl = ControlMode.POSITION;
+         }
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
          for (int i = 0; i < ACTUATOR_COUNT - 2; i++)
          {
@@ -157,6 +164,11 @@ public class RDXAbilityHand
             ImGuiTools.renderSliderOrProgressNotch(startX + notchNorm * width, ImGui.getColorU32(ImGuiCol.Text));
             if (fingerSliders[i].render(SLIDER_MIN, SLIDER_MAX))
             {
+               if(previousControl != ControlMode.POSITION)
+               {
+                  syncPositionSliders(communication);
+                  previousControl = ControlMode.POSITION;
+               }
                float val = fingerSliders[i].getFloatValue();
                float f = (i == 5) ? -val : val;
                controlMode = ControlMode.POSITION;
@@ -176,5 +188,19 @@ public class RDXAbilityHand
       communication.getCommand(serialNumber).setGrip(grip.toByte());
 
       commandNotification.set();
+      previousControl = ControlMode.GRIP;
+   }
+
+   private void syncPositionSliders(AbilityHandROS2HardwareCommunication comm)
+   {
+      float[] cmdPos = comm.getCommand(serialNumber).getGoalPositions();
+      for (int i = 0; i < ACTUATOR_COUNT; i++)
+      {
+         float live = actuatorPostions[i];
+         cmdPos[i] = live;
+         float val = (i == 5) ? -live : live;
+         fingerSliders[i].setFloatValue(val);
+      }
+      controlFingersSlider.setFloatValue(cmdPos[0]);
    }
 }
