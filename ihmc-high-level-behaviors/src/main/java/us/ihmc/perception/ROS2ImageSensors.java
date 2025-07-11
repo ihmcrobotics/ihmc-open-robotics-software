@@ -55,12 +55,6 @@ public class ROS2ImageSensors
       zedPublishThread.addTopic(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
       zedPublishThread.addTopic(PerceptionAPI.ZED_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
       setupCallbackForDemandNode(zedPublishThread, zedPublishDemandNode);
-
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-                                                      {
-                                                         zedPublishDemandNode.destroy();
-                                                         zedPublishThread.blockingKill();
-                                                      }));
    }
 
    private static void setupCallbackForDemandNode(RepeatingTaskThread loopThread, ROS2DemandGraphNode demandNode)
