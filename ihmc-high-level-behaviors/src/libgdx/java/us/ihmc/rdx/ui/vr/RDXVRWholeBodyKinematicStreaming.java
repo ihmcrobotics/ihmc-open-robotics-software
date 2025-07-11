@@ -168,7 +168,7 @@ public class RDXVRWholeBodyKinematicStreaming
       miniGhostFullRobotModel = syncedRobot.getRobotModel().createFullRobotModel();
       miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
       miniGhostRobotGraphic = new RDXMultiBodyGraphic(syncedRobot.getRobotModel().getSimpleRobotName() + " (Mini Preview Ghost)");
-      miniGhostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, miniGhostFullRobotModel.getElevator(), 0.1, false);
+      miniGhostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, miniGhostFullRobotModel.getElevator(), 0.3, false);
       miniGhostRobotGraphic.setActive(true);
       miniGhostRobotGraphic.create();
 
@@ -610,7 +610,7 @@ public class RDXVRWholeBodyKinematicStreaming
                   miniGhostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
                }
                ghostFullRobotModel.getElevator().updateFramesRecursively();
-               miniGhostFullRobotModel.getElevator().updateFramesRecursively();
+//               miniGhostFullRobotModel.getElevator().updateFramesRecursively();
             }
             if (ENABLE_MULTI_CONTACT)
             {
@@ -691,14 +691,14 @@ public class RDXVRWholeBodyKinematicStreaming
             initialize();
             wakeUpToolbox();
             ghostRobotGraphic.setActive(true);
-            miniGhostRobotGraphic.setActive(false);
+            miniGhostRobotGraphic.setActive(true);
          }
       }
       else // Disable
       {
          sleepToolbox();
-         ghostRobotGraphic.setActive(true);
-         miniGhostRobotGraphic.setActive(true);
+         ghostRobotGraphic.setActive(false);
+         miniGhostRobotGraphic.setActive(false);
          setStreamToController(false, false);
       }
 
@@ -793,6 +793,7 @@ public class RDXVRWholeBodyKinematicStreaming
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
+         miniGhostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       }
 
       if (showReferenceFrameGraphics.get())
