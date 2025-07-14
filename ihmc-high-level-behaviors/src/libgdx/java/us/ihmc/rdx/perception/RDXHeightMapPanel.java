@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.heightMap.HeightMapBinaryLogReader;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -46,7 +45,6 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
       super("Height Map Panel");
       setRenderMethod(this::renderImGuiWidgets);
 
-      HeightMapParameters heightMapParameters = new HeightMapParameters();
       heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer");
       heightMapVisualizer.setActive(true);
    }
