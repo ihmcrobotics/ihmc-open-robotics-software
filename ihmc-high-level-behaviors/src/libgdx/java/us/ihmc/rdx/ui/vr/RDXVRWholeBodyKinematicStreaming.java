@@ -577,7 +577,6 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (isKSTEnabled.get())
       {
-         miniGhost.setActive(showMiniGhost.get());
          if (streamToController.get())
          {
             ghostRobotGraphic.setActive(showGhosts.get());
@@ -585,6 +584,7 @@ public class RDXVRWholeBodyKinematicStreaming
             if (showGhosts.get())
                robotVisualizer.setOpacity(0.5f);
          }
+         miniGhost.setActive(showGhosts.get() && showMiniGhost.get());
 
          if (status.getMessageNotification().poll())
          {
