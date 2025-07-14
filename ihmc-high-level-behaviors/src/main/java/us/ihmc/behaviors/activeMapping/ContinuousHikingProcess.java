@@ -136,9 +136,9 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
+      ros2ImageSensors.destroy();
       d455Sensor.close();
       zedSensor.close();
-      ros2ImageSensors.destroy();
       rapidHeightMapThread.blockingKill();
       continuousPlannerSchedulingTask.destroy();
       snappingTerrainManager.close();
