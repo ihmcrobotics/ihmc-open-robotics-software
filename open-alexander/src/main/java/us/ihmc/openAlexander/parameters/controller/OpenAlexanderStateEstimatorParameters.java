@@ -37,7 +37,7 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
    private final double angularVelocityFrequency;
    private final double linearAccelerationFrequency;
 
-   private final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
+   protected final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
 
    private final AlexanderSensorInformation sensorInformation;
 
@@ -61,26 +61,6 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       linearAccelerationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
-
-      String pelvisIMU = sensorInformation.getPrimaryBodyImu();
-
-      if (pelvisIMU != null && target == RobotTarget.REAL_ROBOT)
-      {
-         double breakFrequencyForPositionEstimation = 2.0;
-         double breakFrequencyForVelocityEstimation = 0.15;
-
-         String torsoIMU = sensorInformation.getTorsoIMUName();
-
-//         if (torsoIMU != null)
-//         {
-//            imuBasedJointStateEstimatorParameters.add(new IMUBasedJointStateEstimatorParameters("Spine",
-//                                                                                                true,
-//                                                                                                pelvisIMU,
-//                                                                                                torsoIMU,
-//                                                                                                breakFrequencyForVelocityEstimation,
-//                                                                                                breakFrequencyForPositionEstimation));
-//         }
-      }
    }
 
    @Override
@@ -294,6 +274,6 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
    @Override
    public MomentumEstimatorMode getMomentumEstimatorMode()
    {
-      return MomentumEstimatorMode.SIMPLE; //TODO eventually want to move to DISTRIBUTED_IMUS
+      return MomentumEstimatorMode.SIMPLE;
    }
 }

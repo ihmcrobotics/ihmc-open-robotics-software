@@ -176,7 +176,8 @@ public class HeightMapTools
                                              Point3D gridCenter,
                                              float widthInMeters,
                                              float cellSizeInMeters,
-                                             HeightMapParameters heightMapParameters)
+                                             float heightScaleFactor,
+                                             float heightOffset)
    {
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
@@ -201,7 +202,7 @@ public class HeightMapTools
          int height = major | minor;
 
          // Calculate cell height
-         float cellHeight = (float) (((float) height / heightMapParameters.getHeightScaleFactor()) - heightMapParameters.getHeightOffset());
+         float cellHeight = (float) (((float) height / heightScaleFactor) - heightOffset);
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);

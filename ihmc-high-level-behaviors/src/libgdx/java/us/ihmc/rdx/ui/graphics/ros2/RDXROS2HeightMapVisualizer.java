@@ -29,7 +29,6 @@ import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.perception.globalHeightMap.GlobalLattice;
 import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -52,19 +51,19 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
-   private final HeightMapParameters heightMapParameters;
    private TerrainMapData latestTerrainMapData;
 
    private final Point3D heightMapCenter = new Point3D();
 
    private final Stopwatch stopwatch = new Stopwatch();
    private int cellsPerAxis;
+   private float latestHeightMapOffset;
+   private float latestCellSizeInMeters;
 
-   public RDXROS2HeightMapVisualizer(String title, HeightMapParameters heightMapParameters)
+   public RDXROS2HeightMapVisualizer(String title)
    {
       super(title);
 
-      this.heightMapParameters = heightMapParameters;
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
@@ -115,7 +114,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, heightMapParameters);
+                                              latestHeightMapOffset = (float) heightMapMessage.getHeightOffset();
+                                              latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
+                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage,
+                                                                                                   latestHeightMapOffset,
+                                                                                                   (float) heightMapMessage.getHeightScaleFactor());
 
                                               if (latestHeightMapData == null)
                                               {
@@ -127,9 +130,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               HeightMapTools.convertToHeightMapData(heightMap,
                                                                                     latestHeightMapData,
                                                                                     heightMapCenter,
-                                                                                    (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                                                    (float) heightMapParameters.getCellSizeInMeters(),
-                                                                                    heightMapParameters);
+                                                                                    (float) heightMapMessage.getWidthInMeters(),
+                                                                                    (float) heightMapMessage.getCellSizeInMeters(),
+                                                                                    (float) heightMapMessage.getHeightScaleFactor(),
+                                                                                    (float) heightMapMessage.getHeightOffset());
 
                                               // This prevents the rendering from happening to early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)
@@ -227,11 +231,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          {
             float pixelScalingFactor = 10000.0f;
             heightMapRenderer.update(heightMap,
-                                     (float) heightMapParameters.getHeightOffset(),
+                                     latestHeightMapOffset,
                                      heightMapCenter.getX32(),
                                      heightMapCenter.getY32(),
                                      cellsPerAxis / 2,
-                                     (float) heightMapParameters.getCellSizeInMeters(),
+                                     latestCellSizeInMeters,
                                      pixelScalingFactor);
          }
       }
