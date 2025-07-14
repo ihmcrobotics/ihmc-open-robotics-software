@@ -98,6 +98,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXMultiBodyGraphic ghostRobotGraphic;
    private final RDXVRMiniGhostPreview miniGhost;
    private final ImBoolean showGhosts = new ImBoolean(true);
+   private final ImBoolean showMiniGhost = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -576,11 +577,11 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (isKSTEnabled.get())
       {
+         miniGhost.setActive(showMiniGhost.get());
          if (streamToController.get())
          {
             ghostRobotGraphic.setActive(showGhosts.get());
             robotVisualizer.setActive(showGhosts.get());
-            miniGhost.setActive(showGhosts.get());
             if (showGhosts.get())
                robotVisualizer.setOpacity(0.5f);
          }
@@ -673,7 +674,8 @@ public class RDXVRWholeBodyKinematicStreaming
       }
 
       ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
-      ImGui.checkbox(labels.get("Show Ghosts during Control"), showGhosts);
+      ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
+      ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
       ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
    }
 
