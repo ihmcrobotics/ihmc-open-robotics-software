@@ -47,7 +47,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
       setRenderMethod(this::renderImGuiWidgets);
 
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer", heightMapParameters);
+      heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map Visualizer");
       heightMapVisualizer.setActive(true);
    }
 
