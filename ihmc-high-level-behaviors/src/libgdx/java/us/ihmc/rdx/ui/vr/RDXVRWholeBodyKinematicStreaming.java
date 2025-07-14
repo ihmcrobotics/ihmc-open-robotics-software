@@ -8,6 +8,7 @@ import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
@@ -28,12 +29,16 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LoggerRequestedState;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -56,6 +61,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -90,6 +96,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXROS2RobotVisualizer robotVisualizer;
    private float userRobotOpacity = 1.0f; // store this so we can avoid overriding the user
    private final RDXMultiBodyGraphic ghostRobotGraphic;
+   private final RDXVRMiniGhostPreview miniGhost;
    private final ImBoolean showGhosts = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
@@ -138,14 +145,14 @@ public class RDXVRWholeBodyKinematicStreaming
                                            RetargetingParameters retargetingParameters,
                                            KinematicsStreamingToolboxParameters kstParameters,
                                            boolean createToolbox,
-                                           RDXHandConfigurationManager handManager)
+                                           RDXHandConfigurationManager handManager,
+                                           FullHumanoidRobotModel miniGhostFullRobotModel)
    {
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.retargetingParameters = retargetingParameters;
       this.vrContext = vrContext;
       this.robotVisualizer = robotVisualizer;
-
       this.kstParameters = kstParameters;
 
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
@@ -159,6 +166,11 @@ public class RDXVRWholeBodyKinematicStreaming
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
+
+      miniGhost = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName(),
+                                            ghostRobotDefinition,
+                                            miniGhostFullRobotModel,
+                                            vrContext);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -178,11 +190,9 @@ public class RDXVRWholeBodyKinematicStreaming
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
-
       MutableReferenceFrame headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot.getFullRobotModel(), ghostFullRobotModel, handDesiredControlFrames, trackerReferenceFrames,
                                                      headsetReferenceFrame, retargetingParameters);
-
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
       ros2LogMessagePublisher = ros2ControllerHelper.getROS2Node().createPublisher(ROS2LogRecord.getROS2LogTopic());
@@ -570,6 +580,7 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             ghostRobotGraphic.setActive(showGhosts.get());
             robotVisualizer.setActive(showGhosts.get());
+            miniGhost.setActive(showGhosts.get());
             if (showGhosts.get())
                robotVisualizer.setOpacity(0.5f);
          }
@@ -594,6 +605,7 @@ public class RDXVRWholeBodyKinematicStreaming
                for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                {
                   ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+                  miniGhost.setJoint(i, latestStatus.getDesiredJointAngles().get(i));
                }
                ghostFullRobotModel.getElevator().updateFramesRecursively();
             }
@@ -605,6 +617,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
          if (ghostRobotGraphic.isActive())
             ghostRobotGraphic.update();
+         miniGhost.updatePose();
       }
    }
 
@@ -631,7 +644,6 @@ public class RDXVRWholeBodyKinematicStreaming
                                       newConfiguration);
          setKSTEnabled(false);
       }
-      ImGui.checkbox(labels.get("Show Ghosts during Control"), showGhosts);
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(CHEST.getSegmentName()))
@@ -660,8 +672,8 @@ public class RDXVRWholeBodyKinematicStreaming
          comTracking.set(false);
       }
 
-      ghostRobotGraphic.renderImGuiWidgets(); // FIXME: Does nothing?
       ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+      ImGui.checkbox(labels.get("Show Ghosts during Control"), showGhosts);
       ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
    }
 
@@ -674,12 +686,14 @@ public class RDXVRWholeBodyKinematicStreaming
             initialize();
             wakeUpToolbox();
             ghostRobotGraphic.setActive(true);
+            miniGhost.setActive(true);
          }
       }
       else // Disable
       {
          sleepToolbox();
-         visualizeIKPreviewGraphic(true);
+         ghostRobotGraphic.setActive(false);
+         miniGhost.setActive(false);
          setStreamToController(false, false);
       }
 
@@ -699,6 +713,7 @@ public class RDXVRWholeBodyKinematicStreaming
             robotVisualizer.setOpacity(userRobotOpacity);
             robotVisualizer.setActive(true);
             ghostRobotGraphic.setActive(true);
+            miniGhost.setActive(true);
          }
       }
 
@@ -773,6 +788,7 @@ public class RDXVRWholeBodyKinematicStreaming
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
+         miniGhost.getRenderables(renderables, pool, sceneLevels);
       }
 
       if (showReferenceFrameGraphics.get())
@@ -800,16 +816,12 @@ public class RDXVRWholeBodyKinematicStreaming
       }
    }
 
-   public void visualizeIKPreviewGraphic(boolean visualize)
-   {
-      ghostRobotGraphic.setActive(visualize);
-   }
-
    public void destroy()
    {
       if (toolbox != null)
          toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
+      miniGhost.destroy();
       for (RobotSide side : RobotSide.values)
       {
          controllerFrameGraphics.get(side).dispose();
