@@ -45,6 +45,7 @@ public class ContinuousHikingProcess
    private final RealSenseImageSensor d455Sensor;
    private final ZEDImageSensor zedSensor;
    private final RapidHeightMapThread rapidHeightMapThread;
+   private final ROS2ImageSensors ros2ImageSensors;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
    {
@@ -63,9 +64,9 @@ public class ContinuousHikingProcess
       zedSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2I, SL_INPUT_TYPE_USB, SL_DEPTH_MODE_NEURAL);
 
       // Creates the threading for the perception sensors
-      ROS2ImageSensors perceptionProcess = new ROS2ImageSensors(ros2Node, syncedRobot);
-      perceptionProcess.addRealsenseSensor(d455Sensor);
-      perceptionProcess.addZEDSensor(zedSensor);
+      ros2ImageSensors = new ROS2ImageSensors(ros2Node, syncedRobot);
+      ros2ImageSensors.addRealsenseSensor(d455Sensor);
+      ros2ImageSensors.addZEDSensor(zedSensor);
       d455Sensor.run(true); // Start this now so the height map can be running as well by default
 
       // This allows the sensor to be tuned via the user interface and the affect shows on hardware, needed for calibrating the sensor
@@ -137,6 +138,7 @@ public class ContinuousHikingProcess
    {
       d455Sensor.close();
       zedSensor.close();
+      ros2ImageSensors.destroy();
       rapidHeightMapThread.blockingKill();
       continuousPlannerSchedulingTask.destroy();
       snappingTerrainManager.close();
