@@ -66,6 +66,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup();
 
+   public abstract RobotInitialSetup<HumanoidFloatingRootJointRobot> getSimulatedRobotInitialSetup();
+
    default RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return getDefaultRobotInitialSetup(groundHeight, initialYaw, 0, 0);
@@ -83,6 +85,15 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    default RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw, double x, double y, double z)
    {
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = getDefaultRobotInitialSetup();
+      robotInitialSetup.setInitialGroundHeight(groundHeight);
+      robotInitialSetup.setInitialYaw(initialYaw);
+      robotInitialSetup.setOffset(new Vector3D(x, y, z));
+      return robotInitialSetup;
+   }
+
+   default RobotInitialSetup<HumanoidFloatingRootJointRobot> getSimulatedRobotInitialSetup(double groundHeight, double initialYaw, double x, double y, double z)
+   {
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = getSimulatedRobotInitialSetup();
       robotInitialSetup.setInitialGroundHeight(groundHeight);
       robotInitialSetup.setInitialYaw(initialYaw);
       robotInitialSetup.setOffset(new Vector3D(x, y, z));

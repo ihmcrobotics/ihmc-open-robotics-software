@@ -235,7 +235,13 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public HumanoidRobotInitialSetup getDefaultRobotInitialSetup()
    {
-      return new AlexanderInitialSetup(getRobotVersion(),getRobotDefinition(), getJointMap());
+      return new AlexanderInitialSetup(getRobotVersion(), getRobotDefinition(), getJointMap());
+   }
+
+   @Override
+   public HumanoidRobotInitialSetup getSimulatedRobotInitialSetup()
+   {
+      return new AlexanderInitialSetup(getRobotVersion(), getRobotDefinition(), getJointMap());
    }
 
    @Override
