@@ -32,8 +32,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
@@ -57,6 +58,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -95,6 +97,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean showGhosts = new ImBoolean(true);
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final FullHumanoidRobotModel miniGhostFullRobotModel;
+   private ReferenceFrame miniGhostFrame;
    private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private OneDoFJointBasics[] miniGhostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -120,6 +123,7 @@ public class RDXVRWholeBodyKinematicStreaming
    public long controllerLastPollTimeNanos;
 
    private final FramePose3D tempFramePose = new FramePose3D();
+   private final MutableReferenceFrame headsetReferenceFrame;
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
@@ -165,13 +169,20 @@ public class RDXVRWholeBodyKinematicStreaming
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
+      headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
       if (miniGhostFullRobotModel != null)
       {
          miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
          miniGhostRobotGraphic = new RDXMultiBodyGraphic(syncedRobot.getRobotModel().getSimpleRobotName() + " (Mini Preview Ghost)");
-         miniGhostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, miniGhostFullRobotModel.getElevator(), 0.3, false);
+         miniGhostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, miniGhostFullRobotModel.getElevator(), 0.05, false);
          miniGhostRobotGraphic.setActive(true);
          miniGhostRobotGraphic.create();
+         RigidBodyTransform headsetTransform = headsetReferenceFrame.getReferenceFrame().getTransformToRoot();
+         Pose3D ghostPose = new Pose3D(headsetTransform);
+         ghostPose.getTranslation().addX(0.2);
+         ghostPose.getTranslation().addY(-0.1);
+         ghostPose.getTranslation().addZ(-0.1);
+         miniGhostFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(headsetReferenceFrame.getReferenceFrame(), ghostPose);
       }
 
       for (RobotSide side : RobotSide.values)
@@ -192,11 +203,8 @@ public class RDXVRWholeBodyKinematicStreaming
          }
          ikControlFramePoses.put(side, ikControlFramePose);
       }
-
-      MutableReferenceFrame headsetReferenceFrame = new MutableReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot.getFullRobotModel(), ghostFullRobotModel, handDesiredControlFrames, trackerReferenceFrames,
                                                      headsetReferenceFrame, retargetingParameters);
-
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
       ros2LogMessagePublisher = ros2ControllerHelper.getROS2Node().createPublisher(ROS2LogRecord.getROS2LogTopic());
@@ -614,7 +622,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
                if (miniGhostFullRobotModel != null)
                {
-                  miniGhostFullRobotModel.getRootJoint().setJointPosition(new Point3D());
+//                  miniGhostFullRobotModel.getRootJoint().setJointOrientation();
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                   {
                      miniGhostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
@@ -631,7 +639,10 @@ public class RDXVRWholeBodyKinematicStreaming
          if (ghostRobotGraphic.isActive())
             ghostRobotGraphic.update();
          if (miniGhostFullRobotModel != null)
+         {
+            miniGhostFullRobotModel.getRootJoint().setJointPosition(miniGhostFrame.getTransformToRoot().getTranslation());
             miniGhostRobotGraphic.update();
+         }
       }
    }
 
@@ -658,7 +669,6 @@ public class RDXVRWholeBodyKinematicStreaming
                                       newConfiguration);
          setKSTEnabled(false);
       }
-      ImGui.checkbox(labels.get("Show Ghosts during Control"), showGhosts);
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(CHEST.getSegmentName()))
@@ -687,8 +697,8 @@ public class RDXVRWholeBodyKinematicStreaming
          comTracking.set(false);
       }
 
-      ghostRobotGraphic.renderImGuiWidgets(); // FIXME: Does nothing?
       ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+      ImGui.checkbox(labels.get("Show Ghosts during Control"), showGhosts);
       ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
    }
 
