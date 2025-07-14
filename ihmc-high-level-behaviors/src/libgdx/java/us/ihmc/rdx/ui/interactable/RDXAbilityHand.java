@@ -80,6 +80,7 @@ public class RDXAbilityHand
 
    public void renderImGuiWidgets(AbilityHandROS2HardwareCommunication communication)
    {
+      ImGui.pushID(serialNumber);
       if (!communication.getAvailableHandSerialNumbers().contains(serialNumber))
          return;
       communication.getCommand(serialNumber).setSerialNumber(serialNumber);
@@ -178,11 +179,13 @@ public class RDXAbilityHand
             }
          }
       }
+      ImGui.popID();
    }
 
    private void gripMode(Grip grip, AbilityHandROS2HardwareCommunication communication)
    {
       controlMode = ControlMode.GRIP;
+      communication.getCommand(serialNumber).setSerialNumber(serialNumber);
       Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
       communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
       communication.getCommand(serialNumber).setGrip(grip.toByte());
