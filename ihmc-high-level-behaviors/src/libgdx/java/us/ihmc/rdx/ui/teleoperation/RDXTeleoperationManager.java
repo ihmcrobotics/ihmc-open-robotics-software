@@ -20,9 +20,8 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -485,26 +484,40 @@ public class RDXTeleoperationManager extends RDXPanel
    private void processWBMPCCommand()
    {
       // Get the current and desired poses for comparison
-      double xyTolerance = 0.01; // 1cm tolerance for x,y movement
-      Vector3DBasics currentPosition = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame().getTranslation();
-      FramePoint3DReadOnly desiredPosition = interactablePelvis.getPose().getPosition();
       FrameQuaternionReadOnly desiredOrientation = interactablePelvis.getPose().getOrientation();
 
-      LogTools.info("This is the current position vector of the robot in the WF: {}", desiredPosition);
-      LogTools.info("This is the current desired position vector in the WF: {}", currentPosition );
+      // Get the current Center of Mass height in MidFeetZUpFrame
+      FramePoint3D currentCoMPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+      currentCoMPosition.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
 
-      // @TODO: preallocate these variables - Calculate position difference
-      double deltaZ = Math.abs(desiredPosition.getZ() - currentPosition.getZ());
-      // Define tolerance for considering movement as "z-only"
+      // Get the desired pelvis height in MidFeetZUpFrame
+      FramePoint3D desiredPelvisPosition = new FramePoint3D();
+      desiredPelvisPosition.setIncludingFrame(interactablePelvis.getPose().getPosition());
+      desiredPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
 
-      boolean isZOnlyMovement = (deltaZ > xyTolerance);
-      if (isZOnlyMovement)
+      // Calculate the actual offset between current CoM and current pelvis
+      FramePoint3D currentPelvisPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getPelvisFrame());
+      currentPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+
+      double currentComToPelvisOffset = currentCoMPosition.getZ() - currentPelvisPosition.getZ();
+      double desiredCoMHeight = desiredPelvisPosition.getZ() + currentComToPelvisOffset;
+
+      // Calculate Z displacement only
+      double deltaZ = Math.abs(desiredCoMHeight - currentCoMPosition.getZ());
+
+      // Tolerance for height movement
+      double heightTolerance = 0.01; // 1cm tolerance
+
+      LogTools.info("Current CoM height: {}, Desired CoM height: {}, Delta: {}",
+                    currentCoMPosition.getZ(), desiredCoMHeight, deltaZ);
+
+      if (deltaZ > heightTolerance)
       {
-         // Send center of mass trajectory for z-only movement
-         RDXBaseUI.pushNotification("Commanding center of mass trajectory...");
+         // Send center of mass height trajectory
+         RDXBaseUI.pushNotification("Commanding center of mass height trajectory...");
          ros2Helper.publishToController(HumanoidMessageTools.createCenterOfMassTrajectoryMessage(
                teleoperationParameters.getTrajectoryTime(),
-               desiredPosition));
+               new Point3D(0.0, 0.0, desiredCoMHeight)));
       }
       else
       {
