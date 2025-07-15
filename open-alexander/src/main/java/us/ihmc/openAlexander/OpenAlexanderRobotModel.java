@@ -3,6 +3,8 @@ package us.ihmc.openAlexander;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControllerParameters;
 import us.ihmc.openAlexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
@@ -242,6 +244,15 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public HumanoidRobotInitialSetup getSimulatedRobotInitialSetup()
    {
       return new AlexanderInitialSetup(getRobotVersion(), getRobotDefinition(), getJointMap());
+   }
+
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getSimulatedRobotInitialSetup(double groundHeight, double initialYaw, double x, double y, double z)
+   {
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = getSimulatedRobotInitialSetup();
+      robotInitialSetup.setInitialGroundHeight(groundHeight);
+      robotInitialSetup.setInitialYaw(initialYaw);
+      robotInitialSetup.setOffset(new Vector3D(x, y, z));
+      return robotInitialSetup;
    }
 
    @Override
