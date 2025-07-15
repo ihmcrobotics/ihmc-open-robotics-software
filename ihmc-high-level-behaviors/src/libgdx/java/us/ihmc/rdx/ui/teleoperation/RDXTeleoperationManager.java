@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import org.jfree.util.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -16,11 +17,16 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -257,9 +263,14 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                      RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
-                      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                        interactablePelvis.getPose()));
+                        boolean flag = true;
+                        if (flag)
+                           processWBMPCCommand();
+                        else
+                           RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
+                           ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
+                                 teleoperationParameters.getTrajectoryTime(),
+                                 interactablePelvis.getPose()));
                      }
                   });
                   allInteractableRobotLinks.add(interactablePelvis);
@@ -468,6 +479,40 @@ public class RDXTeleoperationManager extends RDXPanel
 
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.processVRInput(vrContext);
+      }
+   }
+
+   private void processWBMPCCommand()
+   {
+      // Get the current and desired poses for comparison
+      double xyTolerance = 0.01; // 1cm tolerance for x,y movement
+      Vector3DBasics currentPosition = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame().getTranslation();
+      FramePoint3DReadOnly desiredPosition = interactablePelvis.getPose().getPosition();
+      FrameQuaternionReadOnly desiredOrientation = interactablePelvis.getPose().getOrientation();
+
+      LogTools.info("This is the current position vector of the robot in the WF: {}", desiredPosition);
+      LogTools.info("This is the current desired position vector in the WF: {}", currentPosition );
+
+      // @TODO: preallocate these variables - Calculate position difference
+      double deltaZ = Math.abs(desiredPosition.getZ() - currentPosition.getZ());
+      // Define tolerance for considering movement as "z-only"
+
+      boolean isZOnlyMovement = (deltaZ > xyTolerance);
+      if (isZOnlyMovement)
+      {
+         // Send center of mass trajectory for z-only movement
+         RDXBaseUI.pushNotification("Commanding center of mass trajectory...");
+         ros2Helper.publishToController(HumanoidMessageTools.createCenterOfMassTrajectoryMessage(
+               teleoperationParameters.getTrajectoryTime(),
+               desiredPosition));
+      }
+      else
+      {
+         // Send orientation-only trajectory for other movements
+         RDXBaseUI.pushNotification("Commanding pelvis orientation trajectory...");
+         ros2Helper.publishToController(HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(
+               teleoperationParameters.getTrajectoryTime(),
+               desiredOrientation));
       }
    }
 

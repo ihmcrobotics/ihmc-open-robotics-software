@@ -19,6 +19,7 @@ import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CenterOfMassTrajectoryMessage;
 import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
@@ -2196,6 +2197,37 @@ public class HumanoidMessageTools
          message.getWayPointTimes().add(keyFrameTimes.get(i));
          message.getDesiredWayPointPositionsInWorld().add().set(keyFramePoints.get(i));
       }
+      return message;
+   }
+
+   /**
+    * Use this constructor to execute a straight line trajectory for center of mass.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime     how long it takes to reach the desired position.
+    * @param desiredPosition    desired center of mass position expressed in world frame.
+    */
+   public static CenterOfMassTrajectoryMessage createCenterOfMassTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition)
+   {
+      CenterOfMassTrajectoryMessage message = new CenterOfMassTrajectoryMessage();
+      message.getEuclideanTrajectory().set(createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, ReferenceFrame.getWorldFrame()));
+      return message;
+   }
+
+   /**
+    * Use this constructor to execute a straight line trajectory for center of mass with velocity.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime         how long it takes to reach the desired position.
+    * @param desiredPosition        desired center of mass position expressed in world frame.
+    * @param desiredLinearVelocity  desired linear velocity at the end of the trajectory.
+    */
+   public static CenterOfMassTrajectoryMessage createCenterOfMassTrajectoryMessage(double trajectoryTime,
+                                                                                   Point3DReadOnly desiredPosition,
+                                                                                   Vector3DReadOnly desiredLinearVelocity)
+   {
+      CenterOfMassTrajectoryMessage message = new CenterOfMassTrajectoryMessage();
+      message.getEuclideanTrajectory().set(createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, ReferenceFrame.getWorldFrame()));
       return message;
    }
 
