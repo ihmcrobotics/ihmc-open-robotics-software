@@ -62,7 +62,7 @@ public class RDXVRModeControls
       switch (vrModeManager.getMode())
       {
          case FOOTSTEP_PLACEMENT -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRFootstepPlacement.class.getSimpleName());
-         case WHOLE_BODY_IK_STREAMING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRKinematicsStreamingMode.class.getSimpleName());
+         case WHOLE_BODY_IK_STREAMING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRWholeBodyKinematicStreaming.class.getSimpleName());
          case JOYSTICK_WALKING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXJoystickBasedStepping.class.getSimpleName());
       }
 
@@ -74,9 +74,9 @@ public class RDXVRModeControls
          switch (vrModeManager.getMode())
          {
             case WHOLE_BODY_IK_STREAMING -> {
-               if (vrModeManager.getKinematicsStreamingMode() != null)
+               if (vrModeManager.getKinematicsStreaming() != null)
                {
-                  vrModeManager.getKinematicsStreamingMode().renderImGuiWidgets();
+                  vrModeManager.getKinematicsStreaming().renderImGuiWidgets();
                }
                else
                {
