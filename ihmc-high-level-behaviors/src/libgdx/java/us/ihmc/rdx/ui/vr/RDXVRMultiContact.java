@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
+import imgui.type.ImBoolean;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -37,6 +38,7 @@ public class RDXVRMultiContact
    private final FullHumanoidRobotModel ghostFullRobotModel;
    private final double streamPeriod;
    private final RDXVRContext vrContext;
+   private final ImBoolean userIsControllingRobot;
 
    private final RDXMultiContactRegionGraphic multiContactStabilityGraphic;
    private final RDXMultiContactRegionHelper regionHelper;
@@ -58,21 +60,16 @@ public class RDXVRMultiContact
                             ROS2ControllerHelper ros2ControllerHelper,
                             RDXVRContext vrContext,
                             double streamPeriod,
-                            RDXVRHandControl handControl)
+                            ImBoolean userIsControllingRobot,
+                            SideDependentList<RDXHandControlMode> handControlModes)
    {
       this.syncedRobot = syncedRobot;
       this.ghostFullRobotModel = ghostFullRobotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.vrContext = vrContext;
       this.streamPeriod = streamPeriod;
-      if (handControl == null)
-      {
-         handControlModes = new SideDependentList<>(RDXHandControlMode.LOAD_BEARING, RDXHandControlMode.LOAD_BEARING);
-      }
-      else
-      {
-         handControlModes = handControl.getHandsControlMode();
-      }
+      this.handControlModes = handControlModes;
+      this.userIsControllingRobot = userIsControllingRobot;
 
       multiContactStabilityGraphic = new RDXMultiContactRegionGraphic(ghostFullRobotModel);
       regionHelper = new RDXMultiContactRegionHelper(ghostFullRobotModel, ros2ControllerHelper.getROS2Node());
@@ -80,6 +77,11 @@ public class RDXVRMultiContact
 
    public void processVRInput()
    {
+      if (!isEnabled())
+         return;
+      if (!userIsControllingRobot.get())
+         return;
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
@@ -103,6 +105,9 @@ public class RDXVRMultiContact
    // When hands are loaded, allow the user to directly control the CoM with the right joysticks
    public void doCoMControl(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
    {
+      if (!isEnabled())
+         return;
+
       boolean isUpperBodyLoadBearing = handsAreLoaded.get(RobotSide.LEFT) || handsAreLoaded.get(RobotSide.RIGHT);
       if (!isUpperBodyLoadBearing)
          return;
@@ -153,11 +158,22 @@ public class RDXVRMultiContact
 
    public void update(KinematicsToolboxOutputStatus latestStatus)
    {
-      multiContactStabilityGraphic.update(latestStatus, desiredCoMPositionFiltered);
+      if (isEnabled())
+      {
+         multiContactStabilityGraphic.update(latestStatus, desiredCoMPositionFiltered);
+      }
+   }
+
+   private boolean isEnabled()
+   {
+      return handControlModes.get(RobotSide.LEFT) == RDXHandControlMode.LOAD_BEARING || handControlModes.get(RobotSide.RIGHT) == RDXHandControlMode.LOAD_BEARING;
    }
 
    public void reset()
    {
+      if (!isEnabled())
+         return;
+
       comPositionInitial.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
       comPositionInitial.changeFrame(ReferenceFrame.getWorldFrame());
       comTrackerOffset.setToZero();
@@ -166,7 +182,10 @@ public class RDXVRMultiContact
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      multiContactStabilityGraphic.getRenderables(renderables, pool);
+      if (isEnabled())
+      {
+         multiContactStabilityGraphic.getRenderables(renderables, pool);
+      }
    }
 
    private void sendHandLoadBearingMessage(RobotSide robotSide)

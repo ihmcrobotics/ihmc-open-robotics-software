@@ -8,7 +8,6 @@ import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
@@ -29,16 +28,12 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
 import us.ihmc.communication.ros2log.ROS2LoggerRequestedState;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -61,7 +56,6 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -84,12 +78,10 @@ public class RDXVRWholeBodyKinematicStreaming
 {
    public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
-   private static final boolean ENABLE_MULTI_CONTACT = false;
 
-   @Nullable
-   private RDXVRMultiContact multiContact;
-   @Nullable
-   private RDXVRHandControl handControl;
+   private final RDXVRMultiContact multiContact;
+   private final RDXVRHandControl handControl;
+   private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.HAND_CONFIGURATION, RDXHandControlMode.HAND_CONFIGURATION);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RDXVRContext vrContext;
@@ -219,14 +211,8 @@ public class RDXVRWholeBodyKinematicStreaming
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
       }
 
-      if (syncedRobot.getRobotModel().getRobotVersion().hasBothHandsWithFingers())
-      {
-         handControl = new RDXVRHandControl(vrContext, handManager, streamToController);
-      }
-      if (ENABLE_MULTI_CONTACT)
-      {
-         multiContact = new RDXVRMultiContact(syncedRobot, ghostFullRobotModel, ros2ControllerHelper, vrContext, streamPeriod, handControl);
-      }
+      handControl = new RDXVRHandControl(vrContext, handManager, streamToController, handControlModes);
+      multiContact = new RDXVRMultiContact(syncedRobot, ghostFullRobotModel, ros2ControllerHelper, vrContext, streamPeriod, streamToController, handControlModes);
    }
 
    private void handleRecordRequest()
@@ -273,25 +259,16 @@ public class RDXVRWholeBodyKinematicStreaming
          controllerLastPollTimeNanos = controller.getLastPollTimeNanos();
       });
 
-      if (ENABLE_MULTI_CONTACT)
-      {
-         multiContact.processVRInput();
-      }
-      if (handControl != null)
-      {
-         handControl.processVRInput();
-      }
-
+      multiContact.processVRInput();
+      handControl.processVRInput();
+      
       if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processControllers(toolboxInputMessage);
          processTrackers(toolboxInputMessage);
          retargetMotion(toolboxInputMessage);
-         if (ENABLE_MULTI_CONTACT)
-         {
-            multiContact.doCoMControl(toolboxInputMessage);
-         }
+         multiContact.doCoMControl(toolboxInputMessage);
 
          if (isKSTEnabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
@@ -610,10 +587,7 @@ public class RDXVRWholeBodyKinematicStreaming
                }
                ghostFullRobotModel.getElevator().updateFramesRecursively();
             }
-            if (ENABLE_MULTI_CONTACT)
-            {
-               multiContact.update(latestStatus);
-            }
+            multiContact.update(latestStatus);
          }
 
          if (ghostRobotGraphic.isActive())
@@ -730,10 +704,7 @@ public class RDXVRWholeBodyKinematicStreaming
       motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
       motionRetargeting.setArmScaling(armScaling.get());
       motionRetargeting.setCoMTracking(comTracking.get());
-      if (ENABLE_MULTI_CONTACT)
-      {
-         multiContact.reset();
-      }
+      multiContact.reset();
    }
 
    private void reinitializeToolboxRobotConfiguration()
@@ -812,10 +783,16 @@ public class RDXVRWholeBodyKinematicStreaming
          chestFrameGraphics.getRenderables(renderables, pool);
       }
 
-      if (ENABLE_MULTI_CONTACT)
-      {
-         multiContact.getRenderables(renderables, pool);
-      }
+      multiContact.getRenderables(renderables, pool);
+   }
+
+   /**
+    * Configures the hand control modes, see {@link RDXHandControlMode} for options
+    */
+   public void setVRHandConfiguration(RDXHandControlMode leftHandMode, RDXHandControlMode rightHandMode)
+   {
+      handControlModes.set(RobotSide.LEFT, leftHandMode);
+      handControlModes.set(RobotSide.RIGHT, rightHandMode);
    }
 
    public void destroy()

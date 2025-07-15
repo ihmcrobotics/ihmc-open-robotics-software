@@ -13,16 +13,20 @@ public class RDXVRHandControl
 {
    private final RDXVRContext vrContext;
    private final RDXHandConfigurationManager handManager;
-   private final SideDependentList<RDXHandControlMode> handsControlModes = new SideDependentList<>(RDXHandControlMode.HAND_CONFIGURATION, RDXHandControlMode.HAND_CONFIGURATION);
 
+   private final SideDependentList<RDXHandControlMode> handsControlModes;
    private final SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
    private final ImBoolean userIsControllingRobot;
 
-   public RDXVRHandControl(RDXVRContext vrContext, RDXHandConfigurationManager handManager, ImBoolean userIsControllingRobot)
+   public RDXVRHandControl(RDXVRContext vrContext,
+                           RDXHandConfigurationManager handManager,
+                           ImBoolean userIsControllingRobot,
+                           SideDependentList<RDXHandControlMode> handControlModes)
    {
       this.vrContext = vrContext;
       this.handManager = handManager;
       this.userIsControllingRobot = userIsControllingRobot;
+      this.handsControlModes = handControlModes;
    }
 
    public void processVRInput()
