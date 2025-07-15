@@ -21,7 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -484,7 +484,8 @@ public class RDXTeleoperationManager extends RDXPanel
    private void processWBMPCCommand()
    {
       // Get the current and desired poses for comparison
-      FrameQuaternionReadOnly desiredOrientation = interactablePelvis.getPose().getOrientation();
+
+      FramePose3DReadOnly desiredOrientation = interactablePelvis.getPose();
 
       // Get the current Center of Mass height in MidFeetZUpFrame
       FramePoint3D currentCoMPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
@@ -522,8 +523,8 @@ public class RDXTeleoperationManager extends RDXPanel
       else
       {
          // Send orientation-only trajectory for other movements
-         RDXBaseUI.pushNotification("Commanding pelvis orientation trajectory...");
-         ros2Helper.publishToController(HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(
+         RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
+         ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
                teleoperationParameters.getTrajectoryTime(),
                desiredOrientation));
       }
