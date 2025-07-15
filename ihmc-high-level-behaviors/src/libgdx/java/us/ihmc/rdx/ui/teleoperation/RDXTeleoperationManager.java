@@ -516,7 +516,7 @@ public class RDXTeleoperationManager extends RDXPanel
          // Send center of mass height trajectory
          RDXBaseUI.pushNotification("Commanding center of mass height trajectory...");
          ros2Helper.publishToController(HumanoidMessageTools.createCenterOfMassTrajectoryMessage(
-               teleoperationParameters.getTrajectoryTime(),
+               2*teleoperationParameters.getTrajectoryTime(),
                new Point3D(0.0, 0.0, desiredCoMHeight)));
       }
       else
