@@ -13,11 +13,13 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.InputStateEstimatorType;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters.InputStateEstimatorType;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -56,8 +58,6 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -203,9 +203,9 @@ public class RDXCapturyKinematicsStreaming
       KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
       parameters.setDefault();
       parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
-      parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
+      parameters.setDefaultChestAngularWeight(1.0);
       // That locks the pelvis in place, lower to gain some more freedom
-      parameters.setDefaultPelvisMessageLinearWeight(1.0, 1.0, 1.0);
+      parameters.setDefaultPelvisLinearWeight(1.0);
       // Max velocity
       parameters.setDefaultLinearRateLimit(100.0);
       // Max angular velocity
@@ -243,12 +243,12 @@ public class RDXCapturyKinematicsStreaming
       if (createToolbox)
       {
          boolean startYoVariableServer = true;
-         toolbox = new KinematicsStreamingToolboxModule(robotModel,
-                                                        parameters,
-                                                        startYoVariableServer,
-                                                        DomainFactory.PubSubImplementation.FAST_RTPS);
-         ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(
-               createInitialConfiguration(robotModel));
+//         toolbox = new KinematicsStreamingToolboxModule(robotModel,
+//                                                        parameters,
+//                                                        startYoVariableServer,
+//                                                        DomainFactory.PubSubImplementation.FAST_RTPS);
+//         ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(
+//               createInitialConfiguration(robotModel));
       }
 
       RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
@@ -557,9 +557,7 @@ public class RDXCapturyKinematicsStreaming
 
    public void sendHandCommand(RobotSide robotSide, HandConfiguration desiredHandConfiguration)
    {
-      ros2ControllerHelper.publish(DeprecatedAPIs::getHandConfigurationTopic,
-                                   HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide,
-                                                                                              desiredHandConfiguration));
+      return;
    }
 
    public HandConfiguration nextHandConfiguration(RobotSide robotSide)
@@ -610,8 +608,8 @@ public class RDXCapturyKinematicsStreaming
             MessageTools.packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
             message.getControlFramePositionInEndEffector().set(ikHandControlFramePoses.get(side).getPosition());
             message.getControlFrameOrientationInEndEffector().set(ikHandControlFramePoses.get(side).getOrientation());
-            message.setHasAngularVelocity(true);
-            message.setHasLinearVelocity(true);
+            message.setHasDesiredAngularVelocity(true);
+            message.setHasDesiredLinearVelocity(true);
             output.set(message);
             break;
          }
@@ -645,8 +643,8 @@ public class RDXCapturyKinematicsStreaming
                Pose3D controlFramePose = ikUpperArmControlFramePoses.get(side);
                message.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
                message.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
-               message.setHasAngularVelocity(true);
-               message.setHasLinearVelocity(true);
+               message.setHasDesiredAngularVelocity(true);
+               message.setHasDesiredLinearVelocity(true);
                output.set(message);
             }
             break;
@@ -676,8 +674,8 @@ public class RDXCapturyKinematicsStreaming
                message.getControlFramePositionInEndEffector().set(ikForearmControlFramePoses.get(side).getPosition());
                message.getControlFrameOrientationInEndEffector()
                       .set(ikForearmControlFramePoses.get(side).getOrientation());
-               message.setHasAngularVelocity(true);
-               message.setHasLinearVelocity(true);
+               message.setHasDesiredAngularVelocity(true);
+               message.setHasDesiredLinearVelocity(true);
                output.set(message);
             }
             break;
@@ -713,8 +711,8 @@ public class RDXCapturyKinematicsStreaming
                MessageTools.packSelectionMatrix3DMessage(true, true, true, null, message.getAngularSelectionMatrix());
                message.getControlFramePositionInEndEffector().set(ikChestControlFramePoses.getPosition());
                message.getControlFrameOrientationInEndEffector().set(ikChestControlFramePoses.getOrientation());
-               message.setHasAngularVelocity(true);
-               message.setHasLinearVelocity(true);
+               message.setHasDesiredAngularVelocity(true);
+               message.setHasDesiredLinearVelocity(true);
                output.set(message);
             }
             break;

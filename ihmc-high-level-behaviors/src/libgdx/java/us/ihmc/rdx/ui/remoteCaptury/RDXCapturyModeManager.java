@@ -111,12 +111,12 @@ public class RDXCapturyModeManager
          if (streamingWithStereo)
          {
             kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
-            robotVisualizer.fadeVisuals(0.0f, 0.01f);
+            robotVisualizer.setOpacity(0.01f);
          }
          else
          {
             kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
-            robotVisualizer.fadeVisuals(1.0f, 0.01f);
+            robotVisualizer.setOpacity(1.0f);
          }
       }
    }
