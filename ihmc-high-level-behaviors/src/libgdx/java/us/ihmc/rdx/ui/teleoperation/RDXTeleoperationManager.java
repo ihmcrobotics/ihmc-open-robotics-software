@@ -126,6 +126,12 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
+   /** For post-processing WBMPC commands */
+   private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
+   private final FramePoint3D tempDesiredPelvisPosition = new FramePoint3D();
+   private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
+   private static final double HEIGHT_TOLERANCE = 0.01;
+
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
     */
@@ -266,10 +272,8 @@ public class RDXTeleoperationManager extends RDXPanel
                         if (flag)
                            processWBMPCCommand();
                         else
-                           RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
-                           ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
-                                 teleoperationParameters.getTrajectoryTime(),
-                                 interactablePelvis.getPose()));
+                           // Old version
+                           processIKStreamingCommand();
                      }
                   });
                   allInteractableRobotLinks.add(interactablePelvis);
@@ -481,44 +485,39 @@ public class RDXTeleoperationManager extends RDXPanel
       }
    }
 
+   /**
+    * Function that routes the corresponding height displacement as CoM Trajectory Command, and the orientation
+    * as a Pelvis Trajectory Command
+    * @comment: For now, it can only process z displacements, it will be easy to extend it's funcionality for
+    *  displacements in the other directions
+    * @comment: Investigate which cases causes it to freak out
+    */
    private void processWBMPCCommand()
    {
-      // Get the current and desired poses for comparison
-
       FramePose3DReadOnly desiredOrientation = interactablePelvis.getPose();
 
-      // Get the current Center of Mass height in MidFeetZUpFrame
-      FramePoint3D currentCoMPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
-      currentCoMPosition.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      // Get all positions in world frame
+      tempCurrentCoMPosition.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+      tempCurrentCoMPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
 
-      // Get the desired pelvis height in MidFeetZUpFrame
-      FramePoint3D desiredPelvisPosition = new FramePoint3D();
-      desiredPelvisPosition.setIncludingFrame(interactablePelvis.getPose().getPosition());
-      desiredPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      tempDesiredPelvisPosition.setIncludingFrame(desiredOrientation.getPosition());
+      tempDesiredPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
 
-      // Calculate the actual offset between current CoM and current pelvis
-      FramePoint3D currentPelvisPosition = new FramePoint3D(syncedRobot.getReferenceFrames().getPelvisFrame());
-      currentPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      tempCurrentPelvisPosition.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
+      tempCurrentPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
 
-      double currentComToPelvisOffset = currentCoMPosition.getZ() - currentPelvisPosition.getZ();
-      double desiredCoMHeight = desiredPelvisPosition.getZ() + currentComToPelvisOffset;
+      // Calculate desired CoM height maintaining current offset
+      double currentComToPelvisOffset = tempCurrentCoMPosition.getZ() - tempCurrentPelvisPosition.getZ();
+      double desiredCoMHeight = tempDesiredPelvisPosition.getZ() + currentComToPelvisOffset;
+      double deltaZ = Math.abs(desiredCoMHeight - tempCurrentCoMPosition.getZ());
 
-      // Calculate Z displacement only
-      double deltaZ = Math.abs(desiredCoMHeight - currentCoMPosition.getZ());
-
-      // Tolerance for height movement
-      double heightTolerance = 0.01; // 1cm tolerance
-
-      LogTools.info("Current CoM height: {}, Desired CoM height: {}, Delta: {}",
-                    currentCoMPosition.getZ(), desiredCoMHeight, deltaZ);
-
-      if (deltaZ > heightTolerance)
+      if (deltaZ > HEIGHT_TOLERANCE)
       {
          // Send center of mass height trajectory
-         RDXBaseUI.pushNotification("Commanding center of mass height trajectory...");
+         RDXBaseUI.pushNotification("Commanding CoM height trajectory...");
          ros2Helper.publishToController(HumanoidMessageTools.createCenterOfMassTrajectoryMessage(
-               2*teleoperationParameters.getTrajectoryTime(),
-               new Point3D(0.0, 0.0, desiredCoMHeight)));
+               teleoperationParameters.getTrajectoryTime(),
+               new Point3D(tempCurrentCoMPosition.getX(), tempCurrentCoMPosition.getY(), desiredCoMHeight)));
       }
       else
       {
@@ -528,6 +527,14 @@ public class RDXTeleoperationManager extends RDXPanel
                teleoperationParameters.getTrajectoryTime(),
                desiredOrientation));
       }
+   }
+
+   private void processIKStreamingCommand()
+   {
+      RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
+      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
+            teleoperationParameters.getTrajectoryTime(),
+            interactablePelvis.getPose()));
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
