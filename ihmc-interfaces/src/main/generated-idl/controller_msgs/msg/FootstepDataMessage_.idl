@@ -40,7 +40,7 @@ module controller_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Specifies which foot will swing to reach the footstep.
          */
@@ -146,6 +146,15 @@ module controller_msgs
          * If the controller should check and fail if the step is not reachable
          */
         boolean should_check_for_reachability;
+        /**
+         * If the swing trajectory should be continuously updated everytime a new touchdown position is received by the controller
+         */
+        boolean update_footstep_reference_continuously;
+        /**
+         * If CoP feedback control should be disabled. This is desirable when using a stepping-based balance control strategy,
+         * rather than an ankle-based balance control strategy, which is used by default
+         */
+        boolean disable_cop_feedback_control;
       };
     };
   };

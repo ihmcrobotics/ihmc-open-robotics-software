@@ -15,7 +15,7 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8629abf0bedc09b07fbaf7994315ad6bf80b5a1d0d716d1ddce528e27f114e6a";
+   		return "76c145a0d1a9e0426a89a93be0c5c8d8b8637c49968689e56c3f30bd675fd144";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRequestedAtlasLowLevelControlMode());
 
@@ -89,7 +89,7 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRequestedAtlasLowLevelControlMode(cdr.read_type_9());
       	
@@ -99,14 +99,14 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("requested_atlas_low_level_control_mode", data.getRequestedAtlasLowLevelControlMode());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRequestedAtlasLowLevelControlMode(ser.read_type_9("requested_atlas_low_level_control_mode"));
    }
 

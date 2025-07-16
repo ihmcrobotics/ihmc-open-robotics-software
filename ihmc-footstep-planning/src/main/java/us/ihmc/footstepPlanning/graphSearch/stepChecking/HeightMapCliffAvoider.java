@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -130,7 +130,7 @@ public class HeightMapCliffAvoider
          Point2DReadOnly polygonVertex = scaledFootPolygon.getVertex(pointIdx);
          double zBestFitPlane = bestFitPlane.getZOnPlane(polygonVertex.getX(), polygonVertex.getY());
          double zHeightMap = heightMapData.getHeightAt(polygonVertex.getX(), polygonVertex.getY());
-         double distanceFromBestFitPlane = zHeightMap - zBestFitPlane;
+         double distanceFromBestFitPlane = Math.abs(zHeightMap - zBestFitPlane);
          highestCliffHeight.set(Math.max(distanceFromBestFitPlane, highestCliffHeight.getValue()));
 
          if (distanceFromBestFitPlane > parameters.getCliffHeightThreshold())

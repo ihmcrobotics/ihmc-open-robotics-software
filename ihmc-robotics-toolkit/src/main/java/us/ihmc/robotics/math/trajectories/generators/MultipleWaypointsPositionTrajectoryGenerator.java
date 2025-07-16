@@ -18,8 +18,8 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.trajectories.interfaces.FramePositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FixedFrameEuclideanTrajectoryPointBasics;
@@ -365,6 +365,19 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
    public double getLastWaypointTime()
    {
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
+   }
+
+   public void removeFirstWaypoint()
+   {
+      if (numberOfWaypoints.getIntegerValue() == 0)
+         return;
+
+      numberOfWaypoints.decrement();
+      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
+      {
+         waypoints.get(i).set(waypoints.get(i + 1));
+      }
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setToNaN();
    }
 
    @Override

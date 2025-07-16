@@ -16,8 +16,8 @@ public class PelvisHeightOrientationActionState extends ActionNodeState<PelvisHe
       super(id, new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       pelvisFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
-                                                     getDefinition().getCRDTParentFrameName(),
-                                                     getDefinition().getPelvisToParentTransform());
+                                                     definition.getCRDTParentFrameName(),
+                                                     definition.getPelvisToParentTransform());
    }
 
    @Override
@@ -28,16 +28,16 @@ public class PelvisHeightOrientationActionState extends ActionNodeState<PelvisHe
 
    public void toMessage(PelvisHeightOrientationActionStateMessage message)
    {
-      getDefinition().toMessage(message.getDefinition());
+      definition.toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
    }
 
    public void fromMessage(PelvisHeightOrientationActionStateMessage message)
    {
-      super.fromMessage(message.getState());
+      definition.fromMessage(message.getDefinition());
 
-      getDefinition().fromMessage(message.getDefinition());
+      super.fromMessage(message.getState());
    }
 
    public CRDTDetachableReferenceFrame getPelvisFrame()

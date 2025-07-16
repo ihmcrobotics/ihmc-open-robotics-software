@@ -1,8 +1,5 @@
 package us.ihmc.avatar.networkProcessor.directionalControlToolboxModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -15,23 +12,25 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DirectionalControlModule extends ToolboxModule
 {
-   private ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
-   private ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
-   private ROS2PublisherBasics<FootstepDataListMessage> footstepVisualizationPublisher;
+   private ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+   private ROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private ROS2Publisher<FootstepDataListMessage> footstepVisualizationPublisher;
    private final DirectionalControlController steppingController;
 
    /*
@@ -53,10 +52,9 @@ public class DirectionalControlModule extends ToolboxModule
       setup(robotModel);
    }
 
-   public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer)
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS,
-            pubSubImplementation);
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS);
 
       steppingController = new DirectionalControlController(fullRobotModel, robotModel.getWalkingControllerParameters(), statusOutputManager, registry);
       setup(robotModel);
@@ -99,7 +97,7 @@ public class DirectionalControlModule extends ToolboxModule
     * standalone mode.
     */
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       ROS2Topic<?> controllerPubGenerator = HumanoidControllerAPI.getOutputTopic(robotName);
 

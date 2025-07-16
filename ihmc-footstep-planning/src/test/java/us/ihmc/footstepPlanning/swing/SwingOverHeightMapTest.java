@@ -66,8 +66,8 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicBox3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -78,7 +78,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
    private static final double heightMapResolution = 0.03;
 
    private SimulationConstructionSet2 scs;
@@ -321,7 +321,7 @@ public class SwingOverHeightMapTest
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.getPosition().set(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(-0.05, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
@@ -412,7 +412,7 @@ public class SwingOverHeightMapTest
       ConvexPolygon2D foot = getFootPolygon();
 
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
       SwingPlannerParametersBasics swingPlannerParameters = getParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -423,8 +423,8 @@ public class SwingOverHeightMapTest
                                                                                walkingControllerParameters,
                                                                                footPolygons,
                                                                                null,
-                                                                               yoGraphicsListRegistry,
-                                                                               registry);
+                                                                               visualize ? yoGraphicsListRegistry : null,
+                                                                               visualize ? registry : null);
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
@@ -482,7 +482,7 @@ public class SwingOverHeightMapTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
       request.setHeightMapData(heightMapData);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
@@ -510,6 +510,7 @@ public class SwingOverHeightMapTest
          scs.setDT(1.0);
          scs.addRegistry(registry);
          scs.addYoGraphic(sylviasBox);
+         scs.addYoGraphic(expander.getSCS2YoGraphics());
          scs.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 //         scs.setGroundVisible(false);
 //         Conver();
@@ -555,10 +556,9 @@ public class SwingOverHeightMapTest
 
       List<Point3D> waypoints = footstepPlan.getFootstep(0).getCustomWaypointPositions();
       RecyclingArrayList<FramePoint3D> waypointListCopy = new RecyclingArrayList<>(FramePoint3D.class);
-      if (waypoints.size() > 0)
+      for (Point3D waypoint : waypoints)
       {
-         waypointListCopy.add().set(waypoints.get(0));
-         waypointListCopy.add().set(waypoints.get(1));
+         waypointListCopy.add().set(waypoint);
       }
 
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
@@ -606,7 +606,7 @@ public class SwingOverHeightMapTest
       };
       swingPlannerParameters.set(originalSwingPlannerParameters);
 
-      HeightMapData heightMapData = request.getHeightMapData();
+      HeightMapData heightMapData = request.getEnvironmentHandler().getHeightMapData();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
@@ -639,7 +639,7 @@ public class SwingOverHeightMapTest
          collisionBox.getPose().set(boxCenterPose);
 
 
-         double closestDistance = Double.MAX_VALUE;
+         double closestDistance = 0.0;
          Point3DReadOnly closestCollision = null;
 
          for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
@@ -650,7 +650,7 @@ public class SwingOverHeightMapTest
             collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
             collisionRelativeToStartFoot.changeFrame(startFootPoseFrame);
 
-            double distanceToCollision = collisionBox.distance(collision);
+            double distanceToCollision = collisionBox.signedDistance(collision);
             if (distanceToCollision < closestDistance)
             {
                closestDistance = distanceToCollision;
@@ -658,14 +658,14 @@ public class SwingOverHeightMapTest
             }
          }
 
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
          if (collisionResult.getSignedDistance() < closestDistance)
          {
             closestDistance = collisionResult.getSignedDistance();
             closestCollision = new Point3D(collisionResult.getPointOnB());
          }
 
-         boolean colliding = (closestDistance + 1.5e-2) < 0.0;
+         boolean colliding = (closestDistance + 1e-3) <= 0.0;
          if (colliding)
          {
             collisionPosition.set(closestCollision);
@@ -692,6 +692,8 @@ public class SwingOverHeightMapTest
       SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
 //      parameters.setDoInitialFastApproximation(true);
       parameters.setMinimumSwingFootClearance(0.05);
+      parameters.setMaxDisplacementLow(0.5);
+      parameters.setMaxDisplacementHigh(0.5);
       return parameters;
    }
 

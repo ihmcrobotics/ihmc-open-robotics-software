@@ -19,8 +19,6 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCylinder3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
-import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.Capsule3DDefinition;
@@ -38,6 +36,8 @@ import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.simulation.collision.Collidable;
+import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 

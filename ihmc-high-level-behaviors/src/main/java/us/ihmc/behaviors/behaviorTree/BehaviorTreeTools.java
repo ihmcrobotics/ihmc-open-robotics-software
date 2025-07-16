@@ -1,9 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +23,15 @@ public class BehaviorTreeTools
       return (BehaviorTreeRootNodeDefinition) findRootNodeGeneral(node);
    }
 
-   public static BehaviorTreeNode<?> findRootNodeGeneral(BehaviorTreeNode<?> node)
+   public static <T extends BehaviorTreeNode<T, ?, ?>> T findRootNode(T node)
+   {
+      while (!node.isRootNode())
+         node = node.getParent();
+
+      return node;
+   }
+
+   public static TreeNode<?> findRootNodeGeneral(TreeNode<?> node)
    {
       while (!node.isRootNode())
          node = node.getParent();
@@ -39,6 +44,26 @@ public class BehaviorTreeTools
       operation.accept(node);
 
       for (BehaviorTreeNodeDefinition child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static <LT extends TreeNode<LT>> void runForSubtreeNodes(LT node, Consumer<LT> operation)
+   {
+      operation.accept(node);
+
+      for (LT child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
+   }
+
+   public static <T extends BehaviorTreeNode<T, ?, ?>> void runForSubtreeNodes(T node, Consumer<T> operation)
+   {
+      operation.accept(node);
+
+      for (T child : node.getChildren())
       {
          runForSubtreeNodes(child, operation);
       }
@@ -60,5 +85,21 @@ public class BehaviorTreeTools
          }
       });
       return actionDefinitions;
+   }
+
+   public static int getNodeDepth(BehaviorTreeNodeState<?> node)
+   {
+      int depth = 0;
+      while (!node.isRootNode())
+      {
+         ++depth;
+         node = node.getParent();
+      }
+      return depth;
+   }
+
+   public static int getChildIndex(BehaviorTreeNodeState<?> node)
+   {
+      return node.isRootNode() ? 0 : node.getParent().getChildren().indexOf(node);
    }
 }

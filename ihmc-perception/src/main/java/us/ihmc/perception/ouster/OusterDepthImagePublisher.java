@@ -4,15 +4,12 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -25,7 +22,7 @@ public class OusterDepthImagePublisher
    private static final IntPointer COMPRESSION_PARAMETERS = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
 
    private final ROS2Node ros2Node;
-   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2Publisher<ImageMessage> ros2DepthImagePublisher;
 
    private long lastSequenceNumber = -1L;
    private RawImage nextCpuDepthImage;
@@ -39,7 +36,7 @@ public class OusterDepthImagePublisher
    {
       this.ouster = ouster;
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
+      ros2Node = new ROS2NodeBuilder().build("ouster_depth_publisher");
       ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
 
       publishDepthThread = new RestartableThread("OusterDepthImagePublisher", this::publishDepthThreadFunction);
@@ -79,23 +76,12 @@ public class OusterDepthImagePublisher
 
          // Publish image
          ImageMessage depthImageMessage = new ImageMessage();
-         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
-         imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
-         MessageTools.toMessage(depthImageToPublish.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
-         depthImageMessage.setFocalLengthXPixels(depthImageToPublish.getFocalLengthX());
-         depthImageMessage.setFocalLengthYPixels(depthImageToPublish.getFocalLengthY());
-         depthImageMessage.setPrincipalPointXPixels(depthImageToPublish.getPrincipalPointX());
-         depthImageMessage.setPrincipalPointYPixels(depthImageToPublish.getPrincipalPointY());
-         depthImageMessage.setImageWidth(depthImageToPublish.getImageWidth());
-         depthImageMessage.setImageHeight(depthImageToPublish.getImageHeight());
-         depthImageMessage.getPosition().set(depthImageToPublish.getPosition());
-         depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
-         depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
-         depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-         CameraModel.OUSTER.packMessageFormat(depthImageMessage);
-         ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
-         MessageTools.packIDLSequence(ouster.getBeamAltitudeAnglesBuffer(), depthImageMessage.getOusterBeamAltitudeAngles());
-         MessageTools.packIDLSequence(ouster.getBeamAzimuthAnglesBuffer(), depthImageMessage.getOusterBeamAzimuthAngles());
+         PerceptionMessageTools.packImageMessage(depthImageToPublish,
+                                                 depthPNGPointer,
+                                                 CompressionType.PNG,
+                                                 ouster.getBeamAltitudeAnglesBuffer(),
+                                                 ouster.getBeamAzimuthAnglesBuffer(),
+                                                 depthImageMessage);
 
          ros2DepthImagePublisher.publish(depthImageMessage);
          lastSequenceNumber = depthImageToPublish.getSequenceNumber();

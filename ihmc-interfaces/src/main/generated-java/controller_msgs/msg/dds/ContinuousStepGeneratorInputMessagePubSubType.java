@@ -15,7 +15,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9b769610caee25d78da0240df2032f7cc0ebe07f190f740564d1897cf1f1ead1";
+   		return "562d09ec9cd6770d7886d802d367c8b23b6a71dedd98b12d36d0764199738509";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -77,7 +77,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -101,7 +101,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
 
    public static void write(controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getWalk());
 
@@ -117,7 +117,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
 
    public static void read(controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setWalk(cdr.read_type_7());
       	
@@ -135,7 +135,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("walk", data.getWalk());
       ser.write_type_6("forward_velocity", data.getForwardVelocity());
       ser.write_type_6("lateral_velocity", data.getLateralVelocity());
@@ -146,7 +146,7 @@ public class ContinuousStepGeneratorInputMessagePubSubType implements us.ihmc.pu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ContinuousStepGeneratorInputMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setWalk(ser.read_type_7("walk"));
       data.setForwardVelocity(ser.read_type_6("forward_velocity"));
       data.setLateralVelocity(ser.read_type_6("lateral_velocity"));

@@ -15,7 +15,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7e0e4d33021b2ceb874deee72ab87c9ca8349b1379585469e0604f2c369b49f8";
+   		return "b449f56a65cdc924735b20e9068d9a1a46c442c56be4018a0fbdb2c29e84269d";
    }
    
    @Override
@@ -52,13 +52,11 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -73,6 +71,12 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -87,37 +91,45 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getJointsToDeactivate().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getJointsToActivate().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -126,7 +138,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getJointVelocityWeight());
 
@@ -148,11 +160,19 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       cdr.write_type_7(data.getDisableSupportPolygonConstraint());
 
+      if(data.getJointsToDeactivate().size() <= 10)
+      cdr.write_type_e(data.getJointsToDeactivate());else
+          throw new RuntimeException("joints_to_deactivate field exceeds the maximum length: %d > %d".formatted(data.getJointsToDeactivate().size(), 10));
+
+      if(data.getJointsToActivate().size() <= 10)
+      cdr.write_type_e(data.getJointsToActivate());else
+          throw new RuntimeException("joints_to_activate field exceeds the maximum length: %d > %d".formatted(data.getJointsToActivate().size(), 10));
+
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setJointVelocityWeight(cdr.read_type_6());
       	
@@ -174,13 +194,15 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       	
       data.setDisableSupportPolygonConstraint(cdr.read_type_7());
       	
+      cdr.read_type_e(data.getJointsToDeactivate());	
+      cdr.read_type_e(data.getJointsToActivate());	
 
    }
 
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("joint_velocity_weight", data.getJointVelocityWeight());
       ser.write_type_6("joint_acceleration_weight", data.getJointAccelerationWeight());
       ser.write_type_7("enable_joint_velocity_limits", data.getEnableJointVelocityLimits());
@@ -191,12 +213,14 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       ser.write_type_7("enable_input_persistence", data.getEnableInputPersistence());
       ser.write_type_7("enable_support_polygon_constraint", data.getEnableSupportPolygonConstraint());
       ser.write_type_7("disable_support_polygon_constraint", data.getDisableSupportPolygonConstraint());
+      ser.write_type_e("joints_to_deactivate", data.getJointsToDeactivate());
+      ser.write_type_e("joints_to_activate", data.getJointsToActivate());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setJointVelocityWeight(ser.read_type_6("joint_velocity_weight"));
       data.setJointAccelerationWeight(ser.read_type_6("joint_acceleration_weight"));
       data.setEnableJointVelocityLimits(ser.read_type_7("enable_joint_velocity_limits"));
@@ -207,6 +231,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       data.setEnableInputPersistence(ser.read_type_7("enable_input_persistence"));
       data.setEnableSupportPolygonConstraint(ser.read_type_7("enable_support_polygon_constraint"));
       data.setDisableSupportPolygonConstraint(ser.read_type_7("disable_support_polygon_constraint"));
+      ser.read_type_e("joints_to_deactivate", data.getJointsToDeactivate());
+      ser.read_type_e("joints_to_activate", data.getJointsToActivate());
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)

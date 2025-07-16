@@ -15,7 +15,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "82ffe2fbd077f17e9ba202e8be9abc6d7a9b85a58a9dd9016a9621bee9b4d6b6";
+   		return "23ec523eac3514161f3ad22ff942b1b8c178602d3c3ddf5558a2bc044cfeb1b7";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -71,7 +71,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -86,7 +86,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getClassSimpleNameBasedHashCode());
 
@@ -96,7 +96,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setClassSimpleNameBasedHashCode(cdr.read_type_2());
       	
@@ -108,7 +108,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("class_simple_name_based_hash_code", data.getClassSimpleNameBasedHashCode());
       ser.write_type_7("clear_all_delay_buffers", data.getClearAllDelayBuffers());
    }
@@ -116,7 +116,7 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ClearDelayQueueMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setClassSimpleNameBasedHashCode(ser.read_type_2("class_simple_name_based_hash_code"));
       data.setClearAllDelayBuffers(ser.read_type_7("clear_all_delay_buffers"));
    }

@@ -7,7 +7,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,7 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
@@ -27,7 +26,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,28 +56,26 @@ public class TerrainPlanningDebugger
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
-   private ROS2PublisherBasics<FootstepDataListMessage> plannedFootstesPublisherForUI;
-   private ROS2PublisherBasics<ContinuousWalkingStatusMessage> statusPublisher;
-   private ROS2PublisherBasics<FootstepDataListMessage> monteCarloPlanPublisherForUI;
-   private ROS2PublisherBasics<PoseListMessage> startAndGoalPublisherForUI;
-   private ROS2PublisherBasics<PoseListMessage> monteCarloNodesPublisherForUI;
+   private ROS2Publisher<FootstepDataListMessage> plannedFootstesPublisherForUI;
+   private ROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
+   private ROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
+   private ROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
+   private ROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
-   private PlanningMode planningMode;
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters, PlanningMode planningMode)
+   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
-      this.planningMode = planningMode;
       if (ros2Node != null)
       {
-         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
-         statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
-         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
-         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
-         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
+         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.PLANNED_FOOTSTEPS);
+         statusPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_WALKING_STATUS);
+         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_TREE_NODES);
       }
    }
 
@@ -88,9 +85,9 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getHeightMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getTerrainMapData().getHeightMapCenter().getY() * parameters.getNodesPerMeter());
-      refresh(request.getTerrainMapData());
+      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
+      refresh(request.getEnvironmentHandler().getTerrainMapData());
    }
 
    public void refresh(TerrainMapData terrainMapData)
@@ -98,8 +95,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getHeightMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (terrainMapData.getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (terrainMapData.getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
@@ -244,6 +241,16 @@ public class TerrainPlanningDebugger
       }
    }
 
+   public void resetVisualizationForUIPublisher()
+   {
+      PoseListMessage poseListMessage = new PoseListMessage();
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      startAndGoalPublisherForUI.publish(poseListMessage);
+      monteCarloNodesPublisherForUI.publish(poseListMessage);
+      plannedFootstesPublisherForUI.publish(footstepDataListMessage);
+   }
+
    public void publishStartAndGoalForVisualization(SideDependentList<FramePose3D> startPoses, SideDependentList<FramePose3D> goalPoses)
    {
       List<Pose3D> poses = new ArrayList<>();
@@ -256,25 +263,6 @@ public class TerrainPlanningDebugger
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
       startAndGoalPublisherForUI.publish(poseListMessage);
-   }
-
-   public void resetVisualizationForUIPublisher()
-   {
-      PoseListMessage poseListMessage = new PoseListMessage();
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-
-      if (planningMode == PlanningMode.FAST_HIKING)
-      {
-         startAndGoalPublisherForUI.publish(poseListMessage);
-         monteCarloNodesPublisherForUI.publish(poseListMessage);
-         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
-      }
-
-      if (planningMode == PlanningMode.WALK_TO_GOAL)
-      {
-         monteCarloNodesPublisherForUI.publish(poseListMessage);
-         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
-      }
    }
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
@@ -326,7 +314,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      PerceptionDebugTools.printMat("Contact Map", request.getTerrainMapData().getContactMap(), 4);
+      PerceptionDebugTools.printMat("Contact Map", request.getEnvironmentHandler().getTerrainMapData().getContactMap(), 4);
    }
 
    public void printHeightMap()
@@ -334,7 +322,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      PerceptionDebugTools.printMat("Height Map", request.getTerrainMapData().getHeightMap(), 4);
+      PerceptionDebugTools.printMat("Height Map", request.getEnvironmentHandler().getTerrainMapData().getHeightMap(), 4);
    }
 
    public void publishContinuousWalkingStatusMessage()
@@ -345,16 +333,6 @@ public class TerrainPlanningDebugger
    public Mat getDisplayImage()
    {
       return stacked;
-   }
-
-   public PlanningMode getPlanningMode()
-   {
-      return planningMode;
-   }
-
-   public void setPlanningMode(PlanningMode planningMode)
-   {
-      this.planningMode = planningMode;
    }
 
    public void setEnabled(boolean enabled)

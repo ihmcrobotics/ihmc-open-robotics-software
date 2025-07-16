@@ -79,7 +79,7 @@ public class FootstepPlannerRejectionReasonsMessagePubSubType implements us.ihmc
    {
       if(data.getRejectionReasons().size() <= 30)
       cdr.write_type_e(data.getRejectionReasons());else
-          throw new RuntimeException("rejection_reasons field exceeds the maximum length");
+          throw new RuntimeException("rejection_reasons field exceeds the maximum length: %d > %d".formatted(data.getRejectionReasons().size(), 30));
 
    }
 

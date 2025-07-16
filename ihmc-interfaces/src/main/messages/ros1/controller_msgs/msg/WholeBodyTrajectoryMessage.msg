@@ -2,7 +2,7 @@
 # Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Trajectory for the left hand
 controller_msgs/HandTrajectoryMessage left_hand_trajectory_message
@@ -42,5 +42,8 @@ controller_msgs/NeckTrajectoryMessage neck_trajectory_message
 
 # Trajectory for the head
 controller_msgs/HeadTrajectoryMessage head_trajectory_message
+
+# Trajectory for the CoM
+controller_msgs/CenterOfMassTrajectoryMessage center_of_mass_trajectory_message
 
 

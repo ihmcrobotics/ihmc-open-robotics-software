@@ -15,7 +15,7 @@ public class GlobalMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c9b617108b1e683322464951d9d4c6e02d906eb1f353d68cecb0135057a93ae2";
+   		return "c4cf3fdd4cf5d66ab760177ee926188e7f616348eb157f69e944d953af6a66e6";
    }
    
    @Override
@@ -79,7 +79,7 @@ public class GlobalMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       if(data.getGlobalMap().size() <= 100)
       cdr.write_type_e(data.getGlobalMap());else
-          throw new RuntimeException("global_map field exceeds the maximum length");
+          throw new RuntimeException("global_map field exceeds the maximum length: %d > %d".formatted(data.getGlobalMap().size(), 100));
 
    }
 

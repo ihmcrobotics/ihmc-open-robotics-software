@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;

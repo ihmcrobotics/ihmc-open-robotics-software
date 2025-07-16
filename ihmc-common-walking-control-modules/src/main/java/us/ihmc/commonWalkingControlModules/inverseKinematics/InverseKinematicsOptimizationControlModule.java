@@ -4,10 +4,22 @@ import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.*;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPVariableSubstitution;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
@@ -120,6 +132,12 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
 
    public void initialize()
    {
+      reset();
+      qpSolver.notifyResetActiveSet();
+   }
+
+   public void reset()
+   {
       qpSolver.reset();
       motionQPInputCalculator.initialize();
    }
@@ -164,6 +182,10 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
       }
 
       DMatrixRMaj jointVelocities = qpSolver.getJointVelocities();
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      { // Just to make sure the velocities are 0.0 for the inactive joints.
+         jointVelocities.set(inactiveJointIndices.get(i), 0.0);
+      }
       MomentumReadOnly centroidalMomentumSolution = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
       if (computeJointTorques.getValue())

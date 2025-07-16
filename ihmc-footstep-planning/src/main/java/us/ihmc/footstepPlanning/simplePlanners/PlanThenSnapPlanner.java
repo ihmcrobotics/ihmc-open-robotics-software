@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
@@ -14,13 +14,13 @@ import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 public class PlanThenSnapPlanner
 {
    private final TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
-   private final FootstepPlannerEnvironmentHandler internalEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
+   private final EnvironmentHandler internalEnvironmentHandler = new EnvironmentHandler();
    private HeightMapData heightMapData;
    private final HeightMapPolygonSnapper snapper;
    private final HeightMapSnapWiggler wiggler;
@@ -47,7 +47,7 @@ public class PlanThenSnapPlanner
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      internalEnvironmentHandler.setHeightMap(heightMapData);
+      internalEnvironmentHandler.setHeightMapData(heightMapData);
       this.heightMapData = heightMapData;
    }
 

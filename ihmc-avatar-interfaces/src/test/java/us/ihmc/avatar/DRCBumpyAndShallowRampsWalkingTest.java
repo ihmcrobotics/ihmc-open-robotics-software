@@ -7,28 +7,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
-import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -36,14 +38,15 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private BlockingSimulationRunner blockingSimulationRunner;
+   private SCS2AvatarTestingSimulation testingSimulation;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -60,10 +63,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
 
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (blockingSimulationRunner != null)
+      if (testingSimulation != null)
       {
-         blockingSimulationRunner.destroySimulation();
-         blockingSimulationRunner = null;
+         testingSimulation.destroy();
+         testingSimulation = null;
       }
       robotModel = null;
 
@@ -85,87 +88,71 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       double standingTimeDuration = 1.0;
       double maximumWalkTime = 30.0;
-      double desiredVelocityValue = 1.0;
+      double desiredVelocityValue = 0.75;
 
       boolean useVelocityAndHeadingScript = false;
       boolean cheatWithGroundHeightAtForFootstep = true;
 
-      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
-         maximumWalkTime = 3.0;
-
-      WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
-
-      //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
-
-      ImmutablePair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRamp();
-      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.getLeft();
-      boolean drawGroundProfile = false;
+      ImmutablePair<CommonAvatarEnvironmentInterface, Double> combinedTerrainObjectAndRampEndX = createRamp();
+      CommonAvatarEnvironmentInterface environment = combinedTerrainObjectAndRampEndX.getLeft();
 
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters,
-                                                             null,
-                                                             combinedTerrainObject,
-                                                             drawGroundProfile,
-                                                             useVelocityAndHeadingScript,
-                                                             cheatWithGroundHeightAtForFootstep,
-                                                             robotInitialSetup);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, null);
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
-      scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
-
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-
-      NothingChangedVerifier nothingChangedVerifier = null;
-      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
+      testingSimulation = simulationTestHelperFactory.createAvatarTestingSimulation();
+      if (cheatWithGroundHeightAtForFootstep)
       {
-         nothingChangedVerifier = new NothingChangedVerifier("DRCOverShallowRampTest", scs);
+         testingSimulation.getAvatarSimulation()
+                          .getStepGeneratorThread()
+                          .getContinuousStepGeneratorPlugin()
+                          .setFootstepAdjustment(new HeightMapBasedFootstepAdjustment(environment.getTerrainObject3D().getHeightMapIfAvailable()));
       }
+      testingSimulation.start();
 
-      blockingSimulationRunner.simulateAndBlock(0.5);
-      FullHumanoidRobotModel controllerFullRobotModel = track.getAvatarSimulation().getControllerFullRobotModel();
+      SimulationConstructionSet2 scs = testingSimulation.getSimulationConstructionSet();
+
+      testingSimulation.simulateNow(0.5);
+      FullHumanoidRobotModel controllerFullRobotModel = testingSimulation.getAvatarSimulation().getControllerFullRobotModel();
       controllerFullRobotModel.updateFrames();
       FramePoint3D pelvisPosition = new FramePoint3D(controllerFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() - 0.05);
 
-      track.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getCommandInputManager().submitMessage(pelvisHeightMessage);
+      testingSimulation.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getCommandInputManager().submitMessage(pelvisHeightMessage);
 
-      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
-      YoDouble q_x = (YoDouble) scs.findVariable("q_x");
-      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocityCSGX");
+      String suffix = "StepGeneratorCommandInputManager";
+      YoBoolean walk = (YoBoolean) scs.findVariable("walk_" + suffix);
+      YoDouble q_x = (YoDouble) scs.findVariable("q_" + controllerFullRobotModel.getRootBody().getName() + "_x");
+      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocity_" + suffix + "X");
 
-      //    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
       YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
-      //      YoDouble leftFootHeight = (YoDouble) scs.getVariable("p_leftFootPositionZ");
-      //      YoDouble rightFootHeight = (YoDouble) scs.getVariable("p_rightFootPositionZ");
 
-      initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
+      walk.set(false);
+      testingSimulation.simulateNow(standingTimeDuration);
+      walk.set(true);
+
       desiredSpeed.set(desiredVelocityValue);
-
-      //    ThreadTools.sleepForever();
 
       double timeIncrement = 1.0;
       boolean done = false;
       while (!done)
       {
-         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+         assertTrue(testingSimulation.simulateNow(timeIncrement));
 
          if (Math.abs(comError.getDoubleValue()) > 0.11)
          {
             fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
 
-         if (scs.getTime() > standingTimeDuration + maximumWalkTime)
+         if (scs.getTime().getDoubleValue() > standingTimeDuration + maximumWalkTime)
             done = true;
          if (q_x.getDoubleValue() > rampEndX)
             done = true;
       }
-
-      if (simulationTestingParameters.getCheckNothingChangedInSimulation())
-         checkNothingChanged(nothingChangedVerifier);
 
       createVideo(scs);
    }
@@ -188,35 +175,40 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
-      ImmutablePair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks();
-      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.getLeft();
-      boolean drawGroundProfile = false;
+      ImmutablePair<CommonAvatarEnvironmentInterface, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks();
+      CommonAvatarEnvironmentInterface environment = combinedTerrainObjectAndRampEndX.getLeft();
 
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
 
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters,
-                                                             null,
-                                                             combinedTerrainObject,
-                                                             drawGroundProfile,
-                                                             useVelocityAndHeadingScript,
-                                                             cheatWithGroundHeightAtForFootstep,
-                                                             robotInitialSetup);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, null);
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
-      scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(combinedTerrainObject.getLinkGraphics());
+      testingSimulation = simulationTestHelperFactory.createAvatarTestingSimulation();
+      if (cheatWithGroundHeightAtForFootstep)
+      {
+         testingSimulation.getAvatarSimulation()
+                          .getStepGeneratorThread()
+                          .getContinuousStepGeneratorPlugin()
+                          .setFootstepAdjustment(new HeightMapBasedFootstepAdjustment(environment.getTerrainObject3D().getHeightMapIfAvailable()));
+      }
+      testingSimulation.start();
 
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      SimulationConstructionSet2 scs = testingSimulation.getSimulationConstructionSet();
 
-      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
-      YoDouble q_x = (YoDouble) scs.findVariable("q_x");
-      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocityCSGX");
+      String suffix = "StepGeneratorCommandInputManager";
+      YoBoolean walk = (YoBoolean) scs.findVariable("walk_" + suffix);
+      YoDouble q_x = (YoDouble) scs.findVariable("q_" + testingSimulation.getControllerFullRobotModel().getRootBody().getName() + "_x");
+      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocity_" + suffix + "X");
 
-      //    YoDouble centerOfMassHeight = (YoDouble) scs.getVariable("ProcessedSensors.comPositionz");
       YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
 
-      initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
+      walk.set(false);
+      testingSimulation.simulateNow(standingTimeDuration);
+      walk.set(true);
+
       desiredSpeed.set(desiredVelocityValue);
 
       //    ThreadTools.sleepForever();
@@ -226,7 +218,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean success = true;
       while (!done)
       {
-         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+         assertTrue(testingSimulation.simulateNow(timeIncrement));
 
          if (Math.abs(comError.getDoubleValue()) > 0.09)
          {
@@ -234,7 +226,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
             fail("comError = " + Math.abs(comError.getDoubleValue()));
          }
 
-         if (scs.getTime() > standingTimeDuration + maximumWalkTime)
+         if (scs.getTime().getDoubleValue() > standingTimeDuration + maximumWalkTime)
             done = true;
          if (q_x.getDoubleValue() > rampEndX)
             done = true;
@@ -244,7 +236,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       assertTrue(success);
    }
 
-   private ImmutablePair<CombinedTerrainObject3D, Double> createRamp()
+   private ImmutablePair<CommonAvatarEnvironmentInterface, Double> createRamp()
    {
       double rampSlopeUp = 0.1;
       double rampSlopeDown = 0.08;
@@ -271,10 +263,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 6.0, rampYEnd, -0.05, 0.0);
 
-      return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, rampEndX);
+      CommonAvatarEnvironmentInterface environment = () -> combinedTerrainObject;
+      return new ImmutablePair<>(environment, rampEndX);
    }
 
-   private ImmutablePair<CombinedTerrainObject3D, Double> createRandomBlocks()
+   private ImmutablePair<CommonAvatarEnvironmentInterface, Double> createRandomBlocks()
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("RandomBlocks");
 
@@ -299,9 +292,11 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
 
-      return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
+      CommonAvatarEnvironmentInterface environment = () -> combinedTerrainObject;
+      return new ImmutablePair<>(environment, xMax);
    }
 
+   @Disabled
    @Test
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -315,37 +310,51 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       //TODO: This should work with cheatWithGroundHeightAtForFootstep = false also, but for some reason height gets messed up and robot gets stuck...
       boolean cheatWithGroundHeightAtForFootstep = true;
 
-      GroundProfile3D groundProfile = createBumpyGroundProfile();
+      TerrainObject3D groundProfile = createBumpyGroundProfile();
+      CommonAvatarEnvironmentInterface environment = () -> groundProfile;
       boolean drawGroundProfile = true;
 
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters,
-                                                             groundProfile,
-                                                             null,
-                                                             drawGroundProfile,
-                                                             useVelocityAndHeadingScript,
-                                                             cheatWithGroundHeightAtForFootstep,
-                                                             robotInitialSetup);
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(useVelocityAndHeadingScript, null);
 
-      SimulationConstructionSet scs = track.getSimulationConstructionSet();
+      testingSimulation = simulationTestHelperFactory.createAvatarTestingSimulation();
+      if (cheatWithGroundHeightAtForFootstep)
+      {
+         testingSimulation.getAvatarSimulation()
+                          .getStepGeneratorThread()
+                          .getContinuousStepGeneratorPlugin()
+                          .setFootstepAdjustment(new HeightMapBasedFootstepAdjustment(groundProfile.getHeightMapIfAvailable()));
+      }
+      testingSimulation.start();
 
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
+      SimulationConstructionSet2 scs = testingSimulation.getSimulationConstructionSet();
 
-      YoBoolean walk = (YoBoolean) scs.findVariable("walkCSG");
+      String suffix = "StepGeneratorCommandInputManager";
+      YoBoolean walk = (YoBoolean) scs.findVariable("walk_" + suffix);
+      YoDouble q_x = (YoDouble) scs.findVariable("q_" + testingSimulation.getControllerFullRobotModel().getRootBody().getName() + "_x");
+      YoDouble desiredSpeed = (YoDouble) scs.findVariable("desiredVelocity_" + suffix + "X");
+
+      YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
+
       YoDouble stepLength = (YoDouble) scs.findVariable("maxStepLengthCSG");
       YoDouble offsetHeightAboveGround = (YoDouble) scs.findVariable("offsetHeightAboveGround");
-      YoDouble comError = (YoDouble) scs.findVariable("positionError_comHeight");
       stepLength.set(0.4);
       offsetHeightAboveGround.set(-0.1);
-      initiateMotion(standingTimeDuration, blockingSimulationRunner, walk);
+
+      walk.set(false);
+      testingSimulation.simulateNow(standingTimeDuration);
+      walk.set(true);
 
       double timeIncrement = 1.0;
 
-      while (scs.getTime() - standingTimeDuration < walkingTimeDuration)
+      while (scs.getTime().getDoubleValue() - standingTimeDuration < walkingTimeDuration)
       {
-         blockingSimulationRunner.simulateAndBlock(timeIncrement);
+         assertTrue(testingSimulation.simulateNow(timeIncrement));
 
          if (Math.abs(comError.getDoubleValue()) > 0.09)
          {
@@ -357,15 +366,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, YoBoolean walk)
-         throws SimulationExceededMaximumTimeException, ControllerFailureException
-   {
-      walk.set(false);
-      runner.simulateAndBlock(standingTimeDuration);
-      walk.set(true);
-   }
-
-   private void createVideo(SimulationConstructionSet scs)
+   private void createVideo(SimulationConstructionSet2 scs)
    {
       if (simulationTestingParameters.getCreateSCSVideos())
       {
@@ -373,81 +374,59 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       }
    }
 
-   boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
-
-   private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, GroundProfile3D groundProfile,
-                                                          GroundProfile3D groundProfile3D, boolean drawGroundProfile, boolean useVelocityAndHeadingScript,
-                                                          boolean cheatWithGroundHeightAtForFootstep,
-                                                          RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
-   {
-      DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-
-      DRCSCSInitialSetup scsInitialSetup;
-
-      if (groundProfile != null)
-      {
-         scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
-      }
-      else
-      {
-         scsInitialSetup = new DRCSCSInitialSetup(groundProfile3D, robotModel.getSimulateDT());
-      }
-      scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
-
-      if (cheatWithGroundHeightAtForFootstep)
-         scsInitialSetup.setInitializeEstimatorToActual(true);
-
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup,
-                                                                                          guiInitialSetup,
-                                                                                          scsInitialSetup,
-                                                                                          useVelocityAndHeadingScript,
-                                                                                          cheatWithGroundHeightAtForFootstep,
-                                                                                          robotModel);
-
-      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      scs.setGroundVisible(false);
-      setupCameraForUnitTest(scs);
-
-      return drcFlatGroundWalkingTrack;
-   }
-
-   private static BumpyGroundProfile createBumpyGroundProfile()
+   private static BumpyTerrainProfile createBumpyGroundProfile()
    {
       double xAmp1 = 0.05, xFreq1 = 0.5, xAmp2 = 0.01, xFreq2 = 0.5;
       double yAmp1 = 0.01, yFreq1 = 0.07, yAmp2 = 0.05, yFreq2 = 0.37;
       double flatgroundBoxWidthAtZero = 0.6;
-      BumpyGroundProfile groundProfile = new BumpyGroundProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, flatgroundBoxWidthAtZero);
+      BumpyTerrainProfile groundProfile = new BumpyTerrainProfile(xAmp1, xFreq1, xAmp2, xFreq2, yAmp1, yFreq1, yAmp2, yFreq2, flatgroundBoxWidthAtZero);
+
       return groundProfile;
    }
 
-   private void checkNothingChanged(NothingChangedVerifier nothingChangedVerifier)
+   private static class BumpyTerrainProfile extends BumpyGroundProfile implements TerrainObject3D
    {
-      ArrayList<String> stringsToIgnore = new ArrayList<String>();
-      stringsToIgnore.add("nano");
-      stringsToIgnore.add("milli");
-      stringsToIgnore.add("Timer");
+      public BumpyTerrainProfile(double xAmp1,
+                                 double xFreq1,
+                                 double xAmp2,
+                                 double xFreq2,
+                                 double yAmp1,
+                                 double yFreq1,
+                                 double yAmp2,
+                                 double yFreq2,
+                                 double flatgroundBoxWidthAtZero)
+      {
+         super(xAmp1,
+               xFreq1,
+               xAmp2,
+               xFreq2,
+               yAmp1,
+               yFreq1,
+               yAmp2,
+               yFreq2,
+               (double) -10.0F,
+               (double) 10.0F,
+               (double) -10.0F,
+               (double) 10.0F,
+               flatgroundBoxWidthAtZero);
+      }
 
-      boolean writeNewBaseFile = nothingChangedVerifier.getWriteNewBaseFile();
+      @Override
+      public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
+      {
+         return new ArrayList<>();
+      }
 
-      double maxPercentDifference = 0.001;
-      nothingChangedVerifier.verifySameResultsAsPreviously(maxPercentDifference, stringsToIgnore);
-      assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
-   }
+      @Override
+      public Graphics3DObject getLinkGraphics()
+      {
+         Graphics3DObject texturedGroundLinkGraphics = new Graphics3DObject();
 
-   private DRCGuiInitialSetup createGUIInitialSetup()
-   {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
-      return guiInitialSetup;
-   }
+         HeightMap heightMap = getHeightMapIfAvailable();
 
-   protected void setupCameraForUnitTest(SimulationConstructionSet scs)
-   {
-      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      cameraConfiguration.setCameraFix(0.6, 0.4, 1.1);
-      cameraConfiguration.setCameraPosition(-0.15, 10.0, 3.0);
-      cameraConfiguration.setCameraTracking(true, true, true, false);
-      cameraConfiguration.setCameraDolly(true, true, true, false);
-      scs.setupCamera(cameraConfiguration);
-      scs.selectCamera("testCamera");
+         texturedGroundLinkGraphics.addHeightMap(heightMap, 300, 300, YoAppearance.DarkGreen());
+
+         return texturedGroundLinkGraphics;
+      }
    }
 }

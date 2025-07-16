@@ -6,8 +6,8 @@ import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointReadOnly;
@@ -239,6 +239,19 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       return numberOfWaypoints.getIntegerValue() == 0;
    }
 
+   public void removeFirstWaypoint()
+   {
+      if (numberOfWaypoints.getIntegerValue() == 0)
+         return;
+
+      numberOfWaypoints.decrement();
+      for (int i = 0; i < numberOfWaypoints.getIntegerValue(); i++)
+      {
+         waypoints.get(i).set(waypoints.get(i + 1));
+      }
+      waypoints.get(numberOfWaypoints.getIntegerValue()).setToNaN();
+   }
+
    @Override
    public double getValue()
    {
@@ -270,6 +283,11 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    public double getLastWaypointTime()
    {
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
+   }
+
+   public OneDoFTrajectoryPointReadOnly getWaypoint(int index)
+   {
+      return waypoints.get(index);
    }
 
    public void getLastWaypoint(OneDoFTrajectoryPointBasics pointToPack)

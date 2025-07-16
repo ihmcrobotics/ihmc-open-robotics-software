@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -284,7 +281,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       Vector2D direction = new Vector2D(pushDirection);
       Vector2D velocityDirection = new Vector2D(desiredVelocity);
       direction.normalize();
-      if (velocityDirection.lengthSquared() > 0.0)
+      if (velocityDirection.normSquared() > 0.0)
          velocityDirection.normalize();
 
       double xMax;

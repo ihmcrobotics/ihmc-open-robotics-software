@@ -7,16 +7,16 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
-import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.ui.processes.FootstepPlanningModuleProcess;
+import us.ihmc.rdx.ui.processes.LidarREAProcess;
+import us.ihmc.rdx.ui.processes.MapSenseHeadlessProcess;
+import us.ihmc.rdx.ui.processes.ObjectDetectionProcess;
 import us.ihmc.rdx.ui.processes.RestartableProcess;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
-import us.ihmc.rdx.ui.processes.*;
 
 import java.util.ArrayList;
 
@@ -57,22 +57,15 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       this.environmentInitialSetup = environmentInitialSetup;
 
       // TODO: GUI selection
-      BehaviorManagerProcess behaviorManagerProcess = new BehaviorManagerProcess(this::getRobotModel);
-      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel, this::getROS2Mode);
+      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
-      objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getROS2Mode, this::getRobotTarget);
+      objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getRobotTarget);
       lidarREAProcess = new LidarREAProcess();
 
-      processes.add(behaviorManagerProcess);
       processes.add(footstepPlanningModuleProcess);
       processes.add(mapsenseHeadlessProcess);
       processes.add(objectDetectionProcess);
       processes.add(lidarREAProcess);
-   }
-
-   private PubSubImplementation getROS2Mode()
-   {
-      return CommunicationMode.fromOrdinal(ros2Mode.get()).getPubSubImplementation();
    }
 
    private RobotTarget getRobotTarget()
@@ -95,7 +88,6 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       ImGui.combo(labels.get("RobotVersion"), getRobotVersion(), getRobotVersions(), getRobotVersions().length);
       ImGui.text("ROS 2 Mode: ");
       ImGui.sameLine();
-      ImGui.combo(labels.get("ROS2Mode"), ros2Mode, CommunicationMode.ROS2_NAMES, CommunicationMode.VALUES.length);
       ImGui.popItemWidth();
 
       ImGui.text("Simulation:");
@@ -128,12 +120,5 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       {
          process.destroy();
       }
-
-      IntraProcessDomain.getInstance().stopAll();
-   }
-
-   public void setROS2Mode(CommunicationMode communicationMode)
-   {
-      ros2Mode.set(communicationMode.ordinal());
    }
 }

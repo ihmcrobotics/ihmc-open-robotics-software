@@ -8,7 +8,7 @@ int8 KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME=2
 # This message is part of the IHMC whole-body inverse kinematics module.
 # This output status will be converted into the WholeBodyTrajectoryMessage.
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Field default value -1
 int32 plan_id

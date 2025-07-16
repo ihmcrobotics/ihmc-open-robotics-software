@@ -1,15 +1,15 @@
 package us.ihmc.avatar.handControl.packetsAndConsumers;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
+import us.ihmc.concurrent.Builder;
+import us.ihmc.concurrent.ConcurrentCopier;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Publisher;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.concurrent.Builder;
-import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandJointAngleCommunicator
 {
@@ -23,9 +23,9 @@ public class HandJointAngleCommunicator
 
    private final ScheduledExecutorService executor;
 
-   private final ROS2PublisherBasics<HandJointAnglePacket> publisher;
+   private final ROS2Publisher<HandJointAnglePacket> publisher;
 
-   public HandJointAngleCommunicator(RobotSide side, ROS2PublisherBasics<HandJointAnglePacket> publisher)
+   public HandJointAngleCommunicator(RobotSide side, ROS2Publisher<HandJointAnglePacket> publisher)
    {
       this.side = side;
       this.publisher = publisher;

@@ -28,6 +28,16 @@ public enum CameraModel
 
    public static final CameraModel[] values = values();
 
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static CameraModel fromByte(byte ordinalByte)
+   {
+      return values[ordinalByte];
+   }
+
    public void packMessageFormat(ImageMessage imageMessage)
    {
       imageMessage.setCameraModel((byte) ordinal());
@@ -43,6 +53,6 @@ public enum CameraModel
          }
       }
 
-      throw new RuntimeException("Missing format " + imageMessage.getFormat());
+      throw new RuntimeException("Missing format " + imageMessage.getCameraModel());
    }
 }

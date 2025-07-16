@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
@@ -24,42 +25,45 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDX3DSituatedText;
-import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A graphic representing one or more sequential footsteps.
+ * They are colored outlines of the maximum base of support, with a solid fill, and text number on each step.
+ * Optionally, more text can be added to give a name to the footstep plan.
+ *
+ * TODO: Make this class hold a list of RDXFootstepGraphic instead, moving the extra elements here to that class.
+ */
 public class RDXFootstepPlanGraphic implements RenderableProvider
 {
    private final ModelBuilder modelBuilder = new ModelBuilder();
-   RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
-   // visualization options
-   private final Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
+   private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    private final SideDependentList<Color> footstepColors = new SideDependentList<>();
-
    {
       footstepColors.set(RobotSide.LEFT, new Color(RDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
       footstepColors.set(RobotSide.RIGHT, new Color(RDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
    }
-
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
-
    private ModelInstance modelInstance;
    private Model lastModel;
 
-   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final RepeatingTaskThread thread = new RepeatingTaskThread(getClass().getSimpleName(), this::taskThread);
+   {
+      thread.start();
+   }
+   private final AtomicReference<ArrayList<MinimalFootstep>> footsteps = new AtomicReference<>();
    private final ArrayList<RDX3DSituatedText> textRenderables = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ReferenceFrame footstepFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstepFrame",
@@ -113,7 +117,14 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    {
       if (buildMeshAndCreateModelInstance != null)
       {
-         buildMeshAndCreateModelInstance.run();
+         try
+         {
+            buildMeshAndCreateModelInstance.run();
+         }
+         catch (Exception e)
+         {
+            LogTools.warn(e.getMessage());
+         }
          buildMeshAndCreateModelInstance = null;
       }
    }
@@ -135,7 +146,15 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void generateMeshesAsync(ArrayList<MinimalFootstep> footsteps)
    {
-      executorService.clearQueueAndExecute(() -> generateMeshes(footsteps));
+      this.footsteps.set(footsteps);
+      thread.addScheduled(1);
+   }
+
+   private void taskThread()
+   {
+      ArrayList<MinimalFootstep> footsteps = this.footsteps.getAndSet(null);
+      if (footsteps != null)
+         generateMeshes(footsteps);
    }
 
    public void clear()
@@ -199,6 +218,13 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       }
       buildMeshAndCreateModelInstance = () ->
       {
+         // First, dispose last models
+         for (RDX3DSituatedText textRenderable : textRenderables)
+            textRenderable.dispose();
+
+         if (lastModel != null)
+            lastModel.dispose();
+
          // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
          textRenderables.clear();
          for (int i = 0; i < footsteps.size(); i++)
@@ -227,9 +253,6 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
                textRenderables.add(footstepListDescriptionText);
             }
          }
-
-         if (lastModel != null)
-            lastModel.dispose();
 
          lastModel = RDXModelBuilder.buildModelFromMesh(modelBuilder, meshBuilder);
          LibGDXTools.setOpacity(lastModel, footstepColors.get(RobotSide.LEFT).a);
@@ -278,6 +301,6 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
 
    public void destroy()
    {
-      executorService.destroy();
+      thread.kill();
    }
 }

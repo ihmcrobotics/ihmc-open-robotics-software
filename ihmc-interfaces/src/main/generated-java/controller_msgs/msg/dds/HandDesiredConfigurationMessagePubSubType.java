@@ -15,7 +15,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "85497c7160de6e824b90d2fd9aefb33bf741ca16a473b555a9542acf0e7ea3b5";
+   		return "e79fd48f0aa4298a274bf943052c99ecce577644f59ea649f49a41208e05e183";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(controller_msgs.msg.dds.HandDesiredConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -96,7 +96,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(controller_msgs.msg.dds.HandDesiredConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(controller_msgs.msg.dds.HandDesiredConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_9("desired_hand_configuration", data.getDesiredHandConfiguration());
    }
@@ -116,7 +116,7 @@ public class HandDesiredConfigurationMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandDesiredConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setDesiredHandConfiguration(ser.read_type_9("desired_hand_configuration"));
    }

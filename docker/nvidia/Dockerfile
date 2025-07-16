@@ -1,9 +1,10 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia
-# Current version: 0.5
+# Current version: 0.6
 # Refer to the NVIDIA/CUDA base image here: (https://hub.docker.com/r/nvidia/cuda/)
-# This is currently based on Ubuntu 20.04 Focal Fossa.
-FROM nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04
+# This is currently based on Ubuntu 22.04 Focal Fossa.
+# This version corresponds to the instructions in ihmc-perception/README.md
+FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
 # Max: swapping out base images
 #FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-runtime
 
@@ -54,6 +55,22 @@ RUN apt-get --quiet 2 --yes update \
  && rm -rf /var/lib/apt/lists/* \
  && mkdir -p /etc/OpenCL/vendors \
  && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
+
+# Install nvCOMP
+RUN wget https://developer.download.nvidia.com/compute/nvcomp/3.0.5/local_installers/nvcomp_3.0.5_x86_64_12.x.tgz \
+ && tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/lib64/ --strip-components=1 lib/ \
+ && tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/include/ --strip-components=1 include/ \
+ && rm -f nvcomp_3.0.5_x86_64_12.x.tgz
+
+# Install ZED SDK
+RUN apt-get --quiet 2 --yes update  \
+ && apt-get --quiet 2 --yes install zstd > /dev/null \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN wget https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.2/ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run \
+ && chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run \
+ && ./ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run -- silent \
+ && rm -f ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
 
 #Configure NVIDIA runtime for Docker
 ENV NVIDIA_VISIBLE_DEVICES all

@@ -15,7 +15,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c769e55d2ae133bfca9f1ae369e9e6e0145ed274fce8aba2a65ab8345b23e8f5";
+   		return "4b1572e5d11003a5ad39bbfe2bb7d527de099e77ae27fdc7dcbe725b1846a7c7";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 3; ++i0)
       {
@@ -79,7 +79,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -108,29 +108,29 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
 
    public static void write(toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getCenterOfMassInputs().size() <= 3)
       cdr.write_type_e(data.getCenterOfMassInputs());else
-          throw new RuntimeException("center_of_mass_inputs field exceeds the maximum length");
+          throw new RuntimeException("center_of_mass_inputs field exceeds the maximum length: %d > %d".formatted(data.getCenterOfMassInputs().size(), 3));
 
       if(data.getRigidBodyInputs().size() <= 20)
       cdr.write_type_e(data.getRigidBodyInputs());else
-          throw new RuntimeException("rigid_body_inputs field exceeds the maximum length");
+          throw new RuntimeException("rigid_body_inputs field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyInputs().size(), 20));
 
       if(data.getJointInputs().size() <= 20)
       cdr.write_type_e(data.getJointInputs());else
-          throw new RuntimeException("joint_inputs field exceeds the maximum length");
+          throw new RuntimeException("joint_inputs field exceeds the maximum length: %d > %d".formatted(data.getJointInputs().size(), 20));
 
       if(data.getContactStateInput().size() <= 1)
       cdr.write_type_e(data.getContactStateInput());else
-          throw new RuntimeException("contact_state_input field exceeds the maximum length");
+          throw new RuntimeException("contact_state_input field exceeds the maximum length: %d > %d".formatted(data.getContactStateInput().size(), 1));
 
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getCenterOfMassInputs());	
       cdr.read_type_e(data.getRigidBodyInputs());	
@@ -142,7 +142,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("center_of_mass_inputs", data.getCenterOfMassInputs());
       ser.write_type_e("rigid_body_inputs", data.getRigidBodyInputs());
       ser.write_type_e("joint_inputs", data.getJointInputs());
@@ -152,7 +152,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("center_of_mass_inputs", data.getCenterOfMassInputs());
       ser.read_type_e("rigid_body_inputs", data.getRigidBodyInputs());
       ser.read_type_e("joint_inputs", data.getJointInputs());

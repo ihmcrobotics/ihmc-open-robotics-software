@@ -31,6 +31,6 @@ byte CUTTING_WALL = 27
 byte REPEATEDLY_WALK_FOOTSTEP_LIST = 28
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte humanoid_behavior_type 255

@@ -3,7 +3,6 @@ package us.ihmc.communication.producers;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
@@ -12,6 +11,7 @@ import us.ihmc.communication.video.VideoCallback;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
+@Deprecated
 public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
 {
    private final JPEGDecoder decoder = new JPEGDecoder();
@@ -25,7 +25,7 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public void onFrame(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, CameraPinholeBrown intrinsicParameters)
+   public void onFrame(VideoSource videoSource, byte[] data, long timestamp, Point3DReadOnly position, QuaternionReadOnly orientation, Object intrinsicParameters)
    {
       ByteBuffer buffer = byteBufferProvider.getOrCreateBuffer(data.length);
       buffer.put(data);

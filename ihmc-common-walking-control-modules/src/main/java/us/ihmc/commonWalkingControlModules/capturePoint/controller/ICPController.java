@@ -55,6 +55,8 @@ public class ICPController implements ICPControllerInterface
 
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
+   private final BooleanParameter useCoPFeedbackByDefault;
+   private final YoBoolean disableCoPFeedback;
 
    private final BooleanProvider scaleFeedbackWeightWithGain;
 
@@ -161,6 +163,9 @@ public class ICPController implements ICPControllerInterface
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
+      useCoPFeedbackByDefault = new BooleanParameter(yoNamePrefix + "UseCoPFeedbackByDefault", registry, icpOptimizationParameters.useCoPFeedback());
+      disableCoPFeedback = new YoBoolean(yoNamePrefix + "DisableCoPFeedback", registry);
+      disableCoPFeedback.set(!icpOptimizationParameters.useCoPFeedback());
 
       scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain",
                                                          registry,
@@ -449,7 +454,9 @@ public class ICPController implements ICPControllerInterface
 
    private void computeFeedForwardAndFeedBackAlphas()
    {
-      if (parameters.getFeedbackAlphaCalculator() != null)
+      if (disableCoPFeedback.getValue() || !useCoPFeedbackByDefault.getValue())
+         feedbackAlpha.set(1.0);
+      else if (parameters.getFeedbackAlphaCalculator() != null)
          feedbackAlpha.set(parameters.getFeedbackAlphaCalculator().computeAlpha(currentICP, copConstraintHandler.getCoPConstraint()));
       else
          feedbackAlpha.set(0.0);
@@ -499,13 +506,18 @@ public class ICPController implements ICPControllerInterface
       }
    }
 
+   public void setDisableCoPFeedbackControl(boolean disableCoPFeedbackControl)
+   {
+      disableCoPFeedback.set(disableCoPFeedbackControl);
+   }
+
    /**
     * {@inheritDoc}
     */
    @Override
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
-      this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      this.copConstraintHandler.setMultiContactStabilityRegion(multiContactStabilityRegion);
    }
 
    @Override

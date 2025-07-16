@@ -17,12 +17,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.math.linearAlgebra.DampedLeastSquaresSolver;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -60,7 +60,7 @@ public class ExternalWrenchJointTorqueBasedEstimatorVisualizer
                                                                    rootBody,
                                                                    contactableBodies.stream().map(ContactablePlaneBody::getRigidBody)
                                                                                     .collect(Collectors.toList()),
-                                                                   contactableBodies.stream().map(ContactablePlaneBody::getSoleFrame)
+                                                                   contactableBodies.stream().map(ContactablePlaneBody::getContactFrame)
                                                                                     .collect(Collectors.toList()),
                                                                    vizScaling,
                                                                    yoGraphicsListRegistry,

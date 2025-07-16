@@ -21,7 +21,7 @@ import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -343,7 +343,7 @@ public class SteppableRegionsCalculationModule
          }
       }
 
-      messageToPack.getData().reset();
+      messageToPack.getData().resetQuick();
       uncompressedByteBuffer.rewind();
       for (int i = 0; i < totalSize; i++)
          messageToPack.getData().add(uncompressedByteBuffer.get());
@@ -391,7 +391,7 @@ public class SteppableRegionsCalculationModule
          }
       }
 
-      messageToPack.getData().reset();
+      messageToPack.getData().resetQuick();
       uncompressedByteBuffer.rewind();
       for (int i = 0; i < totalSize; i++)
          messageToPack.getData().add(uncompressedByteBuffer.get());

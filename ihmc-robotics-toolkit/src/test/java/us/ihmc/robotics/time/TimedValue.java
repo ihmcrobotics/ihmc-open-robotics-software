@@ -1,5 +1,8 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.commons.time.TimeInterval;
+import us.ihmc.commons.time.TimeIntervalProvider;
+
 public class TimedValue implements TimeIntervalProvider
 {
    private int value;

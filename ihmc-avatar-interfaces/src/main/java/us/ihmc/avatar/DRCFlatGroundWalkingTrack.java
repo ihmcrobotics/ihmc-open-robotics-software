@@ -1,12 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
-
-import java.util.ArrayList;
-
-import javax.swing.JButton;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
@@ -24,15 +17,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -40,13 +31,19 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import javax.swing.*;
+import java.util.ArrayList;
+
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 public class DRCFlatGroundWalkingTrack
 {
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
    private final AvatarSimulation avatarSimulation;
 
-   private final RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "flat_ground_walking_track_simulation");
+   private final RealtimeROS2Node realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("flat_ground_walking_track_simulation");
 
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
@@ -99,7 +96,6 @@ public class DRCFlatGroundWalkingTrack
 
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      PushRecoveryControllerParameters pushRecoveryControllerParameters = model.getPushRecoveryControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = model.getCoPTrajectoryParameters();
       SplitFractionCalculatorParametersReadOnly splitFractionParameters = model.getSplitFractionCalculatorParameters();
       HumanoidRobotSensorInformation sensorInformation = model.getSensorInformation();
@@ -122,7 +118,6 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    pushRecoveryControllerParameters,
                                                                                                     copTrajectoryParameters,
                                                                                                     splitFractionParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());

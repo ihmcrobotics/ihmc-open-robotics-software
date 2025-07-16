@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -12,15 +10,21 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestInterface
 {
@@ -109,6 +113,10 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
 
    public void testTakingStep(TestInfo testInfo, double stepHeight, double initialStepYoffset)
    {
+      testTakingStep(testInfo, stepHeight, initialStepYoffset, 0.0);
+   }
+   public void testTakingStep(TestInfo testInfo, double stepHeight, double initialStepYoffset, double heightOffset)
+   {
       StepsEnvironment steps = new StepsEnvironment();
       double startYPosition = 0.0;
       double width = 0.6;
@@ -117,9 +125,23 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       createStepsEnvironment(steps, getStepLength(), startYPosition, width, depth, stepHeight, initialStepYoffset);
       setupTest(testInfo, steps);
 
+      if (!MathTools.epsilonEquals(heightOffset, 0.0, 1e-2))
+         sendPelvisHeightOffset(heightOffset);
+
       walkForward(getStepLength(), numberOfSteps, stepHeight, initialStepYoffset);
-      assertTrue(simulationTestHelper.simulateNow(3.0));
+      assertTrue(simulationTestHelper.simulateNow(1.5));
    }
+
+   private void sendPelvisHeightOffset(double heightOffset)
+   {
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+      FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      pelvisPosition.add(0.0, 0.0, heightOffset);
+      double desiredHeight = pelvisPosition.getZ();
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
+   }
+
 
    private void setupTest(TestInfo testInfo, CommonAvatarEnvironmentInterface environment)
    {
@@ -132,7 +154,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       simulationTestHelper.start();
       simulationTestHelper.setCamera(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
    private void createStepsEnvironment(StepsEnvironment stepsEnvironment,
@@ -201,7 +223,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       footsteps.getFootstepDataList().add().set(footstepData);
 
       simulationTestHelper.publishToController(footsteps);
-      assertTrue(simulationTestHelper.simulateNow(numberOfSteps * 1.5));
+      assertTrue(simulationTestHelper.simulateNow(footsteps.getFootstepDataList().size() * 1.1 * (swingTime + transferTime)));
    }
 
    private static class StepsEnvironment implements CommonAvatarEnvironmentInterface

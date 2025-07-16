@@ -1,14 +1,16 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
+import us.ihmc.commons.UnitConversions;
 
+/**
+ * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ */
 public class HumanoidKinematicsSimulationParameters
 {
    private boolean createPeriodicThread = true;
    private boolean createYoVariableServer = false;
    private boolean logToFile = false;
-   private PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
    private double initialGroundHeight = 0.0;
    private double initialRobotYaw = 0.0;
    private double initialRobotX = 0.0;
@@ -87,16 +89,6 @@ public class HumanoidKinematicsSimulationParameters
    public boolean getLogToFile()
    {
       return logToFile;
-   }
-
-   public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
-   {
-      this.pubSubImplementation = pubSubImplementation;
-   }
-
-   public PubSubImplementation getPubSubImplementation()
-   {
-      return pubSubImplementation;
    }
 
    public void setPlaybackSpeedMultiplier(double playbackSpeedMultiplier)

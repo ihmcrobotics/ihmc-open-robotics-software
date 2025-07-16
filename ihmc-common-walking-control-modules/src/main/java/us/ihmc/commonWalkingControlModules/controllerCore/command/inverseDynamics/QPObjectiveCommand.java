@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 /**
  * Command is a cost function to go directly into QP. It is of the form
  *
- * 0.5 (S J x - S b)<sup>T</sup> S<sup>T</sup> Q S (S J x - S b)
+ * 0.5 (S J x - S b)<sup>T</sup> S Q S<sup>T</sup> (S J x - S b)
  *
  * where x is the variable vector specified in the {@link us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore},
  * J is the function Jacobian, and b is the objective.

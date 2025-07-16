@@ -1,6 +1,7 @@
 package us.ihmc.parameterEstimation.solver;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -94,7 +95,7 @@ public class DoglegSolverRosenbrock2DTest
       DMatrixRMaj gradient = solver.getGradient(); // NOTE: assumes testGradient() is passing
       DMatrixRMaj expected = new DMatrixRMaj(2, 1);
       expected.set(gradient);
-      MatrixMissingTools.negate(expected);
+      CommonOps_DDRM.changeSign(expected);
 
       boolean isEqual = MatrixFeatures_DDRM.isEquals(steepestDescentStep, expected, EPSILON);
       assertTrue(isEqual);
@@ -107,7 +108,7 @@ public class DoglegSolverRosenbrock2DTest
 
       DMatrixRMaj jacobian = solver.getJacobian(); // NOTE: assumes testJacobian() is passing
       DMatrixRMaj residual = solver.getResidual(); // NOTE: assumes testResidual() is passing
-      MatrixMissingTools.negate(residual);
+      CommonOps_DDRM.changeSign(residual);
       DMatrixRMaj expected = new DMatrixRMaj(2, 1);
       // We use an SVD based system solve here, as it's the most robust and performance isn't an issue. Perhaps we should change this to the solver we use
       // inside the NLLS solver, however

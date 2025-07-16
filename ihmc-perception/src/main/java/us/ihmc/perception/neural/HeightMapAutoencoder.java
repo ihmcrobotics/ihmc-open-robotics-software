@@ -1,6 +1,6 @@
 package us.ihmc.perception.neural;
 
-import ai.onnxruntime.*;
+//import ai.onnxruntime.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -31,123 +31,128 @@ public class HeightMapAutoencoder
    private static final int IMAGE_WIDTH = 201;
 
    private WorkspaceResourceDirectory modelDirectory = new WorkspaceResourceDirectory(this.getClass(), "/weights/");
+   // TODO: We should use opencv to load this onnx model or perhaps use pytorch with opencv
+   // To readd the Microsoft onnx dependency, add this to the main gradle dependencies:
+   //    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
+   //    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
    private WorkspaceFile onnxFile = new WorkspaceFile(modelDirectory, "height_map_autoencoder.onnx");
 
    // the following fields are used for model loading and inference using the ONNX runtime library and PyTorch trained model stored as .onnx file
-   private OrtEnvironment onnxRuntimeEnvironment = OrtEnvironment.getEnvironment();
-   private OrtSession.SessionOptions onnxRuntimeSessionOptions = new OrtSession.SessionOptions();
-   private OrtSession onnxRuntimeSession;
+//   private OrtEnvironment onnxRuntimeEnvironment = OrtEnvironment.getEnvironment();
+//   private OrtSession.SessionOptions onnxRuntimeSessionOptions = new OrtSession.SessionOptions();
+//   private OrtSession onnxRuntimeSession;
 
    public HeightMapAutoencoder()
    {
-      try
-      {
-         onnxRuntimeSession = onnxRuntimeEnvironment.createSession(onnxFile.getFilesystemFile().toString(), onnxRuntimeSessionOptions);
-
-         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : onnxRuntimeSession.getInputInfo().entrySet())
-         {
-            LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
-         }
-         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : onnxRuntimeSession.getOutputInfo().entrySet())
-         {
-            LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
-         }
-
-         //print all input names and sizes
-         for (Map.Entry<String, NodeInfo> entry : onnxRuntimeSession.getInputInfo().entrySet())
-         {
-            String inputName = entry.getKey();
-            NodeInfo nodeInfo = entry.getValue();
-            LogTools.info("Input Name: {}", inputName);
-            LogTools.info("Input Info: {}", nodeInfo.toString());
-         }
-      }
-      catch (OrtException e)
-      {
-         throw new RuntimeException(e);
-      }
+//      try
+//      {
+//         onnxRuntimeSession = onnxRuntimeEnvironment.createSession(onnxFile.getFilesystemFile().toString(), onnxRuntimeSessionOptions);
+//
+//         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : onnxRuntimeSession.getInputInfo().entrySet())
+//         {
+//            LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
+//         }
+//         for (Map.Entry<String, NodeInfo> stringNodeInfoEntry : onnxRuntimeSession.getOutputInfo().entrySet())
+//         {
+//            LogTools.info("{}: {}", stringNodeInfoEntry.getKey(), stringNodeInfoEntry.getValue());
+//         }
+//
+//         //print all input names and sizes
+//         for (Map.Entry<String, NodeInfo> entry : onnxRuntimeSession.getInputInfo().entrySet())
+//         {
+//            String inputName = entry.getKey();
+//            NodeInfo nodeInfo = entry.getValue();
+//            LogTools.info("Input Name: {}", inputName);
+//            LogTools.info("Input Info: {}", nodeInfo.toString());
+//         }
+//      }
+//      catch (OrtException e)
+//      {
+//         throw new RuntimeException(e);
+//      }
    }
 
    public Mat denoiseHeightMap(Mat heightMap, double offset)
    {
       Mat denoisedHeightMapImage = null;
-      try
-      {
-         long startTime = System.nanoTime();
-
-         denoisedHeightMapImage = predict(heightMap, (float) offset);
-
-         long endTime = System.nanoTime();
-         LogTools.debug("Inference time: {} ms", Conversions.nanosecondsToMilliseconds(endTime - startTime));
-      }
-      catch (OrtException e)
-      {
-         throw new RuntimeException(e);
-      }
+//      try
+//      {
+//         long startTime = System.nanoTime();
+//
+//         denoisedHeightMapImage = predict(heightMap, (float) offset);
+//
+//         long endTime = System.nanoTime();
+//         LogTools.debug("Inference time: {} ms", Conversions.nanosecondsToMilliseconds(endTime - startTime));
+//      }
+//      catch (OrtException e)
+//      {
+//         throw new RuntimeException(e);
+//      }
 
       return denoisedHeightMapImage;
    }
 
-   public Mat predict(Mat imageInput, float offset) throws OrtException
+   public Mat predict(Mat imageInput, float offset)
    {
-      if (imageInput.rows() != IMAGE_HEIGHT || imageInput.cols() != IMAGE_WIDTH)
-         throw new RuntimeException("Image height and width must be " + IMAGE_HEIGHT + " and " + IMAGE_WIDTH);
-
-      LogTools.debug("Image Input Size: {}x{}", imageInput.rows(), imageInput.cols());
-
-      Mat heightMapImage = imageInput.clone();
-
-      Mat heightMapInput = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
-      heightMapImage.convertTo(heightMapInput, opencv_core.CV_32FC1, 1, 0);
-      FloatBuffer inputFloatBuffer = FloatBuffer.allocate(IMAGE_HEIGHT * IMAGE_WIDTH);
-
-      for (int i = 0; i < IMAGE_HEIGHT; i++)
-      {
-         for (int j = 0; j < IMAGE_WIDTH; j++)
-         {
-            inputFloatBuffer.put(heightMapInput.ptr(i, j).getFloat() / 10000.0f - offset);
-         }
-      }
-      inputFloatBuffer.rewind();
-
-      // set the image to be in the first input
-      String inputName = (String) onnxRuntimeSession.getInputNames().toArray()[0];
-      long[] tensorInputShape = {1, 1, heightMapInput.rows(), heightMapInput.cols()};
-
-      // create a map to store the input tensors
-      Map<String, OnnxTensor> inputs = new HashMap<>();
-      inputs.put(inputName, OnnxTensor.createTensor(onnxRuntimeEnvironment, inputFloatBuffer, tensorInputShape));
-
-      // run the inference
-      OrtSession.Result output = onnxRuntimeSession.run(inputs);
-
-      Mat outputImage = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
-
-      Map.Entry<String, OnnxValue> stringOnnxValueEntry = output.iterator().next();
-      LogTools.debug("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
-      OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
-
-      float[][][][] outputArray = (float[][][][]) outputTensor.getValue();
-      LogTools.debug("Output: {}", outputTensor.getInfo());
-
-      if (outputArray[0][0].length != IMAGE_HEIGHT && outputArray[0][0][0].length != IMAGE_WIDTH)
-      {
-         throw new RuntimeException("Output size must be " + IMAGE_HEIGHT * IMAGE_WIDTH);
-      }
-
-      for (int i = 0; i < IMAGE_HEIGHT; i++)
-      {
-         for (int j = 0; j < IMAGE_WIDTH; j++)
-         {
-            outputImage.ptr(i, j).putFloat((outputArray[0][0][i][j] + offset) * 10000.0f);
-         }
-      }
-      // scale up the output image and convert to 16UC1
-      outputImage.convertTo(outputImage, opencv_core.CV_16UC1, 1, 0);
-      return outputImage;
+//      if (imageInput.rows() != IMAGE_HEIGHT || imageInput.cols() != IMAGE_WIDTH)
+//         throw new RuntimeException("Image height and width must be " + IMAGE_HEIGHT + " and " + IMAGE_WIDTH);
+//
+//      LogTools.debug("Image Input Size: {}x{}", imageInput.rows(), imageInput.cols());
+//
+//      Mat heightMapImage = imageInput.clone();
+//
+//      Mat heightMapInput = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
+//      heightMapImage.convertTo(heightMapInput, opencv_core.CV_32FC1, 1, 0);
+//      FloatBuffer inputFloatBuffer = FloatBuffer.allocate(IMAGE_HEIGHT * IMAGE_WIDTH);
+//
+//      for (int i = 0; i < IMAGE_HEIGHT; i++)
+//      {
+//         for (int j = 0; j < IMAGE_WIDTH; j++)
+//         {
+//            inputFloatBuffer.put(heightMapInput.ptr(i, j).getFloat() / 10000.0f - offset);
+//         }
+//      }
+//      inputFloatBuffer.rewind();
+//
+//      // set the image to be in the first input
+//      String inputName = (String) onnxRuntimeSession.getInputNames().toArray()[0];
+//      long[] tensorInputShape = {1, 1, heightMapInput.rows(), heightMapInput.cols()};
+//
+//      // create a map to store the input tensors
+//      Map<String, OnnxTensor> inputs = new HashMap<>();
+//      inputs.put(inputName, OnnxTensor.createTensor(onnxRuntimeEnvironment, inputFloatBuffer, tensorInputShape));
+//
+//      // run the inference
+//      OrtSession.Result output = onnxRuntimeSession.run(inputs);
+//
+//      Mat outputImage = new Mat(IMAGE_HEIGHT, IMAGE_WIDTH, opencv_core.CV_32FC1);
+//
+//      Map.Entry<String, OnnxValue> stringOnnxValueEntry = output.iterator().next();
+//      LogTools.debug("{}: {}", stringOnnxValueEntry.getKey(), stringOnnxValueEntry.getValue());
+//      OnnxTensor outputTensor = (OnnxTensor) stringOnnxValueEntry.getValue();
+//
+//      float[][][][] outputArray = (float[][][][]) outputTensor.getValue();
+//      LogTools.debug("Output: {}", outputTensor.getInfo());
+//
+//      if (outputArray[0][0].length != IMAGE_HEIGHT && outputArray[0][0][0].length != IMAGE_WIDTH)
+//      {
+//         throw new RuntimeException("Output size must be " + IMAGE_HEIGHT * IMAGE_WIDTH);
+//      }
+//
+//      for (int i = 0; i < IMAGE_HEIGHT; i++)
+//      {
+//         for (int j = 0; j < IMAGE_WIDTH; j++)
+//         {
+//            outputImage.ptr(i, j).putFloat((outputArray[0][0][i][j] + offset) * 10000.0f);
+//         }
+//      }
+//      // scale up the output image and convert to 16UC1
+//      outputImage.convertTo(outputImage, opencv_core.CV_16UC1, 1, 0);
+//      return outputImage;
+      return null;
    }
 
-   public static void main(String[] args) throws OrtException
+   public static void main(String[] args)
    {
       String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20231023_131517_PerceptionLog.hdf5").toString();
 

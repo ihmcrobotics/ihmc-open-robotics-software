@@ -1,15 +1,10 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Set;
-
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-
-import controller_msgs.msg.dds.LocalizationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.IHMCPacketToMsgPublisher;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -25,13 +20,13 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ros1.IHMCETHRosLocalizationUpdateSubscriber;
 import us.ihmc.perception.ros1.RosLocalizationServiceClient;
-import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.JointNameMap;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -41,6 +36,10 @@ import us.ihmc.sensorProcessing.parameters.HumanoidForceSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Set;
 
 public class RosModule implements CloseableAndDisposable
 {
@@ -64,42 +63,32 @@ public class RosModule implements CloseableAndDisposable
            HumanoidControllerAPI.getOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), realtimeROS2Node);
    }
 
-   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, PubSubImplementation pubSubImplementation)
+   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           HumanoidControllerAPI.getOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), pubSubImplementation);
+           HumanoidControllerAPI.getOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class));
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,
                     AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap<?> jointMap,
-                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, ROS2Topic<?> robotConfigurationDataTopicName,
-                    RealtimeROS2Node realtimeROS2Node)
+                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, ROS2Topic<?> robotConfigurationDataTopicName)
    {
       this(robotModelFactory, rosClockCalculator, sensorInformation, forceSensorInformation, jointMap, rosCoreURI, simulatedSensorCommunicator,
-           robotConfigurationDataTopicName, realtimeROS2Node, null);
-   }
-
-   public RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,
-                    AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap<?> jointMap,
-                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, ROS2Topic<?> robotConfigurationDataTopicName,
-                    PubSubImplementation pubSubImplementation)
-   {
-      this(robotModelFactory, rosClockCalculator, sensorInformation, forceSensorInformation, jointMap, rosCoreURI, simulatedSensorCommunicator,
-           robotConfigurationDataTopicName, null, pubSubImplementation);
+           robotConfigurationDataTopicName, null);
    }
 
    private RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,
                      AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap<?> jointMap,
                      URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, ROS2Topic<?> robotConfigurationDataTopicName,
-                     RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
+                     RealtimeROS2Node realtimeROS2Node)
    {
       LogTools.info("Starting ROS Module");
 
       String simpleRobotName = robotModelFactory.getRobotDefinition().getName();
       manageROS2Node = realtimeROS2Node == null;
       if (realtimeROS2Node == null)
-         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_ros_node");
+         realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("ihmc_ros_node");
       ros2Node = realtimeROS2Node;
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       robotName = simpleRobotName.toLowerCase();

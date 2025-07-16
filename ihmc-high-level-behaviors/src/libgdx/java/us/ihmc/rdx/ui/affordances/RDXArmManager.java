@@ -19,6 +19,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -35,7 +36,6 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.function.BooleanSupplier;
 
@@ -83,7 +83,7 @@ public class RDXArmManager
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
-   private final ImInt selectedArmConfiguration = new ImInt(PresetArmConfiguration.TUCKED_UP_ARMS.ordinal());
+   private final ImInt selectedArmConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal());
    private final String[] armConfigurationNames = new String[PresetArmConfiguration.values.length];
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
@@ -151,14 +151,6 @@ public class RDXArmManager
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            if (syncedRobot.getHandWrenchCalculators().get(side) == null)
-               continue;
-
-            // wrench expressed in wrist pitch body fixed-frame
-            if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
-               interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-            interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
-
             if (!interactableHands.get(side).isDeleted())
             {
                armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), interactableHands.get(side).getControlReferenceFrame());
@@ -171,6 +163,14 @@ public class RDXArmManager
                   desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
                }
             }
+            
+            if (syncedRobot.getHandWrenchCalculators().get(side) == null)
+               continue;
+
+            // wrench expressed in wrist pitch body fixed-frame
+            if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
+               interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
+            interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
          }
 
          // The following puts the solver on a thread as to not slow down the UI
@@ -182,7 +182,7 @@ public class RDXArmManager
                armIKSolvers.get(side).copySourceToWork();
             }
 
-            MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            ThreadTools.startAThread(() ->
             {
                try
                {
@@ -195,7 +195,7 @@ public class RDXArmManager
                {
                   readyToCopySolution = true;
                }
-            });
+            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, "IKSolver");
          }
 
          if (readyToCopySolution)
@@ -275,29 +275,6 @@ public class RDXArmManager
       {
          ImGui.openPopup(labels.get("Warning"));
       }
-
-      if (ImGui.beginPopupModal(labels.get("Warning")))
-      {
-         ImGui.text("""
-                          The hand is currently open.
-                                                    
-                          Continuing to door avoidance
-                          may cause the hand to collide
-                          with the body of the robot.""");
-
-         ImGui.separator();
-         if (ImGui.button("Continue"))
-         {
-            executeArmAngles(showWarningNotification.read(), PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
-            ImGui.closeCurrentPopup();
-         }
-         ImGui.sameLine();
-         if (ImGui.button("Cancel"))
-         {
-            ImGui.closeCurrentPopup();
-         }
-         ImGui.endPopup();
-      }
    }
 
    public void executeArmHome(RobotSide side)
@@ -312,22 +289,6 @@ public class RDXArmManager
 
       armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
       communicationHelper.publishToController(armHomeMessage);
-   }
-
-   public void executeDoorAvoidanceArmAngles(RobotSide side)
-   {
-      // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
-      // i.e. when the fingers are more than 30 degrees apart from each other
-      // This is an arbitrary value
-      if (syncedRobot.getRobotModel().getHandModels().toString().contains("SakeHand") &&
-           syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
-      {
-         showWarningNotification.set(side);
-      }
-      else
-      {
-         executeArmAngles(side, PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
-      }
    }
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)

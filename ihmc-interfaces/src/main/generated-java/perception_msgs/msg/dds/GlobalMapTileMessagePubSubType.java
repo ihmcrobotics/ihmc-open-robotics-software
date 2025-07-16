@@ -15,7 +15,7 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6d19a28f0830a716c62a96cf86e2cbf89830dc93735f951814727e970d92a2f7";
+   		return "7a05e2094f720e604dbf519e5e34c0c4d60fd5dd449e13ce30375a3016cf5065";
    }
    
    @Override

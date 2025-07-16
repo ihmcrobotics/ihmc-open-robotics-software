@@ -1,18 +1,20 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.JointHashCodeResolver;
@@ -23,7 +25,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 /**
  * This class allows the retrieve the rigid-body from its hash code when converting a
  * {@link KinematicsToolboxRigidBodyMessage} into a {@link KinematicsToolboxRigidBodyCommand}.
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class KinematicsToolboxCommandConverter implements CommandConversionInterface
@@ -59,6 +61,8 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
          return true;
       if (message instanceof KinematicsToolboxOneDoFJointMessage)
          return true;
+      if (message instanceof KinematicsToolboxConfigurationMessage)
+         return true;
       if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
          return true;
       if (message instanceof KinematicsToolboxSupportRegionMessage)
@@ -74,33 +78,33 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> void process(C command, M message)
    {
-      if (message instanceof KinematicsToolboxRigidBodyMessage)
+      if (message instanceof KinematicsToolboxRigidBodyMessage rigidBodyMessage)
       {
-         KinematicsToolboxRigidBodyMessage rigidBodyMessage = (KinematicsToolboxRigidBodyMessage) message;
          KinematicsToolboxRigidBodyCommand rigidBodyCommand = (KinematicsToolboxRigidBodyCommand) command;
          rigidBodyCommand.set(rigidBodyMessage, rigidBodyHashCodeResolver, referenceFrameHashCodeResolver);
       }
-      else if (message instanceof KinematicsToolboxOneDoFJointMessage)
+      else if (message instanceof KinematicsToolboxOneDoFJointMessage jointMessage)
       {
-         KinematicsToolboxOneDoFJointMessage jointMessage = (KinematicsToolboxOneDoFJointMessage) message;
          KinematicsToolboxOneDoFJointCommand jointCommand = (KinematicsToolboxOneDoFJointCommand) command;
          jointCommand.set(jointMessage, jointHashCodeResolver);
       }
-      else if (message instanceof KinematicsToolboxSupportRegionMessage)
+      else if (message instanceof KinematicsToolboxConfigurationMessage configurationMessage)
       {
-         KinematicsToolboxSupportRegionMessage contactStateMessage = (KinematicsToolboxSupportRegionMessage) message;
+         KinematicsToolboxConfigurationCommand configurationCommand = (KinematicsToolboxConfigurationCommand) command;
+         configurationCommand.set(configurationMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxSupportRegionMessage contactStateMessage)
+      {
          KinematicsToolboxSupportRegionCommand contactStateCommand = (KinematicsToolboxSupportRegionCommand) command;
          contactStateCommand.set(contactStateMessage, referenceFrameHashCodeResolver);
       }
-      else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
+      else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage privConfMessage)
       {
-         KinematicsToolboxPrivilegedConfigurationMessage privConfMessage = (KinematicsToolboxPrivilegedConfigurationMessage) message;
          KinematicsToolboxPrivilegedConfigurationCommand privConfCommand = (KinematicsToolboxPrivilegedConfigurationCommand) command;
          privConfCommand.set(privConfMessage, jointHashCodeResolver);
       }
-      else if (message instanceof KinematicsToolboxInputCollectionMessage)
+      else if (message instanceof KinematicsToolboxInputCollectionMessage collectionMessage)
       {
-         KinematicsToolboxInputCollectionMessage collectionMessage = (KinematicsToolboxInputCollectionMessage) message;
          KinematicsToolboxInputCollectionCommand collectionCommand = (KinematicsToolboxInputCollectionCommand) command;
          collectionCommand.set(collectionMessage, rigidBodyHashCodeResolver, referenceFrameHashCodeResolver, jointHashCodeResolver);
       }

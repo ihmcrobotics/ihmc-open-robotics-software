@@ -49,12 +49,11 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
@@ -340,7 +339,7 @@ public class SwingOverPlanarRegionsTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
+      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
@@ -503,7 +502,7 @@ public class SwingOverPlanarRegionsTest
                hittingEndGoal |= endFootPolygon.getMinX() < desiredPosition.getX();
                hittingStartGoal |= desiredPosition.getX() < startFootPolygon.getMaxX();
 
-               double distanceToCollision = foot.distance(collision);
+               double distanceToCollision = foot.signedDistance(collision);
                if ((!hittingEndGoal && !hittingStartGoal && ignoreGroundSegments) && distanceToCollision < closestDistance)
                {
                   closestDistance = distanceToCollision;

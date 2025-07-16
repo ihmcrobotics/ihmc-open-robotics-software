@@ -257,18 +257,13 @@ public class FootstepPoseCheckerTest
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
 
-      double maxYawAtFullLength = yawReduction * maxYaw;
-      double minYawAtFullLength = yawReduction * minYaw;
-
       FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedYPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaxStepReach());
-      double reachAtChild = EuclidCoreTools.norm(snappedXPosition, snappedYPosition - parameters.getIdealFootstepWidth());
 
-      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT);
-      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(snappedXPosition, parameters.getIdealFootstepWidth(), snapDownToYaw(maxValue), RobotSide.LEFT);
+      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(snappedXPosition, parameters.getIdealFootstepWidth(), snapUpToYaw(maxYaw), RobotSide.LEFT);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(0.25, 0.15);

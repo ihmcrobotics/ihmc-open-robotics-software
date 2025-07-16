@@ -44,17 +44,25 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
             */
    public us.ihmc.idl.IDLSequence.Float  privileged_joint_angles_;
    /**
+            * Specifies the value for the alpha parameter of the nullspace projection.
+            * The nullspace projection is computed using a damped least square solver which the alpha parameter is for.
+            * The alpha value controls the size of the singularity neighborhood that is used to project the privileged configuration.
+            * A small value will result in a small neighborhood (for the arms, the elbows will more easily go straight)
+            * and a large value will result in a large neighborhood (for the arms, the elbows will resist going straight).
+            * Any negative value will be ignored and result in the solver using its default value.
+            */
+   public double nullspace_alpha_ = -1.0;
+   /**
             * The weight to use in the optimization for the privileged configuration.
             * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
             * weight of the main objectives.
-            * Any value less than zero will be ignored.
-            * A value of -1 will result in the solver using its default value.
+            * Any negative value will be ignored and result in the solver using its default value.
             */
    public double privileged_weight_ = -1.0;
    /**
             * The feedback proportional gain to use for the privileged configuration.
             * It is coupled to some extent to the privileged_weight
-            * A value of -1 will result in the solver using its default value.
+            * Any negative value will be ignored and result in the solver using its default value.
             */
    public double privileged_gain_ = -1.0;
 
@@ -86,6 +94,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.privileged_root_joint_orientation_, privileged_root_joint_orientation_);
       privileged_joint_hash_codes_.set(other.privileged_joint_hash_codes_);
       privileged_joint_angles_.set(other.privileged_joint_angles_);
+      nullspace_alpha_ = other.nullspace_alpha_;
+
       privileged_weight_ = other.privileged_weight_;
 
       privileged_gain_ = other.privileged_gain_;
@@ -175,11 +185,35 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
    }
 
    /**
+            * Specifies the value for the alpha parameter of the nullspace projection.
+            * The nullspace projection is computed using a damped least square solver which the alpha parameter is for.
+            * The alpha value controls the size of the singularity neighborhood that is used to project the privileged configuration.
+            * A small value will result in a small neighborhood (for the arms, the elbows will more easily go straight)
+            * and a large value will result in a large neighborhood (for the arms, the elbows will resist going straight).
+            * Any negative value will be ignored and result in the solver using its default value.
+            */
+   public void setNullspaceAlpha(double nullspace_alpha)
+   {
+      nullspace_alpha_ = nullspace_alpha;
+   }
+   /**
+            * Specifies the value for the alpha parameter of the nullspace projection.
+            * The nullspace projection is computed using a damped least square solver which the alpha parameter is for.
+            * The alpha value controls the size of the singularity neighborhood that is used to project the privileged configuration.
+            * A small value will result in a small neighborhood (for the arms, the elbows will more easily go straight)
+            * and a large value will result in a large neighborhood (for the arms, the elbows will resist going straight).
+            * Any negative value will be ignored and result in the solver using its default value.
+            */
+   public double getNullspaceAlpha()
+   {
+      return nullspace_alpha_;
+   }
+
+   /**
             * The weight to use in the optimization for the privileged configuration.
             * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
             * weight of the main objectives.
-            * Any value less than zero will be ignored.
-            * A value of -1 will result in the solver using its default value.
+            * Any negative value will be ignored and result in the solver using its default value.
             */
    public void setPrivilegedWeight(double privileged_weight)
    {
@@ -189,8 +223,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
             * The weight to use in the optimization for the privileged configuration.
             * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
             * weight of the main objectives.
-            * Any value less than zero will be ignored.
-            * A value of -1 will result in the solver using its default value.
+            * Any negative value will be ignored and result in the solver using its default value.
             */
    public double getPrivilegedWeight()
    {
@@ -200,7 +233,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
    /**
             * The feedback proportional gain to use for the privileged configuration.
             * It is coupled to some extent to the privileged_weight
-            * A value of -1 will result in the solver using its default value.
+            * Any negative value will be ignored and result in the solver using its default value.
             */
    public void setPrivilegedGain(double privileged_gain)
    {
@@ -209,7 +242,7 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
    /**
             * The feedback proportional gain to use for the privileged configuration.
             * It is coupled to some extent to the privileged_weight
-            * A value of -1 will result in the solver using its default value.
+            * Any negative value will be ignored and result in the solver using its default value.
             */
    public double getPrivilegedGain()
    {
@@ -246,6 +279,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.privileged_joint_angles_, other.privileged_joint_angles_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.nullspace_alpha_, other.nullspace_alpha_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_weight_, other.privileged_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_gain_, other.privileged_gain_, epsilon)) return false;
@@ -273,6 +308,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
       if (!this.privileged_root_joint_orientation_.equals(otherMyClass.privileged_root_joint_orientation_)) return false;
       if (!this.privileged_joint_hash_codes_.equals(otherMyClass.privileged_joint_hash_codes_)) return false;
       if (!this.privileged_joint_angles_.equals(otherMyClass.privileged_joint_angles_)) return false;
+      if(this.nullspace_alpha_ != otherMyClass.nullspace_alpha_) return false;
+
       if(this.privileged_weight_ != otherMyClass.privileged_weight_) return false;
 
       if(this.privileged_gain_ != otherMyClass.privileged_gain_) return false;
@@ -301,6 +338,8 @@ public class KinematicsToolboxPrivilegedConfigurationMessage extends Packet<Kine
       builder.append(this.privileged_joint_hash_codes_);      builder.append(", ");
       builder.append("privileged_joint_angles=");
       builder.append(this.privileged_joint_angles_);      builder.append(", ");
+      builder.append("nullspace_alpha=");
+      builder.append(this.nullspace_alpha_);      builder.append(", ");
       builder.append("privileged_weight=");
       builder.append(this.privileged_weight_);      builder.append(", ");
       builder.append("privileged_gain=");

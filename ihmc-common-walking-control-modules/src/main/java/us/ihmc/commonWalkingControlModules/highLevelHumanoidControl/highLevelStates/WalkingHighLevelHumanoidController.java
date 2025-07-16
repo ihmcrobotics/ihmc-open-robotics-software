@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
@@ -9,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -43,18 +45,20 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -131,8 +135,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final YoBoolean enablePushRecoveryOnFailure = new YoBoolean("enablePushRecoveryOnFailure", registry);
-
    private final YoBoolean allowUpperBodyMotionDuringLocomotion = new YoBoolean("allowUpperBodyMotionDuringLocomotion", registry);
 
    private final CommandInputManager commandInputManager;
@@ -147,6 +149,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final LegElasticityDebuggator legElasticityDebuggator;
 
    private final YoBoolean isUpperBodyLoadBearing = new YoBoolean("isUpperBodyLoadBearing", registry);
+   private final FrameConvexPolygon2D zeroRegion = new FrameConvexPolygon2D();
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -223,7 +226,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          {
             continue;
          }
-         Arrays.asList(manager.getControlledJoints()).stream().forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
+         Arrays.stream(manager.getControlledJoints()).forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -231,7 +234,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(pelvis, foot), OneDoFJointBasics.class);
          Set<String> jointNames = new HashSet<>();
-         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         Arrays.asList(legJoints).forEach(legJoint -> jointNames.add(legJoint.getName()));
          legJointNames.put(robotSide, jointNames);
       }
 
@@ -275,8 +278,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
-
-      isUpperBodyLoadBearing.addListener(v -> controllerToolbox.resetMultiContactCoMRegion());
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
       {
@@ -535,6 +536,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       controllerToolbox.initialize();
+      // This must be done before calling managerFactory.initializeManagers(), becuase the pelvis orientation manager relies on thew alking trajectory path.
+      initializeWalkingTrajectoryPath();
+
       managerFactory.initializeManagers();
 
       commandInputManager.clearAllCommands();
@@ -561,7 +565,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+         footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
@@ -579,12 +583,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       firstTick = true;
    }
 
+   private void initializeWalkingTrajectoryPath()
+   {
+      controllerToolbox.getWalkingTrajectoryPath().clearFootsteps();
+      controllerToolbox.getWalkingTrajectoryPath().reset();
+      controllerToolbox.getWalkingTrajectoryPath().initializeDoubleSupport();
+      controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(FootControlModule.ConstraintType.FULL, FootControlModule.ConstraintType.FULL);
+   }
+
    private void initializeManagers()
    {
       balanceManager.disablePelvisXYControl();
-
-      double stepTime = walkingMessageHandler.getDefaultStepTime();
-      pelvisOrientationManager.setTrajectoryTime(stepTime);
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
@@ -660,8 +669,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       WalkingState currentState = stateMachine.getCurrentState();
       commandConsumer.update();
       commandConsumer.consumeHeadCommands();
-      commandConsumer.consumeChestCommands();
-      commandConsumer.consumePelvisHeightCommands();
+      commandConsumer.consumeChestCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
+      commandConsumer.consumePelvisHeightCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.consumeGoHomeMessages();
       commandConsumer.consumeFootLoadBearingCommands(currentState);
       commandConsumer.consumeStopAllTrajectoryCommands();
@@ -698,16 +707,19 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
          // This happens on the first tick when the controller core has not yet run to update the center of pressure.
-         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getSoleFrame())
+         if (footDesiredCoPs.get(robotSide).getReferenceFrame() != feet.get(robotSide).getContactFrame())
          {
-            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
+            footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getContactFrame());
          }
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
          controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification();
       }
 
       updateAndPublishFootstepQueueStatus();
-      statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
+
+      CapturabilityBasedStatus capturabilityBasedStatus = balanceManager.updateAndReturnCapturabilityBasedStatus();
+      packHandLoadBearingStatuses(capturabilityBasedStatus);
+      statusOutputManager.reportStatusMessage(capturabilityBasedStatus);
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
@@ -753,15 +765,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT
                              || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
-         if (enablePushRecoveryOnFailure.getBooleanValue() && !isInSwing)
-         {
-            commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
-         }
-         else
-         {
-            walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
-            controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
-         }
+         walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
+         controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
       }
    }
 
@@ -775,6 +780,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       feetManager.compute();
 
       boolean isUpperBodyLoadBearing = false;
+
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
@@ -782,17 +788,27 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          {
             bodyManager.compute();
 
-            if (bodyManager.isLoadBearing())
+            if (bodyManager.isLoadBearing() && controllerToolbox.enableUpperBodyLoadBearing())
                isUpperBodyLoadBearing = true;
          }
       }
 
       this.isUpperBodyLoadBearing.set(isUpperBodyLoadBearing);
+      StabilityMarginRegionCalculator multiContactRegionCalculator = controllerToolbox.getMultiContactStabilityRegionCalculator();
+      boolean useMultiContactStabilityRegion = false;
+
       if (isUpperBodyLoadBearing)
       {
          updateWholeBodyContactState();
          controllerToolbox.updateMultiContactCoMRegion();
+         useMultiContactStabilityRegion = multiContactRegionCalculator.hasSolvedWholeRegion();
       }
+      else if (multiContactRegionCalculator != null)
+      {
+         multiContactRegionCalculator.clear();
+      }
+
+      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = useMultiContactStabilityRegion ? multiContactRegionCalculator.getFeasibleRegion() : zeroRegion;
 
       pelvisOrientationManager.compute();
       if (naturalPostureManager != null && naturalPostureManager.isEnabled())
@@ -809,14 +825,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
        * two modules.
        */
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
-      if (currentState.isDoubleSupportState())
-         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
-      else
-         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
+      RobotSide supportLeg = currentState.isDoubleSupportState() ? currentState.getTransferToSide() : currentState.getSupportSide();
+      balanceManager.compute(supportLeg, heightControlCommand, multiContactStabilityRegion, controlHeightWithMomentum);
    }
 
    private void updateWholeBodyContactState()
    {
+      if (!hasContactStateChanged())
+      {
+         return;
+      }
+
       WholeBodyContactState wholeBodyContactState = controllerToolbox.getWholeBodyContactState();
       wholeBodyContactState.clear();
 
@@ -827,6 +846,51 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Set upper body contact points
       for (int i = 0; i < bodyManagers.size(); i++)
          bodyManagers.get(i).updateWholeBodyContactState(wholeBodyContactState);
+
+      wholeBodyContactState.updateContactPoints();
+      wholeBodyContactState.updateJointIndices();
+
+      controllerToolbox.onWholeBodyContactsChanged();
+   }
+
+   private void packHandLoadBearingStatuses(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      if (fullRobotModel.getHand(RobotSide.LEFT) != null)
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.LEFT), capturabilityBasedStatus.getLeftHandContactPoints(), capturabilityBasedStatus.getLeftHandContactNormal());
+      if (fullRobotModel.getHand(RobotSide.RIGHT) != null)
+         packBodyLoadStatus(fullRobotModel.getHand(RobotSide.RIGHT), capturabilityBasedStatus.getRightHandContactPoints(), capturabilityBasedStatus.getRightHandContactNormal());
+   }
+
+   private void packBodyLoadStatus(RigidBodyBasics rigidBody, RecyclingArrayList<Point3D> contactPointList, Vector3D contactNormalToPack)
+   {
+      contactPointList.clear();
+      contactNormalToPack.setToZero();
+
+      for (int i = 0; i < bodyManagers.size(); i++)
+      {
+         if (bodyManagers.get(i).getBodyToControl() == rigidBody)
+         {
+            bodyManagers.get(i).packContactData(contactPointList, contactNormalToPack);
+         }
+      }
+   }
+
+   private boolean hasContactStateChanged()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         // peek because other parts of the controller (WalkingSingleSupportState#handleChangeInContactState) use the notification.
+         // it is polled in this class at the end of doAction
+         if (controllerToolbox.getFootContactState(robotSide).peekContactHasChangedNotification())
+            return true;
+      }
+      for (int i = 0; i < bodyManagers.size(); i++)
+      {
+         // poll because this is the only class that listens to the notification
+         if (bodyManagers.get(i).pollContactHasChangedNotification())
+            return true;
+      }
+      return false;
    }
 
    private void reportStatusMessages()

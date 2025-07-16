@@ -6,17 +6,17 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -30,8 +30,8 @@ import java.util.function.Supplier;
 public class OusterDepthPublisher
 {
    private final RealtimeROS2Node realtimeROS2Node;
-   private final ROS2PublisherBasics<ImageMessage> imagePublisher;
-   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
+   private final ROS2Publisher<ImageMessage> imagePublisher;
+   private final ROS2Publisher<LidarScanMessage> lidarScanPublisher;
 
    private final FramePose3D cameraPose = new FramePose3D();
    private IntPointer compressionParameters;
@@ -51,7 +51,7 @@ public class OusterDepthPublisher
    {
       this.publishLidarScan = publishLidarScan;
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime("ouster_depth_publisher");
 
       LogTools.info("Publishing ROS 2 ImageMessage: {}", imageMessageTopic);
       imagePublisher = realtimeROS2Node.createPublisher(imageMessageTopic);
@@ -107,13 +107,14 @@ public class OusterDepthPublisher
       {
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(outputImageMessage);
+      outputImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
+      outputImageMessage.setCompressionType(CompressionType.PNG.toByte());
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
       outputImageMessage.setFocalLengthXPixels(depthWidth / (2.0f * (float) Math.PI)); // These are nominal values approximated by Duncan & Tomasz
       outputImageMessage.setFocalLengthYPixels(depthHeight / ((float) Math.PI / 2.0f));
-      CameraModel.OUSTER.packMessageFormat(outputImageMessage);
+      outputImageMessage.setCameraModel(CameraModel.OUSTER.toByte());
       MessageTools.packIDLSequence(beamAltitudeAnglesBuffer, outputImageMessage.getOusterBeamAltitudeAngles());
       MessageTools.packIDLSequence(beamAzimuthAnglesBuffer, outputImageMessage.getOusterBeamAzimuthAngles());
       imagePublisher.publish(outputImageMessage);
@@ -124,7 +125,7 @@ public class OusterDepthPublisher
          lidarScanMessage.getLidarPosition().set(cameraPose.getPosition());
          lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
          lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(acquisitionInstant.getEpochSecond()) + acquisitionInstant.getNano());
-         lidarScanMessage.getScan().reset();
+         lidarScanMessage.getScan().resetQuick();
          LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan,
                                                        lidarScanMessage,
                                                        (i, j) -> depthExtractionKernel.getPointCloudInWorldFrame().get(3 * i + j));

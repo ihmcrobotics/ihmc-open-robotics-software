@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import java.io.Serial;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -162,6 +163,7 @@ public class SnapAndWiggleSingleStep
 
    public static class SnappingFailedException extends Exception
    {
+      @Serial
       private static final long serialVersionUID = 6962526781987562540L;
 
       private SnappingFailedException()

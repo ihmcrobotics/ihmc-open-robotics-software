@@ -111,7 +111,7 @@ public class StringStretcher2dTest
       assertEquals(3, waypoints.size());
 
       EuclidCoreTestTools.assertEquals(minPoint1, waypoints.get(0), 1e-8);
-      EuclidCoreTestTools.assertEquals(minPoint3, waypoints.get(1), 1e-8);
+      EuclidCoreTestTools.assertEquals(maxPoint3, waypoints.get(1), 1e-8);
       EuclidCoreTestTools.assertEquals(minPoint2, waypoints.get(2), 1e-8);
    }
 

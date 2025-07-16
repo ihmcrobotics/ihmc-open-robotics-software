@@ -213,6 +213,12 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    @Override
+   public void setSwingSpeedUpEnabled(boolean swingSpeedUpEnabled)
+   {
+      this.swingSpeedUpEnabled.set(swingSpeedUpEnabled);
+   }
+
+   @Override
    public List<StepConstraintRegion> getStepConstraintRegions()
    {
       return null;
@@ -245,7 +251,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       computeLimitedAreaForCoP();
 
       captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
-                                                     timeRemainingInState.getDoubleValue(),
+                                                     Math.max(timeRemainingInState.getDoubleValue(), 0.05),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);

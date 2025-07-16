@@ -14,9 +14,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -46,7 +46,7 @@ public class CollisionFreeSwingCalculatorLogViewer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 

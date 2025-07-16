@@ -1,6 +1,6 @@
 package us.ihmc.communication.property;
 
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -10,12 +10,12 @@ import java.util.ArrayList;
  */
 public class ROS2StoredPropertySetGroup
 {
-   private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
+   private final ROS2Node ros2Node;
    private final ArrayList<ROS2StoredPropertySet<?>> ros2StoredPropertySets = new ArrayList<>();
 
-   public ROS2StoredPropertySetGroup(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2StoredPropertySetGroup(ROS2Node ros2Node)
    {
-      this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
+      this.ros2Node = ros2Node;
    }
 
    /**
@@ -26,7 +26,7 @@ public class ROS2StoredPropertySetGroup
     */
    public void registerStoredPropertySet(StoredPropertySetROS2TopicPair topicPair, StoredPropertySetBasics storedPropertySet)
    {
-      ROS2StoredPropertySet<?> ros2StoredPropertySet = new ROS2StoredPropertySet<>(ros2PublishSubscribeAPI, topicPair, storedPropertySet);
+      ROS2StoredPropertySet<?> ros2StoredPropertySet = new ROS2StoredPropertySet<>(ros2Node, topicPair, storedPropertySet);
       ros2StoredPropertySets.add(ros2StoredPropertySet);
    }
 

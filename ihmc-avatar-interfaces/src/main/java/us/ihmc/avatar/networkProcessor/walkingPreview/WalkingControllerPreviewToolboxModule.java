@@ -1,46 +1,39 @@
 package us.ihmc.avatar.networkProcessor.walkingPreview;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 {
    private final WalkingControllerPreviewToolboxController controller;
 
-   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node) throws IOException
-   {
-      this(robotModel, startYoVariableServer, realtimeROS2Node, null);
-   }
-
-   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer)
          throws IOException
    {
-      this(robotModel, startYoVariableServer, null, pubSubImplementation);
+      this(robotModel, startYoVariableServer, null);
    }
 
-   private WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node,
-                                                 PubSubImplementation pubSubImplementation)
+   public WalkingControllerPreviewToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node)
          throws IOException
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, realtimeROS2Node, pubSubImplementation);
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS, realtimeROS2Node);
       setTimeWithoutInputsBeforeGoingToSleep(60.0);
 
       controller = new WalkingControllerPreviewToolboxController(robotModel, 0.02, commandInputManager, statusOutputManager, yoGraphicsListRegistry, registry);
@@ -48,7 +41,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 

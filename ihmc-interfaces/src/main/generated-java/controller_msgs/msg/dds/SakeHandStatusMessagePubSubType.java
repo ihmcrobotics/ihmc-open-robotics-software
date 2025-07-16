@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e926ecc3c55a58a18be01b74a6974d6d4c55068fd8da94041097b34270c7a81d";
+   		return "e0e5094e787e6a2005ce83792bb1dccd0a8d61c0bc92a92e14b2de2151cafa0a";
    }
    
    @Override
@@ -80,6 +80,12 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -135,6 +141,15 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -169,6 +184,12 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_7(data.getNeedsReset());
 
+      cdr.write_type_7(data.getIsCalibrating());
+
+      cdr.write_type_7(data.getIsCoolingDown());
+
+      cdr.write_type_7(data.getAutomaticCooldownEnabled());
+
    }
 
    public static void read(controller_msgs.msg.dds.SakeHandStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -201,6 +222,12 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       	
       data.setNeedsReset(cdr.read_type_7());
       	
+      data.setIsCalibrating(cdr.read_type_7());
+      	
+      data.setIsCoolingDown(cdr.read_type_7());
+      	
+      data.setAutomaticCooldownEnabled(cdr.read_type_7());
+      	
 
    }
 
@@ -221,6 +248,9 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       ser.write_type_2("realtime_tick", data.getRealtimeTick());
       ser.write_type_7("is_calibrated", data.getIsCalibrated());
       ser.write_type_7("needs_reset", data.getNeedsReset());
+      ser.write_type_7("is_calibrating", data.getIsCalibrating());
+      ser.write_type_7("is_cooling_down", data.getIsCoolingDown());
+      ser.write_type_7("automatic_cooldown_enabled", data.getAutomaticCooldownEnabled());
    }
 
    @Override
@@ -240,6 +270,9 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setRealtimeTick(ser.read_type_2("realtime_tick"));
       data.setIsCalibrated(ser.read_type_7("is_calibrated"));
       data.setNeedsReset(ser.read_type_7("needs_reset"));
+      data.setIsCalibrating(ser.read_type_7("is_calibrating"));
+      data.setIsCoolingDown(ser.read_type_7("is_cooling_down"));
+      data.setAutomaticCooldownEnabled(ser.read_type_7("automatic_cooldown_enabled"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SakeHandStatusMessage src, controller_msgs.msg.dds.SakeHandStatusMessage dest)

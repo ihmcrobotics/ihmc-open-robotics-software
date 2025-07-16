@@ -29,14 +29,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A multiline, colored outline graphic of the foot, typically the 100% support polygon.
+ */
 public class RDXFootstepGraphic implements RenderableProvider
 {
    public static final Color LEFT_FOOT_RED_COLOR = new Color(0.5f, 0.0f, 0.0f, 1.0f);
    public static final Color RIGHT_FOOT_GREEN_COLOR = new Color(0.0f, 0.5f, 0.0f, 1.0f);
    public static final SideDependentList<Color> FOOT_COLORS = new SideDependentList<>(LEFT_FOOT_RED_COLOR, RIGHT_FOOT_GREEN_COLOR);
-   private static final AtomicInteger INDEX = new AtomicInteger();
+
+   public static final SideDependentList<Color> DEBUG_FOOT_COLORS = new SideDependentList<>(Color.CORAL, Color.PURPLE);
 
    private final Color color;
    private final Color highlightColor;

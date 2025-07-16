@@ -1,23 +1,11 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
-import perception_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -26,7 +14,6 @@ import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
@@ -35,10 +22,24 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageC
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
-import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SLAMModule implements PerceptionModule
 {
@@ -103,7 +104,7 @@ public class SLAMModule implements PerceptionModule
 
    public SLAMModule(Messager messager, File configurationFile)
    {
-      this(ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, PerceptionAPI.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
+      this(new ROS2NodeBuilder().build(PerceptionAPI.REA_NODE_NAME), messager, configurationFile, new RigidBodyTransform(), true);
    }
 
    public SLAMModule(ROS2Node ros2Node, Messager messager, File configurationFile)
@@ -128,8 +129,8 @@ public class SLAMModule implements PerceptionModule
       ros2Node.createSubscription(PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD, this::handlePointCloud);
       ros2Node.createSubscription(PerceptionAPI.D435_POINT_CLOUD, this::handlePointCloud);
       ros2Node.createSubscription(REACommunicationProperties.stereoInputTopic.withType(REAStateRequestMessage.class), this::handleREAStateRequestMessage);
-      new ROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
-      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      ros2Node.createSubscription2(SLAMModuleAPI.CLEAR, message -> clearSLAM());
+      ros2Node.createSubscription2(SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");
          stop();

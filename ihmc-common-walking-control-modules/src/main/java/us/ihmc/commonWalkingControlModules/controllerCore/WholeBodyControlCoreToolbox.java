@@ -417,7 +417,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public WrenchMatrixCalculator getWrenchMatrixCalculator()
    {
       if (wrenchMatrixCalculator == null)
-         wrenchMatrixCalculator = new WrenchMatrixCalculator(this, registry);
+         wrenchMatrixCalculator = new WrenchMatrixCalculator(this, centerOfMassFrame, registry);
       return wrenchMatrixCalculator;
    }
 
@@ -696,6 +696,11 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public List<OneDoFJointBasics> getInactiveOneDoFJoints()
    {
       return inactiveOneDoFJoints;
+   }
+
+   public CentroidalMomentumCalculator getCentroidalMomentumCalculator()
+   {
+      return centroidalMomentumCalculator;
    }
 
    @Override

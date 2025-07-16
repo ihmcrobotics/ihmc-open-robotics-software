@@ -48,6 +48,13 @@ public class OpenCVTools
       opencv_core.normalize(source, destination, min, max, normType, depthType, mask);
    }
 
+   public static void cudaClampTo8BitUnsignedChar(GpuMat source, GpuMat destination, double min, double max)
+   {
+      int normType = opencv_core.NORM_MINMAX;
+      int depthType = opencv_core.CV_8U; // converting to 8 bit
+      opencv_cudaarithm.normalize(source, destination, min, max, normType, depthType);
+   }
+
    public static void transferDepth16UC1ToLower8UC3(Mat source, Mat destination)
    {
       BytePointer data = source.data();
@@ -281,6 +288,21 @@ public class OpenCVTools
       return a.cols() == imageWidth && a.rows() == imageHeight;
    }
 
+   public static boolean dimensionsMatch(Mat a, Mat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
+   public static boolean dimensionsMatch(GpuMat a, GpuMat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
+   public static boolean dimensionsMatch(Mat a, GpuMat b)
+   {
+      return a.cols() == b.cols() && a.rows() == b.rows();
+   }
+
    /**
     * Puts 3 floats in a Mat that is an array of Float3s i.e. type == CV_32FC3
     * Assumes Mat is continuous. i.e. Mat::isContinuous == true
@@ -322,5 +344,69 @@ public class OpenCVTools
          opencv_cudaarithm.bitwise_and(colorImage, colorImage, resultGpuMat, imageMask, Stream.Null());
       }
       return resultGpuMat;
+   }
+
+   /**
+    * @return Total size of data stored in the mat, in bytes.
+    */
+   public static long dataSize(Mat mat)
+   {
+      return mat.elemSize() * mat.total();
+   }
+
+   /**
+    * @return Bytes of memory used to store the data in the mat.
+    *       Not necessarily equal to {@link #dataSize(Mat)} as the
+    *       stored data may have padding at the end of each row.
+    */
+   public static long memorySize(Mat mat)
+   {
+      return mat.step() * mat.rows();
+   }
+
+   /**
+    * @return Total size of data stored in the mat, in bytes.
+    */
+   public static long dataSize(GpuMat mat)
+   {
+      return mat.elemSize() * mat.rows() * mat.cols();
+   }
+
+   /**
+    * @return Bytes of memory used to store the data in the mat.
+    *       Not necessarily equal to {@link #dataSize(GpuMat)} as the
+    *       stored data may have padding at the end of each row.
+    */
+   public static long memorySize(GpuMat mat)
+   {
+      return mat.step() * mat.rows();
+   }
+
+   /**
+    * Calculates the average difference per pixel of the two Mats.
+    * If the mats are not comparable (i.e. of different dimensions or types), positive infinity is returned.
+    * @param matA First mat
+    * @param matB Second mat
+    * @return Average difference of the pixels in the mats. Positive infinity if the mats are not comparable.
+    */
+   public static double averagePixelDifference(Mat matA, Mat matB)
+   {
+      if (!OpenCVTools.dimensionsMatch(matA, matB))
+         return Double.POSITIVE_INFINITY;
+
+      if (OpenCVTools.dataSize(matA) != OpenCVTools.dataSize(matB))
+         return Double.POSITIVE_INFINITY;
+
+      try (Mat differenceMat = new Mat())
+      {
+         // Find absolute difference for each element
+         opencv_core.absdiff(matA, matB, differenceMat);
+
+         // Find the sum of the differences
+         double totalDifference = opencv_core.sumElems(differenceMat).get();
+
+         // Divide total difference by number of pixels
+         return totalDifference / differenceMat.total();
+      }
    }
 }

@@ -23,7 +23,7 @@ module controller_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * The coordinates in world of the origin of each constraint region.
          */
@@ -51,7 +51,7 @@ module controller_msgs
         /**
          * Single buffer used to store for each constraint the vertices of the concave hull and the convex polygons.
          */
-        sequence<geometry_msgs::msg::dds::Point, 50000> vertex_buffer;
+        sequence<geometry_msgs::msg::dds::Point, 5000> vertex_buffer;
       };
     };
   };

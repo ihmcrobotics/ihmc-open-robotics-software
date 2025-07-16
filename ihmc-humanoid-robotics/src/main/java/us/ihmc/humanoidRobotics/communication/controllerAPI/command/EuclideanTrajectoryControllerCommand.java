@@ -269,6 +269,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
    public void changeFrame(ReferenceFrame referenceFrame)
    {
       trajectoryPointList.changeFrame(referenceFrame);
+      trajectoryFrame = referenceFrame;
    }
 
    /**

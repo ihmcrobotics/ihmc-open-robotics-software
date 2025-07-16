@@ -4,7 +4,7 @@
 # All the information here is expressed in the world frame.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
 geometry_msgs/Point capture_point_2d

@@ -15,7 +15,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "45b58b844d1abe33b51618fa4eeae630dbc7ea88d1d327015b27e4b68b4df4ee";
+   		return "ae6bcaac8e53e4d1f1604f944640b039b3a8de8d937e6db808d362b169070265";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 20; ++i0)
       {
@@ -69,7 +69,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -85,7 +85,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -126,41 +126,41 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.StepConstraintsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       if(data.getRegionOrigin().size() <= 20)
       cdr.write_type_e(data.getRegionOrigin());else
-          throw new RuntimeException("region_origin field exceeds the maximum length");
+          throw new RuntimeException("region_origin field exceeds the maximum length: %d > %d".formatted(data.getRegionOrigin().size(), 20));
 
       if(data.getRegionOrientation().size() <= 20)
       cdr.write_type_e(data.getRegionOrientation());else
-          throw new RuntimeException("region_orientation field exceeds the maximum length");
+          throw new RuntimeException("region_orientation field exceeds the maximum length: %d > %d".formatted(data.getRegionOrientation().size(), 20));
 
       if(data.getRegionNormal().size() <= 20)
       cdr.write_type_e(data.getRegionNormal());else
-          throw new RuntimeException("region_normal field exceeds the maximum length");
+          throw new RuntimeException("region_normal field exceeds the maximum length: %d > %d".formatted(data.getRegionNormal().size(), 20));
 
       if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
-          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length: %d > %d".formatted(data.getConcaveHullsSize().size(), 100));
 
       if(data.getNumberOfHolesInRegion().size() <= 100)
       cdr.write_type_e(data.getNumberOfHolesInRegion());else
-          throw new RuntimeException("number_of_holes_in_region field exceeds the maximum length");
+          throw new RuntimeException("number_of_holes_in_region field exceeds the maximum length: %d > %d".formatted(data.getNumberOfHolesInRegion().size(), 100));
 
       if(data.getHolePolygonsSize().size() <= 100)
       cdr.write_type_e(data.getHolePolygonsSize());else
-          throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
+          throw new RuntimeException("hole_polygons_size field exceeds the maximum length: %d > %d".formatted(data.getHolePolygonsSize().size(), 100));
 
-      if(data.getVertexBuffer().size() <= 50000)
+      if(data.getVertexBuffer().size() <= 5000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 5000));
 
    }
 
    public static void read(controller_msgs.msg.dds.StepConstraintsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       cdr.read_type_e(data.getRegionOrigin());	
       cdr.read_type_e(data.getRegionOrientation());	
@@ -175,7 +175,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.StepConstraintsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
       ser.write_type_e("region_orientation", data.getRegionOrientation());
       ser.write_type_e("region_normal", data.getRegionNormal());
@@ -188,7 +188,7 @@ public class StepConstraintsListMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StepConstraintsListMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_e("region_origin", data.getRegionOrigin());
       ser.read_type_e("region_orientation", data.getRegionOrientation());
       ser.read_type_e("region_normal", data.getRegionNormal());

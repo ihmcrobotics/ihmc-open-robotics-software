@@ -1,7 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -29,6 +27,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterface
 {
@@ -75,7 +75,6 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -118,7 +117,6 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       setupCameraForWalkingOffOfLargePlatform();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfLargePlatform();
@@ -150,7 +148,6 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
@@ -197,7 +194,6 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 

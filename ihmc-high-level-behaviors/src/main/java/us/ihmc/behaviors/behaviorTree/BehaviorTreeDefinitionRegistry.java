@@ -1,55 +1,150 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
+import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BehaviorTreeDefinitionRegistry
 {
-   private record RegistryRecord(Class<?> typeClass, byte messageByte) { }
-
-   private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
+   private static final DefinitionMapping[] DEFINITIONS = new DefinitionMapping[]
    {
-      new RegistryRecord(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
-      new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
-      new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
-      new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
-      new RegistryRecord(TrashCanInteractionDefinition.class, BehaviorTreeStateMessage.TRASH_CAN_INTERACTION),
-      new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
+      new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
+      new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
+      new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
+      new DefinitionMapping(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
+      new DefinitionMapping(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
+      new DefinitionMapping(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
+      new DefinitionMapping(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
+      new DefinitionMapping(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
+      new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
+      new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
-      new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
-      new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
-      new RegistryRecord(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
-      new RegistryRecord(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
-      new RegistryRecord(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
-      new RegistryRecord(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
-      new RegistryRecord(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
-      new RegistryRecord(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
-      new RegistryRecord(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
+      new DefinitionMapping(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
+      new DefinitionMapping(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
+      new DefinitionMapping(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
+      new DefinitionMapping(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
+      new DefinitionMapping(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
+      new DefinitionMapping(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
+      new DefinitionMapping(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
+      new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
+      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
    };
+   private static final Map<Class<?>, DefinitionMapping> DEFINITIONS_MAP = new HashMap<>();
+   static
+   {
+      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      {
+         DEFINITIONS_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
+      }
+   }
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
-      for (RegistryRecord definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : DEFINITIONS)
       {
-         if (typeName.equals(definitionEntry.typeClass().getSimpleName()))
-            return definitionEntry.typeClass();
+         if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
+            return definitionEntry.getTypeClass();
       }
-
       return null;
    }
 
    public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
-      for (RegistryRecord definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : DEFINITIONS)
       {
-         if (nodeType == definitionEntry.messageByte())
-            return definitionEntry.typeClass();
+         if (nodeType == definitionEntry.getMessageByte())
+            return definitionEntry.getTypeClass();
       }
 
       return null;
+   }
+
+   public static byte getMessageByte(Class<?> definitionClass)
+   {
+      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      if (definitionMapping != null)
+      {
+         return definitionMapping.getMessageByte();
+      }
+
+      return -1;
+   }
+
+   public static String getInitialName(Class<?> definitionClass)
+   {
+      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      if (definitionMapping != null)
+      {
+         return definitionMapping.getInitialName();
+      }
+
+      return null;
+   }
+
+   private static class DefinitionMapping
+   {
+      private final String initialName;
+      private final Class<?> typeClass;
+      private final byte messageByte;
+
+      private DefinitionMapping(Class<?> typeClass, byte messageByte)
+      {
+         this.typeClass = typeClass;
+         this.messageByte = messageByte;
+
+         if (typeClass == BehaviorTreeNodeDefinition.class)
+         {
+            this.initialName = "Basic node";
+         }
+         else
+         {
+            // Convert "PascalCase" to "Sentence case"
+            String initialName = typeClass.getSimpleName();
+            initialName = initialName.replaceFirst("^BehaviorTree", "");
+            initialName = initialName.replaceFirst("Definition$", "");
+            initialName = initialName.replaceFirst("Node$", " Node");
+            initialName = initialName.replaceAll("([a-z])([A-Z]+)", "$1 $2");
+
+            // Undercase words after first
+            String[] words = initialName.split(" ");
+            if (words.length > 1)
+            {
+               StringBuilder modifiedName = new StringBuilder();
+               modifiedName.append(words[0]);
+               for (int i = 1; i < words.length; i++)
+               {
+                  modifiedName.append(" ").append(words[i].toLowerCase());
+               }
+               initialName = modifiedName.toString();
+            }
+
+            this.initialName = initialName;
+         }
+      }
+
+      public String getInitialName()
+      {
+         return initialName;
+      }
+
+      public Class<?> getTypeClass()
+      {
+         return typeClass;
+      }
+
+      public byte getMessageByte()
+      {
+         return messageByte;
+      }
    }
 }

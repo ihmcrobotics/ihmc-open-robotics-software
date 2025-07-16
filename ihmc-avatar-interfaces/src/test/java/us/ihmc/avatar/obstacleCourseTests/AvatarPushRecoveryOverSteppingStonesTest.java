@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +40,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
@@ -125,7 +125,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
    private FootstepDataListMessage startTest()
    {
-      simulationTestHelper.setKeepSCSUp(true);
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(100.0, new YoRegistry("test"));

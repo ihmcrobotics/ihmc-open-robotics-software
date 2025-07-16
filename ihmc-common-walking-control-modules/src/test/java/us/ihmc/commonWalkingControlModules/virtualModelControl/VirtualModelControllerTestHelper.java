@@ -1934,6 +1934,12 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public MovingReferenceFrame getHeadFrame()
+      {
+         return null;
+      }
    }
 
    public static class ForcePointController implements RobotController

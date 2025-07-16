@@ -9,7 +9,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.promp.ProMPUtil;
 import us.ihmc.behaviors.tools.TrajectoryRecordReplay;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,9 +48,10 @@ public class ProMPAssistantGenerationFrameTest
       assertNotNull(myManager);
       assertNotNull(proMPAssistant.getProMPManager(task));
       // use a csv file with the trajectories of the hands of the robot for testing
-      String etcDirectory = ProMPUtil.getEtcDirectory().toString();
-      //      String demoDirectory = etcDirectory + "/test/ReachHandleTest";
-      String demoDirectory = etcDirectory + "/test/LeftPunchTest";
+      String etcDirectory = Objects.requireNonNull(new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                          "ihmc-high-level-behaviors/promps").getFilesystemDirectory()).toString();
+      String demoDirectory = etcDirectory + "/test/ReachHandleTest";
+//      String demoDirectory = etcDirectory + "/test/LeftPunchTest";
       //get test number from config file
       String testFilePath = demoDirectory + "/" + proMPAssistant.getTestNumber() + ".csv";
       //copy test file to have it always under same name for faster plotting

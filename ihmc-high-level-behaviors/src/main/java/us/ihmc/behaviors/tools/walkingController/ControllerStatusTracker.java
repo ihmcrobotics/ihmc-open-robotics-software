@@ -1,18 +1,22 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.PlanOffsetStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.log.LogToolsWriteOnly;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.log.LogToolsWriteOnly;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.tools.Timer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,20 +48,20 @@ public class ControllerStatusTracker
    private final List<Notification> abortedListeners = new ArrayList<>();
    private CapturabilityBasedStatus latestCapturabilityBasedStatus;
 
-   public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
+   public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2Node ros2Node, String robotName)
    {
       this.statusLogger = statusLogger;
       footstepTracker = new WalkingFootstepTracker(ros2Node, robotName);
 
       finishedWalkingNotification.set();
 
-      new ROS2Callback<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
-      new ROS2Callback<>(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
-      new ROS2Callback<>(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
-      new ROS2Callback<>(ros2Node, getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
-      new ROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
-      new ROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
-      new ROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+      ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
+      ros2Node.createSubscription2(getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
+      ros2Node.createSubscription2(getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
+      ros2Node.createSubscription2(getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
+      ros2Node.createSubscription2(getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
+      ros2Node.createSubscription2(getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
+      ros2Node.createSubscription2(getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
    }
 
    public void registerAbortedListener(Notification abortedListener)

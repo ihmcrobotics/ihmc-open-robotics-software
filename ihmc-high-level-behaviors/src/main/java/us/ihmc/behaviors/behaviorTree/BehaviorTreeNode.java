@@ -1,37 +1,35 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import javax.annotation.Nullable;
-import java.util.List;
+import us.ihmc.log.LogTools;
+import us.ihmc.tools.Destroyable;
 
 /**
- * Base interface for a behavior tree node. It is implemented by
- * several layers of node abstractions, including:
- * - Definition
- * - State
- * - Executor
- * - Graphical user interface
+ * An interface that represents a complete behavior tree node for instantiation in
+ * the RDX UI or on the robot as an executor. It encapsulates the node state and definition
+ * while allowing extension to implement the various node types.
  *
- * A node has a list of children and a reference to the parent.
+ * @param <T> The generic type of this node: RDX or Executor
+ * @param <S> The type of this node's state instance.
+ * @param <D> The type of this node's definition instance.
  */
-public interface BehaviorTreeNode<T extends BehaviorTreeNode<T>>
+public interface BehaviorTreeNode<T extends BehaviorTreeNode<T, ?, ?>,
+                                  S extends BehaviorTreeNodeState<D>,
+                                  D extends BehaviorTreeNodeDefinition>
+      extends TreeNode<T>, Destroyable
 {
-   /**
-    * @return The node's children in order
-    */
-   List<T> getChildren();
+   S getState();
 
-   /**
-    * @param parent Sets the parent node or null if this is the root node
-    */
-   void setParent(@Nullable T parent);
+   D getDefinition();
 
-   /**
-    * @return The parent node or null if this is the root node
-    */
-   @Nullable T getParent();
-
-   default boolean isRootNode()
+   default void update()
    {
-      return getParent() == null;
+      getState().update();
+   }
+
+   @Override
+   default void destroy()
+   {
+      LogTools.info("{}: Destroying node: {}:{}", getClass().getSimpleName(), getDefinition().getName(), getState().getID());
+      getState().destroy();
    }
 }

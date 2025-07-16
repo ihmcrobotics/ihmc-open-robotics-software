@@ -10,16 +10,16 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapPlanarRegionCalculator;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapPlanarRegionCalculator;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -208,8 +208,8 @@ public class HeightMapDataVisualizer
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      environmentHandler.setHeightMap(heightMapData);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      environmentHandler.setHeightMapData(heightMapData);
 
       for (int i = 0; i < poses.length; i++)
       {

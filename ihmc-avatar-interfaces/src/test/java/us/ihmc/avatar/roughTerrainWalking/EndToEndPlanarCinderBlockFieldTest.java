@@ -72,7 +72,6 @@ public abstract class EndToEndPlanarCinderBlockFieldTest implements MultiRobotTe
       CinderBlockFieldPlanarRegionEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldPlanarRegionEnvironment();
 
       setupSimulation(cinderBlockFieldEnvironment);
-      simulationTestHelper.setKeepSCSUp(true);
       simulationTestHelper.getHighLevelHumanoidControllerFactory().addUpdatable(new Updatable()
       {
          int counter = 0;

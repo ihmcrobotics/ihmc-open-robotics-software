@@ -15,7 +15,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9fa6ce6528459794b345a9dc6a61aeac31b8a11dbf9ac40cb598478a4a71c1a1";
+   		return "183d114b7dbcc883473ec09a7a3af7a2c66da3dbd38481400234aaff257cfa74";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -81,7 +81,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -111,7 +111,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(exoskeleton_msgs.msg.dds.NoraxonFootWrenchMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -131,7 +131,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(exoskeleton_msgs.msg.dds.NoraxonFootWrenchMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -153,7 +153,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(exoskeleton_msgs.msg.dds.NoraxonFootWrenchMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("linear_force_x", data.getLinearForceX());
       ser.write_type_6("linear_force_y", data.getLinearForceY());
@@ -166,7 +166,7 @@ public class NoraxonFootWrenchMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, exoskeleton_msgs.msg.dds.NoraxonFootWrenchMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setLinearForceX(ser.read_type_6("linear_force_x"));
       data.setLinearForceY(ser.read_type_6("linear_force_y"));

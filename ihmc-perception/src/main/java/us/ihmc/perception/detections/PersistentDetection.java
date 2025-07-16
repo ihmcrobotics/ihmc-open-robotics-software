@@ -39,6 +39,7 @@ public class PersistentDetection
    private boolean isValid = false;
    private final Notification hasBecomeValidNotification = new Notification();
    private boolean readyForDeletion = false;
+   private boolean destroyed = false;
 
    public PersistentDetection(InstantDetection firstDetection,
                               double filterAlpha,
@@ -64,7 +65,6 @@ public class PersistentDetection
    public void addDetection(InstantDetection newDetection)
    {
       detectionHistory.add(newDetection);
-      newDetection.setPersistentDetectionID(id);
 
       filteredDetectionFrame.update(transformToWorld -> transformToWorld.interpolate(new RigidBodyTransform(getMostRecentPose()), filterAlpha));
    }
@@ -265,6 +265,12 @@ public class PersistentDetection
       {
          instantDetection.destroy();
       }
+      destroyed = true;
+   }
+
+   public boolean isDestroyed()
+   {
+      return destroyed;
    }
 
    public void setFilterAlpha(double filterAlpha)

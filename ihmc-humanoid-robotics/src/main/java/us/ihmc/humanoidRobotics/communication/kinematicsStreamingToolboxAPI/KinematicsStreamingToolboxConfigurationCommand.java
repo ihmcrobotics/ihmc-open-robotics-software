@@ -17,12 +17,16 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
    private boolean enableLeftArmJointspace = true;
    private boolean enableRightArmJointspace = true;
+   private boolean enableLeftLegJointspace = true;
+   private boolean enableRightLegJointspace = true;
+   private boolean enableSpineJointspace = true;
    private boolean enableNeckJointspace = true;
 
    private boolean enableLeftHandTaskspace = true;
    private boolean enableRightHandTaskspace = true;
    private boolean enableChestTaskspace = true;
    private boolean enablePelvisTaskspace = true;
+   private boolean enableCenterOfMassTrajectory = false;
 
    private long leftHandTrajectoryFrameId = WORLD_FRAME_ID;
    private long rightHandTrajectoryFrameId = WORLD_FRAME_ID;
@@ -40,14 +44,19 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       lockPelvis = false;
       lockChest = false;
+
       enableLeftArmJointspace = true;
       enableRightArmJointspace = true;
-      enableNeckJointspace = true;
-
       enableLeftHandTaskspace = true;
       enableRightHandTaskspace = true;
+      enableNeckJointspace = true;
       enableChestTaskspace = true;
       enablePelvisTaskspace = true;
+
+      enableLeftLegJointspace = false;
+      enableRightLegJointspace = false;
+      enableSpineJointspace = false;
+      enableCenterOfMassTrajectory = false;
 
       leftHandTrajectoryFrameId = WORLD_FRAME_ID;
       rightHandTrajectoryFrameId = WORLD_FRAME_ID;
@@ -64,12 +73,16 @@ public class KinematicsStreamingToolboxConfigurationCommand
       lockChest = other.lockChest;
       enableLeftArmJointspace = other.enableLeftArmJointspace;
       enableRightArmJointspace = other.enableRightArmJointspace;
+      enableLeftLegJointspace = other.enableLeftLegJointspace;
+      enableRightLegJointspace = other.enableRightLegJointspace;
+      enableSpineJointspace = other.enableSpineJointspace;
       enableNeckJointspace = other.enableNeckJointspace;
 
       enableLeftHandTaskspace = other.enableLeftHandTaskspace;
       enableRightHandTaskspace = other.enableRightHandTaskspace;
       enableChestTaskspace = other.enableChestTaskspace;
       enablePelvisTaskspace = other.enablePelvisTaskspace;
+      enableCenterOfMassTrajectory = other.enableCenterOfMassTrajectory;
 
       leftHandTrajectoryFrameId = other.leftHandTrajectoryFrameId;
       rightHandTrajectoryFrameId = other.rightHandTrajectoryFrameId;
@@ -89,12 +102,16 @@ public class KinematicsStreamingToolboxConfigurationCommand
 
       enableLeftArmJointspace = message.getEnableLeftArmJointspace();
       enableRightArmJointspace = message.getEnableRightArmJointspace();
+      enableLeftLegJointspace = message.getEnableLeftLegJointspace();
+      enableRightLegJointspace = message.getEnableRightLegJointspace();
+      enableSpineJointspace = message.getEnableSpineJointspace();
       enableNeckJointspace = message.getEnableNeckJointspace();
 
       enableLeftHandTaskspace = message.getEnableLeftHandTaskspace();
       enableRightHandTaskspace = message.getEnableRightHandTaskspace();
       enableChestTaskspace = message.getEnableChestTaskspace();
       enablePelvisTaskspace = message.getEnablePelvisTaskspace();
+      enableCenterOfMassTrajectory = message.getEnableCenterOfMassControl();
 
       leftHandTrajectoryFrameId = message.getLeftHandTrajectoryFrameId();
       rightHandTrajectoryFrameId = message.getRightHandTrajectoryFrameId();
@@ -133,6 +150,26 @@ public class KinematicsStreamingToolboxConfigurationCommand
       return enableRightArmJointspace;
    }
 
+   public boolean isEnableLeftLegJointspaceEnabled()
+   {
+      return enableLeftLegJointspace;
+   }
+
+   public boolean isEnableRightLegJointspaceEnabled()
+   {
+      return enableRightLegJointspace;
+   }
+
+   public boolean isLegJointspaceEnabled(RobotSide robotSide)
+   {
+      return robotSide == RobotSide.LEFT ? isEnableLeftLegJointspaceEnabled() : isEnableRightLegJointspaceEnabled();
+   }
+
+   public boolean isSpineJointspaceEnabled()
+   {
+      return enableSpineJointspace;
+   }
+
    public boolean isNeckJointspaceEnabled()
    {
       return enableNeckJointspace;
@@ -161,6 +198,11 @@ public class KinematicsStreamingToolboxConfigurationCommand
    public boolean isPelvisTaskspaceEnabled()
    {
       return enablePelvisTaskspace;
+   }
+
+   public boolean isCenterOfMassTrajectoryEnabled()
+   {
+      return enableCenterOfMassTrajectory;
    }
 
    public long getHandTrajectoryFrameId(RobotSide robotSide)

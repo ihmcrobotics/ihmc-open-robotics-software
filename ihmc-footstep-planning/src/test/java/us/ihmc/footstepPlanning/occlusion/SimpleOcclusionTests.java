@@ -38,7 +38,7 @@ import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -226,7 +226,7 @@ public class SimpleOcclusionTests
          }
 
          request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
-         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(visiblePlanarRegions)));
+         request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(visiblePlanarRegions)));
          request.setRequestedInitialStanceSide(stanceSide);
          request.setStartFootPoses(parameters.getIdealFootstepWidth(), stancePose);
          request.setTimeout(maxAllowedSolveTime + 5.0);

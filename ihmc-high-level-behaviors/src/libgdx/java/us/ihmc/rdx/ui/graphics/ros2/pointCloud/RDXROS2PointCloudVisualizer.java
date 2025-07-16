@@ -24,14 +24,14 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.BufferOverflowException;
@@ -44,11 +44,11 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
-   private ROS2Callback<?> ros2Callback = null;
+   private ROS2Subscription<?> subscription;
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld pointCloudRenderer = new RDXPointCloudRendererOld();
    private int pointsPerSegment;
    private int numberOfSegments;
    private int totalNumberOfPoints;
@@ -74,13 +74,13 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
       this.ros2Node = ros2Node;
       this.topic = topic;
 
-      setActivenessChangeCallback(isActive ->
+      addActivenessChangeCallback(isActive ->
       {
-         if (isActive && ros2Callback == null)
+         if (isActive && !subscribed)
          {
             subscribe();
          }
-         else if (!isActive && ros2Callback != null)
+         else if (!isActive && subscribed)
          {
             unsubscribe();
          }
@@ -97,16 +97,15 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
       subscribed = true;
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         ros2Callback = new ROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
+         subscription = ros2Node.createSubscription2(topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
       }
       else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
       {
-         ros2Callback = new ROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
+         subscription = ros2Node.createSubscription2(topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
       }
       else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
       {
-         ros2Callback = new ROS2Callback<>(ros2Node,
-                                               topic.withType(FusedSensorHeadPointCloudMessage.class),
+         subscription = ros2Node.createSubscription2(topic.withType(FusedSensorHeadPointCloudMessage.class),
                                                this::queueRenderFusedSensorHeadPointCloud);
       }
    }
@@ -176,7 +175,7 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
                decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
                if (pointCloudVertexBuffer != null)
                   pointCloudVertexBuffer.destroy(openCLManager);
-               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRendererOld.FLOATS_PER_VERTEX,
                                                               pointCloudRenderer.getVertexBuffer());
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
                LogTools.info("Allocated new buffers. {} points per segment. {} segments.", pointsPerSegment, numberOfSegments);
@@ -302,16 +301,17 @@ public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
 
    private void unsubscribe()
    {
-      ros2Callback.destroy();
-      ros2Callback = null;
+      subscription.remove();
+      subscription = null;
+      subscribed = false;
    }
 
    @Override
    public void destroy()
    {
+      super.destroy();
       if (lidarActiveHeartbeat != null)
          lidarActiveHeartbeat.destroy();
-      super.destroy();
    }
 
    @Override

@@ -15,7 +15,7 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "719ae080a28c22f4da2fdcf7a669f31334e333a17b6c6502798dd33b117abe65";
+   		return "22fba5bc04c493b32b2b9f16000f7487fbd1f67dd0f1689c11d677f982a08249";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,7 +69,7 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -81,7 +81,7 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
 
    public static void write(controller_msgs.msg.dds.AutomaticManipulationAbortMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getEnable());
 
@@ -89,7 +89,7 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
 
    public static void read(controller_msgs.msg.dds.AutomaticManipulationAbortMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setEnable(cdr.read_type_7());
       	
@@ -99,14 +99,14 @@ public class AutomaticManipulationAbortMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(controller_msgs.msg.dds.AutomaticManipulationAbortMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("enable", data.getEnable());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AutomaticManipulationAbortMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setEnable(ser.read_type_7("enable"));
    }
 

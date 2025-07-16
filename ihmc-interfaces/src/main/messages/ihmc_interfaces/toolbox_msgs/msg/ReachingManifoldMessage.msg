@@ -2,7 +2,7 @@
 # Main usage is the IHMC WholeBodyTrajectoryToolbox.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte CONFIGURATION_SPACE_NAME_X = 0
 byte CONFIGURATION_SPACE_NAME_Y = 1

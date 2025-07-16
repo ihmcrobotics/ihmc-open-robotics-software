@@ -16,6 +16,7 @@ import org.lwjgl.openvr.VRCompositor;
 import org.lwjgl.openvr.VREvent;
 import org.lwjgl.openvr.VRInput;
 import org.lwjgl.openvr.VRSystem;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,7 +28,6 @@ import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -36,8 +36,11 @@ import java.nio.LongBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -54,16 +57,6 @@ import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
  */
 public class RDXVRContext
 {
-   // TODO. remove body segments names and serial number once integrated openxr. Use tracker role instead
-   private static final Map<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
-   {
-      {
-         put("LHR-6680BD50", "chest");
-         put("LHR-743512BE", "leftForeArm");
-         put("LHR-41A915A6", "rightForeArm");
-      }
-   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
-
    // couple of scratch buffers
    private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
    private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
@@ -117,16 +110,34 @@ public class RDXVRContext
    private final ReferenceFrame vrPlayAreaYUpZBackFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
                                                                                                                             teleportFrameIHMCZUp,
                                                                                                                             openVRYUpToIHMCZUpSpace);
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
+   private RDXVRHardwareModel vrModel = RDXVRHardwareModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
-   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRControllerModel.UNKNOWN,
+   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRHardwareModel.UNKNOWN,
                                                                                                               RobotSide.LEFT,
                                                                                                               vrPlayAreaYUpZBackFrame),
-                                                                                          new RDXVRController(RDXVRControllerModel.UNKNOWN,
+                                                                                          new RDXVRController(RDXVRHardwareModel.UNKNOWN,
                                                                                                               RobotSide.RIGHT,
                                                                                                               vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final Map<String, RDXVRTracker> trackers = new HashMap<>();
+   private final Map<String, RDXVRTracker> trackers =  new HashMap<>(); // <serial number, tracker>
+   private final Map<String, String> savedTrackersRoleMap = new HashMap<>(); // <role, serial number>
+   private final Map<String, String> trackersRoleMap = new HashMap<>(); // <role, serial number>
+   private final SortedSet<String> availableTrackerRoles = new TreeSet<>()
+   {
+      {
+         add("Chest");
+         add("Waist");
+         add("Left Wrist");
+         add("Right Wrist");
+         add("Left Ankle");
+         add("Right Ankle");
+      }
+   };
+   private final List<String> newTrackerSerialNumber = new ArrayList<>();
+   private final List<String> removedTrackerSerialNumber = new ArrayList<>();
+   private final Notification rolesResetNotification = new Notification();
+   private final Notification loadingRolesNotification = new Notification();
+   private WorkspaceResourceFile trackerRolesFile;
 
    public void initSystem()
    {
@@ -153,41 +164,56 @@ public class RDXVRContext
 
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/vr");
       WorkspaceResourceFile actionManifestFile = new WorkspaceResourceFile(directory, "actions.json");
-      JSONFileTools.load(actionManifestFile, node ->
-      {
-         JSONTools.forEachArrayElement(node, "default_bindings", objectNode ->
-         {
-            String controllerBindings = objectNode.get("binding_url").asText();
-            if (controllerBindings.contains("focus3"))
-               controllerModel = RDXVRControllerModel.FOCUS3;
-            else
-               controllerModel = RDXVRControllerModel.INDEX;
-         });
-      });
-      LogTools.info("Using VR controller model: {}", controllerModel);
       VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilesystemFile().toString());
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
       headset.initSystem();
+
+      trackerRolesFile = new WorkspaceResourceFile(directory, "tracker_roles.json");
+      JSONFileTools.load(trackerRolesFile, node ->
+      {
+         for (String role : availableTrackerRoles)
+         {
+            savedTrackersRoleMap.put(role, node.get(role).asText());
+         }
+      });
+
+      int[] deviceIndices = new int[VR.k_unMaxTrackedDeviceCount];
+      // Create all potential indexes
+      for (int i = 0; i<deviceIndices.length; i++)
+      {
+         deviceIndices[i] = i;
+      }
+      String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(0, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
+      if (modelNumber.toLowerCase().contains("focus3"))
+         vrModel = RDXVRHardwareModel.FOCUS3;
+      else
+         vrModel = RDXVRHardwareModel.INDEX;
+
+      LogTools.info("Using VR headset/controller model: {}", vrModel);
       for (RDXVRController controller : controllers)
       {
-         controller.setModel(controllerModel);
+         controller.setModel(vrModel);
          controller.initSystem();
       }
-      // TODO: Bindings for /user/gamepad
-      int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
-      IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
-      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker,
-                                                                                    trackerIndices,
-                                                                                    -1);
-      for (int i = 0; i < numberOfTrackers; i++)
+
+      // Iterate over all potential indexes to see which one is a tracker and add it
+      // NOTE. lgwjl openvr API is not stable and functions like VRSystem_GetSortedTrackedDeviceIndicesOfClass do not work
+      for (int deviceIndex : deviceIndices)
       {
-         int deviceIndex = trackerIndices.get(i);
-         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
+         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
-            trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+            if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+            {
+               trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
+               newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
+               LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
+            }
          }
       }
+      if (!trackers.isEmpty())
+         loadTrackerRolesFromFile();
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
@@ -278,22 +304,36 @@ public class RDXVRContext
          controllers.get(side).update(newTrackedDevicePosesParsed);
       }
 
-      while (VRSystem.VRSystem_PollNextEvent(event))
+      while (VRSystem.VRSystem_PollNextEvent(event)) // a tracker is connected/disconnected after initialization
       {
          int deviceIndex = event.trackedDeviceIndex();
-         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
+         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
          {
-            int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
+            if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceActivated)
             {
-               trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+               if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+               {
+                  trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
+                  newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
+                  LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
+                  loadTrackerRolesFromFile();
+               }
+            }
+            else if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceDeactivated)
+            {
+               if (trackers.containsKey(getSerialNumber(event.trackedDeviceIndex())))
+               {
+                  removedTrackerSerialNumber.add(getSerialNumber(deviceIndex));
+                  LogTools.warn("Tracker {} disconnected", getSerialNumber(deviceIndex));
+               }
             }
          }
       }
 
-      for (Map.Entry<String, RDXVRTracker> entryTracker : trackers.entrySet())
+      for (var tracker : trackers.entrySet())
       {
-         entryTracker.getValue().update(newTrackedDevicePosesParsed);
+         tracker.getValue().update(newTrackedDevicePosesParsed);
       }
 
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
@@ -308,22 +348,6 @@ public class RDXVRContext
       {
          vrInputProcessor.accept(this);
       }
-   }
-
-   private String getSerialNumber(int index)
-   {
-      String serialNumber = VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
-      return serialNumber;
-   }
-
-   public SideDependentList<RDXVRController> getControllers()
-   {
-      return controllers;
-   }
-
-   private String getTrackedBodySegment(String serialNumber)
-   {
-      return TRACKER_SERIAL_MAP.get(serialNumber);
    }
 
    /**
@@ -416,23 +440,20 @@ public class RDXVRContext
       }
    }
 
-   public void getTrackerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getTrackerRenderables(String serialNumber, Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXVRTracker tracker : trackers.values())
+      ModelInstance modelInstance = trackers.get(serialNumber).getModelInstance();
+      if (modelInstance != null)
       {
-         ModelInstance modelInstance = tracker.getModelInstance();
-         if (modelInstance != null)
-         {
-            modelInstance.getRenderables(renderables, pool);
-         }
+         modelInstance.getRenderables(renderables, pool);
       }
    }
 
-   public void getBaseStationRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getTrackersRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXVRBaseStation baseStation : baseStations.values())
+      for (var tracker : trackers.entrySet())
       {
-         ModelInstance modelInstance = baseStation.getModelInstance();
+         ModelInstance modelInstance = tracker.getValue().getModelInstance();
          if (modelInstance != null)
          {
             modelInstance.getRenderables(renderables, pool);
@@ -445,19 +466,128 @@ public class RDXVRContext
       return controllers.get(side);
    }
 
+   public SideDependentList<RDXVRController> getControllers()
+   {
+      return controllers;
+   }
+
    public RDXVRHeadset getHeadset()
    {
       return headset;
    }
 
-   public RDXVRTracker getTracker(String bodySegment)
+   private String getSerialNumber(int index)
    {
-      return trackers.get(bodySegment);
+      return VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
    }
 
-   public Set<String> getBodySegmentsWithTrackers()
+   public void setTrackerRole(String role, int index)
    {
-      return trackers.keySet();
+      trackersRoleMap.put(role, getSerialNumber(index));
+   }
+
+   public RDXVRTracker getTracker(String role)
+   {
+      return trackers.get(trackersRoleMap.get(role));
+   }
+
+   public Map<String, RDXVRTracker> getTrackers()
+   {
+      return trackers;
+   }
+
+   public Set<String> getAssignedTrackerRoles()
+   {
+      return trackersRoleMap.keySet();
+   }
+
+   public SortedSet<String> getAvailableTrackerRoles()
+   {
+      return availableTrackerRoles;
+   }
+
+   public void setTrackerRoleAsUnavailable(String role)
+   {
+      availableTrackerRoles.remove(role);
+   }
+
+   public void setTrackerRoleAsAvailable(String role)
+   {
+      availableTrackerRoles.add(role);
+      trackersRoleMap.remove(role);
+   }
+
+   public void resetTrackerRoles()
+   {
+      trackersRoleMap.clear();
+      availableTrackerRoles.clear();
+      availableTrackerRoles.add("Chest");
+      availableTrackerRoles.add("Waist");
+      availableTrackerRoles.add("Left Wrist");
+      availableTrackerRoles.add("Right Wrist");
+      availableTrackerRoles.add("Left Ankle");
+      availableTrackerRoles.add("Right Ankle");
+      rolesResetNotification.set();
+   }
+
+   public void saveTrackerRolesToFile()
+   {
+      if (trackerRolesFile.isFileAccessAvailable())
+      {
+         LogTools.info("Saving tracker roles to file ...");
+         JSONFileTools.save(trackerRolesFile, jsonNode ->
+         {
+            for (String role : savedTrackersRoleMap.keySet())
+            {
+               jsonNode.put(role, trackersRoleMap.getOrDefault(role, ""));
+            }
+         });
+         LogTools.info("Saved to file");
+      }
+   }
+
+   public void loadTrackerRolesFromFile()
+   {
+      LogTools.info("Loading tracker roles from file");
+      resetTrackerRoles();
+      for (var roleMap : savedTrackersRoleMap.entrySet())
+      {
+         if (!roleMap.getValue().isEmpty() && trackers.containsKey(roleMap.getValue()))
+         {
+            trackersRoleMap.put(roleMap.getKey(), roleMap.getValue());
+            availableTrackerRoles.remove(roleMap.getKey());
+         }
+      }
+      loadingRolesNotification.set();
+   }
+
+   public Notification getRolesResetNotification()
+   {
+      return rolesResetNotification;
+   }
+
+   public Notification getLoadingRolesNotification()
+   {
+      return loadingRolesNotification;
+   }
+
+   public List<String> getNewTrackersSerialNumbers()
+   {
+      List<String> serialNumbers = new ArrayList<>(newTrackerSerialNumber);
+      newTrackerSerialNumber.clear();
+      return serialNumbers;
+   }
+
+   public List<String> getRemovedTrackersSerialNumbers()
+   {
+      List<String> serialNumbers = new ArrayList<>(removedTrackerSerialNumber);
+      removedTrackerSerialNumber.clear();
+      return serialNumbers;
+   }
+
+   public Map<String, String> getTrackersRoleMap()
+   {
+      return trackersRoleMap;
    }
 
    public Collection<RDXVRBaseStation> getBaseStations()
@@ -485,9 +615,9 @@ public class RDXVRContext
       return teleportIHMCZUpToIHMCZUpWorld;
    }
 
-   public RDXVRControllerModel getControllerModel()
+   public RDXVRHardwareModel getVRModel()
    {
-      return controllerModel;
+      return vrModel;
    }
 
    private static sun.misc.Unsafe getUnsafeInstance()

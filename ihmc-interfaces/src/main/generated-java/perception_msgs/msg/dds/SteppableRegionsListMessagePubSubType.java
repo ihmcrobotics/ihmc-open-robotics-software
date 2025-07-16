@@ -15,7 +15,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "02d0a78df2a5ea7c2bc6e9da81dd87dca368258fbeaca813f3702a1e561b2a93";
+   		return "71118accbe8ebb8adb526e955761794eb7ef8038cf6b79700b5645c49db6a524";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -90,7 +90,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getLastUpdated(), current_alignment);
@@ -137,44 +137,44 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(perception_msgs.msg.dds.SteppableRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getLastUpdated(), cdr);
       cdr.write_type_6(data.getFootYaw());
 
       if(data.getRegionId().size() <= 1000)
       cdr.write_type_e(data.getRegionId());else
-          throw new RuntimeException("region_id field exceeds the maximum length");
+          throw new RuntimeException("region_id field exceeds the maximum length: %d > %d".formatted(data.getRegionId().size(), 1000));
 
       if(data.getRegionOrigin().size() <= 1000)
       cdr.write_type_e(data.getRegionOrigin());else
-          throw new RuntimeException("region_origin field exceeds the maximum length");
+          throw new RuntimeException("region_origin field exceeds the maximum length: %d > %d".formatted(data.getRegionOrigin().size(), 1000));
 
       if(data.getRegionOrientation().size() <= 1000)
       cdr.write_type_e(data.getRegionOrientation());else
-          throw new RuntimeException("region_orientation field exceeds the maximum length");
+          throw new RuntimeException("region_orientation field exceeds the maximum length: %d > %d".formatted(data.getRegionOrientation().size(), 1000));
 
       if(data.getRegionNormal().size() <= 1000)
       cdr.write_type_e(data.getRegionNormal());else
-          throw new RuntimeException("region_normal field exceeds the maximum length");
+          throw new RuntimeException("region_normal field exceeds the maximum length: %d > %d".formatted(data.getRegionNormal().size(), 1000));
 
       if(data.getConcaveHullsSize().size() <= 100)
       cdr.write_type_e(data.getConcaveHullsSize());else
-          throw new RuntimeException("concave_hulls_size field exceeds the maximum length");
+          throw new RuntimeException("concave_hulls_size field exceeds the maximum length: %d > %d".formatted(data.getConcaveHullsSize().size(), 100));
 
       if(data.getVertexBuffer().size() <= 3000)
       cdr.write_type_e(data.getVertexBuffer());else
-          throw new RuntimeException("vertex_buffer field exceeds the maximum length");
+          throw new RuntimeException("vertex_buffer field exceeds the maximum length: %d > %d".formatted(data.getVertexBuffer().size(), 3000));
 
       if(data.getLocalHeightMap().size() <= 100)
       cdr.write_type_e(data.getLocalHeightMap());else
-          throw new RuntimeException("local_height_map field exceeds the maximum length");
+          throw new RuntimeException("local_height_map field exceeds the maximum length: %d > %d".formatted(data.getLocalHeightMap().size(), 100));
 
    }
 
    public static void read(perception_msgs.msg.dds.SteppableRegionsListMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getLastUpdated(), cdr);	
       data.setFootYaw(cdr.read_type_6());
@@ -192,7 +192,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(perception_msgs.msg.dds.SteppableRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
       ser.write_type_6("foot_yaw", data.getFootYaw());
@@ -208,7 +208,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SteppableRegionsListMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("last_updated", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getLastUpdated());
 
       data.setFootYaw(ser.read_type_6("foot_yaw"));

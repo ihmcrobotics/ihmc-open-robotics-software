@@ -1,20 +1,20 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCommunicatorInterface
 {
    private final ConcurrentLinkedQueue<StampedPosePacket> packetQueue = new ConcurrentLinkedQueue<StampedPosePacket>();
-   private final ROS2PublisherBasics<PelvisPoseErrorPacket> poseErrorPublisher;
-   private final ROS2PublisherBasics<LocalizationPacket> localizationPublisher;
+   private final ROS2Publisher<PelvisPoseErrorPacket> poseErrorPublisher;
+   private final ROS2Publisher<LocalizationPacket> localizationPublisher;
 
    public PelvisPoseCorrectionCommunicator(RealtimeROS2Node realtimeROS2Node, String robotName)
    {

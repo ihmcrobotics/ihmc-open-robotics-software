@@ -15,7 +15,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "22b14d7aa5cbe374d4e22b1999fe6fa7b5e4d7c49203513ef8cc0910f8f58cc0";
+   		return "82aeee3249d5c08330786e368c0b74ec5412b1cec9971241b00f84cd8ff8ce0a";
    }
    
    @Override
@@ -95,7 +95,7 @@ public class ChestOrientationActionDefinitionMessagePubSubType implements us.ihm
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
       cdr.write_type_d(data.getParentFrameName());else
-          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length: %d > %d".formatted(data.getParentFrameName().length(), 255));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getChestTransformToParent(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());

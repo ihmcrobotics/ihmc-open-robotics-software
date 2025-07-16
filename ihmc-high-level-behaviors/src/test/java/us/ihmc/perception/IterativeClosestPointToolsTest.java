@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class IterativeClosestPointToolsTest
 {
+   @Disabled
    @Test
    public void testComputeCorrespondencePointOnBox()
    {

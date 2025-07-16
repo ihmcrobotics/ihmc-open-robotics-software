@@ -41,7 +41,7 @@ module toolbox_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         long end_effector_hash_code;
         geometry_msgs::msg::dds::Point manifold_origin_position;
         geometry_msgs::msg::dds::Quaternion manifold_origin_orientation;

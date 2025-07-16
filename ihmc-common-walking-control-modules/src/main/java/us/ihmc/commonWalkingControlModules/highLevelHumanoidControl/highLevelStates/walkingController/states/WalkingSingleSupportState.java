@@ -81,6 +81,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final DoubleProvider swingFootCoPWeight;
    private final CenterOfPressureCommand copCommand = new CenterOfPressureCommand();
 
+   private final WalkingMessageHandler.Listener footstepConsumptionListener = this::handleNewFootstep;
+
    public WalkingSingleSupportState(WalkingStateEnum stateEnum,
                                     WalkingMessageHandler walkingMessageHandler,
                                     TouchdownErrorCompensator touchdownErrorCompensator,
@@ -130,8 +132,17 @@ public class WalkingSingleSupportState extends SingleSupportState
       isFootInContact = robotSide -> robotSide == supportSide;
       ContactableFoot contactableSwingFoot = controllerToolbox.getContactableFeet().get(getSwingSide());
       copCommand.setContactingRigidBody(contactableSwingFoot.getRigidBody());
-      copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getSoleFrame());
+      copCommand.getDesiredCoP().setToZero(contactableSwingFoot.getContactFrame());
       swingFootCoPWeight = ParameterProvider.getOrCreateParameter(parentRegistry.getName(), getClass().getSimpleName(), "swingFootCoPWeight", registry, Double.NaN);
+
+      walkingMessageHandler.getUpdateFootstepReferenceContinuously().addListener(value ->
+                                                                                  {
+                                                                                     if (walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue())
+                                                                                        walkingMessageHandler.addFootstepConsumptionListener(footstepConsumptionListener);
+                                                                                     else
+                                                                                        walkingMessageHandler.removeFootstepConsumptionListener(footstepConsumptionListener);
+
+                                                                                  });
    }
 
    int stepsToAdd;
@@ -167,7 +178,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          if (Double.isFinite(swingFootCoPWeight.getValue()))
          {
             copCommand.getWeight()
-                      .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getSoleFrame(),
+                      .setIncludingFrame(controllerToolbox.getContactableFeet().get(getSwingSide()).getContactFrame(),
                                          swingFootCoPWeight.getValue(),
                                          swingFootCoPWeight.getValue());
          }
@@ -188,7 +199,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (!hasSwingFootTouchedDown.getValue())
          balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
-      balanceManager.computeICPPlan(isFootInContact);
+      balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
 
       // call this here, too, so that the time in state is updated properly for all the swing speed up stuff, so it doesn't get out of sequence. This is
@@ -260,7 +271,7 @@ public class WalkingSingleSupportState extends SingleSupportState
           * When waitUntilICPPlannerIsDone is true, we indicate that the foot has touched down with
           * hasSwingFootTouchedDown and keep returning false here until the ICP planner is done
           */
-         if (waitUntilICPPlannerIsDone.getValue())
+         if (waitUntilICPPlannerIsDone.getValue() && !walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue())
          {
             return balanceManager.isICPPlanDone();
          }
@@ -273,36 +284,41 @@ public class WalkingSingleSupportState extends SingleSupportState
       return finishWhenICPPlannerIsDone.getValue() && balanceManager.isICPPlanDone();
    }
 
-   @Override
-   public void onEntry()
+   private void handleNewFootstep()
    {
-      super.onEntry();
+      handleNewFootstep(false);
+   }
 
-      hasSwingFootTouchedDown.set(false);
-      hasTriggeredTouchdown.set(false);
+   private void handleNewFootstep(boolean firstTick)
+   {
+      if (!haveWeEntered)
+         return;
 
+      if (!walkingMessageHandler.isNextFootstepFor(swingSide))
+         return;
+
+      //
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-
       swingTime = walkingMessageHandler.getNextSwingTime();
       walkingMessageHandler.poll(nextFootstep, footstepTiming);
       if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
          walkingMessageHandler.peekFootstep(0, nextNextFootstep);
 
+      //
       desiredFootPoseInWorld.set(nextFootstep.getFootstepPose());
       desiredFootPoseInWorld.changeFrame(worldFrame);
 
-      /**
-       * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
-       * contact points are up to date
-       */
-      feetManager.setContactStateForSwing(swingSide);
-
+      //
       updateFootstepParameters();
 
+      //
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.clearICPPlan();
+      balanceManager.clearSwingFootTrajectory();
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
+      //
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       for (int i = 0; i < stepsToAdd; i++)
       {
@@ -311,30 +327,67 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
-      balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport();
 
-      /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
-      walkingMessageHandler.pollStepConstraints(stepConstraints);
-      balanceManager.setCurrentStepConstraints(stepConstraints);
 
+      //
       updateHeightManager();
 
-      feetManager.requestSwing(swingSide,
-                               nextFootstep,
-                               swingTime,
-                               balanceManager.getFinalDesiredCoMVelocity(),
-                               balanceManager.getFinalDesiredCoMAcceleration());
+      //
+      if (firstTick)
+      {
+         feetManager.requestSwing(swingSide,
+                                  nextFootstep,
+                                  swingTime,
+                                  balanceManager.getFinalDesiredCoMVelocity(),
+                                  balanceManager.getFinalDesiredCoMAcceleration());
 
+      }
+
+      else
+         feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+
+      //
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
       }
 
-      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      //
+      controllerToolbox.updateBipedSupportPolygons();
 
-      pelvisOrientationManager.initializeSwing();
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      balanceManager.adjustFootstepInCoPPlan(nextFootstep);
+      balanceManager.computeICPPlan();
+   }
+
+   private boolean haveWeEntered = false;
+
+   @Override
+   public void onEntry()
+   {
+      super.onEntry();
+
+      haveWeEntered = true;
+
+      hasSwingFootTouchedDown.set(false);
+      hasTriggeredTouchdown.set(false);
+
+      /**
+       * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
+       * contact points are up to date
+       */
+      feetManager.setContactStateForSwing(swingSide);
+      balanceManager.setICPPlanSupportSide(supportSide);
+
+      handleNewFootstep(true);
+
+      //
+      balanceManager.initializeICPPlanForSingleSupport();
+
+      /** This has to be called after calling initialize ICP Plan, as that resets the step constraints **/
+      walkingMessageHandler.pollStepConstraints(stepConstraints);
+      balanceManager.setCurrentStepConstraints(stepConstraints);
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
@@ -345,6 +398,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    public void onExit(double timeInState)
    {
       super.onExit(timeInState);
+
+      haveWeEntered = false;
 
       triggerTouchdown();
    }
@@ -446,11 +501,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodies.
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
-
-      pelvisOrientationManager.setTrajectoryTime(swingTime);
-      pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
-      pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
-
    }
 
    private void updateHeightManager()
@@ -479,7 +529,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.computeICPPlan(isFootInContact);
+      balanceManager.computeICPPlan();
    }
 
    @Override

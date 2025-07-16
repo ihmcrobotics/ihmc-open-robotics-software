@@ -10,8 +10,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javafx.ApplicationNoModule;
 
 public class LidarScanLoggerUI extends ApplicationNoModule
 {

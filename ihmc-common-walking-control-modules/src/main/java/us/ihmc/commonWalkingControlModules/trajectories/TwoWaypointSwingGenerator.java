@@ -27,7 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -192,7 +192,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       isDone = new YoBoolean(namePrefix + "IsDone", registry);
       isSteppingDown = new YoBoolean(namePrefix + "IsSteppingDown", registry);
       swingHeight = new YoDouble(namePrefix + "SwingHeight", registry);
-      swingHeight.set(minSwingHeight);
+      swingHeight.set(defaultSwingHeight);
 
       this.maxSwingHeight = new YoDouble(namePrefix + "MaxSwingHeight", registry);
       this.maxSwingHeight.set(maxSwingHeight);
@@ -475,7 +475,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
             break;
          }
          case CUSTOM:
+         {
+            if (initialGroundZ >= finalGroundZ)
+            { // Stepping down
+               isSteppingDown.set(true);
+            }
             break;
+         }
          default:
             throw new RuntimeException("Trajectory type not implemented");
       }

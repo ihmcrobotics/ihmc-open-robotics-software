@@ -1,13 +1,11 @@
 package us.ihmc.behaviors.sequence;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-
 /**
  * Base template for a robot action, like a hand pose or a walk goal.
  */
 public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
                                          D extends ActionNodeDefinition>
-      extends BehaviorTreeNodeExecutor<S, D>
+      extends LeafNodeExecutor<S, D>
 {
    public ActionNodeExecutor(S state)
    {
@@ -15,19 +13,13 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
    }
 
    /** Trigger the action to begin executing. Called once per execution. */
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      getState().setIsExecuting(true);
-      getState().setFailed(false);
-      getState().setNominalExecutionDuration(0.0);
-      getState().setElapsedExecutionTime(0.0);
-      getState().getCommandedTrajectory().accessValue().clear();
-      getState().getCommandedJointTrajectories().clear(0);
-   }
+      super.triggerExecution();
 
-   /** Called every tick only when this action is executing. */
-   public void updateCurrentlyExecuting()
-   {
-
+      state.setNominalExecutionDuration(0.0);
+      state.setElapsedExecutionTime(0.0);
+      state.getCommandedTrajectory().accessValue().clear();
+      state.getCommandedJointTrajectories().clear(0);
    }
 }

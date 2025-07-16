@@ -3,30 +3,44 @@ package us.ihmc.rdx.perception;
 import imgui.ImGui;
 import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.type.*;
+import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import imgui.type.ImString;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacv.JavaCV;
 import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Point2f;
+import org.bytedeco.opencv.opencv_core.Point2fVector;
+import org.bytedeco.opencv.opencv_core.Point2fVectorVector;
+import org.bytedeco.opencv.opencv_core.Point3f;
+import org.bytedeco.opencv.opencv_core.Point3fVector;
+import org.bytedeco.opencv.opencv_core.Point3fVectorVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.TermCriteria;
 import org.bytedeco.opencv.opencv_features2d.SimpleBlobDetector;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarker;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.spinnaker.BlackflyModelProperties;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.logging.RDXHDF5ImageBrowser;
 import us.ihmc.rdx.logging.RDXHDF5ImageLoggingUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -37,7 +51,6 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.SwapReference;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
 
@@ -408,7 +421,7 @@ public class RDXBlackflyCalibrationSuite
                                  undistortionRemapBorderValue);
 
             newCameraMatrixEstimate.copyTo(arUcoMarkerDetector.getCameraMatrix());
-            arUcoMarkerDetector.update(texture.getRGBA8Image());
+            arUcoMarkerDetector.update(texture.getRGBA8Image().getBytedecoOpenCVMat());
             arUcoMarkerDetectionUI.copyOutputData(arUcoMarkerDetector);
             arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
 
@@ -687,7 +700,9 @@ public class RDXBlackflyCalibrationSuite
       if (fixFocalLength.get())
          flags |= opencv_calib3d.FISHEYE_CALIB_FIX_FOCAL_LENGTH;
 
-      TermCriteria terminationCriteria = new TermCriteria(TermCriteria.COUNT + TermCriteria.EPS, 100, JavaCV.DBL_EPSILON);
+      double DBL_EPSILON = 2.2204460492503131e-16; // https://github.com/bytedeco/javacv/blob/master/src/main/java/org/bytedeco/javacv/JavaCV.java#L48
+
+      TermCriteria terminationCriteria = new TermCriteria(TermCriteria.COUNT + TermCriteria.EPS, 100, DBL_EPSILON);
 
       // Here we use the cv::fisheye version
       // https://docs.opencv.org/4.6.0/db/d58/group__calib3d__fisheye.html#gad626a78de2b1dae7489e152a5a5a89e1

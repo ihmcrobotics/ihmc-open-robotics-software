@@ -5,10 +5,10 @@ import org.bytedeco.cuda.global.cudart;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static us.ihmc.perception.cuda.CUDATools.checkCUDAError;
+import static us.ihmc.perception.cuda.CUDATools.hasCUDADevice;
 
 /**
  * Limits the number of CUDA streams created to (ideally) the number of device connections.
@@ -21,28 +21,33 @@ public class CUDAStreamManager
    public static final int MAX_CUDA_STREAMS = 8;
 
    private static final List<ReferencedCUDAStream> streams = new ArrayList<>(MAX_CUDA_STREAMS);
-   private static int streamsGotten = 0;
+   private static int nextStream = 0;
 
    public static synchronized CUstream_st getStream()
    {
-      if (streams.size() < MAX_CUDA_STREAMS)
-      {
-         ReferencedCUDAStream stream = new ReferencedCUDAStream();
-         streams.add(stream);
-      }
+      if (!hasCUDADevice())
+         return null;
 
-      return streams.get(streamsGotten++ % streams.size()).get();
+      if (streams.size() < MAX_CUDA_STREAMS)
+         streams.add(new ReferencedCUDAStream());
+
+      return streams.get(nextStream++ % streams.size()).get();
    }
 
-   @SuppressWarnings("SuspiciousMethodCalls")
    public static synchronized void releaseStream(CUstream_st stream)
    {
-      int index = streams.indexOf(stream);
-      if (index < 0)
-         throw new IllegalArgumentException("Attempting to release an independent stream not managed by " + CUDAStreamManager.class.getSimpleName());
+      if (stream instanceof ReferencedCUDAStream referencedStream && streams.contains(referencedStream))
+      {
+         if (referencedStream.release())
+         {
+            streams.remove(referencedStream);
+            nextStream--;
+         }
 
-      if (streams.get(index).release())
-         streams.remove(index);
+         return;
+      }
+
+      throw new IllegalArgumentException("Attempting to release an independent stream not managed by " + CUDAStreamManager.class.getSimpleName());
    }
 
    /* package-private */ static synchronized int getNumberOfActiveStreams()
@@ -50,10 +55,17 @@ public class CUDAStreamManager
       return streams.size();
    }
 
+   /* package-private */ static synchronized void reset()
+   {
+      while (!streams.isEmpty())
+         streams.remove(0).destroy();
+
+      nextStream = 0;
+   }
+
    private static class ReferencedCUDAStream extends CUstream_st
    {
       private final AtomicLong references = new AtomicLong(0L);
-      private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
       private ReferencedCUDAStream()
       {
@@ -66,11 +78,11 @@ public class CUDAStreamManager
        */
       private ReferencedCUDAStream get()
       {
-         if (destroyed.get())
-            return null;
+         if (references.incrementAndGet() > 0L)
+            return this;
 
-         references.incrementAndGet();
-         return this;
+         references.decrementAndGet();
+         return null;
       }
 
       /**
@@ -79,16 +91,18 @@ public class CUDAStreamManager
        */
       private boolean release()
       {
-         if (references.decrementAndGet() == 0L)
-         {
-            checkCUDAError(cudart.cudaStreamSynchronize(this));
-            checkCUDAError(cudart.cudaStreamDestroy(this));
-            close();
+         if (references.decrementAndGet() > 0)
+            return false;
 
-            return true;
-         }
+         destroy();
+         return true;
+      }
 
-         return false;
+      private void destroy()
+      {
+         checkCUDAError(cudart.cudaStreamSynchronize(this));
+         checkCUDAError(cudart.cudaStreamDestroy(this));
+         close();
       }
    }
 }

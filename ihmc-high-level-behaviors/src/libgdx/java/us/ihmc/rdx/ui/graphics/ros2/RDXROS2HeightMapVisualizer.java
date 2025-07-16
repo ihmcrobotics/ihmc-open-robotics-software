@@ -5,34 +5,33 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.GlobalMapMessage;
+import org.bytedeco.opencv.opencv_core.Point;
 import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
+import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.sensorProcessing.globalHeightMap.GlobalLattice;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.globalHeightMap.GlobalLattice;
+import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
 
@@ -40,32 +39,26 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
-   private final RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
-   private final RDXGlobalHeightMapGraphic globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
+   private ROS2PublishSubscribeAPI ros2;
    private final ResettableExceptionHandlingExecutorService executorService;
 
-   private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
+   private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
+   private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
+   private final RDXGlobalHeightMapGraphic globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
+
    private final ImBoolean enableGlobalHeightMapVisualizer = new ImBoolean(false);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
-   private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
 
-   private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
-   private final TerrainMapData terrainMapData = new TerrainMapData(RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                                    RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize());
-
-   private ROS2PublishSubscribeAPI ros2;
-   private HeightMapMessage latestHeightMapMessage = new HeightMapMessage();
+   private Mat heightMap;
    private HeightMapData latestHeightMapData;
-   private Mat heightMapImage;
-   private Mat compressedBytesMat;
-   private ByteBuffer incomingCompressedImageBuffer;
-   private BytePointer incomingCompressedImageBytePointer;
+   private TerrainMapData latestTerrainMapData;
 
-   private int compressedBufferDefaultSize = 100000;
+   private final Point3D heightMapCenter = new Point3D();
 
-   private float pixelScalingFactor = 10000.0f;
-   private boolean heightMapMessageGenerated = false;
+   private final Stopwatch stopwatch = new Stopwatch();
+   private int cellsPerAxis;
+   private float latestHeightMapOffset;
+   private float latestCellSizeInMeters;
 
    public RDXROS2HeightMapVisualizer(String title)
    {
@@ -77,52 +70,20 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public List<ROS2Topic<?>> getTopics()
    {
-      return List.of(PerceptionAPI.HEIGHT_MAP_OUTPUT, PerceptionAPI.HEIGHT_MAP_CROPPED);
-   }
-
-   public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
-   {
-      this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
+      return List.of(PerceptionAPI.HEIGHT_MAP_MESSAGE);
    }
 
    public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptHeightMapMessage);
+      ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
    public void setupForGlobalHeightMapTileMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE, this::acceptGlobalMapTileMessage);
-   }
-
-   @Override
-   public void create()
-   {
-      super.create();
-      int cellsPerAxis = RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize();
-      heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
-   }
-
-   public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
-   {
-      if (isActive())
-      {
-         updateGridMapGraphic(heightMapMessage);
-      }
-   }
-
-   public void acceptGlobalMapMessage(GlobalMapMessage globalMapMessage)
-   {
-      if (enableGlobalHeightMapVisualizer.get())
-      {
-         for (int i = 0; i < globalMapMessage.getGlobalMap().size(); i++)
-         {
-            acceptGlobalMapTileMessage(globalMapMessage.getGlobalMap().get(i));
-         }
-      }
    }
 
    public void acceptGlobalMapTileMessage(GlobalMapTileMessage globalMapTileMessage)
@@ -134,70 +95,86 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       }
    }
 
-   private void updateGridMapGraphic(HeightMapMessage heightMapMessage)
+   public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
    {
+      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      if (!isActive())
+         return;
+
       executorService.clearQueueAndExecute(() ->
                                            {
-                                              if (enableHeightMapVisualizer.get())
+                                              long sequenceId = heightMapMessage.getSequenceId();
+                                              if (sequenceId > 1)
                                               {
-                                                 heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
+                                                 // We add +1 here because the height map is
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(4.0, 0.02);
+                                                 cellsPerAxis = 2 * centerIndex + 1;
                                               }
+
+                                              heightMapCenter.setX(heightMapMessage.getGridCenterX());
+                                              heightMapCenter.setY(heightMapMessage.getGridCenterY());
+                                              latestHeightMapOffset = (float) heightMapMessage.getHeightOffset();
+                                              latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
+                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage,
+                                                                                                   latestHeightMapOffset,
+                                                                                                   (float) heightMapMessage.getHeightScaleFactor());
+
+                                              if (latestHeightMapData == null)
+                                              {
+                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
+                                                                                         heightMapMessage.getGridSizeXy(),
+                                                                                         heightMapMessage.getGridCenterX(),
+                                                                                         heightMapMessage.getGridCenterY());
+                                              }
+                                              HeightMapTools.convertToHeightMapData(heightMap,
+                                                                                    latestHeightMapData,
+                                                                                    heightMapCenter,
+                                                                                    (float) heightMapMessage.getWidthInMeters(),
+                                                                                    (float) heightMapMessage.getCellSizeInMeters(),
+                                                                                    (float) heightMapMessage.getHeightScaleFactor(),
+                                                                                    (float) heightMapMessage.getHeightOffset());
+
+                                              // This prevents the rendering from happening to early, it was throwing exceptions
+                                              if (stopwatch.lapElapsed() > 3)
+                                                 updateHeightMapImage();
                                            });
 
-      getFrequency(PerceptionAPI.HEIGHT_MAP_OUTPUT).ping();
+      getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
    }
 
-   public void acceptImageMessage(ImageMessage imageMessage)
+   private void updateHeightMapImage()
    {
-      if (isActive())
-      {
-         executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 pixelScalingFactor = imageMessage.getDepthDiscretization();
-                                                 zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
+      DoublePointer minVal = new DoublePointer(1);
+      DoublePointer maxVal = new DoublePointer(1);
+      Point minLoc = new Point();
+      Point maxLoc = new Point();
 
-                                                 if (heightMapImage == null)
-                                                 {
-                                                    heightMapImage = new Mat(imageMessage.getImageHeight(), imageMessage.getImageWidth(), opencv_core.CV_16UC1);
-                                                    compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
-                                                    incomingCompressedImageBuffer = NativeMemoryTools.allocate(compressedBufferDefaultSize);
-                                                    incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
-                                                    LogTools.warn("Creating Buffer of Size: {}", compressedBufferDefaultSize);
-                                                 }
+      opencv_core.minMaxLoc(heightMap, minVal, maxVal, minLoc, maxLoc, null);
 
-                                                 if (latestHeightMapData == null)
-                                                 {
-                                                    latestHeightMapData = new HeightMapData(RapidHeightMapExtractor.getHeightMapParameters()
-                                                                                                                   .getGlobalCellSizeInMeters(),
-                                                                                            RapidHeightMapExtractor.getHeightMapParameters()
-                                                                                                                   .getGlobalWidthInMeters(),
-                                                                                            imageMessage.getPosition().getX(),
-                                                                                            imageMessage.getPosition().getY());
-                                                 }
+      // Normalize depth to 8-bit
+      Mat normalized = new Mat();
+      double alpha = 255.0 / (maxVal.get() - minVal.get());
+      double beta = -minVal.get() * alpha;
+      heightMap.convertTo(normalized, opencv_core.CV_8U, alpha, beta);
 
-                                                 PerceptionMessageTools.convertToHeightMapImage(imageMessage,
-                                                                                                heightMapImage,
-                                                                                                incomingCompressedImageBuffer,
-                                                                                                incomingCompressedImageBytePointer,
-                                                                                                compressedBytesMat);
+      // Apply colormap
+      Mat colorized = new Mat();
+      opencv_imgproc.applyColorMap(normalized, colorized, opencv_imgproc.COLORMAP_JET);
 
-                                                 if (!heightMapMessageGenerated)
-                                                 {
-                                                    PerceptionMessageTools.convertToHeightMapData(heightMapImage,
-                                                                                                  latestHeightMapData,
-                                                                                                  imageMessage.getPosition(),
-                                                                                                  (float) RapidHeightMapExtractor.getHeightMapParameters()
-                                                                                                                                 .getGlobalWidthInMeters(),
-                                                                                                  (float) RapidHeightMapExtractor.getHeightMapParameters()
-                                                                                                                                 .getGlobalCellSizeInMeters());
-                                                    latestHeightMapMessage = HeightMapMessageTools.toMessage(latestHeightMapData);
-                                                    heightMapMessageGenerated = true;
-                                                 }
+      // Convert to RGBA for display/publishing
+      Mat colorizedRGBA = new Mat();
+      opencv_imgproc.cvtColor(colorized, colorizedRGBA, opencv_imgproc.COLOR_BGR2RGBA);
 
-                                              });
-      }
+      heightMapImageVisualizer.setImage(colorizedRGBA);
+   }
 
-      getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();
+   public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
+   {
+      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      if (!isActive())
+         return;
+
+      latestTerrainMapData = new TerrainMapData(terrainMapMessage);
    }
 
    @Override
@@ -213,16 +190,18 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public void renderImGuiWidgets()
    {
+      ImGui.indent();
       if (ros2 != null && ImGui.button(labels.get("Reset Ground to Feet")))
          ros2.publish(PerceptionAPI.RESET_HEIGHT_MAP);
 
+      if (ros2 != null && ImGui.button(labels.get("Lower Height Map Backdrop")))
+         ros2.publish(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP);
+
       if (ImGui.collapsingHeader(labels.get("Visualization Options")))
       {
-         ImGui.checkbox(labels.get("Enable Height Map Visualizer"), enableHeightMapVisualizer);
-         ImGui.checkbox(labels.get("Enable Global Height Map Visualizer"), enableGlobalHeightMapVisualizer);
          ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
-         ImGui.checkbox(labels.get("Display Global Height Map Image"), displayGlobalHeightMapImage);
       }
+      ImGui.unindent();
    }
 
    @Override
@@ -230,35 +209,32 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       super.update();
 
-      if (heightMapMessageGenerated)
-      {
-         heightMapMessageGenerated = false;
-         updateGridMapGraphic(latestHeightMapMessage);
-      }
+      // From the visualizer side, if we don't want to visualize any height map, we don't need to update any graphics
+      if (!isActive())
+         return;
 
-      boolean isActive = isActive();
-      if (isActive && enableHeightMapVisualizer.get())
+      if (cellsPerAxis > 0 && !heightMapRenderer.isHasBeenCreated())
       {
-         heightMapGraphicNew.update();
+         heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
+         stopwatch.start();
       }
       if (enableGlobalHeightMapVisualizer.get())
       {
-         heightMapGraphicNew.update();
          globalHeightMapGraphic.update();
       }
 
-      if (isActive && enableHeightMapRenderer.get() && heightMapImage != null)
+      if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
       {
-         if (heightMapImage.ptr(0) != null)
+         // An additional check here to make sure that we have data in the image
+         if (heightMap != null && heightMap.ptr(0) != null)
          {
-            //PerceptionDebugTools.printMat("Height Map Image", heightMapImage, 10);
-            heightMapRenderer.update(zUpToWorldTransform,
-                                     heightMapImage.ptr(0),
-                                     (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset(),
-                                     zUpToWorldTransform.getTranslation().getX32(),
-                                     zUpToWorldTransform.getTranslation().getY32(),
-                                     heightMapImage.rows() / 2,
-                                     (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+            float pixelScalingFactor = 10000.0f;
+            heightMapRenderer.update(heightMap,
+                                     latestHeightMapOffset,
+                                     heightMapCenter.getX32(),
+                                     heightMapCenter.getY32(),
+                                     cellsPerAxis / 2,
+                                     latestCellSizeInMeters,
                                      pixelScalingFactor);
          }
       }
@@ -267,47 +243,45 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && sceneLevelCheck(sceneLevels))
-      {
-         if (enableHeightMapVisualizer.get())
-         {
-            heightMapGraphicNew.getRenderables(renderables, pool);
-         }
+      // From the visualizer side, if we don't want to visualize any height map, we don't need to update any graphics
+      if (!isActive())
+         return;
 
+      if (sceneLevelCheck(sceneLevels))
+      {
          if (enableGlobalHeightMapVisualizer.get())
          {
             globalHeightMapGraphic.getRenderables(renderables, pool);
-            heightMapGraphicNew.getRenderables(renderables, pool);
          }
 
-         if (enableHeightMapRenderer.get())
+         if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
          {
             heightMapRenderer.getRenderables(renderables, pool);
          }
       }
    }
 
+   @Override
    public void destroy()
    {
+      super.destroy();
       executorService.destroy();
-      heightMapGraphicNew.destroy();
       globalHeightMapGraphic.destroy();
+      heightMapRenderer.dispose();
    }
 
    public HeightMapData getLatestHeightMapData()
    {
-      return latestHeightMapData;
+      return isActive() ? latestHeightMapData : null;
    }
 
-   public TerrainMapData getTerrainMapData()
+   public TerrainMapData getLatestTerrainMapData()
    {
-      terrainMapData.setHeightMap(heightMapImage);
-      terrainMapData.setSensorOrigin(zUpToWorldTransform.getTranslation().getX(), zUpToWorldTransform.getTranslation().getY());
-      return terrainMapData;
+      return latestTerrainMapData;
    }
 
-   public ImBoolean getDisplayGlobalHeightMapImage()
+   public RDXOpenCVVideoVisualizer getHeightMapImageVisualizer()
    {
-      return displayGlobalHeightMapImage;
+      return heightMapImageVisualizer;
    }
 }

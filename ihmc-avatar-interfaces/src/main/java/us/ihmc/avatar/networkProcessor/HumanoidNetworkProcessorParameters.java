@@ -17,7 +17,6 @@ public class HumanoidNetworkProcessorParameters
    private boolean useKinematicsStreamingToolboxModule, visualizeKinematicsStreamingToolboxModule;
    private boolean useFootstepPlanningToolboxModule, visualizeFootstepPlanningToolboxModule;
    private boolean useDirectionalControlModule;
-   private boolean useBehaviorModule, visualizeBehaviorModule;
    private boolean useAutomaticDiagnostic;
    private double automatedDiagnosticInitialDelay;
    private boolean useROSModule;
@@ -120,17 +119,6 @@ public class HumanoidNetworkProcessorParameters
 	   this.useDirectionalControlModule = enable;
    }
 
-   public void setUseBehaviorModule(boolean enable)
-   {
-      setUseBehaviorModule(enable, false);
-   }
-
-   public void setUseBehaviorModule(boolean enable, boolean visualize)
-   {
-      this.useBehaviorModule = enable;
-      this.visualizeBehaviorModule = visualize;
-   }
-
    public void setUseAutomaticDiagnostic(boolean enable, double autamotedDiagnosticeInitialDelay)
    {
       setUseAutomaticDiagnostic(enable, false, autamotedDiagnosticeInitialDelay);
@@ -138,10 +126,7 @@ public class HumanoidNetworkProcessorParameters
 
    public void setUseAutomaticDiagnostic(boolean enable, boolean visualize, double autamotedDiagnosticInitialDelay)
    {
-      if (enable == true)
-         useBehaviorModule = true;
       this.useAutomaticDiagnostic = enable;
-      this.visualizeBehaviorModule = visualize;
       this.automatedDiagnosticInitialDelay = autamotedDiagnosticInitialDelay;
    }
 
@@ -260,16 +245,6 @@ public class HumanoidNetworkProcessorParameters
    public boolean isUseDirectionalControlModule()
    {
 	   return useDirectionalControlModule;
-   }
-
-   public boolean isUseBehaviorModule()
-   {
-      return useBehaviorModule;
-   }
-
-   public boolean isVisualizeBehaviorModule()
-   {
-      return visualizeBehaviorModule;
    }
 
    public boolean isUseAutomaticDiagnostic()

@@ -1,0 +1,5 @@
+newmtl Material
+map_Kd color.jpg
+norm normal.jpg
+map_ao occlusion.jpg
+Pr 1.00

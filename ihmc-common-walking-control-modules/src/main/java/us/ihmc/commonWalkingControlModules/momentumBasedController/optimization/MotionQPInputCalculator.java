@@ -6,14 +6,18 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQPSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -25,8 +29,17 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.algorithms.MultiBodyGravityGradientCalculator;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.mecano.spatial.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -43,6 +56,7 @@ public class MotionQPInputCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final double defaultNullspaceProjectionAlpha;
    private final YoDouble nullspaceProjectionAlpha;
    private final YoDouble secondaryTaskJointsWeight = new YoDouble("secondaryTaskJointsWeight", registry);
 
@@ -152,11 +166,13 @@ public class MotionQPInputCalculator
       {
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
          nullspaceProjectionAlpha = new YoDouble("nullspaceProjectionAlpha", registry);
-         nullspaceProjectionAlpha.set(jointPrivilegedConfigurationParameters.getNullspaceProjectionAlpha());
+         defaultNullspaceProjectionAlpha = jointPrivilegedConfigurationParameters.getNullspaceProjectionAlpha();
+         nullspaceProjectionAlpha.set(defaultNullspaceProjectionAlpha);
       }
       else
       {
          privilegedConfigurationHandler = null;
+         defaultNullspaceProjectionAlpha = Double.NaN;
          nullspaceProjectionAlpha = null;
       }
 
@@ -188,6 +204,8 @@ public class MotionQPInputCalculator
       if (privilegedConfigurationHandler == null)
          throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
+      if (command.getNullspaceAlpha() > 0.0 && Double.isFinite(command.getNullspaceAlpha()))
+         nullspaceProjectionAlpha.set(command.getNullspaceAlpha());
    }
 
    public void submitPrivilegedAccelerations(PrivilegedJointSpaceCommand command)
@@ -352,7 +370,7 @@ public class MotionQPInputCalculator
     * The {@code qpVariableSubstitutionToPack} can then be add to the QP to register an additional
     * substitution perform.
     * </p>
-    * 
+    *
     * @param function                     the explicit function representing a kinematic loop in the
     *                                     multi-body system.
     * @param qpVariableSubstitutionToPack the variable substitution to be configured. Modified.
@@ -367,16 +385,17 @@ public class MotionQPInputCalculator
       int[] actuatedJointIndices = function.getActuatedJointIndices();
 
       if (loopJacobian.getNumRows() != loopConvectiveTerm.getNumRows())
-         throw new IllegalArgumentException("Inconsistent dimensions: number of rows in Jacobian: " + loopJacobian.getNumRows() + ", number of joints: "
-                                            + loopJoints.size());
+         throw new IllegalArgumentException(
+               "Inconsistent dimensions: number of rows in Jacobian: " + loopJacobian.getNumRows() + ", number of joints: " + loopJoints.size());
 
       if (loopJacobian.getNumRows() != loopConvectiveTerm.getNumRows())
          throw new MatrixDimensionException("Inconsistent dimensions: loopJacobian.numRows=" + loopJacobian.getNumRows() + ", loopConvectiveTerm.numRows="
                                             + loopConvectiveTerm.getNumRows());
 
       if (actuatedJointIndices.length != loopJacobian.getNumCols())
-         throw new IllegalArgumentException("Inconsistent dimensions: number of actuated joints: " + actuatedJointIndices.length
-                                            + ", number of columns in Jacobian: " + loopJacobian.getNumCols());
+         throw new IllegalArgumentException(
+               "Inconsistent dimensions: number of actuated joints: " + actuatedJointIndices.length + ", number of columns in Jacobian: "
+               + loopJacobian.getNumCols());
 
       qpVariableSubstitutionToPack.reshape(loopJoints.size(), loopJacobian.getNumRows());
 
@@ -466,7 +485,7 @@ public class MotionQPInputCalculator
     * the QP solver is solving for, and p is the M-by-1 objective vector. M is called the task size and
     * N is the overall number of degrees of freedom (DoFs) to be controlled.
     * </p>
-    * 
+    *
     * @return true if the command was successfully converted.
     */
    public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, NativeQPInputTypeA qpInputToPack)
@@ -537,15 +556,15 @@ public class MotionQPInputCalculator
 
       if (primaryBase == null)
       { // No primary base provided for this task.
-        // Record the resulting Jacobian matrix for the privileged configuration.
+         // Record the resulting Jacobian matrix for the privileged configuration.
          tempTaskJacobian.set(qpInputToPack.taskJacobian);
          recordTaskJacobian(tempTaskJacobian);
          // We're done!
       }
       else
       { // A primary base has been provided, two things are happening here:
-        // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
-        // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
+         // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+         // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
          nativeTempPrimaryTaskJacobian.set(qpInputToPack.taskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
@@ -558,7 +577,7 @@ public class MotionQPInputCalculator
 
             if (isJointUpstreamOfPrimaryBase)
             { // The current joint is located between the base and the primary base:
-              // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+               // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
                int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
                for (int dofIndex : jointIndices)
@@ -593,7 +612,7 @@ public class MotionQPInputCalculator
     * solver is solving for, and p is the M-by-1 objective vector. M is called the task size and N is
     * the overall number of degrees of freedom (DoFs) to be controlled.
     * </p>
-    * 
+    *
     * @return true if the command was successfully converted.
     */
    public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, QPInputTypeA qpInputToPack)
@@ -661,14 +680,14 @@ public class MotionQPInputCalculator
       {
          if (primaryBase == null)
          { // No primary base provided for this task.
-           // Record the resulting Jacobian matrix for the privileged configuration.
+            // Record the resulting Jacobian matrix for the privileged configuration.
             recordTaskJacobian(qpInputToPack.taskJacobian);
             // We're done!
          }
          else
          { // A primary base has been provided, two things are happening here:
-           // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
-           // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
+            // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+            // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
             tempPrimaryTaskJacobian.set(qpInputToPack.taskJacobian);
 
             boolean isJointUpstreamOfPrimaryBase = false;
@@ -681,7 +700,7 @@ public class MotionQPInputCalculator
 
                if (isJointUpstreamOfPrimaryBase)
                { // The current joint is located between the base and the primary base:
-                 // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+                  // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
                   int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
                   for (int dofIndex : jointIndices)
@@ -709,7 +728,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link MomentumRateCommand} into a {@link NativeQPInputTypeA}.
-    * 
+    *
     * @return true if the command was successfully converted.
     */
    public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, NativeQPInputTypeA qpInputToPack)
@@ -802,7 +821,7 @@ public class MotionQPInputCalculator
    {
       if (convertLinearMomentumRateCostCommand(commandToConvert, tempBInput))
       {
-         qpInputToPack.getTaskWeightMatrix().set(tempBInput.getTaskWeightMatrix());
+         qpInputToPack.setWeight(tempBInput.getWeight());
          qpInputToPack.getDirectCostHessian().set(tempBInput.getDirectCostHessian());
          qpInputToPack.getDirectCostGradient().set(tempBInput.getDirectCostGradient());
          qpInputToPack.getTaskJacobian().set(tempBInput.getTaskJacobian());
@@ -832,26 +851,21 @@ public class MotionQPInputCalculator
          return false;
 
       qpInputToPack.reshape(taskSize);
-      qpInputToPack.setUseWeightScalar(false);
 
       // Compute the weight: W = S * W * S^T
-      tempTaskWeight.reshape(Wrench.SIZE, Wrench.SIZE);
-      tempTaskWeightSubspace.reshape(taskSize, 3);
-      commandToConvert.getWeightMatrix(tempTaskWeight);
-      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+      qpInputToPack.setWeight(commandToConvert.getWeight());
 
       // Compute the hessian: H = S * H * S^T
       tempTaskWeight.set(commandToConvert.getMomentumRateHessian());
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.directCostHessian);
 
+      // Compute the gradient: g = S * g
+      CommonOps_DDRM.multTransB(tempSelectionMatrix, commandToConvert.getMomentumRateGradient(), qpInputToPack.directCostGradient);
+
       // Compute the task Jacobian: J = S * A
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
-
-      // Compute the gradient: g = S * g
-      CommonOps_DDRM.multTransB(tempSelectionMatrix, commandToConvert.getMomentumRateGradient(), qpInputToPack.directCostGradient);
 
       // Compute the task convective term: p = S * ADot qDot
       DMatrixRMaj convectiveTerm = getCentroidalMomentumConvectiveTerm();
@@ -863,8 +877,44 @@ public class MotionQPInputCalculator
    }
 
    /**
+    * Converts a {@link QPCostCommand} into a {@link NativeQPInputTypeB}.
+    *
+    * @return true if the command was successfully converted.
+    */
+   public boolean convertQPCostCommand(QPCostCommand commandToConvert, NativeQPInputTypeB qpInputToPack)
+   {
+      tempSelectionMatrix.zero();
+      int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
+
+      if (taskSize == 0)
+         return false;
+
+      qpInputToPack.reshape(taskSize);
+
+      // Set the weight
+      qpInputToPack.setWeight(commandToConvert.getWeight());
+
+      // Set the hessian
+      qpInputToPack.directCostHessian.set(commandToConvert.getCostHessian());
+
+      // Set the gradient
+      qpInputToPack.directCostGradient.set(commandToConvert.getCostGradient());
+
+      // Set the task Jacobian
+      qpInputToPack.taskJacobian.set(commandToConvert.getStateJacobian());
+
+      // Compute the task convective term: p = -b
+      qpInputToPack.taskConvectiveTerm.scale(-1.0, commandToConvert.getStateObjective());
+
+//      recordTaskJacobian(qpInputToPack.taskJacobian);
+
+      return true;
+   }
+
+   /**
     * Converts a {@link MomentumCommand} into a {@link QPInputTypeA}.
-    * 
+    *
     * @return true if the command was successfully converted.
     */
    public boolean convertMomentumCommand(MomentumCommand commandToConvert, QPInputTypeA qpInputToPack)
@@ -918,7 +968,7 @@ public class MotionQPInputCalculator
     * each pair of consecutive vertices given by
     * {@link LinearMomentumConvexConstraint2DCommand#getLinearMomentumConstraintVertices()}.
     * </p>
-    * 
+    *
     * @param command       the command to be converted. Not modified.
     * @param qpInputToPack the result of the conversion. Modified.
     * @return {@code true} if the command was successfully converted, {@code false} otherwise.
@@ -984,7 +1034,7 @@ public class MotionQPInputCalculator
     * It is up to the caller of this method to set the type of constraint of the given
     * {@code qoInputToPack}.
     * </p>
-    * 
+    *
     * @param constraintIndex                  the index in {@code qpInputToPack} where to put the new
     *                                         constraint.
     * @param firstPointOnLine                 the first point the line is going through. Not modified.

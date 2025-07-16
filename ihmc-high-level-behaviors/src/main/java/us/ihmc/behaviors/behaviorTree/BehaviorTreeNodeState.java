@@ -12,11 +12,13 @@ import java.util.List;
 /**
  * A behavior tree node layer that sits over the Definition layer.
  * The state layer is the layer that gets synchronized over the network.
+ *
+ * @param <D> The type of this node's definition instance.
  */
-public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
-      implements BehaviorTreeNodeLayer<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
+public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> implements TreeNode<BehaviorTreeNodeState<?>>
 {
-   private final D definition;
+   /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
+   protected final D definition;
 
    /** The node's unique ID. */
    private final long id;
@@ -43,7 +45,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       this.id = id;
       this.definition = definition;
 
-      logger = new BehaviorTreeNodeMessageLogger(definition);
+      logger = new BehaviorTreeNodeMessageLogger(crdtInfo);
    }
 
    /** Used to determine if the node's full data needs to be sent. */
@@ -70,7 +72,17 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       logger.fromMessage(message.getRecentLogMessages());
    }
 
-   @Override
+   public void update()
+   {
+      definition.checkModified();
+      definition.updateName();
+   }
+
+   public void drawToSVG()
+   {
+      new BehaviorTreeSVGWriter(this);
+   }
+
    public void destroy()
    {
 
@@ -111,22 +123,9 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
       return parent;
    }
 
-   @Override
-   public D getNextLowerLayer()
-   {
-      return getDefinition();
-   }
-
-   @Override
    public D getDefinition()
    {
       return definition;
-   }
-
-   @Override
-   public BehaviorTreeNodeState<D> getState()
-   {
-      return this;
    }
 
    public BehaviorTreeNodeMessageLogger getLogger()

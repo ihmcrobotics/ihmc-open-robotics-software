@@ -15,7 +15,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ab3a162abf80a085daa2d9bf39cc79a7980d79ffdeab0c64b36a5269079d79fc";
+   		return "e4b89efece4330a9bc8cd03409674b573dd9eb6b64753ff32c2364234d0d4928";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -79,7 +79,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCapturePoint2d(), current_alignment);
@@ -106,27 +106,27 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.MultiContactBalanceStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getCapturePoint2d(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterOfMass3d(), cdr);
       if(data.getContactPointsInWorld().size() <= 16)
       cdr.write_type_e(data.getContactPointsInWorld());else
-          throw new RuntimeException("contact_points_in_world field exceeds the maximum length");
+          throw new RuntimeException("contact_points_in_world field exceeds the maximum length: %d > %d".formatted(data.getContactPointsInWorld().size(), 16));
 
       if(data.getSurfaceNormalsInWorld().size() <= 16)
       cdr.write_type_e(data.getSurfaceNormalsInWorld());else
-          throw new RuntimeException("surface_normals_in_world field exceeds the maximum length");
+          throw new RuntimeException("surface_normals_in_world field exceeds the maximum length: %d > %d".formatted(data.getSurfaceNormalsInWorld().size(), 16));
 
       if(data.getSupportRigidBodyIds().size() <= 16)
       cdr.write_type_e(data.getSupportRigidBodyIds());else
-          throw new RuntimeException("support_rigid_body_ids field exceeds the maximum length");
+          throw new RuntimeException("support_rigid_body_ids field exceeds the maximum length: %d > %d".formatted(data.getSupportRigidBodyIds().size(), 16));
 
    }
 
    public static void read(controller_msgs.msg.dds.MultiContactBalanceStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getCapturePoint2d(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterOfMass3d(), cdr);	
@@ -139,7 +139,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.MultiContactBalanceStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 
       ser.write_type_a("center_of_mass_3d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterOfMass3d());
@@ -152,7 +152,7 @@ public class MultiContactBalanceStatusPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultiContactBalanceStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 
       ser.read_type_a("center_of_mass_3d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterOfMass3d());

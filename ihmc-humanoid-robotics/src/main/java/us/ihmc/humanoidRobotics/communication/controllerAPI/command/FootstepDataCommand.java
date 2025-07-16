@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ContinuousStepGeneratorMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,6 +55,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double adjustedExecutionTime;
    public boolean shouldCheckForReachability;
 
+   public boolean updateFootstepReferenceContinuously;
+   public boolean disableCoPFeedbackControl;
+
    private final StepConstraintsListCommand stepConstraints = new StepConstraintsListCommand();
 
    public FootstepDataCommand()
@@ -83,6 +87,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       stepConstraints.clear();
       shouldCheckForReachability = false;
+
+      updateFootstepReferenceContinuously = false;
+      disableCoPFeedbackControl = false;
    }
 
    @Override
@@ -93,6 +100,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       swingHeight = message.getSwingHeight();
       shouldCheckForReachability = message.getShouldCheckForReachability();
+      updateFootstepReferenceContinuously = message.getUpdateFootstepReferenceContinuously();
+      disableCoPFeedbackControl = message.getDisableCopFeedbackControl();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
@@ -162,6 +171,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
       shouldCheckForReachability = other.shouldCheckForReachability;
+      updateFootstepReferenceContinuously = other.updateFootstepReferenceContinuously;
+      disableCoPFeedbackControl = other.disableCoPFeedbackControl;
 
       RecyclingArrayList<MutableDouble> otherWaypointProportions = other.customWaypointProportions;
       customWaypointProportions.clear();
@@ -228,6 +239,16 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
+   }
+
+   public void setUpdateFootstepReferenceContinuously(boolean updateFootstepReferenceContinuously)
+   {
+      this.updateFootstepReferenceContinuously = updateFootstepReferenceContinuously;
+   }
+
+   public void setDisableCoPFeedbackControl(boolean disableCoPFeedbackControl)
+   {
+      this.disableCoPFeedbackControl = disableCoPFeedbackControl;
    }
 
    public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
@@ -320,6 +341,16 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public boolean getShouldCheckForReachability()
    {
       return shouldCheckForReachability;
+   }
+
+   public boolean getUpdateFootstepReferenceContinuously()
+   {
+      return updateFootstepReferenceContinuously;
+   }
+
+   public boolean getDisableCoPFeedbackControl()
+   {
+      return disableCoPFeedbackControl;
    }
 
    @Override

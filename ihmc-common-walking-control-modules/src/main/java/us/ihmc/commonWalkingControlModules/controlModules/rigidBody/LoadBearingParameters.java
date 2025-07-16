@@ -26,6 +26,11 @@ public class LoadBearingParameters
     */
    private final DoubleParameter holdPositionDampingRatio;
 
+   /**
+    * Duration (in seconds) of time taken to load the hand
+    */
+   private final DoubleParameter handLoadDuration;
+
    public LoadBearingParameters(YoRegistry registry)
    {
       normalForceThresholdForLoaded = new DoubleParameter("handLoadedForceThreshold", registry, 12.0);
@@ -33,6 +38,8 @@ public class LoadBearingParameters
 
       holdPositionStiffness = new DoubleParameter("kpXYHandLoadBearingPosition", registry, 100.0);
       holdPositionDampingRatio = new DoubleParameter("zetaXYHandLoadBearingPosition", registry, 0.65);
+
+      handLoadDuration = new DoubleParameter("handLoadDuration", registry, 0.8);
    }
 
    public double getNormalForceThresholdForLoaded()
@@ -53,5 +60,10 @@ public class LoadBearingParameters
    public double getHoldPositionDampingRatio()
    {
       return holdPositionDampingRatio.getValue();
+   }
+
+   public double getHandLoadDuration()
+   {
+      return handLoadDuration.getValue();
    }
 }

@@ -15,7 +15,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4836725d2faa66af4d9039c2643aecbbfee8e9103ab7147b5bf78fc1361062b0";
+   		return "f580281d69aab89012816f1bd0fa3ec59d3d6eace406af2af6769b2909fd33dc";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void write(controller_msgs.msg.dds.ObjectWeightPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -96,7 +96,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    public static void read(controller_msgs.msg.dds.ObjectWeightPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void serialize(controller_msgs.msg.dds.ObjectWeightPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("weight", data.getWeight());
    }
@@ -116,7 +116,7 @@ public class ObjectWeightPacketPubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ObjectWeightPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setWeight(ser.read_type_6("weight"));
    }

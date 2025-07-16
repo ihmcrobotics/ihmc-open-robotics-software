@@ -3,13 +3,11 @@ package us.ihmc.behaviors.tools;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +24,12 @@ public class RemoteEnvironmentMapInterface
 
    private final ArrayList<Consumer<PlanarRegionsList>> callbacks = new ArrayList<>();
 
-   public RemoteEnvironmentMapInterface(ROS2NodeInterface ros2Node)
+   public RemoteEnvironmentMapInterface(ROS2Node ros2Node)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REALSENSE_SLAM_MODULE.withOutput(), this::acceptRealsenseSLAMRegions);
+      ros2Node.createSubscription2(PerceptionAPI.REALSENSE_SLAM_MODULE.withOutput().withType(PlanarRegionsListMessage.class), this::acceptRealsenseSLAMRegions);
 
       // used to be "/ihmc/rea/custom_region/input/planar_regions_list"
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REA_SUPPORT_REGIONS.withOutput(), this::acceptAdditionalRegionList);
+      ros2Node.createSubscription2(PerceptionAPI.REA_SUPPORT_REGIONS.withOutput().withType(PlanarRegionsListMessage.class), this::acceptAdditionalRegionList);
    }
 
    public synchronized PlanarRegionsList getLatestCombinedRegionsList()

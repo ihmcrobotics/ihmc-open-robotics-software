@@ -1,8 +1,5 @@
 package us.ihmc.perception.ros1;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.LongUnaryOperator;
-
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.LocalizationPointMapPacket;
 import controller_msgs.msg.dds.LocalizationStatusPacket;
@@ -11,13 +8,13 @@ import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -25,13 +22,16 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 import us.ihmc.utilities.ros.subscriber.RosPoseStampedSubscriber;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongUnaryOperator;
+
 public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketConsumer<LocalizationPacket>
 {
    private static final boolean DEBUG = false;
    private double overlap = 1.0;
 
    private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
-   private final ROS2PublisherBasics<LocalizationPointMapPacket> localizationPointMapPublisher;
+   private final ROS2Publisher<LocalizationPointMapPacket> localizationPointMapPublisher;
 
    public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, RealtimeROS2Node ros2Node,
                                                  LongUnaryOperator robotMonotonicTimeCalculator)
@@ -39,7 +39,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withTypeName(LocalizationPacket.class), s -> receivedPacket(s.takeNextData()));
       localizationPointMapPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(LocalizationPointMapPacket.class));
 
-      ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StampedPosePacket.class));
+      ROS2Publisher<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StampedPosePacket.class));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
       {
          @Override
@@ -59,7 +59,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 
       rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
 
-      ROS2PublisherBasics<LocalizationStatusPacket> localizationStatusPublisher
+      ROS2Publisher<LocalizationStatusPacket> localizationStatusPublisher
             = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(LocalizationStatusPacket.class));
       AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE)
       {

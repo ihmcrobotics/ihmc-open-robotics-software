@@ -10,9 +10,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFModel;

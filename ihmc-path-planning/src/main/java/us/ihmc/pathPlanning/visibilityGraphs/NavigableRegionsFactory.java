@@ -19,7 +19,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 public class NavigableRegionsFactory
 {

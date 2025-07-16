@@ -1,7 +1,5 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -14,26 +12,27 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-trajectory-optimization:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.19")
+   api("us.ihmc:ihmc-convex-optimization:0.17.23")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-parameter-estimation:source")
+   api("us.ihmc:ihmc-robotics-tools:0.15.3")
+   api("us.ihmc:scs2-simulation:17-0.30.0")
+   api("us.ihmc:mecano-yovariables-filters:17-0.19.2")
 }
 
 testDependencies {
    api(ihmc.sourceSetProject("visualizers"))
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.19")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.23")
 }
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.25.1")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.26.0")
+   api("us.ihmc:simulation-construction-set:0.25.3")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.30.0")
 
-   var javaFXVersion = "17.0.9"
+   var javaFXVersion = "17.0.8"
    api(ihmc.javaFXModule("base", javaFXVersion))
    api(ihmc.javaFXModule("controls", javaFXVersion))
    api(ihmc.javaFXModule("graphics", javaFXVersion))

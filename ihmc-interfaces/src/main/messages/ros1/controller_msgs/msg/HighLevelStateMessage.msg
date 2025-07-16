@@ -30,7 +30,7 @@ int8 EXTERNAL_TRANSITION_STATE=12
 int8 EXTERNAL=13
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the which state the controller should transition into.
 # Field default value 255

@@ -15,6 +15,8 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -40,8 +42,7 @@ import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
 import us.ihmc.robotics.interaction.PointCollidable;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -453,7 +454,7 @@ public class RDXInteractableFootstep
       return plannedFootstepInternal.getFootstepPose().getYaw();
    }
 
-   public FramePose3DReadOnly getFootPose()
+   public FramePose3D getFootPose()
    {
       return plannedFootstepInternal.getFootstepPose();
    }
@@ -504,7 +505,7 @@ public class RDXInteractableFootstep
    /**
     * TODO: Evaluate the use of this method.
     */
-   public void copyFrom(RDXBaseUI baseUI, RDXInteractableFootstep manuallyPlacedFootstep)
+   public void copyFrom(RDXInteractableFootstep manuallyPlacedFootstep)
    {
       this.footstepIndexText = manuallyPlacedFootstep.footstepIndexText;
       this.footstepModelInstance = manuallyPlacedFootstep.footstepModelInstance;

@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -186,10 +186,7 @@ public class AStarBodyPathSmoother
 
                if (visualize)
                {
-                  if (waypointIndex - 1 != 0)
-                  {
-                     waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
-                  }
+                  waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
                   if (waypointIndex + 1 != pathSize - 1)
                   {
                      waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());

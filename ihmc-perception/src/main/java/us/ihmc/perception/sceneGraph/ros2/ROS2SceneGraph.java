@@ -5,7 +5,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 import java.util.function.BiFunction;
 

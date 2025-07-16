@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -15,21 +15,20 @@ import java.util.List;
 public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInterface
 {
    private final IdealStepCalculator nominalIdealStepCalculator;
+   private final YoBoolean stepSideIncorrect;
+   // This will be used to query what reference alpha to use.
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private FootstepPlan referenceFootstepPlan;
    private DirectedGraph<FootstepGraphNode> footstepGraph;
    private DiscreteFootstep nominalIdealStep;
-   private final YoBoolean stepSideIncorrect;
 
-   // This will be used to query what reference alpha to use.
-   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
-   private final YoBoolean usingReferenceStep;
-
-   public ReferenceBasedIdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
+   public ReferenceBasedIdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
+                                            IdealStepCalculator nominalIdealStepCalculator,
+                                            YoRegistry registry)
    {
       this.nominalIdealStepCalculator = nominalIdealStepCalculator;
       stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);
       this.footstepPlannerParameters = footstepPlannerParameters;
-      this.usingReferenceStep = new YoBoolean("usingReferenceStep", registry);
    }
 
    @Override
@@ -57,8 +56,11 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
          throw new RuntimeException("Invalid side on reference plan");
       }
 
-      FramePose3D referenceFootstepPose = referenceFootstep.getFootstepPose();
-      return new DiscreteFootstep(referenceFootstepPose.getX(), referenceFootstepPose.getY(), referenceFootstepPose.getYaw(), referenceFootstep.getRobotSide());
+      Pose2D nominalStepPose = new Pose2D(nominalIdealStep.getX(), nominalIdealStep.getY(), nominalIdealStep.getYaw());
+      Pose2D referenceStepPose = new Pose2D(referenceFootstep.getFootstepPose());
+      Pose2D interpolatedPose = new Pose2D(nominalStepPose);
+      interpolatedPose.interpolate(referenceStepPose, referenceAlpha);
+      return new DiscreteFootstep(interpolatedPose.getX(), interpolatedPose.getY(), interpolatedPose.getYaw(), referenceFootstep.getRobotSide());
    }
 
    public void setReferenceFootstepPlan(FootstepPlan referenceFootstepPlan)
@@ -66,19 +68,9 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
       this.referenceFootstepPlan = referenceFootstepPlan;
    }
 
-   public void clearReferencePlan()
-   {
-      referenceFootstepPlan = null;
-   }
-
    public void setFootstepGraph(DirectedGraph<FootstepGraphNode> footstepGraph)
    {
       this.footstepGraph = footstepGraph;
-   }
-
-   public boolean isUsingReferenceStep()
-   {
-      return usingReferenceStep.getBooleanValue();
    }
 
    public PlannedFootstep getReferenceStep(FootstepGraphNode graphNode)

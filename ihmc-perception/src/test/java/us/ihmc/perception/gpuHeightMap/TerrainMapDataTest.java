@@ -3,12 +3,14 @@ package us.ihmc.perception.gpuHeightMap;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.perception.heightMap.TerrainMapTools;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
-   private TerrainMapData terrainMapData = new TerrainMapData(size, size);
+   private final HeightMapParameters parameters = new HeightMapParameters();
+   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset());
 
    @Test
    public void testTerrainMapSurfaceNormals()
@@ -24,6 +26,6 @@ public class TerrainMapDataTest
 
       //PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 1);
 
-      LogTools.info("Normal: {}", terrainMapData.computeSurfaceNormalInWorld(0.3f, 0.3f));
+      LogTools.info("Normal: {}", TerrainMapTools.computeSurfaceNormalInWorld(terrainMapData, 0.3f, 0.3f, 1));
    }
 }

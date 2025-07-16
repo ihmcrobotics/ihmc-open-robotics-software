@@ -15,7 +15,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9fc5fdaff0b5bc6cf704491ee99037e8c88c67ed0964fe9bb64a1a78b41be258";
+   		return "962dd9670bbe8ff4c6d74f8f44ec51101d0b2605e38deee224dc26056ac6ed26";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -79,7 +79,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -104,7 +104,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.HandLoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -120,7 +120,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.HandLoadBearingMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -138,7 +138,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.HandLoadBearingMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_7("load", data.getLoad());
       ser.write_type_6("coefficient_of_friction", data.getCoefficientOfFriction());
@@ -152,7 +152,7 @@ public class HandLoadBearingMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandLoadBearingMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setLoad(ser.read_type_7("load"));
       data.setCoefficientOfFriction(ser.read_type_6("coefficient_of_friction"));

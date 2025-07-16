@@ -5,9 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.crdt.CRDTBidirectionalString;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -20,8 +19,9 @@ import java.util.List;
 /**
  * The base definition of a behavior tree node.
  */
-public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
+public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implements TreeNode<BehaviorTreeNodeDefinition>
 {
+   private final LatestTimestampModifiable childrenModification;
    /**
     * The name of the node.
     * It should be a set of words that summarize the node and that fits onto one line.
@@ -29,13 +29,13 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
     * i.e. "PickUpObject.json"
     * i.e. "Move left hand"
     */
-   private final CRDTUnidirectionalString name;
+   private final CRDTBidirectionalString name;
    /**
     * Long form notes about the node.
     * Can be in paragraph form and include notes about the current
     * development state.
     */
-   private final CRDTUnidirectionalString notes;
+   private final CRDTBidirectionalString notes;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
@@ -52,8 +52,17 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
       this.saveFileDirectory = saveFileDirectory;
 
-      name = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
-      notes = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
+      childrenModification = new LatestTimestampModifiable(crdtInfo);
+      name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
+      notes = new CRDTBidirectionalString(this, "");
+
+      updateName();
+   }
+
+   public void updateName()
+   {
+      setModifierName(name.getValue());
+      childrenModification.setModifierName(name.getValue() + " children");
    }
 
    /** Save as JSON file root node. */
@@ -103,6 +112,8 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
    {
       name.setValue(jsonNode.get("name").textValue());
       notes.setValue(jsonNode.get("notes").textValue());
+
+      updateName();
    }
 
    public void setOnDiskFields()
@@ -117,8 +128,13 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void undoAllNontopologicalChanges()
    {
-      name.setValue(onDiskName);
-      notes.setValue(onDiskNotes);
+      if (isUndoAvailable())
+      {
+         name.setValue(onDiskName);
+         notes.setValue(onDiskNotes);
+
+         updateName();
+      }
 
       // We are not able to undo changes to children topology.
       // The user must delete and reload the entire tree.
@@ -146,7 +162,10 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      toMessage(message.getConfirmableRequest());
+      message.setType(BehaviorTreeDefinitionRegistry.getMessageByte(getClass()));
+
+      toMessage(message.getLatestModificationToData());
+      childrenModification.toMessage(message.getLatestModificationToChildren());
 
       message.setName(name.toMessage());
       // message.setNotes(notes.toMessage());
@@ -155,10 +174,29 @@ public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implemen
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
-      fromMessage(message.getConfirmableRequest()); // Unpack first, because this also unfreezes
+      fromMessage(message, false);
+   }
+
+   public void fromMessage(BehaviorTreeNodeDefinitionMessage message, boolean checkOnly)
+   {
+      // Needs to be done first to detect incoming modification
+      fromMessage(message.getLatestModificationToData(), checkOnly);
+      childrenModification.fromMessage(message.getLatestModificationToChildren());
 
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());
+
+      updateName();
+   }
+
+   public LatestTimestampModifiable getChildrenModification()
+   {
+      return childrenModification;
+   }
+
+   public boolean isUndoAvailable()
+   {
+      return onDiskName != null;
    }
 
    public void setName(String name)

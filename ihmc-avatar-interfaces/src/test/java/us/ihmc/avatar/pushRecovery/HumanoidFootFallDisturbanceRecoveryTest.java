@@ -91,7 +91,6 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
    }
 
    public void testBlindWalkOverHole(TestInfo testInfo, double swingDuration, double transferDuration, double holeDepth, Consumer<YoRegistry> yoVariableMutator)
-         throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
 
@@ -113,7 +112,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       if (enableToeOffInSingleSupport)
       {
          simulationTestHelper.findVariable("doToeOffIfPossibleInSingleSupport").setValueFromDouble(1.0);
-         simulationTestHelper.findVariable("forceToeOffAtJointLimit").setValueFromDouble(1.0);
+         simulationTestHelper.findVariable("doToeOffWhenHittingRearKneeLowerLimit").setValueFromDouble(1.0);
       }
 
       if (enableStepAdjustment)
@@ -150,7 +149,6 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
                                          double transferDuration,
                                          double stepHeight,
                                          Consumer<YoRegistry> yoVariableMutator)
-         throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
 
@@ -169,7 +167,7 @@ public abstract class HumanoidFootFallDisturbanceRecoveryTest implements MultiRo
       if (enableToeOffInSingleSupport)
       {
          simulationTestHelper.findVariable("doToeOffIfPossibleInSingleSupport").setValueFromDouble(1.0);
-         simulationTestHelper.findVariable("forceToeOffAtJointLimit").setValueFromDouble(1.0);
+         simulationTestHelper.findVariable("doToeOffWhenHittingRearKneeLowerLimit").setValueFromDouble(1.0);
       }
 
       if (enableStepAdjustment)

@@ -1,7 +1,5 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "8.3"
-   id("us.ihmc.ihmc-cd") version "1.26"
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
@@ -14,9 +12,11 @@ ihmc {
 }
 
 mainDependencies {
+   api("us.ihmc:ihmc-commons-testing:0.35.1")
    api("us.ihmc:ihmc-perception:source")
-   api("us.ihmc:ihmc-common-walking-control-modules:source")
+   api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
+   api("us.ihmc:ihmc-common-walking-control-modules:source")
 }
 
 testDependencies {

@@ -15,7 +15,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f59d8310b8c6a4da79d23234e59e7a0a6fb88daba0a0ec96d60ba50a8cfbbe52";
+   		return "ddf517d7b9b497b6f13b0ef5a7cae19ff9681e9000eb0c338bcde554f0d2d60b";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -92,7 +92,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -135,7 +135,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
    public static void write(toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getPlanId());
 
@@ -147,27 +147,27 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getHeightMapMessage(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
-          throw new RuntimeException("body_path field exceeds the maximum length");
+          throw new RuntimeException("body_path field exceeds the maximum length: %d > %d".formatted(data.getBodyPath().size(), 100));
 
       if(data.getBodyPathUnsmoothed().size() <= 100)
       cdr.write_type_e(data.getBodyPathUnsmoothed());else
-          throw new RuntimeException("body_path_unsmoothed field exceeds the maximum length");
+          throw new RuntimeException("body_path_unsmoothed field exceeds the maximum length: %d > %d".formatted(data.getBodyPathUnsmoothed().size(), 100));
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalPose(), cdr);
       toolbox_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.write(data.getPlannerTimings(), cdr);
       if(data.getExceptionMessage().length() <= 255)
       cdr.write_type_d(data.getExceptionMessage());else
-          throw new RuntimeException("exception_message field exceeds the maximum length");
+          throw new RuntimeException("exception_message field exceeds the maximum length: %d > %d".formatted(data.getExceptionMessage().length(), 255));
 
       if(data.getStacktrace().size() <= 20)
       cdr.write_type_e(data.getStacktrace());else
-          throw new RuntimeException("stacktrace field exceeds the maximum length");
+          throw new RuntimeException("stacktrace field exceeds the maximum length: %d > %d".formatted(data.getStacktrace().size(), 20));
 
    }
 
    public static void read(toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setPlanId(cdr.read_type_2());
       	
@@ -189,7 +189,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final void serialize(toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
@@ -210,7 +210,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 

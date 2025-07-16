@@ -3,7 +3,7 @@
 # See QueuedFootstepStatusMessage for more information about defining a footstep.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies whether the first step in the queue list is currently being taken in swing
 bool is_first_step_in_swing false

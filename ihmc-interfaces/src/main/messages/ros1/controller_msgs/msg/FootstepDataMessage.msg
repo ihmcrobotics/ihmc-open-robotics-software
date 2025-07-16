@@ -14,7 +14,7 @@ int8 TRAJECTORY_TYPE_CUSTOM=2
 int8 TRAJECTORY_TYPE_WAYPOINTS=3
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies which foot will swing to reach the footstep.
 # Field default value 255
@@ -103,5 +103,12 @@ controller_msgs/StepConstraintsListMessage step_constraints
 
 # If the controller should check and fail if the step is not reachable
 bool should_check_for_reachability
+
+# If the swing trajectory should be continuously updated everytime a new touchdown position is received by the controller
+bool update_footstep_reference_continuously
+
+# If CoP feedback control should be disabled. This is desirable when using a stepping-based balance control strategy,
+# rather than an ankle-based balance control strategy, which is used by default
+bool disable_cop_feedback_control
 
 

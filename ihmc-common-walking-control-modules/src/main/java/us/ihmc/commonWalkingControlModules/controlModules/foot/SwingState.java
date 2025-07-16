@@ -34,7 +34,6 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
@@ -44,9 +43,11 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.yoVariables.euclid.filters.RateLimitedYoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -110,7 +111,7 @@ public class SwingState extends AbstractFootControlState
 
 
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
-   private final RateLimitedYoFramePose rateLimitedAdjustedPose;
+   private final RateLimitedYoFramePose3D rateLimitedAdjustedPose;
 
    private final FramePose3D footstepPose = new FramePose3D();
 
@@ -207,7 +208,7 @@ public class SwingState extends AbstractFootControlState
       replanTrajectory = new YoBoolean(namePrefix + "ReplanTrajectory", registry);
       footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
 
-      rateLimitedAdjustedPose = new RateLimitedYoFramePose(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
+      rateLimitedAdjustedPose = new RateLimitedYoFramePose3D(namePrefix + "AdjustedFootstepPose", "", registry, 10.0, controlDT, worldFrame);
 
       soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
@@ -242,6 +243,24 @@ public class SwingState extends AbstractFootControlState
       currentTimeWithSwingSpeedUp = new YoDouble(namePrefix + "CurrentTimeWithSpeedUp", registry);
       isSwingSpeedUpEnabled = new YoBoolean(namePrefix + "IsSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+
+      YoVariableChangedListener qfpParameterListener = change ->
+      {
+         boolean updateFootstepReferenceContinuously = controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().getBooleanValue();
+
+         if (updateFootstepReferenceContinuously)
+         {
+            isSwingSpeedUpEnabled.set(false);
+            swingTrajectorySmoother.setTrackingZeta(0.0);
+         }
+         else
+         {
+            isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            swingTrajectorySmoother.setTrackingZeta(swingTrajectorySmoother.getDefaultTrackingZeta());
+         }
+      };
+
+      controllerToolbox.getWalkingMessageHandler().getUpdateFootstepReferenceContinuously().addListener(qfpParameterListener);
 
       swingTimeSpeedUpFactor.setToNaN();
 
@@ -658,7 +677,9 @@ public class SwingState extends AbstractFootControlState
             adjustedWaypoint.changeFrame(footstepFrame);
             adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
             adjustedWaypoint.changeFrame(worldFrame);
-            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration - timeWhenAdjusted.getValue());
+            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration);
+            swingTrajectorySmoother.updateErrorDynamicsAtTime(timeWhenAdjusted.getDoubleValue(), desiredPositionWhenAdjusted, desiredVelocityWhenAdjusted);
+
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     adjustedWaypoint.getPosition(), touchdownDesiredLinearVelocity,
                                                     touchdownDesiredLinearAcceleration);

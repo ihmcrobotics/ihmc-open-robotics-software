@@ -47,8 +47,11 @@ float64 right_goal_foot_yaw_to_gizmo
 # Initial stance side when planning
 int8 planner_initial_stance_side
 
-# Whether to use the turn walk turn planner instead of A*
-bool planner_use_turn_walk_turn
+# Whether to perform A* search in the planner
+bool planner_perform_a_star_search
+
+# Whether to walk, turning first, matching the goal orientation
+bool planner_walk_with_goal_orientation
 
 # The footstep planner parameters
 ihmc_common_msgs/PrimitiveDataVectorMessage planner_parameters

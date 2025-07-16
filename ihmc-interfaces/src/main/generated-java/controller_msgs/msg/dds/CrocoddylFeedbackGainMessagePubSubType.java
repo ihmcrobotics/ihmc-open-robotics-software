@@ -93,7 +93,7 @@ public class CrocoddylFeedbackGainMessagePubSubType implements us.ihmc.pubsub.To
 
       if(data.getData().size() <= 100)
       cdr.write_type_e(data.getData());else
-          throw new RuntimeException("data field exceeds the maximum length");
+          throw new RuntimeException("data field exceeds the maximum length: %d > %d".formatted(data.getData().size(), 100));
 
    }
 

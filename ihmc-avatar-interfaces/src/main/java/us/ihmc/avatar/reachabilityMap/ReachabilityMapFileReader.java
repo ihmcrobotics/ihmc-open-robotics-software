@@ -8,7 +8,7 @@ import java.util.List;
 
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 
 public interface ReachabilityMapFileReader
@@ -32,8 +32,8 @@ public interface ReachabilityMapFileReader
 
    default File openSelectionFileDialog(File initialDirectory)
    {
-      JavaFXMissingTools.startup();
-      return JavaFXMissingTools.runAndWait(() ->
+      JavaFXTools.startup();
+      return JavaFXTools.runAndWait(() ->
       {
          FileChooser fileChooser = new FileChooser();
          fileChooser.setTitle("Choose reachability map to load");

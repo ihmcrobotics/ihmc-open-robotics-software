@@ -14,13 +14,13 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXDashedLineMesh;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
@@ -33,8 +33,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   private final ScrewPrimitiveActionState state;
-   private final ScrewPrimitiveActionDefinition definition;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
@@ -66,14 +64,9 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    {
       super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
-      state = getState();
-      definition = getDefinition();
-
-      definition.setName("Screw primitive");
-
       this.syncedRobot = syncedRobot;
 
-      screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().accessValue(), ReferenceFrame.getWorldFrame());
+      screwAxisGizmo = new RDXSelectablePose3DGizmo();
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
@@ -145,11 +138,15 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         screwAxisGizmo.getPoseGizmo().setGizmoFrame(state.getScrewFrame().getReferenceFrame());
-         screwAxisGizmo.getPoseGizmo().update();
+         if (screwAxisGizmo.getPoseGizmo().getGizmoFrame() != state.getScrewFrame().getReferenceFrame())
+         {
+            screwAxisGizmo.getPoseGizmo().setGizmoFrame(state.getScrewFrame().getReferenceFrame());
+         }
 
-         if (screwAxisGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-            definition.getScrewAxisPoseInObjectFrame().accessValue();
+         if (!getSelected())
+            screwAxisGizmo.setSelected(false);
+
+         RDXCRDTTools.syncGizmoWithBidirectionalField(screwAxisGizmo.getPoseGizmo(), definition.getScrewAxisPoseInObjectFrame(), definition);
 
          double screwAxisLineWidth = 0.005;
          screwAxisGraphic.update(screwAxisGizmo.getPoseGizmo().getPose(), screwAxisLineWidth, 1.0);
@@ -162,7 +159,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
 
          if (state.getIsNextForExecution())
          {
-            RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(getDefinition().getSide());
+            RDXArmMultiBodyGraphic armMultiBodyGraphic = armMultiBodyGraphics.get(definition.getSide());
             armMultiBodyGraphic.getFloatingJoint().getJointPose().set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame));
             for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
             {
@@ -256,12 +253,12 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
          trajectoryGraphic.getRenderables(renderables, pool);
 
          if (state.getIsNextForExecution())
-            armMultiBodyGraphics.get(getDefinition().getSide()).getRootBody().getVisualRenderables(renderables, pool);
+            armMultiBodyGraphics.get(definition.getSide()).getRootBody().getVisualRenderables(renderables, pool);
       }
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
       return definition.getSide().getPascalCaseName() + " Screw Primitive";
    }

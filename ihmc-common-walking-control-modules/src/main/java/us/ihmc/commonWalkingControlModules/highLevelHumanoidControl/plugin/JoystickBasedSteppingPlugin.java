@@ -44,7 +44,7 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(time);
 
-      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.CUSTOM1)
+      if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.QUICKSTER)
          fastWalkingJoystickPlugin.update(time);
       else if (latestHighLevelControllerStatus.getValue() == HighLevelControllerName.WALKING)
          stepGenerator.update(time);

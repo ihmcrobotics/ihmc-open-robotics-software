@@ -13,7 +13,7 @@ int8 ESTIMATOR_WRITE=4
 int8 ESTIMATOR_RUN=5
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Field default value 255
 int8 controller_crash_location

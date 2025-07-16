@@ -14,11 +14,10 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -52,8 +51,8 @@ public class RDXIterativeClosestPointBasicDemo
    private final int[] icpGuiNumICPIterations = {1};
    private double icpGuiICPRunTimeInSeconds = 0;
 
-   private final RDXPointCloudRenderer envPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
+   private final RDXPointCloudRendererOld envPointCloudRenderer = new RDXPointCloudRendererOld();
+   private final RDXPointCloudRendererOld objectPointCloudRenderer = new RDXPointCloudRendererOld();
    private RDXReferenceFrameGraphic referenceFrameGraphic;
 
    private final RecyclingArrayList<Point3D32> envPointCloud = new RecyclingArrayList<>(Point3D32::new);

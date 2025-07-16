@@ -121,6 +121,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * If the controller should check and fail if the step is not reachable
             */
    public boolean should_check_for_reachability_;
+   /**
+            * If the swing trajectory should be continuously updated everytime a new touchdown position is received by the controller
+            */
+   public boolean update_footstep_reference_continuously_;
+   /**
+            * If CoP feedback control should be disabled. This is desirable when using a stepping-based balance control strategy,
+            * rather than an ankle-based balance control strategy, which is used by default
+            */
+   public boolean disable_cop_feedback_control_;
 
    public FootstepDataMessage()
    {
@@ -171,6 +180,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.step_constraints_, step_constraints_);
       should_check_for_reachability_ = other.should_check_for_reachability_;
+
+      update_footstep_reference_continuously_ = other.update_footstep_reference_continuously_;
+
+      disable_cop_feedback_control_ = other.disable_cop_feedback_control_;
 
    }
 
@@ -445,6 +458,38 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return should_check_for_reachability_;
    }
 
+   /**
+            * If the swing trajectory should be continuously updated everytime a new touchdown position is received by the controller
+            */
+   public void setUpdateFootstepReferenceContinuously(boolean update_footstep_reference_continuously)
+   {
+      update_footstep_reference_continuously_ = update_footstep_reference_continuously;
+   }
+   /**
+            * If the swing trajectory should be continuously updated everytime a new touchdown position is received by the controller
+            */
+   public boolean getUpdateFootstepReferenceContinuously()
+   {
+      return update_footstep_reference_continuously_;
+   }
+
+   /**
+            * If CoP feedback control should be disabled. This is desirable when using a stepping-based balance control strategy,
+            * rather than an ankle-based balance control strategy, which is used by default
+            */
+   public void setDisableCopFeedbackControl(boolean disable_cop_feedback_control)
+   {
+      disable_cop_feedback_control_ = disable_cop_feedback_control;
+   }
+   /**
+            * If CoP feedback control should be disabled. This is desirable when using a stepping-based balance control strategy,
+            * rather than an ankle-based balance control strategy, which is used by default
+            */
+   public boolean getDisableCopFeedbackControl()
+   {
+      return disable_cop_feedback_control_;
+   }
+
 
    public static Supplier<FootstepDataMessagePubSubType> getPubSubType()
    {
@@ -511,6 +556,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (!this.step_constraints_.epsilonEquals(other.step_constraints_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.should_check_for_reachability_, other.should_check_for_reachability_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.update_footstep_reference_continuously_, other.update_footstep_reference_continuously_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.disable_cop_feedback_control_, other.disable_cop_feedback_control_, epsilon)) return false;
+
 
       return true;
    }
@@ -552,6 +601,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!this.step_constraints_.equals(otherMyClass.step_constraints_)) return false;
       if(this.should_check_for_reachability_ != otherMyClass.should_check_for_reachability_) return false;
+
+      if(this.update_footstep_reference_continuously_ != otherMyClass.update_footstep_reference_continuously_) return false;
+
+      if(this.disable_cop_feedback_control_ != otherMyClass.disable_cop_feedback_control_) return false;
 
 
       return true;
@@ -598,7 +651,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       builder.append("step_constraints=");
       builder.append(this.step_constraints_);      builder.append(", ");
       builder.append("should_check_for_reachability=");
-      builder.append(this.should_check_for_reachability_);
+      builder.append(this.should_check_for_reachability_);      builder.append(", ");
+      builder.append("update_footstep_reference_continuously=");
+      builder.append(this.update_footstep_reference_continuously_);      builder.append(", ");
+      builder.append("disable_cop_feedback_control=");
+      builder.append(this.disable_cop_feedback_control_);
       builder.append("}");
       return builder.toString();
    }

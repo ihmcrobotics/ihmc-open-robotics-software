@@ -9,13 +9,14 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ICPCoPConstraintHandler
 {
+   private static final boolean CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION = true;
    private final ICPControlPolygons icpControlPolygons;
 
    private final boolean hasICPControlPolygons;
    private final BooleanProvider useICPControlPolygons;
-   private final YoBoolean keepCoPInsideSupportPolygon;
-
-   private final FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+   private final YoBoolean copIsConstrainedByMultiContactRegion;
+   private FrameConvexPolygon2DReadOnly multiContactStabilityRegion;
+   private final FrameConvexPolygon2D nominalSupportPolygon = new FrameConvexPolygon2D();
 
    private int numberOfVertices = 0;
    private boolean hasSupportPolygonChanged;
@@ -28,9 +29,7 @@ public class ICPCoPConstraintHandler
       this.icpControlPolygons = icpControlPolygons;
       this.useICPControlPolygons = useICPControlPolygons;
       this.hasICPControlPolygons = hasICPControlPolygons;
-
-      keepCoPInsideSupportPolygon = new YoBoolean("keepCoPInsideSupportPolygon", parentRegistry);
-      keepCoPInsideSupportPolygon.set(true);
+      this.copIsConstrainedByMultiContactRegion = new YoBoolean("copIsConstrainedByMultiContactRegion", parentRegistry);
    }
 
    /**
@@ -48,7 +47,13 @@ public class ICPCoPConstraintHandler
     */
    public FrameConvexPolygon2DReadOnly updateCoPConstraint(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
-      if (keepCoPInsideSupportPolygon.getBooleanValue())
+      copIsConstrainedByMultiContactRegion.set(CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION && multiContactStabilityRegion != null && !multiContactStabilityRegion.isEmpty());
+
+      if (copIsConstrainedByMultiContactRegion.getValue())
+      {
+         return multiContactStabilityRegion;
+      }
+      else
       {
          FrameConvexPolygon2DReadOnly supportPolygon;
          if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPolygons)
@@ -67,19 +72,21 @@ public class ICPCoPConstraintHandler
             hasSupportPolygonChanged = false;
          }
 
-         copConstraint.setIncludingFrame(supportPolygon);
+         nominalSupportPolygon.setIncludingFrame(supportPolygon);
          return supportPolygon;
       }
-
-      return null;
    }
 
    public FrameConvexPolygon2DReadOnly getCoPConstraint()
    {
-      if (keepCoPInsideSupportPolygon.getBooleanValue())
-         return copConstraint;
+      if (copIsConstrainedByMultiContactRegion.getValue())
+      {
+         return multiContactStabilityRegion;
+      }
       else
-         return null;
+      {
+         return nominalSupportPolygon;
+      }
    }
 
    /**
@@ -91,8 +98,8 @@ public class ICPCoPConstraintHandler
       return hasSupportPolygonChanged;
    }
 
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
-      this.keepCoPInsideSupportPolygon.set(keepCoPInsideSupportPolygon);
+      this.multiContactStabilityRegion = multiContactStabilityRegion;
    }
 }

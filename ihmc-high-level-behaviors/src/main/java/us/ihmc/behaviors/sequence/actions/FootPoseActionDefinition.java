@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,10 +15,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootPoseActionDefinition extends ActionNodeDefinition implements SidedObject
 {
-   private final CRDTUnidirectionalEnumField<RobotSide> side;
-   private final CRDTUnidirectionalDouble trajectoryDuration;
-   private final CRDTUnidirectionalString parentFrameName;
-   private final CRDTUnidirectionalRigidBodyTransform footToParentTransform;
+   private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalDouble trajectoryDuration;
+   private final CRDTBidirectionalString parentFrameName;
+   private final CRDTBidirectionalRigidBodyTransform footToParentTransform;
 
    // On disk fields
    private RobotSide onDiskSide;
@@ -31,10 +30,10 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super(crdtInfo, saveFileDirectory);
 
-      side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, this, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, this, 4.0);
-      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, ReferenceFrame.getWorldFrame().getName());
-      footToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, this);
+      side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
+      trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
+      parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());
+      footToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
    }
 
    @Override
@@ -56,7 +55,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, footToParentTransform.accessValue());
+      JSONTools.toEuclid(jsonNode, footToParentTransform.getValueAndModify());
    }
 
    @Override
@@ -75,10 +74,13 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super.undoAllNontopologicalChanges();
 
-      side.setValue(onDiskSide);
-      trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      parentFrameName.setValue(onDiskParentFrameName);
-      footToParentTransform.accessValue().set(onDiskFootToParentTransform);
+      if (isUndoAvailable())
+      {
+         side.setValue(onDiskSide);
+         trajectoryDuration.setValue(onDiskTrajectoryDuration);
+         parentFrameName.setValue(onDiskParentFrameName);
+         footToParentTransform.getValueAndModify().set(onDiskFootToParentTransform);
+      }
    }
 
    @Override
@@ -116,7 +118,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
 
    public RotationMatrixBasics getRotation()
    {
-      return footToParentTransform.accessValue().getRotation();
+      return footToParentTransform.getValueAndModify().getRotation();
    }
 
    @Override
@@ -150,12 +152,12 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       this.parentFrameName.setValue(parentFrameName);
    }
 
-   public CRDTUnidirectionalString getCRDTParentFrameName()
+   public CRDTBidirectionalString getCRDTParentFrameName()
    {
       return parentFrameName;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getFootToParentTransform()
+   public CRDTBidirectionalRigidBodyTransform getFootToParentTransform()
    {
       return footToParentTransform;
    }

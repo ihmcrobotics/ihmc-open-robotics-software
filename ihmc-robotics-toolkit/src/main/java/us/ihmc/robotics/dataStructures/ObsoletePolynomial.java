@@ -4,13 +4,14 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.math.ComplexNumber;
 
 /**
  * <p>
  * Polynomial Function with real coefficients. Immuatable.
  * </p>
  *
- * Has been replaced with {@link us.ihmc.robotics.math.trajectories.core.Polynomial}
+ * Has been replaced with {@link us.ihmc.robotics.trajectories.core.Polynomial}
  *
  * @author IHMC Biped Team
  * @version 1.0
@@ -136,7 +137,7 @@ public class ObsoletePolynomial
    public static ObsoletePolynomial constructFromComplexPairRoot(ComplexNumber oneComplexRoot)
    {
       double a = oneComplexRoot.real();
-      double b = oneComplexRoot.imag();
+      double b = oneComplexRoot.imaginary();
 
       return new ObsoletePolynomial(new double[] {1.0, -2.0 * a, a * a + b * b});
    }

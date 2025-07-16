@@ -15,7 +15,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d5b2d0d188042835c4c287069a45a56543d2087df8e356f20961e2f7d13ce48b";
+   		return "dcaa39caea72a4e1d4cb5fea6b7d8c8e695168b1d3d293c9b91882fbc11ec481";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -88,7 +88,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -127,7 +127,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getId());
 
@@ -137,7 +137,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       if(data.getObjectType().length() <= 255)
       cdr.write_type_d(data.getObjectType());else
-          throw new RuntimeException("object_type field exceeds the maximum length");
+          throw new RuntimeException("object_type field exceeds the maximum length: %d > %d".formatted(data.getObjectType().length(), 255));
 
       for(int i0 = 0; i0 < data.getBoundingBox2dVertices().length; ++i0)
       {
@@ -151,17 +151,17 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       if(data.getObjectPointCloud().size() <= 32768)
       cdr.write_type_e(data.getObjectPointCloud());else
-          throw new RuntimeException("object_point_cloud field exceeds the maximum length");
+          throw new RuntimeException("object_point_cloud field exceeds the maximum length: %d > %d".formatted(data.getObjectPointCloud().size(), 32768));
 
       if(data.getSegmentedPointCloud().size() <= 32768)
       cdr.write_type_e(data.getSegmentedPointCloud());else
-          throw new RuntimeException("segmented_point_cloud field exceeds the maximum length");
+          throw new RuntimeException("segmented_point_cloud field exceeds the maximum length: %d > %d".formatted(data.getSegmentedPointCloud().size(), 32768));
 
    }
 
    public static void read(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setId(cdr.read_type_2());
       	
@@ -188,7 +188,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(perception_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("id", data.getId());
       ser.write_type_a("sensor_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getSensorPose());
 
@@ -205,7 +205,7 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectedObjectPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setId(ser.read_type_2("id"));
       ser.read_type_a("sensor_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getSensorPose());
 

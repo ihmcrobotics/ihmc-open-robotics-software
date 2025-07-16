@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ca9c7f5afaf7251ebfe8b0f5eca6b104b0e326f02fded9f9d5d365fe2e9b7c9b";
+   		return "39fc419efb1bbde0721677c6492bf6a15072ee537b1251b76273d34d13852c35";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -80,6 +80,8 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -93,7 +95,7 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.getCdrSerializedSize(data.getLeftHandTrajectoryMessage(), current_alignment);
@@ -122,13 +124,15 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.getCdrSerializedSize(data.getHeadTrajectoryMessage(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassTrajectoryMessage(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.write(data.getLeftHandTrajectoryMessage(), cdr);
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.write(data.getRightHandTrajectoryMessage(), cdr);
@@ -143,11 +147,12 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
       controller_msgs.msg.dds.LegTrajectoryMessagePubSubType.write(data.getRightLegTrajectoryMessage(), cdr);
       controller_msgs.msg.dds.NeckTrajectoryMessagePubSubType.write(data.getNeckTrajectoryMessage(), cdr);
       controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.write(data.getHeadTrajectoryMessage(), cdr);
+      controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType.write(data.getCenterOfMassTrajectoryMessage(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.read(data.getLeftHandTrajectoryMessage(), cdr);	
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.read(data.getRightHandTrajectoryMessage(), cdr);	
@@ -162,13 +167,14 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
       controller_msgs.msg.dds.LegTrajectoryMessagePubSubType.read(data.getRightLegTrajectoryMessage(), cdr);	
       controller_msgs.msg.dds.NeckTrajectoryMessagePubSubType.read(data.getNeckTrajectoryMessage(), cdr);	
       controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.read(data.getHeadTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType.read(data.getCenterOfMassTrajectoryMessage(), cdr);	
 
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_a("left_hand_trajectory_message", new controller_msgs.msg.dds.HandTrajectoryMessagePubSubType(), data.getLeftHandTrajectoryMessage());
 
       ser.write_type_a("right_hand_trajectory_message", new controller_msgs.msg.dds.HandTrajectoryMessagePubSubType(), data.getRightHandTrajectoryMessage());
@@ -195,12 +201,14 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_a("head_trajectory_message", new controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType(), data.getHeadTrajectoryMessage());
 
+      ser.write_type_a("center_of_mass_trajectory_message", new controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType(), data.getCenterOfMassTrajectoryMessage());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyTrajectoryMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       ser.read_type_a("left_hand_trajectory_message", new controller_msgs.msg.dds.HandTrajectoryMessagePubSubType(), data.getLeftHandTrajectoryMessage());
 
       ser.read_type_a("right_hand_trajectory_message", new controller_msgs.msg.dds.HandTrajectoryMessagePubSubType(), data.getRightHandTrajectoryMessage());
@@ -226,6 +234,8 @@ public class WholeBodyTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.read_type_a("neck_trajectory_message", new controller_msgs.msg.dds.NeckTrajectoryMessagePubSubType(), data.getNeckTrajectoryMessage());
 
       ser.read_type_a("head_trajectory_message", new controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType(), data.getHeadTrajectoryMessage());
+
+      ser.read_type_a("center_of_mass_trajectory_message", new controller_msgs.msg.dds.CenterOfMassTrajectoryMessagePubSubType(), data.getCenterOfMassTrajectoryMessage());
 
    }
 

@@ -1,6 +1,10 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
-import org.bytedeco.opencv.global.*;
+import org.bytedeco.opencv.global.opencv_calib3d;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudaimgproc;
+import org.bytedeco.opencv.global.opencv_cudawarping;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
@@ -8,10 +12,9 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
@@ -34,7 +37,7 @@ public class ArUcoDetectionUpdater
    private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
    private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
-   private BytedecoImage arUcoBytedecoImage;
+   private Mat arUcoImageMat;
    private final Supplier<ReferenceFrame> blackflyFrameSupplier;
 
    private final BlackflyLensProperties blackflyLensProperties;
@@ -62,19 +65,19 @@ public class ArUcoDetectionUpdater
       {
          RawImage arUcoImage = distortedInputImage.read();
 
-         if (arUcoBytedecoImage == null)
-            initialize(arUcoImage.getImageWidth(), arUcoImage.getImageHeight());
+         if (arUcoImageMat == null)
+            initialize(arUcoImage.getWidth(), arUcoImage.getHeight());
 
          // Convert color from BGR to RGB
-         GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
+         GpuMat imageForUndistortionRGB = new GpuMat(arUcoImage.getHeight(), arUcoImage.getWidth(), arUcoImage.getOpenCVType());
          opencv_cudaimgproc.cvtColor(arUcoImage.getGpuImageMat(), imageForUndistortionRGB, opencv_imgproc.COLOR_BGR2RGB);
 
          // Undistort image
-         GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getImageHeight(), arUcoImage.getImageWidth(), arUcoImage.getOpenCVType());
+         GpuMat undistortedImageRGB = new GpuMat(arUcoImage.getHeight(), arUcoImage.getWidth(), arUcoImage.getOpenCVType());
          opencv_cudawarping.remap(imageForUndistortionRGB, undistortedImageRGB, undistortionMap1, undistortionMap2, opencv_imgproc.INTER_LINEAR);
 
-         // Update the Bytedeco image
-         undistortedImageRGB.download(arUcoBytedecoImage.getBytedecoOpenCVMat());
+         // Update the image mat
+         undistortedImageRGB.download(arUcoImageMat);
 
          arUcoMarkerDetector.update();
          arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
@@ -94,9 +97,9 @@ public class ArUcoDetectionUpdater
       LogTools.info("Image dimensions: {} x {}", imageWidth, imageHeight);
 
       initializeImageUndistortion(imageWidth, imageHeight);
-      arUcoBytedecoImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+      arUcoImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
       arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
-      arUcoMarkerDetector.setSourceImageForDetection(arUcoBytedecoImage);
+      arUcoMarkerDetector.setSourceImageForDetection(arUcoImageMat);
       cameraMatrixEstimate.copyTo(arUcoMarkerDetector.getCameraMatrix());
       arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
 

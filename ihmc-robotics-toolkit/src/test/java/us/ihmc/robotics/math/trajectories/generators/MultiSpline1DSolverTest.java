@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.math.linearDynamicSystems.MatlabChart;
 import us.ihmc.mecano.tools.MecanoTestTools;
-import us.ihmc.robotics.linearDynamicSystems.MatlabChart;
 import us.ihmc.robotics.math.functionGenerator.BaseFunctionGenerator;
 
 public class MultiSpline1DSolverTest

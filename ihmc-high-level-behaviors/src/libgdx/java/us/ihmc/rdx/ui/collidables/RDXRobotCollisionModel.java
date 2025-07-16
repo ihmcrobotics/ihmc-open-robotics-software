@@ -10,8 +10,8 @@ import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.scs2.simulation.collision.Collidable;
 
 import java.util.ArrayList;
 import java.util.List;

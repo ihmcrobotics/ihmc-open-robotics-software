@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javafx.application.Application.Parameters;
 import javafx.stage.Stage;
-import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 

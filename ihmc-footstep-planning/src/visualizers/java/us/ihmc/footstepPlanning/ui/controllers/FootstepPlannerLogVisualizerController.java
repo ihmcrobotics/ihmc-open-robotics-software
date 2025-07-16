@@ -38,7 +38,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.communication.property.StoredPropertySetMessageTools;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -49,7 +49,7 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -68,10 +68,12 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 public class FootstepPlannerLogVisualizerController
 {
@@ -87,7 +89,7 @@ public class FootstepPlannerLogVisualizerController
    private List<FootstepPlannerIterationData> iterationDataList;
    private Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap;
    private List<VariableDescriptor> variableDescriptors;
-   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+   private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), new DefaultFootstepPlannerParameters(), environmentHandler); // TODO
 
    private final AtomicBoolean loadingLog = new AtomicBoolean();
@@ -152,8 +154,10 @@ public class FootstepPlannerLogVisualizerController
       messager.addTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, this::loadLog);
 
       AtomicReference<HeightMapMessage> heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
+      AtomicReference<TerrainMapMessage> terrainMapMessage = messager.createInput(FootstepPlannerMessagerAPI.TerrainMapData);
       messager.addTopicListener(FootstepPlannerMessagerAPI.GraphData,
-                                     graphData -> Platform.runLater(() -> updateGraphData(HeightMapMessageTools.unpackMessage(heightMapMessage.get()),
+                                     graphData -> Platform.runLater(() -> updateGraphData(HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage.get()),
+                                                                                          convertToTerrainMapData(terrainMapMessage.get()),
                                                                                           graphData.getLeft(),
                                                                                           graphData.getMiddle(),
                                                                                           graphData.getRight())));
@@ -180,6 +184,14 @@ public class FootstepPlannerLogVisualizerController
       iterationLoadSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE, 0, 1));
       iterationLoadSpinner.valueProperty().addListener((obs, oldValue, newValue) -> loadIteration());
    }
+
+   private static TerrainMapData convertToTerrainMapData(TerrainMapMessage terrainMapMessage)
+   {
+      if (terrainMapMessage == null)
+         return null;
+      return new TerrainMapData(terrainMapMessage);
+   }
+
 
    public void onPrimaryStageLoaded()
    {
@@ -318,9 +330,9 @@ public class FootstepPlannerLogVisualizerController
       footstepPlannerParameters.set(footstepPlannerLog.getFootstepParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
-      // publish body path parameteres
+      // publish body path parameters
       AStarBodyPathPlannerParameters bodyPathPlannerParameters = new AStarBodyPathPlannerParameters();
-      StoredPropertySetMessageTools.fromMessage(footstepPlannerLog.getBodyPathParametersPacket(), bodyPathPlannerParameters);
+      bodyPathPlannerParameters.set(footstepPlannerLog.getAStarBodyPathPlannerParametersPacket());
       messager.submitMessage(FootstepPlannerMessagerAPI.AStarBodyPathPlannerParameters, bodyPathPlannerParameters);
 
       // publish swing parameters
@@ -340,11 +352,15 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(footstepPlannerLog.getRequestPacket().getHeightMapMessage());
 
       if (!heightMapData.isEmpty())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      }
+      if (!TerrainMapTools.isEmpty(footstepPlannerLog.getRequestPacket().getTerrainMapMessage()))
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.TerrainMapData, footstepPlannerLog.getRequestPacket().getTerrainMapMessage());
       }
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
@@ -374,7 +390,11 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, true);
 
       // set footstep graph data
-      updateGraphData(heightMapData, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData(), footstepPlannerLog.getVariableDescriptors());
+      updateGraphData(heightMapData,
+                      convertToTerrainMapData(footstepPlannerLog.getRequestPacket().getTerrainMapMessage()),
+                      footstepPlannerLog.getEdgeDataMap(),
+                      footstepPlannerLog.getIterationData(),
+                      footstepPlannerLog.getVariableDescriptors());
 
       // set body path graph data
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathGraphData,
@@ -397,6 +417,7 @@ public class FootstepPlannerLogVisualizerController
    }
 
    private void updateGraphData(HeightMapData heightMapData,
+                                TerrainMapData terrainMapData,
                                 Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData> edgeDataMap,
                                 List<FootstepPlannerIterationData> iterationData,
                                 List<VariableDescriptor> variableDescriptors)
@@ -404,7 +425,8 @@ public class FootstepPlannerLogVisualizerController
       this.iterationDataList = iterationData;
       this.edgeDataMap = edgeDataMap;
       this.variableDescriptors = variableDescriptors;
-      environmentHandler.setHeightMap(heightMapData);
+      environmentHandler.setHeightMapData(heightMapData);
+      environmentHandler.setTerrainMapData(terrainMapData);
 
       parentNodeStack.clear();
       selectedRow.set(null);
