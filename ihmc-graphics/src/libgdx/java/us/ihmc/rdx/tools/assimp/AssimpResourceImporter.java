@@ -1,9 +1,18 @@
 package us.ihmc.rdx.tools.assimp;
 
 import org.apache.logging.log4j.Level;
-import org.lwjgl.assimp.*;
+import org.lwjgl.assimp.AIFileCloseProcI;
+import org.lwjgl.assimp.AIFileIO;
+import org.lwjgl.assimp.AIFileOpenProcI;
+import org.lwjgl.assimp.AILogStream;
+import org.lwjgl.assimp.AILogStreamCallbackI;
+import org.lwjgl.assimp.AIPropertyStore;
+import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.Assimp;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.log.LogTools;
+
+import java.io.IOException;
 
 public class AssimpResourceImporter
 {
@@ -24,7 +33,15 @@ public class AssimpResourceImporter
          @Override
          public long invoke(long assimpFileIOAddress, long fileNameAddress, long openModeAddress)
          {
-            AssimpOpenedFile assimpOpenedFile = new AssimpOpenedFile(assimpFileIOAddress, fileNameAddress, openModeAddress);
+            AssimpOpenedFile assimpOpenedFile;
+            try
+            {
+               assimpOpenedFile = new AssimpOpenedFile(assimpFileIOAddress, fileNameAddress, openModeAddress);
+            }
+            catch (IOException e)
+            {
+               throw new RuntimeException(e);
+            }
             return assimpOpenedFile.getAssimpFileStructAddress();
          }
       };

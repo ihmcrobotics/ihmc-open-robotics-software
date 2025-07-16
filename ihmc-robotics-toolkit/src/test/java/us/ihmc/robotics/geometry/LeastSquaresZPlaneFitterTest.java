@@ -1,7 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,7 +13,9 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LeastSquaresZPlaneFitterTest
 {
@@ -44,8 +44,8 @@ public class LeastSquaresZPlaneFitterTest
       
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointListB, plane3dB);
       Vector3D normalB = new Vector3D(plane3dB.getNormal());
-      
-      assertTrue(normalA.epsilonEquals(normalB, 1e-7));
+
+      EuclidCoreTestTools.assertEquals(normalA, normalB, 1e-7);
    }
    
 	@Test
@@ -99,8 +99,8 @@ public class LeastSquaresZPlaneFitterTest
    {
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3D planePoint = RandomGeometry.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
-         Vector3D planeNormal = RandomGeometry.nextVector3D(random, 1.0);
+         Point3D planePoint = EuclidCoreRandomTools.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
          if (planeNormal.getZ() < 0.0)
             planeNormal.scale(-1.0);
@@ -112,10 +112,10 @@ public class LeastSquaresZPlaneFitterTest
 
          for (int j = 0; j < numberOfPoints; j++)
          {
-            Point3D point = RandomGeometry.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
+            Point3D point = EuclidCoreRandomTools.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
             plane3d.orthogonalProjection(point);
 
-            point.add(RandomGeometry.nextVector3D(random, pointNoiseAmplitude));
+            point.add(EuclidCoreRandomTools.nextVector3D(random, pointNoiseAmplitude));
             
             listOfPoints.add(point);
          }

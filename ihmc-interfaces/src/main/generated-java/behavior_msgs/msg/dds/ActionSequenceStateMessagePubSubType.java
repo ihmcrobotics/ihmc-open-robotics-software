@@ -15,7 +15,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0b3f9991e0f19c577394b6aee7b938597705c060a7033393519c82d003e60d3a";
+   		return "ec9caa56679f564718bc1253b7d2b2043d6a91f02de8186cf9406c9e5456ba22";
    }
    
    @Override
@@ -86,7 +86,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void read(behavior_msgs.msg.dds.ActionSequenceStateMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
-      behavior_msgs.msg.dds.ActionSequenceDefinitionMessagePubSubType.read(data.getDefinition(), cdr);
+      behavior_msgs.msg.dds.ActionSequenceDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
 
    }
 

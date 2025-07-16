@@ -54,9 +54,10 @@ public class IntraprocessYoVariableLogger
       Path incomingLogsDirectory = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
-         incomingLogsDirectory = incomingLogsDirectory.resolve("bamboo-logs")
-                                                      .resolve(System.getenv("bamboo_planKey"))
-                                                      .resolve(System.getenv("bamboo_buildResultKey"));
+         // TODO GITHUB WORKFLOWS
+//         incomingLogsDirectory = incomingLogsDirectory.resolve("bamboo-logs")
+//                                                      .resolve(System.getenv("bamboo_planKey"))
+//                                                      .resolve(System.getenv("bamboo_buildResultKey"));
       }
       else
       {

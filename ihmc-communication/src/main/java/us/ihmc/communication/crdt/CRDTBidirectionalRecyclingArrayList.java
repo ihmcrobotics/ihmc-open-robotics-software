@@ -1,0 +1,60 @@
+package us.ihmc.communication.crdt;
+
+import us.ihmc.commons.lists.RecyclingArrayList;
+
+import java.util.function.Consumer;
+
+/**
+ * Represents a recycling array list that can be modified by both the
+ * robot and the operator. The internal writeable instance is kept protected
+ * from unchecked modifications.
+ *
+ * Warning: With this type, the data should not be continuously modified
+ *   tick after tick, as that will mean the value is essentially never
+ *   synced properly to the other side.
+ */
+public class CRDTBidirectionalRecyclingArrayList<T> extends CRDTBidirectionalMutableField<RecyclingArrayList<T>>
+{
+   public CRDTBidirectionalRecyclingArrayList(LatestTimestampModifiable latestTimestampModifiable, RecyclingArrayList<T> initialValue)
+   {
+      super(latestTimestampModifiable, initialValue);
+   }
+
+   public T getValueReadOnly(int index)
+   {
+      return getValueInternal().get(index);
+   }
+
+   public int getSize()
+   {
+      return getValueInternal().size();
+   }
+
+   /** Use to prevent unecessary modifications. */
+   public void setValue(int index, T value)
+   {
+      if (!getValueReadOnly(index).equals(value))
+         getValueAndModify().set(index, value);
+   }
+
+   public int getLength()
+   {
+      return getValueInternal().size();
+   }
+
+   /**
+    * Used only for preallocating using {@link us.ihmc.commons.lists.RecyclingArrayListTools#getUnsafe}.
+    */
+   public RecyclingArrayList<T> getValueUnsafe()
+   {
+      return getValueInternal();
+   }
+
+   public void fromMessage(Consumer<RecyclingArrayList<T>> valueConsumer)
+   {
+      if (isModificationIncoming())
+      {
+         valueConsumer.accept(getValueInternal());
+      }
+   }
+}

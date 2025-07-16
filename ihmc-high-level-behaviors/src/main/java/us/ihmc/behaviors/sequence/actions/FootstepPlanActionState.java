@@ -15,7 +15,7 @@ import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.lists.RecyclingArrayListTools;
+import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,7 +24,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
-   private final FootstepPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
@@ -46,8 +45,6 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
                                   DRCRobotModel robotModel)
    {
       super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, robotModel.getFootstepPlannerParameters()), crdtInfo);
-
-      definition = getDefinition();
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 
@@ -71,6 +68,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    @Override
    public void update()
    {
+      super.update();
+
       for (RobotSide side : RobotSide.values)
       {
          goalFootstepToGoalTransforms.get(side).getTranslation().setZ(0.0);
@@ -89,7 +88,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
    }
 
-   public void copyDefinitionToGoalFoostepToGoalTransform(RobotSide side)
+   public void copyDefinitionToGoalFootstepToGoalTransform(RobotSide side)
    {
       goalFootstepToGoalTransforms.get(side).setToZero();
       goalFootstepToGoalTransforms.get(side).getTranslation().setX(definition.getGoalFootstepToGoalX(side).getValue());
@@ -146,9 +145,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public void fromMessage(FootstepPlanActionStateMessage message)
    {
-      super.fromMessage(message.getState());
-
       definition.fromMessage(message.getDefinition());
+
+      super.fromMessage(message.getState());
 
       goalToParentTransform.fromMessage(message.getGoalTransformToParent());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
@@ -236,5 +235,10 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    public CRDTStatusFootstepList getPreviewFootsteps()
    {
       return previewFootsteps;
+   }
+
+   public ReferenceFrame getFrameByName(String frameName)
+   {
+      return referenceFrameLibrary.findFrameByName(frameName);
    }
 }

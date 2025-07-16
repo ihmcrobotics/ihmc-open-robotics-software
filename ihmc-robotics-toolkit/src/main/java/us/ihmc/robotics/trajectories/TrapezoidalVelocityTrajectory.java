@@ -2,6 +2,7 @@ package us.ihmc.robotics.trajectories;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class TrapezoidalVelocityTrajectory
 {
    private final double epsilon = 1e-7;

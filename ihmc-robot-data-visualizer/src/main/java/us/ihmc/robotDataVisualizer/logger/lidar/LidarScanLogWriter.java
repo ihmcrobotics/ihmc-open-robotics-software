@@ -177,9 +177,9 @@ public class LidarScanLogWriter
 
          logDataOutputStream.writeInt(lidarScanMessage.getScan().size());
 
-         for (byte scanData : lidarScanMessage.getScan().toArray())
+         for (int i = 0; i < lidarScanMessage.getScan().size(); i++)
          {
-            logDataOutputStream.writeByte(scanData);
+            logDataOutputStream.writeByte(lidarScanMessage.getScan().get(i));
          }
       }
       catch (IOException e)

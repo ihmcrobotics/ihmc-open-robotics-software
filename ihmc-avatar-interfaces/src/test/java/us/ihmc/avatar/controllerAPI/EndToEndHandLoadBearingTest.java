@@ -1,26 +1,20 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.List;
-
-import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.HandLoadBearingMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -31,7 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -42,6 +36,10 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -49,11 +47,41 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   protected double getPelvisHeightOffset()
+   {
+      return 0.0;
+   }
+
+   protected double getHandForwardPositionInChest()
+   {
+      return 0.45;
+   }
+
+   protected void applyPitch(ReferenceFrame pelvisZUpFrame)
+   {
+      Quaternion chestOrientation = new Quaternion();
+      chestOrientation.appendPitchRotation(Math.PI / 4.0);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
+      simulationTestHelper.publishToController(chestTrajectoryMessage);
+      boolean success = simulationTestHelper.simulateNow(1.5);
+      assertTrue(success);
+   }
+
+   private void sendPelvisHeightOffset(double heightOffset)
+   {
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+      FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      pelvisPosition.add(0.0, 0.0, heightOffset);
+      double desiredHeight = pelvisPosition.getZ();
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
+   }
+
    @Test
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
       simulationTestingParameters.setKeepSCSUp(true);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       TestingEnvironment testingEnvironment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
@@ -61,7 +89,9 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, testingEnvironment, simulationTestingParameters);
       simulationTestHelper.start();
       double totalMass = fullRobotModel.getTotalMass();
-      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
+                                                                                simulationTestHelper.getRobot(),
+                                                                                fullRobotModel);
 
       simulationTestHelper.setCameraPosition(0.2, -10.0, 1.0);
       simulationTestHelper.setCameraFocusPosition(0.2, 0.0, 1.0);
@@ -74,24 +104,28 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
 
-      // Position hand above table
-      Quaternion chestOrientation = new Quaternion();
-      chestOrientation.appendPitchRotation(Math.PI / 4.0);
-      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
-      simulationTestHelper.publishToController(chestTrajectoryMessage);
-      success = simulationTestHelper.simulateNow(1.5);
-      assertTrue(success);
+      sendPelvisHeightOffset(getPelvisHeightOffset());
 
+      // pitch the chest forward towards the table.
+      applyPitch(pelvisZUpFrame);
+
+      // Position hand above table
       Quaternion handOrientation = new Quaternion();
       handOrientation.appendYawRotation(-Math.PI / 2.0);
-      handOrientation.appendPitchRotation(Math.PI / 2.0);
+//      handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage();
       handTrajectoryMessage1.setRobotSide(RobotSide.LEFT.toByte());
       SE3TrajectoryMessage se3Trajectory1 = handTrajectoryMessage1.getSe3Trajectory();
       se3Trajectory1.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-      se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
+      se3Trajectory1.getTaskspaceTrajectoryPoints()
+                    .add()
+                    .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0,
+                                                                              new Point3D(getHandForwardPositionInChest(), 0.4, 0.5),
+                                                                              handOrientation,
+                                                                              new Vector3D(),
+                                                                              new Vector3D()));
       simulationTestHelper.publishToController(handTrajectoryMessage1);
       success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
@@ -101,9 +135,15 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       SE3TrajectoryMessage se3Trajectory2 = handTrajectoryMessage2.getSe3Trajectory();
       se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-      se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.5), handOrientation, new Vector3D(), new Vector3D()));
+      se3Trajectory2.getTaskspaceTrajectoryPoints()
+                    .add()
+                    .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0,
+                                                                              new Point3D(getHandForwardPositionInChest(), 0.4, 0.5),
+                                                                              handOrientation,
+                                                                              new Vector3D(),
+                                                                              new Vector3D()));
       simulationTestHelper.publishToController(handTrajectoryMessage2);
-      success = simulationTestHelper.simulateNow(1.5);
+      success = simulationTestHelper.simulateNow(2.0);
       assertTrue(success);
 
       HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
@@ -117,16 +157,14 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       // Now push the robot
-      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.1;
+      Vector3D forceDirection = new Vector3D(0.0, 0.0, -1.0);
+      double percentWeight = 0.05;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 2.0;
       pushRobotController.applyForce(forceDirection, magnitude, duration);
 
       success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
-
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
@@ -172,7 +210,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -185,7 +223,6 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-
 }

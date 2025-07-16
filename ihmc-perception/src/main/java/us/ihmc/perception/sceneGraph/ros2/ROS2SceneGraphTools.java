@@ -13,6 +13,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -21,7 +22,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMecha
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import java.util.Arrays;
@@ -96,7 +96,6 @@ public class ROS2SceneGraphTools
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
                                     subscriptionNode.getYOLONodeMessage().getConfidence(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose(),
                                     crdtInfo);
@@ -136,11 +135,12 @@ public class ROS2SceneGraphTools
          }
          sceneNode = doorNode;
       }
-      else if (nodeType == SceneGraphMessage.TRASH_CAN_NODE_TYPE)
+      else if (nodeType == SceneGraphMessage.FOUNDATION_POSE_NODE_TYPE)
       {
-         TrashCanNode trashCanNode = new TrashCanNode(nodeID, nodeName, crdtInfo);
-         trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
-         sceneNode = trashCanNode;
+         sceneNode = new FoundationPoseNode(nodeID,
+                                            nodeName,
+                                            subscriptionNode.getFoundationPoseNodeMessage().getObjectPose(),
+                                            crdtInfo);
       }
       else
       {

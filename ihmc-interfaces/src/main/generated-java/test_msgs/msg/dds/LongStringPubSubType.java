@@ -77,7 +77,7 @@ public class LongStringPubSubType implements us.ihmc.pubsub.TopicDataType<test_m
    {
       if(data.getLongString().size() <= 2048)
       cdr.write_type_e(data.getLongString());else
-          throw new RuntimeException("long_string field exceeds the maximum length");
+          throw new RuntimeException("long_string field exceeds the maximum length: %d > %d".formatted(data.getLongString().size(), 2048));
 
    }
 

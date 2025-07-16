@@ -12,9 +12,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 
 /**
- * This calculator is based on {@link HermiteCurvedBasedOrientationTrajectoryGenerator} without YoVariables.
+ * This calculator is based on {@link HermiteCurveBasedOrientationTrajectoryGenerator} without YoVariables.
  * And this is using {@code Riven.atan2(y, x)} which is faster than {@code Math.atan2(y, x)} defined in {@code jre 1.8}.
- * See test file {@link InverseOfTangentComputationTest.}
  */
 public class SimpleHermiteCurvedBasedOrientationTrajectoryCalculator
 {

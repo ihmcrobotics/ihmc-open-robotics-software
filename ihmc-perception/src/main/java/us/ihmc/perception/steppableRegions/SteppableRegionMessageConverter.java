@@ -11,8 +11,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class SteppableRegionMessageConverter
 
       if (message.getLocalHeightMap().getHeights().size() > 0)
       {
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap());
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message.getLocalHeightMap());
          steppableRegion.setLocalHeightMap(heightMapData);
       }
 
@@ -182,7 +182,7 @@ public class SteppableRegionMessageConverter
 
          if (message.getLocalHeightMap().get(regionIndex).getHeights().size() > 0)
          {
-            HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap().get(regionIndex));
+            HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message.getLocalHeightMap().get(regionIndex));
             steppableRegion.setLocalHeightMap(heightMapData);
          }
       }
@@ -309,7 +309,7 @@ public class SteppableRegionMessageConverter
 
             if (message.getLocalHeightMap().get(regionIndex).getHeights().size() > 0)
             {
-               HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(message.getLocalHeightMap().get(regionIndex));
+               HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message.getLocalHeightMap().get(regionIndex));
                steppableRegion.setLocalHeightMap(heightMapData);
             }
          }

@@ -5,10 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -32,7 +29,7 @@ import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -116,7 +113,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
    public void testFlatGroundWalking()
    {
       DRCRobotModel robotModel = getRobotModel();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       //      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -142,7 +139,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       setupCameraForUnitTest();
       simulateAndAssertGoodWalking(simulationTestHelper, pushRobotController);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void simulateAndAssertGoodWalking(SCS2AvatarTestingSimulation simulationTestHelper, PushRobotControllerSCS2 pushRobotController)
@@ -284,7 +281,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       Vector2D direction = new Vector2D(pushDirection);
       Vector2D velocityDirection = new Vector2D(desiredVelocity);
       direction.normalize();
-      if (velocityDirection.lengthSquared() > 0.0)
+      if (velocityDirection.normSquared() > 0.0)
          velocityDirection.normalize();
 
       double xMax;

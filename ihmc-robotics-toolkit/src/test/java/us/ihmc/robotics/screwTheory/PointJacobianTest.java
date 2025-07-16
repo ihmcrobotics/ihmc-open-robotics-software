@@ -1,7 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
@@ -23,7 +21,9 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author twan
@@ -57,7 +57,7 @@ public class PointJacobianTest
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
-      FramePoint3D point = new FramePoint3D(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
+      FramePoint3D point = new FramePoint3D(base.getBodyFixedFrame(), EuclidCoreRandomTools.nextVector3D(random));
       PointJacobian pointJacobian = new PointJacobian();
       pointJacobian.set(geometricJacobian, point);
       pointJacobian.compute();
@@ -103,8 +103,8 @@ public class PointJacobianTest
       GeometricJacobian geometricJacobian = new GeometricJacobian(base, endEffector, base.getBodyFixedFrame());
       geometricJacobian.compute();
 
-      FramePoint3D point1 = new FramePoint3D(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
-      FramePoint3D point2 = new FramePoint3D(base.getBodyFixedFrame(), RandomGeometry.nextVector3D(random));
+      FramePoint3D point1 = new FramePoint3D(base.getBodyFixedFrame(), EuclidCoreRandomTools.nextVector3D(random));
+      FramePoint3D point2 = new FramePoint3D(base.getBodyFixedFrame(), EuclidCoreRandomTools.nextVector3D(random));
 
       PointJacobian pointJacobian1 = new PointJacobian();
       pointJacobian1.set(geometricJacobian, point1);

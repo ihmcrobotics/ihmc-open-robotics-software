@@ -34,9 +34,9 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -161,7 +161,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       jointNameToMatrixIndexFunction = j ->
       {
          OneDoFJointBasics joint = jointNameMap.get(j);
-         return dynamicsMatrixCalculator.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
+         return controlCoreToolbox.getMassMatrixCalculator().getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
       };
 
       enableJointNoiseModel.set(false);
@@ -250,7 +250,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
       dynamicsMatrixCalculator.compute();
       dynamicsMatrixCalculator.getMassMatrix(massMatrix);
-      dynamicsMatrixCalculator.getCoriolisMatrix(coriolisGravityMatrix);
+      dynamicsMatrixCalculator.getGravityAndCoriolisVector(coriolisGravityMatrix);
 
       CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
       CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);

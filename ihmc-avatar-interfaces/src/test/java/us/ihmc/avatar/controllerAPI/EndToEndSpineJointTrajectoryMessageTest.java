@@ -27,6 +27,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.QuaternionCalculus;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -43,8 +44,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -382,7 +382,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(54651);
 
@@ -670,7 +670,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private void setupTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
       ThreadTools.sleep(1000);
@@ -780,9 +780,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          if (!currentDesiredOrientation.containsNaN() && !previousDesiredOrientation.containsNaN())
          {
             Vector4D derivative = new Vector4D();
-            quaternionCalculus.computeQDotByFiniteDifferenceCentral(previousDesiredOrientation, currentDesiredOrientation, controllerDT, derivative);
+            QuaternionCalculus.computeQDotByFiniteDifferenceCentral(previousDesiredOrientation, currentDesiredOrientation, controllerDT, derivative);
             Vector3D angularVelocity = new Vector3D();
-            quaternionCalculus.computeAngularVelocityInWorldFrame(currentDesiredOrientation, derivative, angularVelocity);
+            quaternionCalculus.computeAngularVelocityInParentFrame(currentDesiredOrientation, derivative, angularVelocity);
             double speed = angularVelocity.length();
             if (speed > maxSpeed.getDoubleValue())
                maxSpeed.set(speed);

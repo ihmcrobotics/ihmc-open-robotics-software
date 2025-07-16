@@ -2,7 +2,7 @@
 # Main usage is for the IHMC KinematicsToolbox.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Nothing reported by the toolbox.
 byte CURRENT_TOOLBOX_STATE_NO_STATUS = 0

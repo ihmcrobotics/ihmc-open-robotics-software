@@ -1,7 +1,7 @@
 # Input message for the ContinuousStepGenerator.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 bool walk
 float64 forward_velocity

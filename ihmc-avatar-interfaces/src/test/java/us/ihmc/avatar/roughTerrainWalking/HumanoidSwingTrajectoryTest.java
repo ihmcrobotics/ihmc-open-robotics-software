@@ -1,7 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -31,23 +29,23 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by agrabertilton on 2/25/15.
@@ -77,7 +75,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private class TestController implements Controller
+   private static class TestController implements Controller
    {
       YoRegistry registry = new YoRegistry("SwingHeightTestController");
       Random random = new Random();
@@ -140,7 +138,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double[] heights = {0.1, 0.2, 0.3};
       double[] maxHeights = new double[heights.length];
@@ -157,11 +155,11 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
          TestController testController = new TestController(estimatorRobotModel);
          simulationTestHelper.getRobot().addController(testController);
 
-         success = simulationTestHelper.simulateNow(2.0); // 2.0);
+         success = simulationTestHelper.simulateNow(0.5); // 2.0);
 
          FootstepDataListMessage footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
          simulationTestHelper.publishToController(footstepDataList);
-         success = success && simulationTestHelper.simulateNow(4.0);
+         success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList));
          maxHeights[i] = testController.getMaxFootHeight();
          assertTrue(success);
 
@@ -181,7 +179,15 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
          }
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private double getSimDuration(FootstepDataListMessage footsteps)
+   {
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+      double duration = walkingControllerParameters.getDefaultInitialTransferTime() + walkingControllerParameters.getDefaultFinalTransferTime();
+      double stepDuration = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
+      return duration + stepDuration * footsteps.getFootstepDataList().size();
    }
 
    @Test
@@ -189,7 +195,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
       double currentHeight = 10.0;
@@ -199,12 +205,11 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
                                                                                             simulationTestingParameters);
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
-      success = simulationTestHelper.simulateNow(2.0); // 2.0);
+      success = simulationTestHelper.simulateNow(0.5); // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
       simulationTestHelper.publishToController(footstepDataList);
-      success = success && simulationTestHelper.simulateNow(8.0);
+      success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList));
       assertTrue(success);
 
       Point3D center = new Point3D(1.2, 0.0, .75);
@@ -212,7 +217,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -220,7 +225,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
       double currentHeight = -0.1;
@@ -230,12 +235,11 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
                                                                                             simulationTestingParameters);
       simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
-      success = simulationTestHelper.simulateNow(2.0); // 2.0);
+      success = simulationTestHelper.simulateNow(0.5); // 2.0);
 
       FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
       simulationTestHelper.publishToController(footstepDataList);
-      success = success && simulationTestHelper.simulateNow(6.0);
+      success = success && simulationTestHelper.simulateNow(getSimDuration(footstepDataList));
       assertTrue(success);
 
       Point3D center = new Point3D(1.2, 0.0, .75);
@@ -243,7 +247,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FootstepDataListMessage createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
@@ -281,7 +285,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
    public void testSelfCollisionAvoidance()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       DRCRobotModel robotModel = getRobotModel();
@@ -307,8 +311,7 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       CollisionDetector collisionDetector = new CollisionDetector(referenceFrames, footPolygons);
       simulationTestHelper.addRobotControllerOnControllerThread(collisionDetector);
 
-      ThreadTools.sleep(1000);
-      Assert.assertTrue(simulationTestHelper.simulateNow(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       double referenceLength = walkingControllerParameters.nominalHeightAboveAnkle();
@@ -353,8 +356,8 @@ public abstract class HumanoidSwingTrajectoryTest implements MultiRobotTestInter
       double simulationTime = initialTransfer + steps * stepTime + 0.5;
       while (simulationTestHelper.getSimulationTime() < simulationTime)
       {
-         Assert.assertTrue(simulationTestHelper.simulateNow(0.5));
-         Assert.assertFalse(collisionDetector.didFeetCollide());
+         assertTrue(simulationTestHelper.simulateNow(0.5));
+         assertFalse(collisionDetector.didFeetCollide());
       }
    }
 

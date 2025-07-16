@@ -1,19 +1,11 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.List;
-import java.util.Random;
-
+import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.MatrixFeatures_DDRM;
-import org.ejml.dense.row.NormOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -22,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
@@ -46,14 +37,21 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class PointFeedbackControllerTest
 {
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @Test
@@ -108,8 +106,11 @@ public final class PointFeedbackControllerTest
       {
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand spatialAccelerationCommand = pointFeedbackController.getInverseDynamicsOutput();
-         Assert.assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
-         NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()), new DMatrixRMaj(motionQPInput.getTaskObjective()), damping, jointAccelerations);
+         assertTrue(motionQPInputCalculator.convertSpatialAccelerationCommand(spatialAccelerationCommand, motionQPInput));
+         NativeCommonOps.solveDamped(new DMatrixRMaj(motionQPInput.getTaskJacobian()),
+                                     new DMatrixRMaj(motionQPInput.getTaskObjective()),
+                                     damping,
+                                     jointAccelerations);
 
          // Need to do a fine grain integration since the point we care about will be the center of rotation of the body and we need
          // to maintain that situation.
@@ -137,7 +138,7 @@ public final class PointFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -160,8 +161,7 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
-                                                                            registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -210,7 +210,7 @@ public final class PointFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
-         errorMagnitude = errorVector.length();
+         errorMagnitude = errorVector.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;
@@ -225,7 +225,7 @@ public final class PointFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -248,8 +248,7 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
-                                                                            registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -314,8 +313,16 @@ public final class PointFeedbackControllerTest
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
          jerryQPSolver.solve(jointAccelerationsFromJerryQP);
-         oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
-                             jointAccelerationsFromQPOASES, true);
+         oasesQPSolver.solve(solverInput_H,
+                             solverInput_f,
+                             solverInput_Aeq,
+                             solverInput_beq,
+                             solverInput_Ain,
+                             solverInput_bin,
+                             solverInput_lb,
+                             solverInput_ub,
+                             jointAccelerationsFromQPOASES,
+                             true);
 
          pseudoInverseSolver.setA(new DMatrixRMaj(motionQPInput.taskJacobian));
          pseudoInverseSolver.invert(jInverse);
@@ -333,10 +340,191 @@ public final class PointFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          errorVector.sub(desiredPosition, currentPosition);
-         errorMagnitude = errorVector.length();
+         errorMagnitude = errorVector.norm();
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
          assertTrue(isErrorReducing);
          previousErrorMagnitude = errorMagnitude;
+      }
+   }
+
+   @Test
+   public void testCompareSpatialControllerIndependently() throws Exception
+   {
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      Random random = new Random(564671L);
+
+      YoRegistry registry = new YoRegistry("Dummy");
+      int numberOfRevoluteJoints = 10;
+      RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, numberOfRevoluteJoints);
+      List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
+      RigidBodyBasics elevator = randomFloatingChain.getElevator();
+      RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
+
+      ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
+      JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
+      double controlDT = 0.004;
+
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
+      toolbox.setupForInverseDynamicsSolver(null);
+
+      // Making the controllers to run with different instances of the toolbox so they don't share variables.
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector,
+                                                                                    toolbox,
+                                                                                    new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                    registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector,
+                                                                                          toolbox,
+                                                                                          new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                          registry);
+
+      pointFeedbackController.setEnabled(true);
+      spatialFeedbackController.setEnabled(true);
+
+      PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
+      pointFeedbackControlCommand.set(elevator, endEffector);
+      PID3DGains positionGains = new DefaultPID3DGains();
+
+      SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+      spatialFeedbackControlCommand.set(elevator, endEffector);
+      spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForLinearControl();
+
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
+      NativeQPInputTypeA pointMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      NativeQPInputTypeA spatialMotionQPInput = new NativeQPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+
+      SpatialAccelerationCommand pointControllerOutput = pointFeedbackController.getInverseDynamicsOutput();
+      SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();
+
+      for (int i = 0; i < 300; i++)
+      {
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, -Math.PI / 2.0, Math.PI / 2.0, joints);
+         MultiBodySystemRandomTools.nextState(random, JointStateType.VELOCITY, joints);
+         joints.get(0).getPredecessor().updateFramesRecursively();
+         centerOfMassFrame.update();
+
+         double proportionalGain = RandomNumbers.nextDouble(random, 10.0, 200.0);
+         double derivativeGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
+         double integralGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
+         double maxIntegralError = RandomNumbers.nextDouble(random, 0.0, 10.0);
+
+         // for only control X space
+         positionGains.setProportionalGains(proportionalGain, 0, 0);
+         positionGains.setDerivativeGains(derivativeGain, 0, 0);
+         positionGains.setIntegralGains(integralGain, 0, 0, maxIntegralError);
+         //         positionGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
+         positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
+         pointFeedbackControlCommand.setGains(positionGains);
+         spatialFeedbackControlCommand.setPositionGains(positionGains);
+
+         FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+         FramePoint3D desiredPosition = new FramePoint3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+
+         pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+         spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
+
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+
+         spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
+         pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+
+         spatialFeedbackController.computeInverseDynamics();
+         pointFeedbackController.computeInverseDynamics();
+
+         motionQPInputCalculator.convertSpatialAccelerationCommand(pointControllerOutput, pointMotionQPInput);
+         motionQPInputCalculator.convertSpatialAccelerationCommand(spatialControllerOutput, spatialMotionQPInput);
+
+         DMatrixRMaj pointDesiredAcceleration = new DMatrixRMaj(3, 1);
+         DMatrixRMaj spatialDesiredAcceleration = new DMatrixRMaj(3, 1);
+         pointControllerOutput.getDesiredSpatialAcceleration(pointDesiredAcceleration);
+         spatialControllerOutput.getDesiredSpatialAcceleration(spatialDesiredAcceleration);
+
+         assertEquals(spatialDesiredAcceleration, pointDesiredAcceleration, 1.0e-12);
+
+         assertEquals(spatialMotionQPInput.taskJacobian, pointMotionQPInput.taskJacobian, 1.0e-12);
+         assertEquals(spatialMotionQPInput.taskObjective, pointMotionQPInput.taskObjective, 1.0e-12);
+         assertEquals(spatialMotionQPInput.taskWeightMatrix, pointMotionQPInput.taskWeightMatrix, 1.0e-12);
+
+         // for only controlling Y space
+
+         positionGains.setProportionalGains(0, proportionalGain, 0);
+         positionGains.setDerivativeGains(0, derivativeGain, 0);
+         positionGains.setIntegralGains(0, integralGain, 0, maxIntegralError);
+
+         positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
+         pointFeedbackControlCommand.setGains(positionGains);
+         spatialFeedbackControlCommand.setPositionGains(positionGains);
+
+         pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+         spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
+
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+
+         spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
+         pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+
+         spatialFeedbackController.computeInverseDynamics();
+         pointFeedbackController.computeInverseDynamics();
+
+         motionQPInputCalculator.convertSpatialAccelerationCommand(pointControllerOutput, pointMotionQPInput);
+         motionQPInputCalculator.convertSpatialAccelerationCommand(spatialControllerOutput, spatialMotionQPInput);
+
+         pointDesiredAcceleration = new DMatrixRMaj(3, 1);
+         spatialDesiredAcceleration = new DMatrixRMaj(3, 1);
+         pointControllerOutput.getDesiredSpatialAcceleration(pointDesiredAcceleration);
+         spatialControllerOutput.getDesiredSpatialAcceleration(spatialDesiredAcceleration);
+
+         assertEquals(spatialDesiredAcceleration, pointDesiredAcceleration, 1.0e-12);
+
+         assertEquals(spatialMotionQPInput.taskJacobian, pointMotionQPInput.taskJacobian, 1.0e-12);
+         assertEquals(spatialMotionQPInput.taskObjective, pointMotionQPInput.taskObjective, 1.0e-12);
+         assertEquals(spatialMotionQPInput.taskWeightMatrix, pointMotionQPInput.taskWeightMatrix, 1.0e-12);
+
+         // for only controlling z space
+
+         positionGains.setProportionalGains(0, 0, proportionalGain);
+         positionGains.setDerivativeGains(0, 0, derivativeGain);
+         positionGains.setIntegralGains(0, 0, integralGain, maxIntegralError);
+
+         positionGains.setMaxProportionalError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxDerivativeError(RandomNumbers.nextDouble(random, 0.0, 10.0));
+         positionGains.setMaxFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0));
+         pointFeedbackControlCommand.setGains(positionGains);
+         spatialFeedbackControlCommand.setPositionGains(positionGains);
+
+         pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
+         spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
+
+         pointFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+
+         spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
+         pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
+
+         spatialFeedbackController.computeInverseDynamics();
+         pointFeedbackController.computeInverseDynamics();
+
+         motionQPInputCalculator.convertSpatialAccelerationCommand(pointControllerOutput, pointMotionQPInput);
+         motionQPInputCalculator.convertSpatialAccelerationCommand(spatialControllerOutput, spatialMotionQPInput);
+
+         pointDesiredAcceleration = new DMatrixRMaj(3, 1);
+         spatialDesiredAcceleration = new DMatrixRMaj(3, 1);
+         pointControllerOutput.getDesiredSpatialAcceleration(pointDesiredAcceleration);
+         spatialControllerOutput.getDesiredSpatialAcceleration(spatialDesiredAcceleration);
+
+         assertEquals(spatialDesiredAcceleration, pointDesiredAcceleration, 1.0e-12);
+
+         assertEquals(spatialMotionQPInput.taskJacobian, pointMotionQPInput.taskJacobian, 1.0e-12);
+         assertEquals(spatialMotionQPInput.taskObjective, pointMotionQPInput.taskObjective, 1.0e-12);
+         assertEquals(spatialMotionQPInput.taskWeightMatrix, pointMotionQPInput.taskWeightMatrix, 1.0e-12);
       }
    }
 
@@ -356,12 +544,17 @@ public final class PointFeedbackControllerTest
       JointBasics[] jointsToOptimizeFor = MultiBodySystemTools.collectSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
-                                                                            registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.
-      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
-      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoRegistry("Dummy")), registry);
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector,
+                                                                                    toolbox,
+                                                                                    new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                    registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector,
+                                                                                          toolbox,
+                                                                                          new FeedbackControllerToolbox(new YoRegistry("Dummy")),
+                                                                                          registry);
       pointFeedbackController.setEnabled(true);
       spatialFeedbackController.setEnabled(true);
 
@@ -438,13 +631,6 @@ public final class PointFeedbackControllerTest
 
    private static void assertEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)
    {
-      assertTrue(assertErrorMessage(expected, actual), MatrixFeatures_DDRM.isEquals(expected, actual, epsilon));
-   }
-
-   private static String assertErrorMessage(DMatrixRMaj expected, DMatrixRMaj actual)
-   {
-      DMatrixRMaj diff = new DMatrixRMaj(expected.getNumRows(), expected.getNumCols());
-      CommonOps_DDRM.subtract(expected, actual, diff);
-      return "Expected:\n" + expected + "\nActual:\n" + actual + ", difference: " + NormOps_DDRM.normP2(diff);
+      EjmlUnitTests.assertEquals(actual, expected, epsilon);
    }
 }

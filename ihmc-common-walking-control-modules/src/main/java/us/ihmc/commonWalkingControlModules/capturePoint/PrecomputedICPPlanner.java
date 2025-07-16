@@ -32,12 +32,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.math.filters.AlphaFilteredTuple2D;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -194,12 +194,14 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       yoDesiredCMPPosition.set(desiredCMPPosition);
    }
 
-   public void compute(double time,
+   public boolean compute(double time,
                        FramePoint2DBasics desiredCapturePoint2dToPack,
                        FrameVector2DBasics desiredCapturePointVelocity2dToPack,
                        FramePoint2DBasics desiredCoP2DToPack)
    {
-      if (isWithinInterval(time))
+      boolean withinTimeInterval = isWithinInterval(time);
+
+      if (withinTimeInterval)
       {
          compute(time);
          desiredCapturePoint2dToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredICPPosition);
@@ -214,9 +216,10 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 
       centerOfMassTrajectoryHandler.clearPointsInPast();
       momentumTrajectoryHandler.clearPointsInPast();
+      return withinTimeInterval;
    }
 
-   public void computeAndBlend(double time,
+   public boolean computeAndBlend(double time,
                                FixedFramePoint2DBasics desiredCapturePoint2dToPack,
                                FixedFrameVector2DBasics desiredCapturePointVelocity2dToPack,
                                FixedFramePoint2DBasics desiredCenterOfPressure2dToPack)
@@ -225,7 +228,8 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       desiredCapturePointVelocity2dToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       desiredCenterOfPressure2dToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      if (isWithinInterval(time))
+      boolean withinTimeInterval = isWithinInterval(time);
+      if (withinTimeInterval)
       {
          compute(time);
          if (!currentlyBlendingICPTrajectories.getBooleanValue())
@@ -254,6 +258,7 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
 
       centerOfMassTrajectoryHandler.clearPointsInPast();
       momentumTrajectoryHandler.clearPointsInPast();
+      return withinTimeInterval;
    }
 
    public boolean isWithinInterval(double time)
@@ -294,6 +299,11 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       yoDesiredCMPPosition.setToNaN();
    }
 
+   public void clear()
+   {
+      centerOfMassTrajectoryHandler.clear();
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
@@ -303,5 +313,10 @@ public class PrecomputedICPPlanner implements SCS2YoGraphicHolder
       group.addChild(newYoGraphicPoint2D("Desired CoP Precomputed", yoDesiredCoPPosition, 0.010, ColorDefinitions.BlueViolet(), DIAMOND));
       group.addChild(newYoGraphicPoint2D("Desired CMP Precomputed", yoDesiredCMPPosition, 0.010, ColorDefinitions.BlueViolet(), CIRCLE));
       return group;
+   }
+
+   public double getBlendingDuration()
+   {
+      return blendingDuration.getDoubleValue();
    }
 }

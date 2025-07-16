@@ -19,8 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -31,6 +30,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -70,7 +70,6 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
 
    private final FrameVector3D comVelocityGRFPart = new FrameVector3D();
    private final FrameVector3D comVelocityPelvisAndKinPart = new FrameVector3D();
-   private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final FrameVector3D tempCoMAcceleration = new FrameVector3D(worldFrame);
    private final FrameVector3D tempFootForce = new FrameVector3D(worldFrame);
 
@@ -92,7 +91,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       MovingReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       RigidBodyReadOnly elevator = rootJoint.getPredecessor();
 
-      robotMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
+      robotMass.set(MultiBodySystemMissingTools.computeSubTreeMass(elevator));
 
       useGroundReactionForcesToComputeCenterOfMassVelocity = new BooleanParameter("useGRFToComputeCoMVelocity",
                                                                                   registry,
@@ -154,7 +153,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
          comVelocityGRFPart.add(comAcceleration);
          comAcceleration.scale(1.0 / estimatorDT);
 
-         comVelocityPelvisAndKinPart.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
+         comVelocityPelvisAndKinPart.set(yoCenterOfMassVelocityUsingPelvisAndKinematics);
 
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(grfAgainstIMUAndKinematicsForVelocityBreakFrequency.getValue(),
                                                                                         estimatorDT);
@@ -165,7 +164,7 @@ public class SimpleMomentumStateUpdater implements MomentumStateUpdater
       }
       else
       {
-         yoCenterOfMassVelocity.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
+         yoCenterOfMassVelocity.set(yoCenterOfMassVelocityUsingPelvisAndKinematics);
       }
 
       if (estimatorCenterOfMassDataHolderToUpdate != null)

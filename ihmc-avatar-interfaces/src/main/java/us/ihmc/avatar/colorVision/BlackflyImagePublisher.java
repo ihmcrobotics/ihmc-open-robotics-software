@@ -5,21 +5,20 @@ import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.cuda.CUDAImageEncoder;
+import us.ihmc.perception.cuda.CUDAJPEGProcessor;
+import us.ihmc.perception.imageMessage.CompressionType;
+import us.ihmc.perception.imageMessage.ImageMessageDataPacker;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.parameters.IntrinsicCameraMatrixProperties;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
-import us.ihmc.perception.tools.ImageMessageDataPacker;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -31,9 +30,9 @@ public class BlackflyImagePublisher
 {
    private final ROS2Node ros2Node;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
-   private final ROS2PublisherBasics<ImageMessage> ros2DistoredImagePublisher;
+   private final ROS2Publisher<ImageMessage> ros2DistoredImagePublisher;
 
-   private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
+   private final CUDAJPEGProcessor imageEncoder = new CUDAJPEGProcessor();
 
    private long lastImageSequenceNumber = -1L;
    private RawImage nextGpuDistortedImage;
@@ -48,9 +47,9 @@ public class BlackflyImagePublisher
    {
       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
+      ros2Node = new ROS2NodeBuilder().build("blackfly_publisher");
       ros2DistoredImagePublisher = ros2Node.createPublisher(distortedImageTopic);
-      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
+      ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(ros2Node,
                                                                         BlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);
 
@@ -93,18 +92,14 @@ public class BlackflyImagePublisher
          // Scale image by publishedImageScaleFactor to reduce size over the network
          GpuMat scaledImageMat = new GpuMat();
 
-         int scaledWidth = Math.round(imageToPublish.getImageWidth() * publishedImageScaleFactor);
-         int scaledHeight = Math.round(imageToPublish.getImageHeight() * publishedImageScaleFactor);
+         int scaledWidth = Math.round(imageToPublish.getWidth() * publishedImageScaleFactor);
+         int scaledHeight = Math.round(imageToPublish.getHeight() * publishedImageScaleFactor);
 
          opencv_cudawarping.resize(imageToPublish.getGpuImageMat(), scaledImageMat, new Size(scaledWidth, scaledHeight));
 
          // Compress image
          BytePointer distortedImageJPEGPointer = new BytePointer((long) scaledImageMat.rows() * scaledImageMat.cols());
-         imageEncoder.encodeBGR(scaledImageMat.data(),
-                                distortedImageJPEGPointer,
-                                scaledWidth,
-                                scaledHeight,
-                                scaledImageMat.step());
+         imageEncoder.encodeBGR(scaledImageMat, distortedImageJPEGPointer);
          
          // Publish intrinsics
          ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
@@ -120,11 +115,12 @@ public class BlackflyImagePublisher
          distortedImageMessage.setPrincipalPointYPixels(imageToPublish.getPrincipalPointY() * publishedImageScaleFactor);
          distortedImageMessage.setImageWidth(scaledWidth);
          distortedImageMessage.setImageHeight(scaledHeight);
-         distortedImageMessage.getPosition().set(imageToPublish.getPosition());
-         distortedImageMessage.getOrientation().set(imageToPublish.getOrientation());
+         distortedImageMessage.getPosition().set(imageToPublish.getTranslation());
+         distortedImageMessage.getOrientation().set(imageToPublish.getRotation());
          distortedImageMessage.setSequenceNumber(imageToPublish.getSequenceNumber());
-         CameraModel.EQUIDISTANT_FISHEYE.packMessageFormat(distortedImageMessage);
-         ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(distortedImageMessage);
+         distortedImageMessage.setCameraModel(CameraModel.EQUIDISTANT_FISHEYE.toByte());
+         distortedImageMessage.setPixelFormat(PixelFormat.BGR8.toByte());
+         distortedImageMessage.setCompressionType(CompressionType.NVJPEG.toByte());
          ros2DistoredImagePublisher.publish(distortedImageMessage);
 
          lastImageSequenceNumber = imageToPublish.getSequenceNumber();

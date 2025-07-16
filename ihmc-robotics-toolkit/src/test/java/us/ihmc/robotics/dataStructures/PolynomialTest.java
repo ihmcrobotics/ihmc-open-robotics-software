@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.math.ComplexNumber;
 
 public class PolynomialTest
 {
@@ -240,7 +241,7 @@ public class PolynomialTest
    private void verifyEpsilonEquals(ComplexNumber expectedComplexNumber, ComplexNumber actualComplexNumber, double epsilon)
    {
       assertEquals(expectedComplexNumber.real(), actualComplexNumber.real(), epsilon);
-      assertEquals(expectedComplexNumber.imag(), actualComplexNumber.imag(), epsilon);
+      assertEquals(expectedComplexNumber.imaginary(), actualComplexNumber.imaginary(), epsilon);
    }
 
 	@Test

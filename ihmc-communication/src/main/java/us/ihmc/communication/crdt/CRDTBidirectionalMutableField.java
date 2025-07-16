@@ -6,15 +6,23 @@ package us.ihmc.communication.crdt;
  */
 public class CRDTBidirectionalMutableField<T>
 {
-   private final RequestConfirmFreezable requestConfirmFreezable;
+   private final LatestTimestampModifiable latestTimestampModifiable;
 
    private final T value;
 
-   public CRDTBidirectionalMutableField(RequestConfirmFreezable requestConfirmFreezable, T initialValue)
+   public CRDTBidirectionalMutableField(LatestTimestampModifiable latestTimestampModifiable, T initialValue)
    {
-      this.requestConfirmFreezable = requestConfirmFreezable;
+      this.latestTimestampModifiable = latestTimestampModifiable;
 
       value = initialValue;
+   }
+
+   /**
+    * Used to set the initial value which can require special computation.
+    */
+   public T getValueToInitialize()
+   {
+      return value;
    }
 
    /**
@@ -22,20 +30,31 @@ public class CRDTBidirectionalMutableField<T>
     * Do not call this every tick.
     * @return modifiable interface
     */
-   public T getValueAndFreeze()
+   public T getValueAndModify()
    {
-      requestConfirmFreezable.freeze(); // Freeze to prevent it getting overwritten immediately
+      // Mark and timestamp modification
+      modify();
       return value;
    }
 
    /**
-    * Call this to update the data every tick, but it can get overritten immediately by
+    * Call this to update the data every tick, but it can get overwritten immediately by
     * incoming data. And example is to update a calculation on the robot side, but allow
-    * the UI to also modify that using {@link #getValueAndFreeze}.
+    * the UI to also modify that using {@link #getValueAndModify}.
     */
    public T getValue()
    {
       return value;
+   }
+
+   /**
+    * Call this when making a change to the value.
+    * You may find {@link #getValueAndModify()} to be handy.
+    * Do not call this every tick.
+    */
+   public void modify()
+   {
+      latestTimestampModifiable.modify(); // Mark and timestamp modification
    }
 
    protected T getValueInternal()
@@ -43,8 +62,8 @@ public class CRDTBidirectionalMutableField<T>
       return value;
    }
 
-   protected boolean isFrozen()
+   protected boolean isModificationIncoming()
    {
-      return requestConfirmFreezable.isFrozen();
+      return latestTimestampModifiable.isModificationIncoming();
    }
 }

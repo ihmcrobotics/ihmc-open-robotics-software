@@ -1,5 +1,6 @@
 package us.ihmc.avatar.ros2.visualizer;
 
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -9,14 +10,12 @@ import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.attributes.ParticipantAttributes;
+import us.ihmc.pubsub.attributes.ParticipantProfile;
 import us.ihmc.pubsub.common.DiscoveryStatus;
-import us.ihmc.pubsub.common.Time;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -73,8 +72,8 @@ public class SCSROS2Visualizer
    private void setupROS2Debugger() throws Exception
    {
       int domainID = NetworkParameters.getRTPSDomainID();
-      Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
-      ParticipantAttributes attributes = domain.createParticipantAttributes(domainID, getClass().getSimpleName());
+      Domain domain = DomainFactory.getDomain();
+      ParticipantProfile attributes = domain.createParticipantAttributes(domainID, getClass().getSimpleName());
 
       participant = domain.createParticipant(attributes, (participant, info) ->
       {
@@ -93,13 +92,13 @@ public class SCSROS2Visualizer
          }
       });
       participant.registerEndpointDiscoveryListeners(
-      ((isAlive, guid, participantGuid, typeName, topicName, userDefinedId, typeMaxSerialized, topicKind) ->
+      ((isAlive, guid, participantGuid, typeName, topicName, userDefinedId, typeMaxSerialized) ->
       {
          numberOfPublishers.add(1);
          numberOfEndpoints.add(1);
          LogTools.info("Discovered publisher on topic: {}", topicName);
       }),
-      ((isAlive, guid, expectsInlineQos, participantGuid, typeName, topicName, userDefinedId, javaTopicKind) ->
+      ((isAlive, guid, expectsInlineQos, participantGuid, typeName, topicName, userDefinedId) ->
       {
          numberOfSubscribers.add(1);
          numberOfEndpoints.add(1);

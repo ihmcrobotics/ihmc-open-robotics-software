@@ -231,4 +231,16 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    {
       return sequenceId;
    }
+
+   public void addBodyPartToGoHome(HumanoidBodyPart bodyPart, RobotSide robotSide)
+   {
+      if (bodyPart.isRobotSideNeeded())
+      {
+         sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setValue(true);
+      }
+      else
+      {
+         otherBodyPartRequestMap.get(bodyPart).setValue(true);
+      }
+   }
 }

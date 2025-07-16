@@ -23,7 +23,7 @@ module atlas_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         @defaultValue(value=255)
         octet requested_atlas_low_level_control_mode;
       };

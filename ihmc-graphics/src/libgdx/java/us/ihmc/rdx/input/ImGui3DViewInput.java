@@ -129,9 +129,9 @@ public class ImGui3DViewInput
 
             int rowAdjustment = aliasedFlippedMouseY * aliasedRenderedAreaWidth * Float.BYTES;
             int columnAdjustment = aliasedMouseX * Float.BYTES;
-            float normalizedDeviceCoordinateZ = depthBuffer.getFloat(rowAdjustment + columnAdjustment);
+            float normalizedDeviceCoordinateZ = 2.0f * depthBuffer.getFloat(rowAdjustment + columnAdjustment) - 1.0f;
 
-            if (normalizedDeviceCoordinateZ > 0.503)
+            if (normalizedDeviceCoordinateZ < 1.0f) // 1.0 corresponds to no collision
             {
                fallbackToXYPlaneIntersection = false;
 

@@ -1,6 +1,6 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.ros2.ROS2Topic;
@@ -14,7 +14,7 @@ import us.ihmc.tools.string.StringTools;
  */
 public class StoredPropertySetROS2TopicPair
 {
-   private final ROS2IOTopicPair<StoredPropertySetMessage> topicPair;
+   private final ROS2IOTopicPair<PrimitiveDataVectorMessage> topicPair;
 
    public StoredPropertySetROS2TopicPair(String moduleTopicName, StoredPropertySetReadOnly storedPropertySetReadOnly)
    {
@@ -24,16 +24,16 @@ public class StoredPropertySetROS2TopicPair
    public StoredPropertySetROS2TopicPair(String moduleTopicName, String topicNameSuffix)
    {
       ROS2Topic<?> baseTopic = ROS2Tools.IHMC_ROOT.withModule(moduleTopicName);
-      ROS2Topic<StoredPropertySetMessage> propertySetTopic = baseTopic.withType(StoredPropertySetMessage.class).withSuffix(topicNameSuffix);
+      ROS2Topic<PrimitiveDataVectorMessage> propertySetTopic = baseTopic.withType(PrimitiveDataVectorMessage.class).withSuffix(topicNameSuffix);
       topicPair = new ROS2IOTopicPair<>(propertySetTopic);
    }
 
-   public ROS2Topic<StoredPropertySetMessage> getCommandTopic()
+   public ROS2Topic<PrimitiveDataVectorMessage> getCommandTopic()
    {
       return topicPair.getCommandTopic();
    }
 
-   public ROS2Topic<StoredPropertySetMessage> getStatusTopic()
+   public ROS2Topic<PrimitiveDataVectorMessage> getStatusTopic()
    {
       return topicPair.getStatusTopic();
    }

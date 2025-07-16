@@ -215,16 +215,21 @@ public class BytedecoImage
       ensureDimensionsMatch(other, null);
    }
 
+   public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
+   {
+      ensureDimensionsMatch(other.getBytedecoOpenCVMat(), openCLManager);
+   }
+
    /**
     * Resizes this image to match the dimensions of other if necessary.
     *
     * // FIXME: Broken for external byte buffers
     */
-   public void ensureDimensionsMatch(BytedecoImage other, OpenCLManager openCLManager)
+   public void ensureDimensionsMatch(Mat other, OpenCLManager openCLManager)
    {
-      if (!OpenCVTools.dimensionsMatch(this, other))
+      if (!OpenCVTools.dimensionsMatch(bytedecoOpenCVMat, other))
       {
-         resize(other.getImageWidth(), other.getImageHeight(), openCLManager, backingDirectByteBuffer);
+         resize(other.cols(), other.rows(), openCLManager, backingDirectByteBuffer);
       }
    }
 

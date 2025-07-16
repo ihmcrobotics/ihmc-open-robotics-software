@@ -11,9 +11,9 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Random;
 
@@ -62,8 +62,8 @@ public class HeightMapPolygonSnapperTest
          }
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-         FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-         environmentHandler.setHeightMap(heightMapData);
+         EnvironmentHandler environmentHandler = new EnvironmentHandler();
+         environmentHandler.setHeightMapData(heightMapData);
          RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
          // Check XY position of centroid isn't changed
@@ -135,8 +135,8 @@ public class HeightMapPolygonSnapperTest
          heightMapData.setHeightAt(polygonToSnap.getVertex(3).getX(), polygonToSnap.getVertex(3).getY(), offsetZ3);
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-         FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-         environmentHandler.setHeightMap(heightMapData);
+         EnvironmentHandler environmentHandler = new EnvironmentHandler();
+         environmentHandler.setHeightMapData(heightMapData);
          snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
          Assertions.assertTrue(plane.getNormal().epsilonEquals(snapper.getBestFitPlane().getNormal(), 1e-10));
@@ -170,17 +170,20 @@ public class HeightMapPolygonSnapperTest
       polygonToSnap.addVertex(-footLength / 2.0, footWidth / 2.0);
       polygonToSnap.update();
 
+      double totalArea = footLength * footWidth;
+
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      environmentHandler.setHeightMap(heightMapData);
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      environmentHandler.setHeightMapData(heightMapData);
       snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, 0.05, Math.toRadians(45.0));
 
-      Assertions.assertTrue(snapper.getAreaFraction() >= polygonToSnap.getArea());
+      Assertions.assertTrue(snapper.getAreaFraction() * totalArea >= polygonToSnap.getArea());
 
       // make the foot overhang by a fair bit
       polygonToSnap.translate(-gridResolution, 0.0);
       snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, 0.05, Math.toRadians(45.0));
-      Assertions.assertFalse(snapper.getAreaFraction() >= polygonToSnap.getArea());
-      Assertions.assertEquals(snapper.getAreaFraction(), (footLength - 0.05) * footWidth, 2e-3);
+      double expectedArea = (footLength - 0.05) * footWidth;
+      Assertions.assertFalse(snapper.getAreaFraction() > 1.0, "Expected area less than " + polygonToSnap.getArea() + ", got " + snapper.getAreaFraction());
+      Assertions.assertEquals(expectedArea, totalArea * snapper.getAreaFraction(), 2e-3);
    }
 }

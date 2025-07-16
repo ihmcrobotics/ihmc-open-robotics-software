@@ -12,6 +12,7 @@ import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
 
 import java.nio.file.Paths;
 
@@ -24,7 +25,7 @@ public class FFMPEGFileLogger extends FFMPEGLogger
       isInitialized = true;
 
       int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), streamFlags);
-      FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
+      FFmpegTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
 
       avFrameToBeEncoded = avutil.av_frame_alloc();
       avFrameToBeEncoded.format(encoderAVPixelFormat);
@@ -33,11 +34,11 @@ public class FFMPEGFileLogger extends FFMPEGLogger
 
       int bufferSizeAlignment = 0;
       returnCode = avutil.av_frame_get_buffer(avFrameToBeEncoded, bufferSizeAlignment);
-      FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
+      FFmpegTools.checkNonZeroError(returnCode, "Allocating new buffer for avFrame");
 
       AVCodecParameters avCodecParameters = avStream.codecpar();
       returnCode = avcodec.avcodec_parameters_from_context(avCodecParameters, avEncoderContext);
-      FFMPEGTools.checkNonZeroError(returnCode, "Setting stream parameters to codec context values");
+      FFmpegTools.checkNonZeroError(returnCode, "Setting stream parameters to codec context values");
 
       // Dump information about the stream to a file
       int streamIndex = 0;
@@ -48,11 +49,11 @@ public class FFMPEGFileLogger extends FFMPEGLogger
 
       AVIOContext avBytestreamIOContext = new AVIOContext();
       returnCode = avformat.avio_open(avBytestreamIOContext, fileName, avformat.AVIO_FLAG_WRITE);
-      FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
+      FFmpegTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
       avFormatContext.pb(avBytestreamIOContext);
 
       returnCode = avformat.avformat_write_header(avFormatContext, streamFlags);
-      FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
+      FFmpegTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
 
       if (encoderFormatConversionNecessary)
       {
@@ -62,7 +63,7 @@ public class FFMPEGFileLogger extends FFMPEGLogger
          avFrameToBeScaled.height(sourceVideoHeight);
 
          returnCode = avutil.av_frame_get_buffer(avFrameToBeScaled, bufferSizeAlignment);
-         FFMPEGTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
+         FFmpegTools.checkNonZeroError(returnCode, "Allocating new buffer for tempAVFrame");
 
          int sourceFormat = sourceAVPixelFormat;
          int sourceVideoWidth = avEncoderContext.width();
@@ -84,7 +85,7 @@ public class FFMPEGFileLogger extends FFMPEGLogger
                                              sourceFilter,
                                              destinationFilter,
                                              extraParameters);
-         FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
+         FFmpegTools.checkPointer(swsContext, "Allocating SWS context");
       }
    }
 
@@ -107,12 +108,12 @@ public class FFMPEGFileLogger extends FFMPEGLogger
       do
       {
          returnCode = avcodec.avcodec_send_frame(avEncoderContext, avFrameToBeEncoded);
-         FFMPEGTools.checkNonZeroError(returnCode, "Supplying frame to encoder");
+         FFmpegTools.checkNonZeroError(returnCode, "Supplying frame to encoder");
 
          returnCode = avcodec.avcodec_receive_packet(avEncoderContext, avPacket);
       }
       while (returnCode == tryAgainError);
-      FFMPEGTools.checkNonZeroError(returnCode, "Reading encoded data from the encoder");
+      FFmpegTools.checkNonZeroError(returnCode, "Reading encoded data from the encoder");
 
       // Convert valid timing fields (timestamps / durations) in a packet from one timebase to another
       AVRational sourceTimebase = avEncoderContext.time_base();
@@ -123,7 +124,7 @@ public class FFMPEGFileLogger extends FFMPEGLogger
       avPacket.stream_index(avStream.index());
 
       returnCode = avformat.av_interleaved_write_frame(avFormatContext, avPacket);
-      FFMPEGTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
+      FFmpegTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
 
       return returnCode == 0;
    }

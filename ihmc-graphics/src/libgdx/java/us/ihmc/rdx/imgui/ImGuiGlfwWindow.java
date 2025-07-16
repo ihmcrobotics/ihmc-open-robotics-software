@@ -12,7 +12,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridResourceDirectory;
 import us.ihmc.tools.io.HybridResourceFile;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.commons.time.FrequencyCalculator;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

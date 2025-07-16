@@ -22,7 +22,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 public class CenterOfMassReferenceFrameTest
 {
@@ -40,18 +40,18 @@ public class CenterOfMassReferenceFrameTest
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>(nJoints);
       RigidBodyBasics elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoF", elevator);
-      RigidBodyBasics floatingBody = new RigidBody("floatingBody", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(), RandomGeometry.nextVector3D(random));
+      RigidBodyBasics floatingBody = new RigidBody("floatingBody", sixDoFJoint, EuclidCoreRandomTools.nextDiagonalMatrix3D(random), random.nextDouble(), EuclidCoreRandomTools.nextVector3D(random));
 
       Vector3D[] jointAxes = new Vector3D[nJoints];
       for (int i = 0; i < nJoints; i++)
       {
-         jointAxes[i] = RandomGeometry.nextVector3D(random);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3D(random);
       }
 
       joints.addAll(MultiBodySystemRandomTools.nextRevoluteJointChain(random, "test", floatingBody, jointAxes));
       ReferenceFrame centerOfMassReferenceFrame = new CenterOfMassReferenceFrame("com", elevator.getBodyFixedFrame(), elevator);
 
-      sixDoFJoint.setJointPosition(RandomGeometry.nextVector3D(random));
+      sixDoFJoint.setJointPosition(EuclidCoreRandomTools.nextVector3D(random));
       sixDoFJoint.getJointPose().getOrientation().setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
       for (RevoluteJoint joint : joints)

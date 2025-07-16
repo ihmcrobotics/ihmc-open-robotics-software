@@ -16,16 +16,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -48,13 +41,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    protected boolean startStancePreferenceSpecified = false;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   protected HeightMapWithPoints heightMap;
    protected SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
-
-   //TODO: Fix so not specific to Atlas...
-   private final QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
-   private final QuadTreeFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
    private SideDependentList<Footstep> priorStanceFeet;
    boolean priorStanceFeetSpecified = false;
@@ -101,30 +89,11 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       ReferenceFrame soleFrame = soleFrames.get(currentFootstepSide);
 
       Footstep footstep;
-      try
-      {
-         if (heightMap != null)
-         {
-            footstep = footstepSnapper.generateFootstepUsingHeightMap(solePose, foot, soleFrame, currentFootstepSide, heightMap);
-         }
-         else
-         {
             FramePoint3D soleFrameInWorldPoint = new FramePoint3D(soleFrame);
             soleFrameInWorldPoint.changeFrame(WORLD_FRAME);
-            footstep = footstepSnapper.generateFootstepWithoutHeightMap(solePose, foot, soleFrame, currentFootstepSide, soleFrameInWorldPoint.getZ(), new Vector3D(0.0, 0.0, 1.0));
+            footstep = generateFootstepWithoutHeightMap(solePose, foot, soleFrame, currentFootstepSide, soleFrameInWorldPoint.getZ(), new Vector3D(0.0, 0.0, 1.0));
             if (VERBOSE_ERROR_PRINTS)
                System.err.println("AbstractFootstepGenerator: Grid data unavailable. Using best guess for ground height.");
-         }
-      }
-      catch (InsufficientDataException e)
-      {
-         footstep = footstepSnapper.generateFootstepWithoutHeightMap(solePose, foot, soleFrame, currentFootstepSide, 0, new Vector3D(0.0, 0.0, 1.0));
-
-         if (VERBOSE_DEBUG)
-         {
-            System.err.println("AbstractFootstepGenerator: No lidar data found for step. Using best guess.");
-         }
-      }
 
       return footstep;
    }
@@ -241,17 +210,6 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    }
 
    protected abstract OverheadPath getPath();
-
-   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
-   {
-      this.heightMap = heightMap;
-      this.contactableFeet = contactableFeet;
-   }
-
-   public void setPoseFinderParams(double kernelMaskSafetyBuffer, double kernelSize)
-   {
-      footstepSnapper.setUseMask(USE_MASK, kernelMaskSafetyBuffer, kernelSize);
-   }
 
    protected RobotSide sideOfHipAngleOpeningStep(double deltaYaw)
    {

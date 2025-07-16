@@ -8,17 +8,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageReplay;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
@@ -30,8 +25,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -80,7 +75,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    {
       DRCRobotModel robotModel = newRobotModel();
       String robotName = robotModel.getSimpleRobotName();
-      kinematicsStreamingToolboxMessageReplay = new KinematicsStreamingToolboxMessageReplay(robotName, inputStream, PubSubImplementation.INTRAPROCESS);
+      kinematicsStreamingToolboxMessageReplay = new KinematicsStreamingToolboxMessageReplay(robotName, inputStream);
 
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          simulationTestingParameters.setKeepSCSUp(true);
@@ -103,7 +98,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       simulationTestHelperFactory.addSecondaryRobot(toolboxGhost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
 
-      toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
+      toolboxROS2Node = new ROS2NodeBuilder().buildRealtime("toolbox_node");
       createToolboxController(robotModel);
       toolboxGhost.addThrottledController(new Controller()
       {
@@ -186,7 +181,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
 
       KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
-      parameters.setDefault();
+      parameters.setDefault(false);
       parameters.setToolboxUpdatePeriod(toolboxControllerPeriod);
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,

@@ -1,7 +1,7 @@
 # This message is part of the IHMC footstep planning module.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
@@ -49,8 +49,10 @@ float64 timeout 5.0
 int32 max_iterations -1
 # Max body path length if using body path
 float64 horizon_length
-# Height map data, if you don'ot want to assume flat ground.
+# Height map data, if you don't want to assume flat ground.
 perception_msgs/HeightMapMessage height_map_message
+# Terrain map data, if you don't want to assume flat ground.
+perception_msgs/TerrainMapMessage terrain_map_message
 # If true, steps are snapped assuming flat ground.
 # Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
 bool assume_flat_ground

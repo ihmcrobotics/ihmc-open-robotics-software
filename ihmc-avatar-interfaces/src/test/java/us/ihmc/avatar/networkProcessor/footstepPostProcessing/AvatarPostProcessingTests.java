@@ -1,24 +1,15 @@
 package us.ihmc.avatar.networkProcessor.footstepPostProcessing;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import perception_msgs.msg.dds.HeightMapMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -29,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -54,12 +44,12 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -69,7 +59,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.BlockEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
@@ -80,6 +70,13 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPostProcessingTests implements MultiRobotTestInterface
 {
@@ -102,15 +99,15 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       DRCRobotModel robotModel = getRobotModel();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
-      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), DomainFactory.PubSubImplementation.INTRAPROCESS);
+      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel());
 
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
@@ -125,6 +122,14 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+
+   protected abstract String getLeftAnkleXName();
+
+   protected abstract String getLeftAnkleYName();
+
+   protected abstract String getRightAnkleXName();
+
+   protected abstract String getRightAnkleYName();
 
    @Test
    public void testWalkingOffOfMediumPlatform()
@@ -144,9 +149,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setMaxStepZ(height + 0.05);
       footstepPlannerParameters.setIdealFootstepLength(0.28);
 
-      ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(1.0);
-      Assertions.assertTrue(success);
+      boolean success = simulationTestHelper.simulateNow(0.5);
+      assertTrue(success);
 
       PoseReferenceFrame startingFrame = new PoseReferenceFrame("startingFrame", ReferenceFrame.getWorldFrame());
       startingFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), startingLocation.getAdditionalOffset()));
@@ -185,8 +189,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlannerParameters.setMinDistanceFromCliffBottoms(-1.0);
       footstepPlannerParameters.setMinDistanceFromCliffTops(-1.0);
 
-      ThreadTools.sleep(1000);
-      simulationTestHelper.simulateNow(1.0);
+      simulationTestHelper.simulateNow(0.5);
 
       FramePose3D goalPose = new FramePose3D();
       goalPose.getPosition().set(2.0, 0.0, 0.0);
@@ -222,14 +225,14 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       //      parameters.setFractionTimeOnFootIfOtherFootHasNoWidth(0.7);
 
       // increase ankle damping to match the real robot better
-      YoDouble damping_l_akx = (YoDouble) simulationTestHelper.findVariable("damping_l_leg_akx");
-      YoDouble damping_l_aky = (YoDouble) simulationTestHelper.findVariable("damping_l_leg_aky");
-      YoDouble damping_r_akx = (YoDouble) simulationTestHelper.findVariable("damping_r_leg_akx");
-      YoDouble damping_r_aky = (YoDouble) simulationTestHelper.findVariable("damping_r_leg_aky");
+      YoDouble damping_l_akx = (YoDouble) simulationTestHelper.findVariable("damping_" + getLeftAnkleXName());
+      YoDouble damping_l_aky = (YoDouble) simulationTestHelper.findVariable("damping_" + getLeftAnkleYName());
+      YoDouble damping_r_akx = (YoDouble) simulationTestHelper.findVariable("damping_" + getRightAnkleXName());
+      YoDouble damping_r_aky = (YoDouble) simulationTestHelper.findVariable("damping_" + getRightAnkleYName());
       damping_l_akx.set(1.0);
-      damping_l_aky.set(1.0);
+      damping_l_aky.set(0.1);
       damping_r_akx.set(1.0);
-      damping_r_aky.set(1.0);
+      damping_r_aky.set(0.1);
 
       SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
       // get foot states
@@ -263,8 +266,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       soleVertices.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
       ConvexPolygon2D defaultSolePolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(soleVertices));
       defaultSolePolygon.update();
-
-      ThreadTools.sleep(1000);
 
       armsUp();
 
@@ -326,6 +327,11 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          {
             if (footStates.get(robotSide1).getEnumValue() == ConstraintType.SWING)
             {
+               if (stepCounter == footsteps.size())
+               {
+                  return;
+               }
+
                List<Point3D> contactPoints3D = footsteps.remove(stepCounter).getPredictedContactPoints2d();
                if (contactPoints3D.size() < 1)
                {
@@ -343,20 +349,12 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       simulationTestHelper.publishToController(footstepDataListMessage);
 
-      boolean success = simulationTestHelper.simulateNow((swingDuration + transferDuration) * numberOfSteps + 5.0);
+      boolean success = simulationTestHelper.simulateNow((swingDuration + transferDuration) * numberOfSteps + 3.0);
       assertTrue(success);
    }
 
-   private static final double[] rightHandStraightSideJointAngles = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155,
-         -1.2398714600960365, -0.005510224629709242, 0.6123343067479899, 0.12524505635696856};
-   private static final double[] leftHandStraightSideJointAngles = new double[] {0.61130147334225, 0.22680071472282162, 1.6270339908033258, 1.2703560974484844,
-         0.10340544060719102, -0.6738299572358809, 0.13264785356924128};
-   private static final SideDependentList<double[]> straightArmConfigs = new SideDependentList<>();
-   static
-   {
-      straightArmConfigs.put(RobotSide.LEFT, leftHandStraightSideJointAngles);
-      straightArmConfigs.put(RobotSide.RIGHT, rightHandStraightSideJointAngles);
-   }
+
+   protected abstract double[] getStraightArmConfig(RobotSide robotSide);
 
    private void armsUp()
    {
@@ -367,7 +365,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       {
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
          armTrajectoryMessage.setRobotSide(robotSide.toByte());
-         double[] armConfig = straightArmConfigs.get(robotSide);
+         double[] armConfig = getStraightArmConfig(robotSide);
          for (int i = 0; i < armConfig.length; i++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
@@ -380,7 +378,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          simulationTestHelper.publishToController(armTrajectoryMessage);
       }
 
-      simulationTestHelper.simulateNow(2.0);
+      simulationTestHelper.simulateNow(0.6);
    }
 
    private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel,
@@ -397,6 +395,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.setRequestedInitialStanceSide(FootstepPlanningRequestPacket.ROBOT_SIDE_LEFT);
       request.getStartLeftFootPose().set(leftFoot);
       request.getStartRightFootPose().set(rightFoot);
+
+      HeightMapMessage heightMap = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      request.getHeightMapMessage().set(heightMap);
 
       SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalPose, footstepPlannerParameters.getIdealFootstepWidth());
       request.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
@@ -446,17 +447,20 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       simulationTestHelper.publishToController(footstepDataListMessage);
 
+      WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
+
       double stepTime = footstepDataListMessage.getDefaultSwingDuration() + footstepDataListMessage.getDefaultTransferDuration();
       if (stepTime < 0.5)
       {
-         WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
          stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       }
-      double simulationTime = 2.0 + 1.5 * stepTime * footstepDataListMessage.getFootstepDataList().size();
+      double simulationTime =  walkingControllerParameters.getDefaultInitialTransferTime() + walkingControllerParameters.getDefaultFinalTransferTime()
+                               + stepTime * footstepDataListMessage.getFootstepDataList().size();
 
       boolean success = simulationTestHelper.simulateNow(simulationTime);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
       //      simulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
@@ -583,8 +587,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       // build default foot polygon:
       SteppingParameters steppingParameters = getRobotModel().getWalkingControllerParameters().getSteppingParameters();
-      double footForwardOffset = steppingParameters.getFootForwardOffset();
-      double footBackwardOffset = steppingParameters.getFootBackwardOffset();
+      double footForwardOffset = steppingParameters.getFootLength() / 2.0;
+      double footBackwardOffset = footForwardOffset;
       double footWidth = steppingParameters.getFootWidth();
       double toeWidth = steppingParameters.getToeWidth();
 

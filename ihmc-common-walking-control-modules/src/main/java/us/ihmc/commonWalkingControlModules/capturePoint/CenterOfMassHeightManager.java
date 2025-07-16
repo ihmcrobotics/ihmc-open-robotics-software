@@ -243,7 +243,9 @@ public class CenterOfMassHeightManager implements SCS2YoGraphicHolder
     */
    public void goHome(double trajectoryTime)
    {
-      stateMachine.getCurrentState().goHome(trajectoryTime);
+      PelvisHeightControlMode walkingControllerState = PelvisHeightControlMode.WALKING_CONTROLLER;
+      requestState(walkingControllerState);
+      stateMachine.getState(walkingControllerState).goHome(trajectoryTime);
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)

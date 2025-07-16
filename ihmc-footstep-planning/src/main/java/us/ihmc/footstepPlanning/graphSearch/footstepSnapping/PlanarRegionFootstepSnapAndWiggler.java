@@ -23,6 +23,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.HashMap;
 import java.util.function.ToDoubleFunction;
 
+/**
+ * This class is now deprecated. It only works for planar regions. See {@link FootstepSnapAndWiggler} instead.
+ */
+@Deprecated
 public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;

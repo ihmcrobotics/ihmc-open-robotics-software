@@ -15,7 +15,6 @@ import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.AtlasWristSensorCalibrationRequestPacket;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import atlas_msgs.msg.dds.BDIBehaviorStatusPacket;
-import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
@@ -30,7 +29,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
@@ -123,6 +121,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -586,7 +585,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
                + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().reset();
+      message.getConfigurationSpaceNamesToExplore().resetQuick();
       message.getExplorationRangeUpperLimits().reset();
       message.getExplorationRangeLowerLimits().reset();
 
@@ -616,7 +615,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
                + ", explorationRangeLowerLimits.length = ");
 
-      message.getConfigurationSpaceNamesToExplore().reset();
+      message.getConfigurationSpaceNamesToExplore().resetQuick();
       message.getExplorationRangeUpperLimits().reset();
       message.getExplorationRangeLowerLimits().reset();
 
@@ -1245,14 +1244,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static HandCollisionDetectedPacket createHandCollisionDetectedPacket(RobotSide robotSide, int collisionSeverityLevelZeroToThree)
-   {
-      HandCollisionDetectedPacket message = new HandCollisionDetectedPacket();
-      message.setRobotSide(robotSide.toByte());
-      message.setCollisionSeverityLevelOneToThree(MathTools.clamp(collisionSeverityLevelZeroToThree, 1, 3));
-      return message;
-   }
-
    public static AtlasLowLevelControlModeMessage createAtlasLowLevelControlModeMessage(AtlasLowLevelControlMode request)
    {
       AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
@@ -1411,24 +1402,26 @@ public class HumanoidMessageTools
       return message;
    }
 
+   @Deprecated
    public static FisheyePacket createFisheyePacket(VideoSource videoSource,
                                                    long timeStamp,
                                                    byte[] data,
                                                    Point3DReadOnly position,
                                                    Orientation3DReadOnly orientation,
-                                                   CameraPinholeBrown intrinsicParameters)
+                                                   Object intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
       message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       return message;
    }
 
+   @Deprecated
    public static VideoPacket createVideoPacket(VideoSource videoSource,
                                                long timeStamp,
                                                byte[] data,
                                                Point3DReadOnly position,
                                                Orientation3DReadOnly orientation,
-                                               CameraPinholeBrown intrinsicParameters)
+                                               Object intrinsicParameters)
    {
       VideoPacket message = new VideoPacket();
       message.setVideoSource(videoSource.toByte());
@@ -1440,7 +1433,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, CameraPinholeBrown intrinsicParameters)
+   @Deprecated
+   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, Object intrinsicParameters)
    {
       LocalVideoPacket message = new LocalVideoPacket();
       message.timeStamp = timeStamp;
@@ -2416,38 +2410,40 @@ public class HumanoidMessageTools
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
    }
 
-   public static IntrinsicParametersMessage toIntrinsicParametersMessage(CameraPinholeBrown intrinsicParameters)
+   @Deprecated
+   public static IntrinsicParametersMessage toIntrinsicParametersMessage(Object intrinsicParameters)
    {
       IntrinsicParametersMessage intrinsicParametersMessage = new IntrinsicParametersMessage();
-      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
-      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
-      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
-      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
-      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
-      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
-      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
-      if (intrinsicParameters.radial != null)
-         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
-      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
-      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
+//      intrinsicParametersMessage.setWidth(intrinsicParameters.width);
+//      intrinsicParametersMessage.setHeight(intrinsicParameters.height);
+//      intrinsicParametersMessage.setFx(intrinsicParameters.fx);
+//      intrinsicParametersMessage.setFy(intrinsicParameters.fy);
+//      intrinsicParametersMessage.setSkew(intrinsicParameters.skew);
+//      intrinsicParametersMessage.setCx(intrinsicParameters.cx);
+//      intrinsicParametersMessage.setCy(intrinsicParameters.cy);
+//      if (intrinsicParameters.radial != null)
+//         intrinsicParametersMessage.getRadial().add(intrinsicParameters.radial);
+//      intrinsicParametersMessage.setT1(intrinsicParameters.t1);
+//      intrinsicParametersMessage.setT2(intrinsicParameters.t2);
       return intrinsicParametersMessage;
    }
 
-   public static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
+   @Deprecated
+   public static Object toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
-      intrinsicParameters.width = message.getWidth();
-      intrinsicParameters.height = message.getHeight();
-      intrinsicParameters.fx = message.getFx();
-      intrinsicParameters.fy = message.getFy();
-      intrinsicParameters.skew = message.getSkew();
-      intrinsicParameters.cx = message.getCx();
-      intrinsicParameters.cy = message.getCy();
-      if (!message.getRadial().isEmpty())
-         intrinsicParameters.radial = message.getRadial().toArray();
-      intrinsicParameters.t1 = message.getT1();
-      intrinsicParameters.t2 = message.getT2();
-      return intrinsicParameters;
+//      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+//      intrinsicParameters.width = message.getWidth();
+//      intrinsicParameters.height = message.getHeight();
+//      intrinsicParameters.fx = message.getFx();
+//      intrinsicParameters.fy = message.getFy();
+//      intrinsicParameters.skew = message.getSkew();
+//      intrinsicParameters.cx = message.getCx();
+//      intrinsicParameters.cy = message.getCy();
+//      if (!message.getRadial().isEmpty())
+//         intrinsicParameters.radial = message.getRadial().toArray();
+//      intrinsicParameters.t1 = message.getT1();
+//      intrinsicParameters.t2 = message.getT2();
+      return new Object();
    }
 
    public static void packPredictedContactPoints(Point2DReadOnly[] contactPoints, FootstepDataMessage message)
@@ -2644,7 +2640,7 @@ public class HumanoidMessageTools
 
    public static FrameConvexPolygon2D unpackFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide)
    {
-      if (robotSide == RobotSide.LEFT && capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() > 0)
+      if (robotSide == RobotSide.LEFT && !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty())
          return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(),
                                          Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon3d()));
       else if (capturabilityBasedStatus.getRightFootSupportPolygon3d() != null)
@@ -2656,15 +2652,36 @@ public class HumanoidMessageTools
 
    public static boolean unpackIsInDoubleSupport(CapturabilityBasedStatus capturabilityBasedStatus)
    {
-      return capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() != 0 & capturabilityBasedStatus.getRightFootSupportPolygon3d().size() != 0;
+      return !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty() & !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
    }
 
    public static boolean unpackIsSupportFoot(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotside)
    {
       if (robotside == RobotSide.LEFT)
-         return capturabilityBasedStatus.getLeftFootSupportPolygon3d().size() != 0;
+         return !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
       else
-         return capturabilityBasedStatus.getRightFootSupportPolygon3d().size() != 0;
+         return !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
+   }
+
+   public static boolean isHandLoadBearing(RobotSide robotSide, CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      if (robotSide == RobotSide.LEFT)
+         return !capturabilityBasedStatus.getLeftHandContactPoints().isEmpty();
+      else
+         return !capturabilityBasedStatus.getRightHandContactPoints().isEmpty();
+   }
+
+   public static boolean unpackIsSupportHand(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide, FullHumanoidRobotModel fullRobotModel, FramePoint3DBasics contactPointToPack)
+   {
+      List<Point3D> handContactPointList = robotSide == RobotSide.LEFT ? capturabilityBasedStatus.getLeftHandContactPoints() : capturabilityBasedStatus.getRightHandContactPoints();
+      boolean isLoadBearing = !handContactPointList.isEmpty();
+
+      if (isLoadBearing)
+         contactPointToPack.setIncludingFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handContactPointList.get(0));
+      else
+         contactPointToPack.setToNaN();
+
+      return isLoadBearing;
    }
 
    public static void packManifold(byte[] configurationSpaces, double[] lowerLimits, double[] upperLimits, ReachingManifoldMessage reachingManifoldMessage)
@@ -2672,7 +2689,7 @@ public class HumanoidMessageTools
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
 
-      reachingManifoldMessage.getManifoldConfigurationSpaceNames().reset();
+      reachingManifoldMessage.getManifoldConfigurationSpaceNames().resetQuick();
       reachingManifoldMessage.getManifoldLowerLimits().reset();
       reachingManifoldMessage.getManifoldUpperLimits().reset();
       reachingManifoldMessage.getManifoldConfigurationSpaceNames().add(configurationSpaces);

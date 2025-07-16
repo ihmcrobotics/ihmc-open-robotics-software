@@ -1,10 +1,18 @@
 package us.ihmc.robotics.math.trajectories.interfaces;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 
-public interface FixedFrameOrientationTrajectoryGenerator extends OrientationTrajectoryGenerator, FrameOrientationProvider
+public interface FixedFrameOrientationTrajectoryGenerator extends OrientationTrajectoryGenerator, ReferenceFrameHolder
 {
+   default ReferenceFrame getReferenceFrame()
+   {
+      return getOrientation().getReferenceFrame();
+   }
+
+   @Override
+   FrameOrientation3DReadOnly getOrientation();
+
    @Override
    FrameVector3DReadOnly getAngularVelocity();
 

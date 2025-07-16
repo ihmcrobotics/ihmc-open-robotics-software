@@ -1,7 +1,7 @@
 # This message is part of the KinematicsStreamingToolbox API.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The timestamp (in nanoseconds) at which this message was generated.
 # This is used on the toolbox side to estimate things such as desired end-effector velocities.
@@ -37,5 +37,17 @@ float64 linear_rate_limitation
 # control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
 # to the robot's end-effectors.
 toolbox_msgs/KinematicsToolboxRigidBodyMessage[] inputs
+
+# When true, the solver will use the center of mass input to control the robot's center of mass.
+bool use_center_of_mass_input
+
+# The (optional) input for controlling the center of mass of the robot.
+# If use_center_of_mass_input is false, this message is ignored.
+toolbox_msgs/KinematicsToolboxCenterOfMassMessage center_of_mass_input
+
+# Used to synchronize the marking of demonstration episodes to enable automatic dataset generation
+# True when this motion is part of a demonstration episode
+# False at all other times
+bool is_demonstration_episode
 
 

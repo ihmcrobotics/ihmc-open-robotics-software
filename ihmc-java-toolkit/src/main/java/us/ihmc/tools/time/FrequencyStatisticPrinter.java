@@ -3,7 +3,7 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import java.util.ArrayDeque;
@@ -11,7 +11,7 @@ import java.util.ArrayDeque;
 /**
  * This is designed to be functionally the same as ros topic hz but usable for lots of things.
  *
- * Deprecated - not super accurate. Use {@link FrequencyCalculator} instead.
+ * Deprecated - not super accurate. Use {@link us.ihmc.commons.time.FrequencyCalculator} instead.
  */
 @Deprecated
 public class FrequencyStatisticPrinter

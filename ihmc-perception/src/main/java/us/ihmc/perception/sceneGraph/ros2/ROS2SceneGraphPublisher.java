@@ -5,12 +5,12 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
+import perception_msgs.msg.dds.FoundationPoseNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
-import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
@@ -19,20 +19,18 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import java.util.UUID;
@@ -59,7 +57,7 @@ public class ROS2SceneGraphPublisher
    {
       sceneGraphMessage.setSequenceId(sceneGraph.getCRDTInfo().getUpdateNumber());
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
-      sceneGraphMessage.getSceneTreeTypes().clear();
+      sceneGraphMessage.getSceneTreeTypes().resetQuick();
       sceneGraphMessage.getSceneTreeIndices().clear();
       sceneGraphMessage.getSceneNodes().clear();
       sceneGraphMessage.getDetectableSceneNodes().clear();
@@ -67,10 +65,10 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getCenterposeSceneNodes().clear();
       sceneGraphMessage.getYoloSceneNodes().clear();
+      sceneGraphMessage.getFoundationPoseSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
       sceneGraphMessage.getDoorSceneNodes().clear();
-      sceneGraphMessage.getTrashCanNodes().clear();
 
       packSceneTreeToMessage(sceneGraph.getRootNode());
 
@@ -145,7 +143,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNode.fromMessage(yoloNodeMessage);
+            yoloNode.toMessage(yoloNodeMessage);
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }
@@ -169,14 +167,14 @@ public class ROS2SceneGraphPublisher
             }
             detectableSceneNodeMessage = doorNodeMessage.getDetectableSceneNode();
          }
-         else if (sceneNode instanceof TrashCanNode trashCanNode)
+         else if (sceneNode instanceof FoundationPoseNode foundationPoseNode)
          {
-            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.TRASH_CAN_NODE_TYPE);
-            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getTrashCanNodes().size());
-            TrashCanNodeMessage trashCanNodeMessage = sceneGraphMessage.getTrashCanNodes().add();
-            trashCanNodeMessage.getTrashCanToWorldTransform().set(trashCanNode.getTrashCanToWorldTransform());
-            trashCanNodeMessage.setTrashCanYaw(trashCanNode.getYaw());
-            detectableSceneNodeMessage = trashCanNodeMessage.getDetectableSceneNode();
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.FOUNDATION_POSE_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getFoundationPoseSceneNodes().size());
+            FoundationPoseNodeMessage foundationPoseNodeMessage = sceneGraphMessage.getFoundationPoseSceneNodes().add();
+            foundationPoseNode.toMessage(foundationPoseNodeMessage);
+
+            detectableSceneNodeMessage = foundationPoseNodeMessage.getDetectableSceneNode();
          }
          else
          {

@@ -37,8 +37,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -231,7 +231,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          // Plan body path
          setStartFootPosesToCurrent();
 
-         heightMapUsedForPlanning = HeightMapMessageTools.unpackMessage(heightMapMessage.get());
+         heightMapUsedForPlanning = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage.get());
          request.setHeightMapData(heightMapUsedForPlanning);
 
          Pose3D goalPose = new Pose3D(goalPosition.get(), goalOrientation.get());
@@ -289,7 +289,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          request.setPlanBodyPath(false);
          request.setPerformAStarSearch(true);
-         request.setHeightMapData(HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
+         request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegions.get())));
          request.setRequestedInitialStanceSide(lastStepSide);
 
          LogTools.info("Planning step");

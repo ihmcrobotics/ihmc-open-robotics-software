@@ -2,7 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.ui;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 
 public class SimpleUILauncher extends ApplicationNoModule
 {

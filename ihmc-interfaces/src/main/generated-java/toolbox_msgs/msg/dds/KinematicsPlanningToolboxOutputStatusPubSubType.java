@@ -15,7 +15,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ea819530b3daf557f1360f413573d2c548c15649b6ce802bbdd0ff3957d493e1";
+   		return "a503326897dee5045f25aa53a759d78ab1301ea0b64e652c49ff3c85ee497579";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -78,7 +78,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -104,17 +104,17 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
    public static void write(toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getPlanId());
 
       if(data.getKeyFrameTimes().size() <= 100)
       cdr.write_type_e(data.getKeyFrameTimes());else
-          throw new RuntimeException("key_frame_times field exceeds the maximum length");
+          throw new RuntimeException("key_frame_times field exceeds the maximum length: %d > %d".formatted(data.getKeyFrameTimes().size(), 100));
 
       if(data.getRobotConfigurations().size() <= 100)
       cdr.write_type_e(data.getRobotConfigurations());else
-          throw new RuntimeException("robot_configurations field exceeds the maximum length");
+          throw new RuntimeException("robot_configurations field exceeds the maximum length: %d > %d".formatted(data.getRobotConfigurations().size(), 100));
 
       cdr.write_type_6(data.getSolutionQuality());
 
@@ -123,7 +123,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
 
    public static void read(toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setPlanId(cdr.read_type_2());
       	
@@ -138,7 +138,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
@@ -150,7 +150,7 @@ public class KinematicsPlanningToolboxOutputStatusPubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_e("key_frame_times", data.getKeyFrameTimes());
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());

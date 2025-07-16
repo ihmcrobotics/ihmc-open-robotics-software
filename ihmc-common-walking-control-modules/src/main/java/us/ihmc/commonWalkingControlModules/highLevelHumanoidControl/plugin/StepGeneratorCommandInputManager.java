@@ -16,8 +16,12 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,14 +32,15 @@ import java.util.function.Consumer;
 
 public class StepGeneratorCommandInputManager implements Updatable
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final CommandInputManager commandInputManager = new CommandInputManager(supportedCommands());
 
    private boolean isOpen = false;
-   private boolean walk = false;
-   private boolean isUnitVelocities = false;
-   private double swingHeight = 0.1;
-   private final Vector2D desiredVelocity = new Vector2D();
-   private double turningVelocity = 0.0;
+   private final YoBoolean walk;
+   private final YoVector2D desiredVelocity;
+   private final YoDouble turningVelocity;
+   private final YoDouble swingHeight;
+   private final YoBoolean isUnitVelocities;
    private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
@@ -51,6 +56,13 @@ public class StepGeneratorCommandInputManager implements Updatable
 
    public StepGeneratorCommandInputManager()
    {
+      String suffix = "StepGeneratorCommandInputManager";
+      walk = new YoBoolean("walk_" + suffix, registry);
+      desiredVelocity = new YoVector2D("desiredVelocity_" + suffix, registry);
+      turningVelocity = new YoDouble("desiredTurningVelocity_" + suffix, registry);
+      swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
+      isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
+      isUnitVelocities.set(false);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -118,16 +130,16 @@ public class StepGeneratorCommandInputManager implements Updatable
    @Override
    public void update(double time)
    {
-      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.CUSTOM1;
+      isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
          desiredVelocity.setX(command.getForwardVelocity());
          desiredVelocity.setY(command.getLateralVelocity());
-         turningVelocity = command.getTurnVelocity();
-         isUnitVelocities = command.isUnitVelocities();
-         walk = command.isWalk();
+         turningVelocity.set(command.getTurnVelocity());
+         isUnitVelocities.set(command.isUnitVelocities());
+         walk.set(command.isWalk());
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
 
@@ -137,14 +149,15 @@ public class StepGeneratorCommandInputManager implements Updatable
          ContinuousStepGeneratorParameters parameters = command.getParameters();
 
          ticksToUpdateTheEnvironment = parameters.getTicksToUpdateTheEnvironment();
-         swingHeight = parameters.getSwingHeight();
+         swingHeight.set(parameters.getSwingHeight());
 
          if (continuousStepGenerator != null)
          {
             continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());
-            continuousStepGenerator.setSwingHeight(swingHeight);
+            continuousStepGenerator.setSwingHeight(swingHeight.getDoubleValue());
             continuousStepGenerator.setFootstepsAreAdjustable(parameters.getStepsAreAdjustable());
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
+            continuousStepGenerator.setMaxStepLength(parameters.getMaxStepLength());
          }
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
@@ -188,7 +201,7 @@ public class StepGeneratorCommandInputManager implements Updatable
       previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());
 
       if (!isOpen)
-         walk = false;
+         walk.set(false);
    }
 
    public boolean isOpen()
@@ -209,7 +222,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          @Override
          public boolean isUnitVelocity()
          {
-            return isUnitVelocities;
+            return isUnitVelocities.getBooleanValue();
          }
       };
    }
@@ -221,24 +234,29 @@ public class StepGeneratorCommandInputManager implements Updatable
          @Override
          public double getTurningVelocity()
          {
-            return turningVelocity;
+            return turningVelocity.getDoubleValue();
          }
 
          @Override
          public boolean isUnitVelocity()
          {
-            return isUnitVelocities;
+            return isUnitVelocities.getBooleanValue();
          }
       };
    }
 
    public BooleanProvider createWalkInputProvider()
    {
-      return () -> walk;
+      return walk::getBooleanValue;
    }
 
    public DoubleProvider createSwingHeightProvider()
    {
-      return () -> swingHeight;
+      return swingHeight::getDoubleValue;
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }

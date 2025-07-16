@@ -1,0 +1,24 @@
+#ifndef __behavior_msgs__msg__AI2RNodeDefinitionMessage__idl__
+#define __behavior_msgs__msg__AI2RNodeDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::AI2RNodeDefinitionMessage_")
+      struct AI2RNodeDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif

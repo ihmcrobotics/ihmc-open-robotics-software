@@ -3,7 +3,7 @@
 # The parameters exposed through this message are specific to application to humanoid robots.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # When set to true, the solver will maintain, if possible, the current x and y coordinates of the center
 # of mass. By 'current', it means that the solver will use the robot configuration data
@@ -14,12 +14,8 @@ bool hold_current_center_of_mass_xy_position true
 # - when the walking controller is running, the CapturabilityBasedStatus message is used to identify the current support polygon.
 # - when the multi-contact controller is running, the MultiContactBalanceStatus message is used to identify the current support polygon.
 bool enable_auto_support_polygon true
-# When set to true, the solver will hold the pose of the rigid-bodies with active contact points.
-# - when the walking controller is running, the rigid-bodies in question are the feet.
-# - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
-bool hold_support_rigid_bodies true
-# If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
-bool enable_multi_contact_support_region_solver false
+# If true, enables an objective for improving the stability margin of the robot when the upper body is load-bearing.
+bool enable_stability_objective false
 
 # Whether restrictive joint limits are enabled, in order to have the IK avoid a solution at the joint limit.
 bool enable_joint_limit_reduction true

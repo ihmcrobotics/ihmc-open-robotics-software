@@ -1,11 +1,5 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
-import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -17,7 +11,6 @@ import us.ihmc.avatar.stepAdjustment.SimpleStep;
 import us.ihmc.avatar.stepAdjustment.StepConstraintCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -30,9 +23,16 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class StepConstraintToolboxController extends ToolboxController
 {
@@ -43,7 +43,7 @@ public class StepConstraintToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   private final ROS2PublisherBasics<StepConstraintMessage> constraintRegionPublisher;
+   private final ROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final HumanoidReferenceFrames referenceFrames;
@@ -54,7 +54,7 @@ public class StepConstraintToolboxController extends ToolboxController
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
-                                          ROS2PublisherBasics<StepConstraintMessage> constraintRegionPublisher,
+                                          ROS2Publisher<StepConstraintMessage> constraintRegionPublisher,
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           double gravityZ,

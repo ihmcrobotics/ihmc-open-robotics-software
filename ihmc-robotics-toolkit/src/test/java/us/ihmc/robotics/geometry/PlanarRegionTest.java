@@ -37,7 +37,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionTest
 {
@@ -423,8 +422,8 @@ public class PlanarRegionTest
 
       for (int iteration = 0; iteration < 10; iteration++)
       {
-         Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
-         Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
+         Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(45.0));
+         Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
          ReferenceFrame localFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);

@@ -5,11 +5,11 @@
 #include "perception_msgs/msg/./CenterposeNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 #include "perception_msgs/msg/./DoorNodeMessage_.idl"
+#include "perception_msgs/msg/./FoundationPoseNodeMessage_.idl"
 #include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./PrimitiveRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 #include "perception_msgs/msg/./StaticRelativeSceneNodeMessage_.idl"
-#include "perception_msgs/msg/./TrashCanNodeMessage_.idl"
 #include "perception_msgs/msg/./YOLOv8NodeMessage_.idl"
 module perception_msgs
 {
@@ -41,10 +41,10 @@ module perception_msgs
       const octet YOLO_NODE_TYPE =
       7;
 
-      const octet DOOR_NODE_TYPE =
+      const octet FOUNDATION_POSE_NODE_TYPE =
       8;
 
-      const octet TRASH_CAN_NODE_TYPE =
+      const octet DOOR_NODE_TYPE =
       9;
 
 
@@ -60,7 +60,7 @@ module perception_msgs
         /**
          * Monotonically increasing message ID that matches the CRDTInfo update number
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * The ID to assign to the next instantiated node
          */
@@ -108,13 +108,13 @@ module perception_msgs
          */
         sequence<perception_msgs::msg::dds::YOLOv8NodeMessage, 200> yolo_scene_nodes;
         /**
+         * FoundationPose scene nodes
+         */
+        sequence<perception_msgs::msg::dds::FoundationPoseNodeMessage> foundation_pose_scene_nodes;
+        /**
          * Door scene nodes
          */
         sequence<perception_msgs::msg::dds::DoorNodeMessage, 200> door_scene_nodes;
-        /**
-         * Trash can scene nodes
-         */
-        sequence<perception_msgs::msg::dds::TrashCanNodeMessage, 200> trash_can_nodes;
       };
     };
   };

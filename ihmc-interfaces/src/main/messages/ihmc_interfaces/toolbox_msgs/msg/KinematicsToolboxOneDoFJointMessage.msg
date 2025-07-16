@@ -3,7 +3,7 @@
 # a given 1-DoF joint in the solver.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The is the unique hash code of the joint to be solved for.
 # It is used on the solver side to retrieve the desired joint to be controlled.

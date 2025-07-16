@@ -110,7 +110,7 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
       if(data.getObjectType().length() <= 255)
       cdr.write_type_d(data.getObjectType());else
-          throw new RuntimeException("object_type field exceeds the maximum length");
+          throw new RuntimeException("object_type field exceeds the maximum length: %d > %d".formatted(data.getObjectType().length(), 255));
 
       cdr.write_type_2(data.getObjectId());
 

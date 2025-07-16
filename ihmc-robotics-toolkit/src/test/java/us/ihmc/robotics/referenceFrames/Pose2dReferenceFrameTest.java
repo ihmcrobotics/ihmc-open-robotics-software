@@ -1,22 +1,21 @@
 
 package us.ihmc.robotics.referenceFrames;
 
-import static us.ihmc.robotics.Assert.*;
-
-import java.util.Random;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.random.RandomGeometry;
+
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.robotics.Assert.assertFalse;
 
 public class Pose2dReferenceFrameTest
 {
@@ -59,7 +58,7 @@ public class Pose2dReferenceFrameTest
       FramePoint3D framePointInWorldThree = new FramePoint3D(framePoint);
       framePointInWorldThree.changeFrame(worldFrame);
 
-      assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));
+      EuclidFrameTestTools.assertEquals(framePointInWorldThree, framePointInWorldTwo, 1e-7);
    }
 
 	@Test
@@ -123,9 +122,9 @@ public class Pose2dReferenceFrameTest
 
       FramePoint2D newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);
       newPoint.changeFrame(framePoint.getReferenceFrame());
-      
-      assertTrue(newPoint.epsilonEquals(framePoint, 1e-7)); 
-      
+
+      EuclidFrameTestTools.assertEquals(framePoint, newPoint, 1e-7);
+
       
       doRandomPoseChangeAndUpdate(poseFrame01, random);
       newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);      
@@ -136,8 +135,7 @@ public class Pose2dReferenceFrameTest
       FramePoint2D newPointInWorldTwo = new FramePoint2D(newPoint);
       newPointInWorldTwo.changeFrame(worldFrame);
 
-      assertTrue(newPointInWorldOne.epsilonEquals(newPointInWorldTwo, 1e-7));
-
+      EuclidFrameTestTools.assertEquals(newPointInWorldOne, newPointInWorldTwo, 1e-7);
    }
 
    private void updateAllFrames(ReferenceFrame[] referenceFrames)
@@ -151,7 +149,7 @@ public class Pose2dReferenceFrameTest
    private void doRandomPoseChangeAndUpdate(Pose2dReferenceFrame poseReferenceFrame, Random random)
    {
 
-      Point2D randomPoint2d = RandomGeometry.nextPoint2D(random, 1234, 1234);
+      Point2D randomPoint2d = EuclidCoreRandomTools.nextPoint2D(random, 1234, 1234);
       FramePose2D framePose = new FramePose2D(poseReferenceFrame.getParent(), randomPoint2d,random.nextGaussian());
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }

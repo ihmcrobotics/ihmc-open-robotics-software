@@ -36,6 +36,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -708,6 +709,7 @@ public class CrossRobotCommandCodeQualityTest
       safeTypes.add(Wrench.class);
       safeTypes.add(SpatialForce.class);
       safeTypes.add(ConvexPolygon2D.class);
+      safeTypes.add(FrameConvexPolygon2D.class);
       safeTypes.add(double[].class);
       return safeTypes;
    }

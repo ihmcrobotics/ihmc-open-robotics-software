@@ -1,18 +1,16 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableToroidRobot;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ContactableToroidRobotTest
 {
@@ -43,7 +41,7 @@ public class ContactableToroidRobotTest
                if ((x_sq + y_sq < rma_sq) &&  ((x_sq + y_sq) + z_sq < rmi_sq))
                {
                   testPoint.set(x, y, z);
-                  assertTrue("Nope: " + testPoint, bot.isPointOnOrInside(testPoint));
+                  assertTrue(bot.isPointOnOrInside(testPoint), "Nope: " + testPoint);
                }
             }
          }
@@ -59,7 +57,7 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
       
-      Vector3D randomVector = RandomGeometry.nextVector3D(random);
+      Vector3D randomVector = EuclidCoreRandomTools.nextVector3D(random);
       RigidBodyTransform transform3d = new RigidBodyTransform();
       transform3d.getTranslation().set(randomVector);
 
@@ -82,7 +80,7 @@ public class ContactableToroidRobotTest
                if ((x_sq + y_sq < rma_sq) &&  ((x_sq + y_sq) + z_sq < rmi_sq))
                {
                   pt.set(x, y, z);
-                  assertTrue("Nope: " + pt, bot.isPointOnOrInside(pt));
+                  assertTrue(bot.isPointOnOrInside(pt), "Nope: " + pt);
                }
             }
          }
@@ -98,7 +96,7 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
       
-      Vector3D vector3d = RandomGeometry.nextVector3D(random);
+      Vector3D vector3d = EuclidCoreRandomTools.nextVector3D(random);
       RigidBodyTransform randomTransform = new RigidBodyTransform();
       randomTransform.getTranslation().set(vector3d);
 
@@ -121,7 +119,7 @@ public class ContactableToroidRobotTest
                if ((x_sq + y_sq < rma_sq) &&  ((x_sq + y_sq) + z_sq < rmi_sq))
                {
                   pt.set(x, y, z);
-                  assertFalse("Nope: " + pt, bot.isPointOnOrInside(pt));
+                  assertFalse(bot.isPointOnOrInside(pt), "Nope: " + pt);
                }
             }
          }

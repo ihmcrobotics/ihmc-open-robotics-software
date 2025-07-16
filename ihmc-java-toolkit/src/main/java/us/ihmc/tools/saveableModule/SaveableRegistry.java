@@ -2,7 +2,7 @@ package us.ihmc.tools.saveableModule;
 
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.processes;
 
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 
 public class LidarREAProcess extends RestartableProcess

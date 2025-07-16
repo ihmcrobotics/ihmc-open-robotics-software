@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c7383277fe76fb8398bd39e13e663ec74953805ff50f461e542afb1d8e54ad7d";
+   		return "783e478ab71dd206a61145274561ba5f39f3d0fea0c521874ccd92012d80e44b";
    }
    
    @Override
@@ -142,7 +142,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       if(data.getObjectFrameName().length() <= 255)
       cdr.write_type_d(data.getObjectFrameName());else
-          throw new RuntimeException("object_frame_name field exceeds the maximum length");
+          throw new RuntimeException("object_frame_name field exceeds the maximum length: %d > %d".formatted(data.getObjectFrameName().length(), 255));
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getScrewAxisPose(), cdr);
       cdr.write_type_6(data.getTranslation());

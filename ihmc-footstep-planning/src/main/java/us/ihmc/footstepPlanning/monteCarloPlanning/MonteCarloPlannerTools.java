@@ -20,13 +20,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -327,9 +326,9 @@ public class MonteCarloPlannerTools
       LogTools.info("Optimal Path Size: {}", path.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
-      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      environmentHandler.setHeightMap(request.getHeightMapData());
-      environmentHandler.setTerrainMapData(request.getTerrainMapData());
+      EnvironmentHandler environmentHandler = new EnvironmentHandler();
+      environmentHandler.setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
+      environmentHandler.setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -338,7 +337,7 @@ public class MonteCarloPlannerTools
 
          float nodeX = (float) (footstepNode.getState().getX32() / parameters.getNodesPerMeter());
          float nodeY = (float) (footstepNode.getState().getY32() / parameters.getNodesPerMeter());
-         float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
+         float nodeZ = request.getEnvironmentHandler().getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
          ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
@@ -353,7 +352,7 @@ public class MonteCarloPlannerTools
       return footstepPlan;
    }
 
-   public static void snapFootPoseToHeightMap(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
+   public static void snapFootPoseToHeightMap(EnvironmentHandler environmentHandler, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
@@ -467,7 +466,7 @@ public class MonteCarloPlannerTools
          else if (isWithinGridBoundaries(new Point2D(position), gridColor.cols()) && node.getRobotSide() == RobotSide.RIGHT)
          {
             gridColor.ptr((int) position.getX32(), (int) position.getY32())
-                     .put(new byte[] {(byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255});
+                     .put((byte) (score * 255), (byte) (score * 255), (byte) 255, (byte) 255);
          }
       }
    }
@@ -514,7 +513,7 @@ public class MonteCarloPlannerTools
 
       double goalReward = parameters.getGoalReward() * progressToGoal;
 
-      double contactValue = request.getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
+      double contactValue = request.getEnvironmentHandler().getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
       contactValue = MathTools.clamp(contactValue, parameters.getMinimumContactValue(), parameters.getMaximumContactValue());
       contactValue /= parameters.getMaximumContactValue();
       double contactReward = (contactValue) * parameters.getFeasibleContactReward();

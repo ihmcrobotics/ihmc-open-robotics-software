@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.javafx.MeshHolder;
+import us.ihmc.javaFXToolkit.MeshHolder;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -132,12 +132,16 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          FootstepSnapData snapData = touchdownStepData.getRight();
 
          RigidBodyTransform stepPose = new RigidBodyTransform();
+         RigidBodyTransform unsnappedStepPose = new RigidBodyTransform();
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          RigidBodyTransform wiggleTransformInWorld = snapData.getWiggleTransformInWorld();
 
+         unsnappedStepPose.setTranslationAndIdentityRotation(touchdownStep.getX(), touchdownStep.getY(), 0.1);
+         unsnappedStepPose.getRotation().setYawPitchRoll(touchdownStep.getYaw(), 0.0, 0.0);
+
          if (snapTransform.containsNaN())
          {
-            stepPose.setTranslationAndIdentityRotation(touchdownStep.getX(), touchdownStep.getY(), 0.1);
+            stepPose.setTranslationAndIdentityRotation(touchdownStep.getX(), touchdownStep.getY(), 0.0);
             stepPose.getRotation().setYawPitchRoll(touchdownStep.getYaw(), 0.0, 0.0);
          }
          else
@@ -145,12 +149,13 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
             DiscreteFootstepTools.getSnappedStepTransform(touchdownStep, snapTransform, stepPose);
             double yaw = stepPose.getRotation().getYaw();
             stepPose.getRotation().setYawPitchRoll(yaw, 0.0, 0.0);
-            stepPose.appendTranslation(0.0, 0.0, 0.1);
          }
+
+         unsnappedStepPose.appendTranslation(0.0, 0.0, stepPose.getTranslationZ());
 
          // Render unsnapped footstep
          meshBuilder.clear();
-         addFootstep(stepPose.getTranslation(), stepPose.getRotation(), defaultFootPoints, defaultFootPolygon, unsnappedFootholdColor);
+         addFootstep(unsnappedStepPose.getTranslation(), unsnappedStepPose.getRotation(), defaultFootPoints, defaultFootPolygon, unsnappedFootholdColor);
          loggedUnsnappedCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedUnsnappedCandidateStepGraphic.update();
 

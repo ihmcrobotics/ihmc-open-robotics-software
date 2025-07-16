@@ -1,8 +1,5 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -14,30 +11,31 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class StepConstraintToolboxModule extends ToolboxModule
 {
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 10;
 
    protected final StepConstraintToolboxController controller;
-   private ROS2PublisherBasics<StepConstraintMessage> constraintRegionPublisher;
+   private ROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
 
-   public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation, double gravityZ)
+   public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, double gravityZ)
    {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
             startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS,
-            pubSubImplementation);
+            DEFAULT_UPDATE_PERIOD_MILLISECONDS);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       controller = new StepConstraintToolboxController(statusOutputManager,
@@ -57,7 +55,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
    }
 
    @Override
-   public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
+   public void registerExtraPuSubs(ROS2Node ros2Node)
    {
       ROS2Topic<?> controllerPubGenerator = HumanoidControllerAPI.getOutputTopic(robotName);
 

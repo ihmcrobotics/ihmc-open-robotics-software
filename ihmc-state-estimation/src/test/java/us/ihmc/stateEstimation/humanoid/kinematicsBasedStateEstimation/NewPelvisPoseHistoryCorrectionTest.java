@@ -1,7 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +12,7 @@ import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -25,7 +24,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -35,6 +34,8 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NewPelvisPoseHistoryCorrectionTest
 {
@@ -204,8 +205,8 @@ public class NewPelvisPoseHistoryCorrectionTest
 
       for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)
       {
-         Vector3D translationOffset = RandomGeometry.nextVector3D(random, 0.04);
-         Quaternion rotationOffset = RandomGeometry.nextQuaternion(random, 0.04);
+         Vector3D translationOffset = EuclidCoreRandomTools.nextVector3D(random, 0.04);
+         Quaternion rotationOffset = EuclidCoreRandomTools.nextQuaternion(random, 0.04);
          saveIcpOffsetInTransformBuffer(timeStamp, translationOffset, rotationOffset);
          generateIcpOffsetsWithRespectToPelvisInTransformBuffer(timeStamp, translationOffset, rotationOffset);
       }
@@ -319,8 +320,7 @@ public class NewPelvisPoseHistoryCorrectionTest
                pelvisExpectedCorrection.multiply(temporaryTransform);
                pelvisExpectedCorrection.multiply(pelvisBeforeCorrection_Rotation);
 
-               assertTrue(pelvisExpectedCorrection.epsilonEquals(pelvisAfterCorrection, 1e-4));
-
+               EuclidCoreTestTools.assertEquals(pelvisExpectedCorrection, pelvisAfterCorrection, 1e-4);
             }
          }
       }
@@ -376,8 +376,7 @@ public class NewPelvisPoseHistoryCorrectionTest
 
          simulationConstructionSet.tickAndUpdate();
 
-         assertTrue(pelvisBeforeCorrection.epsilonEquals(pelvisAfterCorrection, 1e-4));
-
+         EuclidCoreTestTools.assertEquals(pelvisBeforeCorrection, pelvisAfterCorrection, 1e-4);
       }
    }
 
@@ -422,7 +421,7 @@ public class NewPelvisPoseHistoryCorrectionTest
 
       for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)
       {
-         Vector3D translationOffset = RandomGeometry.nextVector3D(random, 0.04);
+         Vector3D translationOffset = EuclidCoreRandomTools.nextVector3D(random, 0.04);
          Quaternion rotationOffset = orientationTooBigOffset[index];
          saveIcpOffsetInTransformBuffer(timeStamp, translationOffset, rotationOffset);
          generateIcpOffsetsWithRespectToPelvisInTransformBuffer(timeStamp, translationOffset, rotationOffset);

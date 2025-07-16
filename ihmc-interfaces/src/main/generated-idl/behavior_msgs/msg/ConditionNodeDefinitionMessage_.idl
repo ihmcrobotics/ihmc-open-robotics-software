@@ -1,0 +1,107 @@
+#ifndef __behavior_msgs__msg__ConditionNodeDefinitionMessage__idl__
+#define __behavior_msgs__msg__ConditionNodeDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./LeafNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet COUNTER_TYPE =
+      0;
+
+      const octet LLM_TYPE =
+      1;
+
+      const octet PROXIMITY_TYPE =
+      2;
+
+      const octet PROXIMITY_XYZ =
+      0;
+
+      const octet PROXIMITY_XY =
+      1;
+
+      const octet PROXIMITY_Z =
+      2;
+
+
+      /**
+       * COUNTER TYPE
+       * LLM TYPE
+       * PROXIMITY TYPE
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::ConditionNodeDefinitionMessage_")
+      struct ConditionNodeDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::LeafNodeDefinitionMessage definition;
+        /**
+         * The type of condition as defined above
+         */
+        octet type;
+        /**
+         * The number of times to fail before passing
+         */
+        unsigned long count_to;
+        /**
+         * Whether to reset the context on each run
+         */
+        boolean reset_context_each_run;
+        /**
+         * Whether to generate behavior state information and add it to the prompt
+         */
+        boolean inject_behavior_state;
+        /**
+         * Whether to generate environment state information and add it to the prompt
+         */
+        boolean inject_environment_state;
+        /**
+         * If a response match indicates success, else a match indicates failure
+         */
+        boolean match_is_success;
+        /**
+         * The prompt given once at the very beginning
+         */
+        string<10000> system;
+        /**
+         * The prompt defining how to make the boolean decision
+         */
+        string<10000> prompt;
+        /**
+         * A regular expression, where if it matches, the execution failed
+         */
+        string<10000> response_matcher;
+        /**
+         * The type of distance condition as defined above
+         */
+        octet proximity_distance_type;
+        /**
+         * Name of the object frame
+         */
+        string proximity_object_frame_name;
+        /**
+         * Name of the frame the distance is expressed in
+         */
+        string proximity_reference_frame_name;
+        /**
+         * The maximum distance between the object and the reference frame
+         */
+        double proximity_distance_to_object;
+        /**
+         * The maximum time that is spent in evaluating the condition
+         */
+        double proximity_evaluation_time;
+        /**
+         * Whether the failure of missing frame is handled internally by the condition node or not
+         */
+        boolean manage_missing_frame_internally;
+      };
+    };
+  };
+};
+
+#endif

@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__WholeBodyStreamingMessage__idl__
 
 #include "controller_msgs/msg/./JointspaceStreamingMessage_.idl"
+#include "ihmc_common_msgs/msg/./EuclideanStreamingMessage_.idl"
 #include "ihmc_common_msgs/msg/./SE3StreamingMessage_.idl"
 #include "ihmc_common_msgs/msg/./SO3StreamingMessage_.idl"
 module controller_msgs
@@ -21,7 +22,7 @@ module controller_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
          * This integration allows to improve continuity of execution for streams.
@@ -54,6 +55,21 @@ module controller_msgs
         boolean has_right_arm_streaming_message;
         controller_msgs::msg::dds::JointspaceStreamingMessage right_arm_streaming_message;
         /**
+         * Information for the spine joints
+         */
+        boolean has_spine_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage spine_streaming_message;
+        /**
+         * Information for the left leg joints
+         */
+        boolean has_left_leg_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage left_leg_streaming_message;
+        /**
+         * Information for the right leg joints
+         */
+        boolean has_right_leg_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage right_leg_streaming_message;
+        /**
          * Information for the chest
          */
         boolean has_chest_streaming_message;
@@ -67,6 +83,11 @@ module controller_msgs
          */
         boolean enable_user_pelvis_control;
         ihmc_common_msgs::msg::dds::SE3StreamingMessage pelvis_streaming_message;
+        /**
+         * Information for the CoM
+         */
+        boolean has_center_of_mass_trajectory_message;
+        ihmc_common_msgs::msg::dds::EuclideanStreamingMessage center_of_mass_trajectory_message;
         /**
          * Information for the neck joints
          */

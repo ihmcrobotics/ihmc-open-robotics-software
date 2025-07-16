@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.robotics.Assert.assertArrayEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Random;
 
@@ -46,8 +43,10 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class SpatialFeedbackControllerTest
 {
@@ -129,7 +128,7 @@ public final class SpatialFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);
@@ -233,7 +232,7 @@ public final class SpatialFeedbackControllerTest
       int numberOfJoints = 10;
       Vector3D[] jointAxes = new Vector3D[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3D(random, 1.0);
 
       YoRegistry registry = new YoRegistry("Dummy");
       RandomFloatingRevoluteJointChain randomFloatingChain = new RandomFloatingRevoluteJointChain(random, jointAxes);

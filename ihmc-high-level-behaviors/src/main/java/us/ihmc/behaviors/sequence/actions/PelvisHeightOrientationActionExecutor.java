@@ -18,8 +18,6 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
 {
    public static final double POSITION_TOLERANCE = 0.15;
 
-   private final PelvisHeightOrientationActionDefinition definition;
-   private final PelvisHeightOrientationActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
@@ -35,12 +33,8 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
    {
       super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
-      state = getState();
-
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-
-      definition = getDefinition();
    }
 
    @Override
@@ -54,9 +48,9 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       if (state.getPelvisFrame().isChildOfWorld())
       {
@@ -86,7 +80,7 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
          syncedPelvisPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
          desiredPelvisPose.getTranslation().set(syncedPelvisPose.getTranslationX(), syncedPelvisPose.getTranslationY(), desiredPelvisPose.getTranslationZ());
          desiredPelvisPose.getRotation().setYawPitchRoll(syncedPelvisPose.getYaw(), desiredPelvisPose.getPitch(), syncedPelvisPose.getRoll());
-         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedPelvisPose, desiredPelvisPose, getDefinition().getTrajectoryDuration());
+         state.getCommandedTrajectory().setSingleSegmentTrajectory(syncedPelvisPose, desiredPelvisPose, definition.getTrajectoryDuration());
       }
       else
       {
@@ -100,11 +94,10 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
 
-      if (trackingCalculator.getHitTimeLimit())
+      if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out.");
          return;
       }
 

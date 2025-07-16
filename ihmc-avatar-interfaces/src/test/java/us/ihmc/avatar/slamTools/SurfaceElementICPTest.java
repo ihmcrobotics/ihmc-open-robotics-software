@@ -1,18 +1,10 @@
 package us.ihmc.avatar.slamTools;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.File;
-import java.util.List;
-import java.util.function.Function;
-
-import org.ejml.data.DMatrixRMaj;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -29,7 +21,10 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.robotics.optimization.OutputCalculator;
 
-@Tag("point-cloud-drift-correction-test")
+import java.io.File;
+import java.util.List;
+import java.util.function.Function;
+
 public class SurfaceElementICPTest
 {
    private static final boolean VISUALIZE = true;

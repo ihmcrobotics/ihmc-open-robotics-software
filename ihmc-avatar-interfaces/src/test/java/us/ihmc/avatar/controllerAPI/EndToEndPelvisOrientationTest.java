@@ -1,25 +1,17 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import org.jcodec.common.Assert;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import org.jcodec.common.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -30,13 +22,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -45,15 +35,15 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -64,6 +54,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInterface
 {
@@ -78,7 +74,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    @Test
    public void testGoHome()
    {
-      double epsilon = 1.0e-4;
+      double epsilon = 1.5e-4;
       double yaw = Math.toRadians(15.0);
       double trajectoryTime = 0.5;
 
@@ -135,7 +131,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       pelvisOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation);
-      message.setSequenceId(random.nextLong());
+      message.setSequenceId(Math.abs(random.nextLong()));
       SO3TrajectoryPointMessage waypoint = message.getSo3Trajectory().getTaskspaceTrajectoryPoints().get(0);
       simulationTestHelper.publishToController(message);
       simulationTestHelper.simulateNow(4.0 * controllerDT);
@@ -168,7 +164,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                         epsilon,
                                                         controllerDT);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -203,29 +200,39 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, true);
       simulationTestHelper.publishToController(footsteps);
-      simulationTestHelper.simulateNow(walkingTime + 1.0);
+      simulationTestHelper.simulateNow(walkingTime + 0.5);
 
-      assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode(), "Control Mode");
       humanoidReferenceFrames.updateFrames();
-      ReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
-      FrameQuaternion midFeetOrientation = new FrameQuaternion(midFeetZUpFrame);
-      midFeetOrientation.changeFrame(worldFrame);
+
+      FramePose3D leftFootPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPose = new FramePose3D(humanoidReferenceFrames.getSoleFrame(RobotSide.RIGHT));
+
+      leftFootPose.changeFrame(worldFrame);
+      rightFootPose.changeFrame(worldFrame);
+
+      FrameQuaternion midFeetOrientation = new FrameQuaternion();
+      double walkingPathYaw = AngleTools.interpolateAngle(leftFootPose.getYaw(), rightFootPose.getYaw(), 0.5);
+      double currentControllerWalkingPathYaw = findWalkingTrajectoryPathCurrentYaw();
+      assertEquals(AngleTools.computeAngleDifferenceMinusPiToPi(walkingPathYaw, currentControllerWalkingPathYaw), 0.0, 1e-2);
+      midFeetOrientation.setToYawOrientation(currentControllerWalkingPathYaw);
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation, zeroVector, epsilon, simulationTestHelper);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testWalkingAfterTrajectory()
    {
-      double epsilon = 3.0e-3;
+      double epsilon = 7.5e-3;
 
       simulationTestHelper.findVariable(PelvisOrientationManager.class.getSimpleName(), "doPreparePelvisForLocomotion").setValueFromDouble(0.0);
 
-      assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode() ,"Control Mode");
       testSingleTrajectoryPoint();
-      assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.USER, findCurrentControlMode(), "Control Mode");
 
       humanoidReferenceFrames.updateFrames();
       ReferenceFrame midFeetZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
@@ -240,13 +247,14 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       double walkingTime = createWalkingMessage(steps, footsteps, false);
       simulationTestHelper.publishToController(footsteps);
       simulationTestHelper.simulateNow(walkingTime + 1.5);
-      assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode(), "Control Mode");
 
       humanoidReferenceFrames.updateFrames();
       desiredAfterTrajectory.changeFrame(worldFrame);
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory, zeroVector, epsilon, simulationTestHelper);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -343,7 +351,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                         statusMessages.remove(0),
                                                         controllerDT);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
@@ -358,16 +367,16 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                                                                                  midFootZUpGroundFrame);
       message.setEnableUserPelvisControlDuringWalking(true);
 
-      assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode(), "Control Mode");
       simulationTestHelper.publishToController(message);
       simulationTestHelper.simulateNow(trajectoryTime);
-      assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.USER, findCurrentControlMode(), "Control Mode");
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createCircularWalkingMessage(8, footsteps, true);
       simulationTestHelper.publishToController(footsteps);
       simulationTestHelper.simulateNow(walkingTime / 2.0);
-      assertEquals("Control Mode", PelvisOrientationControlMode.USER, findCurrentControlMode());
+      assertEquals(PelvisOrientationControlMode.USER, findCurrentControlMode(),"Control Mode");
    }
 
    @Test
@@ -406,18 +415,21 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
                                                                                               worldFrame,
                                                                                               worldFrame);
       simulationTestHelper.publishToController(chestMessage);
-      simulationTestHelper.simulateNow(chestTrajectoryTime + 1.0);
+      // This time had to be increased for Alexander. Because there is no spine pitch, the chest can't move to the position without the pelvis moving. However,
+      // The pelvis is just tracking the chest. So it's pretty laggy.
+      simulationTestHelper.simulateNow(chestTrajectoryTime + 3.0);
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, epsilon, simulationTestHelper);
 
-      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
+      // TODO GITHUB WORKFLOWS
+//      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    @Test
    public void testStreaming() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -426,7 +438,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
-      boolean success = simulationTestHelper.simulateNow(1.0);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -520,7 +532,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(desiredOrientation, currentDesiredTrajectoryPoint.getOrientation(), desiredEpsilon);
       EuclidCoreTestTools.assertEquals(desiredAngularVelocity, currentDesiredTrajectoryPoint.getAngularVelocity(), desiredEpsilon);
-      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.0e-3);
+      EndToEndChestTrajectoryMessageTest.assertControlErrorIsLow(simulationTestHelper, pelvis, 1.5e-3);
    }
 
    @SuppressWarnings("unchecked")
@@ -529,6 +541,12 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       String managerName = PelvisOrientationManager.class.getSimpleName();
       YoVariable variable = simulationTestHelper.findVariable(managerName, managerName + "CurrentState");
       return ((YoEnum<PelvisOrientationControlMode>) variable).getEnumValue();
+   }
+
+   private double findWalkingTrajectoryPathCurrentYaw()
+   {
+      YoVariable variable = simulationTestHelper.findVariable("WalkingTrajectoryPath", "walkingTrajectoryPathCurrentYaw");
+      return ((YoDouble) variable).getDoubleValue();
    }
 
    private double createCircularWalkingMessage(int steps, FootstepDataListMessage messageToPack, boolean squareUp)

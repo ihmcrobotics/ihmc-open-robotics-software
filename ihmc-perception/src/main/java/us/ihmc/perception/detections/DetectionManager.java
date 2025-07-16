@@ -4,6 +4,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.ros2.ROS2Node;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class DetectionManager
 {
@@ -21,12 +23,14 @@ public class DetectionManager
    private final Set<PersistentDetection> persistentDetections = new HashSet<>();
    /** Set of detections that have become valid for the first time. Only accessed by the SceneGraph*/
    private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
+   private final List<Consumer<PersistentDetection>> newlyValidDetectionCallbacks = new ArrayList<>();
+   private final List<Consumer<PersistentDetection>> detectionRemovedCallbacks = new ArrayList<>();
    private final Object persistentDetectionsLock = new Object();
 
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
    private final ROS2StoredPropertySet<DetectionManagerSettings> settingsSync;
 
-   public DetectionManager(ROS2PublishSubscribeAPI ros2)
+   public DetectionManager(ROS2Node ros2)
    {
       settingsSync = ros2 == null ? null : new ROS2StoredPropertySet<>(ros2, PerceptionAPI.DETECTION_MANAGER_SETTINGS, settings);
    }
@@ -111,6 +115,16 @@ public class DetectionManager
       }
    }
 
+   public void addNewlyValidDetectionCallback(Consumer<PersistentDetection> callback)
+   {
+      newlyValidDetectionCallbacks.add(callback);
+   }
+
+   public void addDetectionRemovedCallback(Consumer<PersistentDetection> callback)
+   {
+      detectionRemovedCallbacks.add(callback);
+   }
+
    public <T extends InstantDetection> List<PersistentDetection> updateAndGetDetectionsOfType(Class<T> classType)
    {
       synchronized (persistentDetectionsLock)
@@ -168,8 +182,13 @@ public class DetectionManager
          while (detectionIterator.hasNext())
          {
             PersistentDetection detection = detectionIterator.next();
-            if (detection.isReadyForDeletion())
+            if (detection.isDestroyed())
             {
+               detectionIterator.remove();
+            }
+            else if (detection.isReadyForDeletion())
+            {
+               detectionRemovedCallbacks.forEach(callback -> callback.accept(detection));
                detection.destroy();
                detectionIterator.remove();
             }
@@ -180,6 +199,7 @@ public class DetectionManager
                {
                   detection.setStabilityConfidenceThreshold(settings.getStabilityAverageConfidence());
                   newlyValidDetections.add(detection);
+                  newlyValidDetectionCallbacks.forEach(callback -> callback.accept(detection));
                }
             }
          }

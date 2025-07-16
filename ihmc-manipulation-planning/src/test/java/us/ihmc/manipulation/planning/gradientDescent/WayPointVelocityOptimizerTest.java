@@ -5,13 +5,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.robotics.numericalMethods.GradientDescentModule;
-import us.ihmc.robotics.numericalMethods.SingleQueryFunction;
 
 public class WayPointVelocityOptimizerTest
 {
@@ -127,11 +127,11 @@ public class WayPointVelocityOptimizerTest
 
    private void runOptimizer(OptimizationType optimizationType, TDoubleArrayList initial)
    {
-      SingleQueryFunction function = new EvaluationFunction(optimizationType);
+      ToDoubleFunction<TDoubleArrayList> function = new EvaluationFunction(optimizationType);
       GradientDescentModule optimizer = new GradientDescentModule(function, initial);
       optimizer.setMaximumIterations(100);
 
-      LogTools.info("initial " + optimizationType.toString() + function.getQuery(initial));
+      LogTools.info("initial " + optimizationType.toString() + function.applyAsDouble(initial));
 
       System.out.println("iteration is " + optimizer.run());
       TDoubleArrayList optimalSolution = optimizer.getOptimalInput();
@@ -148,7 +148,7 @@ public class WayPointVelocityOptimizerTest
       System.out.println("optimal " + optimizationType.toString() + optimizer.getOptimalQuery());
    }
 
-   private class EvaluationFunction implements SingleQueryFunction
+   private class EvaluationFunction implements ToDoubleFunction<TDoubleArrayList>
    {
       private OptimizationType optimizationType;
 
@@ -158,7 +158,7 @@ public class WayPointVelocityOptimizerTest
       }
 
       @Override
-      public double getQuery(TDoubleArrayList values)
+      public double applyAsDouble(TDoubleArrayList values)
       {
          int numberOfTicks = (int) (times.get(times.size() - 1) / velocitOptimizerDT);
          double time = 0.0;

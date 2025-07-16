@@ -1,24 +1,24 @@
 package us.ihmc.footstepPlanning.ui;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.communication.FootstepPlannerAPI;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Node;
+
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RemotePlannerMessageConverter
 {
@@ -29,9 +29,10 @@ public class RemotePlannerMessageConverter
    private final Messager messager;
    private final String robotName;
 
-   private ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
+   private ROS2Publisher<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
 
    private Optional<HeightMapMessage> heightMapData = Optional.empty();
+   private Optional<TerrainMapMessage> terrainMapData = Optional.empty();
 
    private final AtomicReference<FootstepPlanningResult> resultReference;
    private final AtomicReference<FootstepDataListMessage> footstepPlanReference;
@@ -39,19 +40,9 @@ public class RemotePlannerMessageConverter
    private final AtomicReference<Integer> receivedPlanIdReference;
    private final AtomicReference<Boolean> acceptNewPlanarRegionsReference;
 
-   public static RemotePlannerMessageConverter createRemoteConverter(Messager messager, String robotName)
+   public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName)
    {
-      return createConverter(messager, robotName, DomainFactory.PubSubImplementation.FAST_RTPS);
-   }
-
-   public static RemotePlannerMessageConverter createIntraprocessConverter(Messager messager, String robotName)
-   {
-      return createConverter(messager, robotName, DomainFactory.PubSubImplementation.INTRAPROCESS);
-   }
-
-   public static RemotePlannerMessageConverter createConverter(Messager messager, String robotName, DomainFactory.PubSubImplementation implementation)
-   {
-      RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "ihmc_footstep_planner_ui");
+      RealtimeROS2Node ros2Node = new ROS2NodeBuilder().buildRealtime("ihmc_footstep_planner_ui");
       return new RemotePlannerMessageConverter(ros2Node, messager, robotName);
    }
 
@@ -109,6 +100,15 @@ public class RemotePlannerMessageConverter
       {
          this.heightMapData = Optional.of(heightMapMessage);
       }
+      TerrainMapMessage terrainMapMessage = packet.getTerrainMapMessage();
+      if (terrainMapMessage == null)
+      {
+         this.terrainMapData = Optional.empty();
+      }
+      else
+      {
+         this.terrainMapData = Optional.of(terrainMapMessage);
+      }
 
       RobotSide initialSupportSide = RobotSide.fromByte(packet.getRequestedInitialStanceSide());
       int plannerRequestId = packet.getPlannerRequestId();
@@ -117,6 +117,7 @@ public class RemotePlannerMessageConverter
       double horizonLength = packet.getHorizonLength();
 
       this.heightMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, regions));
+      this.terrainMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.TerrainMapData, regions));
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());

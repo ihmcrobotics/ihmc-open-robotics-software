@@ -27,8 +27,8 @@ import us.ihmc.perception.opencl.OpenCLFloatMemory;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -342,7 +342,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      heightMapData = request.getHeightMapData();
+      heightMapData = request.getEnvironmentHandler().getHeightMapData();
       if (firstTick)
       {
          firstTickSetup();

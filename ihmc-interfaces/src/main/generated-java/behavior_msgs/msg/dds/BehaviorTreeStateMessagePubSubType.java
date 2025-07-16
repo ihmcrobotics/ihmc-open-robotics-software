@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8a44e070360b505fdf96e97040c07fd1e8e6694e2f9cde3b6cf6750ffa431ded";
+   		return "3bc16fc4bbece622955144dded25f9e7ad8a784daa953d470799382e79344e5a";
    }
    
    @Override
@@ -52,59 +52,76 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 300; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.SakeHandCommandActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -120,13 +137,15 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestModificationToRootReference(), current_alignment);
+
+      current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestModificationToData(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getBehaviorTreeTypes().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -135,6 +154,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getBehaviorTreeIndices().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getPartialDataNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getCdrSerializedSize(data.getPartialDataNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getRootNodes().size(); ++i0)
@@ -147,19 +171,39 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
           current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getCdrSerializedSize(data.getBasicNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getAi2rNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.AI2RNodeStateMessagePubSubType.getCdrSerializedSize(data.getAi2rNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getActionSequences().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getCdrSerializedSize(data.getActionSequences().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getFallbackNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.FallbackNodeStateMessagePubSubType.getCdrSerializedSize(data.getFallbackNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getConditionNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.ConditionNodeStateMessagePubSubType.getCdrSerializedSize(data.getConditionNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getGotoNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.GotoNodeStateMessagePubSubType.getCdrSerializedSize(data.getGotoNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getCheckpointNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.CheckPointNodeStateMessagePubSubType.getCdrSerializedSize(data.getCheckpointNodes().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getDoorTraversals().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getCdrSerializedSize(data.getDoorTraversals().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getTrashCanInteractions().size(); ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType.getCdrSerializedSize(data.getTrashCanInteractions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBuildingExplorations().size(); ++i0)
@@ -217,95 +261,122 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_4(data.getNextId());
 
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToRootReference(), cdr);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToData(), cdr);
       if(data.getBehaviorTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getBehaviorTreeTypes());else
-          throw new RuntimeException("behavior_tree_types field exceeds the maximum length");
+          throw new RuntimeException("behavior_tree_types field exceeds the maximum length: %d > %d".formatted(data.getBehaviorTreeTypes().size(), 1000));
 
       if(data.getBehaviorTreeIndices().size() <= 1000)
       cdr.write_type_e(data.getBehaviorTreeIndices());else
-          throw new RuntimeException("behavior_tree_indices field exceeds the maximum length");
+          throw new RuntimeException("behavior_tree_indices field exceeds the maximum length: %d > %d".formatted(data.getBehaviorTreeIndices().size(), 1000));
+
+      if(data.getPartialDataNodes().size() <= 300)
+      cdr.write_type_e(data.getPartialDataNodes());else
+          throw new RuntimeException("partial_data_nodes field exceeds the maximum length: %d > %d".formatted(data.getPartialDataNodes().size(), 300));
 
       if(data.getRootNodes().size() <= 1)
       cdr.write_type_e(data.getRootNodes());else
-          throw new RuntimeException("root_nodes field exceeds the maximum length");
+          throw new RuntimeException("root_nodes field exceeds the maximum length: %d > %d".formatted(data.getRootNodes().size(), 1));
 
-      if(data.getBasicNodes().size() <= 200)
+      if(data.getBasicNodes().size() <= 120)
       cdr.write_type_e(data.getBasicNodes());else
-          throw new RuntimeException("basic_nodes field exceeds the maximum length");
+          throw new RuntimeException("basic_nodes field exceeds the maximum length: %d > %d".formatted(data.getBasicNodes().size(), 120));
 
-      if(data.getActionSequences().size() <= 200)
+      if(data.getAi2rNodes().size() <= 1)
+      cdr.write_type_e(data.getAi2rNodes());else
+          throw new RuntimeException("ai2r_nodes field exceeds the maximum length: %d > %d".formatted(data.getAi2rNodes().size(), 1));
+
+      if(data.getActionSequences().size() <= 120)
       cdr.write_type_e(data.getActionSequences());else
-          throw new RuntimeException("action_sequences field exceeds the maximum length");
+          throw new RuntimeException("action_sequences field exceeds the maximum length: %d > %d".formatted(data.getActionSequences().size(), 120));
 
-      if(data.getDoorTraversals().size() <= 200)
+      if(data.getFallbackNodes().size() <= 120)
+      cdr.write_type_e(data.getFallbackNodes());else
+          throw new RuntimeException("fallback_nodes field exceeds the maximum length: %d > %d".formatted(data.getFallbackNodes().size(), 120));
+
+      if(data.getConditionNodes().size() <= 120)
+      cdr.write_type_e(data.getConditionNodes());else
+          throw new RuntimeException("condition_nodes field exceeds the maximum length: %d > %d".formatted(data.getConditionNodes().size(), 120));
+
+      if(data.getGotoNodes().size() <= 120)
+      cdr.write_type_e(data.getGotoNodes());else
+          throw new RuntimeException("goto_nodes field exceeds the maximum length: %d > %d".formatted(data.getGotoNodes().size(), 120));
+
+      if(data.getCheckpointNodes().size() <= 120)
+      cdr.write_type_e(data.getCheckpointNodes());else
+          throw new RuntimeException("checkpoint_nodes field exceeds the maximum length: %d > %d".formatted(data.getCheckpointNodes().size(), 120));
+
+      if(data.getDoorTraversals().size() <= 120)
       cdr.write_type_e(data.getDoorTraversals());else
-          throw new RuntimeException("door_traversals field exceeds the maximum length");
+          throw new RuntimeException("door_traversals field exceeds the maximum length: %d > %d".formatted(data.getDoorTraversals().size(), 120));
 
-      if(data.getTrashCanInteractions().size() <= 200)
-      cdr.write_type_e(data.getTrashCanInteractions());else
-          throw new RuntimeException("trash_can_interactions field exceeds the maximum length");
-
-      if(data.getBuildingExplorations().size() <= 200)
+      if(data.getBuildingExplorations().size() <= 120)
       cdr.write_type_e(data.getBuildingExplorations());else
-          throw new RuntimeException("building_explorations field exceeds the maximum length");
+          throw new RuntimeException("building_explorations field exceeds the maximum length: %d > %d".formatted(data.getBuildingExplorations().size(), 120));
 
-      if(data.getChestOrientationActions().size() <= 200)
+      if(data.getChestOrientationActions().size() <= 120)
       cdr.write_type_e(data.getChestOrientationActions());else
-          throw new RuntimeException("chest_orientation_actions field exceeds the maximum length");
+          throw new RuntimeException("chest_orientation_actions field exceeds the maximum length: %d > %d".formatted(data.getChestOrientationActions().size(), 120));
 
-      if(data.getFootstepPlanActions().size() <= 200)
+      if(data.getFootstepPlanActions().size() <= 120)
       cdr.write_type_e(data.getFootstepPlanActions());else
-          throw new RuntimeException("footstep_plan_actions field exceeds the maximum length");
+          throw new RuntimeException("footstep_plan_actions field exceeds the maximum length: %d > %d".formatted(data.getFootstepPlanActions().size(), 120));
 
-      if(data.getSakeHandCommandActions().size() <= 200)
+      if(data.getSakeHandCommandActions().size() <= 120)
       cdr.write_type_e(data.getSakeHandCommandActions());else
-          throw new RuntimeException("sake_hand_command_actions field exceeds the maximum length");
+          throw new RuntimeException("sake_hand_command_actions field exceeds the maximum length: %d > %d".formatted(data.getSakeHandCommandActions().size(), 120));
 
-      if(data.getHandPoseActions().size() <= 200)
+      if(data.getHandPoseActions().size() <= 120)
       cdr.write_type_e(data.getHandPoseActions());else
-          throw new RuntimeException("hand_pose_actions field exceeds the maximum length");
+          throw new RuntimeException("hand_pose_actions field exceeds the maximum length: %d > %d".formatted(data.getHandPoseActions().size(), 120));
 
-      if(data.getHandWrenchActions().size() <= 200)
+      if(data.getHandWrenchActions().size() <= 120)
       cdr.write_type_e(data.getHandWrenchActions());else
-          throw new RuntimeException("hand_wrench_actions field exceeds the maximum length");
+          throw new RuntimeException("hand_wrench_actions field exceeds the maximum length: %d > %d".formatted(data.getHandWrenchActions().size(), 120));
 
-      if(data.getScrewPrimitiveActions().size() <= 200)
+      if(data.getScrewPrimitiveActions().size() <= 120)
       cdr.write_type_e(data.getScrewPrimitiveActions());else
-          throw new RuntimeException("screw_primitive_actions field exceeds the maximum length");
+          throw new RuntimeException("screw_primitive_actions field exceeds the maximum length: %d > %d".formatted(data.getScrewPrimitiveActions().size(), 120));
 
-      if(data.getPelvisHeightActions().size() <= 200)
+      if(data.getPelvisHeightActions().size() <= 120)
       cdr.write_type_e(data.getPelvisHeightActions());else
-          throw new RuntimeException("pelvis_height_actions field exceeds the maximum length");
+          throw new RuntimeException("pelvis_height_actions field exceeds the maximum length: %d > %d".formatted(data.getPelvisHeightActions().size(), 120));
 
-      if(data.getWaitDurationActions().size() <= 200)
+      if(data.getWaitDurationActions().size() <= 120)
       cdr.write_type_e(data.getWaitDurationActions());else
-          throw new RuntimeException("wait_duration_actions field exceeds the maximum length");
+          throw new RuntimeException("wait_duration_actions field exceeds the maximum length: %d > %d".formatted(data.getWaitDurationActions().size(), 120));
 
-      if(data.getFootPoseActions().size() <= 200)
+      if(data.getFootPoseActions().size() <= 120)
       cdr.write_type_e(data.getFootPoseActions());else
-          throw new RuntimeException("foot_pose_actions field exceeds the maximum length");
+          throw new RuntimeException("foot_pose_actions field exceeds the maximum length: %d > %d".formatted(data.getFootPoseActions().size(), 120));
 
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setNextId(cdr.read_type_4());
       	
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToRootReference(), cdr);	
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToData(), cdr);	
       cdr.read_type_e(data.getBehaviorTreeTypes());	
       cdr.read_type_e(data.getBehaviorTreeIndices());	
+      cdr.read_type_e(data.getPartialDataNodes());	
       cdr.read_type_e(data.getRootNodes());	
       cdr.read_type_e(data.getBasicNodes());	
+      cdr.read_type_e(data.getAi2rNodes());	
       cdr.read_type_e(data.getActionSequences());	
+      cdr.read_type_e(data.getFallbackNodes());	
+      cdr.read_type_e(data.getConditionNodes());	
+      cdr.read_type_e(data.getGotoNodes());	
+      cdr.read_type_e(data.getCheckpointNodes());	
       cdr.read_type_e(data.getDoorTraversals());	
-      cdr.read_type_e(data.getTrashCanInteractions());	
       cdr.read_type_e(data.getBuildingExplorations());	
       cdr.read_type_e(data.getChestOrientationActions());	
       cdr.read_type_e(data.getFootstepPlanActions());	
@@ -322,17 +393,24 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
-      ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+      ser.write_type_a("latest_modification_to_root_reference", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToRootReference());
+
+      ser.write_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       ser.write_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.write_type_e("partial_data_nodes", data.getPartialDataNodes());
       ser.write_type_e("root_nodes", data.getRootNodes());
       ser.write_type_e("basic_nodes", data.getBasicNodes());
+      ser.write_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
+      ser.write_type_e("fallback_nodes", data.getFallbackNodes());
+      ser.write_type_e("condition_nodes", data.getConditionNodes());
+      ser.write_type_e("goto_nodes", data.getGotoNodes());
+      ser.write_type_e("checkpoint_nodes", data.getCheckpointNodes());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
-      ser.write_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.write_type_e("building_explorations", data.getBuildingExplorations());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.write_type_e("footstep_plan_actions", data.getFootstepPlanActions());
@@ -348,17 +426,24 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeStateMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
-      ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+      ser.read_type_a("latest_modification_to_root_reference", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToRootReference());
+
+      ser.read_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       ser.read_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.read_type_e("partial_data_nodes", data.getPartialDataNodes());
       ser.read_type_e("root_nodes", data.getRootNodes());
       ser.read_type_e("basic_nodes", data.getBasicNodes());
+      ser.read_type_e("ai2r_nodes", data.getAi2rNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
+      ser.read_type_e("fallback_nodes", data.getFallbackNodes());
+      ser.read_type_e("condition_nodes", data.getConditionNodes());
+      ser.read_type_e("goto_nodes", data.getGotoNodes());
+      ser.read_type_e("checkpoint_nodes", data.getCheckpointNodes());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
-      ser.read_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.read_type_e("building_explorations", data.getBuildingExplorations());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.read_type_e("footstep_plan_actions", data.getFootstepPlanActions());

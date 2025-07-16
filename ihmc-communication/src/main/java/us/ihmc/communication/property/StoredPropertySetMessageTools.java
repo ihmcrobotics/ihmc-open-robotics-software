@@ -1,11 +1,13 @@
 package us.ihmc.communication.property;
 
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage;
+import us.ihmc.idl.IDLSequence.Boolean;
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
+import us.ihmc.tools.property.IntegerStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class StoredPropertySetMessageTools
 {
@@ -13,27 +15,99 @@ public class StoredPropertySetMessageTools
     * @param runIfChanged Will get called only if any properties are not equal to the previous
     *                     values. The parameter set will have the new values when this is called.
     */
-   public static void copyToStoredPropertySet(StoredPropertySetMessage message, StoredPropertySetBasics setToPack, Runnable runIfChanged)
+   public static void copyToStoredPropertySet(PrimitiveDataVectorMessage message, StoredPropertySetBasics setToPack, Runnable runIfChanged)
    {
-      List<String> values = Arrays.asList(message.getStrings().toStringArray());
-
-      if (!setToPack.getAllAsStrings().equals(values))
+      if (!valuesAreAllEqual(message, setToPack))
       {
-         setToPack.setAllFromStrings(values);
+         fromMessage(message, setToPack);
          runIfChanged.run();
       }
    }
 
-   public static boolean valuesAreAllEqual(StoredPropertySetMessage message, StoredPropertySetReadOnly set)
+   public static boolean valuesAreAllEqual(PrimitiveDataVectorMessage message, StoredPropertySetReadOnly storedPropertySet)
    {
-      List<String> values = Arrays.asList(message.getStrings().toStringArray());
-      return set.getAllAsStrings().equals(values);
+      int doubleIndex = 0;
+      int integerIndex = 0;
+      int booleanIndex = 0;
+
+      for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+      {
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         {
+            if (storedPropertySet.get(doubleKey) != message.getDoubleValues().get(doubleIndex))
+               return false;
+            ++doubleIndex;
+         }
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         {
+            if (storedPropertySet.get(integerKey) != message.getIntegerValues().get(integerIndex))
+               return false;
+            ++integerIndex;
+         }
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         {
+            if (storedPropertySet.get(booleanKey) != (message.getBooleanValues().get(booleanIndex) == Boolean.True))
+               return false;
+            ++booleanIndex;
+         }
+      }
+
+      return true;
    }
 
-   public static StoredPropertySetMessage newMessage(StoredPropertySetBasics storedPropertySet)
+   public static PrimitiveDataVectorMessage newMessage(StoredPropertySetReadOnly storedPropertySet)
    {
-      StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
-      storedPropertySet.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
-      return storedPropertySetMessage;
+      PrimitiveDataVectorMessage message = new PrimitiveDataVectorMessage();
+      toMessage(message, storedPropertySet);
+      return message;
+   }
+
+   public static void toMessage(PrimitiveDataVectorMessage message, StoredPropertySetReadOnly storedPropertySet)
+   {
+      message.getDoubleValues().resetQuick();
+      message.getIntegerValues().resetQuick();
+      message.getBooleanValues().resetQuick();
+
+      for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+      {
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         {
+            message.getDoubleValues().add(storedPropertySet.get(doubleKey));
+         }
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         {
+            message.getIntegerValues().add(storedPropertySet.get(integerKey));
+         }
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         {
+            message.getBooleanValues().add(storedPropertySet.get(booleanKey));
+         }
+      }
+   }
+
+   public static void fromMessage(PrimitiveDataVectorMessage message, StoredPropertySetBasics storedPropertySet)
+   {
+      int doubleIndex = 0;
+      int integerIndex = 0;
+      int booleanIndex = 0;
+
+      for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+      {
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         {
+            storedPropertySet.set(doubleKey, message.getDoubleValues().get(doubleIndex));
+            ++doubleIndex;
+         }
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         {
+            storedPropertySet.set(integerKey, message.getIntegerValues().get(integerIndex));
+            ++integerIndex;
+         }
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         {
+            storedPropertySet.set(booleanKey, message.getBooleanValues().get(booleanIndex) == Boolean.True);
+            ++booleanIndex;
+         }
+      }
    }
 }

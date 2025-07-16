@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "02834143142106e8df98428110fd9ed671901225742ce0e986fd45c55959544f";
+   		return "468e523da6712c95a491f4a8b570a496f3a3f11cadd83ac7a2203807b738c94f";
    }
    
    @Override
@@ -52,7 +52,15 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -64,16 +72,16 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (45000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 45000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 45000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -89,7 +97,19 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -135,7 +155,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getXyResolution());
 
@@ -145,33 +165,41 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getGridCenterY());
 
+      cdr.write_type_6(data.getHeightOffset());
+
+      cdr.write_type_6(data.getHeightScaleFactor());
+
       cdr.write_type_6(data.getEstimatedGroundHeight());
 
-      if(data.getKeys().size() <= 45000)
+      cdr.write_type_6(data.getWidthInMeters());
+
+      cdr.write_type_6(data.getCellSizeInMeters());
+
+      if(data.getKeys().size() <= 255000)
       cdr.write_type_e(data.getKeys());else
-          throw new RuntimeException("keys field exceeds the maximum length");
+          throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 255000));
 
-      if(data.getHeights().size() <= 45000)
+      if(data.getHeights().size() <= 255000)
       cdr.write_type_e(data.getHeights());else
-          throw new RuntimeException("heights field exceeds the maximum length");
+          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 255000));
 
-      if(data.getVariances().size() <= 45000)
+      if(data.getVariances().size() <= 255000)
       cdr.write_type_e(data.getVariances());else
-          throw new RuntimeException("variances field exceeds the maximum length");
+          throw new RuntimeException("variances field exceeds the maximum length: %d > %d".formatted(data.getVariances().size(), 255000));
 
-      if(data.getCentroids().size() <= 45000)
+      if(data.getCentroids().size() <= 255000)
       cdr.write_type_e(data.getCentroids());else
-          throw new RuntimeException("centroids field exceeds the maximum length");
+          throw new RuntimeException("centroids field exceeds the maximum length: %d > %d".formatted(data.getCentroids().size(), 255000));
 
-      if(data.getNormals().size() <= 45000)
+      if(data.getNormals().size() <= 255000)
       cdr.write_type_e(data.getNormals());else
-          throw new RuntimeException("normals field exceeds the maximum length");
+          throw new RuntimeException("normals field exceeds the maximum length: %d > %d".formatted(data.getNormals().size(), 255000));
 
    }
 
    public static void read(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setXyResolution(cdr.read_type_6());
       	
@@ -181,7 +209,15 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setGridCenterY(cdr.read_type_6());
       	
+      data.setHeightOffset(cdr.read_type_6());
+      	
+      data.setHeightScaleFactor(cdr.read_type_6());
+      	
       data.setEstimatedGroundHeight(cdr.read_type_6());
+      	
+      data.setWidthInMeters(cdr.read_type_6());
+      	
+      data.setCellSizeInMeters(cdr.read_type_6());
       	
       cdr.read_type_e(data.getKeys());	
       cdr.read_type_e(data.getHeights());	
@@ -194,12 +230,16 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("xy_resolution", data.getXyResolution());
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
       ser.write_type_6("grid_center_x", data.getGridCenterX());
       ser.write_type_6("grid_center_y", data.getGridCenterY());
+      ser.write_type_6("height_offset", data.getHeightOffset());
+      ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
       ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
+      ser.write_type_6("width_in_meters", data.getWidthInMeters());
+      ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_e("keys", data.getKeys());
       ser.write_type_e("heights", data.getHeights());
       ser.write_type_e("variances", data.getVariances());
@@ -210,12 +250,16 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.HeightMapMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setXyResolution(ser.read_type_6("xy_resolution"));
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
       data.setGridCenterX(ser.read_type_6("grid_center_x"));
       data.setGridCenterY(ser.read_type_6("grid_center_y"));
+      data.setHeightOffset(ser.read_type_6("height_offset"));
+      data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
       data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
+      data.setWidthInMeters(ser.read_type_6("width_in_meters"));
+      data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       ser.read_type_e("keys", data.getKeys());
       ser.read_type_e("heights", data.getHeights());
       ser.read_type_e("variances", data.getVariances());

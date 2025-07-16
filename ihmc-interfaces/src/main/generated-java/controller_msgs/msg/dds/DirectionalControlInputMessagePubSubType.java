@@ -15,7 +15,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d4214e040772434f3f45ae142120672b9cbbb0c55270ad03cc9ad8104ae4eca5";
+   		return "a58203a892bc99f48fbccaeaebac3c8612c8b739f598be9d6ca5b0e4d9517a5c";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +73,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -91,7 +91,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(controller_msgs.msg.dds.DirectionalControlInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getForward());
 
@@ -103,7 +103,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
 
    public static void read(controller_msgs.msg.dds.DirectionalControlInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setForward(cdr.read_type_6());
       	
@@ -117,7 +117,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(controller_msgs.msg.dds.DirectionalControlInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("forward", data.getForward());
       ser.write_type_6("right", data.getRight());
       ser.write_type_6("clockwise", data.getClockwise());
@@ -126,7 +126,7 @@ public class DirectionalControlInputMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DirectionalControlInputMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setForward(ser.read_type_6("forward"));
       data.setRight(ser.read_type_6("right"));
       data.setClockwise(ser.read_type_6("clockwise"));

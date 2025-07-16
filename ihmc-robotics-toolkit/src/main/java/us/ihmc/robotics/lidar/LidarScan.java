@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.Ray3d;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 
 public class LidarScan
@@ -175,13 +174,6 @@ public class LidarScan
    public RigidBodyTransform getAverageTransform()
    {
       return averageTransform;
-   }
-
-   public Ray3d getRay(int index)
-   {
-      LineSegment3D unitSegment = getLineSegment(index, 1.0f);
-
-      return new Ray3d(unitSegment.getFirstEndpoint(), unitSegment.getDirection(true));
    }
 
    /* PRIVATE/PROTECTED FUNCTIONS */

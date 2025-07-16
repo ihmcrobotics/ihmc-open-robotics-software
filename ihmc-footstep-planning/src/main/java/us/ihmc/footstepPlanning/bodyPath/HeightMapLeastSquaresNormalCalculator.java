@@ -6,17 +6,17 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Arrays;
 
 public class HeightMapLeastSquaresNormalCalculator
 {
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
-   private final FootstepPlannerEnvironmentHandler internalEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
+   private final EnvironmentHandler internalEnvironmentHandler = new EnvironmentHandler();
 
    private UnitVector3DBasics[] surfaceNormals;
    private double[] sampledHeights;
@@ -55,7 +55,7 @@ public class HeightMapLeastSquaresNormalCalculator
 
       double maxIncline = Math.toRadians(45.0);
       double snapHeightThreshold = patchWidth * Math.sin(maxIncline);
-      internalEnvironmentHandler.setHeightMap(heightMapData);
+      internalEnvironmentHandler.setHeightMapData(heightMapData);
 
       for (int xIndex = 0; xIndex < gridWidth; xIndex++)
       {

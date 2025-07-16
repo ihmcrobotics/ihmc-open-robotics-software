@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
@@ -15,10 +16,13 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    private long sequenceId;
    private long timestamp;
    private final RecyclingArrayList<KinematicsToolboxRigidBodyCommand> inputs = new RecyclingArrayList<>(KinematicsToolboxRigidBodyCommand::new);
+   private boolean useCenterOfMassInput = false;
+   private final KinematicsToolboxCenterOfMassCommand centerOfMassInput = new KinematicsToolboxCenterOfMassCommand();
    private boolean streamToController = false;
    private double streamInitialBlendDuration = -1.0;
    private double angularRateLimitation = -1.0;
    private double linearRateLimitation = -1.0;
+   private boolean isDemonstrationEpisode = false;
 
    @Override
    public void clear()
@@ -26,10 +30,13 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       sequenceId = 0;
       timestamp = 0;
       inputs.clear();
+      useCenterOfMassInput = false;
+      centerOfMassInput.clear();
       streamToController = false;
       streamInitialBlendDuration = -1.0;
       angularRateLimitation = -1.0;
       linearRateLimitation = -1.0;
+      isDemonstrationEpisode = false;
    }
 
    @Override
@@ -40,10 +47,13 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       inputs.clear();
       for (int i = 0; i < other.inputs.size(); i++)
          inputs.add().set(other.inputs.get(i));
+      useCenterOfMassInput = other.useCenterOfMassInput;
+      centerOfMassInput.set(other.centerOfMassInput);
       streamToController = other.streamToController;
       streamInitialBlendDuration = other.streamInitialBlendDuration;
       angularRateLimitation = other.angularRateLimitation;
       linearRateLimitation = other.linearRateLimitation;
+      isDemonstrationEpisode = other.isDemonstrationEpisode;
    }
 
    @Override
@@ -61,10 +71,13 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       inputs.clear();
       for (int i = 0; i < message.getInputs().size(); i++)
          inputs.add().set(message.getInputs().get(i), rigidBodyHashCodeResolver, referenceFrameResolver);
+      useCenterOfMassInput = message.getUseCenterOfMassInput();
+      centerOfMassInput.setFromMessage(message.getCenterOfMassInput());
       streamToController = message.getStreamToController();
       streamInitialBlendDuration = message.getStreamInitialBlendDuration();
       angularRateLimitation = message.getAngularRateLimitation();
       linearRateLimitation = message.getLinearRateLimitation();
+      isDemonstrationEpisode = message.getIsDemonstrationEpisode();
    }
 
    public void setTimestamp(long timestamp)
@@ -123,6 +136,27 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       return null;
    }
 
+   public void setUseCenterOfMassInput(boolean useCenterOfMassInput)
+   {
+      this.useCenterOfMassInput = useCenterOfMassInput;
+   }
+
+   public void setCenterOfMassInput(KinematicsToolboxCenterOfMassCommand centerOfMassInput)
+   {
+      this.centerOfMassInput.set(centerOfMassInput);
+      useCenterOfMassInput = true;
+   }
+
+   public boolean hasCenterOfMassInput()
+   {
+      return useCenterOfMassInput;
+   }
+
+   public KinematicsToolboxCenterOfMassCommand getCenterOfMassInput()
+   {
+      return centerOfMassInput;
+   }
+
    public boolean getStreamToController()
    {
       return streamToController;
@@ -143,6 +177,11 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       return linearRateLimitation;
    }
 
+   public boolean getIsDemonstrationEpisode()
+   {
+      return isDemonstrationEpisode;
+   }
+
    @Override
    public Class<KinematicsStreamingToolboxInputMessage> getMessageClass()
    {
@@ -152,6 +191,14 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    @Override
    public boolean isCommandValid()
    {
+      for (int i = 0; i < inputs.size(); i++)
+      {
+         if (!inputs.get(i).isCommandValid())
+            return false;
+      }
+      if (useCenterOfMassInput && !centerOfMassInput.isCommandValid())
+         return false;
+
       return true;
    }
 

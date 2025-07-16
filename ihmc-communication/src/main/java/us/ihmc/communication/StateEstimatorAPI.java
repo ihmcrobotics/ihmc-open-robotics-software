@@ -13,11 +13,9 @@ import us.ihmc.ros2.ROS2Topic;
  */
 public final class StateEstimatorAPI
 {
-   private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HumanoidControllerAPI.HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
-
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
    {
-      return HAND_JOINT_ANGLES.withRobot(robotName);
+      return getTopic(HandJointAnglePacket.class, robotName);
    }
 
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
@@ -28,11 +26,6 @@ public final class StateEstimatorAPI
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(ROS2Topic<?> outputTopic)
    {
       return outputTopic.withTypeName(RobotConfigurationData.class).withQoS(ROS2QosProfile.BEST_EFFORT());
-   }
-
-   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
-   {
-      return getTopic(HandJointAnglePacket.class, robotName);
    }
 
    public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)

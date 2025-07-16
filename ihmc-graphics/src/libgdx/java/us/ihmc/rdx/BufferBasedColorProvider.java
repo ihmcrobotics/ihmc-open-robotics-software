@@ -1,13 +1,13 @@
 package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.Color;
-import us.ihmc.rdx.RDXPointCloudRenderer.ColorProvider;
+import us.ihmc.rdx.RDXPointCloudRendererOld.ColorProvider;
 
 import java.util.ArrayList;
 
 public class BufferBasedColorProvider implements ColorProvider
 {
-   private ArrayList<Color> colors = new ArrayList<>();
+   private final ArrayList<Color> colors = new ArrayList<>();
    private int indexR = 0;
    private int indexG = 0;
    private int indexB = 0;

@@ -151,7 +151,7 @@ public class StoredPropertySetDelegate implements StoredPropertySetBasics
    }
 
    @Override
-   public StoredPropertyKeyListReadOnly getKeyList()
+   public StoredPropertyKeyListBasics getKeyList()
    {
       return storedPropertySet.getKeyList();
    }

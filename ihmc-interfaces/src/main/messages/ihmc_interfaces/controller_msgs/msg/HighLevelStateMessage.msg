@@ -17,7 +17,7 @@ byte EXTERNAL_TRANSITION_STATE = 12
 byte EXTERNAL = 13
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Specifies the which state the controller should transition into.
 byte high_level_controller_name 255

@@ -23,8 +23,8 @@ import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.YoPoint2D;
@@ -80,7 +80,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
    {
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       gravity = Math.abs(gravity);
-      mass = TotalMassCalculator.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootJoint.getPredecessor()));
+      mass = MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootJoint.getPredecessor()));
       wrenchSensors = addFrameCorruptors(wrenchSensors, registry); // TODO Remove me
       measuredCoMFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootJoint.getPredecessor());
 

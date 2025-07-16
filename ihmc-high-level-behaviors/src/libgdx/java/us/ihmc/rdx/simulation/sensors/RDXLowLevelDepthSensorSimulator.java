@@ -19,8 +19,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.RDXPointCloudRendererOld;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.perception.RDXBytedecoImagePanel;
@@ -34,7 +33,7 @@ import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -46,7 +45,7 @@ import java.util.Random;
 public class RDXLowLevelDepthSensorSimulator
 {
    // Each point contains {X, Y, Z, R, G, B, A, Size}
-   public static final int FLOATS_PER_POINT = RDXPointCloudRenderer.FLOATS_PER_VERTEX;
+   public static final int FLOATS_PER_POINT = RDXPointCloudRendererOld.FLOATS_PER_VERTEX;
 
    private final String depthWindowName;
    private final String colorWindowName;
@@ -98,7 +97,7 @@ public class RDXLowLevelDepthSensorSimulator
    /** This contains a float buffer that has the point cloud in world coordinates **/
    private OpenCLFloatBuffer pointCloudRenderingBuffer;
    private OpenCLFloatBuffer parametersBuffer;
-   private boolean firstRender = true;
+   private long sequenceNumber = 0;
 
    public RDXLowLevelDepthSensorSimulator(String sensorName,
                                           double fieldOfViewY,
@@ -189,10 +188,10 @@ public class RDXLowLevelDepthSensorSimulator
 
    public void render(RDX3DScene scene)
    {
-      render(scene, true, null, 0.01f);
+      render(scene, true, null, 1.0f);
    }
 
-   public void render(RDX3DScene scene, boolean colorBasedOnWorldZ, Color userPointColor, float pointSize)
+   public void render(RDX3DScene scene, boolean colorBasedOnWorldZ, Color userPointColor, float pointSizeScale)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -256,6 +255,7 @@ public class RDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(5, calculatePointCloud);
       parametersBuffer.getBytedecoFloatBufferPointer().put(6, imageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(7, imageHeight);
+      float pointSize = pointSizeScale / focalLengthPixels.get();
       parametersBuffer.getBytedecoFloatBufferPointer().put(8, pointSize);
       parametersBuffer.getBytedecoFloatBufferPointer().put(9, colorBasedOnWorldZ ? 1.0f : 0.0f);
       parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.r);
@@ -277,9 +277,8 @@ public class RDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(26, noiseAmplitudeAtMinRange);
       parametersBuffer.getBytedecoFloatBufferPointer().put(27, noiseAmplitudeAtMaxRange);
       parametersBuffer.getBytedecoFloatBufferPointer().put(28, simulateL515Noise);
-      if (firstRender)
+      if (sequenceNumber++ == 0)
       {
-         firstRender = false;
          normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          noiseImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
@@ -438,6 +437,11 @@ public class RDXLowLevelDepthSensorSimulator
    public Texture getFrameBufferColorTexture()
    {
       return frameBuffer.getColorTexture();
+   }
+
+   public long getSequenceNumber()
+   {
+      return sequenceNumber;
    }
 
    public CameraIntrinsics getCameraIntrinsics()

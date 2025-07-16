@@ -1,17 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class KinematicsToolboxPrivilegedConfigurationCommand
       implements Command<KinematicsToolboxPrivilegedConfigurationCommand, KinematicsToolboxPrivilegedConfigurationMessage>
@@ -26,6 +26,7 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
    private final List<OneDoFJointBasics> joints = new ArrayList<>();
    private final TFloatArrayList privilegedJointAngles = new TFloatArrayList();
 
+   private double nullspaceAlpha = -1.0;
    private double privilegedWeight = -1.0;
    private double privilegedGain = -1.0;
 
@@ -39,6 +40,7 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
       privilegedRootJointOrientation.setToNaN();
       joints.clear();
       privilegedJointAngles.reset();
+      nullspaceAlpha = -1.0;
       privilegedWeight = -1.0;
       privilegedGain = -1.0;
    }
@@ -73,6 +75,7 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
          }
       }
 
+      nullspaceAlpha = other.nullspaceAlpha;
       privilegedWeight = other.privilegedWeight;
       privilegedGain = other.privilegedGain;
    }
@@ -125,6 +128,7 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
          }
       }
 
+      nullspaceAlpha = message.getNullspaceAlpha();
       privilegedWeight = message.getPrivilegedWeight();
       privilegedGain = message.getPrivilegedGain();
    }
@@ -164,9 +168,29 @@ public class KinematicsToolboxPrivilegedConfigurationCommand
       return privilegedJointAngles;
    }
 
+   public boolean hasNullspaceAlpha()
+   {
+      return nullspaceAlpha >= 0.0 && Double.isFinite(nullspaceAlpha);
+   }
+
+   public double getNullspaceAlpha()
+   {
+      return nullspaceAlpha;
+   }
+
+   public boolean hasPrivilegedWeight()
+   {
+      return privilegedWeight >= 0.0 && Double.isFinite(privilegedWeight);
+   }
+
    public double getPrivilegedWeight()
    {
       return privilegedWeight;
+   }
+
+   public boolean hasPrivilegedGain()
+   {
+      return privilegedGain >= 0.0 && Double.isFinite(privilegedGain);
    }
 
    public double getPrivilegedGain()

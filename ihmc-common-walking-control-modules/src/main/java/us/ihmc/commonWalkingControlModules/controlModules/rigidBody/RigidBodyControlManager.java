@@ -1,17 +1,20 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -53,6 +56,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public static final double INITIAL_GO_HOME_TIME = 2.0;
 
    private final String bodyName;
+   private final RigidBodyBasics bodyToControl;
    private final YoRegistry registry;
    private final StateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final YoEnum<RigidBodyControlMode> requestedState;
@@ -64,6 +68,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final RigidBodyLoadBearingControlState loadBearingControlState;
    private final RigidBodyExternalWrenchManager externalWrenchManager;
 
+   private final RigidBodyJointControlHelper jointControlHelper;
    private final double[] initialJointPositions;
    private final FramePose3D homePose;
 
@@ -89,11 +94,14 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                   LoadBearingParameters loadBearingParameters,
                                   RigidBodyControlMode defaultControlMode,
                                   boolean enableFunctionGenerators,
+                                  double nominalRhoWeight,
+                                  WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
                                   YoDouble yoTime,
                                   double controlDT,
                                   YoGraphicsListRegistry graphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
+      this.bodyToControl = bodyToControl;
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoRegistry(namePrefix);
@@ -107,7 +115,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       initialJointPositions = new double[jointsToControl.length];
 
-      RigidBodyJointControlHelper jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, parentRegistry);
+      jointControlHelper = new RigidBodyJointControlHelper(bodyName, jointsToControl, yoTime, controlDT, enableFunctionGenerators, postureAdjustmentProvider, parentRegistry);
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsToControl, homeConfiguration, yoTime, jointControlHelper, registry);
 
@@ -189,6 +197,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
                                                                         jointControlHelper,
                                                                         taskspaceControlState.getOrientationControlHelper(),
                                                                         loadBearingParameters,
+                                                                        nominalRhoWeight,
                                                                         graphicsListRegistry,
                                                                         registry);
       }
@@ -596,6 +605,14 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
    }
 
+   public void packContactData(RecyclingArrayList<Point3D> contactPointList, Vector3DBasics contactNormalToPack)
+   {
+      if (isLoadBearing())
+      {
+         loadBearingControlState.packContactData(contactPointList, contactNormalToPack);
+      }
+   }
+
    public void resetJointIntegrators()
    {
       // FIXME
@@ -605,16 +622,14 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
-      if (stateMachine.getCurrentStateKey() == jointspaceControlState.getControlMode())
+      boolean isInJointspaceMode = stateMachine.getCurrentStateKey() == jointspaceControlState.getControlMode();
+      boolean isInTaskspaceHybridMode = stateMachine.getCurrentStateKey() == taskspaceControlState.getControlMode() && taskspaceControlState.isHybridModeActive();
+      boolean isInLoadbearingHybridMode = loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode() && loadBearingControlState.isJointspaceControlActive();
+
+      if (isInJointspaceMode || isInTaskspaceHybridMode || isInLoadbearingHybridMode)
       {
          for (int i = 0; i < jointsToControl.length; i++)
-            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
-      }
-      else if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode()
-               && loadBearingControlState.isJointspaceControlActive())
-      {
-         for (int i = 0; i < jointsToControl.length; i++)
-            desiredJointPositionsToPack[i] = loadBearingControlState.getJointDesiredPosition(i);
+            desiredJointPositionsToPack[i] = jointControlHelper.getJointDesiredPosition(i);
       }
       else
       {
@@ -672,6 +687,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       return ret;
    }
 
+   public RigidBodyBasics getBodyToControl()
+   {
+      return bodyToControl;
+   }
+
    public OneDoFJointBasics[] getControlledJoints()
    {
       return jointsToControl;
@@ -703,12 +723,12 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
          loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
    }
 
-   public boolean pollContactHasChangedNotification()
+   public boolean peekContactHasChangedNotification()
    {
       return hasContactStateChanged;
    }
 
-   public boolean peekContactHasChangedNotification()
+   public boolean pollContactHasChangedNotification()
    {
       boolean hasContactStateChanged = this.hasContactStateChanged;
       this.hasContactStateChanged = false;

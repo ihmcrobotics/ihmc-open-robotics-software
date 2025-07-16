@@ -41,9 +41,9 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey percentageExtraSizeZLow = keys.addDoubleKey("Percentage extra size z low", 0.15);
    public static final DoubleStoredPropertyKey percentageExtraSizeZHigh = keys.addDoubleKey("Percentage extra size z high", 0.3);
    public static final DoubleStoredPropertyKey extraSizeZLow = keys.addDoubleKey("Extra size z low", -0.005);
-   public static final DoubleStoredPropertyKey extraSizeZHigh = keys.addDoubleKey("Extra size z high", 0.06);
-   public static final DoubleStoredPropertyKey percentageMaxDisplacementLow = keys.addDoubleKey("Percentage max displacement low", 0.05);
-   public static final DoubleStoredPropertyKey percentageMaxDisplacementHigh = keys.addDoubleKey("Percentage max displacement high", 0.3);
+   public static final DoubleStoredPropertyKey extraSizeZHigh = keys.addDoubleKey("Extra size z high", 0.15);
+   public static final DoubleStoredPropertyKey percentageMaxDisplacementLow = keys.addDoubleKey("Percentage max displacement low", 0.08);
+   public static final DoubleStoredPropertyKey percentageMaxDisplacementHigh = keys.addDoubleKey("Percentage max displacement high", 0.4);
    public static final DoubleStoredPropertyKey maxDisplacementLow = keys.addDoubleKey("Max displacement low", 0.05);
    public static final DoubleStoredPropertyKey maxDisplacementHigh = keys.addDoubleKey("Max displacement high", 0.1);
    public static final DoubleStoredPropertyKey motionCorrelationAlpha = keys.addDoubleKey("Motion correlation alpha", 0.65);

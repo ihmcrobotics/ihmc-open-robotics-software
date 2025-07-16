@@ -1,14 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.fusion.objectDetection;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.MathTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -19,16 +13,22 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+@Deprecated
 public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 {
-   private static final CameraPinholeBrown intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
+   private static final Object intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
    protected final List<Point3DBasics> pointCloudToCalculate;
    protected final RegionOfInterest objectROI = new RegionOfInterest();
 
    private final Class<T> messageType;
-   private final ROS2PublisherBasics<T> packetPublisher;
+   private final ROS2Publisher<T> packetPublisher;
    protected final AtomicReference<T> newPacket = new AtomicReference<>(null);
 
    public AbstractObjectParameterCalculator(ROS2Node ros2Node, Class<T> messageType)

@@ -14,7 +14,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 /**
  * Command is a cost function to go directly into QP. It is of the form
  *
- * 0.5 u<sup>T</sup> Q u + q u
+ * w ( 0.5 (S u) <sup>T</sup> (S Q S<sup>T</sup>) (S u ) + q u )
  *
  * where u is the momentum rate of change
  */
@@ -32,13 +32,15 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
     */
    private final DMatrixRMaj momentumRateGradient = new DMatrixRMaj(1, Momentum.SIZE);
 
-   private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+   /**
+    * w in the above equations
+    */
+   private double weight = 1.0;
+
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    public LinearMomentumRateCostCommand()
    {
-      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
-      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
       selectionMatrix.clearAngularSelection();
    }
 
@@ -48,63 +50,18 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
       commandId = other.commandId;
       momentumRateHessian.set(other.momentumRateHessian);
       momentumRateGradient.set(other.momentumRateGradient);
-      weightMatrix.set(other.weightMatrix);
+      weight = other.weight;
       selectionMatrix.set(other.selectionMatrix);
-   }
-
-   public void setSelectionMatrixToIdentity()
-   {
-      selectionMatrix.resetSelection();
-      selectionMatrix.clearAngularSelection();
-   }
-
-   public void setSelectionMatrixForLinearXYControl()
-   {
-      selectionMatrix.resetSelection();
-      selectionMatrix.clearAngularSelection();
-      selectionMatrix.selectLinearZ(false);
    }
 
    public void setWeight(double weight)
    {
-      weightMatrix.getLinearPart().setWeights(weight, weight, weight);
+      this.weight = weight;
    }
 
-   public void setWeights(double linearX, double linearY, double linearZ)
+   public double getWeight()
    {
-      weightMatrix.getLinearPart().setWeights(linearX, linearY, linearZ);
-   }
-
-   public void setWeights(Tuple3DReadOnly linear)
-   {
-      weightMatrix.getLinearPart().setWeights(linear.getX(), linear.getY(), linear.getZ());
-   }
-
-   /**
-    * Sets the weights to use in the optimization problem for each individual degree of freedom.
-    * <p>
-    * WARNING: It is not the value of each individual command's weight that is relevant to how the
-    * optimization will behave but the ratio between them. A command with a higher weight than other
-    * commands value will be treated as more important than the other commands.
-    * </p>
-    *
-    * @param weightMatrix weight matrix holding the weights to use for each component of the desired
-    *           acceleration. Not modified.
-    */
-   public void setWeightMatrix(WeightMatrix6D weightMatrix)
-   {
-      this.weightMatrix.set(weightMatrix);
-   }
-
-   public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
-   {
-      weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
-      weightMatrix.getFullWeightMatrixInFrame(ReferenceFrame.getWorldFrame(), weightMatrixToPack);
-   }
-
-   public WeightMatrix6D getWeightMatrix()
-   {
-      return weightMatrix;
+      return weight;
    }
 
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
@@ -206,7 +163,7 @@ public class LinearMomentumRateCostCommand implements InverseDynamicsCommand<Lin
             return false;
          if (!MatrixFeatures_DDRM.isEquals(momentumRateGradient, other.momentumRateGradient))
             return false;
-         if (!weightMatrix.equals(other.weightMatrix))
+         if (weight != other.weight)
             return false;
          if (!selectionMatrix.equals(other.selectionMatrix))
             return false;

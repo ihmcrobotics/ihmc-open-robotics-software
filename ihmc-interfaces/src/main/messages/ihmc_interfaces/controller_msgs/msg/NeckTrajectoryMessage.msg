@@ -3,7 +3,7 @@
 # A third order polynomial function is used to interpolate between trajectory points.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The trajectories for each joint in order from the one closest to the chest to the one the closest to the head.
 JointspaceTrajectoryMessage jointspace_trajectory

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -119,6 +120,10 @@ public class PredefinedContactExternalForceSolverTest
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has some sort of hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testDoublePendulumRobot()
    {
@@ -128,6 +133,10 @@ public class PredefinedContactExternalForceSolverTest
       cleanup();
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has some sort of hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testMultiPendulumRobot()
    {

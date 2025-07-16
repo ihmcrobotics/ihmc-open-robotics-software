@@ -1,6 +1,6 @@
 package us.ihmc.rdx;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Model;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -10,7 +10,8 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -19,7 +20,7 @@ import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXImGuiBasedUIDemo
+public class RDXUIDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
@@ -32,7 +33,7 @@ public class RDXImGuiBasedUIDemo
    private RDX3DPanelToolbarButton flyingCarButton;
    private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
-   public RDXImGuiBasedUIDemo()
+   public RDXUIDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -41,12 +42,14 @@ public class RDXImGuiBasedUIDemo
          {
             baseUI.create();
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiPanelManager().addPanel("Window 1", RDXImGuiBasedUIDemo.this::renderWindow1);
-            baseUI.getImGuiPanelManager().addPanel("Window 2", RDXImGuiBasedUIDemo.this::renderWindow2);
-            baseUI.getImGuiPanelManager().addPanel("Window 3", RDXImGuiBasedUIDemo.this::renderWindow3);
+            Model model = RDXModelLoader.load("environmentObjects/couch/Couch.gltf");
+            baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(model));
+
+            baseUI.getImGuiPanelManager().addPanel("Window 1", RDXUIDemo.this::renderWindow1);
+            baseUI.getImGuiPanelManager().addPanel("Window 2", RDXUIDemo.this::renderWindow2);
+            baseUI.getImGuiPanelManager().addPanel("Window 3", RDXUIDemo.this::renderWindow3);
 
             baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
             {
@@ -149,6 +152,6 @@ public class RDXImGuiBasedUIDemo
 
    public static void main(String[] args)
    {
-      new RDXImGuiBasedUIDemo();
+      new RDXUIDemo();
    }
 }

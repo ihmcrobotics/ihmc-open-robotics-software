@@ -1,8 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,21 +30,23 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements MultiRobotTestInterface
 {
@@ -109,6 +108,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       ((YoBoolean) simulationTestHelper.findVariable("controllerSwingSpeedUpEnabled")).set(false);
       ((YoBoolean) simulationTestHelper.findVariable("leftFootSwingIsSpeedUpEnabled")).set(false);
       ((YoBoolean) simulationTestHelper.findVariable("rightFootSwingIsSpeedUpEnabled")).set(false);
+      ((YoDouble) simulationTestHelper.findVariable("FootSwingTouchdownAccelerationZ")).set(0.0);
 
       FootstepDataMessage footstep = message.getFootstepDataList().add();
       footstep.setRobotSide(robotSide.toByte());
@@ -162,9 +162,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       simulationTestHelper.publishToController(message);
       assertTrue(simulationTestHelper.simulateNow(initialTransferTime + (1.0 - lastPortion / 2.0) * swingTime));
-      Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
+      assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
       assertTrue(simulationTestHelper.simulateNow(lastPortion));
-      Assert.assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
+      assertEquals(touchdownVelocity, desiredVelocity.getValueAsDouble(), 1.0e-10);
    }
 
    @Test
@@ -297,9 +297,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) simulationTestHelper.findVariable(swingStateNamespace, typeName);
       YoVariable currentWaypointIndex = simulationTestHelper.findVariable(linearNamespace, currentIndexName);
 
-      assertEquals("Unexpected Trajectory Type", TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue());
+      assertEquals(TrajectoryType.WAYPOINTS, currentTrajectoryType.getEnumValue(), "Unexpected Trajectory Type");
       assertTrue(simulationTestHelper.simulateNow(swingTime + transferTime));
-      assertEquals("Swing Trajectory did not execute.", points, currentWaypointIndex.getValueAsLongBits());
+      assertEquals(points, currentWaypointIndex.getValueAsLongBits(), "Swing Trajectory did not execute.");
    }
 
    private DRCRobotModel setup(DRCStartingLocation startingLocation)
@@ -327,7 +327,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
    public void showMemoryUsageBeforeTest()
    {
       pushAndAdjust = null;
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -340,7 +340,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
       pushAndAdjust = null;
    }

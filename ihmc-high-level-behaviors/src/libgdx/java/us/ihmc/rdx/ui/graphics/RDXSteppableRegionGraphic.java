@@ -12,7 +12,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionsListCollection;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -36,9 +36,6 @@ public class RDXSteppableRegionGraphic implements RenderableProvider
 
    public void clear()
    {
-      for (int i = 0; i < gridMapGraphics.size(); i++)
-         gridMapGraphics.get(i).clear();
-
       regionGraphics.clear();
       gridMapGraphics.clear();
    }

@@ -52,6 +52,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
    private boolean firstTickInState = true;
+   protected final RobotSide swingSide;
 
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
                                               WalkingMessageHandler walkingMessageHandler,
@@ -88,6 +89,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+
+      swingSide = transferToSide.getOppositeSide();
    }
 
    @Override
@@ -100,16 +103,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       if (getPreviousWalkingStateEnum() == WalkingStateEnum.STANDING || getPreviousWalkingStateEnum() == WalkingStateEnum.TO_STANDING)
       {
          walkingMessageHandler.reportWalkingStarted();
-      }
-
-      if (isInitialTransfer())
-      {
-         pelvisOrientationManager.moveToAverageInSupportFoot(transferToSide);
-      }
-      else
-      {
-         // In middle of walking or leaving foot pose, pelvis is good leave it like that.
-         pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
@@ -140,16 +133,15 @@ public class TransferToWalkingSingleSupportState extends TransferState
       currentTransferDuration.set(firstTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransfer();
-
-      pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
-      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
    public void doAction(double timeInState)
    {
+      // Beomyeong: This is triggered, so that means, if walkingMessageHandler is updated when new VR stepping is delivered.
+      // We don't need to add something to calculate & update the ICP , CMP
       if (resubmitStepsInTransferEveryTick.getBooleanValue()
-            && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
+          && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
       {
          int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
          for (int i = balanceManager.getNumberOfStepsBeingConsidered() - 1; i < stepsToAdd; i++)
@@ -164,7 +156,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          }
       }
 
-      RobotSide swingSide = transferToSide.getOppositeSide();
+      //      RobotSide swingSide = transferToSide.getOppositeSide();
       if (!firstTickInState)
          feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
@@ -225,7 +217,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       super.onEntry();
-
+      
       feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 

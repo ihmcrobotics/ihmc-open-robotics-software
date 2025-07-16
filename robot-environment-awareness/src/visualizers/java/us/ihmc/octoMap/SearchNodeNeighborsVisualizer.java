@@ -12,8 +12,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.tools.OcTreeKeyConversionTools;
 import us.ihmc.jOctoMap.tools.OcTreeKeyTools;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javafx.ApplicationNoModule;
 
 public class SearchNodeNeighborsVisualizer extends ApplicationNoModule
 {

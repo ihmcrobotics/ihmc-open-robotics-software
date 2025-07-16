@@ -1,7 +1,7 @@
 # This message is part of the IHMC height map module
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # Discretization of the height map grid
 # Field default value -1.0
@@ -17,8 +17,20 @@ float64 grid_center_x
 # Y coordinate of the center of the height map
 float64 grid_center_y
 
+# Z height offset for converting between floats and shorts
+float64 height_offset
+
+# Z height scale factor for converting between floats and shorts
+float64 height_scale_factor
+
 # Height of the ground plane, which is assumed to be flat
 float64 estimated_ground_height
+
+# Width of the height map in meters
+float64 width_in_meters
+
+# Cell size in meters of an individual cell
+float64 cell_size_in_meters
 
 # List of height map keys. See HeightMapTools for converting keys to coordinates
 int32[] keys

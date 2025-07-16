@@ -4,6 +4,7 @@
 #include "controller_msgs/msg/./FootstepDataListMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "perception_msgs/msg/./HeightMapMessage_.idl"
+#include "perception_msgs/msg/./TerrainMapMessage_.idl"
 module toolbox_msgs
 {
   module msg
@@ -38,7 +39,7 @@ module toolbox_msgs
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        unsigned long sequence_id;
+        unsigned long long sequence_id;
         /**
          * Starting left foot pose
          */
@@ -117,9 +118,13 @@ module toolbox_msgs
          */
         double horizon_length;
         /**
-         * Height map data, if you don'ot want to assume flat ground.
+         * Height map data, if you don't want to assume flat ground.
          */
         perception_msgs::msg::dds::HeightMapMessage height_map_message;
+        /**
+         * Terrain map data, if you don't want to assume flat ground.
+         */
+        perception_msgs::msg::dds::TerrainMapMessage terrain_map_message;
         /**
          * If true, steps are snapped assuming flat ground.
          * Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions

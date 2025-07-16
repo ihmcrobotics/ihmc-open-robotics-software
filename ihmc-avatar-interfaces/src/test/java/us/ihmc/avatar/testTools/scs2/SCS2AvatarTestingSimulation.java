@@ -10,7 +10,6 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
@@ -20,12 +19,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
-import us.ihmc.log.LogTools;
+import us.ihmc.avatar.scriptCommandGenerator.ScriptBasedControllerCommandGenerator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -37,8 +36,6 @@ import us.ihmc.scs2.simulation.SimulationTerminalCondition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.RobotInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools.VideoAndDataExporter;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -72,7 +69,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    private ROS2Node ros2Node;
    @SuppressWarnings("rawtypes")
-   private Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers;
+   private Map<Class<?>, ROS2Publisher> defaultControllerPublishers;
 
    private final AtomicReference<Throwable> lastThrowable = new AtomicReference<>();
 
@@ -577,21 +574,21 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void publishToController(Object message)
    {
-      ROS2PublisherBasics ROS2PublisherBasics = defaultControllerPublishers.get(message.getClass());
-      ROS2PublisherBasics.publish(message);
+      ROS2Publisher publisher = defaultControllerPublishers.get(message.getClass());
+      publisher.publish(message);
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       return createPublisher(messageType, HumanoidControllerAPI.getInputTopic(getRobotModel().getSimpleRobotName()));
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
+   public <T> ROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
       return ros2Node.createPublisher(generator.withTypeName(messageType));
    }
 
-   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, String topicName)
+   public <T> ROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
    {
       return ros2Node.createPublisher(messageType, topicName);
    }
@@ -636,7 +633,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    @SuppressWarnings("rawtypes")
-   public void setDefaultControllerPublishers(Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers)
+   public void setDefaultControllerPublishers(Map<Class<?>, ROS2Publisher> defaultControllerPublishers)
    {
       this.defaultControllerPublishers = defaultControllerPublishers;
    }
@@ -795,59 +792,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public double getTimePerRecordTick()
    {
       return getSimulationConstructionSet().getBufferRecordTimePeriod();
-   }
-
-   public void createBambooVideo(String simplifiedRobotModelName, int callStackHeight)
-   {
-      if (createVideo)
-      {
-         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName,
-                                                                                        createBambooToolsVideoAndDataExporter(),
-                                                                                        callStackHeight,
-                                                                                        avatarSimulation.getShowGUI());
-      }
-      else
-      {
-         LogTools.info("Skipping video generation.");
-      }
-   }
-
-   public void createBambooVideo(String videoName)
-   {
-      if (createVideo)
-      {
-         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(createBambooToolsVideoAndDataExporter(), videoName, avatarSimulation.getShowGUI());
-      }
-      else
-      {
-         LogTools.info("Skipping video generation.");
-      }
-   }
-
-   private VideoAndDataExporter createBambooToolsVideoAndDataExporter()
-   {
-      return new VideoAndDataExporter()
-      {
-         @Override
-         public void writeData(File dataFile)
-         {
-            // TODO Implement me
-         }
-
-         @Override
-         public void gotoOutPointNow()
-         {
-            getSimulationConstructionSet().gotoBufferOutPoint();
-         }
-
-         @Override
-         public File createVideo(String string)
-         {
-            File videoFile = new File(string);
-            exportVideo(videoFile);
-            return videoFile;
-         }
-      };
    }
 
    public void exportVideo(File videoFile)

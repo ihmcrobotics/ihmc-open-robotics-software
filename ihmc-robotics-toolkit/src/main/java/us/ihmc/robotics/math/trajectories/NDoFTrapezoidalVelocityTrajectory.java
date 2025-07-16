@@ -16,6 +16,7 @@ import us.ihmc.robotics.trajectories.TrapezoidalVelocityTrajectory;
  * @author not attributable
  * @version 1.0
  */
+@Deprecated
 public class NDoFTrapezoidalVelocityTrajectory
 {
    private final TrapezoidalVelocityTrajectory[] trajectories;

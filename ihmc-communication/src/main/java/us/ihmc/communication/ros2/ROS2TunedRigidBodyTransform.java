@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.commons.thread.Throttler;
 
 /**
  * This class is used to hava UI that tunes a transform running remotely on the robot.

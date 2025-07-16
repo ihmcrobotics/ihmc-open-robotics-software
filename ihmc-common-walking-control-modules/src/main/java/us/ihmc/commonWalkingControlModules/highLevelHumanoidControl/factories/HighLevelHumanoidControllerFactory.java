@@ -23,8 +23,6 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -51,12 +49,12 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -104,9 +102,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControlManagerFactory managerFactory;
    private final WholeBodyControllerCoreFactory controllerCoreFactory;
-   private final PushRecoveryControlManagerFactory pushRecoveryManagerFactory;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
@@ -130,7 +126,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
-                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters)
    {
       this(contactableBodiesFactory,
@@ -138,7 +133,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
            wristSensorNames,
            highLevelControllerParameters,
            walkingControllerParameters,
-           pushRecoveryControllerParameters,
            copTrajectoryParameters,
            new DefaultSplitFractionCalculatorParameters());
    }
@@ -148,13 +142,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
-                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters,
                                              SplitFractionCalculatorParametersReadOnly splitFractionCalculatorParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.pushRecoveryControllerParameters = pushRecoveryControllerParameters;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.footSensorNames = footForceSensorNames;
       this.wristSensorNames = wristSensorNames;
@@ -174,11 +166,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
-
-      pushRecoveryManagerFactory = new PushRecoveryControlManagerFactory(managerFactory, registry);
-      pushRecoveryManagerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
-      pushRecoveryManagerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      pushRecoveryManagerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
 
       controllerCoreFactory = new WholeBodyControllerCoreFactory(registry);
       controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
@@ -350,14 +337,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.WALKING, controllerStateFactory);
    }
 
-   public void useDefaultPushRecoveryControlState()
-   {
-      PushRecoveryControllerStateFactory controllerStateFactory = new PushRecoveryControllerStateFactory(pushRecoveryManagerFactory);
-
-      controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelControllerName.PUSH_RECOVERY, controllerStateFactory);
-   }
-
    public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
    {
       HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
@@ -507,7 +486,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       contactablePlaneBodies.addAll(additionalContacts);
 
       double gravityZ = Math.abs(gravity);
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
@@ -544,6 +523,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
 
+      List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
+      if (controllerToolbox.enableUpperBodyLoadBearing() && jointsToCheckTorqueFeasibilityInMultiContact != null)
+         controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
+
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
@@ -560,7 +543,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      pushRecoveryManagerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
@@ -572,7 +554,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   initialControllerState,
                                                                                   highLevelControllerParameters,
                                                                                   walkingControllerParameters,
-                                                                                  pushRecoveryControllerParameters,
                                                                                   requestedHighLevelControllerState,
                                                                                   controllerFactoriesMap,
                                                                                   stateTransitionFactories,

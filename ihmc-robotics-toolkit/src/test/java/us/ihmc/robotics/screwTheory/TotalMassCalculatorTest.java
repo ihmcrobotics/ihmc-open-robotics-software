@@ -1,15 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -17,7 +13,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TotalMassCalculatorTest
 {
@@ -38,7 +37,7 @@ public class TotalMassCalculatorTest
       double addedMass = createRandomRigidBodyTreeAndReturnTotalMass(worldFrame, elevator, numberOfJoints, random);
 
 
-      assertEquals(addedMass, TotalMassCalculator.computeSubTreeMass(elevator), 0.00001);
+      assertEquals(addedMass, MultiBodySystemMissingTools.computeSubTreeMass(elevator), 0.00001);
 
    }
 
@@ -50,13 +49,13 @@ public class TotalMassCalculatorTest
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
+         Vector3D jointOffset = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
+         Matrix3D momentOfInertia = EuclidCoreRandomTools.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
          totalMass += mass;
-         Vector3D comOffset = RandomGeometry.nextVector3D(random);
+         Vector3D comOffset = EuclidCoreRandomTools.nextVector3D(random);
 
 
 

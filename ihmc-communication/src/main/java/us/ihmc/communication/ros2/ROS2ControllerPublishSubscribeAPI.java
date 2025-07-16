@@ -24,6 +24,8 @@ public interface ROS2ControllerPublishSubscribeAPI extends ROS2PublishSubscribeA
 
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback);
 
+   public <T> void subscribeToControllerViaVolatileCallback(Class<T> messageClass, Consumer<T> callback);
+
    public Notification subscribeToWalkingCompletedViaNotification();
 
    public String getRobotName();

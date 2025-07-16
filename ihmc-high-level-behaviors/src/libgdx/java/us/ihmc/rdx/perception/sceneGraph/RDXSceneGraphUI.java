@@ -27,6 +27,7 @@ import us.ihmc.rdx.perception.sceneGraph.builder.RDXPredefinedRigidBodySceneNode
 import us.ihmc.rdx.perception.sceneGraph.builder.RDXPrimitiveRigidBodySceneNodeBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.Map;
 import java.util.Set;
@@ -54,8 +55,10 @@ public class RDXSceneGraphUI
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder predefinedPrimitiveRigidBodySceneNodeBuilder;
 
-   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
+   public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDXBaseUI baseUI)
    {
+      panel3D = baseUI.getPrimary3DPanel();
+
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID,
                                                     SceneGraph.ROOT_NODE_NAME,
                                                     new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
@@ -66,19 +69,19 @@ public class RDXSceneGraphUI
          return uiSceneNode.getSceneNode();
       }, ros2PublishSubscribeAPI, ROS2ActorDesignation.OPERATOR);
 
-      this.panel3D = panel3D;
-
-      RDXSceneNode rootNode = new RDXSceneNode(sceneGraph.getRootNode());
-      addUISceneNode(rootNode);
+      addUISceneNode(new RDXSceneNode(sceneGraph.getRootNode()));
 
       sceneGraph.getSceneGraphSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
 
       predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
       primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
       predefinedPrimitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
+
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
+      baseUI.getImGuiPanelManager().addPanel(panel);
    }
 
-   private void addUISceneNode(RDXSceneNode uiSceneNode)
+   public void addUISceneNode(RDXSceneNode uiSceneNode)
    {
       uiSceneNodes.put(uiSceneNode.getSceneNode(), uiSceneNode);
 
@@ -103,7 +106,8 @@ public class RDXSceneGraphUI
             uiSceneNodes.remove(sceneNode);
 
             // Remove the scene node from the scene graph
-            sceneGraph.modifyTree(modificationQueue -> {
+            sceneGraph.modifyTree(modificationQueue ->
+            {
                modificationQueue.accept(new SceneGraphClearSubtree(sceneNode));
                modificationQueue.accept(new SceneGraphNodeRemoval(sceneNode, sceneGraph));
             });
@@ -136,89 +140,119 @@ public class RDXSceneGraphUI
                {
                   ImGui.tableNextRow();
                   ImGui.tableSetColumnIndex(0);
+                  if (ImGui.button(labels.get("Add PieceOfWood")))
+                  {
+                     RDXPredefinedRigidBodySceneNode twoByFour = predefinedRigidBodySceneNodeBuilder.build("PieceOfWood");
+                     modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(twoByFour);
+                  }
+                  if (ImGui.button(labels.get("Add Barrier")))
+                  {
+                     RDXPredefinedRigidBodySceneNode barrier = predefinedRigidBodySceneNodeBuilder.build("Barrier");
+                     modificationQueue.accept(new SceneGraphNodeAddition(barrier.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(barrier);
+                  }
+                  if (ImGui.button(labels.get("Add Bike")))
+                  {
+                     RDXPredefinedRigidBodySceneNode bike = predefinedRigidBodySceneNodeBuilder.build("Bike");
+                     modificationQueue.accept(new SceneGraphNodeAddition(bike.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(bike);
+                  }
+                  if (ImGui.button(labels.get("Add Book")))
+                  {
+                     RDXPredefinedRigidBodySceneNode book = predefinedRigidBodySceneNodeBuilder.build("Book");
+                     modificationQueue.accept(new SceneGraphNodeAddition(book.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(book);
+                  }
                   if (ImGui.button(labels.get("Add Box")))
                   {
                      RDXPredefinedRigidBodySceneNode box = predefinedRigidBodySceneNodeBuilder.build("Box");
-                     modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(box.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(box);
                   }
                   if (ImGui.button(labels.get("Add Can")))
                   {
                      RDXPredefinedRigidBodySceneNode canOfSoup = predefinedRigidBodySceneNodeBuilder.build("CanOfSoup");
-                     modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(canOfSoup);
-                  }
-                  if (ImGui.button(labels.get("Add 2x4")))
-                  {
-                     RDXPredefinedRigidBodySceneNode twoByFour = predefinedRigidBodySceneNodeBuilder.build("2X4");
-                     modificationQueue.accept(new SceneGraphNodeAddition(twoByFour.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(twoByFour);
-                  }
-                  if (ImGui.button(labels.get("Add Work Platform")))
-                  {
-                     RDXPredefinedRigidBodySceneNode workPlatform = predefinedRigidBodySceneNodeBuilder.build("WorkPlatform");
-                     modificationQueue.accept(new SceneGraphNodeAddition(workPlatform.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(workPlatform);
-                  }
-                  if (ImGui.button(labels.get("Add Shoe")))
-                  {
-                     RDXPredefinedRigidBodySceneNode shoe = predefinedRigidBodySceneNodeBuilder.build("Shoe");
-                     modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(shoe);
-                  }
-                  if (ImGui.button(labels.get("Add Laptop")))
-                  {
-                     RDXPredefinedRigidBodySceneNode laptop = predefinedRigidBodySceneNodeBuilder.build("Laptop");
-                     modificationQueue.accept(new SceneGraphNodeAddition(laptop.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(laptop);
-                  }
-                  if (ImGui.button(labels.get("Add Book")))
-                  {
-                     RDXPredefinedRigidBodySceneNode book = predefinedRigidBodySceneNodeBuilder.build("Book");
-                     modificationQueue.accept(new SceneGraphNodeAddition(book.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(book);
                   }
                   if (ImGui.button(labels.get("Add Cereal")))
                   {
                      RDXPredefinedRigidBodySceneNode cereal = predefinedRigidBodySceneNodeBuilder.build("Cereal");
-                     modificationQueue.accept(new SceneGraphNodeAddition(cereal.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(cereal.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(cereal);
                   }
-                  if (ImGui.button(labels.get("Add Mug")))
+                  if (ImGui.button(labels.get("Add Charge")))
                   {
-                     RDXPredefinedRigidBodySceneNode mug = predefinedRigidBodySceneNodeBuilder.build("Mug");
-                     modificationQueue.accept(new SceneGraphNodeAddition(mug.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(mug);
-                  }
-                  if (ImGui.button(labels.get("Add Bike")))
-                  {
-                     RDXPredefinedRigidBodySceneNode bike = predefinedRigidBodySceneNodeBuilder.build("Bike");
-                     modificationQueue.accept(new SceneGraphNodeAddition(bike.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(bike);
-                  }
-                  if (ImGui.button(labels.get("Add Drill")))
-                  {
-                     RDXPredefinedRigidBodySceneNode drill = predefinedRigidBodySceneNodeBuilder.build("Drill");
-                     modificationQueue.accept(new SceneGraphNodeAddition(drill.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(drill);
+                     RDXPredefinedRigidBodySceneNode charge = predefinedRigidBodySceneNodeBuilder.build("Charge");
+                     modificationQueue.accept(new SceneGraphNodeAddition(charge.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(charge);
                   }
                   if (ImGui.button(labels.get("Add Couch")))
                   {
                      RDXPredefinedRigidBodySceneNode couch = predefinedRigidBodySceneNodeBuilder.build("Couch");
-                     modificationQueue.accept(new SceneGraphNodeAddition(couch.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(couch.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(couch);
                   }
-                  if (ImGui.button(labels.get("Add TrashCan")))
+                  if (ImGui.button(labels.get("Add Door Lever")))
+                  {
+                     RDXPredefinedRigidBodySceneNode doorLever = predefinedRigidBodySceneNodeBuilder.build("DoorLever");
+                     modificationQueue.accept(new SceneGraphNodeAddition(doorLever.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(doorLever);
+                  }
+                  if (ImGui.button(labels.get("Add Door Panel")))
+                  {
+                     RDXPredefinedRigidBodySceneNode rightDoorPanel = predefinedRigidBodySceneNodeBuilder.build("DoorPanel");
+                     modificationQueue.accept(new SceneGraphNodeAddition(rightDoorPanel.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(rightDoorPanel);
+                  }
+                  if (ImGui.button(labels.get("Add Drill")))
+                  {
+                     RDXPredefinedRigidBodySceneNode drill = predefinedRigidBodySceneNodeBuilder.build("Drill");
+                     modificationQueue.accept(new SceneGraphNodeAddition(drill.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(drill);
+                  }
+                  if (ImGui.button(labels.get("Add Laptop")))
+                  {
+                     RDXPredefinedRigidBodySceneNode laptop = predefinedRigidBodySceneNodeBuilder.build("Laptop");
+                     modificationQueue.accept(new SceneGraphNodeAddition(laptop.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(laptop);
+                  }
+                  if (ImGui.button(labels.get("Add Mug")))
+                  {
+                     RDXPredefinedRigidBodySceneNode mug = predefinedRigidBodySceneNodeBuilder.build("Mug");
+                     modificationQueue.accept(new SceneGraphNodeAddition(mug.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(mug);
+                  }
+                  if (ImGui.button(labels.get("Add Person")))
+                  {
+                     RDXPredefinedRigidBodySceneNode person = predefinedRigidBodySceneNodeBuilder.build("Person");
+                     modificationQueue.accept(new SceneGraphNodeAddition(person.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(person);
+                  }
+                  if (ImGui.button(labels.get("Add Shoe")))
+                  {
+                     RDXPredefinedRigidBodySceneNode shoe = predefinedRigidBodySceneNodeBuilder.build("Shoe");
+                     modificationQueue.accept(new SceneGraphNodeAddition(shoe.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(shoe);
+                  }
+                  if (ImGui.button(labels.get("Add Table")))
+                  {
+                     RDXPredefinedRigidBodySceneNode table = predefinedRigidBodySceneNodeBuilder.build("Table");
+                     modificationQueue.accept(new SceneGraphNodeAddition(table.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(table);
+                  }
+                  if (ImGui.button(labels.get("Add Trash Can")))
                   {
                      RDXPredefinedRigidBodySceneNode trashCan = predefinedRigidBodySceneNodeBuilder.build("TrashCan");
-                     modificationQueue.accept(new SceneGraphNodeAddition(trashCan.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(trashCan.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(trashCan);
                   }
-                  if (ImGui.button(labels.get("Add RightDoorPanel")))
+                  if (ImGui.button(labels.get("Add Work Platform")))
                   {
-                     RDXPredefinedRigidBodySceneNode rightDoorPanel = predefinedRigidBodySceneNodeBuilder.build("RightDoorPanel");
-                     modificationQueue.accept(new SceneGraphNodeAddition(rightDoorPanel.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
-                     addUISceneNode(rightDoorPanel);
+                     RDXPredefinedRigidBodySceneNode workPlatform = predefinedRigidBodySceneNodeBuilder.build("WorkPlatform");
+                     modificationQueue.accept(new SceneGraphNodeAddition(workPlatform.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
+                     addUISceneNode(workPlatform);
                   }
                   ImGui.endTable();
                }
@@ -255,7 +289,7 @@ public class RDXSceneGraphUI
                      if (ImGui.button(labels.get("Add " + shape.toString().toLowerCase())))
                      {
                         RDXPrimitiveRigidBodySceneNode primitiveRigidBodySceneNode = primitiveRigidBodySceneNodeBuilder.build(shape);
-                        modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNode.getSceneNode(), primitiveRigidBodySceneNodeBuilder.getParent()));
+                        modificationQueue.accept(new SceneGraphNodeAddition(primitiveRigidBodySceneNode.getSceneNode(), primitiveRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                         addUISceneNode(primitiveRigidBodySceneNode);
                      }
                   }
@@ -293,7 +327,7 @@ public class RDXSceneGraphUI
                   {
                      Vector3D32 smallBoxLengths = new Vector3D32(0.206f, 0.254f, 0.165f);
                      RDXPrimitiveRigidBodySceneNode smallBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, smallBoxLengths, null);
-                     modificationQueue.accept(new SceneGraphNodeAddition(smallBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(smallBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(smallBox);
                      smallBox.place();
                   }
@@ -301,7 +335,7 @@ public class RDXSceneGraphUI
                   {
                      Vector3D32 mediumBoxLengths = new Vector3D32(0.3f, 0.4f, 0.2f);
                      RDXPrimitiveRigidBodySceneNode mediumBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, mediumBoxLengths, null);
-                     modificationQueue.accept(new SceneGraphNodeAddition(mediumBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(mediumBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(mediumBox);
                      mediumBox.place();
                   }
@@ -309,7 +343,7 @@ public class RDXSceneGraphUI
                   {
                      Vector3D32 largeBoxLengths = new Vector3D32(0.48f, 0.48f, 0.49f);
                      RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
-                     modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(largeBox);
                      largeBox.place();
                   }
@@ -317,7 +351,7 @@ public class RDXSceneGraphUI
                   {
                      Vector3D32 largeBoxLengths = new Vector3D32(0.314f, 0.394f, 0.26f);
                      RDXPrimitiveRigidBodySceneNode largeBox = predefinedPrimitiveRigidBodySceneNodeBuilder.build(PrimitiveRigidBodyShape.BOX, largeBoxLengths, null);
-                     modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent()));
+                     modificationQueue.accept(new SceneGraphNodeAddition(largeBox.getSceneNode(), predefinedPrimitiveRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(largeBox);
                      largeBox.place();
                   }

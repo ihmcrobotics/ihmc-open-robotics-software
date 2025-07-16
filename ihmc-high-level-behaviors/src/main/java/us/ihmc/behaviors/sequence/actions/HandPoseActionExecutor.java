@@ -30,8 +30,6 @@ import java.util.List;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
 {
-   private final HandPoseActionState state;
-   private final HandPoseActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
@@ -51,9 +49,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  ROS2SyncedRobotModel syncedRobot)
    {
       super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
-
-      state = getState();
-      definition = getDefinition();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -81,33 +76,33 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          ChestOrientationActionState concurrentChestOrientationAction = null;
          PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
-         BehaviorTreeRootNodeExecutor actionSequenceExecutor = BehaviorTreeTools.findRootNode(this);
-         if (actionSequenceExecutor != null)
+         BehaviorTreeRootNodeExecutor rootExecutor = BehaviorTreeTools.findRootNode(this);
+         if (rootExecutor != null)
          {
             if (state.getIsToBeExecutedConcurrently())
             {
-               List<ActionNodeState<?>> actionChildren = actionSequenceExecutor.getState().getActionChildren();
+               List<LeafNodeState<?>> orderedLeaves = rootExecutor.getState().getOrderedLeaves();
 
-               for (int i = state.getActionIndex() - 1; i >= 0 && actionChildren.get(i + 1).getIsToBeExecutedConcurrently(); i--)
+               for (int i = state.getLeafIndex() - 1; i >= 0 && orderedLeaves.get(i + 1).getIsToBeExecutedConcurrently(); i--)
                {
-                  if (actionChildren.get(i) instanceof ChestOrientationActionState chestOrientationAction)
+                  if (orderedLeaves.get(i) instanceof ChestOrientationActionState chestOrientationAction)
                   {
                      concurrentChestOrientationAction = chestOrientationAction;
                   }
-                  if (actionChildren.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+                  if (orderedLeaves.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                   {
                      concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                   }
                }
             }
 
-            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : actionSequenceExecutor.getCurrentlyExecutingActions())
+            for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : rootExecutor.getCurrentlyExecutingLeaves())
             {
-               if (currentlyExecutingAction.getState() instanceof ChestOrientationActionState chestOrientationAction)
+               if (currentlyExecutingLeaf.getState() instanceof ChestOrientationActionState chestOrientationAction)
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingAction.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+               if (currentlyExecutingLeaf.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
@@ -181,9 +176,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    }
 
    @Override
-   public void triggerActionExecution()
+   public void triggerExecution()
    {
-      super.triggerActionExecution();
+      super.triggerExecution();
 
       state.setNominalExecutionDuration(definition.getTrajectoryDuration());
       trackingCalculator.reset();
@@ -264,11 +259,13 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.getTorque().accessValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
       }
 
-      if (trackingCalculator.getHitTimeLimit())
+      if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out.");
+         state.getLogger().error("%s  %s"
+                 .formatted("Position error: %.3f / %.3f".formatted(trackingCalculator.getPositionError(), definition.getPositionErrorTolerance()),
+                            "Orientation error: %.3f / %.3f".formatted(trackingCalculator.getOrientationError(), definition.getOrientationErrorTolerance())));
          return;
       }
 

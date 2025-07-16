@@ -1,19 +1,16 @@
 package us.ihmc.communication.ros2;
 
 import std_msgs.msg.dds.Empty;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
 
 /**
  * Use this class to indicate to other things on the network that something is active.
  * To elaborate, this class sends a periodic broadcast that is just an Empty message
- * with no data. This class intended to be very mutlipurpose. Use this class with 
+ * with no data. This class intended to be very mutlipurpose. Use this class with
  * {@link ROS2HeartbeatMonitor} which subscribes to this heartbeat and returns a boolean
  * value for whether this heartbeat is active or not.
  * Furthermore, the use of this class can allow for dynamic events where dropped messages
@@ -22,7 +19,7 @@ import us.ihmc.tools.thread.Throttler;
  * legitimate reasons why those messages might not be received, as in restarting or
  * starting an application later which would come online not knowing the current
  * status. To solve this ever present issue, a periodic status is required. If publishing
- * a periodic status, one way to do that is to do what this class does and just have 
+ * a periodic status, one way to do that is to do what this class does and just have
  * the act of publishing in itself be a signifier of being enabled.
  * One might think that you could instead publish a periodic status that contains a
  * boolean for alive, and always publishing it, but when the process containing this
@@ -30,7 +27,7 @@ import us.ihmc.tools.thread.Throttler;
  * of it not existing anyway.
  * This class is inspired by the common term in computing:
  * https://en.wikipedia.org/wiki/Heartbeat_(computing)
- * 
+ *
  * @author Duncan Calvert
  */
 public class ROS2Heartbeat
@@ -42,23 +39,16 @@ public class ROS2Heartbeat
     */
    public static final double STATUS_FREQUENCY = 2.5;
    public static final double HEARTBEAT_PERIOD = UnitConversions.hertzToSeconds(STATUS_FREQUENCY);
-   private ROS2PublishSubscribeAPI ros2;
-   private ROS2PublisherBasics<Empty> heartbeatPublisher;
-   private final Empty emptyMessage = new Empty();
-   private final ROS2Topic<Empty> heartbeatTopic;
-   private volatile boolean alive = false;
-   private final Throttler throttler = new Throttler();
+   private static final Empty EMPTY_MESSAGE = new Empty();
 
-   public ROS2Heartbeat(ROS2PublishSubscribeAPI ros2, ROS2Topic<Empty> heartbeatTopic)
+   private final ROS2Publisher<Empty> heartbeatPublisher;
+   private final RepeatingTaskThread publishThread;
+
+   public ROS2Heartbeat(ROS2Node ros2Node, ROS2Topic<Empty> heartbeatTopic)
    {
-      this.ros2 = ros2;
-      this.heartbeatTopic = heartbeatTopic;
-   }
-  
-   public ROS2Heartbeat(ROS2NodeInterface ros2Node, ROS2Topic<Empty> heartbeatTopic)
-   {
-      this.heartbeatTopic = heartbeatTopic;
       heartbeatPublisher = ros2Node.createPublisher(heartbeatTopic);
+      publishThread = new RepeatingTaskThread("Heartbeat-" + heartbeatTopic.getName(), () -> heartbeatPublisher.publish(EMPTY_MESSAGE));
+      publishThread.setFrequencyLimit(STATUS_FREQUENCY);
    }
 
    /**
@@ -67,34 +57,14 @@ public class ROS2Heartbeat
    public void setAlive(boolean alive)
    {
       if (alive)
-      {
-         if (!this.alive)
-            ThreadTools.startAsDaemon(() -> ExceptionTools.handle(this::publishThread, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE),
-                                      "Heartbeat-" + heartbeatTopic.getName());
-         this.alive = true;
-      }
+         publishThread.startRepeating();
       else
-      {
-         this.alive = false;
-      }
-   }
-
-   private void publishThread()
-   {
-      while (alive)
-      {
-         if (ros2 != null)
-            ros2.publish(heartbeatTopic);
-         else
-            heartbeatPublisher.publish(emptyMessage);
-         throttler.waitAndRun(HEARTBEAT_PERIOD);
-      }
+         publishThread.stopRepeating();
    }
 
    public void destroy()
    {
-      setAlive(false);
-      if (heartbeatPublisher != null)
-         heartbeatPublisher.remove();
+      publishThread.blockingKill(); // Important to use blockingKill() - we don't want the publisher to get removed before this finishes
+      heartbeatPublisher.remove();
    }
 }

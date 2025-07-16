@@ -1,65 +1,76 @@
 package us.ihmc.rdx.simulation.scs2;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
+import us.ihmc.codecs.generated.YUVPicture;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.LogVideoLoader;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
-import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.session.log.LogDataReader;
-import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.robotDataLogger.Camera;
+import us.ihmc.scs2.session.log.*;
 import us.ihmc.tools.time.DurationFormatter;
+import us.ihmc.yoVariables.variable.YoLong;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
+
+import static us.ihmc.zed.global.zed.*;
+import static us.ihmc.zed.global.zed.SL_MEM_CPU;
 
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
-   private LogSession logSession;
-   private LogVideoLoader logVideoLoader;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImInt logPosition = new ImInt();
-   private final ArrayList<RDXOpenCVVideoVisualizer> logVideoVisualizers = new ArrayList<>();
+   private final ImFloat zedDelayCompensation = new ImFloat();
+   private final Notification scrubAnyway = new Notification();
+   private int lastUpdatedLogPosition = -1;
+   private SCS2LogSessionWithVideo logSession;
+   private YoLong yoTimestamp;
    private LogDataReader logDataReader;
-   private LogPropertiesReader logProperties;
+
+   private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
+   private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();
+   private record MagewellLogVideo(MagewellScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXOpenCVVideoVisualizer visualizer) { }
+   private final List<MagewellLogVideo> magewellLogVideos = new ArrayList<>();
+   private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
+   private final List<BlackmagicLogVideo> blackmagicLogVideos = new ArrayList<>();
 
    public RDXSCS2LogSession(RDXBaseUI baseUI)
    {
       super(baseUI);
    }
 
-   public RDXSCS2LogSession(RDXBaseUI baseUI, RDXPanel plotManagerParentPanel)
-   {
-      super(baseUI, plotManagerParentPanel);
-   }
-
    public void startSession(String logFilePath, RDXPerceptionVisualizersPanel perceptionVisualizersPanel)
    {
-      logSession = null;
-      logDataReader = null;
-      logProperties = null;
-
-      for (RDXOpenCVVideoVisualizer logVideoVisualizer : logVideoVisualizers)
-      {
-         perceptionVisualizersPanel.removeVisualizer(logVideoVisualizer);
-         logVideoVisualizer.destroy();
-      }
-      logVideoVisualizers.clear();
-
       try
       {
          File file = new File(logFilePath);
          LogTools.info("Loading log: {}", file.toPath().getParent().normalize().toAbsolutePath());
-         logSession = new LogSession(file.getParentFile(), null);
+         if (!Files.exists(file.toPath().getParent()))
+            throw new RuntimeException("Log folder not found.");
+         logSession = new SCS2LogSessionWithVideo(file.getParentFile(), null);
          logDataReader = logSession.getLogDataReader();
-         logProperties = logSession.getLogProperties();
       }
       catch (IOException e)
       {
@@ -70,9 +81,29 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       {
          startSession(logSession);
 
+         yoTimestamp = logDataReader.getTimestamp();
 
-//         imagePanels.add(new RDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaNorth", false));
-//         imagePanels.add(new RDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaSouth", false));
+         for (MagewellScrubber magewellScrubber : logSession.getMagewellScrubbers())
+         {
+            Camera camera = magewellScrubber.getCamera();
+            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            MagewellLogVideo magewellLogVideo = new MagewellLogVideo(magewellScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
+            magewellLogVideos.add(magewellLogVideo);
+         }
+         for (BlackMagicScrubber blackMagicScrubber : logSession.getBlackMagicScrubbers())
+         {
+            Camera camera = blackMagicScrubber.getCamera();
+            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
+            blackmagicLogVideos.add(blackmagicLogVideo);
+         }
+         for (ZEDSVOScrubber zedSVOScrubber : logSession.getZedSVOScrubbers())
+         {
+            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
+            perceptionVisualizersPanel.addVisualizer(visualizer);
+            ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
+            zedLogVideos.add(zedLogVideo);
+         }
 
          for (Runnable onSessionStartedRunnable : getOnSessionStartedRunnables())
          {
@@ -81,25 +112,57 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       }
    }
 
-   public void createLogVideoLoader(String logVideoFilePath, String logVideoTimestampFilePath) throws IOException
-   {
-      logVideoLoader = new LogVideoLoader(logVideoFilePath, logVideoTimestampFilePath);
-
-//      log
-   }
-
    public void update()
    {
       super.update();
 
-      if (getSession().getActiveMode() == SessionMode.RUNNING)
+      int currentLogPosition = logDataReader.getCurrentLogPosition();
+      if (scrubAnyway.poll() || lastUpdatedLogPosition != currentLogPosition)
       {
-//         Mat mat = logVideoLoader.loadNextFrameAsOpenCVMat(logSession.getLogDataReader().getTimestamp().getValue());
-//
-//         if (mat != null)
-//         {
-//            imagePanels.get(0).setImage(mat);
-//         }
+         lastUpdatedLogPosition = currentLogPosition;
+
+         for (MagewellLogVideo magewellLogVideo : magewellLogVideos)
+         {
+            Frame frame = magewellLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
+            if (frame != null)
+            {
+               magewellLogVideo.visualizer.updateImageDimensions(frame.imageWidth, frame.imageHeight);
+               magewellLogVideo.visualizer.setImage(magewellLogVideo.converter.convertToMat(frame), opencv_imgproc.COLOR_BGR2RGBA);
+               frame.close();
+            }
+         }
+         for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
+         {
+            try
+            {
+               YUVPicture yuvPicture = blackmagicLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
+               if (yuvPicture != null)
+               {
+                  blackmagicLogVideo.visualizer.updateImageDimensions(yuvPicture.getWidth(), yuvPicture.getHeight());
+                  // TODO: Convert YUVPicture to Mat
+                  yuvPicture.delete();
+               }
+            }
+            catch (Exception e)
+            {
+               LogTools.error(e.getMessage());
+            }
+         }
+         for (ZEDLogVideo zedLogVideo : zedLogVideos)
+         {
+            zedLogVideo.scrubber.scrub(yoTimestamp.getLongValue());
+
+            int imageHeight = zedLogVideo.scrubber.getImageHeight();
+            int imageWidth = zedLogVideo.scrubber.getImageWidth();
+            zedLogVideo.visualizer.updateImageDimensions(imageWidth, imageHeight);
+
+            Pointer leftColorImageSlMatPointer = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
+            Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
+                              sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
+                              sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
+            zedLogVideo.visualizer.setImage(mat, opencv_imgproc.COLOR_BGR2RGBA);
+            mat.close();
+         }
       }
    }
 
@@ -108,27 +171,66 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    {
       if (isSessionThreadRunning())
       {
+         File logDirectory = logDataReader.getLogDirectory();
+         if (ImGuiTools.textWithUnderlineOnHover("Log directory: %s".formatted(logDirectory.getName())) && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+         {
+            ExceptionTools.handle(() -> Desktop.getDesktop().open(logDirectory), DefaultExceptionHandler.PRINT_MESSAGE);
+         }
+
          int timeQueryTimestamp = MathTools.clamp(logPosition.get(), 0, logDataReader.getNumberOfEntries() - 1);
          String format = "%d/%d %s".formatted(logPosition.get(),
                                               logDataReader.getNumberOfEntries(),
                                               DurationFormatter.formatHoursMinutesSecondsMillis(logDataReader.getRelativeTimestamp(timeQueryTimestamp)));
 
-         if (ImGui.sliderInt(labels.get("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1, format))
+         ImGui.pushItemWidth(ImGui.getColumnWidth());
+         if (ImGui.sliderInt(labels.getHidden("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1, format))
          {
             logSession.submitLogPositionRequest(logPosition.get());
-
          }
          else
          {
-            logPosition.set(logSession.getLogDataReader().getCurrentLogPosition());
+            logPosition.set(logDataReader.getCurrentLogPosition());
          }
+         if (!zedLogVideos.isEmpty())
+         {
+            ImGui.text("ZED delay compensation:");
+            if (ImGui.sliderFloat(labels.getHidden("ZED delay compensation"), zedDelayCompensation.getData(), -5.0f, 5.0f, "%.2f s"))
+            {
+               getFirstZEDScrubber().getTimestampScrubber().setDelay(Conversions.secondsToNanoseconds(zedDelayCompensation.get()));
+               scrubAnyway.set();
+            }
+         }
+         ImGui.popItemWidth();
       }
 
       super.renderImGuiWidgets();
    }
 
-   public void destroy()
+   public void destroy(RDXBaseUI baseUI)
    {
+      for (MagewellLogVideo magewellLogVideo : magewellLogVideos)
+         magewellLogVideo.visualizer.destroy();
+      for (BlackmagicLogVideo blackmagicLogVideo : blackmagicLogVideos)
+         blackmagicLogVideo.visualizer.destroy();
+      for (ZEDLogVideo zedLogVideo : zedLogVideos)
+         zedLogVideo.visualizer.destroy();
 
+      session.shutdownSession();
+
+      super.destroy(baseUI);
+   }
+
+   public ZEDSVOScrubber getFirstZEDScrubber()
+   {
+      if (zedLogVideos.isEmpty())
+         return null;
+      else
+         return zedLogVideos.get(0).scrubber;
+   }
+
+   @Override
+   public SCS2LogSessionWithVideo getSession()
+   {
+      return logSession;
    }
 }

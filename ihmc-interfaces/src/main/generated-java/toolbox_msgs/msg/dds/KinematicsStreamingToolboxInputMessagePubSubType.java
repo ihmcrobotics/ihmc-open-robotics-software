@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3aa12b68ff0ca8b8fb903de4c748a1684dd6fef0a114b419761ea66dedc7004c";
+   		return "65f025ebd45a7697b2e0165a96c306dc08668386d0279cfde892495e8602936a";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -67,6 +67,12 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,7 +86,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -103,13 +109,21 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       {
           current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getCdrSerializedSize(data.getInputs().get(i0), current_alignment);}
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassInput(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_11(data.getTimestamp());
 
@@ -123,13 +137,18 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
 
       if(data.getInputs().size() <= 10)
       cdr.write_type_e(data.getInputs());else
-          throw new RuntimeException("inputs field exceeds the maximum length");
+          throw new RuntimeException("inputs field exceeds the maximum length: %d > %d".formatted(data.getInputs().size(), 10));
+
+      cdr.write_type_7(data.getUseCenterOfMassInput());
+
+      toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.write(data.getCenterOfMassInput(), cdr);
+      cdr.write_type_7(data.getIsDemonstrationEpisode());
 
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setTimestamp(cdr.read_type_11());
       	
@@ -142,31 +161,44 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       data.setLinearRateLimitation(cdr.read_type_6());
       	
       cdr.read_type_e(data.getInputs());	
+      data.setUseCenterOfMassInput(cdr.read_type_7());
+      	
+      toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.read(data.getCenterOfMassInput(), cdr);	
+      data.setIsDemonstrationEpisode(cdr.read_type_7());
+      	
 
    }
 
    @Override
    public final void serialize(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_7("stream_to_controller", data.getStreamToController());
       ser.write_type_6("stream_initial_blend_duration", data.getStreamInitialBlendDuration());
       ser.write_type_6("angular_rate_limitation", data.getAngularRateLimitation());
       ser.write_type_6("linear_rate_limitation", data.getLinearRateLimitation());
       ser.write_type_e("inputs", data.getInputs());
+      ser.write_type_7("use_center_of_mass_input", data.getUseCenterOfMassInput());
+      ser.write_type_a("center_of_mass_input", new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassInput());
+
+      ser.write_type_7("is_demonstration_episode", data.getIsDemonstrationEpisode());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       data.setStreamToController(ser.read_type_7("stream_to_controller"));
       data.setStreamInitialBlendDuration(ser.read_type_6("stream_initial_blend_duration"));
       data.setAngularRateLimitation(ser.read_type_6("angular_rate_limitation"));
       data.setLinearRateLimitation(ser.read_type_6("linear_rate_limitation"));
       ser.read_type_e("inputs", data.getInputs());
+      data.setUseCenterOfMassInput(ser.read_type_7("use_center_of_mass_input"));
+      ser.read_type_a("center_of_mass_input", new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassInput());
+
+      data.setIsDemonstrationEpisode(ser.read_type_7("is_demonstration_episode"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage src, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage dest)

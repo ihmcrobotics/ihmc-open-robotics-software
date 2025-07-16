@@ -4,6 +4,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
@@ -12,33 +15,34 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
  */
 public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
 {
-   private final ROS2BehaviorTreeState ros2BehaviorTreeState;
+   private final ROS2BehaviorTree<BehaviorTreeNodeExecutor<?, ?>> ros2BehaviorTree;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
+                                   ROS2PeerClockOffsetEstimator peerClockEstimator,
                                    ReferenceFrameLibrary referenceFrameLibrary,
-                                   SceneGraph sceneGraph)
+                                   SceneGraph sceneGraph,
+                                   DetectionManager detectionManager)
    {
-      super(robotModel, syncedRobot, referenceFrameLibrary, sceneGraph, ros2ControllerHelper);
+      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
 
-      ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2ControllerHelper);
    }
 
-   /** Expected to be called at the {@link ROS2BehaviorTreeState#SYNC_FREQUENCY} */
+   /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */
    public void update()
    {
-      ros2BehaviorTreeState.updateSubscription();
+      ros2BehaviorTree.updatePublication();
+      ros2BehaviorTree.updateSubscription();
 
       // TODO: Consider updating this at a higher rate than the comms
       super.update();
-
-      ros2BehaviorTreeState.updatePublication();
    }
 
    public void destroy()
    {
-      ros2BehaviorTreeState.destroy();
+      ros2BehaviorTree.destroy();
 
       super.destroy();
    }

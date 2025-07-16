@@ -15,7 +15,7 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4304d7d1f3d085775dbc937aa2ea130429ffe98743441ddad23bf3d546060544";
+   		return "f758c83c4b6c80fb6df0a3ecfd60a8f3a93372821d16b63c3e75fd063d7b8700";
    }
    
    @Override
@@ -56,7 +56,7 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -93,7 +93,7 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -126,11 +126,11 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_7(data.getPublishToController());
+      cdr.write_type_7(data.getEnableContinuousHikingWithKeyboard());
 
-      cdr.write_type_7(data.getEnableContinuousWalking());
+      cdr.write_type_7(data.getEnableContinuousHikingWithJoystickController());
 
-      cdr.write_type_3(data.getNumberOfStepsToSend());
+      cdr.write_type_7(data.getWalkBackwards());
 
       cdr.write_type_6(data.getForwardValue());
 
@@ -152,11 +152,11 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setPublishToController(cdr.read_type_7());
+      data.setEnableContinuousHikingWithKeyboard(cdr.read_type_7());
       	
-      data.setEnableContinuousWalking(cdr.read_type_7());
+      data.setEnableContinuousHikingWithJoystickController(cdr.read_type_7());
       	
-      data.setNumberOfStepsToSend(cdr.read_type_3());
+      data.setWalkBackwards(cdr.read_type_7());
       	
       data.setForwardValue(cdr.read_type_6());
       	
@@ -180,9 +180,9 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("publish_to_controller", data.getPublishToController());
-      ser.write_type_7("enable_continuous_walking", data.getEnableContinuousWalking());
-      ser.write_type_3("number_of_steps_to_send", data.getNumberOfStepsToSend());
+      ser.write_type_7("enable_continuous_hiking_with_keyboard", data.getEnableContinuousHikingWithKeyboard());
+      ser.write_type_7("enable_continuous_hiking_with_joystick_controller", data.getEnableContinuousHikingWithJoystickController());
+      ser.write_type_7("walk_backwards", data.getWalkBackwards());
       ser.write_type_6("forward_value", data.getForwardValue());
       ser.write_type_6("lateral_value", data.getLateralValue());
       ser.write_type_6("turning_value", data.getTurningValue());
@@ -196,9 +196,9 @@ public class ContinuousWalkingCommandMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ContinuousWalkingCommandMessage data)
    {
-      data.setPublishToController(ser.read_type_7("publish_to_controller"));
-      data.setEnableContinuousWalking(ser.read_type_7("enable_continuous_walking"));
-      data.setNumberOfStepsToSend(ser.read_type_3("number_of_steps_to_send"));
+      data.setEnableContinuousHikingWithKeyboard(ser.read_type_7("enable_continuous_hiking_with_keyboard"));
+      data.setEnableContinuousHikingWithJoystickController(ser.read_type_7("enable_continuous_hiking_with_joystick_controller"));
+      data.setWalkBackwards(ser.read_type_7("walk_backwards"));
       data.setForwardValue(ser.read_type_6("forward_value"));
       data.setLateralValue(ser.read_type_6("lateral_value"));
       data.setTurningValue(ser.read_type_6("turning_value"));

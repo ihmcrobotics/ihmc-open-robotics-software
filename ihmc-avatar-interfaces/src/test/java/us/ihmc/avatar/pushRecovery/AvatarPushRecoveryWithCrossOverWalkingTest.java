@@ -1,7 +1,5 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -37,6 +35,8 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements MultiRobotTestInterface
 {
@@ -104,7 +104,6 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
    @Test
    public void testOutwardPushInSwing()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       // setup all parameters
@@ -196,7 +195,7 @@ public abstract class AvatarPushRecoveryWithCrossOverWalkingTest implements Mult
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
    private void walkForward()

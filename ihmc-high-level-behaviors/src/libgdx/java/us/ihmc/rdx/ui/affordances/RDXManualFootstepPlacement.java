@@ -7,14 +7,16 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.EllipticalStepPositionLimiter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -27,15 +29,18 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.ArrayList;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.tools.factories.OptionalFactoryField;
 
 /**
  * Manages and assists with the operator placement of footsteps.
  */
 public class RDXManualFootstepPlacement implements RenderableProvider
 {
+   private final static boolean USE_HEIGHTMAP = true;
+   private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = false;
    private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
+
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
    private boolean footstepBeingPlacedIsReachable;
@@ -50,6 +55,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean renderTooltip = false;
    private final FramePose3D tempFramePose = new FramePose3D();
    private RDX3DPanelTooltip tooltip;
+   private final ImBoolean activeAdjustmentEnabled = new ImBoolean(false);
+   private HeightMapData latestHeightMapData;
+   private final OptionalFactoryField<EllipticalStepPositionLimiter> stepPositionLimiter = new OptionalFactoryField<>("ManualFootstepPlacementLimiter");
 
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
@@ -127,6 +135,10 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepPlan.removeLastStep();
       }
       ImGuiTools.previousWidgetTooltip("Delete");
+      if (ImGui.checkbox("Active Footstep Adjustment", activeAdjustmentEnabled))
+      {
+         footstepPlan.setActiveAdjustment(activeAdjustmentEnabled.get());
+      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -203,23 +215,32 @@ public class RDXManualFootstepPlacement implements RenderableProvider
             }
          }
 
-         // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
-         FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
-         stepChecker.checkValidSingleStep(footstepPlan.getFootsteps(),
-                                          candidateStepPose,
-                                          currentFootStepSide,
-                                          footstepPlan.getNumberOfFootsteps());
+         // Constrain footstep to reachable region
+         if (APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT)
+            applyReachabilityConstraintToStep(footstepBeingPlaced.getFootPose());
 
-         // Get the warnings and flash if the footstep's placement isn't okay
-         ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
-         footstepBeingPlaced.flashFootstepWhenBadPlacement(temporaryReasons.get(temporaryReasons.size() - 1));
+         // Snap footstep to height map
+         if (USE_HEIGHTMAP && latestHeightMapData != null)
+         {
+            double height = latestHeightMapData.getHeightAt(footstepBeingPlaced.getFootPose().getX(), footstepBeingPlaced.getFootPose().getY());
 
-         footstepBeingPlacedIsReachable = isFootstepBeingPlacedReachable();
+            if (!Double.isNaN(height))
+               footstepBeingPlaced.getFootPose().setZ(height);
+            else
+               LogTools.warn("Could not use heightMap for footstep adjustment, since height is NaN");
+         }
+
+         // Update gizmo if we used height map or constrained footstep position
+         if (USE_HEIGHTMAP || APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT)
+            footstepBeingPlaced.setGizmoPose(footstepBeingPlaced.getFootPose().getX(),
+                                             footstepBeingPlaced.getFootPose().getY(),
+                                             footstepBeingPlaced.getFootPose().getZ(),
+                                             footstepBeingPlaced.getFootPose());
 
          // When left button clicked and released.
          if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
          {
-            placeFootstep();
+            forcePlaceFootstep();
          }
 
          if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -231,20 +252,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void placeFootstep()
    {
-      if (footstepBeingPlacedIsReachable)
-      {
-         // If safe to place footstep
-         RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
-         addedStep.copyFrom(baseUI, footstepBeingPlaced);
-         // Switch sides
-         currentFootStepSide = currentFootStepSide.getOppositeSide();
-         createNewFootstep(currentFootStepSide);
-      }
-      else
-      {
-         // If not safe print message and abort footstep placement
-         LogTools.info("Footstep Rejected, too far from previous foot... not placing footstep");
-      }
+      // If safe to place footstep
+      RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
+      addedStep.copyFrom(footstepBeingPlaced);
+      // Switch sides
+      currentFootStepSide = currentFootStepSide.getOppositeSide();
+      createNewFootstep(currentFootStepSide);
    }
 
    public void forcePlaceFootstep()
@@ -300,7 +313,67 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.updatePose(tempFramePose);
    }
 
-   public void setFootstepPose(FramePose3DReadOnly poseToSet)
+   private final FramePose3D stanceFootPose = new FramePose3D();
+   private final PoseReferenceFrame stanceFootFrame = new PoseReferenceFrame("Latest Stance Foot Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   private final FramePose3D constraintFramePose = new FramePose3D();
+   private final PoseReferenceFrame constraintFrame = new PoseReferenceFrame("Latest Control Frame in Plan", ReferenceFrame.getWorldFrame());
+
+   private void applyReachabilityConstraintToStep(FramePose3DReadOnly poseToSet)
+   {
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      RobotSide swingSide = footstepBeingPlaced.getFootstepSide();
+
+      if (footstepPlan.getLastFootstep() != null)
+      {
+         boolean stanceFootPoseHasBeenSet = false;
+
+         // Make sure stance foot is set from latest footstep in plan that is opposite foot of swing foot
+         for (int i = 0 ; i < footstepPlan.getNumberOfFootsteps(); i++)
+            if (swingSide != footstepPlan.getFootsteps().get(i).getFootstepSide())
+            {
+               stanceFootPose.setMatchingFrame(footstepPlan.getFootsteps().get(i).getFootPose());
+               stanceFootPoseHasBeenSet = true;
+            }
+
+         // If all footsteps in plan are with the same foot, set stanceFootPose to robot's current stance foot
+         if (!stanceFootPoseHasBeenSet)
+            stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
+
+         stanceFootPose.changeFrame(stanceFootFrame.getParent());
+         stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+
+         constraintFramePose.setToZero(stanceFootFrame);
+         double offset = swingSide == RobotSide.LEFT ? EllipticalStepPositionLimiter.NOMINAL_STANCE_WIDTH_DEFAULT / 2.0 : -EllipticalStepPositionLimiter.NOMINAL_STANCE_WIDTH_DEFAULT / 2.0;
+         constraintFramePose.getPosition().addY(offset);
+      }
+      else
+      {
+         stanceFootPose.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(swingSide.getOppositeSide()));
+
+         constraintFramePose.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+         double yaw = syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getCenterOfMassFrame()).getRotation().getYaw();
+         constraintFramePose.getOrientation().setToYawOrientation(yaw);
+      }
+
+      stanceFootPose.changeFrame(stanceFootFrame.getParent());
+      constraintFramePose.changeFrame(constraintFrame.getParent());
+
+      stanceFootFrame.setPoseAndUpdate(stanceFootPose);
+      constraintFrame.setPoseAndUpdate(constraintFramePose);
+
+      poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      if (stepPositionLimiter.hasValue())
+         stepPositionLimiter.get().enforceFootPositionConstraint(poseToSet.getPosition(),
+                                                                 footstepBeingPlaced.getFootPose().getPosition(),
+                                                                 constraintFrame,
+                                                                 stanceFootFrame,
+                                                                 swingSide);
+   }
+
+   public void setFootstepBeingPlacedPose(FramePose3DReadOnly poseToSet)
    {
       poseToSet.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(poseToSet);
@@ -365,5 +438,20 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 
       return isReachable;
+   }
+
+   public void clear()
+   {
+      footstepPlan.clear();
+   }
+
+   public void setStepPositionLimiter(EllipticalStepPositionLimiter stepPositionLimiter)
+   {
+      this.stepPositionLimiter.set(stepPositionLimiter);
+   }
+
+   public void setHeightMapData(HeightMapData heightMapMessage)
+   {
+      this.latestHeightMapData = heightMapMessage;
    }
 }

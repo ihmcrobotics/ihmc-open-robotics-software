@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.promp.ProMPUtil.concatenateEigenMatrix;
@@ -82,7 +83,8 @@ public class ProMPManager
     */
    public void loadTaskFromDemos()
    {
-      String demoDirAbs = ProMPUtil.getDemosDirectory().toString();
+      String demoDirAbs = Objects.requireNonNull(new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                        "ihmc-high-level-behaviors/promps/demos").getFilesystemDirectory()).toString();
       String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
       File demoFolder = new File(demoTrainingDirAbs);
       File[] listOfFiles = demoFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv") && !new File(dir, name).isDirectory());

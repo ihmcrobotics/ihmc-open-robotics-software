@@ -6,11 +6,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import gnu.trove.map.hash.TDoubleObjectHashMap;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRFloatAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -19,8 +20,8 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
 import us.ihmc.rdx.visualizers.RDXPolynomial;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
-import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
+import us.ihmc.robotics.trajectories.core.Polynomial;
+import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
@@ -130,7 +131,7 @@ public class RDXVisualTools
                if (model == null)
                {
                   RDXModelInstanceScaler scaler = new RDXModelInstanceScaler(modelFileName);
-                  model = scaler.scaleForModel(scaleFactor);
+                  model = scaler.getScaledDeepCopy(scaleFactor);
                   scaleToModelMap.put(scaleFactor, model);
                }
             }
@@ -170,9 +171,25 @@ public class RDXVisualTools
       {
          for (Material material : modelInstance.materials)
          {
-            Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
-            material.set(ColorAttribute.createDiffuse(color));
-            if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+            boolean definitionSpecifiesColor = materialDefinition.getDiffuseColor() != null;
+            boolean definitionSpecifiesAlpha = materialDefinition.getDiffuseColor().getAlpha() < 1.0;
+            boolean isABlenderExport = material.has(PBRFloatAttribute.Metallic) || material.has(PBRFloatAttribute.Roughness);
+            boolean materialHasPBRColor = material.has(PBRColorAttribute.BaseColorFactor);
+
+            if (!materialHasPBRColor) // To start, fix material if needed
+            {
+               Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
+               material.set(PBRColorAttribute.createBaseColorFactor(color));
+            }
+
+            boolean useDefinitionColor = definitionSpecifiesAlpha || !isABlenderExport; // Keep color if we are opaque and from Blender
+            if (definitionSpecifiesColor && useDefinitionColor)
+            {
+               PBRColorAttribute pbrColorAttribute = material.get(PBRColorAttribute.class, PBRColorAttribute.BaseColorFactor);
+               pbrColorAttribute.color.set(toColor(materialDefinition.getDiffuseColor()));
+            }
+
+            if (definitionSpecifiesAlpha)
             {
                material.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
             }
@@ -184,11 +201,11 @@ public class RDXVisualTools
    public static Material toMaterial(MaterialDefinition materialDefinition)
    {
       if (materialDefinition == null)
-         return new Material(ColorAttribute.createDiffuse(DEFAULT_COLOR));
+         return new Material(PBRColorAttribute.createBaseColorFactor(DEFAULT_COLOR));
 
       Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
 
-      Material attributes = new Material(ColorAttribute.createDiffuse(color));
+      Material attributes = new Material(PBRColorAttribute.createBaseColorFactor(color));
 
       if (materialDefinition.getDiffuseColor() != null && materialDefinition.getDiffuseColor().getAlpha() < 1.0)
       {
@@ -198,7 +215,7 @@ public class RDXVisualTools
       if (materialDefinition.getDiffuseMap() != null && materialDefinition.getDiffuseMap().getFilename() != null)
       {
          Texture textureFromFile = new Texture(materialDefinition.getDiffuseMap().getFilename());
-         attributes.set(TextureAttribute.createDiffuse(textureFromFile));
+         attributes.set(PBRTextureAttribute.createBaseColorTexture(textureFromFile));
       }
 
       return attributes;
@@ -206,7 +223,7 @@ public class RDXVisualTools
 
    public static Color toColor(ColorDefinition colorDefinition)
    {
-      return toColor(colorDefinition, DEFAULT_COLOR);
+      return LibGDXTools.toLibGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
    }
 
    public static Color toColor(ColorDefinition colorDefinition, Color defaultValue)
@@ -214,7 +231,7 @@ public class RDXVisualTools
       if (colorDefinition == null)
          return defaultValue;
       else
-         return LibGDXTools.toLibGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
+         return toColor(colorDefinition);
    }
 
    // TODO: Figure out how to make this general to all things that extend RigidBody

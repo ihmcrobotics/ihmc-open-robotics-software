@@ -4,11 +4,11 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+import us.ihmc.commons.time.TimeInterval;
+import us.ihmc.commons.time.TimeIntervalBasics;
+import us.ihmc.commons.time.TimeIntervalProvider;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.time.TimeInterval;
-import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public class PolynomialEstimator implements TimeIntervalProvider, Settable<PolynomialEstimator>
 {

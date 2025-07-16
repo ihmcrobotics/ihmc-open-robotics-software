@@ -38,7 +38,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -92,7 +92,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    @Test
    public void testChangeOfSupport()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(1738L);
 
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
@@ -196,7 +196,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    /**
@@ -206,7 +206,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    @Test
    public void testPauseWalkingInSwing()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatEnvironment, simulationTestingParameters);
@@ -261,7 +261,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    /**
@@ -271,7 +271,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    @Test
    public void testPauseWalkingInTransferFirstStep()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatEnvironment, simulationTestingParameters);
@@ -326,7 +326,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    /**
@@ -336,7 +336,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
    @Test
    public void testPauseWalkingInTransfer()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), flatEnvironment, simulationTestingParameters);
@@ -391,7 +391,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private FootstepDataListMessage createForwardWalkingFootsteps(int numberOfSteps,

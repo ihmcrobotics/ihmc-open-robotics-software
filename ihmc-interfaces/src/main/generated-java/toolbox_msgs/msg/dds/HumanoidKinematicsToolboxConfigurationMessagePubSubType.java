@@ -15,7 +15,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "512c136f0cf0055d0bdd81435509cb1b8c4f12139314e1899c6868499bcb9269";
+   		return "2ee8531c108e60a6b56d08fc8ef8de994a5c08eb2418aa9602cec1f553c0c8b6";
    }
    
    @Override
@@ -52,9 +52,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -81,10 +79,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -113,39 +108,35 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
    public static void write(toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_7(data.getHoldCurrentCenterOfMassXyPosition());
 
       cdr.write_type_7(data.getEnableAutoSupportPolygon());
 
-      cdr.write_type_7(data.getHoldSupportRigidBodies());
-
-      cdr.write_type_7(data.getEnableMultiContactSupportRegionSolver());
+      cdr.write_type_7(data.getEnableStabilityObjective());
 
       cdr.write_type_7(data.getEnableJointLimitReduction());
 
       if(data.getJointLimitReductionFactors().size() <= 20)
       cdr.write_type_e(data.getJointLimitReductionFactors());else
-          throw new RuntimeException("joint_limit_reduction_factors field exceeds the maximum length");
+          throw new RuntimeException("joint_limit_reduction_factors field exceeds the maximum length: %d > %d".formatted(data.getJointLimitReductionFactors().size(), 20));
 
       if(data.getJointLimitReductionHashCodes().size() <= 20)
       cdr.write_type_e(data.getJointLimitReductionHashCodes());else
-          throw new RuntimeException("joint_limit_reduction_hash_codes field exceeds the maximum length");
+          throw new RuntimeException("joint_limit_reduction_hash_codes field exceeds the maximum length: %d > %d".formatted(data.getJointLimitReductionHashCodes().size(), 20));
 
    }
 
    public static void read(toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setHoldCurrentCenterOfMassXyPosition(cdr.read_type_7());
       	
       data.setEnableAutoSupportPolygon(cdr.read_type_7());
       	
-      data.setHoldSupportRigidBodies(cdr.read_type_7());
-      	
-      data.setEnableMultiContactSupportRegionSolver(cdr.read_type_7());
+      data.setEnableStabilityObjective(cdr.read_type_7());
       	
       data.setEnableJointLimitReduction(cdr.read_type_7());
       	
@@ -157,11 +148,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final void serialize(toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
       ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
-      ser.write_type_7("hold_support_rigid_bodies", data.getHoldSupportRigidBodies());
-      ser.write_type_7("enable_multi_contact_support_region_solver", data.getEnableMultiContactSupportRegionSolver());
+      ser.write_type_7("enable_stability_objective", data.getEnableStabilityObjective());
       ser.write_type_7("enable_joint_limit_reduction", data.getEnableJointLimitReduction());
       ser.write_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.write_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());
@@ -170,11 +160,10 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
       data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
-      data.setHoldSupportRigidBodies(ser.read_type_7("hold_support_rigid_bodies"));
-      data.setEnableMultiContactSupportRegionSolver(ser.read_type_7("enable_multi_contact_support_region_solver"));
+      data.setEnableStabilityObjective(ser.read_type_7("enable_stability_objective"));
       data.setEnableJointLimitReduction(ser.read_type_7("enable_joint_limit_reduction"));
       ser.read_type_e("joint_limit_reduction_factors", data.getJointLimitReductionFactors());
       ser.read_type_e("joint_limit_reduction_hash_codes", data.getJointLimitReductionHashCodes());

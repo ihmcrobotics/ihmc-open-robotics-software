@@ -25,12 +25,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterface
 {
@@ -51,19 +53,19 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       testHelper.publishToController(AvatarRandomTestMessages.nextArmTrajectoryMessage(random, trajectoryTime, RobotSide.LEFT, robot));
       testHelper.publishToController(AvatarRandomTestMessages.nextArmTrajectoryMessage(random, trajectoryTime, RobotSide.RIGHT, robot));
 
-      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
+      assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.LEFT, trajectoryTime));
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.RIGHT, trajectoryTime));
 
-      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
+      assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
       AvatarCommonAsserts.assertDesiredArmPositions(leftHome, RobotSide.LEFT, robot, testHelper, 1.0e-10);
       AvatarCommonAsserts.assertDesiredArmPositions(rightHome, RobotSide.RIGHT, robot, testHelper, 1.0e-10);
       AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.LEFT, robot, testHelper, 1.0e-10);
       AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.RIGHT, robot, testHelper, 1.0e-10);
 
-      Assert.assertTrue(testHelper.simulateNow(2.0));
+      assertTrue(testHelper.simulateNow(2.0));
 
       AvatarCommonAsserts.assertArmPositions(leftHome, RobotSide.LEFT, robot, Math.toRadians(15.0));
       AvatarCommonAsserts.assertArmPositions(rightHome, RobotSide.RIGHT, robot, Math.toRadians(15.0));
@@ -80,16 +82,16 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
       testHelper.publishToController(AvatarRandomTestMessages.nextChestTrajectoryMessage(random, trajectoryTime, pelvisZUpFrame, robot));
 
-      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
+      assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime));
 
-      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
+      assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
       AvatarCommonAsserts.assertDesiredChestOrientation(chestHome, robot, testHelper, 1.0e-6);
       AvatarCommonAsserts.assertDesiredChestAngularVelocityZero(robot, testHelper, 1.0e-6);
 
-      Assert.assertTrue(testHelper.simulateNow(2.0));
+      assertTrue(testHelper.simulateNow(2.0));
 
       AvatarCommonAsserts.assertChestOrientation(chestHome, robot, Math.toRadians(1.0));
    }
@@ -103,11 +105,11 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
       testHelper.publishToController(AvatarRandomTestMessages.nextPelvisTrajectoryMessage(random, trajectoryTime, robot, 0.1, Math.toRadians(30.0)));
 
-      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.5));
+      assertTrue(testHelper.simulateNow(trajectoryTime + 0.5));
 
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime));
 
-      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 1.0));
+      assertTrue(testHelper.simulateNow(trajectoryTime + 1.0));
 
       FrameQuaternion pelvisHomeOrientation = new FrameQuaternion(testHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
       AvatarCommonAsserts.assertDesiredPelvisOrientation(pelvisHomeOrientation, robot, testHelper, 1.0e-3);
@@ -126,9 +128,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       Map<String, RigidBodyControlMode> defaultControlModes = robotModel.getWalkingControllerParameters().getDefaultControlModesForRigidBodies();
       if (defaultControlModes.containsKey(hand.getName()))
       {
-         Assert.assertEquals("This test assumes the hand is controlled in jointspace by default.",
-                             RigidBodyControlMode.JOINTSPACE,
-                             defaultControlModes.get(hand.getName()));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, defaultControlModes.get(hand.getName()), "This test assumes the hand is controlled in jointspace by default.");
       }
 
       int numberOfJoints = MultiBodySystemTools.computeDegreesOfFreedom(armJoints);
@@ -147,10 +147,8 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
       Map<String, Pose3D> bodyHome = robotModel.getWalkingControllerParameters().getOrCreateBodyHomeConfiguration();
       Map<String, RigidBodyControlMode> defaultControlModes = robotModel.getWalkingControllerParameters().getDefaultControlModesForRigidBodies();
-      Assert.assertEquals("This test assumes the chest is controlled in taskspace by default.",
-                          RigidBodyControlMode.TASKSPACE,
-                          defaultControlModes.get(chest.getName()));
-      Assert.assertTrue("Bodies controlled in taskspace by default must specify a home pose.", bodyHome.containsKey(chest.getName()));
+      assertEquals(RigidBodyControlMode.TASKSPACE, defaultControlModes.get(chest.getName()),"This test assumes the chest is controlled in taskspace by default.");
+      assertTrue("Bodies controlled in taskspace by default must specify a home pose.", bodyHome.containsKey(chest.getName()));
 
       return bodyHome.get(chest.getName());
    }
@@ -163,14 +161,14 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       factory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       testHelper = factory.createAvatarTestingSimulation();
       testHelper.start();
-      Assert.assertTrue(testHelper.simulateNow(0.25));
+      assertTrue(testHelper.simulateNow(0.25));
    }
 
    @BeforeEach
    public void setup()
    {
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -182,6 +180,6 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
          testHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 }

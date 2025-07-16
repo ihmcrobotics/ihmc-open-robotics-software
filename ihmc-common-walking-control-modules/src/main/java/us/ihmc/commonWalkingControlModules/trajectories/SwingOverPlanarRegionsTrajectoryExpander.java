@@ -37,7 +37,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.YoCounter;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -91,6 +91,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
    private final double minimumSwingHeight;
+   private final double defaultSwingHeight;
    private final double maximumSwingHeight;
    private final double footLengthOffset;
    private double heelLength;
@@ -155,6 +156,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                                 this.registry,
                                                                 graphicsListRegistry);
       minimumSwingHeight = swingTrajectoryParameters.getMinSwingHeight();
+      defaultSwingHeight = swingTrajectoryParameters.getDefaultSwingHeight();
       maximumSwingHeight = swingTrajectoryParameters.getMaxSwingHeight();
       toeLength = steppingParameters.getFootForwardOffset();
       heelLength = steppingParameters.getFootBackwardOffset();
@@ -422,8 +424,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       firstBaseWaypoint.interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[0]);
       secondBaseWaypoint.interpolate(swingStartPosition, swingEndPosition, swingWaypointProportions[1]);
-      double firstWaypointHeight = Math.max(swingStartPosition.getZ(), firstBaseWaypoint.getZ()) + minimumSwingHeight;
-      double secondWaypointHeight = Math.max(swingEndPosition.getZ(), secondBaseWaypoint.getZ()) + minimumSwingHeight;
+      double firstWaypointHeight = Math.max(swingStartPosition.getZ(), firstBaseWaypoint.getZ()) + defaultSwingHeight;
+      double secondWaypointHeight = Math.max(swingEndPosition.getZ(), secondBaseWaypoint.getZ()) + defaultSwingHeight;
       firstBaseWaypoint.setZ(firstWaypointHeight);
       secondBaseWaypoint.setZ(secondWaypointHeight);
 

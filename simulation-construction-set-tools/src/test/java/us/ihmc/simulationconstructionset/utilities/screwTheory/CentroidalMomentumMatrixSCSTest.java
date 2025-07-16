@@ -24,7 +24,7 @@ import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -70,8 +70,8 @@ public class CentroidalMomentumMatrixSCSTest
       Random random = new Random(167L);
 
       double mass = random.nextDouble();
-      Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
-      Vector3D comOffset = RandomGeometry.nextVector3D(random);
+      Matrix3D momentOfInertia = EuclidCoreRandomTools.nextDiagonalMatrix3D(random);
+      Vector3D comOffset = EuclidCoreRandomTools.nextVector3D(random);
 
       Robot robot = new Robot("robot");
       FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3D(), robot);
@@ -93,13 +93,13 @@ public class CentroidalMomentumMatrixSCSTest
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
       {
-         Vector3D position = RandomGeometry.nextVector3D(random);
+         Vector3D position = EuclidCoreRandomTools.nextVector3D(random);
          RotationMatrix rotation = new RotationMatrix();
          rotation.setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Vector3D linearVelocityInBody = RandomGeometry.nextVector3D(random);
+         Vector3D linearVelocityInBody = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D linearVelocityInWorld = new Vector3D(linearVelocityInBody);
          rotation.transform(linearVelocityInWorld);
-         Vector3D angularVelocity = RandomGeometry.nextVector3D(random);
+         Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
          rootJoint.setPosition(position);
          rootJoint.setRotation(rotation);

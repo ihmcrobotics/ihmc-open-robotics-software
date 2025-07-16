@@ -22,8 +22,8 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -243,7 +243,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       iterationData.clear();
       edgeDataMap.clear();
       gridHeightMap.clear();
-      setHeightMapData(request.getHeightMapData());
+      setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
 
       packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 

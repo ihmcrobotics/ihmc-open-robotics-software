@@ -3,12 +3,10 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
@@ -17,7 +15,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 public class HumanoidActivePerceptionModule
 {
@@ -29,7 +27,6 @@ public class HumanoidActivePerceptionModule
    private final Mat gridColor = new Mat();
 
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
-   private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
    private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
@@ -56,20 +53,6 @@ public class HumanoidActivePerceptionModule
                                                                          {
                                                                          },
                                                                          true);
-   }
-
-   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
-                                                         ROS2Node ros2Node,
-                                                         HumanoidReferenceFrames referenceFrames,
-                                                         ContinuousHikingParameters continuousHikingParameters)
-   {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
-                                                                            ros2Node,
-                                                                            referenceFrames,
-                                                                            continuousHikingParameters,
-                                                                            new MonteCarloFootstepPlannerParameters(),
-                                                                            robotModel.getFootstepPlannerParameters("ForContinuousWalking"),
-                                                                            robotModel.getSwingPlannerParameters());
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
@@ -124,13 +107,5 @@ public class HumanoidActivePerceptionModule
    {
       if (activePlaneMappingRemoteThread != null)
          activePlaneMappingRemoteThread.destroy();
-
-      if (continuousPlannerSchedulingTask != null)
-         continuousPlannerSchedulingTask.destroy();
-   }
-
-   public ContinuousPlannerSchedulingTask getContinuousPlannerSchedulingTask()
-   {
-      return continuousPlannerSchedulingTask;
    }
 }

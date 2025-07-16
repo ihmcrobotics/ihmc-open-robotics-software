@@ -85,11 +85,11 @@ public class ConfirmableRequestMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       if(data.getRequestNumbers().size() <= 10)
       cdr.write_type_e(data.getRequestNumbers());else
-          throw new RuntimeException("request_numbers field exceeds the maximum length");
+          throw new RuntimeException("request_numbers field exceeds the maximum length: %d > %d".formatted(data.getRequestNumbers().size(), 10));
 
       if(data.getConfirmationNumbers().size() <= 250)
       cdr.write_type_e(data.getConfirmationNumbers());else
-          throw new RuntimeException("confirmation_numbers field exceeds the maximum length");
+          throw new RuntimeException("confirmation_numbers field exceeds the maximum length: %d > %d".formatted(data.getConfirmationNumbers().size(), 250));
 
    }
 

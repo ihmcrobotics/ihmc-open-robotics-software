@@ -1,7 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import controller_msgs.msg.dds.StepConstraintsListMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +33,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -44,10 +42,11 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {
@@ -182,7 +181,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.2 * swingTime;
       Vector3D firstForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.3;
+      double percentWeight = 0.2;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
@@ -218,7 +217,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -236,14 +235,13 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          pushRobotController = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
    private static class GapPlanarRegionEnvironment implements CommonAvatarEnvironmentInterface
    {
       private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
-      private final TerrainObjectDefinition terrainObjectDefinition ;
       private final CombinedTerrainObject3D combinedTerrainObject;
       private final PlanarRegionsList planarRegionsList;
       private int id = 0;
@@ -266,8 +264,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          transformGenerator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth + sideGapSize + 0.5 * sideWidth, 0.0);
          addBox(sideLength, sideWidth, platformHeight);
-
-         terrainObjectDefinition = TerrainObjectDefinitionTools.toTerrainObjectDefinition(this);
       }
 
       void addBox(double length, double width, double height)
@@ -311,7 +307,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       }
    }
 
-   private class SingleSupportStartCondition implements StateTransitionCondition
+   private static class SingleSupportStartCondition implements StateTransitionCondition
    {
       private final YoEnum<FootControlModule.ConstraintType> footConstraintType;
 
@@ -327,7 +323,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       }
    }
 
-   private class DoubleSupportStartCondition implements StateTransitionCondition
+   private static class DoubleSupportStartCondition implements StateTransitionCondition
    {
       private final YoEnum<WalkingStateEnum> walkingState;
 

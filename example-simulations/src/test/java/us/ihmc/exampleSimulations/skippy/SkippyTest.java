@@ -32,6 +32,10 @@ public class SkippyTest
       assertTrue(skippySimulation.run(10.0));
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has some type of hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testRecoveringFromPush() throws SimulationExceededMaximumTimeException
    {

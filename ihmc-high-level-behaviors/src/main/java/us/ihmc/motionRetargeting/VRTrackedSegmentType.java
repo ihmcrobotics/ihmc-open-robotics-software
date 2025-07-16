@@ -4,25 +4,26 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public enum VRTrackedSegmentType
 {
-   LEFT_HAND("leftHand", RobotSide.LEFT, 0.0, 1.0), // Defaults are 20 and 1. Reduce the orientation for the knob arms
-   RIGHT_HAND("rightHand", RobotSide.RIGHT, 0.0, 1.0),
-   LEFT_UPPERARM("leftUpperArm", RobotSide.LEFT, 0.0, 1.0),
-   RIGHT_UPPERARM("rightUpperArm", RobotSide.RIGHT, 0.0, 1.0),
-   LEFT_FOREARM("leftForeArm", RobotSide.LEFT, 0.0, 1.0),
-   RIGHT_FOREARM("rightForeArm", RobotSide.RIGHT, 0.0, 1.0),
-   CHEST("chest", null, 0.0, 10);
+   LEFT_HAND("Left Hand", RobotSide.LEFT),
+   RIGHT_HAND("Right Hand", RobotSide.RIGHT),
+   LEFT_WRIST("Left Wrist", RobotSide.LEFT),
+   RIGHT_WRIST("Right Wrist", RobotSide.RIGHT),
+   CHEST("Chest", null),
+   WAIST("Waist", null),
+   LEFT_ANKLE("Left Ankle", RobotSide.LEFT),
+   RIGHT_ANKLE("Right Ankle", RobotSide.RIGHT);
 
-   private String segmentName;
-   private RobotSide robotSide;
-   private double positionWeight;
-   private double orientationWeight;
+   private final String segmentName;
+   private final RobotSide robotSide;
 
-   VRTrackedSegmentType(String segmentName, RobotSide robotSide, double positionWeight, double orientationWeight)
+   public static VRTrackedSegmentType[] TRACKER_TYPES = new VRTrackedSegmentType[] {LEFT_WRIST, RIGHT_WRIST, CHEST, WAIST, LEFT_ANKLE, RIGHT_ANKLE};
+   public static VRTrackedSegmentType[] CONTROLLER_TYPES = new VRTrackedSegmentType[] {LEFT_HAND, RIGHT_HAND};
+
+   VRTrackedSegmentType(String segmentName,
+                        RobotSide robotSide)
    {
       this.segmentName = segmentName;
       this.robotSide = robotSide;
-      this.positionWeight = positionWeight;
-      this.orientationWeight = orientationWeight;
    }
 
    public String getSegmentName()
@@ -35,33 +36,13 @@ public enum VRTrackedSegmentType
       return robotSide;
    }
 
-   public double getPositionWeight()
+   public boolean isFootRelated()
    {
-      return positionWeight;
+      return segmentName.contains("Ankle") || segmentName.contains("Foot");
    }
 
-   public double getOrientationWeight()
+   public boolean isHandRelated()
    {
-      return orientationWeight;
-   }
-
-   public static VRTrackedSegmentType toHand(RobotSide robotSide)
-   {
-      return robotSide == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND;
-   }
-
-   public static VRTrackedSegmentType toForearm(RobotSide robotSide)
-   {
-      return robotSide == RobotSide.LEFT ? LEFT_FOREARM : RIGHT_FOREARM;
-   }
-
-   public static VRTrackedSegmentType toUpperArm(RobotSide robotSide)
-   {
-      return robotSide == RobotSide.LEFT ? LEFT_UPPERARM : RIGHT_UPPERARM;
-   }
-
-   public static VRTrackedSegmentType toChest()
-   {
-      return CHEST;
+      return segmentName.contains("Hand");
    }
 }

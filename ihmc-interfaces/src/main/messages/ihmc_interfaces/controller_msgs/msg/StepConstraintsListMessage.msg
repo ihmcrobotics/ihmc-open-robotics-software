@@ -4,7 +4,7 @@
 # As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the constraint region.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
-uint32 sequence_id
+uint64 sequence_id
 
 # The coordinates in world of the origin of each constraint region.
 geometry_msgs/Point[<=20] region_origin
@@ -21,4 +21,4 @@ int32[<=100] number_of_holes_in_region
 int32[<=100] hole_polygons_size
 
 # Single buffer used to store for each constraint the vertices of the concave hull and the convex polygons.
-geometry_msgs/Point[<=50000] vertex_buffer
+geometry_msgs/Point[<=5000] vertex_buffer

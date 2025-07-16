@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -45,14 +44,14 @@ public class RDXInteractableObject implements RenderableProvider
 
    public void load(String modelFileName)
    {
-      ModelData objectModel = RDXModelLoader.loadModelData(modelFileName);
-      modelInstance = new RDXModelInstance(new Model(objectModel));
+      Model objectModel = RDXModelLoader.load(modelFileName);
+      modelInstance = new RDXModelInstance(objectModel);
    }
 
    public void load(String modelFileName, RigidBodyTransform visualModelTransform)
    {
-      ModelData objectModel = RDXModelLoader.loadModelData(modelFileName);
-      modelInstance = new RDXModelInstance(new Model(objectModel));
+      Model objectModel = RDXModelLoader.load(modelFileName);
+      modelInstance = new RDXModelInstance(objectModel);
       modelInstanceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(objectFrame, visualModelTransform);
    }
 
@@ -77,8 +76,7 @@ public class RDXInteractableObject implements RenderableProvider
       if (modelInstance != null)
          modelInstance.getRenderables(renderables, pool);
 
-      if (selectablePose3DGizmo.getSelected().get())
-         selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
    public RigidBodyTransform getTransformToWorld()

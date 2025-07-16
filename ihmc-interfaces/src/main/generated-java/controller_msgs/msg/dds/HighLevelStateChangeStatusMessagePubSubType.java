@@ -15,7 +15,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5d64b0f92d0a14fcf5e303fe0c99a324e7bfc4508e6e7477a88c8370ca93606c";
+   		return "a544d8a336b5dd69fb0369a44776eb8f724bce3c508531dd0377e27c8fa7de9b";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,7 +71,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -86,7 +86,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
 
    public static void write(controller_msgs.msg.dds.HighLevelStateChangeStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_9(data.getInitialHighLevelControllerName());
 
@@ -96,7 +96,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
 
    public static void read(controller_msgs.msg.dds.HighLevelStateChangeStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setInitialHighLevelControllerName(cdr.read_type_9());
       	
@@ -108,7 +108,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(controller_msgs.msg.dds.HighLevelStateChangeStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_9("initial_high_level_controller_name", data.getInitialHighLevelControllerName());
       ser.write_type_9("end_high_level_controller_name", data.getEndHighLevelControllerName());
    }
@@ -116,7 +116,7 @@ public class HighLevelStateChangeStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HighLevelStateChangeStatusMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setInitialHighLevelControllerName(ser.read_type_9("initial_high_level_controller_name"));
       data.setEndHighLevelControllerName(ser.read_type_9("end_high_level_controller_name"));
    }

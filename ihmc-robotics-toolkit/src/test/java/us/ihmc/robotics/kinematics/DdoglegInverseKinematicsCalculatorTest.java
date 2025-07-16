@@ -1,7 +1,5 @@
 package us.ihmc.robotics.kinematics;
 
-import static us.ihmc.robotics.Assert.*;
-
 import java.util.List;
 import java.util.Random;
 
@@ -10,16 +8,16 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author twan
@@ -58,10 +56,10 @@ public class DdoglegInverseKinematicsCalculatorTest
       {
          setRandomPositions(random, revoluteJoints, Math.PI);
 
-         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
+         AxisAngle axisAngle = EuclidCoreRandomTools.nextAxisAngle(random);
          RotationMatrix rotation = new RotationMatrix();
          rotation.set(axisAngle);
-         Vector3D translation = RandomGeometry.nextVector3D(random, 50.0);
+         Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, 50.0);
          RigidBodyTransform desiredTransform = new RigidBodyTransform(rotation, translation);
 
          long t0 = System.nanoTime();

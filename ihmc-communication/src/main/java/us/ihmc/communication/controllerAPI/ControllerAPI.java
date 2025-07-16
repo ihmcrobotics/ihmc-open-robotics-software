@@ -10,7 +10,11 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Base API for the IHMC control API.
@@ -76,6 +80,9 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
+      // Toolbox management
+      inputMessageClasses.add(ToolboxStateMessage.class);
+
       // Commands supported by the kinematics toolbox
       inputMessageClasses.add(KinematicsToolboxCenterOfMassMessage.class);
       inputMessageClasses.add(KinematicsToolboxRigidBodyMessage.class);
@@ -94,6 +101,10 @@ public final class ControllerAPI
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
       inputMessageClasses.add(WholeBodyStreamingMessage.class);
+
+      // Robot startup messages
+      inputMessageClasses.add(EnableHPUCommandMessage.class);
+      inputMessageClasses.add(MasterGainScaleControllerCommandMessage.class);
 
       // Statuses supported by bipedal walking controller {@link WalkingControllerState}
       outputMessageClasses.add(CapturabilityBasedStatus.class);
@@ -122,6 +133,10 @@ public final class ControllerAPI
       outputMessageClasses.add(MultiContactBalanceStatus.class);
       outputMessageClasses.add(MultiContactTrajectoryStatus.class);
 
+      // Robot hardware status messages
+      outputMessageClasses.add(EnableHPUStatusMessage.class);
+      outputMessageClasses.add(MasterGainScaleControllerStatusMessage.class);
+
       // Setting the input messages with specific QoS
       inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());
       inputMessageClassSpecificQoS.put(KinematicsStreamingToolboxInputMessage.class, ROS2QosProfile.BEST_EFFORT());
@@ -142,15 +157,11 @@ public final class ControllerAPI
    public static <T> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
-      {
          return baseTopic.withInput().withTypeName(messageClass).withQoS(getQoS(messageClass));
-      }
-      if (outputMessageClasses.contains(messageClass))
-      {
+      else if (outputMessageClasses.contains(messageClass))
          return baseTopic.withOutput().withTypeName(messageClass).withQoS(getQoS(messageClass));
-      }
-
-      throw new RuntimeException("Topic does not exist: " + messageClass);
+      else
+         return baseTopic.withTypeName(messageClass).withQoS(getQoS(messageClass));
    }
 
    public static ROS2QosProfile getQoS(Class<?> messageClass)

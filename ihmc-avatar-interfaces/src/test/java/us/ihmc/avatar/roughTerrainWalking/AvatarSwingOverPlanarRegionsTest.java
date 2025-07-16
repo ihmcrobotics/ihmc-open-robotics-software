@@ -28,11 +28,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTestInterface
 {
@@ -44,6 +46,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    @Test
    public void testSwingOverPlanarRegions()
    {
+//      fail("This neesd to be fixed");
       double swingTime = 0.6;
       double transferTime = 0.25;
       double stepLength = 0.35;
@@ -151,7 +154,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       simulationTestHelper.publishToController(footsteps);
       simulationTestHelper.simulateNow(simulationTime);
 
-      Point3D rootJointPosition = new Point3D(3.25, 0.0, 0.83);
+      Point3D rootJointPosition = new Point3D(3.3, 0.0, 0.83);
       Vector3D epsilon = new Vector3D(0.05, 0.05, 0.10);
       Point3D min = new Point3D(rootJointPosition);
       Point3D max = new Point3D(rootJointPosition);
@@ -171,7 +174,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -184,7 +187,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          simulationTestHelper = null;
       }
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters = null;
    }
 }

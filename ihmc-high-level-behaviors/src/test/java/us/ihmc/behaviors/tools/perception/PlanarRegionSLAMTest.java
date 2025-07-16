@@ -31,9 +31,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.javaFXToolkit.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ConcaveHullGraphicalMergerListener;
+import us.ihmc.perception.geometry.PlanarLandmarkList;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
 import us.ihmc.perception.tools.PlaneRegistrationTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
@@ -47,7 +48,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMResult;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.tools.lists.PairList;
+import us.ihmc.commons.lists.PairList;
 
 class PlanarRegionSLAMTest
 {

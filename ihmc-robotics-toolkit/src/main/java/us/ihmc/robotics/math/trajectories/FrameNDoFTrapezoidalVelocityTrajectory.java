@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 
-
+@Deprecated
 public abstract class FrameNDoFTrapezoidalVelocityTrajectory implements ReferenceFrameHolder
 {
    private final ReferenceFrame referenceFrame;

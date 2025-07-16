@@ -17,14 +17,34 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
  */
 public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutableField<RigidBodyTransform>
 {
-   public CRDTBidirectionalRigidBodyTransform(RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTBidirectionalRigidBodyTransform(LatestTimestampModifiable latestTimestampModifiable)
    {
-      super(requestConfirmFreezable, new RigidBodyTransform());
+      super(latestTimestampModifiable, new RigidBodyTransform());
    }
 
    public RigidBodyTransformReadOnly getValueReadOnly()
    {
       return getValueInternal();
+   }
+
+   /**
+    * Used to initialize Pose 3D gizmos. This implementation should be reconsidered.
+    */
+   public RigidBodyTransform getValueUnsafe()
+   {
+      return getValueInternal();
+   }
+
+   /** Prefer this method in the case you need to call it every tick, as it no-ops in the case the value is the same. */
+   public void setValue(RigidBodyTransformReadOnly value, double epsilon)
+   {
+      // rotation and translation must be checked separately to handle pose-transform comparison case
+      // translation must use epsilonEquals because it can be vector vs. point
+      if (!(getValueInternal().getRotation().geometricallyEquals(value.getRotation(), epsilon)
+         && getValueInternal().getTranslation().epsilonEquals(value.getTranslation(), epsilon)))
+      {
+         getValueAndModify().set(value);
+      }
    }
 
    public void toMessage(Pose3D poseMessage)
@@ -39,7 +59,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
       }
@@ -47,7 +67,7 @@ public class CRDTBidirectionalRigidBodyTransform extends CRDTBidirectionalMutabl
 
    public void fromMessage(Pose3D poseMessage)
    {
-      if (!isFrozen()) // Ignore updates if we are frozen
+      if (isModificationIncoming())
       {
          getValueInternal().set(poseMessage);
       }

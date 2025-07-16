@@ -1,0 +1,113 @@
+#ifndef __exoskeleton_msgs__msg__ExoEMGMessage__idl__
+#define __exoskeleton_msgs__msg__ExoEMGMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is going to take in data and assign to each muscle channel
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::ExoEMGMessage_")
+      struct ExoEMGMessage
+      {
+        /**
+         * message ID
+         */
+        unsigned long id;
+        /**
+         * floats for each muscle channel
+         */
+        float frontalisrt;
+        float frontalislt;
+        float tart;
+        float talt;
+        float tprt;
+        float tplt;
+        float masseterrt;
+        float masseterlt;
+        float scmrt;
+        float scmlt;
+        float middeltrt;
+        float middeltlt;
+        float antdeltoidrt;
+        float antdeltoidlt;
+        float mserratusantrt;
+        float mserratusantlt;
+        float lattricepsrt;
+        float lattricepslt;
+        float brachiodrt;
+        float brachiodlt;
+        float bicepsbrrt;
+        float bicepsbrlt;
+        float flexcarpurt;
+        float flexcarpult;
+        float flexcarprrt;
+        float flexcarprlt;
+        float abductpolrt;
+        float abductpollt;
+        float extdigrt;
+        float extdiglt;
+        float pectmajorrt;
+        float pectmajorlt;
+        float rectabdomuprt;
+        float rectabdomuplt;
+        float rectabdomlort;
+        float rectabdomlolt;
+        float extobliquert;
+        float extobliquelt;
+        float intobliquert;
+        float intobliquelt;
+        float adductorsrt;
+        float adductorslt;
+        float soleusrt;
+        float soleuslt;
+        float tibantrt;
+        float tibantlt;
+        float peroneusrt;
+        float peroneuslt;
+        float medgastrort;
+        float medgastrolt;
+        float latgastrort;
+        float latgastrolt;
+        float bicepsfemrt;
+        float bicepsfemlt;
+        float semitendrt;
+        float semitendlt;
+        float vlort;
+        float vlolt;
+        float vmort;
+        float vmolt;
+        float rectusfemrt;
+        float rectusfemlt;
+        float pelvicfloorrt;
+        float pelvicfloorlt;
+        float uppertraprt;
+        float uppertraplt;
+        float middletraprt;
+        float middletraplt;
+        float lowertraprt;
+        float lowertraplt;
+        float thoracicrt;
+        float thoraciclt;
+        float multifidiirt;
+        float multifidiilt;
+        float glutmaxrt;
+        float glutmaxlt;
+        float glutmedrt;
+        float glutmedlt;
+        float latdorsirt;
+        float latdorsilt;
+        float infraspinrt;
+        float infraspinlt;
+        float cervicalpsrt;
+        float cervicalpslt;
+      };
+    };
+  };
+};
+
+#endif

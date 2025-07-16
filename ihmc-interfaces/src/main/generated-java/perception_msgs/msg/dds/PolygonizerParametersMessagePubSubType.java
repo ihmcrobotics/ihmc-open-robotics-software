@@ -15,7 +15,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5796ab7dac2bc9ebc03ec7251a70a35027ffae3d06e329407472b3c68141f7a6";
+   		return "b86d00659dd60333b49f7ac273e6d980d351575b2bc2eedd88df4a7dfb83a543";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,7 +81,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -111,7 +111,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(perception_msgs.msg.dds.PolygonizerParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getConcaveHullThreshold());
 
@@ -131,7 +131,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void read(perception_msgs.msg.dds.PolygonizerParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setConcaveHullThreshold(cdr.read_type_6());
       	
@@ -153,7 +153,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(perception_msgs.msg.dds.PolygonizerParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("concave_hull_threshold", data.getConcaveHullThreshold());
       ser.write_type_2("min_number_of_nodes", data.getMinNumberOfNodes());
       ser.write_type_6("shallow_angle_threshold", data.getShallowAngleThreshold());
@@ -166,7 +166,7 @@ public class PolygonizerParametersMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PolygonizerParametersMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setConcaveHullThreshold(ser.read_type_6("concave_hull_threshold"));
       data.setMinNumberOfNodes(ser.read_type_2("min_number_of_nodes"));
       data.setShallowAngleThreshold(ser.read_type_6("shallow_angle_threshold"));

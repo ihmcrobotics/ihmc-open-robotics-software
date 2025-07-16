@@ -1,8 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -22,8 +19,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FramePoseTest
 {
@@ -34,7 +33,7 @@ public class FramePoseTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@Test
+   @Test
    public void testGetOrientationDistanceTrivial()
    {
       RigidBodyTransform transform1 = new RigidBodyTransform();
@@ -49,7 +48,7 @@ public class FramePoseTest
       assertEquals(0.0, distance, 1e-9);
    }
 
-	@Test
+   @Test
    public void testGetTransform()
    {
       Random random = new Random(1179L);
@@ -72,7 +71,7 @@ public class FramePoseTest
 
       FramePose3D framePose = new FramePose3D(worldFrame);
       framePose.getPosition().set(1.0, 0.0, 1.0);
-      framePose.getOrientation().set(RandomGeometry.nextQuaternion(random));
+      framePose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
 
       FrameVector3D rotationAxis = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
       FramePoint3D rotationAxisOrigin = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
@@ -85,10 +84,14 @@ public class FramePoseTest
       Vector3D positionError = new Vector3D();
       positionError.sub(desiredPosition, actualPosePositionAfterRotation);
 
-      assertTrue("Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
-            + worldFrame.getName(), framePose.getReferenceFrame() == worldFrame);
-      assertEquals("FramePose Position after rotation is wrong.  Desired position: " + desiredPosition + ", actual position: "
-            + actualPosePositionAfterRotation, 0.0, positionError.length(), 1e-3);
+      assertTrue(framePose.getReferenceFrame() == worldFrame,
+                 "Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
+                 + worldFrame.getName());
+      assertEquals(0.0,
+                   positionError.norm(),
+                   1e-3,
+                   "FramePose Position after rotation is wrong.  Desired position: " + desiredPosition + ", actual position: "
+                   + actualPosePositionAfterRotation);
    }
 
    @Test
@@ -101,7 +104,7 @@ public class FramePoseTest
 
       FramePose3D framePose = new FramePose3D(worldFrame);
       framePose.getPosition().set(1.0, 0.0, 1.0);
-      framePose.getOrientation().set(RandomGeometry.nextQuaternion(random));
+      framePose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
 
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, angleToRotate, framePose);
 
@@ -112,10 +115,12 @@ public class FramePoseTest
       Vector3D positionError = new Vector3D();
       positionError.sub(desiredPosition, actualPosePositionAfterRotation);
 
-      assertTrue("Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
-            + worldFrame.getName(), framePose.getReferenceFrame() == worldFrame);
-      assertEquals("FramePose Position after rotation is wrong.  Desired position: " + desiredPosition + ", actual position: "
-            + actualPosePositionAfterRotation, 0.0, positionError.length(), 1e-3);
+      assertTrue(framePose.getReferenceFrame() == worldFrame, "Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: " + worldFrame.getName());
+      assertEquals(
+            0.0,
+            positionError.norm(),
+            1e-3,
+            "FramePose Position after rotation is wrong.  Desired position: " + desiredPosition + ", actual position: " + actualPosePositionAfterRotation);
    }
 
    @Test
@@ -143,9 +148,11 @@ public class FramePoseTest
 
          AxisAngle actualRotationAxisAngle = new AxisAngle(rotatedPose.getOrientation());
 
-         assertTrue("Actual rotation: " + actualRotationAxisAngle + " does not match desired: " + desiredRotationAxisAngle,
-               RotationTools.axisAngleEpsilonEquals(desiredRotationAxisAngle, actualRotationAxisAngle, 1e-5,
-                     AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS));
+         assertTrue(RotationTools.axisAngleEpsilonEquals(desiredRotationAxisAngle,
+                                                         actualRotationAxisAngle,
+                                                         1e-5,
+                                                         AxisAngleComparisonMode.IGNORE_FLIPPED_AXES_ROTATION_DIRECTION_AND_COMPLETE_ROTATIONS),
+                    "Actual rotation: " + actualRotationAxisAngle + " does not match desired: " + desiredRotationAxisAngle);
 
          angleToRotate += Math.toRadians(5.0);
       }
@@ -170,10 +177,11 @@ public class FramePoseTest
 
       double desiredOrientationDistance = AngleTools.trimAngleMinusPiToPi(angleToRotate);
 
-      assertTrue("Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
-            + worldFrame.getName(), framePose.getReferenceFrame() == worldFrame);
-      assertEquals("Change in FramePose Position after rotation is wrong.", 0.0, positionDistance, 1e-3);
-      assertEquals("Change in FramePose Orientation after rotation is wrong.", desiredOrientationDistance, orientationDistance, Math.toRadians(0.1));
+      assertTrue(framePose.getReferenceFrame() == worldFrame,
+                 "Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
+                 + worldFrame.getName());
+      assertEquals(0.0, positionDistance, 1e-3, "Change in FramePose Position after rotation is wrong.");
+      assertEquals(desiredOrientationDistance, orientationDistance, Math.toRadians(0.1), "Change in FramePose Orientation after rotation is wrong.");
    }
 
    @Test
@@ -186,16 +194,17 @@ public class FramePoseTest
       framePose.getPosition().set(0.0, 0.0, 1.0);
       FramePose3D framePoseCopy = new FramePose3D(framePose);
 
-      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, 0.5 * angleToRotate , framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, 0.5 * angleToRotate, framePose);
       GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, -0.5 * angleToRotate, framePose);
 
       double positionDistance = framePose.getPositionDistance(framePoseCopy);
       double orientationDistance = framePose.getOrientationDistance(framePoseCopy);
 
-      assertTrue("Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
-            + worldFrame.getName(), framePose.getReferenceFrame() == worldFrame);
-      assertEquals("Change in FramePose Position after rotation is wrong.", 0.0, positionDistance, 1e-3);
-      assertEquals("Change in FramePose Orientation after rotation is wrong.", 0.0, orientationDistance, Math.toRadians(0.1));
+      assertTrue(framePose.getReferenceFrame() == worldFrame,
+                 "Reference Frame shoud not have changed.  Actual frame: " + framePose.getReferenceFrame().getName() + ", Desired frame: "
+                 + worldFrame.getName());
+      assertEquals(0.0, positionDistance, 1e-3, "Change in FramePose Position after rotation is wrong.");
+      assertEquals(0.0, orientationDistance, Math.toRadians(0.1), "Change in FramePose Orientation after rotation is wrong.");
    }
 
    @Test
@@ -210,7 +219,7 @@ public class FramePoseTest
 
       FramePose3D initialPose = new FramePose3D(worldFrame);
       FramePose3D rotatedPose = new FramePose3D(worldFrame);
-      
+
       Point3D actualPosition = new Point3D();
       Point3D desiredPosition = new Point3D();
       Vector3D positionError = new Vector3D();
@@ -218,23 +227,28 @@ public class FramePoseTest
       while (angleToRotate < Math.toRadians(720.0))
       {
          initialPose.getPosition().set(1.0, 0.0, 1.0);
-         initialPose.getOrientation().set(RandomGeometry.nextQuaternion(random));
+         initialPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
          rotatedPose.setIncludingFrame(initialPose);
-         
+
          GeometryTools.rotatePoseAboutAxis(worldFrame, Axis3D.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
          actualPosition.set(rotatedPose.getPosition());
 
          desiredPosition.set(Math.cos(angleToRotate), Math.sin(angleToRotate), 1.0);
          positionError.sub(desiredPosition, actualPosition);
 
-         assertTrue("Reference Frame shoud not have changed.  Actual frame: " + rotatedPose.getReferenceFrame().getName() + ", Desired frame: "
-               + worldFrame.getName(), rotatedPose.getReferenceFrame() == worldFrame);
-         
-         assertEquals("FramePose Position after rotation is wrong.  Desired position: " + desiredPosition + ", actual position: "
-               + actualPosition, 0.0, positionError.length(), 1e-3);
-         
-         assertEquals("Change in FramePose Orientation after rotation is wrong.  Orientation should not have changed.", 0.0,
-               rotatedPose.getOrientationDistance(initialPose), Math.toRadians(0.1));
+         assertTrue(rotatedPose.getReferenceFrame() == worldFrame,
+                    "Reference Frame shoud not have changed.  Actual frame: " + rotatedPose.getReferenceFrame().getName() + ", Desired frame: "
+                    + worldFrame.getName());
+
+         assertEquals(0.0,
+                      positionError.norm(),
+                      1e-3,
+                      "FramePose Position after rotation is wrong.  Desired position: " + desiredPosition + ", actual position: " + actualPosition);
+
+         assertEquals(0.0,
+                      rotatedPose.getOrientationDistance(initialPose),
+                      Math.toRadians(0.1),
+                      "Change in FramePose Orientation after rotation is wrong.  Orientation should not have changed.");
 
          angleToRotate += Math.toRadians(1.0);
       }
@@ -256,7 +270,7 @@ public class FramePoseTest
       while (angleToRotate < Math.toRadians(180.0))
       {
          rotatedPose.getPosition().set(1.0, 0.0, 1.0);
-         rotatedPose.getOrientation().set(RandomGeometry.nextQuaternion(random));
+         rotatedPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
 
          initialPose.setIncludingFrame(rotatedPose);
 
@@ -269,11 +283,14 @@ public class FramePoseTest
          Vector3D changeInPosition = new Vector3D();
          changeInPosition.sub(actualPosePositionAfterRotation, actualpositionBeforeRotation);
 
-         assertTrue("Reference Frame shoud not have changed.  Actual frame: " + rotatedPose.getReferenceFrame().getName() + ", Desired frame: "
-               + worldFrame.getName(), rotatedPose.getReferenceFrame() == worldFrame);
-         assertEquals("FramePose Position after rotation is wrong.", 0.0, changeInPosition.length(), 1e-3);
-         assertEquals("Change in FramePose Orientation after rotation is wrong.", angleToRotate, rotatedPose.getOrientationDistance(initialPose),
-               Math.toRadians(0.1));
+         assertTrue(rotatedPose.getReferenceFrame() == worldFrame,
+                    "Reference Frame shoud not have changed.  Actual frame: " + rotatedPose.getReferenceFrame().getName() + ", Desired frame: "
+                    + worldFrame.getName());
+         assertEquals(0.0, changeInPosition.norm(), 1e-3, "FramePose Position after rotation is wrong.");
+         assertEquals(angleToRotate,
+                      rotatedPose.getOrientationDistance(initialPose),
+                      Math.toRadians(0.1),
+                      "Change in FramePose Orientation after rotation is wrong.");
 
          angleToRotate += Math.toRadians(5.0);
       }

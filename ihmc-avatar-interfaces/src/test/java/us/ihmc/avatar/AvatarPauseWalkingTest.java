@@ -1,8 +1,5 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,13 +18,15 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
@@ -58,7 +57,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -73,7 +72,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       robotModel = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -81,7 +80,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       setupTest();
       walkPaused.set(false);
-      assertTrue(simulationTestHelper.simulateNow(1.0));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
       sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(simulationTestHelper.simulateNow(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
@@ -274,7 +273,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    private void setupTest()
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
 
       robotModel = getRobotModel();
@@ -283,7 +282,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       simulationTestHelper.start();
       YoRegistry registry = simulationTestHelper.getRootRegistry();
       walkPaused = new YoBoolean("isWalkPaused", registry);
-      ThreadTools.sleep(1000);
       setupCameraSideView();
    }
 

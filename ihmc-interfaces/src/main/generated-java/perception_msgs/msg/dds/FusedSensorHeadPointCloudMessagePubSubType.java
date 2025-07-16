@@ -114,7 +114,7 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
 
       if(data.getScan().size() <= 7000000)
       cdr.write_type_e(data.getScan());else
-          throw new RuntimeException("scan field exceeds the maximum length");
+          throw new RuntimeException("scan field exceeds the maximum length: %d > %d".formatted(data.getScan().size(), 7000000));
 
    }
 

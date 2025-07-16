@@ -31,17 +31,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -55,7 +54,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    public void testSingleWaypoint() throws Exception
    {
       simulationTestingParameters.setKeepSCSUp(false);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -92,7 +91,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       double trajectoryTime = 1.0;
       FramePose3D desiredFootPose = new FramePose3D(foot.getBodyFixedFrame());
       desiredFootPose.getOrientation().set(EuclidCoreRandomTools.nextYawPitchRoll(random, 0.17, 0.4, 0.4));
-      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+      desiredFootPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       if (footSide == RobotSide.LEFT)
@@ -143,8 +142,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.03, 0.05));
+      desiredPelvisPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 1.0));
+      desiredPelvisPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 0.05, 0.03, 0.05));
       desiredPelvisPose.setZ(desiredPelvisPose.getZ() - 0.1);
       desiredPosition = new Point3D();
       desiredOrientation = new Quaternion();
@@ -153,7 +152,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage()
                                 .set(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
-      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
       desiredOrientation = new Quaternion(desiredChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
@@ -194,7 +193,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    @Test
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -230,8 +229,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       // Now we can do the usual test.
       double trajectoryTime = 1.0;
       FramePose3D desiredFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.5));
-      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.05, 0.15));
+      desiredFootPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 0.5));
+      desiredFootPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.05, 0.15));
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       messageCollectionMessenger.addMessage(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
@@ -268,8 +267,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.7));
-      desiredPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.03, 0.05));
+      desiredPelvisPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 0.7));
+      desiredPelvisPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 0.05, 0.03, 0.05));
       desiredPelvisPose.setZ(desiredPelvisPose.getZ() - 0.1);
       desiredPosition = new Point3D();
       desiredOrientation = new Quaternion();
@@ -277,7 +276,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPelvisPose.get(desiredPosition, desiredOrientation);
       messageCollectionMessenger.addMessage(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
-      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
       desiredOrientation = new Quaternion(desiredChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
@@ -319,7 +318,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    @Test
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
 
@@ -354,8 +353,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       // Now we can do the usual test.
       double trajectoryTime = 1.0;
       FramePose3D desiredFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.5));
-      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.05, 0.15));
+      desiredFootPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 0.5));
+      desiredFootPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.05, 0.15));
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       messageCollectionMessenger.addMessage(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
@@ -394,8 +393,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.7));
-      desiredPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.03, 0.05));
+      desiredPelvisPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 0.7));
+      desiredPelvisPose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 0.05, 0.03, 0.05));
       desiredPelvisPose.setZ(desiredPelvisPose.getZ() - 0.1);
       desiredPosition = new Point3D();
       desiredOrientation = new Quaternion();
@@ -403,7 +402,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       desiredPelvisPose.get(desiredPosition, desiredOrientation);
       messageCollectionMessenger.addMessage(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation));
 
-      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, RandomGeometry.nextQuaternion(random, 0.5));
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.nextQuaternion(random, 0.5));
       desiredChestOrientation.changeFrame(worldFrame);
       desiredOrientation = new Quaternion(desiredChestOrientation);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame);
@@ -447,7 +446,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    @Test
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
@@ -478,7 +477,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();

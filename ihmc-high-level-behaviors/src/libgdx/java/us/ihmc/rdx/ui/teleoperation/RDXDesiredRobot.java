@@ -31,10 +31,12 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final String pelvisRigidBodyName;
    private final String chestRigidBodyName;
+   private final String headRigidBodyName;
    private final SideDependentList<ArrayList<String>> armRigidBodyNames = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final SideDependentList<ArrayList<String>> legRigidBodyNames = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private boolean pelvisShowing = false;
    private boolean chestShowing = false;
+   private boolean headShowing = false;
    private final SideDependentList<Boolean> armShowing = new SideDependentList<>(false, false);
    private final SideDependentList<Boolean> legShowing = new SideDependentList<>(false, false);
    private RDXRigidBody[] allRigidBodies;
@@ -49,6 +51,7 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
 
       pelvisRigidBodyName = robotModel.getJointMap().getPelvisName();
       chestRigidBodyName = robotModel.getJointMap().getChestName();
+      headRigidBodyName = robotModel.getJointMap().getHeadName();
 
       super.setActive(true);
    }
@@ -132,6 +135,7 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       {
          setPelvisShowing(false);
          setChestShowing(false);
+         setHeadShowing(false);
          for (RobotSide side : RobotSide.values)
          {
             setArmShowing(side, false);
@@ -163,6 +167,19 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
             getMultiBody().getRigidBodiesToHide().add(chestRigidBodyName);
 
          chestShowing = showing;
+      }
+   }
+
+   public void setHeadShowing(boolean showing)
+   {
+      if (showing != headShowing)
+      {
+         if (showing)
+            getMultiBody().getRigidBodiesToHide().remove(headRigidBodyName);
+         else
+            getMultiBody().getRigidBodiesToHide().add(headRigidBodyName);
+
+         headShowing = showing;
       }
    }
 

@@ -1,17 +1,11 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
@@ -35,11 +29,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class VirtualModelMomentumControllerTest
 {
@@ -55,7 +55,7 @@ public class VirtualModelMomentumControllerTest
       random = new Random(1000L);
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
@@ -69,7 +69,7 @@ public class VirtualModelMomentumControllerTest
 
       random = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
@@ -465,6 +465,9 @@ public class VirtualModelMomentumControllerTest
       VirtualModelMomentumControllerTestHelper.compareWrenches(desiredWrench, appliedWrench);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // SEVERE: Could not create a robot, so the mouse cannot be grabbed!
    @Test
    public void testVMCWithArm() throws Exception
    {
@@ -490,6 +493,10 @@ public class VirtualModelMomentumControllerTest
             desiredTorques, externalForcePoints, new SelectionMatrix6D(), simulationTestingParameters);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has a hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testVMCWithPlanarArm() throws Exception
    {
@@ -519,6 +526,10 @@ public class VirtualModelMomentumControllerTest
                                                                                      desiredForces, desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has a hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testPlanarHydra() throws Exception
    {
@@ -557,6 +568,10 @@ public class VirtualModelMomentumControllerTest
             desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
    }
 
+   @Disabled
+   // TODO GITHUB WORKFLOWS
+   // This test has a hard crash
+   // X Error of failed request:  BadWindow (invalid Window parameter)
    @Test
    public void testHydra() throws Exception
    {

@@ -12,16 +12,16 @@ public class RDXVRModeControls
    private final RDXVRModeManager vrModeManager;
    private boolean wasVRReady = false;
    private final ImBoolean renderOnLeftHand = new ImBoolean(false);
+   private final RDXBaseUI baseUI;
 
    public RDXVRModeControls(RDXVRModeManager vrModeManager)
    {
       this.vrModeManager = vrModeManager;
+      baseUI = RDXBaseUI.getInstance();
    }
 
    public void update()
    {
-      RDXBaseUI baseUI = RDXBaseUI.getInstance();
-
       boolean isVRReady = baseUI.getVRManager().isVRReady();
 
       if (isVRReady && !wasVRReady)
@@ -40,6 +40,17 @@ public class RDXVRModeControls
    {
       ImGui.checkbox("Render on left hand", renderOnLeftHand);
 
+      ImGuiTools.separatorText("Trackers");
+      if (ImGui.button("Save roles"))
+      {
+         baseUI.getVRManager().getContext().saveTrackerRolesToFile();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Load roles"))
+      {
+         baseUI.getVRManager().getContext().loadTrackerRolesFromFile();
+      }
+
       ImGuiTools.separatorText("Stereo vision");
       vrModeManager.getStereoVision().renderControls();
 
@@ -50,7 +61,7 @@ public class RDXVRModeControls
       RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRModeManager.class.getSimpleName());
       switch (vrModeManager.getMode())
       {
-         case FOOTSTEP_PLACEMENT -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRHandPlacedFootstepMode.class.getSimpleName());
+         case FOOTSTEP_PLACEMENT -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRFootstepPlacement.class.getSimpleName());
          case WHOLE_BODY_IK_STREAMING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRKinematicsStreamingMode.class.getSimpleName());
          case JOYSTICK_WALKING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXJoystickBasedStepping.class.getSimpleName());
       }

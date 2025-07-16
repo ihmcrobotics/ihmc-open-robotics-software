@@ -83,8 +83,6 @@ public class RDXBaseUI
 {
    public static final int ANTI_ALIASING = 2;
 
-   private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
-   public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
    private static RDXBaseUI instance;
@@ -103,10 +101,9 @@ public class RDXBaseUI
    private final RDXVRManager vrManager = new RDXVRManager();
    private final RDXCapturyManager capturyManager = new RDXCapturyManager();
    private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-//   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
-   private String configurationExtraPath;
+   private final String configurationExtraPath;
    private final HybridResourceDirectory configurationBaseDirectory;
    private final ImGuiFrequencyDisplay frameRateDisplay = new ImGuiFrequencyDisplay("frameRateDisplay");
    private final Stopwatch runTime = new Stopwatch().start();
@@ -115,6 +112,7 @@ public class RDXBaseUI
    private final ImInt foregroundFPSLimit = new ImInt(240);
    private final ImBoolean plotFrameRate = new ImBoolean(false);
    private final ImBoolean vsync = new ImBoolean(false);
+   private final ImBoolean lockPanelsWithinWindows = new ImBoolean(true);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
@@ -123,13 +121,12 @@ public class RDXBaseUI
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
-   private double isoZoomOut = 0.7;
+   private final double isoZoomOut = 0.7;
    private enum Theme
    {
       LIGHT, DARK, CLASSIC
    }
    private Theme theme = Theme.LIGHT;
-   private final String shadePrefix = "shade=";
 
    public RDXBaseUI()
    {
@@ -197,16 +194,6 @@ public class RDXBaseUI
       layoutManager.getSaveListeners().add(imGuiWindowAndDockSystem::saveConfiguration);
       layoutManager.applyLayoutDirectory();
 
-//      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
-//      onCloseRequestListeners.add(guiRecorder::stop);
-//      Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
-
-      if (RECORD_VIDEO)
-      {
-         //         ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
-//         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
-      }
-
       primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
       primary3DPanel.setBackgroundShade((float) view3DBackgroundShade.get());
    }
@@ -229,9 +216,11 @@ public class RDXBaseUI
       }
       plotFrameRate.set(settings.plotFrameRateEnabled());
       setVsync(settings.vsyncEnabled());
+      lockPanelsWithinWindows.set(settings.getlockPanelsWithinWindows());
       setForegroundFPSLimit(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
       imguiFontSize.set(settings.getFontSize());
+      ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
       try
       {
          setTheme(Theme.valueOf(settings.getThemeName()));
@@ -305,7 +294,7 @@ public class RDXBaseUI
    {
       vrManager.pollEventsAndRender(this, primaryScene);
       Gdx.graphics.setTitle(windowTitle);
-      imGuiWindowAndDockSystem.beforeWindowManagement();
+      imGuiWindowAndDockSystem.beforeWindowManagement(settings.getlockPanelsWithinWindows());
       primary3DPanel.render();
       for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
@@ -476,6 +465,10 @@ public class RDXBaseUI
             settings.setVsync(vsync.get());
             Gdx.graphics.setForegroundFPS(Integer.MAX_VALUE);
             Gdx.graphics.setVSync(vsync.get());
+         }
+         if (ImGui.menuItem(labels.get("Lock panels within windows"), null, lockPanelsWithinWindows))
+         {
+            settings.setlockPanelsWithinWindows(lockPanelsWithinWindows.get());
          }
 
          ImGui.separator(); // Environment section

@@ -19,6 +19,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.ffmpeg.FFmpegTools;
 
 /**
  * Doxygen:
@@ -84,7 +85,7 @@ public abstract class FFMPEGLogger
       // Allocate format context for an output format
       avFormatContext = new AVFormatContext();
       int returnCode = avformat.avformat_alloc_output_context2(avFormatContext, null, formatName, fileName);
-      FFMPEGTools.checkError(returnCode, avFormatContext, formatName + " format request");
+      FFmpegTools.checkError(returnCode, avFormatContext, formatName + " format request");
 
       // Allow for saving metadata
       metadata = new AVDictionary();
@@ -97,11 +98,11 @@ public abstract class FFMPEGLogger
 
       // Allocate a packet for later use
       avPacket = avcodec.av_packet_alloc();
-      FFMPEGTools.checkPointer(avPacket, "Allocating a packet");
+      FFmpegTools.checkPointer(avPacket, "Allocating a packet");
 
       // Create a new stream
       avStream = avformat.avformat_new_stream(avFormatContext, null);
-      FFMPEGTools.checkPointer(avStream, "Adding a new stream");
+      FFmpegTools.checkPointer(avStream, "Adding a new stream");
 
       avEncoderContext.codec_id(avFormatContext.video_codec_id());
       avEncoderContext.bit_rate(bitRate); // This is what they've used in all the examples but is arbitrary other than that
@@ -149,7 +150,7 @@ public abstract class FFMPEGLogger
       {
          int codecId = outputFormat.video_codec();
          avEncoder = avcodec.avcodec_find_encoder(codecId);
-         FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
+         FFmpegTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
          LogTools.info("Found encoder " + avEncoder.name().getString() + " - id:" + avEncoder.id());
       }
 
@@ -174,21 +175,21 @@ public abstract class FFMPEGLogger
          returnCode = avcodec.avcodec_send_frame(avEncoderContext, null);
          if (returnCode != 0 && returnCode != endOfFileError) // end of file is okay
          {
-            LogTools.warn("Got code: {}: {}", returnCode, FFMPEGTools.getErrorCodeString(returnCode));
-            FFMPEGTools.checkNonZeroError(returnCode, "Supplying null frame to encoder to signal end of stream");
+            LogTools.warn("Got code: {}: {}", returnCode, FFmpegTools.getErrorCodeString(returnCode));
+            FFmpegTools.checkNonZeroError(returnCode, "Supplying null frame to encoder to signal end of stream");
          }
 
          // Reading encoded data packet from the encoder
          returnCode = avcodec.avcodec_receive_packet(avEncoderContext, avPacket);
          if (returnCode != 0 && returnCode != tryAgainError && returnCode != endOfFileError) // try again, end of file, are okay
          {
-            FFMPEGTools.checkNonZeroError(returnCode, "Reading encoded data packet from the encoder");
+            FFmpegTools.checkNonZeroError(returnCode, "Reading encoded data packet from the encoder");
          }
       }
       while (returnCode != endOfFileError);
 
       returnCode = avformat.av_write_trailer(avFormatContext);
-      FFMPEGTools.checkNonZeroError(returnCode, "Writing stream trailer to output media file");
+      FFmpegTools.checkNonZeroError(returnCode, "Writing stream trailer to output media file");
 
       avformat.avformat_flush(avFormatContext);
 
@@ -209,7 +210,7 @@ public abstract class FFMPEGLogger
    {
       int returnCode;
       returnCode = avutil.av_frame_make_writable(avFrameToBeEncoded);
-      FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
+      FFmpegTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
 
       if (swsContext == null)
       {
@@ -218,7 +219,7 @@ public abstract class FFMPEGLogger
       else
       {
          returnCode = avutil.av_frame_make_writable(avFrameToBeScaled);
-         FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
+         FFmpegTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
 
          avFrameToBeScaled.data(0, sourceImage.getBytedecoByteBufferPointer());
 

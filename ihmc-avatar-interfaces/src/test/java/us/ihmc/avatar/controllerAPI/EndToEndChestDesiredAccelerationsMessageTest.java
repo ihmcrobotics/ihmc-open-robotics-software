@@ -26,7 +26,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
@@ -40,7 +40,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
    @Test
    public void testSimpleCommands() throws Exception
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      CITools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564654L);
 
@@ -75,7 +75,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       assertTrue(success);
 
       assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(chest.getName(), simulationTestHelper));
-      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(spineJoints, simulationTestHelper);
+      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(chest.getName(), spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(spineJoints, simulationTestHelper);
       assertArrayEquals(chestDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
@@ -96,10 +96,10 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       return qdd_ds;
    }
 
-   public double[] findControllerDesiredJointAccelerations(OneDoFJointBasics[] joints, YoVariableHolder scs)
+   public double[] findControllerDesiredJointAccelerations(String torsoName, OneDoFJointBasics[] joints, YoVariableHolder scs)
    {
       double[] qdd_ds = new double[joints.length];
-      String prefix = "utorsoUserMode";
+      String prefix = torsoName + "UserMode";
       for (int i = 0; i < joints.length; i++)
       {
          String name = prefix + "_" + joints[i].getName() + "_qdd_d";

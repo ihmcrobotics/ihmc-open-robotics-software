@@ -1,14 +1,5 @@
 package us.ihmc.avatar.simulationStarter;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.PUSH_RECOVERY;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
-
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
@@ -31,17 +22,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
+import us.ihmc.avatar.scriptCommandGenerator.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -49,13 +38,13 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -66,6 +55,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Consumer;
+
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -110,7 +107,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters;
    private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
@@ -125,8 +121,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final List<HighLevelHumanoidControllerPluginFactory> highLevelControllerPluginFactories = new ArrayList<>();
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
-
-   protected PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
    public DRCSimulationStarter(DRCRobotModel robotModel, GroundProfile3D groundProfile3D)
    {
@@ -156,7 +150,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.pushRecoveryControllerParameters = robotModel.getPushRecoveryControllerParameters();
       this.copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       this.splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
@@ -165,11 +158,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public CommonAvatarEnvironmentInterface getEnvironment()
    {
       return environment;
-   }
-
-   public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
-   {
-      this.pubSubImplementation = pubSubImplementation;
    }
 
    public void setInitialStateEnum(HighLevelControllerName initialStateEnum)
@@ -224,11 +212,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          this.controllerFailureListeners.add(listener);
       else
          controllerFactory.attachControllerFailureListener(listener);
-   }
-
-   public PubSubImplementation getPubSubImplementation()
-   {
-      return pubSubImplementation;
    }
 
    /**
@@ -425,7 +408,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          return;
       alreadyCreatedCommunicator = true;
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, IHMC_SIMULATION_STARTER_NODE_NAME);
+      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_SIMULATION_STARTER_NODE_NAME);
    }
 
    /**
@@ -512,7 +495,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                                  wristForceSensorNames,
                                                                  highLevelControllerParameters,
                                                                  walkingControllerParameters,
-                                                                 pushRecoveryControllerParameters,
                                                                  copTrajectoryParameters,
                                                                  splitFractionParameters);
       setupHighLevelStates(controllerFactory);
@@ -584,13 +566,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
-      if (pushRecoveryControllerParameters != null)
-         controllerFactory.useDefaultPushRecoveryControlState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
-      controllerFactory.addRequestableTransition(WALKING, PUSH_RECOVERY);
-      controllerFactory.addFinishedTransition(PUSH_RECOVERY, WALKING);
    }
 
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
@@ -657,7 +635,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
       }
 
-      networkProcessor = HumanoidNetworkProcessor.newFromParameters(robotModel, pubSubImplementation, networkModuleParams);
+      networkProcessor = HumanoidNetworkProcessor.newFromParameters(robotModel, networkModuleParams);
       networkProcessor.start();
    }
 

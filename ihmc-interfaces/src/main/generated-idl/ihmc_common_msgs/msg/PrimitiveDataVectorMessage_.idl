@@ -1,0 +1,36 @@
+#ifndef __ihmc_common_msgs__msg__PrimitiveDataVectorMessage__idl__
+#define __ihmc_common_msgs__msg__PrimitiveDataVectorMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Ordered vector of data as primitives
+       * The number and ordering of values is assumed to be defined ahead of time
+       * so it is not necessary to send indicies.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::PrimitiveDataVectorMessage_")
+      struct PrimitiveDataVectorMessage
+      {
+        /**
+         * double values
+         */
+        sequence<double, 200> double_values;
+        /**
+         * integer values
+         */
+        sequence<long, 200> integer_values;
+        /**
+         * boolean values
+         */
+        sequence<boolean, 200> boolean_values;
+      };
+    };
+  };
+};
+
+#endif

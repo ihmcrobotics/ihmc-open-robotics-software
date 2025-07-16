@@ -1,8 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -16,18 +13,21 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
@@ -107,9 +107,9 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       FramePose3D offsetPoseToPack = new FramePose3D(worldFrame);
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
-      assertTrue(offsetPoseToPack.epsilonEquals(new FramePose3D(worldFrame), 1e-7));
+      EuclidFrameTestTools.assertEquals(offsetPoseToPack, new FramePose3D(worldFrame), 1e-7);
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
-      assertTrue(offsetPoseToPack.epsilonEquals(new FramePose3D(worldFrame), 1e-7));
+      EuclidFrameTestTools.assertEquals(offsetPoseToPack, new FramePose3D(worldFrame), 1e-7);
 
       // Simple test with some error:
 
@@ -125,11 +125,11 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       expectedPose.set(startOffsetError);
       expectedPose.getOrientation().setYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
 
-      assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
+      EuclidFrameTestTools.assertEquals(offsetPoseToPack, expectedPose, 1e-7);
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
       expectedPose.set(goalOffsetError);
       expectedPose.getOrientation().setYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
-      assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
+      EuclidFrameTestTools.assertEquals(offsetPoseToPack, expectedPose, 1e-7);
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -487,7 +487,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
             AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
-            assertTrue("rotationDisplacementAngle.getAngle() = " + rotationDisplacementAngle.getAngle(), Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
+            assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05, "rotationDisplacementAngle.getAngle() = " + rotationDisplacementAngle.getAngle());
 
             interpolatedPoseOneSecondEarlier.set(interpolatedPose);
          }
@@ -596,7 +596,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
          RigidBodyTransform goalPoseTransform = new RigidBodyTransform();
          Vector3D goalPose_Translation = new Vector3D(0.0, 0.0, 0.0);
-         Quaternion goalPose_Rotation = RandomGeometry.nextQuaternion(random, 0.04);
+         Quaternion goalPose_Rotation = EuclidCoreRandomTools.nextQuaternion(random, 0.04);
 
          goalPoseTransform.setIdentity();
          goalPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
@@ -631,7 +631,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          startPoseTransform.multiply(new RigidBodyTransform(startPose_Rotation, new Vector3D()));
          startPose.set(startPoseTransform);
 
-         assertTrue(interpolatedPose.epsilonEquals(startPose, 1e-4));
+         EuclidFrameTestTools.assertEquals(interpolatedPose, startPose, 1e-4);
       }
    }
 
@@ -648,64 +648,64 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       for (int i = 0; i < 200; i++)
       {
-         goalPose.set(RandomGeometry.nextPoint3D(random, 0.1, 0.1, 0.1), RandomGeometry.nextQuaternion(random, Math.toRadians(9.2)));
+         goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 0.1, 0.1, 0.1), EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(9.2)));
          assertFalse(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
       }
 
       goalOrientation.setYawPitchRoll(Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(10.1), Math.toRadians(0.0));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(10.2), Math.toRadians(10.3), Math.toRadians(0.0));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(10.2), Math.toRadians(0.0), Math.toRadians(10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(10.2), Math.toRadians(10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(20.0), Math.toRadians(10.2), Math.toRadians(10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.1), Math.toRadians(0.0), Math.toRadians(0.0));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-10.1), Math.toRadians(0.0));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.2), Math.toRadians(-10.3), Math.toRadians(0.0));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-10.2), Math.toRadians(0.0), Math.toRadians(-10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
       goalOrientation.setYawPitchRoll(Math.toRadians(-20.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
-      goalPose.set(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
+      goalPose.set(EuclidCoreRandomTools.nextPoint3D(random, 1.0, 1.0, 1.0), goalOrientation);
       assertTrue(correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(startPose, goalPose, true));
 
    }
@@ -715,12 +715,12 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       Vector3D translation = new Vector3D();
       Quaternion rotation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
-      translation = RandomGeometry.nextVector3D(random);
-      rotation = RandomGeometry.nextQuaternion(random);
+      translation = EuclidCoreRandomTools.nextVector3D(random);
+      rotation = EuclidCoreRandomTools.nextQuaternion(random);
       putReferenceFrameToBeCorrectedWaypointInTransformBuffer(firstTimestamp, translation, rotation);
 
-      translation = RandomGeometry.nextVector3D(random);
-      rotation = RandomGeometry.nextQuaternion(random);
+      translation = EuclidCoreRandomTools.nextVector3D(random);
+      rotation = EuclidCoreRandomTools.nextQuaternion(random);
       putReferenceFrameToBeCorrectedWaypointInTransformBuffer(lastTimestamp, translation, rotation);
    }
 

@@ -7,7 +7,6 @@ import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -55,16 +54,13 @@ public class RDXROS2ARViaBackgroundDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
-            PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
-                                                                                      pubSubImplementation,
                                                                                       PerceptionAPI.BIG_VIDEO);
             perceptionVisualizerPanel.addVisualizer(videoVisualizer);
 
-            perceptionVisualizerPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            perceptionVisualizerPanel.create(baseUI);
 
             // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix
             double publishRateHz = 60.0;
@@ -88,16 +84,14 @@ public class RDXROS2ARViaBackgroundDemo
                                                                                  0.05,
                                                                                  true,
                                                                                  publishRateHz);
-            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, PerceptionAPI.BIG_VIDEO);
+            highLevelDepthSensorSimulator.setupForROS2Color(PerceptionAPI.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
-            highLevelDepthSensorSimulator.setPublishDepthImageROS1(false);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(false);
-            highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(true);
             highLevelDepthSensorSimulator.setUseSensorColor(true);
             baseUI.getPrimaryScene().addRenderableProvider(highLevelDepthSensorSimulator::getRenderables);

@@ -36,6 +36,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
  * </ul>
  * </p>
  */
+@Deprecated
 public class TwistCalculator
 {
    /**

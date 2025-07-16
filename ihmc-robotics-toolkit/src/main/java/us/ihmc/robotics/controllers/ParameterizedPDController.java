@@ -4,56 +4,20 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+@Deprecated
 public class ParameterizedPDController extends AbstractPDController
 {
-
-   private final DoubleProvider proportionalGain;
-   private final DoubleProvider derivativeGain;
-   private final DoubleProvider positionDeadband;
-
    public ParameterizedPDController(String suffix, YoRegistry registry)
    {
-      super(suffix, registry);
-
-      proportionalGain = new DoubleParameter("kp_" + suffix, registry, 0.0);
-      derivativeGain = new DoubleParameter("kd_" + suffix, registry, 0.0);
-      positionDeadband = new DoubleParameter("positionDeadband_" + suffix, registry, 0.0);
-   }
-
-   public ParameterizedPDController(DoubleProvider proportionalGain, DoubleProvider derivativeGain, DoubleProvider positionDeadband, String suffix,
-                                    YoRegistry registry)
-   {
-      super(suffix, registry);
-
-      this.proportionalGain = proportionalGain;
-      this.derivativeGain = derivativeGain;
-      this.positionDeadband = positionDeadband;
+      super(new DoubleParameter("kp_" + suffix, registry, 0.0),
+            new DoubleParameter("kd_" + suffix, registry, 0.0),
+            new DoubleParameter("positionDeadband_" + suffix, registry, 0.0),
+            suffix,
+            registry);
    }
 
    public ParameterizedPDController(DoubleProvider proportionalGain, DoubleProvider derivativeGain, String suffix, YoRegistry registry)
    {
-      super(suffix, registry);
-
-      this.proportionalGain = proportionalGain;
-      this.derivativeGain = derivativeGain;
-      this.positionDeadband = () -> 0.0;
-   }
-
-   @Override
-   public double getProportionalGain()
-   {
-      return proportionalGain.getValue();
-   }
-
-   @Override
-   public double getDerivativeGain()
-   {
-      return derivativeGain.getValue();
-   }
-
-   @Override
-   public double getPositionDeadband()
-   {
-      return positionDeadband.getValue();
+      super(proportionalGain, derivativeGain, () -> 0.0, suffix, registry);
    }
 }

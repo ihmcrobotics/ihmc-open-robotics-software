@@ -15,7 +15,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "42605e13cd0f54e38ac3a1e2aeb5ca43df62c9846ab4125012d4a248efd562a3";
+   		return "31e206ec5e6f4cb3bcc48761075d11243576488d1865e110f3a90183f043f2ee";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -73,7 +73,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -90,7 +90,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
 
    public static void write(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_2(data.getNumberOfInitialGuesses());
 
@@ -101,7 +101,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
 
    public static void read(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setNumberOfInitialGuesses(cdr.read_type_2());
       	
@@ -114,7 +114,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    @Override
    public final void serialize(toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_2("number_of_initial_guesses", data.getNumberOfInitialGuesses());
       ser.write_type_2("maximum_expansion_size", data.getMaximumExpansionSize());
       ser.write_type_a("initial_configuration", new toolbox_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType(), data.getInitialConfiguration());
@@ -124,7 +124,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNumberOfInitialGuesses(ser.read_type_2("number_of_initial_guesses"));
       data.setMaximumExpansionSize(ser.read_type_2("maximum_expansion_size"));
       ser.read_type_a("initial_configuration", new toolbox_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType(), data.getInitialConfiguration());

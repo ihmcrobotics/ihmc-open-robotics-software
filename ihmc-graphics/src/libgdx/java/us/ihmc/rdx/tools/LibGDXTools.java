@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelMeshPart;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
@@ -525,24 +524,6 @@ public class LibGDXTools
          vertexSize += attribute.getSizeInBytes();
       }
       return vertexSize / Float.BYTES;
-   }
-
-   public static ModelMeshPart findModelMeshPart(ModelData modelData, String meshPartId)
-   {
-      for (ModelMesh mesh : modelData.meshes)
-         for (ModelMeshPart part : mesh.parts)
-            if (part.id.equals(meshPartId))
-               return part;
-      return null;
-   }
-
-   public static ModelMesh findMeshContainingPart(ModelData modelData, String meshPartId)
-   {
-      for (ModelMesh mesh : modelData.meshes)
-         for (ModelMeshPart part : mesh.parts)
-            if (part.id.equals(meshPartId))
-               return mesh;
-      return null;
    }
 
    public static void setFloatVertexPosition(float[] vertices, int floatsPerVertex, int vertexIndex, Tuple3DReadOnly position)

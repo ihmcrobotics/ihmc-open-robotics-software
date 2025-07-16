@@ -73,13 +73,17 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public byte planner_initial_stance_side_;
    /**
-            * Whether to use the turn walk turn planner instead of A*
+            * Whether to perform A* search in the planner
             */
-   public boolean planner_use_turn_walk_turn_;
+   public boolean planner_perform_a_star_search_;
+   /**
+            * Whether to walk, turning first, matching the goal orientation
+            */
+   public boolean planner_walk_with_goal_orientation_;
    /**
             * The footstep planner parameters
             */
-   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage planner_parameters_;
+   public ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage planner_parameters_;
 
    public FootstepPlanActionDefinitionMessage()
    {
@@ -88,7 +92,7 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
       goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      planner_parameters_ = new ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage();
+      planner_parameters_ = new ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage();
 
    }
 
@@ -129,9 +133,11 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       planner_initial_stance_side_ = other.planner_initial_stance_side_;
 
-      planner_use_turn_walk_turn_ = other.planner_use_turn_walk_turn_;
+      planner_perform_a_star_search_ = other.planner_perform_a_star_search_;
 
-      ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
+      planner_walk_with_goal_orientation_ = other.planner_walk_with_goal_orientation_;
+
+      ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessagePubSubType.staticCopy(other.planner_parameters_, planner_parameters_);
    }
 
 
@@ -360,25 +366,40 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    }
 
    /**
-            * Whether to use the turn walk turn planner instead of A*
+            * Whether to perform A* search in the planner
             */
-   public void setPlannerUseTurnWalkTurn(boolean planner_use_turn_walk_turn)
+   public void setPlannerPerformAStarSearch(boolean planner_perform_a_star_search)
    {
-      planner_use_turn_walk_turn_ = planner_use_turn_walk_turn;
+      planner_perform_a_star_search_ = planner_perform_a_star_search;
    }
    /**
-            * Whether to use the turn walk turn planner instead of A*
+            * Whether to perform A* search in the planner
             */
-   public boolean getPlannerUseTurnWalkTurn()
+   public boolean getPlannerPerformAStarSearch()
    {
-      return planner_use_turn_walk_turn_;
+      return planner_perform_a_star_search_;
+   }
+
+   /**
+            * Whether to walk, turning first, matching the goal orientation
+            */
+   public void setPlannerWalkWithGoalOrientation(boolean planner_walk_with_goal_orientation)
+   {
+      planner_walk_with_goal_orientation_ = planner_walk_with_goal_orientation;
+   }
+   /**
+            * Whether to walk, turning first, matching the goal orientation
+            */
+   public boolean getPlannerWalkWithGoalOrientation()
+   {
+      return planner_walk_with_goal_orientation_;
    }
 
 
    /**
             * The footstep planner parameters
             */
-   public ihmc_common_msgs.msg.dds.StoredPropertySetPrimitivesMessage getPlannerParameters()
+   public ihmc_common_msgs.msg.dds.PrimitiveDataVectorMessage getPlannerParameters()
    {
       return planner_parameters_;
    }
@@ -435,7 +456,9 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_initial_stance_side_, other.planner_initial_stance_side_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_use_turn_walk_turn_, other.planner_use_turn_walk_turn_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_perform_a_star_search_, other.planner_perform_a_star_search_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.planner_walk_with_goal_orientation_, other.planner_walk_with_goal_orientation_, epsilon)) return false;
 
       if (!this.planner_parameters_.epsilonEquals(other.planner_parameters_, epsilon)) return false;
 
@@ -479,7 +502,9 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if(this.planner_initial_stance_side_ != otherMyClass.planner_initial_stance_side_) return false;
 
-      if(this.planner_use_turn_walk_turn_ != otherMyClass.planner_use_turn_walk_turn_) return false;
+      if(this.planner_perform_a_star_search_ != otherMyClass.planner_perform_a_star_search_) return false;
+
+      if(this.planner_walk_with_goal_orientation_ != otherMyClass.planner_walk_with_goal_orientation_) return false;
 
       if (!this.planner_parameters_.equals(otherMyClass.planner_parameters_)) return false;
 
@@ -524,8 +549,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.right_goal_foot_yaw_to_gizmo_);      builder.append(", ");
       builder.append("planner_initial_stance_side=");
       builder.append(this.planner_initial_stance_side_);      builder.append(", ");
-      builder.append("planner_use_turn_walk_turn=");
-      builder.append(this.planner_use_turn_walk_turn_);      builder.append(", ");
+      builder.append("planner_perform_a_star_search=");
+      builder.append(this.planner_perform_a_star_search_);      builder.append(", ");
+      builder.append("planner_walk_with_goal_orientation=");
+      builder.append(this.planner_walk_with_goal_orientation_);      builder.append(", ");
       builder.append("planner_parameters=");
       builder.append(this.planner_parameters_);
       builder.append("}");

@@ -41,12 +41,12 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
@@ -58,6 +58,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -78,6 +79,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
+   private static final FrameVector2D zeroVector = new FrameVector2D();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -104,6 +106,12 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
+
+   private final YoBoolean isUsingPrecomputedTrajectory = new YoBoolean("isUsingPrecomputedTrajectory", registry);
+   private final FramePoint2D previousDesiredCapturePointPrecomputed = new FramePoint2D();
+   private final FrameVector2D previousDesiredCapturePointVelocityPrecomputed = new FrameVector2D();
+   private final FramePoint2D previousDesiredCenterOfPressurePrecomputed = new FramePoint2D();
+   private final YoDouble previousPrecomputedTrajectoryTime = new YoDouble("previousPrecomputedICPTime", registry);
 
    private final TimeAdjustmentCalculator timeAdjustmentCalculator = new TimeAdjustmentCalculator();
    private final ICPControllerParameters.FeedbackAlphaCalculator feedbackAlphaCalculator;
@@ -226,7 +234,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       double gravityZ = controllerToolbox.getGravityZ();
-      double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
+      double totalMass = MultiBodySystemMissingTools.computeSubTreeMass(fullRobotModel.getElevator());
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
@@ -309,6 +317,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
+      previousPrecomputedTrajectoryTime.setToNaN();
+
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
          stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
@@ -326,6 +336,21 @@ public class BalanceManager implements SCS2YoGraphicHolder
                                                                               bipedSupportPolygons,
                                                                               registry,
                                                                               yoGraphicsListRegistry);
+      }
+
+      if (walkingMessageHandler != null)
+      {
+         YoVariableChangedListener qfpParameterListener = change ->
+         {
+            boolean updateFootstepReferenceContinuously = walkingMessageHandler.getUpdateFootstepReferenceContinuously().getBooleanValue();
+            boolean requestDisableCoPFeedbackControl = walkingMessageHandler.getRequestDisableCopFeedbackControl().getBooleanValue();
+
+            stepAdjustmentController.setSwingSpeedUpEnabled(updateFootstepReferenceContinuously ? false : walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+            linearMomentumRateControlModuleInput.setDisableCoPFeedbackControl(requestDisableCoPFeedbackControl ? true : !walkingControllerParameters.getICPControllerParameters().useCoPFeedback());
+         };
+
+         walkingMessageHandler.getUpdateFootstepReferenceContinuously().addListener(qfpParameterListener);
+         walkingMessageHandler.getRequestDisableCopFeedbackControl().addListener(qfpParameterListener);
       }
 
       String graphicListName = getClass().getSimpleName();
@@ -478,8 +503,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
             else
             {
             */
-               feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
-//            }
+            feedbackAlpha = 0.5 * (currentFeedbackAlpha.getDoubleValue() + maxAlpha);
+            //            }
             feedbackAlpha = MathTools.clamp(feedbackAlpha, 0.0, 1.0);
          }
          else
@@ -538,7 +563,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
    }
 
-   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean isUpperBodyLoadBearing, boolean controlHeightWithMomentum)
+   public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, FrameConvexPolygon2DReadOnly multiContactStabilityRegion, boolean controlHeightWithMomentum)
    {
       desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
       desiredCapturePointVelocity2d.set(comTrajectoryPlanner.getDesiredDCMVelocity());
@@ -548,7 +573,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
 
       capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
-      pelvisICPBasedTranslationManager.compute(supportLeg, isUpperBodyLoadBearing);
+      pelvisICPBasedTranslationManager.compute(supportLeg, multiContactStabilityRegion);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCoM2d, perfectCMP2d);
 
       double omega0 = controllerToolbox.getOmega0();
@@ -559,11 +584,27 @@ public class BalanceManager implements SCS2YoGraphicHolder
       {
          if (blendICPTrajectories.getBooleanValue())
          {
-            precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d);
+            isUsingPrecomputedTrajectory.set(precomputedICPPlanner.computeAndBlend(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d));
          }
          else
          {
-            precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d);
+            isUsingPrecomputedTrajectory.set(precomputedICPPlanner.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP2d));
+         }
+
+         if (isUsingPrecomputedTrajectory.getValue())
+         {
+            previousDesiredCapturePointPrecomputed.set(desiredCapturePoint2d);
+            previousDesiredCapturePointVelocityPrecomputed.set(desiredCapturePointVelocity2d);
+            previousDesiredCenterOfPressurePrecomputed.set(perfectCMP2d);
+            previousPrecomputedTrajectoryTime.set(yoTime.getValue());
+         }
+         else if (!Double.isNaN(previousPrecomputedTrajectoryTime.getDoubleValue()) && precomputedICPPlanner.getBlendingDuration() > 0.0
+                  && yoTime.getValue() - previousPrecomputedTrajectoryTime.getValue() < precomputedICPPlanner.getBlendingDuration())
+         {
+            double alphaPrecomputed = 1.0 - (yoTime.getValue() - previousPrecomputedTrajectoryTime.getValue()) / precomputedICPPlanner.getBlendingDuration();
+            desiredCapturePoint2d.interpolate(previousDesiredCapturePointPrecomputed, alphaPrecomputed);
+            desiredCapturePointVelocity2d.interpolate(zeroVector, alphaPrecomputed);
+            perfectCMP2d.interpolate(previousDesiredCenterOfPressurePrecomputed, alphaPrecomputed);
          }
       }
 
@@ -623,7 +664,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       perfectCMP2d.setIncludingFrame(yoPerfectCMP);
       perfectCoP2d.setIncludingFrame(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setInitializeOnStateChange(initializeOnStateChange);
-      linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(!isUpperBodyLoadBearing);
+      linearMomentumRateControlModuleInput.setMultiContactStabilityRegion(multiContactStabilityRegion);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
@@ -770,6 +811,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
    public void disablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.disable();
+      if (precomputedICPPlanner != null)
+         precomputedICPPlanner.clear();
+      if (momentumTrajectoryHandler != null)
+         momentumTrajectoryHandler.clear();
    }
 
    public void enablePelvisXYControl()
@@ -1023,11 +1068,15 @@ public class BalanceManager implements SCS2YoGraphicHolder
       icpError2d.changeFrame(leadingSoleZUpFrame);
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
-                                                                       : maxICPErrorBeforeSingleSupportBackwardX.getValue();
+            : maxICPErrorBeforeSingleSupportBackwardX.getValue();
       double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue()
                                                                      : maxICPErrorBeforeSingleSupportOuterY.getValue();
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
-                             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+
+      if (controllerToolbox.getWalkingMessageHandler().getRequestDisableCopFeedbackControl().getBooleanValue())
+         normalizedICPError.set(0.0);
+      else
+         normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX)
+                                + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
    }
 
    public double getNormalizedEllipticICPError()

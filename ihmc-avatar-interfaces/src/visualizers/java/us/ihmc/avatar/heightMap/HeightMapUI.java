@@ -11,24 +11,23 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
-import us.ihmc.perception.depthData.PointCloudData;
-import us.ihmc.perception.heightMap.HeightMapInputData;
+import us.ihmc.javaFXToolkit.ApplicationNoModule;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
+import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapFilterParameters;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 public abstract class HeightMapUI extends ApplicationNoModule
 {
@@ -61,7 +60,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       HeightMapParameters parameters = new HeightMapParameters();
       HeightMapFilterParameters filterParameters = new HeightMapFilterParameters();
 
-      ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
+      ros2Node = new ROS2NodeBuilder().buildRealtime("height_map");
       new HeightMapUpdaterForUI(messager, ros2Node, stage);
 
 

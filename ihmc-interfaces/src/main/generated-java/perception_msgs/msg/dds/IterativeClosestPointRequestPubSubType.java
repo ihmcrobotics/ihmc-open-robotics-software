@@ -15,7 +15,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8a61b79a90e825a68849576fd961f364a96c8f040edb234350b0bab01ae49e0a";
+   		return "207fc517ed681d78739e95955797309d6a1b29e430eccc474c91d96ffda78ddc";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -89,7 +89,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -128,7 +128,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
    public static void write(perception_msgs.msg.dds.IterativeClosestPointRequest data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_4(data.getSequenceId());
+      cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_4(data.getNodeId());
 
@@ -153,7 +153,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
 
    public static void read(perception_msgs.msg.dds.IterativeClosestPointRequest data, us.ihmc.idl.CDR cdr)
    {
-      data.setSequenceId(cdr.read_type_4());
+      data.setSequenceId(cdr.read_type_12());
       	
       data.setNodeId(cdr.read_type_4());
       	
@@ -180,7 +180,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(perception_msgs.msg.dds.IterativeClosestPointRequest data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_4("node_id", data.getNodeId());
       ser.write_type_9("shape", data.getShape());
       ser.write_type_a("lengths", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLengths());
@@ -200,7 +200,7 @@ public class IterativeClosestPointRequestPubSubType implements us.ihmc.pubsub.To
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.IterativeClosestPointRequest data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setNodeId(ser.read_type_4("node_id"));
       data.setShape(ser.read_type_9("shape"));
       ser.read_type_a("lengths", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLengths());

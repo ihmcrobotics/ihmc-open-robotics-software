@@ -11,7 +11,7 @@ import javafx.fxml.FXMLLoader;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
@@ -75,7 +75,6 @@ public abstract class DRCSimulationTools
       if (modulesToStart.contains(Modules.NETWORK_PROCESSOR))
       {
          networkProcessorParameters = new HumanoidNetworkProcessorParameters();
-         networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE), modulesToStart.contains(Modules.BEHAVIOR_MODULE));
          networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.setUseZeroPoseRobotConfigurationPublisherModule(modulesToStart.contains(Modules.ZERO_POSE_PRODUCER));
          networkProcessorParameters.setUseROSModule(modulesToStart.contains(Modules.ROS_MODULE));
@@ -103,9 +102,9 @@ public abstract class DRCSimulationTools
                                                                                                             T... possibleStartingLocations)
    {
       Platform.setImplicitExit(false);
-      JavaFXMissingTools.startup();
+      JavaFXTools.startup();
 
-      return JavaFXMissingTools.runAndWait(() ->
+      return JavaFXTools.runAndWait(() ->
       {
          SimulationSelectorStageController controller;
          try
@@ -170,7 +169,6 @@ public abstract class DRCSimulationTools
       NETWORK_PROCESSOR,
       SENSOR_MODULE,
       ROS_MODULE,
-      BEHAVIOR_MODULE,
       ZERO_POSE_PRODUCER,
       REA_MODULE,
       REA_UI,

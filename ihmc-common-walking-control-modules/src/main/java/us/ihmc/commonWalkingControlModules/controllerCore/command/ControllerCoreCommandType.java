@@ -192,11 +192,18 @@ public enum ControllerCoreCommandType
    OPTIMIZATION_SETTINGS,
 
    /**
-    * Represents a command for the {@link WholeBodyControllerCore} for a custom cost term. This
-    * cost must be quadratic, and can be added directly to the {@link WholeBodyInverseDynamicsSolver}
-    * or {@link WholeBodyVirtualModelControlSolver}.
+    * Represents a command for the {@link WholeBodyControllerCore} for a custom cost term, in the form of
+    * 0.5 (J x - b)<sup>T</sup> Q (J x - b). This  cost must be quadratic, and can be added directly to the
+    * {@link WholeBodyInverseDynamicsSolver} or {@link WholeBodyVirtualModelControlSolver}.
     */
-   QP_INPUT;
+   QP_INPUT,
+
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} for a custom cost term, in the form of
+    * 0.5 (J x - b)<sup>T</sup> Q (J x - b) + q (J x - b). This  cost must be quadratic, and can be added directly to the
+    * {@link WholeBodyInverseDynamicsSolver} or {@link WholeBodyVirtualModelControlSolver}.
+    */
+   QP_COST;
 
    private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, MOMENTUM_CONVEX_CONSTRAINT,
          PRIVILEGED_CONFIGURATION, PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};

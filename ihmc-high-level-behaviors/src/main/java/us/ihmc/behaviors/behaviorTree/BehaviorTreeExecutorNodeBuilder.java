@@ -3,26 +3,51 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
-import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionExecutor;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.door.DoorTraversalExecutor;
+import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.ai2r.AI2RNodeExecutor;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.door.DoorTraversalExecutor;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.sequence.actions.CheckPointNodeExecutor;
+import us.ihmc.behaviors.logic.ConditionNodeDefinition;
+import us.ihmc.behaviors.logic.ConditionNodeExecutor;
+import us.ihmc.behaviors.logic.GotoNodeDefinition;
+import us.ihmc.behaviors.logic.GotoNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
+import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionExecutor;
+import us.ihmc.behaviors.sequence.actions.FootPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootPoseActionExecutor;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionExecutor;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionExecutor;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionExecutor;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionExecutor;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionExecutor;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionExecutor;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionExecutor;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBuilder
+public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -30,26 +55,27 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingFootstepTracker footstepTracker;
-   private final FootstepPlanningModule footstepPlanner;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final SceneGraph sceneGraph;
+   private final DetectionManager detectionManager;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
-                                          SceneGraph sceneGraph)
+                                          SceneGraph sceneGraph,
+                                          DetectionManager detectionManager)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.sceneGraph = sceneGraph;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.detectionManager = detectionManager;
 
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
+      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
-      footstepPlanner = new FootstepPlanningModule(FootstepPlanningModule.class.getSimpleName());
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
    }
 
@@ -64,17 +90,33 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new BehaviorTreeNodeExecutor<>(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == AI2RNodeDefinition.class)
+      {
+         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
+      }
       if (nodeType == ActionSequenceDefinition.class)
       {
          return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == FallbackNodeDefinition.class)
+      {
+         return new FallbackNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == ConditionNodeDefinition.class)
+      {
+         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
+      }
+      if (nodeType == GotoNodeDefinition.class)
+      {
+         return new GotoNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == CheckPointNodeDefinition.class)
+      {
+         return new CheckPointNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
       if (nodeType == DoorTraversalDefinition.class)
       {
          return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
-      }
-      if (nodeType == TrashCanInteractionDefinition.class)
-      {
-         return new TrashCanInteractionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == BuildingExplorationDefinition.class)
       {
@@ -93,8 +135,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                syncedRobot,
                                                controllerStatusTracker,
                                                referenceFrameLibrary,
-                                               walkingControllerParameters,
-                                               footstepPlanner);
+                                               walkingControllerParameters);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {

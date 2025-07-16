@@ -11,7 +11,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, HandWrenchActionDefinition>
 {
-   private final HandWrenchActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final ImDoubleWrapper forceWidget;
@@ -20,15 +19,11 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    {
       super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
 
-      state = getState();
-
-      getDefinition().setName("Hand wrench");
-
-      trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
-                                                     getDefinition()::setTrajectoryDuration,
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
                                                      imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-      forceWidget = new ImDoubleWrapper(getDefinition()::getForce,
-                                        getDefinition()::setForce,
+      forceWidget = new ImDoubleWrapper(definition::getForce,
+                                        definition::setForce,
                                         imDouble -> ImGui.inputDouble(labels.get("Force"), imDouble));
    }
 
@@ -42,8 +37,8 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    }
 
    @Override
-   public String getActionTypeTitle()
+   public String getLeafTypeTitle()
    {
-      return getDefinition().getSide().getPascalCaseName() + " Hand Wrench";
+      return definition.getSide().getPascalCaseName() + " Hand Wrench";
    }
 }
