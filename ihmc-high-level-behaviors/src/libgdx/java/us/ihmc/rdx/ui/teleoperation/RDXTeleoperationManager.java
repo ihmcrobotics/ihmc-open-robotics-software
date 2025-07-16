@@ -127,6 +127,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
    /** For post-processing WBMPC commands */
+   private final ImBoolean WBCCoMCommandsEnabled = new ImBoolean(false);
    private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
    private final FramePoint3D tempDesiredPelvisPosition = new FramePoint3D();
    private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
@@ -268,8 +269,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                        boolean flag = true;
-                        if (flag)
+                        if (WBCCoMCommandsEnabled.get())
                            processWBMPCCommand();
                         else
                            // Old version
@@ -353,7 +353,7 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
-
+         WBCCoMCommandsEnabled.set(false);
          demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
          addChild(demoPoses);
       }
@@ -606,6 +606,8 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          ImGui.checkbox("Interactables Enabled", interactablesEnabled);
       }
+
+      ImGui.checkbox("WBCoM Commands Enabled", WBCCoMCommandsEnabled);
 
       if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
       {
