@@ -102,7 +102,7 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       return toJointNameStrings(SpineJointName.SPINE_YAW);
    }
 
-   private String[] toJointNameStrings(LegJointName... legJointNames)
+   protected String[] toJointNameStrings(LegJointName... legJointNames)
    {
       List<String> names = new ArrayList<>();
 
