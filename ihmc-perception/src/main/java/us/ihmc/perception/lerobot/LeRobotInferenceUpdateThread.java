@@ -56,6 +56,9 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          leRobotInferenceManager.publishImage(RobotSide.LEFT, leftImage.getCpuImageMat());
          leRobotInferenceManager.publishImage(RobotSide.RIGHT, rightImage.getCpuImageMat());
 
+         leftImage.release();
+         rightImage.release();
+
       }
       catch (InterruptedException ex) { }
    }
