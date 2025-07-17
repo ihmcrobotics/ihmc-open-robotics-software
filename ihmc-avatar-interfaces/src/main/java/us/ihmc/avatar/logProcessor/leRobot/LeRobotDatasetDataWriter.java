@@ -44,17 +44,15 @@ public class LeRobotDatasetDataWriter
 
    public static YoPose3D findYoPose(RobotSide side, String qualifier, YoRegistry yoRegistry)
    {
-      String highLevelController = "root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
-
-      if (yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sPositionX".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble xVariable
-       && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sPositionY".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble yVariable
-       && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sPositionZ".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble zVariable
-       && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sOrientationQx".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble qxVariable
-       && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sOrientationQy".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble qyVariable
-       && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sOrientationQz".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble qzVariable
-       && yoRegistry.findVariable("%s%s_GRIPPER_YAW_LINK%sOrientationQs".formatted(feedbackController, side.name(), qualifier)) instanceof YoDouble qsVariable)
+      String highLevelController = "root.main.H1KinematicsStreamingToolboxModule.";
+      String wbcc = highLevelController + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
+      if (yoRegistry.findVariable("%s%s_wrist_yaw_link%sX".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble xVariable
+       && yoRegistry.findVariable("%s%s_wrist_yaw_link%sY".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble yVariable
+       && yoRegistry.findVariable("%s%s_wrist_yaw_link%sZ".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble zVariable
+       && yoRegistry.findVariable("%s%s_wrist_yaw_link%sQx".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble qxVariable
+       && yoRegistry.findVariable("%s%s_wrist_yaw_link%sQy".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble qyVariable
+       && yoRegistry.findVariable("%s%s_wrist_yaw_link%sQz".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble qzVariable
+       && yoRegistry.findVariable("%s%s_wrist_yaw_link%sQs".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble qsVariable)
          return new YoPose3D(new YoPoint3D(xVariable, yVariable, zVariable), new YoQuaternion(qxVariable, qyVariable, qzVariable, qsVariable));
       else
       {
