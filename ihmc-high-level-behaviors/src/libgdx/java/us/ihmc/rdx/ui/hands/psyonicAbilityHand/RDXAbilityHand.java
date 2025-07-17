@@ -1,29 +1,36 @@
-package us.ihmc.rdx.ui.interactable;
+package us.ihmc.rdx.ui.hands.psyonicAbilityHand;
 
+import ihmc_psyonic_ros2.msg.dds.AbilityHandCommand;
 import ihmc_psyonic_ros2.msg.dds.AbilityHandState;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.log.LogTools;
 import us.ihmc.psyonicros2.AbilityHandManager.ControlMode;
 import us.ihmc.psyonicros2.AbilityHandManager.Grip;
 import us.ihmc.psyonicros2.AbilityHandROS2HardwareCommunication;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.ui.hands.RDXHandInterface;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Arrays;
 
 import static us.ihmc.psyonicros2.AbilityHandInterface.ACTUATOR_COUNT;
 
-public class RDXAbilityHand
+public class RDXAbilityHand implements RDXHandInterface
 {
-   private final String serialNumber;
-
    private static final float START_POSITION = 30.0f;
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
+   private static final float GRIP_VELOCITY = 30.0f;
    private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
+
+   private final String serialNumber;
+   private final AbilityHandROS2HardwareCommunication communication;
+   private final RobotSide handSide;
 
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final ImGuiSliderFloat controlFingersSlider;
@@ -32,13 +39,7 @@ public class RDXAbilityHand
    private final Notification commandNotification = new Notification();
    private final Throttler publishThrottler = new Throttler();
 
-
    private ControlMode controlMode;
-   private AbilityHandState state;
-
-   private final float[] currentPosition = new float[ACTUATOR_COUNT];
-   private final float[] goalPosition = new float[ACTUATOR_COUNT];
-   private final float[] goalVelocity = new float[ACTUATOR_COUNT];
 
    private float[] actuatorPostions = new float[ACTUATOR_COUNT];
 
@@ -47,6 +48,7 @@ public class RDXAbilityHand
    public RDXAbilityHand(String serialNumber, AbilityHandROS2HardwareCommunication communication)
    {
       this.serialNumber = serialNumber;
+      this.communication = communication;
 
       controlFingersSlider = new ImGuiSliderFloat("Control Fingers", "%.1f°", Float.NaN);
       controlFingersSlider.addWidgetAligner(widgetAligner);
@@ -54,36 +56,38 @@ public class RDXAbilityHand
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
-         currentPosition[i] = START_POSITION;
-         goalPosition[i] = (i == 5) ? -START_POSITION : START_POSITION;
-         goalVelocity[i] = 0;
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
-         fingerSliders[i].setFloatValue(currentPosition[i]);
-         if (communication.getAvailableHandSerialNumbers().contains(serialNumber))
-            communication.getCommand(serialNumber).getGoalPositions()[i] = goalPosition[i];
+         fingerSliders[i].setFloatValue(START_POSITION);
+         communication.getCommand(serialNumber).getGoalPositions()[i] = (i == 5) ? -START_POSITION : START_POSITION;
       }
+
+      AbilityHandState latestState = communication.readState(serialNumber);
+      handSide = RobotSide.fromByte(latestState.getHandSide());
+
       publishThrottler.setFrequency(30.0);
    }
 
-   public void update(AbilityHandROS2HardwareCommunication communication)
+   @Override
+   public void update()
    {
-      state = communication.readState(serialNumber);
-      actuatorPostions = state.getActuatorPositions();
+      actuatorPostions = communication.readState(serialNumber).getActuatorPositions();
 
       if(publishThrottler.run() && commandNotification.poll())
       {
-         communication.publishCommand(serialNumber);
+         publishCommand();
       }
    }
 
-   public void renderImGuiWidgets(AbilityHandROS2HardwareCommunication communication)
+   @Override
+   public void renderImGuiWidgets()
    {
       ImGui.pushID(serialNumber);
+
       if (!communication.getAvailableHandSerialNumbers().contains(serialNumber))
          return;
-      communication.getCommand(serialNumber).setSerialNumber(serialNumber);
+
       if (ImGui.button("OPEN"))
       {
          gripMode(Grip.RELAX, communication);
@@ -142,7 +146,7 @@ public class RDXAbilityHand
          controlMode = ControlMode.POSITION;
          if(previousControl != ControlMode.POSITION)
          {
-            syncPositionSliders(communication);
+            syncPositionSliders();
             previousControl = ControlMode.POSITION;
          }
          communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
@@ -167,7 +171,7 @@ public class RDXAbilityHand
             {
                if(previousControl != ControlMode.POSITION)
                {
-                  syncPositionSliders(communication);
+                  syncPositionSliders();
                   previousControl = ControlMode.POSITION;
                }
                float val = fingerSliders[i].getFloatValue();
@@ -179,24 +183,28 @@ public class RDXAbilityHand
             }
          }
       }
+
       ImGui.popID();
    }
 
    private void gripMode(Grip grip, AbilityHandROS2HardwareCommunication communication)
    {
-      controlMode = ControlMode.GRIP;
-      communication.getCommand(serialNumber).setSerialNumber(serialNumber);
-      Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), 30.0f);
-      communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+      Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), GRIP_VELOCITY);
+      communication.getCommand(serialNumber).setControlMode(ControlMode.GRIP.toByte());
       communication.getCommand(serialNumber).setGrip(grip.toByte());
 
       commandNotification.set();
       previousControl = ControlMode.GRIP;
    }
 
-   private void syncPositionSliders(AbilityHandROS2HardwareCommunication comm)
+   private synchronized void publishCommand()
    {
-      float[] cmdPos = comm.getCommand(serialNumber).getGoalPositions();
+      communication.publishCommand(serialNumber);
+   }
+
+   private void syncPositionSliders()
+   {
+      float[] cmdPos = communication.getCommand(serialNumber).getGoalPositions();
       for (int i = 0; i < ACTUATOR_COUNT; i++)
       {
          float live = actuatorPostions[i];
@@ -205,5 +213,46 @@ public class RDXAbilityHand
          fingerSliders[i].setFloatValue(val);
       }
       controlFingersSlider.setFloatValue(cmdPos[0]);
+   }
+
+   @Override
+   public RobotSide getSide()
+   {
+      return handSide;
+   }
+
+   @Override
+   public boolean isCalibrated()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean needsReset()
+   {
+      return false;
+   }
+
+   @Override
+   public void sendCommand(HandAction handAction)
+   {
+      byte abilityHandGrip;
+
+      switch (handAction)
+      {
+         case OPEN -> abilityHandGrip = AbilityHandCommand.RELAX_GRIP;
+         case CLOSE, GRIP -> abilityHandGrip = AbilityHandCommand.POWER_GRIP;
+         default ->
+         {
+            LogTools.warn("Attempted to send an unsupported hand action command: {}", handAction.name());
+            return;
+         }
+      }
+
+      Arrays.fill(communication.getCommand(serialNumber).getGoalVelocities(), GRIP_VELOCITY);
+      communication.getCommand(serialNumber).setControlMode(AbilityHandCommand.GRIP_CONTROL);
+      communication.getCommand(serialNumber).setGrip(abilityHandGrip);
+      previousControl = ControlMode.GRIP;
+      publishCommand();
    }
 }

@@ -28,7 +28,6 @@ libgdxDependencies {
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.3")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3")
    api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
-   api("us.ihmc:ihmc_psyonic_ros2:0.0.0")
 }
 
 testDependencies {
