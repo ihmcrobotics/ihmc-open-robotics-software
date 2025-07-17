@@ -113,7 +113,7 @@ public class AlexanderModelFactory
          transform.getTranslation().setZ(-0.06497200);//from cad
          // New force torque sensor for the right foot was installed with an additional yaw offset.
          // TODO Fixme once the sensor is mounter properly
-         transform.appendYawRotation(robotSide == RobotSide.LEFT ? Math.PI : -1.0 / 3.0 * Math.PI);
+         transform.appendYawRotation(robotSide == RobotSide.LEFT ? Math.PI : 0.0 * Math.PI);
          transform.appendRollRotation(Math.PI);
 
          robotDefinition.getJointDefinition(forceSensorParentJointName).addSensorDefinition(new WrenchSensorDefinition(forceSensorName, transform));
