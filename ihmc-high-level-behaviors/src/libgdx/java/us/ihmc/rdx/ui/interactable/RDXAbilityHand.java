@@ -118,7 +118,7 @@ public class RDXAbilityHand
          ImGui.sameLine();
          if (ImGui.button("PINCH CLOSED"))
          {
-            gripMode(Grip.TRIPOD_C, communication);
+            gripMode(Grip.PINCH_C, communication);
          }
          if (ImGui.button("KEY"))
          {
