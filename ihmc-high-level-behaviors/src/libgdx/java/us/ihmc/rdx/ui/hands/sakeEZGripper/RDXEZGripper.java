@@ -24,7 +24,7 @@ import us.ihmc.sakeros2.EZGripperManager;
 import us.ihmc.sakeros2.EZGripperManager.OperationMode;
 import us.ihmc.sakeros2.EZGripperROS2HardwareCommunication;
 
-public class RDXSakeHandWidgets implements RDXHandInterface
+public class RDXEZGripper implements RDXHandInterface
 {
    private static final double SEND_PERIOD = UnitConversions.hertzToSeconds(5.0);
 
@@ -50,14 +50,14 @@ public class RDXSakeHandWidgets implements RDXHandInterface
 
    private EZGripperManager.OperationMode previousOperationMode = null;
 
-   public RDXSakeHandWidgets(RobotSide handSide, EZGripperROS2HardwareCommunication communication)
+   public RDXEZGripper(RobotSide handSide, EZGripperROS2HardwareCommunication communication)
    {
       this.handSide = handSide;
       this.communication = communication;
 
-      handOpenAngleDegreesSlider = new ImGuiSliderDouble(labels.get("Hand Open Angle"), "", Double.NaN);
+      handOpenAngleDegreesSlider = new ImGuiSliderDouble("Hand Open Angle", "", Double.NaN);
       handOpenAngleDegreesSlider.addWidgetAligner(widgetAligner);
-      fingertipGripForceSlider = new ImGuiSliderDouble(labels.get("Fingertip Grip Force Limit"), "%.1f N", Double.NaN);
+      fingertipGripForceSlider = new ImGuiSliderDouble("Fingertip Grip Force Limit", "%.1f N", Double.NaN);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
    }
 
@@ -89,8 +89,15 @@ public class RDXSakeHandWidgets implements RDXHandInterface
 
       if (sendThrottler.run(SEND_PERIOD) && commandChanged.poll())
       {
-         previousOperationMode = OperationMode.fromByte(communication.getCommand(handSide).getOperationMode());
          communication.publishCommand(handSide);
+         previousOperationMode = OperationMode.fromByte(communication.getCommand(handSide).getOperationMode());
+
+         // This prevents requesting calibration or error reset multiple times in a row
+         if (previousOperationMode != OperationMode.POSITION_CONTROL)
+         {
+            communication.getCommand(handSide).setOperationMode(EZGripperCommand.POSITION_CONTROL);
+            commandChanged.set();
+         }
       }
    }
 

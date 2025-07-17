@@ -1,27 +1,15 @@
 package us.ihmc.rdx.ui.hands;
 
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
-import imgui.ImGui;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
-import us.ihmc.avatar.sakeGripper.SakeHandParameters;
-import us.ihmc.avatar.sakeGripper.SakeHandPreset;
-import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.psyonicros2.AbilityHandROS2HardwareCommunication;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.hands.psyonicAbilityHand.RDXAbilityHand;
-import us.ihmc.rdx.ui.hands.sakeEZGripper.RDXSakeHandWidgets;
+import us.ihmc.rdx.ui.hands.sakeEZGripper.RDXEZGripper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sakeros2.EZGripperROS2HardwareCommunication;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Manages the UI for a humanoid robot's hands. A hand configuration is like "open", "closed", etc.
@@ -37,7 +25,7 @@ public class RDXHandManager
    private final Map<String, RDXHandQuickAccessButtons> quickAccessButtons = new HashMap<>();
 
    private final SideDependentList<RDXHandInterface> sideHands = new SideDependentList<>();
-   private final SideDependentList<RDXSakeHandWidgets> ezGrippers = new SideDependentList<>();
+   private final SideDependentList<RDXEZGripper> ezGrippers = new SideDependentList<>();
    private final SideDependentList<RDXAbilityHand> abilityHands = new SideDependentList<>();
 
    private RDXBaseUI baseUI;
@@ -45,6 +33,8 @@ public class RDXHandManager
    public void create(RDXBaseUI baseUI)
    {
       this.baseUI = baseUI;
+      ezGripperCommunication.start();
+      abilityHandCommunication.start();
    }
 
    public void update()
@@ -55,7 +45,7 @@ public class RDXHandManager
          String key = side.name() + "EZGripper";
          if (!rdxHands.containsKey(key))
          {
-            RDXSakeHandWidgets ezGripper = new RDXSakeHandWidgets(side, ezGripperCommunication);
+            RDXEZGripper ezGripper = new RDXEZGripper(side, ezGripperCommunication);
             rdxHands.put(key, ezGripper);
             quickAccessButtons.put(key, new RDXHandQuickAccessButtons(baseUI, ezGripper));
 
@@ -101,7 +91,7 @@ public class RDXHandManager
       return sideHands.get(handSide);
    }
 
-   public SideDependentList<RDXSakeHandWidgets> getEZGrippers()
+   public SideDependentList<RDXEZGripper> getEZGrippers()
    {
       return ezGrippers;
    }
@@ -109,5 +99,11 @@ public class RDXHandManager
    public SideDependentList<RDXAbilityHand> getAbilityHands()
    {
       return abilityHands;
+   }
+
+   public void destroy()
+   {
+      ezGripperCommunication.shutdown();
+      abilityHandCommunication.shutdown();
    }
 }

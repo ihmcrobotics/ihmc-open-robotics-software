@@ -277,6 +277,11 @@ public class RDXArmManager
       }
    }
 
+   public void destroy()
+   {
+      handManager.destroy();
+   }
+
    public void executeArmHome(RobotSide side)
    {
       GoHomeMessage armHomeMessage = new GoHomeMessage();
