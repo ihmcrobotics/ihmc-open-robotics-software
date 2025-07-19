@@ -7,6 +7,7 @@ import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Float32MultiArray;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -32,8 +33,6 @@ public class LeRobotInferenceManager
    private static final ROS2Topic<std_msgs.msg.dds.String> CONNECT = LEROBOT.withSuffix("connect").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> COMMAND = LEROBOT.withSuffix("command").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = LEROBOT.withSuffix("status").withType(std_msgs.msg.dds.String.class);
-   private static final SideDependentList<ROS2Topic<Image>> ZED_IMAGES = new SideDependentList<>(LEROBOT.withSuffix("/zed/left/color").withType(Image.class),
-                                                                                                 LEROBOT.withSuffix("/zed/right/color").withType(Image.class));
    private static final ROS2Topic<Float32MultiArray> STATE_HAND_POSES = LEROBOT.withSuffix("/lerobot/state/hand_poses").withType(Float32MultiArray.class);
    private static final ROS2Topic<Float32MultiArray> ACTION_HAND_POSES = LEROBOT.withSuffix("/lerobot/action/hand_poses").withType(Float32MultiArray.class);
 
@@ -119,7 +118,7 @@ public class LeRobotInferenceManager
 
       bgr8Mat.close();
 
-      ros2.publish(ZED_IMAGES.get(side), message);
+      ros2.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(side), message);
    }
 
    private void update()
