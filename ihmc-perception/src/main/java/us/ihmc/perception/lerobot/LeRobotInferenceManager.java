@@ -77,7 +77,11 @@ public class LeRobotInferenceManager
             pose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
          }
       });
+   }
 
+   /** Optionally start a thread for calling update. */
+   public void startUpdateThread()
+   {
       thread.setFrequencyLimit(20.0);
       thread.startRepeating();
    }
@@ -121,7 +125,7 @@ public class LeRobotInferenceManager
       ros2.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(side), message);
    }
 
-   private void update()
+   public void update()
    {
       command.setData(running ? "diffusion" : ""); // TODO: In future, possibly request model name
       ros2.publish(COMMAND, command);
