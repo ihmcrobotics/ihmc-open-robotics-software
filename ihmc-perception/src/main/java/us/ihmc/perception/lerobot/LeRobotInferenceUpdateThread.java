@@ -12,13 +12,11 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
-   public static final String MODEL_NAME = "TODO";
-
    private final LeRobotInferenceManager leRobotInferenceManager;
    private final FullHumanoidRobotModel fullRobotModel;
    private final ImageSensor zedSensor;
 
-   public LeRobotInferenceUpdateThread(ROS2Node ros2Node, String robotName, FullHumanoidRobotModel fullRobotModel, ImageSensor zedSensor)
+   public LeRobotInferenceUpdateThread(String policyName, ROS2Node ros2Node, String robotName, FullHumanoidRobotModel fullRobotModel, ImageSensor zedSensor)
    {
       super(LeRobotInferenceUpdateThread.class.getSimpleName());
       this.fullRobotModel = fullRobotModel;
@@ -30,7 +28,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       // TODO: This thing already has an internal thread. We probably want to just use this thread
       //   I guess we could provide an option.
       //   LeRobotInferenceManager could be improved, broken up a bit
-      leRobotInferenceManager = new LeRobotInferenceManager(MODEL_NAME, robotName, fullRobotModel);
+      leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel);
       leRobotInferenceManager.setRunning(true); // TODO: Set from ROS 2 callback on new topic that talks to UI
       leRobotInferenceManager.startPythonServer();
    }
