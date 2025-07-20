@@ -56,15 +56,14 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          }
          leRobotInferenceManager.publishHandPoses(leftPose, rightPose);
 
-         RawImage leftImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-         RawImage rightImage = zedSensor.getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
+         RawImage leftBGRAImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+         RawImage rightBGRAImage = zedSensor.getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
 
-         // TODO: Check the image format, might need conversion
-         leRobotInferenceManager.publishImage(RobotSide.LEFT, leftImage.getCpuImageMat());
-         leRobotInferenceManager.publishImage(RobotSide.RIGHT, rightImage.getCpuImageMat());
+         leRobotInferenceManager.publishImage(RobotSide.LEFT, leftBGRAImage.getCpuImageMat());
+         leRobotInferenceManager.publishImage(RobotSide.RIGHT, rightBGRAImage.getCpuImageMat());
 
-         leftImage.release();
-         rightImage.release();
+         leftBGRAImage.release();
+         rightBGRAImage.release();
 
       }
       catch (InterruptedException ex) { } // Ignore
