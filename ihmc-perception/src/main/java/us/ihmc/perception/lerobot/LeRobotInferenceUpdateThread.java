@@ -2,7 +2,6 @@ package us.ihmc.perception.lerobot;
 
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -32,11 +31,8 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       this.fullRobotModelSync = fullRobotModelSync;
       this.zedSensor = zedSensor;
 
-      setFrequencyLimit(5);
+      setFrequencyLimit(20); // TODO: Pick an appropriate frequency
 
-      // TODO: This thing already has an internal thread. We probably want to just use this thread
-      //   I guess we could provide an option.
-      //   LeRobotInferenceManager could be improved, broken up a bit
       leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel);
       leRobotInferenceManager.setRunning(true); // TODO: Set from ROS 2 callback on new topic that talks to UI
       leRobotInferenceManager.startPythonServer();
@@ -65,6 +61,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          leftBGRAImage.release();
          rightBGRAImage.release();
 
+         leRobotInferenceManager.update();
       }
       catch (InterruptedException ex) { } // Ignore
    }
