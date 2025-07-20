@@ -14,13 +14,22 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
    private final LeRobotInferenceManager leRobotInferenceManager;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final Object fullRobotModelSync;
    private final ImageSensor zedSensor;
+   private final Pose3D leftPose = new Pose3D();
+   private final Pose3D rightPose = new Pose3D();
 
-   public LeRobotInferenceUpdateThread(String policyName, ROS2Node ros2Node, String robotName, FullHumanoidRobotModel fullRobotModel, ImageSensor zedSensor)
+   public LeRobotInferenceUpdateThread(String policyName,
+                                       ROS2Node ros2Node,
+                                       String robotName,
+                                       FullHumanoidRobotModel fullRobotModel,
+                                       Object fullRobotModelSync,
+                                       ImageSensor zedSensor)
    {
       super(LeRobotInferenceUpdateThread.class.getSimpleName());
-      this.fullRobotModel = fullRobotModel;
 
+      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModelSync = fullRobotModelSync;
       this.zedSensor = zedSensor;
 
       setFrequencyLimit(5);
@@ -38,13 +47,13 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    {
       try
       {
-         zedSensor.waitForGrab(); // TODO: Ask Tomasz if the threading is correct here
+         zedSensor.waitForGrab();
 
-         // TODO: We're reading from the synced robot here, is threading okay? (probably not, need to synchronize)
-         MovingReferenceFrame leftFrameAfterJoint = fullRobotModel.getHand(RobotSide.LEFT).getParentJoint().getFrameAfterJoint();
-         Pose3D leftPose = new Pose3D(leftFrameAfterJoint.getTransformToWorldFrame());
-         MovingReferenceFrame rightFrameAfterJoint = fullRobotModel.getHand(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint();
-         Pose3D rightPose = new Pose3D(rightFrameAfterJoint.getTransformToWorldFrame());
+         synchronized (fullRobotModelSync)
+         {
+            leftPose.set(fullRobotModel.getHand(RobotSide.LEFT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
+            rightPose.set(fullRobotModel.getHand(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
+         }
          leRobotInferenceManager.publishHandPoses(leftPose, rightPose);
 
          RawImage leftImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
@@ -58,7 +67,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          rightImage.release();
 
       }
-      catch (InterruptedException ex) { }
+      catch (InterruptedException ex) { } // Ignore
    }
 
    public void destroy()

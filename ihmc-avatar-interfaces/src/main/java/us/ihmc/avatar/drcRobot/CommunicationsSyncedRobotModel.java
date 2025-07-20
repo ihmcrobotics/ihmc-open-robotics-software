@@ -103,7 +103,7 @@ public abstract class CommunicationsSyncedRobotModel
       }
    }
 
-   protected void updateInternal()
+   protected synchronized void updateInternal()
    {
       fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());
       fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootPosition());
