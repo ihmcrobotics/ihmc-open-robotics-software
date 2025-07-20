@@ -9,7 +9,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -33,12 +32,6 @@ public class LeRobotIKStreaming
    {
       this.actionHandPoses = actionHandPoses;
       this.fullRobotModel = fullRobotModel;
-
-      if (robotName.toLowerCase().contains("nadia"))
-      {
-         ikSolverConfigurationMessage.getJointsToDeactivate().add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH).hashCode());
-         ikSolverConfigurationMessage.getJointsToDeactivate().add(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL).hashCode());
-      }
 
       configurationPublisher = ros2Node.createPublisher(ToolboxAPIs.getInputToolboxConfigurationTopic(robotName));
       inputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotName));
