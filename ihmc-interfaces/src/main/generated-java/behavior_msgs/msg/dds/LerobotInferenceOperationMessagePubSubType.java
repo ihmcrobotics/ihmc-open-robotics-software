@@ -15,7 +15,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8c40249cb292c3fdef153e43a5ec6f243e8e154d45e2ac2cf7ac1b9a9b15cc46";
+   		return "973e60b5258b8b239fd29ac78389eceb391ddcf894201313e69067658b451777";
    }
    
    @Override
@@ -54,7 +54,15 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -71,7 +79,19 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.getCdrSerializedSize(data.getLatestTimestampModifiable(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -81,14 +101,30 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    public static void write(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_7(data.getRunning());
+
+      cdr.write_type_7(data.getControlRobot());
+
+      cdr.write_type_6(data.getPythonStatusFrequency());
+
+      cdr.write_type_4(data.getReceivedActions());
 
    }
 
    public static void read(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setRunning(cdr.read_type_7());
+      	
+      data.setControlRobot(cdr.read_type_7());
+      	
+      data.setPythonStatusFrequency(cdr.read_type_6());
+      	
+      data.setReceivedActions(cdr.read_type_4());
       	
 
    }
@@ -98,7 +134,11 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("running", data.getRunning());
+      ser.write_type_7("control_robot", data.getControlRobot());
+      ser.write_type_6("python_status_frequency", data.getPythonStatusFrequency());
+      ser.write_type_4("received_actions", data.getReceivedActions());
    }
 
    @Override
@@ -106,7 +146,11 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRunning(ser.read_type_7("running"));
+      data.setControlRobot(ser.read_type_7("control_robot"));
+      data.setPythonStatusFrequency(ser.read_type_6("python_status_frequency"));
+      data.setReceivedActions(ser.read_type_4("received_actions"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.LerobotInferenceOperationMessage src, behavior_msgs.msg.dds.LerobotInferenceOperationMessage dest)
