@@ -71,6 +71,10 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       catch (InterruptedException ex) { } // Ignore
    }
 
+   public void startThread()
+   {
+      leRobotInferenceManager.startUpdateThread();
+   }
    public void destroy()
    {
       blockingKill();
