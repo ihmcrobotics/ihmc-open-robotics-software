@@ -192,7 +192,8 @@ public class RDXTeleoperationManager extends RDXPanel
                                      desiredRobot,
                                      teleoperationParameters,
                                      interactableHands,
-                                     wholeBodyIKManager::getEnabled);
+                                     wholeBodyIKManager::getEnabled,
+                                     ros2Helper);
 
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
