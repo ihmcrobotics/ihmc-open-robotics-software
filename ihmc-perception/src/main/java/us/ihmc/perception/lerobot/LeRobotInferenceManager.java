@@ -131,7 +131,10 @@ public class LeRobotInferenceManager
       System.out.println("Publishing command: " + command.getData());
       ros2Helper.publish(COMMAND, command);
 
-      ikStreaming.update(actionTimestampNanos);
+      if (running)
+      {
+         ikStreaming.update(actionTimestampNanos);
+      }
    }
 
    public void setRunning(boolean running)

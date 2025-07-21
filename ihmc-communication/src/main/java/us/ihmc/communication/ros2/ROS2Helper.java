@@ -136,9 +136,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
-      TypedNotification<T> typedNotification = new TypedNotification<>();
-      ros2Node.createSubscription2(topic, typedNotification::set);
-      return typedNotification;
+      return ROS2Tools.createNotificationSubscription(ros2Node, topic);
    }
 
    @Override

@@ -1,19 +1,31 @@
 package us.ihmc.perception.lerobot;
 
+import behavior_msgs.msg.dds.LerobotInferenceOperationMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
+import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.communication.ros2.ROS2IOTopicPair;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
-   private static final ROS2Topic<?> LEROBOT_UI = new ROS2Topic<>().withPrefix("lerobot_ui");
-   public static final ROS2Topic<std_msgs.msg.dds.Bool> RUNNING = LEROBOT_UI.withSuffix("running").withType(std_msgs.msg.dds.Bool.class);
+   public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> LEROBOT_UI
+         = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(LerobotInferenceOperationMessage.class));
+   public static final double HZ = 20.0; // TODO: Pick an appropriate frequency
 
    private final LeRobotInferenceManager leRobotInferenceManager;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -22,8 +34,14 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    private final Pose3D leftPose = new Pose3D();
    private final Pose3D rightPose = new Pose3D();
 
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lerobot_update_thread");
+   private final LatestTimestampModifiable latestTimestampModifiable;
+   private final CRDTBidirectionalBoolean running;
+   private final TypedNotification<LerobotInferenceOperationMessage> commandSubscription;
+   private final ROS2Publisher<LerobotInferenceOperationMessage> statusPublisher;
+
    public LeRobotInferenceUpdateThread(String policyName,
-                                       ROS2Node ros2Node,
+                                       ROS2PeerClockOffsetEstimator clockOffsetEstimator,
                                        String robotName,
                                        FullHumanoidRobotModel fullRobotModel,
                                        Object fullRobotModelSync,
@@ -35,17 +53,31 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       this.fullRobotModelSync = fullRobotModelSync;
       this.zedSensor = zedSensor;
 
-      setFrequencyLimit(20); // TODO: Pick an appropriate frequency
+      setFrequencyLimit(HZ);
+
+      latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator));
+      latestTimestampModifiable.modify(); // On startup, we want the initial state to propagate
+      running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
       leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node);
       leRobotInferenceManager.startPythonServer();
 
-      ros2Node.createSubscription2(RUNNING, message -> leRobotInferenceManager.setRunning(message.getData()));
+      commandSubscription = ROS2Tools.createNotificationSubscription(ros2Node, LEROBOT_UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier()));
+      statusPublisher = ros2Node.createPublisher(LEROBOT_UI.getTopic(ROS2ActorDesignation.ROBOT.getOutgoingQualifier()));
    }
 
    @Override
    protected void runTask() throws Throwable
    {
+      if (commandSubscription.poll())
+      {
+         LerobotInferenceOperationMessage command = commandSubscription.read();
+         latestTimestampModifiable.fromMessage(command.getLatestTimestampModifiable());
+         running.fromMessage(command.getRunning());
+
+         leRobotInferenceManager.setRunning(running.getValue());
+      }
+
       try
       {
          zedSensor.waitForGrab();
@@ -66,13 +98,20 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          leftBGRAImage.release();
          rightBGRAImage.release();
 
+         leRobotInferenceManager.setRunning(running.getValue());
          leRobotInferenceManager.update();
       }
       catch (InterruptedException ex) { } // Ignore
+
+      LerobotInferenceOperationMessage status = new LerobotInferenceOperationMessage();
+      latestTimestampModifiable.toMessage(status.getLatestTimestampModifiable());
+      status.setRunning(running.toMessage());
+      statusPublisher.publish(status);
    }
    public void destroy()
    {
       blockingKill();
       leRobotInferenceManager.destroy();
+      ros2Node.destroy();
    }
 }
