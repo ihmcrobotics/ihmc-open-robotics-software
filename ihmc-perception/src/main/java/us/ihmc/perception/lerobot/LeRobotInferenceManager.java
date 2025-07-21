@@ -17,7 +17,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
@@ -36,10 +35,10 @@ public class LeRobotInferenceManager
    private static final ROS2Topic<Float32MultiArray> STATE_HAND_POSES = LEROBOT.withSuffix("/lerobot/state/hand_poses").withType(Float32MultiArray.class);
    private static final ROS2Topic<Float32MultiArray> ACTION_HAND_POSES = LEROBOT.withSuffix("/lerobot/action/hand_poses").withType(Float32MultiArray.class);
 
+   private final ROS2Helper ros2Helper;
+
    private final String modelName;
    private final RepeatingTaskThread thread = new RepeatingTaskThread("LeRobotROS2Thread", this::update);
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().domainId(185).build("lerobot_java_side");
-   private final ROS2Helper ros2 = new ROS2Helper(ros2Node);
    private final std_msgs.msg.dds.String command = new std_msgs.msg.dds.String();
    private final std_msgs.msg.dds.String status = new std_msgs.msg.dds.String();
    private final Float32MultiArray stateHandPosesMessage = new Float32MultiArray();
@@ -50,19 +49,20 @@ public class LeRobotInferenceManager
    private final LeRobotIKStreaming ikStreaming;
    private long actionTimestampNanos = 0L;
 
-   public LeRobotInferenceManager(String modelName, String robotName, FullHumanoidRobotModel fullRobotModel)
+   public LeRobotInferenceManager(String modelName, String robotName, FullHumanoidRobotModel fullRobotModel, ROS2Node ros2Node)
    {
       this.modelName = modelName;
 
       actionHandPoses.forEach(Pose3D::setToNaN);
       ikStreaming = new LeRobotIKStreaming(actionHandPoses, robotName, ros2Node, fullRobotModel);
 
-      ros2.subscribeViaVolatileCallback(STATUS, message ->
+      ros2Helper = new ROS2Helper(ros2Node);
+      ros2Helper.subscribeViaVolatileCallback(STATUS, message ->
       {
          status.set(message);
          statusFrequency.ping();
       });
-      ros2.subscribeViaVolatileCallback(ACTION_HAND_POSES, message ->
+      ros2Helper.subscribeViaVolatileCallback(ACTION_HAND_POSES, message ->
       {
          // TODO: Add timestamp to /lerobot/action/hand_poses topic or something
          //   This should be calculated according to the policy output
@@ -101,7 +101,7 @@ public class LeRobotInferenceManager
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getZ32());
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getS32());
       }
-      ros2.publish(STATE_HAND_POSES, stateHandPosesMessage);
+      ros2Helper.publish(STATE_HAND_POSES, stateHandPosesMessage);
    }
 
    public void publishImage(RobotSide side, Mat bgra8Mat)
@@ -122,13 +122,14 @@ public class LeRobotInferenceManager
 
       bgr8Mat.close();
 
-      ros2.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(side), message);
+      ros2Helper.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(side), message);
    }
 
    public void update()
    {
       command.setData(running ? "diffusion" : ""); // TODO: In future, possibly request model name
-      ros2.publish(COMMAND, command);
+      System.out.println("Publishing command: " + command.getData());
+      ros2Helper.publish(COMMAND, command);
 
       ikStreaming.update(actionTimestampNanos);
    }
@@ -142,7 +143,7 @@ public class LeRobotInferenceManager
    {
       std_msgs.msg.dds.String startServer = new std_msgs.msg.dds.String();
       startServer.setData("connect");
-      ros2.publish(CONNECT, startServer);
+      ros2Helper.publish(CONNECT, startServer);
    }
 
    public double getStatusFrequency()
@@ -157,7 +158,6 @@ public class LeRobotInferenceManager
 
    public void destroy()
    {
-      ros2Node.destroy();
       thread.kill();
    }
 

@@ -37,7 +37,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
       setFrequencyLimit(20); // TODO: Pick an appropriate frequency
 
-      leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel);
+      leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node);
       leRobotInferenceManager.startPythonServer();
 
       ros2Node.createSubscription2(RUNNING, message -> leRobotInferenceManager.setRunning(message.getData()));
