@@ -14,7 +14,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Float32MultiArray;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -27,16 +26,17 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.perception.lerobot.LeRobotInferenceManager;
-import us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.lerobot.RDXLeRobotOperation;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
@@ -45,7 +45,6 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
 
 import java.util.function.BooleanSupplier;
 
@@ -83,6 +82,7 @@ public class RDXArmManager
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
    private final RDXHandConfigurationManager handManager;
+   private RDXLeRobotOperation leRobotOperation;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -102,6 +102,7 @@ public class RDXArmManager
    private final Pose3D tmpPose = new Pose3D();
 
    public RDXArmManager(CommunicationHelper communicationHelper,
+                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
@@ -139,6 +140,8 @@ public class RDXArmManager
       }
 
       handManager = new RDXHandConfigurationManager();
+      if (peerClockEstimator != null)
+         leRobotOperation = new RDXLeRobotOperation(communicationHelper, peerClockEstimator);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -243,21 +246,8 @@ public class RDXArmManager
    {
       if (ImGui.collapsingHeader(labels.get("Arms")))
       {
-	      ImGui.text("Lerobot inference:");
-	      ImGui.sameLine();
-	      if (ImGui.button(labels.get("Start")))
-	      {
-	         Bool running = new Bool();
-	         running.setData(true);
-	         communicationHelper.publish(LeRobotInferenceUpdateThread.RUNNING, running);
-	      }
-	      ImGui.sameLine();
-	      if (ImGui.button(labels.get("Stop")))
-	      {
-	         Bool running = new Bool();
-	         running.setData(false);
-	         communicationHelper.publish(LeRobotInferenceUpdateThread.RUNNING, running);
-	      }
+         if (leRobotOperation != null)
+            leRobotOperation.renderImGuiWidgets();
       
          float widgetStartX = 112.0f;
 
