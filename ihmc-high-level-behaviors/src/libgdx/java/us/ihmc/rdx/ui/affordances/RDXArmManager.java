@@ -13,6 +13,7 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import std_msgs.msg.dds.Bool;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -26,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
@@ -216,7 +218,21 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
-      // TODO: Add some widgets here to manage the LeRobotInferenceUpdateThread over ROS 2
+      ImGui.text("Lerobot inference:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Start")))
+      {
+         Bool running = new Bool();
+         running.setData(true);
+         communicationHelper.publish(LeRobotInferenceUpdateThread.RUNNING, running);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stop")))
+      {
+         Bool running = new Bool();
+         running.setData(false);
+         communicationHelper.publish(LeRobotInferenceUpdateThread.RUNNING, running);
+      }
 
       handManager.renderImGuiWidgets();
 
