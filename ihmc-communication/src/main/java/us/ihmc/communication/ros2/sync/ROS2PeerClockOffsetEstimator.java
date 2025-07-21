@@ -151,9 +151,9 @@ public class ROS2PeerClockOffsetEstimator
       return ourGuid;
    }
 
-   public HashMap<Guid, ROS2PeerClockOffsetEstimatorPeer> getPeerMap()
+   public synchronized ROS2PeerClockOffsetEstimatorPeer getPeer(Guid guid)
    {
-      return peerMap;
+      return peerMap.get(guid);
    }
 
    public List<ROS2PeerClockOffsetEstimatorPeer> getPeerList()
