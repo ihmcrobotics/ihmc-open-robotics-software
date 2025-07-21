@@ -252,7 +252,8 @@ public class RDXLeRobotTestSimulator
 
                inferenceManager = new LeRobotInferenceManager(dataset.getName(),
                                                               syncedRobot.getRobotModel().getSimpleRobotName(),
-                                                              syncedRobot.getFullRobotModel());
+                                                              syncedRobot.getFullRobotModel(),
+                                                              ros2Node);
             }
 
             if (ImGui.checkbox(labels.get("Run model"), runInference))
