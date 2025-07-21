@@ -42,9 +42,9 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final double jointAccelerationWeight = 0.005;
    // TODO Needs tune up.
    private final double jointJerkWeight = 1.6E-6;
-   private final double rhoWeight = 1e-5;
+   private final double rhoWeight = 5e-6;
    // TODO Needs tune up.
-   private final double rhoMin = 4.0;
+   private final double rhoMin = 2.0;
    private final double rhoRateDefaultWeight = 1E-7;
    // TODO Needs tune up.
    private final double rhoRateHighWeight = 1.6E-6;

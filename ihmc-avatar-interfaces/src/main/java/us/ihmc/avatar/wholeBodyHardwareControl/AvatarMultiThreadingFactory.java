@@ -25,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
+import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,6 +43,8 @@ import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
+import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -58,6 +61,7 @@ public class AvatarMultiThreadingFactory
 {
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
+   private static final int ROS2_PRIORITY = 25;
 
    private final YoRegistry rootRegistry;
 
@@ -132,9 +136,16 @@ public class AvatarMultiThreadingFactory
       // Estimator and controller ROS2 nodes
       IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_state_estimator";
       IHMC_ROS_CONTROLLER_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_" + HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME;
-      PeriodicNonRealtimeThreadSchedulerFactory ros2RealtimeThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
-      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2RealtimeThreadFactory);
-      controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2RealtimeThreadFactory);
+
+      PeriodicThreadSchedulerFactory ros2ThreadFactory;
+
+      if (useRealtimeThreads)
+         ros2ThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(new PriorityParameters(ROS2_PRIORITY));
+      else
+         ros2ThreadFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+
+      estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
+      controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
 
       // Set up low-level output processor
       lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), masterThreadDt, registry);
@@ -176,9 +187,16 @@ public class AvatarMultiThreadingFactory
    {
       this.stop();
       System.out.println("Calling destroy in the multi-threading factory");
+
       estimatorRealtimeROS2Node.destroy();
+      System.out.println("Estimator node has been destroyed");
+
       controllerRealtimeROS2Node.destroy();
+      System.out.println("Controller node has been destroyed");
+
       hardwareCommunicationInterface.destroy();
+      System.out.println("Hardware communication node has been destroyed");
+
       threadingManager.get().destroy();
    }
 
