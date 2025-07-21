@@ -33,7 +33,7 @@ public class LeRobotInferenceManager
    private static final ROS2Topic<std_msgs.msg.dds.String> COMMAND = LEROBOT.withSuffix("command").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = LEROBOT.withSuffix("status").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<Float32MultiArray> STATE_HAND_POSES = LEROBOT.withSuffix("/lerobot/state/hand_poses").withType(Float32MultiArray.class);
-   private static final ROS2Topic<Float32MultiArray> ACTION_HAND_POSES = LEROBOT.withSuffix("/lerobot/action/hand_poses").withType(Float32MultiArray.class);
+   public static final ROS2Topic<Float32MultiArray> ACTION_HAND_POSES = LEROBOT.withSuffix("/lerobot/action/hand_poses").withType(Float32MultiArray.class);
 
    private final ROS2Helper ros2Helper;
 

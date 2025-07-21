@@ -15,6 +15,7 @@ import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import std_msgs.msg.dds.Bool;
+import std_msgs.msg.dds.Float32MultiArray;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -24,13 +25,18 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.perception.lerobot.LeRobotInferenceManager;
 import us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
@@ -39,6 +45,7 @@ import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 
 import java.util.function.BooleanSupplier;
 
@@ -91,13 +98,17 @@ public class RDXArmManager
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
+   private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoseGraphics = new SideDependentList<>();
+   private final Pose3D tmpPose = new Pose3D();
+
    public RDXArmManager(CommunicationHelper communicationHelper,
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
                         RDXTeleoperationParameters teleoperationParameters,
                         SideDependentList<RDXInteractableHand> interactableHands,
-                        BooleanSupplier enableWholeBodyIK)
+                        BooleanSupplier enableWholeBodyIK,
+                        ROS2Helper ros2Helper)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
@@ -117,6 +128,10 @@ public class RDXArmManager
             this.armJointNames.put(side, armJointNames);
          }
       }
+      // subscribe to the same topic LeRobotInferenceManager publishes to:
+      ros2Helper.subscribeViaVolatileCallback(
+            LeRobotInferenceManager.ACTION_HAND_POSES,
+            this::handleActionHandPoses);
 
       for (int i = 0; i < PresetArmConfiguration.values.length; i++)
       {
@@ -131,6 +146,13 @@ public class RDXArmManager
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
+
+      for (RobotSide side : RobotSide.values)
+      {
+         RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.15);
+         actionHandPoseGraphics.put(side, graphic);
+         baseUI.getPrimaryScene().addRenderableProvider(actionHandPoseGraphics.get(side));
+      }
    }
 
    public void update(boolean interactablesEnabled)
@@ -442,5 +464,25 @@ public class RDXArmManager
    public RDX3DPanelHandWrenchIndicator getPanelHandWrenchIndicator()
    {
       return panelHandWrenchIndicator;
+   }
+
+   private void handleActionHandPoses(Float32MultiArray msg)
+   {
+      // msg.data is [xL, yL, zL, qxL, qyL, qzL, qsL, xR, … ]
+      IDLSequence.Float data = msg.getData();
+      int index = 0;
+      for (RobotSide side : RobotSide.values)
+      {
+         tmpPose.getPosition().set(
+               data.get(index++),
+               data.get(index++),
+               data.get(index++));
+         tmpPose.getOrientation().set(
+               data.get(index++),
+               data.get(index++),
+               data.get(index++),
+               data.get(index++));
+         actionHandPoseGraphics.get(side).setPoseInWorldFrame(tmpPose);
+      }
    }
 }
