@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTStatusLong;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
@@ -36,7 +37,9 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lerobot_update_thread");
    private final LatestTimestampModifiable latestTimestampModifiable;
+   private final CRDTStatusLong sequenceID;
    private final CRDTBidirectionalBoolean running;
+   private final CRDTBidirectionalBoolean controlRobot;
    private final TypedNotification<LerobotInferenceOperationMessage> commandSubscription;
    private final ROS2Publisher<LerobotInferenceOperationMessage> statusPublisher;
 
@@ -53,11 +56,12 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       this.fullRobotModelSync = fullRobotModelSync;
       this.zedSensor = zedSensor;
 
-      setFrequencyLimit(HZ);
-
       latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator));
       latestTimestampModifiable.modify(); // On startup, we want the initial state to propagate
+      sequenceID = new CRDTStatusLong(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0L);
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
+      controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
+      // TODO finish up these data sync comms
 
       leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node);
       leRobotInferenceManager.startPythonServer();

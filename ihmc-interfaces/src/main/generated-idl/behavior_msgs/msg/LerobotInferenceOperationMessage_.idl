@@ -20,9 +20,25 @@ module behavior_msgs
          */
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         /**
+         * Monotonically increasing, number of updates of robot thread
+         */
+        unsigned long sequence_id;
+        /**
          * Whether the inference and action output to IK streaming is active
          */
         boolean running;
+        /**
+         * Whether to enable controlling the robot instead of just previewing
+         */
+        boolean control_robot;
+        /**
+         * Frequency of status from python side
+         */
+        double python_status_frequency;
+        /**
+         * Number of output actions received from policy
+         */
+        unsigned long received_actions;
       };
     };
   };

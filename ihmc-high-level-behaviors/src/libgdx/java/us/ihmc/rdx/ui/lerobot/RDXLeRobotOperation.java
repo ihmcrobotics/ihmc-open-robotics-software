@@ -10,7 +10,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 import static us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread.LEROBOT_UI;
@@ -20,7 +19,7 @@ public class RDXLeRobotOperation
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
    private final TypedNotification<LerobotInferenceOperationMessage> statusSubscription;
-   private final Throttler commandThrottler = new Throttler().setFrequency(LeRobotInferenceUpdateThread.HZ);
+   private final Throttler commandThrottler = new Throttler().setFrequency(30.0);
    private final LatestTimestampModifiable latestTimestampModifiable;
    private final CRDTBidirectionalBoolean running;
 
@@ -32,6 +31,7 @@ public class RDXLeRobotOperation
 
       latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator));
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
+      // TODO Implement rest of sync data comms
    }
 
    public void renderImGuiWidgets()

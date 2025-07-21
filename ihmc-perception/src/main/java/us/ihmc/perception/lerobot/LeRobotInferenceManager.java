@@ -48,6 +48,7 @@ public class LeRobotInferenceManager
    private boolean running = false;
    private final LeRobotIKStreaming ikStreaming;
    private long actionTimestampNanos = 0L;
+   private long numberOfActionsReceived = 0L;
 
    public LeRobotInferenceManager(String modelName, String robotName, FullHumanoidRobotModel fullRobotModel, ROS2Node ros2Node)
    {
@@ -67,6 +68,7 @@ public class LeRobotInferenceManager
          // TODO: Add timestamp to /lerobot/action/hand_poses topic or something
          //   This should be calculated according to the policy output
          actionTimestampNanos = System.nanoTime();
+         ++numberOfActionsReceived;
 
          IDLSequence.Float data = message.getData();
          int i = 0;
@@ -152,6 +154,11 @@ public class LeRobotInferenceManager
    public double getStatusFrequency()
    {
       return statusFrequency.getFrequencyDecaying();
+   }
+
+   public long getNumberOfActionsReceived()
+   {
+      return numberOfActionsReceived;
    }
 
    public SideDependentList<Pose3D> getActionHandPoses()
