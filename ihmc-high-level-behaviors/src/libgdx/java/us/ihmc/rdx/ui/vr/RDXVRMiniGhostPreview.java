@@ -57,7 +57,10 @@ public class RDXVRMiniGhostPreview
 
    public void setJoint(int index, double q)
    {
-      miniGhostOneDoFJointsExcludingHands[index].setQ(q);
+      if (miniGhostFullRobotModel != null && miniGhostRobotGraphic.isActive())
+      {
+         miniGhostOneDoFJointsExcludingHands[index].setQ(q);
+      }
    }
 
    public void updatePose()
