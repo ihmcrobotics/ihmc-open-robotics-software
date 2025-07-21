@@ -241,21 +241,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidRobotInitialSetup getSimulatedRobotInitialSetup()
-   {
-      return new AlexanderInitialSetup(getRobotVersion(), getRobotDefinition(), getJointMap());
-   }
-
-   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getSimulatedRobotInitialSetup(double groundHeight, double initialYaw, double x, double y, double z)
-   {
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = getSimulatedRobotInitialSetup();
-      robotInitialSetup.setInitialGroundHeight(groundHeight);
-      robotInitialSetup.setInitialYaw(initialYaw);
-      robotInitialSetup.setOffset(new Vector3D(x, y, z));
-      return robotInitialSetup;
-   }
-
-   @Override
    public double[] getPresetArmConfiguration(RobotSide side, PresetArmConfiguration presetArmConfiguration)
    {
       return AlexanderPresetArmConfigurations.getPresetArmConfiguration(robotVersion, side, presetArmConfiguration);
