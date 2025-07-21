@@ -7,7 +7,6 @@ import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import org.jfree.util.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -25,7 +24,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -127,7 +125,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
    /** For post-processing WBMPC commands */
-   private final ImBoolean WBCCoMCommandsEnabled = new ImBoolean(false);
+   private final ImBoolean CoMDirectControlEnabled = new ImBoolean(false);
    private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
    private final FramePoint3D tempDesiredPelvisPosition = new FramePoint3D();
    private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
@@ -269,11 +267,10 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                        if (WBCCoMCommandsEnabled.get())
-                           processWBMPCCommand();
+                        if (CoMDirectControlEnabled.get())
+                           processCoMDirectCommand();
                         else
-                           // Old version
-                           processIKStreamingCommand();
+                           processPelvis6DCommand();
                      }
                   });
                   allInteractableRobotLinks.add(interactablePelvis);
@@ -353,7 +350,7 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
-         WBCCoMCommandsEnabled.set(false);
+         CoMDirectControlEnabled.set(false);
          demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
          addChild(demoPoses);
       }
@@ -492,7 +489,7 @@ public class RDXTeleoperationManager extends RDXPanel
     *  displacements in the other directions
     * @comment: Investigate which cases causes it to freak out
     */
-   private void processWBMPCCommand()
+   private void processCoMDirectCommand()
    {
       FramePose3DReadOnly desiredOrientation = interactablePelvis.getPose();
 
@@ -529,7 +526,7 @@ public class RDXTeleoperationManager extends RDXPanel
       }
    }
 
-   private void processIKStreamingCommand()
+   private void processPelvis6DCommand()
    {
       RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
       ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
@@ -607,7 +604,7 @@ public class RDXTeleoperationManager extends RDXPanel
          ImGui.checkbox("Interactables Enabled", interactablesEnabled);
       }
 
-      ImGui.checkbox("WBCoM Commands Enabled", WBCCoMCommandsEnabled);
+      ImGui.checkbox("CoM Direct Commands Enabled", CoMDirectControlEnabled);
 
       if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
       {

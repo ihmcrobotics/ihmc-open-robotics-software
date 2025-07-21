@@ -2200,13 +2200,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   /**
-    * Use this constructor to execute a straight line trajectory for center of mass.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    *
-    * @param trajectoryTime     how long it takes to reach the desired position.
-    * @param desiredPosition    desired center of mass position expressed in world frame.
-    */
    public static CenterOfMassTrajectoryMessage createCenterOfMassTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition)
    {
       CenterOfMassTrajectoryMessage message = new CenterOfMassTrajectoryMessage();
