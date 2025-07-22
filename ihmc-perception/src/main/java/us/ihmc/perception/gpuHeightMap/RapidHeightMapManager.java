@@ -147,7 +147,6 @@ public class RapidHeightMapManager
             {
                Files.createDirectory(heightMapDirectory);
             }
-
          }
          catch (FileNotFoundException e)
          {
@@ -287,12 +286,6 @@ public class RapidHeightMapManager
                                             (float) heightMapParameters.getHeightScaleFactor(),
                                             (float) heightMapParameters.getHeightOffset());
       return latestTerrainHeightMapData;
-   }
-
-   public boolean hasValidHeightMapData()
-   {
-      GpuMat terrainCroppedHeightMap = rapidHeightMapExtractor.getTerrainCroppedHeightMap();
-      return terrainCroppedHeightMap != null && !terrainCroppedHeightMap.empty();
    }
 
    private double computeFootHeight()

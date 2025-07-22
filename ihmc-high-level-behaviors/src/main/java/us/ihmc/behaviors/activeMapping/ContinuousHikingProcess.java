@@ -127,13 +127,10 @@ public class ContinuousHikingProcess
    {
       activeMappingParameterToolBox.update();
 
-      if (rapidHeightMapThread.hasValidHeightMapData())
-      {
-         environmentHandler.setHeightMapData(rapidHeightMapThread.getLatestHeightMapData());
-         snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
-         environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
-      }
-
+      // Update environment
+      environmentHandler.setHeightMapData(rapidHeightMapThread.getLatestHeightMapData());
+      snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
+      environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
       continuousPlannerSchedulingTask.setLatestEnvironmentHandler(environmentHandler);
    }
 

@@ -125,14 +125,6 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       }
    }
 
-   public boolean hasValidHeightMapData()
-   {
-      synchronized (heightMapLock)
-      {
-         return heightMapManager.hasValidHeightMapData();
-      }
-   }
-
    public HeightMapData getLatestHeightMapData()
    {
       synchronized (heightMapLock)
