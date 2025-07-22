@@ -32,6 +32,11 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
    private HeightMapLogReader logReader;
    int currentFrameIndex = 0;
 
+   private boolean isPlaying = false;
+   private final float[] playbackSpeedSeconds = new float[] {0.1f};
+   private long lastPlaybackTime = System.nanoTime();
+   private float currentPlayBackSpeed;
+
    public RDXHeightMapPanel()
    {
       super("Height Map Panel");
@@ -169,6 +174,53 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
             catch (IOException e)
             {
                e.printStackTrace();
+            }
+         }
+
+         // Playback speed slider
+         ImGui.sliderFloat("Playback Speed (sec/frame)", playbackSpeedSeconds, 0.033f, 1.0f, "%.4f");
+         currentPlayBackSpeed = playbackSpeedSeconds[0];
+
+         // Play / Pause button
+         if (ImGui.button(isPlaying ? "Pause" : "Play"))
+         {
+            isPlaying = !isPlaying;
+            lastPlaybackTime = System.nanoTime(); // reset timer on play
+         }
+      }
+
+      // Playback logic
+      if (isPlaying && logReader != null)
+      {
+         long now = System.nanoTime();
+         float elapsedSeconds = (now - lastPlaybackTime) / 1e9f;
+
+         if (elapsedSeconds >= currentPlayBackSpeed)
+         {
+            lastPlaybackTime = now;
+
+            if (currentFrameIndex < logReader.getFrameCount() - 1)
+            {
+               currentFrameIndex++;
+
+               try
+               {
+                  HeightMapMessage msg = logReader.loadFrame(currentFrameIndex);
+                  if (msg != null)
+                  {
+                     heightMapMessage.set(msg);
+                     heightMapVisualizer.acceptHeightMapMessage(heightMapMessage);
+                  }
+               }
+               catch (IOException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+            else
+            {
+               // Reached the end, stop playing
+               isPlaying = false;
             }
          }
       }
