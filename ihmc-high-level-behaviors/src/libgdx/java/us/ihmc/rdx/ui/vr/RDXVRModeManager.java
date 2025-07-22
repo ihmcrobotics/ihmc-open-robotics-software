@@ -32,6 +32,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -58,6 +59,16 @@ public class RDXVRModeManager
    private RDX3DSituatedImGuiPanel vrModeControls3DPanel;
    private final FramePose3D vrModeControls3DPanelPose = new FramePose3D();
 
+   public void create(RDXBaseUI baseUI,
+                      ROS2SyncedRobotModel syncedRobot,
+                      RDXROS2RobotVisualizer robotVisualizer,
+                      ROS2ControllerHelper controllerHelper,
+                      RetargetingParameters retargetingParameters,
+                      boolean createKinematicsStreamingToolboxModule,
+                      KinematicsStreamingToolboxParameters kstParameters)
+   {
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, null, null);
+   }
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -66,7 +77,8 @@ public class RDXVRModeManager
                       RetargetingParameters retargetingParameters,
                       boolean createKinematicsStreamingToolboxModule,
                       KinematicsStreamingToolboxParameters kstParameters,
-                      FullHumanoidRobotModel miniGhostFullRobotModel)
+                      FullHumanoidRobotModel miniGhostFullRobotModel,
+                      RobotDefinition miniGhostRobotDefinition)
    {
       vrManager = baseUI.getVRManager();
 
@@ -94,7 +106,8 @@ public class RDXVRModeManager
                                                                     kstParameters,
                                                                     createKinematicsStreamingToolboxModule,
                                                                     handManager,
-                                                                    miniGhostFullRobotModel);
+                                                                    miniGhostFullRobotModel,
+                                                                    miniGhostRobotDefinition);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
