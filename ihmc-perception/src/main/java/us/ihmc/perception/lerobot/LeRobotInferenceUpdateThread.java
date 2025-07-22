@@ -6,8 +6,6 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTStatusDouble;
-import us.ihmc.communication.crdt.CRDTStatusLong;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
@@ -23,6 +21,9 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
+/**
+ * Autonomy process thread for managing a {@link LeRobotInferenceManager} and supporting remote UI.
+ */
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
    public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> LEROBOT_UI
@@ -38,11 +39,9 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lerobot_update_thread");
    private final LatestTimestampModifiable latestTimestampModifiable;
-   private final CRDTStatusLong sequenceID;
+   private long sequenceID = 0L;
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
-   private final CRDTStatusDouble pythonStatusFrequency;
-   private final CRDTStatusLong receivedActions;
    private final TypedNotification<LerobotInferenceOperationMessage> commandSubscription;
    private final ROS2Publisher<LerobotInferenceOperationMessage> statusPublisher;
 
@@ -61,11 +60,8 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
       latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator));
       latestTimestampModifiable.modify(); // On startup, we want the initial state to propagate
-      sequenceID = new CRDTStatusLong(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0L);
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
-      pythonStatusFrequency = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0.0);
-      receivedActions = new CRDTStatusLong(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0L);
 
       leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node);
       leRobotInferenceManager.startPythonServer();
@@ -110,22 +106,17 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
          leRobotInferenceManager.setRunning(running.getValue());
          leRobotInferenceManager.update();
-
-         pythonStatusFrequency.setValue(leRobotInferenceManager.getStatusFrequency());
-         receivedActions.setValue(leRobotInferenceManager.getNumberOfActionsReceived());
       }
       catch (InterruptedException ex) { } // Ignore
 
       LerobotInferenceOperationMessage status = new LerobotInferenceOperationMessage();
       latestTimestampModifiable.toMessage(status.getLatestTimestampModifiable());
-      status.setSequenceId(sequenceID.toMessage());
+      status.setSequenceId(sequenceID++);
       status.setRunning(running.toMessage());
       status.setControlRobot(controlRobot.toMessage());
-      status.setPythonStatusFrequency(pythonStatusFrequency.toMessage());
-      status.setReceivedActions(receivedActions.toMessage());
+      status.setPythonStatusFrequency(leRobotInferenceManager.getStatusFrequency());
+      status.setReceivedActions(leRobotInferenceManager.getNumberOfActionsReceived());
       statusPublisher.publish(status);
-
-      sequenceID.setValue(sequenceID.getValue() + 1);
    }
    public void destroy()
    {
