@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.crdt.CRDTStatusLong;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -40,6 +41,8 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    private final CRDTStatusLong sequenceID;
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
+   private final CRDTStatusDouble pythonStatusFrequency;
+   private final CRDTStatusLong receivedActions;
    private final TypedNotification<LerobotInferenceOperationMessage> commandSubscription;
    private final ROS2Publisher<LerobotInferenceOperationMessage> statusPublisher;
 
@@ -61,7 +64,8 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       sequenceID = new CRDTStatusLong(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0L);
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
-      // TODO finish up these data sync comms
+      pythonStatusFrequency = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0.0);
+      receivedActions = new CRDTStatusLong(ROS2ActorDesignation.ROBOT, latestTimestampModifiable.getCRDTInfo(), 0L);
 
       leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node);
       leRobotInferenceManager.startPythonServer();
@@ -78,6 +82,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          LerobotInferenceOperationMessage command = commandSubscription.read();
          latestTimestampModifiable.fromMessage(command.getLatestTimestampModifiable());
          running.fromMessage(command.getRunning());
+         controlRobot.fromMessage(command.getControlRobot());
 
          leRobotInferenceManager.setRunning(running.getValue());
       }
@@ -105,13 +110,22 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
          leRobotInferenceManager.setRunning(running.getValue());
          leRobotInferenceManager.update();
+
+         pythonStatusFrequency.setValue(leRobotInferenceManager.getStatusFrequency());
+         receivedActions.setValue(leRobotInferenceManager.getNumberOfActionsReceived());
       }
       catch (InterruptedException ex) { } // Ignore
 
       LerobotInferenceOperationMessage status = new LerobotInferenceOperationMessage();
       latestTimestampModifiable.toMessage(status.getLatestTimestampModifiable());
+      status.setSequenceId(sequenceID.toMessage());
       status.setRunning(running.toMessage());
+      status.setControlRobot(controlRobot.toMessage());
+      status.setPythonStatusFrequency(pythonStatusFrequency.toMessage());
+      status.setReceivedActions(receivedActions.toMessage());
       statusPublisher.publish(status);
+
+      sequenceID.setValue(sequenceID.getValue() + 1);
    }
    public void destroy()
    {
