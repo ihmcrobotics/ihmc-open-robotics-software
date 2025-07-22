@@ -820,7 +820,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    {
       WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
       factory.setDefaultContactThresholdForce(50.0);
-      factory.setDefaultCoPThresholdFraction(0.02);
+      factory.setDefaultCoPThresholdDistance(4.0e-3);
       factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
       return factory;
    }
