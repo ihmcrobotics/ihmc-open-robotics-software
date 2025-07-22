@@ -241,11 +241,11 @@ public class HumanoidKinematicsSimulation
       controllerToolbox.attachRobotMotionStatusChangedListener((newStatus, time) -> robotMotionStatusHolder.setCurrentRobotMotionStatus(newStatus));
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getSimulatedRobotInitialSetup(kinematicsSimulationParameters.getInitialGroundHeight(),
-                                                                                                                     kinematicsSimulationParameters.getInitialRobotYaw(),
-                                                                                                                     kinematicsSimulationParameters.getInitialRobotX(),
-                                                                                                                     kinematicsSimulationParameters.getInitialRobotY(),
-                                                                                                                     kinematicsSimulationParameters.getInitialRobotZ());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(kinematicsSimulationParameters.getInitialGroundHeight(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotYaw(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotX(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotY(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotZ());
       robotInitialSetup.initializeFullRobotModel(fullRobotModel);
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
