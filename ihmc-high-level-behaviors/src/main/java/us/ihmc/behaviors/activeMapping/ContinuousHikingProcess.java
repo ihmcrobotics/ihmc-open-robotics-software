@@ -47,7 +47,7 @@ public class ContinuousHikingProcess
    private final RapidHeightMapThread rapidHeightMapThread;
    private final ROS2ImageSensors ros2ImageSensors;
 
-   public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel)
+   public ContinuousHikingProcess(DRCRobotModel robotModel, RobotCollisionModel robotCollisionModel, )
    {
       // Create a bunch of overhead for the ROS2 communication and the robot
       ROS2Node ros2Node = new ROS2NodeBuilder().build("nadia_terrain_perception_node");
@@ -76,9 +76,6 @@ public class ContinuousHikingProcess
                                                                                                                .getSensorInformation()
                                                                                                                .getSteppingCameraTransform());
 
-//      So I should fix the simulation and hardware differences for starting the process
-//         Or really I want  to create this fo the H1 cause it may be close for testing, and need to be ready
-//         Refresh yourself with this class
       // This is for the height map, it expects the queue of images that we get from the sensors
       BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>();
       d455Sensor.registerImageQueue(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
