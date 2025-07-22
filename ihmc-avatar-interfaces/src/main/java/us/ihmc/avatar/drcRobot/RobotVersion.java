@@ -19,6 +19,17 @@ public interface RobotVersion
       return hasArm(RobotSide.LEFT) && hasArm(RobotSide.RIGHT);
    }
 
+   default boolean hasHandWithFingers(RobotSide side)
+   {
+      return false;
+   }
+
+   default boolean hasBothHandsWithFingers()
+   {
+      return hasHandWithFingers(RobotSide.LEFT) && hasHandWithFingers(RobotSide.RIGHT);
+   }
+
+   // TODO remove sake gripper - use has hands
    default boolean hasSakeGripperJoints(RobotSide side)
    {
       return false;

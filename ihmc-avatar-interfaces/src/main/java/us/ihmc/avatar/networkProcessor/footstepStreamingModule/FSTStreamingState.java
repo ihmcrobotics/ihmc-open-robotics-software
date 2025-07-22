@@ -30,7 +30,6 @@ public class FSTStreamingState implements State
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FSTTools tools;
-   private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
    private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> initialTrackersTransform = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> previousTrackersTransform = new SideDependentList<>();
@@ -167,7 +166,6 @@ public class FSTStreamingState implements State
          currentStrideEstimate = defaultStride.getValue();
          currentYawEstimate = Math.toRadians(defaultTurnDegrees.getValue());
 
-         ankleTrackerFrames.put(side, null);
          initialTrackersTransform.put(side, null);
          initialRobotSwingFootTransformsInWorld.put(side, null);
          maxFeetHeight.put(side, 0.0);

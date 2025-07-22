@@ -1,209 +1,145 @@
 package us.ihmc.rdx.ui.vr;
 
-import org.apache.commons.math3.geometry.partitioning.Side;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxOutputStatus;
-import toolbox_msgs.msg.dds.FootstepStreamingToolboxSideMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.footstepStreamingModule.FootstepStreamingToolboxModule;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.SwingFootTracker;
-import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.motionRetargeting.RetargetingParameters;
+import us.ihmc.motionRetargeting.VRTrackedSegmentType;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * Class responsible for streaming footstep placements based on VR tracker data.
- * It monitors the ankle tracker positions to predict and place footsteps as the user steps.
- */
+import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
+
 public class RDXVRFootstepStreaming
 {
-   private final ROS2Helper ros2Helper;
-   private final FootstepStreamingToolboxModule footstepStreamingToolbox;
-   private final ROS2Input<FootstepStreamingToolboxOutputStatus> status;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final RDXVRFootstepPlacement footstepPlacer;
+   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
+
+   private final RetargetingParameters retargetingParameters;
+   private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
+
+   private final RDXVRContext vrContext;
+   private final RDXVRFootstepStreamingProcessor processor;
+   private final ControllerStatusTracker controllerStatusTracker;
    private final SwingFootTracker swingFootTracker;
-   private final SideDependentList<ReferenceFrame> ankleTrackerFrames = new SideDependentList<>();
-   private final SideDependentList<SpatialVector> ankleTrackerVelocities = new SideDependentList<>();
-   private final SideDependentList<Long> ankleTrackerTimestamps = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> previousAdjustment = new SideDependentList<>();
-   private final Notification readyToStep = new Notification();
-   private boolean wasEnabled = false;
+   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
+   private boolean ankleTrackersPresent = false;
 
-   /**
-    * Constructor for the footstep streaming class.
-    *
-    * @param syncedRobot the synchronized robot model
-    * @param footstepPlacer the footstep placer for manual footstep placement
-    */
    public RDXVRFootstepStreaming(ROS2SyncedRobotModel syncedRobot,
-                                 ROS2Helper ros2Helper,
-                                 RDXVRFootstepPlacement footstepPlacer,
-                                 SwingFootTracker swingFootTracker,
-                                 boolean enableYoVariableServer)
+                                 ROS2ControllerHelper ros2ControllerHelper,
+                                 RDXVRContext vrContext,
+                                 RetargetingParameters retargetingParameters,
+                                 RDXVRFootstepPlacement footstepPlacer)
    {
-      this.syncedRobot = syncedRobot;
-      this.footstepPlacer = footstepPlacer;
-      this.ros2Helper = ros2Helper;
-      this.swingFootTracker = swingFootTracker;
+      this.retargetingParameters = retargetingParameters;
+      this.vrContext = vrContext;
 
-      footstepStreamingToolbox = new FootstepStreamingToolboxModule(syncedRobot.getRobotModel(), enableYoVariableServer);
-      status = ros2Helper.subscribe(FootstepStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
+      this.controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2ControllerHelper.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
+      this.swingFootTracker = new SwingFootTracker(syncedRobot, controllerStatusTracker);
+
+      processor = new RDXVRFootstepStreamingProcessor(syncedRobot, ros2ControllerHelper, footstepPlacer, swingFootTracker, ENABLE_YO_VARIABLE_TOOLBOX_SERVER);
+      RDXBaseUI.getInstance().getKeyBindings().register("Footstep Streaming: Control robot stepping (ankle trackers required)", "Hold both handle grippers");
    }
 
-   public void processVRInput(boolean enabled)
+   public void processVRInput()
    {
-      if (enabled)
+      for (RobotSide side : RobotSide.values)
       {
-         if (!wasEnabled)
+         vrContext.getController(side).runIfConnected(controller -> gripButtonsValue.put(side, controller.getGripActionData().x()));
+      }
+      Set<String> additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
+      boolean bothTrackersActive = true;
+      for (VRTrackedSegmentType segmentType : FOOT_TYPES)
+      {
+         if (additionalTrackedSegments.contains(segmentType.getSegmentName()))
          {
-            footstepStreamingToolbox.wakeUp();
-            wasEnabled = true;
-         }
-         FootstepStreamingToolboxInputMessage toolboxInputMessage = new FootstepStreamingToolboxInputMessage();
-         toolboxInputMessage.setRobotStepDuration(footstepPlacer.getStepDuration());
-         toolboxInputMessage.setRobotSwingDuration(footstepPlacer.getSwingDuration());
-         toolboxInputMessage.setRobotStepElapsedTime(footstepPlacer.getTimeElapsedAfterStep());
-         toolboxInputMessage.setRobotSwingSide(swingFootTracker.getSide().toByte());
-         toolboxInputMessage.setIsRobotSwingFootLanding(swingFootTracker.isLanding());
-
-         for (RobotSide side : RobotSide.values)
-         {
-            if (ankleTrackerFrames.get(side) != null)
+            vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
             {
-               FootstepStreamingToolboxSideMessage footstepMessage = new FootstepStreamingToolboxSideMessage();
-               footstepMessage.setTimestamp(ankleTrackerTimestamps.get(side));
-               footstepMessage.setSide(side.toByte());
-               RigidBodyTransform currentRobotFootTransformInWorld = new RigidBodyTransform(syncedRobot.getReferenceFrames().getSoleFrame(side).getTransformToWorldFrame());
-               footstepMessage.getRobotFootPositionInWorld().set(currentRobotFootTransformInWorld.getTranslation());
-               footstepMessage.getRobotFootOrientationInWorld().set(currentRobotFootTransformInWorld.getRotation());
+               if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
+               {
+                  MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
+                  trackerDesiredControlFrame.getTransformToParent()
+                                            .getRotation()
+                                            .appendInvertOther(retargetingParameters.getControlFrameOrientationInBodyFrame(segmentType));
+                  trackerDesiredControlFrame.getReferenceFrame().update();
+                  trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
 
-               RigidBodyTransform currentTrackerTransform = new RigidBodyTransform();
-               ankleTrackerFrames.get(side).getTransformToWorldFrame().transform(currentTrackerTransform);
-               footstepMessage.getCurrentPositionInWorld().set(currentTrackerTransform.getTranslation());
-               footstepMessage.getCurrentOrientationInWorld().set(currentTrackerTransform.getRotation());
+                  processor.setTrackerReference(segmentType.getSegmentSide(), trackerDesiredControlFrame.getReferenceFrame());
+               }
 
-               footstepMessage.setHasCurrentVelocity(true);
-               footstepMessage.getCurrentLinearVelocityInWorld().set(ankleTrackerVelocities.get(side).getLinearPart());
-               footstepMessage.getCurrentAngularVelocityInWorld().set(ankleTrackerVelocities.get(side).getAngularPart());
-
-               toolboxInputMessage.getSide().add().set(footstepMessage);
-            }
+               processor.setTrackerVelocity(segmentType.getSegmentSide(),
+                                            new SpatialVector(ReferenceFrame.getWorldFrame(),
+                                                              tracker.getAngularVelocity(),
+                                                              tracker.getLinearVelocity()));
+               processor.setTrackerTimestamp(segmentType.getSegmentSide(), tracker.getLastPollTimeNanos());
+            });
          }
-         if (toolboxInputMessage.getSide().size() == 2) // Do not publish if we have only the info of one side
-            ros2Helper.publish(FootstepStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
+         else
+         {
+            bothTrackersActive = false;
+         }
       }
-      else
+
+      if (bothTrackersActive)
       {
-         if (wasEnabled)
-            internalReset();
+         boolean isStepping = gripButtonsValue.get(RobotSide.LEFT) > 0.8f && gripButtonsValue.get(RobotSide.RIGHT) > 0.8f;
+         processor.processVRInput(isStepping);
       }
+      ankleTrackersPresent = bothTrackersActive;
    }
 
-   public void processToolboxOutput()
+   public void update()
    {
-      if (status.getMessageNotification().poll())
+      if (ankleTrackersPresent)
       {
-         FootstepStreamingToolboxOutputStatus latestStatus = status.getMessageNotification().read();
-         RobotSide side = RobotSide.fromByte(latestStatus.getRobotSide());
-         if (side != null)
+         swingFootTracker.update();
+         processor.processToolboxOutput();
+         // Stepping with ankle trackers pauses streaming until walking is done
+         if (!controllerStatusTracker.isWalking())
          {
-            if (!latestStatus.getAdjustmentFootstep()) // First value estimate for a footstep
+            if (processor.getReadyToStepNotification().poll())
             {
-               // Place and send footstep
-               footstepPlacer.createNewFootstep(side);
-               footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                              latestStatus.getDesiredFootPosition(),
-                                                              latestStatus.getDesiredFootOrientation()));
-               // We can't trigger stepping here. We have to notify the KST and stop streaming
-               readyToStep.clear();
-               readyToStep.set();
-            }
-            else if (latestStatus.getAdjustmentFootstep() && !latestStatus.getLastAdjustment()) // Later values of updated estimate
-            {
-               if (footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                  latestStatus.getDesiredFootPosition(),
-                                                                  latestStatus.getDesiredFootOrientation())))
-               {
-                  step(true);
-                  previousAdjustment.put(side, new RigidBodyTransform(latestStatus.getDesiredFootOrientation(), latestStatus.getDesiredFootPosition()));
-               }
-               else
-               {
-                  LogTools.error("Could not place step. Please do not release grip on controllers when streaming footsteps");
-               }
-            }
-            else if (latestStatus.getLastAdjustment()) // Last estimate
-            {
-               LogTools.error("Received last estimate footstep");
-               footstepPlacer.reset();
+               processor.getReadyToStepNotification().clear();
+               LogTools.warn("Stepping from VR");
+               processor.step(false);
+               controllerStatusTracker.getFinishedWalkingNotification().clear();
             }
          }
          else
          {
-            LogTools.error("Received null footstep streaming output status");
+            if (processor.getReadyToStepNotification().poll())
+            {
+               LogTools.warn("Consecutive stepping from VR");
+               processor.step(false);
+               // This prevents wrong logic. The controller might think we're done walking even if we've just
+               // sent a new footstep that needs to propagate to the controller
+               controllerStatusTracker.getFinishedWalkingNotification().clear();
+            }
          }
-      }
-   }
-
-   public Notification getReadyToStepNotification()
-   {
-      return readyToStep;
-   }
-
-   public void step(boolean activeAdjustment)
-   {
-      footstepPlacer.sendStep(activeAdjustment);
-   }
-
-   /**
-    * Sets the reference frame for the tracker of a given side.
-    *
-    * @param side the side (left or right) of the robot
-    * @param trackerReferenceFrame the reference frame of the tracker
-    */
-   public void setTrackerReference(RobotSide side, ReferenceFrame trackerReferenceFrame)
-   {
-      ankleTrackerFrames.put(side, trackerReferenceFrame);
-   }
-
-   public void setTrackerVelocity(RobotSide side, SpatialVector velocity)
-   {
-      ankleTrackerVelocities.put(side, velocity);
-   }
-
-   public void setTrackerTimestamp(RobotSide side, long time)
-   {
-      ankleTrackerTimestamps.put(side, time);
+         }
    }
 
    public void reset()
    {
-      for (RobotSide side : RobotSide.values())
-      {
-         ankleTrackerFrames.put(side, null);
-      }
-      internalReset();
-   }
-
-   private void internalReset()
-   {
-      footstepStreamingToolbox.sleep();
-      wasEnabled = false;
-      readyToStep.clear();
-      footstepPlacer.reset();
-      footstepPlacer.resetTimer();
+      trackerReferenceFrames.clear();
+      processor.reset();
    }
 
    public void destroy()
    {
-      footstepStreamingToolbox.destroy();
+      if (processor != null)
+      {
+         processor.destroy();
+      }
    }
 }

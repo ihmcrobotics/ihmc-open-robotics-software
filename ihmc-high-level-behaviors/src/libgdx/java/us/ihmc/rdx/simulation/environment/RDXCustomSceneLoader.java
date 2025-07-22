@@ -182,7 +182,7 @@ public class RDXCustomSceneLoader
       }
    }
 
-   public String getEnvironmentName(RDXDemoScene demoScene)
+   public static String getEnvironmentName(RDXDemoScene demoScene)
    {
       return switch (demoScene)
       {
