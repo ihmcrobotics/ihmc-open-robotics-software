@@ -8,13 +8,48 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapMessageToolsTest
 {
    private final int iterations = 1000;
-   private final HeightMapParameters heightMapParameters = new HeightMapParameters();
+
+   @Test
+   public void testHeightMapMessaging()
+   {
+      HeightMapMessage heightMapMessage = new HeightMapMessage();
+
+      float widthInMeters = 10.0f;
+      float cellResolution = 0.02f;
+
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            heightMap.ptr(i, j).putInt(i +j);
+         }
+      }
+
+      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000);
+
+      // Inside the try-with-resouce to avoid memory leak
+      try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage))
+      {
+         for (int i = 0; i < cellsPerAxis; i++)
+         {
+            for(int j = 0; j < cellsPerAxis; j++)
+            {
+               assertEquals(heightMap.ptr(i, j).getShort(), heightMapResult.ptr(i, j).getShort());
+            }
+         }
+         // Do nothing
+      }
+   }
 
    @Test
    public void testSpeedUnpackingHeightMapMessage()
@@ -26,23 +61,23 @@ public class HeightMapMessageToolsTest
 
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       for (int i = 0; i < cellsPerAxis; i++)
       {
          for (int j = 0; j < cellsPerAxis; j++)
          {
-            heightMap.ptr(i, j).putFloat(1.0f);
+            heightMap.ptr(i, j).putInt(1);
          }
       }
 
-      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution);
+      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000.0);
 
       long startTime = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
          // Inside the try-with-resouce to avoid memory leak
-         try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage, 3.2768f, 10000f))
+         try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage))
          {
             // Do nothing
          }
@@ -114,7 +149,7 @@ public class HeightMapMessageToolsTest
 
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       for (int i = 0; i < cellsPerAxis; i++)
       {
          for (int j = 0; j < cellsPerAxis; j++)

@@ -120,19 +120,17 @@ public class RapidHeightMapManager
                                       heightMapMessage,
                                       gridCellLocation,
                                       heightMapParameters.getGlobalWidthInMeters(),
-                                      heightMapParameters.getCellSizeInMeters());
-      heightMapMessage.setHeightOffset(heightMapParameters.getHeightOffset());
-      heightMapMessage.setHeightScaleFactor(heightMapParameters.getHeightScaleFactor());
-
-
-      float[] floatsToLog = HeightMapTools.packArrayForFile(hostGlobalHeightMap,
-                                                            gridCellLocation,
-                                                            (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                            (float) heightMapParameters.getCellSizeInMeters(),
-                                                            heightMapParameters);
+                                      heightMapParameters.getCellSizeInMeters(),
+                                      heightMapParameters.getHeightOffset(),
+                                      heightMapParameters.getHeightScaleFactor());
 
       if (heightMapParameters.getLogHeightMap())
       {
+         float[] floatsToLog = HeightMapTools.packArrayForFile(hostGlobalHeightMap,
+                                                               gridCellLocation,
+                                                               (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                               (float) heightMapParameters.getCellSizeInMeters(),
+                                                               heightMapParameters);
          try
          {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));

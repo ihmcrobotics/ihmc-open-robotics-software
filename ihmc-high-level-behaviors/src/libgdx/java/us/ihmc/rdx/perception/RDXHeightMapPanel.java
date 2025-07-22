@@ -10,15 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import imgui.ImGui;
 import imgui.extension.imguifiledialog.ImGuiFileDialog;
 import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.perception.heightMap.HeightMapBinaryLogReader;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.HeightMapLogReader;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
@@ -27,9 +22,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.Set;
 
 public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
@@ -37,7 +29,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
    RDXROS2HeightMapVisualizer heightMapVisualizer;
 
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
-   private HeightMapBinaryLogReader logReader;
+   private HeightMapLogReader logReader;
    int currentFrameIndex = 0;
 
    public RDXHeightMapPanel()
@@ -97,7 +89,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
             {
                try
                {
-                  logReader = new HeightMapBinaryLogReader(selectedFile);
+                  logReader = new HeightMapLogReader(selectedFile);
                   System.out.println("Loaded binary log with " + logReader.getFrameCount() + " frames.");
 
                   currentFrameIndex = 0;
@@ -156,7 +148,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
          }
 
          // Slider for direct frame selection
-         int[] frameIndexArray = { currentFrameIndex };
+         int[] frameIndexArray = {currentFrameIndex};
          if (ImGui.sliderInt("Frame", frameIndexArray, 0, frameCount - 1))
          {
             currentFrameIndex = frameIndexArray[0];
@@ -183,64 +175,6 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
 
       heightMapVisualizer.renderImGuiWidgets();
       heightMapVisualizer.update();
-   }
-
-   public static HeightMapMessage loadFirstHeightMapFromBinary(String path) throws IOException
-   {
-      try (FileInputStream fis = new FileInputStream(path))
-      {
-         byte[] intBytes = new byte[4];
-
-         if (fis.read(intBytes) != 4)
-            return null;
-
-         ByteBuffer intBuffer = ByteBuffer.wrap(intBytes).order(ByteOrder.LITTLE_ENDIAN);
-         int frameSize = intBuffer.getInt();
-
-         byte[] frameBytes = new byte[frameSize];
-         int bytesRead = fis.read(frameBytes);
-         if (bytesRead != frameSize)
-            throw new IOException("Unexpected EOF while reading frame payload");
-
-         ByteBuffer frameBuffer = ByteBuffer.wrap(frameBytes).order(ByteOrder.LITTLE_ENDIAN);
-         double timestamp = frameBuffer.getDouble();
-
-         int numFloats = (frameSize - 8) / Float.BYTES;
-         float[] packedArray = new float[numFloats];
-         frameBuffer.asFloatBuffer().get(packedArray);
-
-         // Unpack header
-         float widthInMeters = packedArray[0];
-         float cellSizeInMeters = packedArray[1];
-         float centerX = packedArray[2];
-         float centerY = packedArray[3];
-         float heightOffset = packedArray[4];
-         float heightScaleFactor = packedArray[5];
-
-         final int headerFloats = 6;
-
-         int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
-         int cellsPerAxis = 2 * centerIndex + 1;
-         int totalCells = cellsPerAxis * cellsPerAxis;
-
-         float[] heightsArray = new float[totalCells];
-         System.arraycopy(packedArray, headerFloats, heightsArray, 0, totalCells);
-
-         Mat mat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
-         FloatBuffer matBuffer = mat.createBuffer();
-         matBuffer.put(heightsArray);
-         matBuffer.rewind();
-
-         Point3D center = new Point3D(centerX, centerY, 0.0);
-
-         // Convert to HeightMapMessage
-         HeightMapMessage msg = new HeightMapMessage();
-         HeightMapMessageTools.toMessage(mat, msg, center, widthInMeters, cellSizeInMeters);
-
-         System.out.println("Loaded frame from binary log. Timestamp = " + timestamp);
-
-         return msg;
-      }
    }
 
    public void getRenderablesFull(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

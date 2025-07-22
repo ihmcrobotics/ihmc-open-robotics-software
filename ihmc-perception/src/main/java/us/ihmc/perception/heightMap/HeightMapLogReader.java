@@ -9,22 +9,21 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HeightMapBinaryLogReader implements Closeable
+public class HeightMapLogReader implements Closeable
 {
    private final List<Long> frameOffsets = new ArrayList<>();
    private final FileChannel channel;
-   private final Path filePath;
 
-   public HeightMapBinaryLogReader(String path) throws IOException
+   public HeightMapLogReader(String path) throws IOException
    {
-      this.filePath = Path.of(path);
+      Path filePath = Path.of(path);
       this.channel = FileChannel.open(filePath, StandardOpenOption.READ);
       indexFrames();
    }
@@ -97,21 +96,26 @@ public class HeightMapBinaryLogReader implements Closeable
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
-      float[] heightsArray = new float[totalCells];
-      System.arraycopy(packedArray, headerFloats, heightsArray, 0, totalCells);
+      float[] floatHeights = new float[totalCells];
+      System.arraycopy(packedArray, headerFloats, floatHeights, 0, totalCells);
 
-      Mat mat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
-      FloatBuffer matBuffer = mat.createBuffer();
-      matBuffer.put(heightsArray);
+      // Convert back to encoded shorts
+      short[] shortHeights = new short[totalCells];
+      for (int i = 0; i < totalCells; ++i)
+      {
+         shortHeights[i] = (short) packedArray[headerFloats + i];
+      }
+
+      // Store into OpenCV Mat (CV_16UC1)
+      Mat mat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      ShortBuffer matBuffer = mat.createBuffer();
+      matBuffer.put(shortHeights);
       matBuffer.rewind();
 
       Point3D center = new Point3D(centerX, centerY, 0.0);
-
       HeightMapMessage msg = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(mat, msg, center, widthInMeters, cellSizeInMeters);
-
+      HeightMapMessageTools.toMessage(mat, msg, center, widthInMeters, cellSizeInMeters, heightOffset, heightScaleFactor);
       msg.setSequenceId(index + 2);
-
       return msg;
    }
 

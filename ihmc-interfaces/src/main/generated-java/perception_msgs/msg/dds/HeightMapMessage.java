@@ -58,7 +58,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  heights_;
+   public us.ihmc.idl.IDLSequence.Integer  heights_;
    /**
             * List of variances, which correspond to the list of keys. May be empty.
             */
@@ -77,7 +77,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    {
       keys_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
-      heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
       variances_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
@@ -284,7 +284,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  getHeights()
+   public us.ihmc.idl.IDLSequence.Integer  getHeights()
    {
       return heights_;
    }
@@ -357,7 +357,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.keys_, other.keys_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.heights_, other.heights_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.variances_, other.variances_, epsilon)) return false;
 
