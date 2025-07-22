@@ -289,6 +289,12 @@ public class RapidHeightMapManager
       return latestTerrainHeightMapData;
    }
 
+   public boolean hasValidHeightMapData()
+   {
+      GpuMat terrainCroppedHeightMap = rapidHeightMapExtractor.getTerrainCroppedHeightMap();
+      return terrainCroppedHeightMap != null && !terrainCroppedHeightMap.empty();
+   }
+
    private double computeFootHeight()
    {
       double thicknessOfTheFoot = 0.02;
