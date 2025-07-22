@@ -84,6 +84,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
       try
       {
+         //TODO: Look at this and all zedSensor for LeRobot
          zedSensor.waitForGrab();
 
          synchronized (fullRobotModelSync)
