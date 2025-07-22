@@ -140,7 +140,7 @@ public class RDXArmManager
 
       handManager = new RDXHandConfigurationManager();
       if (peerClockEstimator != null)
-         leRobotOperation = new RDXLeRobotOperation(communicationHelper, peerClockEstimator);
+         leRobotOperation = new RDXLeRobotOperation(communicationHelper.getROS2Node(), peerClockEstimator);
    }
 
    public void create(RDXBaseUI baseUI)
