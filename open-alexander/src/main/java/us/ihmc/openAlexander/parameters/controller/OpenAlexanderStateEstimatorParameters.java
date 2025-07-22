@@ -285,9 +285,9 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
    public FootSwitchFactory getFootSwitchFactory()
    {
       WrenchBasedFootSwitchFactory factory = new WrenchBasedFootSwitchFactory();
-      factory.setDefaultContactThresholdForce(80.0);
-      factory.setDefaultCoPThresholdFraction(0.02);
-      factory.setDefaultSecondContactThresholdForceIgnoringCoP(Double.POSITIVE_INFINITY);
+      factory.setDefaultContactThresholdForce(50.0);
+      factory.setDefaultCoPThresholdDistance(4.0e-3);
+      factory.setDefaultSecondContactThresholdForceIgnoringCoP(75.0);
       return factory;
    }
 
