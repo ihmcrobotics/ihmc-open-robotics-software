@@ -11,7 +11,6 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.perception.RawImage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -19,7 +18,6 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
-import us.ihmc.sensors.zed.ZEDImageSensor;
 
 /**
  * Autonomy process thread for managing a {@link LeRobotInferenceManager} and supporting remote UI.
@@ -79,8 +77,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          latestTimestampModifiable.fromMessage(command.getLatestTimestampModifiable());
          running.fromMessage(command.getRunning());
          controlRobot.fromMessage(command.getControlRobot());
-
-         leRobotInferenceManager.setRunning(running.getValue());
       }
 
       try
@@ -94,16 +90,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
             rightPose.set(fullRobotModel.getHand(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
          }
          leRobotInferenceManager.publishHandPoses(leftPose, rightPose);
-
-         RawImage leftBGRAImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-         RawImage rightBGRAImage = zedSensor.getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
-
-         leRobotInferenceManager.publishImage(RobotSide.LEFT, leftBGRAImage.getCpuImageMat());
-         leRobotInferenceManager.publishImage(RobotSide.RIGHT, rightBGRAImage.getCpuImageMat());
-
-         leftBGRAImage.release();
-         rightBGRAImage.release();
-
          leRobotInferenceManager.setRunning(running.getValue());
          leRobotInferenceManager.getIKStreaming().setControlRobot(controlRobot.getValue());
          leRobotInferenceManager.update();
