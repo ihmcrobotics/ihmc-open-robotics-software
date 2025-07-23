@@ -65,9 +65,10 @@ public class RDXVRModeManager
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
                       boolean createKinematicsStreamingToolboxModule,
-                      KinematicsStreamingToolboxParameters kstParameters)
+                      KinematicsStreamingToolboxParameters kstParameters,
+                      boolean recordKSTOutput)
    {
-      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, null, null);
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, recordKSTOutput, null, null);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -77,6 +78,7 @@ public class RDXVRModeManager
                       RetargetingParameters retargetingParameters,
                       boolean createKinematicsStreamingToolboxModule,
                       KinematicsStreamingToolboxParameters kstParameters,
+                      boolean recordKSTOutput,
                       FullHumanoidRobotModel miniGhostFullRobotModel,
                       RobotDefinition miniGhostRobotDefinition)
    {
@@ -105,6 +107,7 @@ public class RDXVRModeManager
                                                                     retargetingParameters,
                                                                     kstParameters,
                                                                     createKinematicsStreamingToolboxModule,
+                                                                    recordKSTOutput,
                                                                     handManager,
                                                                     miniGhostFullRobotModel,
                                                                     miniGhostRobotDefinition);
@@ -286,6 +289,11 @@ public class RDXVRModeManager
       stereoVision.getDualBlackflySphericalProjection().shutdown();
       footstepPlacer.destroy();
       footstepStreaming.destroy();
+   }
+
+   public void setMode(RDXVRMode mode)
+   {
+      this.mode = mode;
    }
 
    public RDXVRMode getMode()

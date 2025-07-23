@@ -503,6 +503,18 @@ public class KSTStreamingState implements State
             WeightMatrix6D weightMatrix = rigidBodyInput.getWeightMatrix();
             setDefaultWeightsIfNeeded(rigidBodyInput, selectionMatrix, weightMatrix);
 
+            // Skip the blending for the foot, if the user has just started to control the foot
+            if (rigidBodyInput.getEndEffector().getName().toLowerCase().contains("foot") ||
+                rigidBodyInput.getEndEffector().getName().toLowerCase().contains("ankle") ||
+                rigidBodyInput.getEndEffector().getName().toLowerCase().contains("sole"))
+            {
+               RobotSide footSide = rigidBodyInput.getEndEffector().getName().toLowerCase().contains("left") ? RobotSide.LEFT : RobotSide.RIGHT;
+               if (ikController.getStartFootControlNotification(footSide).poll())
+               {
+                  rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector()).set(timeInState - streamingBlendingDuration.getValue());
+               }
+            }
+
             // Update time for which each rigid body started being controlled.
             YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
             if (startTime.isNaN())

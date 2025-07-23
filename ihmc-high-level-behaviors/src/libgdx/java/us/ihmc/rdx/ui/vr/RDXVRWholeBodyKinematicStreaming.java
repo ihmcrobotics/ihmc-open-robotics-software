@@ -113,7 +113,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean performingDemonstration = new ImBoolean(false);
    private final ROS2Publisher<ROS2LogMessage> ros2LogMessagePublisher;
    private boolean recordRequest = false;
-   private final ModelInstance recordingGraphics;
+   private ModelInstance recordingGraphics;
 
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
@@ -151,6 +151,7 @@ public class RDXVRWholeBodyKinematicStreaming
                                            RetargetingParameters retargetingParameters,
                                            KinematicsStreamingToolboxParameters kstParameters,
                                            boolean createToolbox,
+                                           boolean recordKSTOutput,
                                            RDXHandConfigurationManager handManager,
                                            FullHumanoidRobotModel miniGhostFullRobotModel,
                                            RobotDefinition miniGhostRobotDefinition)
@@ -180,14 +181,17 @@ public class RDXVRWholeBodyKinematicStreaming
                                             miniGhostRobotDefinition,
                                             miniGhostFullRobotModel,
                                             vrContext);
-      ModelBuilder modelBuilder = new ModelBuilder();
-      Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-      pixmap.setColor(Color.RED);
-      pixmap.fill();
-      Texture redTexture = new Texture(pixmap);
-      Material redMaterial = new Material(PBRTextureAttribute.createBaseColorTexture(redTexture));
-      Model circleModel = modelBuilder.createSphere(0.0001f, 0.01f, 0.01f, 20, 20, redMaterial, Usage.Position | Usage.Normal);
-      recordingGraphics = new ModelInstance(circleModel);
+      if (recordKSTOutput)
+      {
+         ModelBuilder modelBuilder = new ModelBuilder();
+         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+         pixmap.setColor(Color.RED);
+         pixmap.fill();
+         Texture redTexture = new Texture(pixmap);
+         Material redMaterial = new Material(PBRTextureAttribute.createBaseColorTexture(redTexture));
+         Model circleModel = modelBuilder.createSphere(0.0001f, 0.01f, 0.01f, 20, 20, redMaterial, Usage.Position | Usage.Normal);
+         recordingGraphics = new ModelInstance(circleModel);
+      }
 
       for (RobotSide side : RobotSide.values)
       {
@@ -618,7 +622,7 @@ public class RDXVRWholeBodyKinematicStreaming
             ghostRobotGraphic.update();
          miniGhost.updatePose();
 
-         if (recordRequest)
+         if (recordRequest && recordingGraphics != null)
          {
             FramePose3D recordingGraphicsPose = new FramePose3D(headsetReferenceFrame.getReferenceFrame());
             recordingGraphicsPose.getTranslation().add(0.3, 0.2, 0.1);
@@ -818,7 +822,7 @@ public class RDXVRWholeBodyKinematicStreaming
       }
 
       multiContact.getRenderables(renderables, pool);
-      if (recordRequest)
+      if (recordRequest && recordingGraphics != null)
          recordingGraphics.getRenderables(renderables, pool);
    }
 
