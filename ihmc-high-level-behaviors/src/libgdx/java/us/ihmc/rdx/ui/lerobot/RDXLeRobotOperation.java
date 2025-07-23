@@ -103,7 +103,7 @@ public class RDXLeRobotOperation
          receivedActions = status.getReceivedActions();
       }
 
-      ImGui.text("LeRobot: Comms: %s   Thread: %3d Hz   Actions: %d".formatted(commsFrequencyText.getText(), (int) pythonStatusFrequency, receivedActions));
+      ImGui.text("LeRobot: Thread: %s   Python: %3d Hz   Actions: %d".formatted(commsFrequencyText.getText(), (int) pythonStatusFrequency, receivedActions));
       if (ImGui.checkbox(labels.get("Run inference & preview"), running.getValue()))
          running.setValue(!running.getValue());
       if (ImGui.checkbox(labels.get("Control robot"), controlRobot.getValue()))
