@@ -103,6 +103,7 @@ public abstract class CommunicationsSyncedRobotModel
       }
    }
 
+   /** This is synchronized to allow multiple threads to consume robot data by synchronizing on this object. */
    protected synchronized void updateInternal()
    {
       fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());

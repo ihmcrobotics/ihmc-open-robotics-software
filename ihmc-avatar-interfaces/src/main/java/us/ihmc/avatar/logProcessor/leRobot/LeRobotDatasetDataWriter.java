@@ -46,6 +46,7 @@ public class LeRobotDatasetDataWriter
    {
       String highLevelController = "root.main.H1KinematicsStreamingToolboxModule.";
       String wbcc = highLevelController + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
+      // FIXME: This is H1-2 specific. Find robot hand link name from robot model or something
       if (yoRegistry.findVariable("%s%s_wrist_yaw_link%sX".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble xVariable
        && yoRegistry.findVariable("%s%s_wrist_yaw_link%sY".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble yVariable
        && yoRegistry.findVariable("%s%s_wrist_yaw_link%sZ".formatted(wbcc, side.name(), qualifier)) instanceof YoDouble zVariable

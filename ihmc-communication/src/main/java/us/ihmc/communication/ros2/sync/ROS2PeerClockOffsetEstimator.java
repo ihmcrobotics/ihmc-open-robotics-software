@@ -151,6 +151,7 @@ public class ROS2PeerClockOffsetEstimator
       return ourGuid;
    }
 
+   /** Synchronized so multiple threads can concurrently access peer data when synchronizing on this object. */
    public synchronized ROS2PeerClockOffsetEstimatorPeer getPeer(Guid guid)
    {
       return peerMap.get(guid);
