@@ -189,7 +189,7 @@ public class RDXVRWholeBodyKinematicStreaming
          pixmap.fill();
          Texture redTexture = new Texture(pixmap);
          Material redMaterial = new Material(PBRTextureAttribute.createBaseColorTexture(redTexture));
-         Model circleModel = modelBuilder.createSphere(0.0001f, 0.01f, 0.01f, 20, 20, redMaterial, Usage.Position | Usage.Normal);
+         Model circleModel = modelBuilder.createSphere(0.0001f, 0.015f, 0.015f, 20, 20, redMaterial, Usage.Position);
          recordingGraphics = new ModelInstance(circleModel);
       }
 

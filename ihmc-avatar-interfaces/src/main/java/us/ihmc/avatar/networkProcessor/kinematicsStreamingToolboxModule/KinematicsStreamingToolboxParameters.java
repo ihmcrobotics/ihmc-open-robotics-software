@@ -297,18 +297,13 @@ public class KinematicsStreamingToolboxParameters
 
    public void setDefault()
    {
-      setDefault(false);
-   }
-
-   public void setDefault(boolean usingRealtimePlugin)
-   {
       clockType = ClockType.CPU_CLOCK;
       toolboxUpdatePeriod = 0.003;
       timeThresholdForSleeping = 3.0;
 
       useStreamingPublisher = true;
       publishingPeriod = 0.006;
-      streamIntegrationDuration = usingRealtimePlugin ? 2.0 * publishingPeriod : 0.1;
+      streamIntegrationDuration = 2.0 * publishingPeriod;
 
       holdChestAngularWeight.set(1.0, 1.0, 0.5);
       holdPelvisLinearWeight.set(10.0, 10.0, 20.0);
