@@ -125,6 +125,7 @@ public class RDXVRModeManager
                                                                     handManager,
                                                                     miniGhostFullRobotModel,
                                                                     miniGhostRobotDefinition);
+         baseUI.getImGuiPanelManager().addPanel("Kinematic Streaming", kinematicsStreaming::renderImGuiWidgets);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
