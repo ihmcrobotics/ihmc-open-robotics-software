@@ -26,6 +26,7 @@ public class LeRobotIKStreaming
    private final Vector3D orientationWeight = new Vector3D(-1.0, -1.0, -1.0); // default values are used
    private final ROS2Publisher<KinematicsToolboxConfigurationMessage> configurationPublisher;
    private final ROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
+   private boolean controlRobot = false;
 
    public LeRobotIKStreaming(SideDependentList<Pose3D> actionHandPoses, String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
@@ -51,7 +52,7 @@ public class LeRobotIKStreaming
    {
       KinematicsStreamingToolboxInputMessage ikInputMessage = new KinematicsStreamingToolboxInputMessage();
 
-      ikInputMessage.setStreamToController(false); // TODO: Hook this up to checkbox in UI
+      ikInputMessage.setStreamToController(controlRobot);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -105,5 +106,10 @@ public class LeRobotIKStreaming
       ikInputMessage.setTimestamp(actionTimestampNanos);
 
       return ikInputMessage;
+   }
+
+   public void setControlRobot(boolean controlRobot)
+   {
+      this.controlRobot = controlRobot;
    }
 }

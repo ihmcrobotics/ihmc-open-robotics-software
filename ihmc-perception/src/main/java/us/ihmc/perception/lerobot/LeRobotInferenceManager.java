@@ -130,7 +130,6 @@ public class LeRobotInferenceManager
    public void update()
    {
       command.setData(running ? "diffusion" : ""); // TODO: In future, possibly request model name
-      System.out.println("Publishing command: " + command.getData());
       ros2Helper.publish(COMMAND, command);
 
       if (running)
@@ -142,6 +141,11 @@ public class LeRobotInferenceManager
    public void setRunning(boolean running)
    {
       this.running = running;
+   }
+
+   public LeRobotIKStreaming getIKStreaming()
+   {
+      return ikStreaming;
    }
 
    public void startPythonServer()
