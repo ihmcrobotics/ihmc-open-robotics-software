@@ -105,6 +105,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          rightBGRAImage.release();
 
          leRobotInferenceManager.setRunning(running.getValue());
+         leRobotInferenceManager.getIKStreaming().setControlRobot(controlRobot.getValue());
          leRobotInferenceManager.update();
       }
       catch (InterruptedException ex) { } // Ignore
