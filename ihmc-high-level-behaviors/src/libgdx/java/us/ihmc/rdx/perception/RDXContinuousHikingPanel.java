@@ -72,9 +72,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private static final boolean DEBUG = true;
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
-   private final ROS2Node ros2Node;
-   private final DRCRobotModel robotModel;
-   private final ROS2SyncedRobotModel syncedRobotModel;
    private final ROS2Publisher<ContinuousHikingCommandMessage> commandPublisher;
    private final ROS2Publisher<Empty> squareUpPublisher;
    private final ContinuousHikingCommandMessage commandMessage = new ContinuousHikingCommandMessage();
@@ -90,7 +87,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
-   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorRemote;
+//   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorRemote;
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
@@ -118,10 +115,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
-
-      this.ros2Node = ros2Node;
-      this.robotModel = robotModel;
-      this.syncedRobotModel = syncedRobotModel;
 
       footstepStatusMessagePublisher = ros2Node.createPublisher(getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()));
       walkingControllerFailureStatusPublisher = ros2Node.createPublisher(getTopic(WalkingControllerFailureStatusMessage.class,
@@ -194,7 +187,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             hostStoredPropertySets,
                             ContinuousHikingAPI.DEPTH_IMAGE_FILTERING_PARAMETERS);
 
-      controllerFootstepQueueMonitorRemote = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
+//      controllerFootstepQueueMonitorRemote = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
       controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
    }
 
@@ -209,24 +202,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       storedPropertySetPanel.create(storedPropertySetParameters, false);
       remotePropertySets.registerRemotePropertySet(storedPropertySetParameters, topicName);
       this.addChild(storedPropertySetPanel);
-   }
-
-   /**
-    * This allows the {@link ContinuousPlannerSchedulingTask} to be started for when things are running in simulation, during the operation on the robot this
-    * method should not be called as it will interfere with the remote process
-    */
-   public void startContinuousPlannerSchedulingTask(ActiveMappingParameterToolBox activeMappingParameterToolBox, boolean publishAndSubscribe)
-   {
-      this.activeMappingParameterToolBox = activeMappingParameterToolBox;
-      this.publishAndSubscribe = publishAndSubscribe;
-      runSubscriberOnly = true;
-
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
-                                                                            ros2Node,
-                                                                            syncedRobotModel,
-                                                                            syncedRobotModel.getReferenceFrames(),
-                                                                            controllerFootstepQueueMonitorRemote,
-                                                                            activeMappingParameterToolBox);
    }
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
@@ -597,20 +572,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       commandPublisher.remove();
       stancePoseSelectionPanel.destroy();
       terrainPlanningDebugger.destroy();
-   }
-
-   /**
-    * This allows the {@link ContinuousPlannerSchedulingTask} to be started for when things are running in simulation, during the operation on the robot this
-    * method should not be called as it will interfere with the remote process
-    */
-   public ContinuousPlannerSchedulingTask getContinuousPlannerSchedulingTask()
-   {
-      return continuousPlannerSchedulingTask;
-   }
-
-   public ControllerFootstepQueueMonitor getControllerFootstepQueueMonitorRemote()
-   {
-      return controllerFootstepQueueMonitorRemote;
    }
 
    public RDXStancePoseSelectionPanel getStancePoseSelectionPanel()

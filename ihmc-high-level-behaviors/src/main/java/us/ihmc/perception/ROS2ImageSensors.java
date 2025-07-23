@@ -9,17 +9,21 @@ import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
+import java.util.concurrent.BlockingQueue;
+
 public class ROS2ImageSensors
 {
    private final ROS2Node ros2Node;
    private final ROS2SyncedRobotModel syncedRobot;
 
    // Realsense
+   private ImageSensor realsenseSensor;
    private ROS2DemandGraphNode realsenseDemandNode;
    private ROS2DemandGraphNode realsensePublishDemandNode;
    private ImageSensorPublishThread realsensePublishThread;
 
    // ZED
+   private ImageSensor zedSensor;
    private ROS2DemandGraphNode zedPublishDemandNode;
    private ImageSensorPublishThread zedPublishThread;
 
@@ -31,6 +35,7 @@ public class ROS2ImageSensors
 
    public void addRealsenseSensor(ImageSensor realsenseSensor)
    {
+      this.realsenseSensor = realsenseSensor;
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
       realsenseSensor.setSensorFrame(syncedRobot.getReferenceFrames().getSteppingCameraFrame());
       setupCallbackForDemandNode(realsenseSensor.getGrabThread(), realsenseDemandNode);
@@ -46,6 +51,7 @@ public class ROS2ImageSensors
 
    public void addZEDSensor(ImageSensor zedSensor)
    {
+      this.zedSensor = zedSensor;
       zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
       zedPublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
       zedSensor.run(true); // Always start ZED, do not wait for any demand node
@@ -68,15 +74,49 @@ public class ROS2ImageSensors
       demandNode.addDemandChangedCallback(loopThread::setRepeating);
    }
 
+   /**
+    * These could all be null because we can't guarantee which sensors will be created.
+    * This is because we know about the sensors that can exist on the humanoid robots, but we can't guarantee that both sensors are created for each robot.
+    */
    public void destroy()
    {
       // Destroy Realsense
-      realsenseDemandNode.destroy();
-      realsensePublishDemandNode.destroy();
-      realsensePublishThread.blockingKill();
+      if (realsenseSensor != null)
+         realsenseSensor.close();
+      if (realsenseDemandNode != null)
+         realsenseDemandNode.destroy();
+      if (realsensePublishDemandNode != null)
+         realsensePublishDemandNode.destroy();
+      if (realsensePublishThread != null)
+         realsensePublishThread.blockingKill();
 
       // Destroy ZED
-      zedPublishDemandNode.destroy();
-      zedPublishThread.blockingKill();
+      if (zedSensor != null)
+         zedSensor.close();
+      if  (zedPublishDemandNode != null)
+         zedPublishDemandNode.destroy();
+      if (zedPublishThread != null)
+         zedPublishThread.blockingKill();
+   }
+
+   /**
+    * We are attempting to add this queue holder to our image sensor.
+    * That sensor could be null depending on the robot you are using.
+    * Having the null check allows for the underlying algorithm to stay the same regardless of what sensors are being used.
+    */
+   public void registerImageQueueForRealsense(BlockingQueue<RawImage> rawImageCollection, int imageKey)
+   {
+      if (realsenseSensor != null)  // Don't have a Realsense Sensor created for this robot
+         realsenseSensor.registerImageQueue(rawImageCollection, imageKey);
+   }
+   /**
+    * We are attempting to add this queue holder to our image sensor.
+    * That sensor could be null depending on the robot you are using.
+    * Having the null check allows for the underlying algorithm to stay the same regardless of what sensors are being used.
+    */
+   public void registerImageQueueForZED(BlockingQueue<RawImage> rawImageCollection, int imageKey)
+   {
+      if (zedSensor != null)  // Don't have a ZED Sensor created for this robot
+         zedSensor.registerImageQueue(rawImageCollection, imageKey);
    }
 }
