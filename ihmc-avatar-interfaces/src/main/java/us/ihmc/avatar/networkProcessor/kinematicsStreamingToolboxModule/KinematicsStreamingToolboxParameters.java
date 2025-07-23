@@ -1144,6 +1144,22 @@ public class KinematicsStreamingToolboxParameters
       }
    }
 
+   public void setJointLimit(String jointName, boolean isUpperLimit, double value)
+   {
+      if (isUpperLimit)
+      {
+         if (jointCustomPositionUpperLimits == null)
+            jointCustomPositionUpperLimits = new HashMap<>();
+         jointCustomPositionUpperLimits.put(jointName, value);
+      }
+      else
+      {
+         if (jointCustomPositionLowerLimits == null)
+            jointCustomPositionLowerLimits = new HashMap<>();
+         jointCustomPositionLowerLimits.put(jointName, value);
+      }
+   }
+
    public List<String> getInactiveJoints()
    {
       return inactiveJoints;

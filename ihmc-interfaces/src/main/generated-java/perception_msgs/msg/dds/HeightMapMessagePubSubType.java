@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f15bf5112c8ff11b3211240f2fa053bee7e3f782378c29df827a974af25afc84";
+   		return "468e523da6712c95a491f4a8b570a496f3a3f11cadd83ac7a2203807b738c94f";
    }
    
    @Override
@@ -64,6 +64,14 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -88,6 +96,18 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    public final static int getCdrSerializedSize(perception_msgs.msg.dds.HeightMapMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -145,7 +165,15 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getGridCenterY());
 
+      cdr.write_type_6(data.getHeightOffset());
+
+      cdr.write_type_6(data.getHeightScaleFactor());
+
       cdr.write_type_6(data.getEstimatedGroundHeight());
+
+      cdr.write_type_6(data.getWidthInMeters());
+
+      cdr.write_type_6(data.getCellSizeInMeters());
 
       if(data.getKeys().size() <= 255000)
       cdr.write_type_e(data.getKeys());else
@@ -181,7 +209,15 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setGridCenterY(cdr.read_type_6());
       	
+      data.setHeightOffset(cdr.read_type_6());
+      	
+      data.setHeightScaleFactor(cdr.read_type_6());
+      	
       data.setEstimatedGroundHeight(cdr.read_type_6());
+      	
+      data.setWidthInMeters(cdr.read_type_6());
+      	
+      data.setCellSizeInMeters(cdr.read_type_6());
       	
       cdr.read_type_e(data.getKeys());	
       cdr.read_type_e(data.getHeights());	
@@ -199,7 +235,11 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
       ser.write_type_6("grid_center_x", data.getGridCenterX());
       ser.write_type_6("grid_center_y", data.getGridCenterY());
+      ser.write_type_6("height_offset", data.getHeightOffset());
+      ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
       ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
+      ser.write_type_6("width_in_meters", data.getWidthInMeters());
+      ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_e("keys", data.getKeys());
       ser.write_type_e("heights", data.getHeights());
       ser.write_type_e("variances", data.getVariances());
@@ -215,7 +255,11 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
       data.setGridCenterX(ser.read_type_6("grid_center_x"));
       data.setGridCenterY(ser.read_type_6("grid_center_y"));
+      data.setHeightOffset(ser.read_type_6("height_offset"));
+      data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
       data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
+      data.setWidthInMeters(ser.read_type_6("width_in_meters"));
+      data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       ser.read_type_e("keys", data.getKeys());
       ser.read_type_e("heights", data.getHeights());
       ser.read_type_e("variances", data.getVariances());
