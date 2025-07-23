@@ -194,12 +194,26 @@ public abstract class ImageSensor implements AutoCloseable
       {
          if (imageQueues.containsKey(imageKey))
          {
+
             imageQueues.get(imageKey).forEach(queue ->
             {
-               if (queue.remainingCapacity() == 0)
-                  queue.remove().release();
+               RawImage image = getImage(imageKey);
 
-               queue.add(getImage(imageKey));
+               if (!queue.offer(image))
+               {
+                  // Meaning we couldn't add the image to the queue
+                  // We need to remove an item from the queue to create space
+                  RawImage oldestImage = queue.poll();
+                  if (oldestImage != null)
+                     oldestImage.release();
+
+                  // Try to add image one more...
+                  if (!queue.offer(image))
+                  {
+                     // Still couldn't add an image to the queue, release image and forget about it
+                     image.release();
+                  }
+               }
             });
          }
       }
