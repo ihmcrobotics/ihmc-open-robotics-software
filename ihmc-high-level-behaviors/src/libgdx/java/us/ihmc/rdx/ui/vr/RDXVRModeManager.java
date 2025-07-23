@@ -11,13 +11,9 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
 import us.ihmc.motionRetargeting.RetargetingParameters;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
@@ -111,6 +107,7 @@ public class RDXVRModeManager
                                                                     handManager,
                                                                     miniGhostFullRobotModel,
                                                                     miniGhostRobotDefinition);
+         baseUI.getImGuiPanelManager().addPanel("Kinematic Streaming", kinematicsStreaming::renderImGuiWidgets);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
