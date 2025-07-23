@@ -134,7 +134,7 @@
    ],
    "default_bindings" : [
       {
-         "binding_url" : "vive_focus3_bindings.json",
+         "binding_url" : "index_bindings.json",
          "controller_type" : "knuckles"
       }
    ],
