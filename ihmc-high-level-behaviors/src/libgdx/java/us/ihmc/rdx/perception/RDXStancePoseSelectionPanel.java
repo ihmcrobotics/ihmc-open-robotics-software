@@ -205,6 +205,9 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
     */
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
+      if (input == null)
+         return;
+
       Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
       latestPickPoint.getTranslation().set(pickPointInWorld);
       LibGDXTools.toLibGDX(latestPickPoint.getPosition(), pickPointSphere.transform);
