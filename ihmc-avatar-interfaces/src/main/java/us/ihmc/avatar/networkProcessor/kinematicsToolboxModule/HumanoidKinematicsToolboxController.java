@@ -423,8 +423,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableJointLimitReduction.set(true);
       getSolution().setLeftFootInContact(true);
       getSolution().setRightFootInContact(true);
-//      for (RobotSide side : RobotSide.values)
-//         startFootControl.get(side).clear();
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
