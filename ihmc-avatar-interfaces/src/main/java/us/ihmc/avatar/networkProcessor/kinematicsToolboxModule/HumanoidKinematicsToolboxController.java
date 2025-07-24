@@ -178,7 +178,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
-   private final SideDependentList<Notification>startFootControl = new SideDependentList<>(new Notification(), new Notification());
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -424,8 +423,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableJointLimitReduction.set(true);
       getSolution().setLeftFootInContact(true);
       getSolution().setRightFootInContact(true);
-      for (RobotSide side : RobotSide.values)
-         startFootControl.get(side).clear();
+//      for (RobotSide side : RobotSide.values)
+//         startFootControl.get(side).clear();
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -874,15 +873,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
          isFootInSupport.get(side).set(value);
-         if (!value)
-            startFootControl.get(side).set();
          getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
          getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
-   }
-
-   public Notification getStartFootControlNotification(RobotSide side)
-   {
-      return startFootControl.get(side);
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());

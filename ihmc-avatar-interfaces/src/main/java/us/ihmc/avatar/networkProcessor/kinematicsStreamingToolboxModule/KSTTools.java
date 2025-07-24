@@ -18,6 +18,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.K
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -121,6 +122,7 @@ public class KSTTools
    private final KSTInputFilter inputFilter;
 
    private final SideDependentList<Boolean> isFootInSupport = new SideDependentList<>();
+   private final SideDependentList<Notification> startFootControl = new SideDependentList<>(new Notification(), new Notification());
 
    private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
    {
@@ -282,6 +284,7 @@ public class KSTTools
          }
          ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
          ikController.initialize();
+         resetFootContactNotification();
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxContactConfigurationCommand.class))
@@ -297,6 +300,8 @@ public class KSTTools
             }
             isFootInSupport.put(side, isFootInContact);
             ikController.setIsFootInSupport(side, isFootInSupport.get(side));
+            if (!isFootInSupport.get(side))
+               startFootControl.get(side).set();
          }
          SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
          ikController.updateSupportPolygon(isFootInSupport, steppingParameters.getFootLength(), steppingParameters.getFootWidth(), true);
@@ -374,6 +379,14 @@ public class KSTTools
    public void resetUserInvalidInputFlag()
    {
       invalidUserInput.set(false);
+   }
+
+   public void resetFootContactNotification()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootControl.get(side).clear();
+      }
    }
 
    public boolean hasUserSubmittedInvalidInput()
@@ -678,6 +691,11 @@ public class KSTTools
    public boolean isFootInSupport(RobotSide side)
    {
       return isFootInSupport.get(side);
+   }
+
+   public Notification getStartFootControlNotification(RobotSide side)
+   {
+      return startFootControl.get(side);
    }
 
    /**

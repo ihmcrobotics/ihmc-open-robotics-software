@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.K
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -319,6 +321,7 @@ public class KSTStreamingState implements State
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
 
       tools.resetUserInvalidInputFlag();
+      tools.resetFootContactNotification();
       KinematicsStreamingToolboxParameters kstParameters = tools.getParameters();
       kstParameters.getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
       kstParameters.getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
@@ -504,15 +507,10 @@ public class KSTStreamingState implements State
             setDefaultWeightsIfNeeded(rigidBodyInput, selectionMatrix, weightMatrix);
 
             // Skip the blending for the foot, if the user has just started to control the foot
-            if (rigidBodyInput.getEndEffector().getName().toLowerCase().contains("foot") ||
-                rigidBodyInput.getEndEffector().getName().toLowerCase().contains("ankle") ||
-                rigidBodyInput.getEndEffector().getName().toLowerCase().contains("sole"))
+            RobotSide footSide = getFootSide(rigidBodyInput.getEndEffector(), tools.getDesiredFullRobotModel());
+            if (footSide != null && tools.getStartFootControlNotification(footSide).poll())
             {
-               RobotSide footSide = rigidBodyInput.getEndEffector().getName().toLowerCase().contains("left") ? RobotSide.LEFT : RobotSide.RIGHT;
-               if (ikController.getStartFootControlNotification(footSide).poll())
-               {
-                  rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector()).set(timeInState - streamingBlendingDuration.getValue());
-               }
+               rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector()).set(timeInState - streamingBlendingDuration.getValue());
             }
 
             // Update time for which each rigid body started being controlled.
@@ -830,6 +828,16 @@ public class KSTStreamingState implements State
          double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
          weightMatrix.scale(blendingFactor);
       }
+   }
+
+   private static RobotSide getFootSide(RigidBodyReadOnly rigidBody, FullHumanoidRobotModel fullHumanoidRobotModel)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (rigidBody.equals(fullHumanoidRobotModel.getFoot(robotSide)))
+            return robotSide;
+      }
+      return null;
    }
 
    @Override
