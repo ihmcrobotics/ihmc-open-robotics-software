@@ -17,12 +17,11 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.input.KS
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataBasics;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -32,7 +31,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxContactConfigurationCommand;
@@ -42,8 +40,6 @@ import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.Kine
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -55,13 +51,11 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -128,6 +122,7 @@ public class KSTTools
    private final KSTInputFilter inputFilter;
 
    private final SideDependentList<Boolean> isFootInSupport = new SideDependentList<>();
+   private final SideDependentList<Notification> startFootControl = new SideDependentList<>(new Notification(), new Notification());
 
    private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
    {
@@ -289,6 +284,7 @@ public class KSTTools
          }
          ikController.setInitialRobotConfigurationNamedMap(initialConfigurationMap);
          ikController.initialize();
+         resetFootContactNotification();
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxContactConfigurationCommand.class))
@@ -304,6 +300,8 @@ public class KSTTools
             }
             isFootInSupport.put(side, isFootInContact);
             ikController.setIsFootInSupport(side, isFootInSupport.get(side));
+            if (!isFootInSupport.get(side))
+               startFootControl.get(side).set();
          }
          SteppingParameters steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
          ikController.updateSupportPolygon(isFootInSupport, steppingParameters.getFootLength(), steppingParameters.getFootWidth(), true);
@@ -381,6 +379,14 @@ public class KSTTools
    public void resetUserInvalidInputFlag()
    {
       invalidUserInput.set(false);
+   }
+
+   public void resetFootContactNotification()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootControl.get(side).clear();
+      }
    }
 
    public boolean hasUserSubmittedInvalidInput()
@@ -685,6 +691,11 @@ public class KSTTools
    public boolean isFootInSupport(RobotSide side)
    {
       return isFootInSupport.get(side);
+   }
+
+   public Notification getStartFootControlNotification(RobotSide side)
+   {
+      return startFootControl.get(side);
    }
 
    /**
