@@ -79,8 +79,8 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
          // We can get the transform to world from the image and use that to get the desired camera frames
          RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
-         ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("RealsenseFrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);
-         ZUpFrame cameraZUpFrameInWorld = new ZUpFrame(cameraFrameInWorld, "RealsenseZUpFrameInWorld");
+         ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("FrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);
+         ZUpFrame cameraZUpFrameInWorld = new ZUpFrame(cameraFrameInWorld, "ZUpFrameInWorld");
          // Need to update this due to how its implemented, other the transform to world will be all zeros
          cameraZUpFrameInWorld.update();
 

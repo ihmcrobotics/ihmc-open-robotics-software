@@ -18,10 +18,7 @@ import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ActiveMappingParameterToolBox;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -87,7 +84,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
-//   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorRemote;
    private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitorUI;
    private final ROS2Publisher<PlanOffsetStatus> planOffsetStatusPublisher;
    private final ROS2Publisher<FootstepStatusMessage> footstepStatusMessagePublisher;
@@ -95,23 +91,18 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ROS2Publisher<Empty> clearGoalFootstepsPublisher;
    private final ROS2Publisher<Empty> resetStateMachinePublisher;
    private final ContinuousHikingParameters continuousHikingParameters;
+   private final ROS2Publisher<Float32> turn90DegreesPublisher;
    private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private FootstepPlan latestFootstepPlan;
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
    // When running in simulation only, these fields allow running the Continuous Hiking Process locally
-   private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
-   private boolean runSubscriberOnly = false;
-   private ActiveMappingParameterToolBox activeMappingParameterToolBox;
-   private boolean publishAndSubscribe;
    private double simulatedDriftInMeters = -0.1;
-
-   private final ROS2Publisher<Float32> turn90DegreesPublisher;
    private boolean previousRightBumper;
    private boolean previousLeftBumper;
    private boolean previousYButton;
    private boolean previousStartButton;
 
-   public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobotModel)
+   public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
@@ -187,7 +178,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             hostStoredPropertySets,
                             ContinuousHikingAPI.DEPTH_IMAGE_FILTERING_PARAMETERS);
 
-//      controllerFootstepQueueMonitorRemote = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
       controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
    }
 
@@ -221,33 +211,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * This method handles updating the stored property sets used in Continuous Hiking.
     * These are all the parameters that are getting synced back and forth between the remote process and the local process.
     * There are three situations that can occur when trying to use Continuous Hiking.
-    * <ul>
-    *    <li>Case 1: The situation where we are simulating the process running on a remote machine but in reality its running locally.
-    *    This is where we only want to update the property sets running on that process. Represented by {@link #activeMappingParameterToolBox}.
-    *    So in this sense we are only subscribing to any updates sent from the user</li>
-    *    <li>Case 2: The situation where we are running everything in one simulation.
-    *    Here we want to publish, and subscribe in one place as everything is being run on the same machine.
-    *    So we update {@link #activeMappingParameterToolBox} and {@link #hostStoredPropertySets}</li>
-    *    <li>Case 3: Then the situation where we only want to publish the property sets to be sent to the remote process.
-    *    This is when we don't want to subscribe but we publish and changes to {@link #hostStoredPropertySets} so the remote process can receive these changes</li>
-    *
-    * </ul>
     */
    private void updateRos2StoredPropertySets()
    {
-      if (runSubscriberOnly && !publishAndSubscribe)  // Case 1
-      {
-         activeMappingParameterToolBox.update();
-      }
-      else if (publishAndSubscribe) // Case 2
-      {
-         activeMappingParameterToolBox.update();
-         hostStoredPropertySets.setPropertyChanged();
-      }
-      else  // Case 3
-      {
-         hostStoredPropertySets.setPropertyChanged();
-      }
+      hostStoredPropertySets.setPropertyChanged();
    }
 
    public void renderImGuiWidgets()
