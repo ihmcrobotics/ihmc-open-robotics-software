@@ -51,7 +51,7 @@ public class ZEDImageSensor extends ImageSensor
    private final ZEDModelData zedModel;
    private final int slInputType;
    private final int slDepthMode;
-   private int resolution;
+   private final int resolution;
    private int fps;
    private int bitrate;
    private String remoteStreamingAddress;
@@ -72,6 +72,7 @@ public class ZEDImageSensor extends ImageSensor
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
    private boolean lastGrabFailed = false;
+   private long currentSensorTimestamp;
 
    protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
@@ -306,6 +307,8 @@ public class ZEDImageSensor extends ImageSensor
          throwOnError(returnCode);
          lastGrabTime = Instant.now();
          ++grabSequenceNumber;
+
+         currentSensorTimestamp = sl_get_current_timestamp(cameraID);
 
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
@@ -547,5 +550,10 @@ public class ZEDImageSensor extends ImageSensor
    public int getStreamingBitrate()
    {
       return bitrate;
+   }
+
+   public long getCurrentSensorTimestamp()
+   {
+      return currentSensorTimestamp;
    }
 }
