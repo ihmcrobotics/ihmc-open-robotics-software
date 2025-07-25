@@ -647,10 +647,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          setStreamToController(streamToController.get(), true);
       }
-      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
-      {
-         reinitializeToolboxRobotConfiguration();
-      }
       if (ImGui.checkbox(labels.get("Control Arms Only"), controlArmsOnly))
       {
          KinematicsStreamingToolboxConfigurationMessage newConfiguration = kstParameters.getDefaultConfiguration();
@@ -658,7 +654,14 @@ public class RDXVRWholeBodyKinematicStreaming
          newConfiguration.setLockChest(controlArmsOnly.get());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                       newConfiguration);
-         setKSTEnabled(false);
+      }
+      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
+      {
+         reinitializeToolboxRobotConfiguration();
+      }
+      if (ImGui.button(labels.get("Wakeup Toolbox")))
+      {
+         wakeUpToolbox();
       }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
@@ -698,13 +701,10 @@ public class RDXVRWholeBodyKinematicStreaming
    {
       if (enabled)
       {
-         if (!isKSTEnabled.get())
-         {
-            initialize();
-            wakeUpToolbox();
-            ghostRobotGraphic.setActive(true);
-            miniGhost.setActive(true);
-         }
+         initialize();
+         wakeUpToolbox();
+         ghostRobotGraphic.setActive(true);
+         miniGhost.setActive(true);
       }
       else // Disable
       {
@@ -712,6 +712,7 @@ public class RDXVRWholeBodyKinematicStreaming
          ghostRobotGraphic.setActive(false);
          miniGhost.setActive(false);
          setStreamToController(false, false);
+         controlArmsOnly.set(false);
       }
 
       isKSTEnabled.set(enabled);
