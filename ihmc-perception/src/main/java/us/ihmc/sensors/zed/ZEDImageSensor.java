@@ -72,7 +72,7 @@ public class ZEDImageSensor extends ImageSensor
    private long grabSequenceNumber = 0L;
    private Instant lastGrabTime;
    private boolean lastGrabFailed = false;
-   private long currentSensorTimestamp;
+   private long lastGrabTimestamp;
 
    protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
@@ -308,7 +308,7 @@ public class ZEDImageSensor extends ImageSensor
          lastGrabTime = Instant.now();
          ++grabSequenceNumber;
 
-         currentSensorTimestamp = sl_get_current_timestamp(cameraID);
+         lastGrabTimestamp = sl_get_current_timestamp(cameraID);
 
          // Update tracked position if tracking enabled
          if (positionalTrackingEnabled)
@@ -552,8 +552,8 @@ public class ZEDImageSensor extends ImageSensor
       return bitrate;
    }
 
-   public long getCurrentSensorTimestamp()
+   public long getLastGrabTimestamp()
    {
-      return currentSensorTimestamp;
+      return lastGrabTimestamp;
    }
 }
