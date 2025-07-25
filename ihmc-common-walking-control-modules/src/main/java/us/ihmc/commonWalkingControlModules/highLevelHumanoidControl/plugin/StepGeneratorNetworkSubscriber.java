@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
@@ -142,13 +143,25 @@ public class StepGeneratorNetworkSubscriber
    private <T extends Settable<T>> void createSubscribersForSupportedMessages()
    {
 
+//      for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
+//      { // Creating the subscribers
+//         Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
+//         T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
+//         ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
+//
+//         realtimeROS2Node.createSubscription(topicName.withTypeName(messageClass), s ->
+//         {
+//            s.takeNextData(messageLocalInstance, null);
+//            receivedMessage(messageLocalInstance);
+//         });
+//      }
+
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
 
-         realtimeROS2Node.createSubscription(topicName.withTypeName(messageClass), s ->
+         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClass), s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
