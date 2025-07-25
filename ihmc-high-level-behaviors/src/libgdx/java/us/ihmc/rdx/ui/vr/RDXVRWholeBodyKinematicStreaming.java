@@ -175,8 +175,11 @@ public class RDXVRWholeBodyKinematicStreaming
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
-      RobotDefinition.forEachRigidBodyDefinition(miniGhostRobotDefinition.getRootBodyDefinition(),
-                                                 body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+      if (miniGhostRobotDefinition != null)
+      {
+         RobotDefinition.forEachRigidBodyDefinition(miniGhostRobotDefinition.getRootBodyDefinition(),
+                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+      }
       miniGhost = new RDXVRMiniGhostPreview(syncedRobot.getRobotModel().getSimpleRobotName(),
                                             miniGhostRobotDefinition,
                                             miniGhostFullRobotModel,
