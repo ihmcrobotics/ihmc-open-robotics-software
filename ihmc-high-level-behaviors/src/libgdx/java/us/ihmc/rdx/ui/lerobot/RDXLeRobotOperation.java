@@ -19,6 +19,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.lerobot.LeRobotInferenceManager;
 import us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread;
 import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -108,6 +109,11 @@ public class RDXLeRobotOperation
          running.setValue(!running.getValue());
       if (ImGui.checkbox(labels.get("Control robot"), controlRobot.getValue()))
          controlRobot.setValue(!controlRobot.getValue());
+      if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
+      {
+         controlRobot.setValue(false);
+         running.setValue(false);
+      }
 
       ImGui.separator();
 
