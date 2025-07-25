@@ -441,9 +441,6 @@ public class AvatarMultiThreadingFactory
          // clear the environment at the beginning of every update
          pluginFactory.addUpdatable(environmentalConstraints);
 
-         // create the callback listeners for the planar regions in the stepping plugin
-         pluginFactory.createStepGeneratorNetworkSubscriber(robotModel.getSimpleRobotName().toLowerCase(), controllerRealtimeROS2Node);
-
          controllerFactory.addControllerPlugin(pluginFactory);
 
          // otherwise this would go into the step generator registry
