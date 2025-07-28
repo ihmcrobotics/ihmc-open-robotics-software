@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetDataWriter;
+import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
@@ -101,9 +102,10 @@ public class RDXLeRobotTestSimulator
       robotVisualizer.createAndSetupStandalone(baseUI);
       robotVisualizer.setActive(false);
 
-      for (RobotSide side : RobotSide.values)
+      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(logSession.getSession().getRobotDefinitions().get(0));
+      for (RobotSide side : robotHandNames.sides())
       {
-         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(side, "Current", logSession.getSession().getRootRegistry()));
+         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(robotHandNames.get(side), "Current", logSession.getSession().getRootRegistry()));
 
          RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
          actionHandPoses.put(side, graphic);

@@ -50,7 +50,7 @@ public class LeRobotDatasetEpisode
    private SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders;
    private LeRobotDatasetDataWriter dataWriter;
    private LeRobotDatasetEpisodeStatistics statistics;
-   private List<LeRobotEpisodeRecord> records = new ArrayList<>();
+   private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
 
    public LeRobotDatasetEpisode(int episodeIndex,
                                 String taskName,
@@ -97,7 +97,7 @@ public class LeRobotDatasetEpisode
          ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(side, zedVideoDirs.get(side).resolve(episodeName + ".mp4"), zedSVOScrubber));
       }
 
-      dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session.getRootRegistry());
+      dataWriter = new LeRobotDatasetDataWriter(episodeIndex, datasetLengthSoFar, session);
       statistics = new LeRobotDatasetEpisodeStatistics();
 
       length = 0L;
