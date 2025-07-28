@@ -102,6 +102,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       status.setRunning(running.toMessage());
       status.setControlRobot(controlRobot.toMessage());
       status.setPythonStatusFrequency(leRobotInferenceManager.getStatusFrequency());
+      status.setPythonStatusMessage(leRobotInferenceManager.getStatusMessage());
       status.setReceivedActions(leRobotInferenceManager.getNumberOfActionsReceived());
       statusPublisher.publish(status);
    }

@@ -160,6 +160,11 @@ public class LeRobotInferenceManager
       return statusFrequency.getFrequencyDecaying();
    }
 
+   public String getStatusMessage()
+   {
+      return status.getDataAsString();
+   }
+
    public long getNumberOfActionsReceived()
    {
       return numberOfActionsReceived;

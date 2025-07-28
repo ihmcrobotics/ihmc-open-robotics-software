@@ -15,7 +15,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "973e60b5258b8b239fd29ac78389eceb391ddcf894201313e69067658b451777";
+   		return "691d5900e6eb8859493f0bc879cb168dce8f0c59a06a3aa0b820c4985efa569c";
    }
    
    @Override
@@ -62,6 +62,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -91,6 +92,8 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPythonStatusMessage().length() + 1;
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -109,6 +112,10 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_6(data.getPythonStatusFrequency());
 
+      if(data.getPythonStatusMessage().length() <= 255)
+      cdr.write_type_d(data.getPythonStatusMessage());else
+          throw new RuntimeException("python_status_message field exceeds the maximum length: %d > %d".formatted(data.getPythonStatusMessage().length(), 255));
+
       cdr.write_type_4(data.getReceivedActions());
 
    }
@@ -124,6 +131,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       	
       data.setPythonStatusFrequency(cdr.read_type_6());
       	
+      cdr.read_type_d(data.getPythonStatusMessage());	
       data.setReceivedActions(cdr.read_type_4());
       	
 
@@ -138,6 +146,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_7("running", data.getRunning());
       ser.write_type_7("control_robot", data.getControlRobot());
       ser.write_type_6("python_status_frequency", data.getPythonStatusFrequency());
+      ser.write_type_d("python_status_message", data.getPythonStatusMessage());
       ser.write_type_4("received_actions", data.getReceivedActions());
    }
 
@@ -150,6 +159,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       data.setRunning(ser.read_type_7("running"));
       data.setControlRobot(ser.read_type_7("control_robot"));
       data.setPythonStatusFrequency(ser.read_type_6("python_status_frequency"));
+      ser.read_type_d("python_status_message", data.getPythonStatusMessage());
       data.setReceivedActions(ser.read_type_4("received_actions"));
    }
 
