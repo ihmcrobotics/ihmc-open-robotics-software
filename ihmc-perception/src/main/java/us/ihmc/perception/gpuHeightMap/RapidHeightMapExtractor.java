@@ -438,7 +438,7 @@ public class RapidHeightMapExtractor
 
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)
    {
-      return new float[] {(float) parameters.getCellSizeInMeters(),
+      return new float[] {(float) parameters.getCellSize(),
                           (float) centerIndexLocal,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
