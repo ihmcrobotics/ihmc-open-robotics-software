@@ -14,6 +14,7 @@ import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 
@@ -64,7 +65,7 @@ public class ContinuousHikingProcess
                                                                                                                    .getSteppingCameraTransform());
 
       // This is for the height map, it expects the queue of images that we get from the sensors
-      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>();
+      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       ros2ImageSensors.registerImageQueueForRealsense(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
       ros2ImageSensors.registerImageQueueForZED(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
 

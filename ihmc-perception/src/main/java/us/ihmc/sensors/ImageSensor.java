@@ -194,7 +194,6 @@ public abstract class ImageSensor implements AutoCloseable
       {
          if (imageQueues.containsKey(imageKey))
          {
-
             imageQueues.get(imageKey).forEach(queue ->
             {
                RawImage image = getImage(imageKey);
