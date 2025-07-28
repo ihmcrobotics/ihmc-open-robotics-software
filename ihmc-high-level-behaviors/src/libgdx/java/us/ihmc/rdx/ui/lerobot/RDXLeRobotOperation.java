@@ -78,11 +78,11 @@ public class RDXLeRobotOperation
       this.syncedRobotModel = syncedRobot;
       this.kstParameters = new KinematicsStreamingToolboxParameters();
       this.kstConfigPublisher = ros2Node.createPublisher(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel()
-                                                                                                                                              .getSimpleRobotName()));
+                                                                                                                                         .getSimpleRobotName()));
       this.kstInitialConfigPublisher = ros2Node.createPublisher(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
-                                                                                                                                                            .getSimpleRobotName()));
+                                                                                                                                                       .getSimpleRobotName()));
       this.toolboxStatePublisher = ros2Node.createPublisher(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel()
-                                                                                                                                .getSimpleRobotName()));
+                                                                                                                           .getSimpleRobotName()));
       latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator));
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
@@ -116,7 +116,7 @@ public class RDXLeRobotOperation
          }
       }
 
-      if(Objects.equals(statusMessage, "Start"))
+      if (Objects.equals(statusMessage, "Start"))
       {
          isKSTEnabled.set(true);
          setKSTEnabled(isKSTEnabled.get());
@@ -126,8 +126,6 @@ public class RDXLeRobotOperation
          config.setLockPelvis(controlArmsOnly.get());
          config.setLockChest(controlArmsOnly.get());
          kstConfigPublisher.publish(config);
-
-         controlRobot.setValue(true);
       }
    }
 
