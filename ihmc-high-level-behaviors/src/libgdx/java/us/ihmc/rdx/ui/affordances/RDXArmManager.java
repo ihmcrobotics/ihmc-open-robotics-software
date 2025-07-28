@@ -128,7 +128,7 @@ public class RDXArmManager
 
       handManager = new RDXHandConfigurationManager();
       if (peerClockEstimator != null)
-         leRobotOperation = new RDXLeRobotOperation(communicationHelper.getROS2Node(), peerClockEstimator);
+         leRobotOperation = new RDXLeRobotOperation(communicationHelper.getROS2Node(), peerClockEstimator, syncedRobot);
    }
 
    public void create(RDXBaseUI baseUI)
