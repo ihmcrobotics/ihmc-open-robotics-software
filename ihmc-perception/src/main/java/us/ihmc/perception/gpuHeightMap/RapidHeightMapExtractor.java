@@ -153,13 +153,13 @@ public class RapidHeightMapExtractor
 
    private void computeDerivedParameters()
    {
-      centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisLocal = 2 * centerIndexLocal + 1;
 
-      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
 
-      centerIndexTerrain = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexTerrain = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisTerrain = 2 * centerIndexTerrain + 1;
    }
 
@@ -265,8 +265,8 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the translate kernel ---------
       {
-         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSizeInMeters());
-         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSize());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)

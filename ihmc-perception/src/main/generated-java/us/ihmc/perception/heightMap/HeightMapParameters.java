@@ -37,7 +37,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey heightOffset = keys.addDoubleKey("Height offset");
    public static final DoubleStoredPropertyKey minClampHeight = keys.addDoubleKey("Min Clamp Height");
    public static final DoubleStoredPropertyKey maxClampHeight = keys.addDoubleKey("Max Clamp Height");
-   public static final DoubleStoredPropertyKey cellSizeInMeters = keys.addDoubleKey("Cell size in meters");
+   public static final DoubleStoredPropertyKey cellSize = keys.addDoubleKey("Cell size");
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey terrainWidthInMeters = keys.addDoubleKey("Terrain width in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");

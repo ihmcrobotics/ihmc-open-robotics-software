@@ -32,7 +32,7 @@ public class SnappingTerrainExtractorTest
       Point3D heightMapCenter = new Point3D();
       heightMapCenter.set(new Point3D(0.0, 0.0, 0.0));
 
-      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                       (float) heightMapParameters.getTerrainWidthInMeters(),
                                                       0,
                                                       0);

@@ -6,7 +6,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -68,7 +67,7 @@ public class RapidHeightMapManager
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
 
-      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
                                                      0.0,
                                                      0.0);
@@ -106,30 +105,28 @@ public class RapidHeightMapManager
       hostGlobalHeightMap.close();
    }
 
-   private void publishHeightMap(Mat hostGlobalHeightMap, Point3D heightMapCenterOrigin)
+   private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter)
    {
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      int currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-      int currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
-      gridCellLocation.set(currentCellX * 0.02, currentCellY * 0.02, 0.0);
-      FramePose3D cameraPose = new FramePose3D();
-      cameraPose.getTranslation().set(gridCellLocation);
+      double currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      gridCellLocation.set(currentCellX, currentCellY, 0.0);
 
-      HeightMapMessageTools.toMessage(hostGlobalHeightMap,
+      HeightMapMessageTools.toMessage(globalHeightMap,
                                       heightMapMessage,
                                       gridCellLocation,
                                       heightMapParameters.getGlobalWidthInMeters(),
-                                      heightMapParameters.getCellSizeInMeters(),
+                                      heightMapParameters.getCellSize(),
                                       heightMapParameters.getHeightOffset(),
                                       heightMapParameters.getHeightScaleFactor());
 
       if (heightMapParameters.getLogHeightMap())
       {
-         float[] floatsToLog = HeightMapTools.packArrayForFile(hostGlobalHeightMap,
+         float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
                                                                gridCellLocation,
                                                                (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                               (float) heightMapParameters.getCellSizeInMeters(),
+                                                               (float) heightMapParameters.getCellSize(),
                                                                heightMapParameters);
          try
          {
@@ -282,7 +279,7 @@ public class RapidHeightMapManager
                                             latestTerrainHeightMapData,
                                             gridCellLocation,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSizeInMeters(),
+                                            (float) heightMapParameters.getCellSize(),
                                             (float) heightMapParameters.getHeightScaleFactor(),
                                             (float) heightMapParameters.getHeightOffset());
       return latestTerrainHeightMapData;

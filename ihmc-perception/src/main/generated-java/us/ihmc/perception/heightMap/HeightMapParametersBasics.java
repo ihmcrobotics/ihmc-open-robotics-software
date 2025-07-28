@@ -103,9 +103,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxClampHeight, maxClampHeight);
    }
 
-   default void setCellSizeInMeters(double cellSizeInMeters)
+   default void setCellSize(double cellSize)
    {
-      set(HeightMapParameters.cellSizeInMeters, cellSizeInMeters);
+      set(HeightMapParameters.cellSize, cellSize);
    }
 
    default void setLocalWidthInMeters(double localWidthInMeters)

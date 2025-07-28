@@ -105,9 +105,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxClampHeight);
    }
 
-   default double getCellSizeInMeters()
+   default double getCellSize()
    {
-      return get(cellSizeInMeters);
+      return get(cellSize);
    }
 
    default double getLocalWidthInMeters()
