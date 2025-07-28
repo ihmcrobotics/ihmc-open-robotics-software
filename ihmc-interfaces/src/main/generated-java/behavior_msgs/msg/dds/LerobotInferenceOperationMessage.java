@@ -32,6 +32,10 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
             */
    public double python_status_frequency_;
    /**
+            * Message received from python
+            */
+   public java.lang.StringBuilder python_status_message_;
+   /**
             * Number of output actions received from policy
             */
    public long received_actions_;
@@ -39,6 +43,7 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    public LerobotInferenceOperationMessage()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
+      python_status_message_ = new java.lang.StringBuilder(255);
    }
 
    public LerobotInferenceOperationMessage(LerobotInferenceOperationMessage other)
@@ -57,6 +62,9 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
       control_robot_ = other.control_robot_;
 
       python_status_frequency_ = other.python_status_frequency_;
+
+      python_status_message_.setLength(0);
+      python_status_message_.append(other.python_status_message_);
 
       received_actions_ = other.received_actions_;
 
@@ -132,6 +140,30 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    }
 
    /**
+            * Message received from python
+            */
+   public void setPythonStatusMessage(java.lang.String python_status_message)
+   {
+      python_status_message_.setLength(0);
+      python_status_message_.append(python_status_message);
+   }
+
+   /**
+            * Message received from python
+            */
+   public java.lang.String getPythonStatusMessageAsString()
+   {
+      return getPythonStatusMessage().toString();
+   }
+   /**
+            * Message received from python
+            */
+   public java.lang.StringBuilder getPythonStatusMessage()
+   {
+      return python_status_message_;
+   }
+
+   /**
             * Number of output actions received from policy
             */
    public void setReceivedActions(long received_actions)
@@ -173,6 +205,8 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.python_status_frequency_, other.python_status_frequency_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.python_status_message_, other.python_status_message_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.received_actions_, other.received_actions_, epsilon)) return false;
 
 
@@ -197,6 +231,8 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
 
       if(this.python_status_frequency_ != otherMyClass.python_status_frequency_) return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.python_status_message_, otherMyClass.python_status_message_)) return false;
+
       if(this.received_actions_ != otherMyClass.received_actions_) return false;
 
 
@@ -219,6 +255,8 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
       builder.append(this.control_robot_);      builder.append(", ");
       builder.append("python_status_frequency=");
       builder.append(this.python_status_frequency_);      builder.append(", ");
+      builder.append("python_status_message=");
+      builder.append(this.python_status_message_);      builder.append(", ");
       builder.append("received_actions=");
       builder.append(this.received_actions_);
       builder.append("}");

@@ -15,5 +15,8 @@ bool control_robot
 # Frequency of status from python side
 float64 python_status_frequency
 
+# Message received from python
+string python_status_message
+
 # Number of output actions received from policy
 uint32 received_actions

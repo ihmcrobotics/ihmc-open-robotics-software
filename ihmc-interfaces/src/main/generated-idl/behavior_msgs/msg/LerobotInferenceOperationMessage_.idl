@@ -36,6 +36,10 @@ module behavior_msgs
          */
         double python_status_frequency;
         /**
+         * Message received from python
+         */
+        string python_status_message;
+        /**
          * Number of output actions received from policy
          */
         unsigned long received_actions;

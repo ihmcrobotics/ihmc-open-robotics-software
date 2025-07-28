@@ -38,6 +38,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
+import java.util.Objects;
+
 import static us.ihmc.perception.lerobot.LeRobotInferenceUpdateThread.LEROBOT_UI;
 
 /**
@@ -68,6 +70,8 @@ public class RDXLeRobotOperation
 
    private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoseGraphics = new SideDependentList<>();
    private final Pose3D handPose = new Pose3D();
+
+   private String statusMessage = "";
 
    public RDXLeRobotOperation(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockEstimator, ROS2SyncedRobotModel syncedRobot)
    {
@@ -112,17 +116,19 @@ public class RDXLeRobotOperation
          }
       }
 
-//      if(receivedActions == 1)
-//      {
-//         isKSTEnabled.set(true);
-//         setKSTEnabled(isKSTEnabled.get());
-//         reinitializeToolboxConfiguration();
-//         controlArmsOnly.set(true);
-//         KinematicsStreamingToolboxConfigurationMessage config = kstParameters.getDefaultConfiguration();
-//         config.setLockPelvis(controlArmsOnly.get());
-//         config.setLockChest(controlArmsOnly.get());
-//         kstConfigPublisher.publish(config);
-//      }
+      if(Objects.equals(statusMessage, "Start"))
+      {
+         isKSTEnabled.set(true);
+         setKSTEnabled(isKSTEnabled.get());
+         reinitializeToolboxConfiguration();
+         controlArmsOnly.set(true);
+         KinematicsStreamingToolboxConfigurationMessage config = kstParameters.getDefaultConfiguration();
+         config.setLockPelvis(controlArmsOnly.get());
+         config.setLockChest(controlArmsOnly.get());
+         kstConfigPublisher.publish(config);
+
+         controlRobot.setValue(true);
+      }
    }
 
    public void renderImGuiWidgets()
@@ -135,6 +141,7 @@ public class RDXLeRobotOperation
          running.fromMessage(status.getRunning());
          controlRobot.fromMessage(status.getControlRobot());
          pythonStatusFrequency = status.getPythonStatusFrequency();
+         statusMessage = status.getPythonStatusMessageAsString();
          receivedActions = status.getReceivedActions();
       }
 
