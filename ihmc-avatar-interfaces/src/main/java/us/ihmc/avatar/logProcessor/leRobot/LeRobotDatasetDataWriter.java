@@ -2,10 +2,12 @@ package us.ihmc.avatar.logProcessor.leRobot;
 
 import com.jerolba.carpet.CarpetWriter;
 import com.jerolba.carpet.ColumnNamingStrategy;
+import org.apache.commons.lang.StringUtils;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoPose3D;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
@@ -23,29 +25,73 @@ import java.util.List;
  * <p>
  * Part of the {@link LeRobotDataset} generation system from IHMC logs.
  * <p>
- * TODO: Transform the end effector poses to walking frame or something
+ * TODO: If using hand poses, transform them to walking frame or something
  */
 public class LeRobotDatasetDataWriter
 {
-   private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
+   private static final boolean USE_HAND_POSES = false;
 
-   record EndEffectorVariables(YoPose3D current,YoPose3D desired) { }
-   private final SideDependentList<EndEffectorVariables> endEffectorVariables = new SideDependentList<>();
+   private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
+   private record StateVariables(YoDouble[] current, YoDouble[] desired) { }
+   private final SideDependentList<StateVariables> stateVariables = new SideDependentList<>();
    private final long episodeIndex;
+   private final YoRegistry rootRegistry;
    private final long datasetLengthSoFar;
-   private final SCS2LogSessionWithVideo session;
 
    public LeRobotDatasetDataWriter(long episodeIndex, long datasetLengthSoFar, SCS2LogSessionWithVideo session)
    {
       this.episodeIndex = episodeIndex;
       this.datasetLengthSoFar = datasetLengthSoFar;
-      this.session = session;
 
-      YoRegistry rootRegistry = session.getRootRegistry();
-      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(session.getRobotDefinitions().get(0));
-      for (RobotSide side : robotHandNames.sides())
-         endEffectorVariables.put(side, new EndEffectorVariables(findYoPose(robotHandNames.get(side), "Current", rootRegistry),
-                                                                 findYoPose(robotHandNames.get(side), "Desired", rootRegistry)));
+      rootRegistry = session.getRootRegistry();
+
+      RobotDefinition robotDefinition = session.getRobotDefinitions().get(0);
+
+      if (USE_HAND_POSES)
+      {
+         SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(robotDefinition);
+         for (RobotSide side : robotHandNames.sides())
+         {
+            YoPose3D current = findYoPose(robotHandNames.get(side), "Current", rootRegistry);
+            YoPose3D desired = findYoPose(robotHandNames.get(side), "Desired", rootRegistry);
+            YoDouble[] currentState = new YoDouble[] {
+                  current.getYoX(), current.getYoY(), current.getYoZ(),
+                  current.getYoQx(), current.getYoQy(), current.getYoQz(), current.getYoQs()
+            };
+            YoDouble[] desiredState = new YoDouble[] {
+                  desired.getYoX(), desired.getYoY(), desired.getYoZ(),
+                  desired.getYoQx(), desired.getYoQy(), desired.getYoQz(), desired.getYoQs()
+            };
+            stateVariables.put(side, new StateVariables(currentState, desiredState));
+         }
+      }
+      else
+      {
+         SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
+         for (RobotSide side : robotArmJointNames.sides())
+         {
+            String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "KinematicsStreamingToolboxModule");
+            String kstController = kstModule + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
+            String capitalizedRobotName = StringUtils.capitalize(robotDefinition.getName());
+            String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
+            String ikSolver = kstController + "WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.";
+
+            List<String> armJointNames = robotArmJointNames.get(side);
+            YoDouble[] currentState = new YoDouble[armJointNames.size()];
+            YoDouble[] desiredState = new YoDouble[armJointNames.size()];
+
+            for (int i = 0; i < armJointNames.size(); i++)
+               if (rootRegistry.findVariable("%sMotorState_Position_%s_%s".formatted(hwPosition,
+                                                                                     armJointNames.get(i),
+                                                                                     capitalizedRobotName)) instanceof YoDouble variable)
+                  currentState[i] = variable;
+            for (int i = 0; i < armJointNames.size(); i++)
+               if (rootRegistry.findVariable("%sq_qp_%s".formatted(ikSolver, armJointNames.get(i))) instanceof YoDouble variable)
+                  desiredState[i] = variable;
+
+            stateVariables.put(side, new StateVariables(currentState, desiredState));
+         }
+      }
    }
 
    public static YoPose3D findYoPose(String handName, String qualifier, YoRegistry rootRegistry)
@@ -73,20 +119,10 @@ public class LeRobotDatasetDataWriter
       List<Float> action = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
       {
-         state.add(endEffectorVariables.get(side).current().getPosition().getX32());
-         state.add(endEffectorVariables.get(side).current().getPosition().getY32());
-         state.add(endEffectorVariables.get(side).current().getPosition().getZ32());
-         state.add(endEffectorVariables.get(side).current().getOrientation().getX32());
-         state.add(endEffectorVariables.get(side).current().getOrientation().getY32());
-         state.add(endEffectorVariables.get(side).current().getOrientation().getZ32());
-         state.add(endEffectorVariables.get(side).current().getOrientation().getS32());
-         action.add(endEffectorVariables.get(side).desired().getPosition().getX32());
-         action.add(endEffectorVariables.get(side).desired().getPosition().getY32());
-         action.add(endEffectorVariables.get(side).desired().getPosition().getZ32());
-         action.add(endEffectorVariables.get(side).desired().getOrientation().getX32());
-         action.add(endEffectorVariables.get(side).desired().getOrientation().getY32());
-         action.add(endEffectorVariables.get(side).desired().getOrientation().getZ32());
-         action.add(endEffectorVariables.get(side).desired().getOrientation().getS32());
+         for (int i = 0; i < stateVariables.get(side).current().length; i++)
+            state.add((float) stateVariables.get(side).current()[i].getDoubleValue());
+         for (int i = 0; i < stateVariables.get(side).desired().length; i++)
+            state.add((float) stateVariables.get(side).desired()[i].getDoubleValue());
       }
 
       float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s
