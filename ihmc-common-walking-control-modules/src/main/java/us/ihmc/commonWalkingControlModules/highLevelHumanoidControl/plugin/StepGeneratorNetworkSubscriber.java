@@ -29,13 +29,13 @@ public class StepGeneratorNetworkSubscriber
 
    private final RealtimeROS2Node realtimeROS2Node;
 
-   private final ROS2Topic<?> inputTopic;
+   private final ROS2Topic<?> baseTopic;
 
-   public StepGeneratorNetworkSubscriber(ROS2Topic<?> inputTopic,
-                                      StepGeneratorCommandInputManager stepGeneratorCommandInputManager,
-                                      RealtimeROS2Node realtimeROS2Node)
+   public StepGeneratorNetworkSubscriber(ROS2Topic<?> baseTopic,
+                                         StepGeneratorCommandInputManager stepGeneratorCommandInputManager,
+                                         RealtimeROS2Node realtimeROS2Node)
    {
-      this.inputTopic = inputTopic;
+      this.baseTopic = baseTopic;
       this.generatorCommandInputManager = stepGeneratorCommandInputManager.getCommandInputManager();
       this.realtimeROS2Node = realtimeROS2Node;
       listOfSupportedControlMessages = generatorCommandInputManager.getListOfSupportedMessages();
@@ -53,7 +53,7 @@ public class StepGeneratorNetworkSubscriber
                                                                             int expectedMessageSize,
                                                                             MessageUnpackingTools.MessageUnpacker<T> messageUnpacker)
    {
-      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, expectedMessageSize, messageUnpacker);
+      registerSubcriberWithMessageUnpacker(multipleMessageType, baseTopic, expectedMessageSize, messageUnpacker);
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
@@ -142,26 +142,12 @@ public class StepGeneratorNetworkSubscriber
    @SuppressWarnings("unchecked")
    private <T extends Settable<T>> void createSubscribersForSupportedMessages()
    {
-
-//      for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
-//      { // Creating the subscribers
-//         Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-//         T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-//         ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
-//
-//         realtimeROS2Node.createSubscription(topicName.withTypeName(messageClass), s ->
-//         {
-//            s.takeNextData(messageLocalInstance, null);
-//            receivedMessage(messageLocalInstance);
-//         });
-//      }
-
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
 
-         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(inputTopic, messageClass), s ->
+         realtimeROS2Node.createSubscription(ControllerAPI.getTopic(baseTopic, messageClass), s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);

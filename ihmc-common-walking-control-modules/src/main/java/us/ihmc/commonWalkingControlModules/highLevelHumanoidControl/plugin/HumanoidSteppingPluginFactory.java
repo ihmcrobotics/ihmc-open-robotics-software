@@ -40,7 +40,6 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
 
    default void createStepGeneratorNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
-      //ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic<?> baseTopic = ControllerAPI.getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName);
       StepGeneratorNetworkSubscriber stepGeneratorNetworkSubscriber = new StepGeneratorNetworkSubscriber(baseTopic,
                                                                                                          getStepGeneratorCommandInputManager(),
