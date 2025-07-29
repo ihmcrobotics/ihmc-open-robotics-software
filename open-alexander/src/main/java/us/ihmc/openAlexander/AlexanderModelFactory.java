@@ -109,12 +109,8 @@ public class AlexanderModelFactory
          String forceSensorParentJointName = feetForceSensorParentJointNames.get(robotSide);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.getTranslation().setX(0.053);//from cad
-         transform.getTranslation().setZ(-0.06497200);//from cad
-         // New force torque sensor for the right foot was installed with an additional yaw offset.
-         // TODO Fixme once the sensor is mounter properly
-         transform.appendYawRotation(robotSide == RobotSide.LEFT ? Math.PI : 0.0 * Math.PI);
-         transform.appendRollRotation(Math.PI);
+         transform.getTranslation().setX(0.024);//from cad, really this time
+         transform.getTranslation().setZ(-0.036);//from cad, really this time
 
          robotDefinition.getJointDefinition(forceSensorParentJointName).addSensorDefinition(new WrenchSensorDefinition(forceSensorName, transform));
       }
