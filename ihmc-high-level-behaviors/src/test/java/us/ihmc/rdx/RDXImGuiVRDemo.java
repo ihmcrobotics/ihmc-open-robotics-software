@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
+import org.lwjgl.openvr.VRSkeletalSummaryData;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -43,6 +44,9 @@ public class RDXImGuiVRDemo
    private InputDigitalActionData rightJoystick;
    private InputDigitalActionData leftTrigger;
    private InputDigitalActionData rightTrigger;
+
+   private VRSkeletalSummaryData leftSkeleton;
+   private VRSkeletalSummaryData rightSkeleton;
 
    private final ImFloat leftForwardJoystickValue = new ImFloat();
    private final ImFloat leftLateralJoystickValue = new ImFloat();
@@ -105,6 +109,7 @@ public class RDXImGuiVRDemo
              leftGripValue.set(controller.getGripActionData().x());
              leftTriggerValue.set(controller.getTriggerActionData().x());
              leftTrigger = controller.getClickTriggerActionData();
+             leftSkeleton = controller.getSkeletalData();
             });
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
@@ -116,6 +121,7 @@ public class RDXImGuiVRDemo
               rightGripValue.set(controller.getGripActionData().x());
               rightTriggerValue.set(controller.getTriggerActionData().x());
               rightTrigger = controller.getClickTriggerActionData();
+              rightSkeleton = controller.getSkeletalData();
             });
          }
 
@@ -157,6 +163,18 @@ public class RDXImGuiVRDemo
                ImGui.text("Left Trigger pressed: " + leftTrigger.bState());
                ImGui.text("Left Trigger: " + leftTriggerValue);
                ImGui.text("Left Grip: " + leftGripValue);
+               if (controllerModel == RDXVRHardwareModel.INDEX)
+               {
+                  ImGui.text("Left Thumb Curl: " + leftSkeleton.flFingerCurl(0));
+                  ImGui.text("Left Index Curl: " + leftSkeleton.flFingerCurl(1));
+                  ImGui.text("Left Middle Curl: " + leftSkeleton.flFingerCurl(2));
+                  ImGui.text("Left Ring Curl: " + leftSkeleton.flFingerCurl(3));
+                  ImGui.text("Left Pinky Curl: " + leftSkeleton.flFingerCurl(4));
+                  ImGui.text("Left Thumb-Index Splay: " + leftSkeleton.flFingerSplay(0));
+                  ImGui.text("Left Index-Middle Splay: " + leftSkeleton.flFingerSplay(1));
+                  ImGui.text("Left Middle-Ring Splay: " + leftSkeleton.flFingerSplay(2));
+                  ImGui.text("Left Ring-Pinky Splay: " + leftSkeleton.flFingerSplay(3));
+               }
 
                ImGui.text("Right Joystick pressed: " + rightJoystick.bState());
                ImGui.text("Right Joystick forward: " + rightForwardJoystickValue);

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.InputAnalogActionData;
 import org.lwjgl.openvr.InputDigitalActionData;
 import org.lwjgl.openvr.InputOriginInfo;
+import org.lwjgl.openvr.VRSkeletalSummaryData;
 import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRInput;
 import us.ihmc.euclid.Axis3D;
@@ -98,6 +99,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
    private boolean gripAsButtonDown = false;
+   LongBuffer skeletalActionHandle = BufferUtils.newLongBuffer(1);
+   private VRSkeletalSummaryData skeletalData;
 
    private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
@@ -191,6 +194,8 @@ public class RDXVRController extends RDXVRTrackedDevice
       joystickActionData = InputAnalogActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_grip", gripActionHandle);
       gripActionData = InputAnalogActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "hand_skeleton", skeletalActionHandle);
+      skeletalData = VRSkeletalSummaryData.create();
    }
 
    public void update(RDXVRTrackedDevicePose[] trackedDevicePoses)
@@ -257,6 +262,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetSkeletalSummaryData(skeletalActionHandle.get(0), VR.EVRSummaryType_VRSummaryType_FromDevice, skeletalData);
 
       gripAsButtonDown = gripActionData.x() > GRIP_AS_BUTTON_THRESHOLD;
       joystickIsCentered = Math.abs(joystickActionData.x()) < JOYSTICK_ZERO_THRESHOLD && Math.abs(joystickActionData.y()) < JOYSTICK_ZERO_THRESHOLD;
@@ -467,6 +473,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public RDXVRDragData getGripDragData()
    {
       return gripDragData;
+   }
+
+   public VRSkeletalSummaryData getSkeletalData()
+   {
+      return skeletalData;
    }
 
    public ReferenceFrame getXForwardZUpControllerFrame()
