@@ -357,12 +357,10 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                                                       inputAngularVelocity,
                                                       inputLinearAcceleration,
                                                       orientationError);
-         angularVelocityBias.scale(-1.0);
-
          if (hasIntegralTerm)
-            angularVelocityTerm.sub(angularVelocityBias);
+            angularVelocityTerm.add(angularVelocityBias);
 
-         angularVelocityUnbiased.sub(inputAngularVelocity, angularVelocityBias);
+         angularVelocityUnbiased.add(inputAngularVelocity, angularVelocityBias);
       }
       else
       {
