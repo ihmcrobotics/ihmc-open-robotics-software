@@ -5,6 +5,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang.StringUtils;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -36,14 +37,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;
 import us.ihmc.yoVariables.euclid.YoPose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.nio.file.Files;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -64,7 +68,7 @@ public class RDXLeRobotTestSimulator
    private final Supplier<KinematicsStreamingToolboxModule> ikStreamingSupplier;
    private final RDXSCS2LogSession logSession;
    private final ZEDSVOScrubber zedScrubber;
-   private final SideDependentList<YoPose3D> logHandPoses = new SideDependentList<>();
+   private final SideDependentList<YoDouble[]> logState = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoses = new SideDependentList<>();
    private long lastZEDTimestamp = -1;
    private final ROS2Node ros2Node;
@@ -102,14 +106,44 @@ public class RDXLeRobotTestSimulator
       robotVisualizer.createAndSetupStandalone(baseUI);
       robotVisualizer.setActive(false);
 
-      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(logSession.getSession().getRobotDefinitions().get(0));
+      RobotDefinition robotDefinition = logSession.getSession().getRobotDefinitions().get(0);
+      YoRegistry registry = logSession.getSession().getRootRegistry();
+      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(robotDefinition);
       for (RobotSide side : robotHandNames.sides())
       {
-         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(robotHandNames.get(side), "Current", logSession.getSession().getRootRegistry()));
+         if (LeRobotDatasetDataWriter.USE_HAND_POSES)
+         {
+            YoPose3D yoPose = LeRobotDatasetDataWriter.findYoPose(robotHandNames.get(side), "Current", registry);
+            YoDouble[] currentState = new YoDouble[] {
+                  yoPose.getYoX(), yoPose.getYoY(), yoPose.getYoZ(),
+                  yoPose.getYoQx(), yoPose.getYoQy(), yoPose.getYoQz(), yoPose.getYoQs()
+            };
+            logState.put(side, currentState);
+         }
 
          RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
          actionHandPoses.put(side, graphic);
          baseUI.getPrimaryScene().addRenderableProvider(graphic);
+      }
+
+      if (!LeRobotDatasetDataWriter.USE_HAND_POSES)
+      {
+         SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
+         for (RobotSide side : robotArmJointNames.sides())
+         {
+            String kstModule = LeRobotDatasetTools.findRegistry(registry, "root.main", "KinematicsStreamingToolboxModule");
+            String capitalizedRobotName = StringUtils.capitalize(robotDefinition.getName());
+            String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
+
+            List<String> armJointNames = robotArmJointNames.get(side);
+            YoDouble[] currentState = new YoDouble[armJointNames.size()];
+            for (int i = 0; i < armJointNames.size(); i++)
+               if (registry.findVariable("%sMotorState_Position_%s_%s".formatted(hwPosition,
+                                                                                 armJointNames.get(i),
+                                                                                 capitalizedRobotName)) instanceof YoDouble variable)
+                  currentState[i] = variable;
+            logState.put(side, currentState);
+         }
       }
    }
 
@@ -124,7 +158,7 @@ public class RDXLeRobotTestSimulator
 
          if (zedSVOTimestamp > 0 && zedSVOTimestamp != lastZEDTimestamp)
          {
-            inferenceManager.publishHandPoses(logHandPoses.get(RobotSide.LEFT), logHandPoses.get(RobotSide.RIGHT));
+//            inferenceManager.publishHandPoses(logState.get(RobotSide.LEFT), logState.get(RobotSide.RIGHT)); // TODO publish state array
 
             int imageHeight = zedScrubber.getImageHeight();
             int imageWidth = zedScrubber.getImageWidth();
