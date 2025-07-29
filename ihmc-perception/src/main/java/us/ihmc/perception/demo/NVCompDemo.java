@@ -175,7 +175,7 @@ public class NVCompDemo
       bitcompManager.close();
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       Loader.load(nvcomp.class);
 

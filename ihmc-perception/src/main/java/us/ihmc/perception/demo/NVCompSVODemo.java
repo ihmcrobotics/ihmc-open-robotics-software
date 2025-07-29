@@ -70,7 +70,7 @@ public class NVCompSVODemo extends NVCompDemo
    private final List<Double> opencvToolsDepthDecompressionTimes = new ArrayList<>();
 
 
-   protected NVCompSVODemo()
+   protected NVCompSVODemo() throws Exception
    {
       super();
 
@@ -377,7 +377,7 @@ public class NVCompSVODemo extends NVCompDemo
       return doubleList.stream().reduce(Double::sum).get() / doubleList.size();
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       NVCompSVODemo demo = new NVCompSVODemo();
       demo.runDemo();
