@@ -95,7 +95,6 @@ public class RawImagePublisher implements AutoCloseable
       switch (imageToPublish.getPixelFormat())
       {
          case GRAY16: // Depth image -> compress using ZSTD nvJPEG hybrid compression (or default to PNG if nvCOMP isn't available)
-         {
             if (compressionTools != null)
             {
                compressedImage = compressionTools.compressDepth(imageToCompress);
@@ -108,7 +107,6 @@ public class RawImagePublisher implements AutoCloseable
                compressionType = PNG;
             }
             break;
-         }
          case BGRA8: // BGRA image -> convert to BGR, then compress using nvJPEG
             GpuMat bgr8Image = new GpuMat();
             opencv_cudaimgproc.cvtColor(imageToCompress, bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
