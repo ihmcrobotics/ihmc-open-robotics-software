@@ -88,6 +88,11 @@ public class LeRobotInferenceManager
       thread.startRepeating();
    }
 
+   public void publishState(float[] stateArray)
+   {
+      // TODO
+   }
+
    public void publishHandPoses(Pose3DReadOnly leftPose, Pose3DReadOnly rightPose)
    {
       int i = 0;

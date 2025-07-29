@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class LeRobotDatasetDataWriter
 {
-   private static final boolean USE_HAND_POSES = false;
+   public static final boolean USE_HAND_POSES = false;
 
    private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
    private record StateVariables(YoDouble[] current, YoDouble[] desired) { }
