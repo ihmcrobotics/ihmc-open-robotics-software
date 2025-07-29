@@ -44,6 +44,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -507,13 +508,19 @@ public class RDXVRWholeBodyKinematicStreaming
       {   // If using ankles and waist tracker, create a CoM message for the toolbox
          KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
          comMessage.setHasDesiredLinearVelocity(false);
-         comMessage.getDesiredPositionInWorld().set(motionRetargeting.getDesiredCenterOfMassXYInWorld());
+         // Add offset from KST parameters
+         FramePose3D centerOfMassDesiredWithOffset = new FramePose3D(ReferenceFrame.getWorldFrame(), motionRetargeting.getDesiredCenterOfMassXYInWorld(), new YawPitchRoll());
+         centerOfMassDesiredWithOffset.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+         centerOfMassDesiredWithOffset.appendTranslation(kstParameters.getCenterOfMassOffset().getX(), kstParameters.getCenterOfMassOffset().getY(), 0.0);
+         centerOfMassDesiredWithOffset.changeFrame(ReferenceFrame.getWorldFrame());
+
+         comMessage.getDesiredPositionInWorld().set(centerOfMassDesiredWithOffset.getPosition());
          comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
          comMessage.getSelectionMatrix().setXSelected(true);
          comMessage.getSelectionMatrix().setYSelected(true);
          comMessage.getSelectionMatrix().setZSelected(false);
-         comMessage.getWeights().setXWeight(1.0);
-         comMessage.getWeights().setYWeight(1.0);
+         comMessage.getWeights().setXWeight(kstParameters.getCenterOfMassTrackingWeight());
+         comMessage.getWeights().setYWeight(kstParameters.getCenterOfMassTrackingWeight());
 
          messageToPack.setUseCenterOfMassInput(true);
          messageToPack.getCenterOfMassInput().set(comMessage);
@@ -658,7 +665,6 @@ public class RDXVRWholeBodyKinematicStreaming
          newConfiguration.setLockChest(controlArmsOnly.get());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                       newConfiguration);
-         setKSTEnabled(false);
       }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
@@ -698,13 +704,10 @@ public class RDXVRWholeBodyKinematicStreaming
    {
       if (enabled)
       {
-         if (!isKSTEnabled.get())
-         {
-            initialize();
-            wakeUpToolbox();
-            ghostRobotGraphic.setActive(true);
-            miniGhost.setActive(true);
-         }
+         initialize();
+         wakeUpToolbox();
+         ghostRobotGraphic.setActive(true);
+         miniGhost.setActive(true);
       }
       else // Disable
       {
@@ -712,6 +715,7 @@ public class RDXVRWholeBodyKinematicStreaming
          ghostRobotGraphic.setActive(false);
          miniGhost.setActive(false);
          setStreamToController(false, false);
+         controlArmsOnly.set(false);
       }
 
       isKSTEnabled.set(enabled);
