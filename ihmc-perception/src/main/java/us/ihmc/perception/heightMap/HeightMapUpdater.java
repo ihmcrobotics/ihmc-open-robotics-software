@@ -5,7 +5,6 @@ import gnu.trove.list.TShortList;
 import gnu.trove.list.array.TShortArrayList;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;

@@ -17,13 +17,13 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.detections.yolo.YOLOv8Detection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionList;
 import us.ihmc.perception.detections.yolo.YOLOv8Model;
 import us.ihmc.perception.detections.yolo.YOLOv8Tools;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -81,7 +81,7 @@ public class RDXYOLOv8PipelineDemo
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImInt erosionKernelRadius = new ImInt(1);
 
-   private final OpenCLDepthImageSegmenter depthImageSegmenter = new OpenCLDepthImageSegmenter();
+   private final CUDADepthImageSegmenter depthImageSegmenter;
    private RawImage segmentedDepth;
    private final RDXOpenCVVideoVisualizer segmentedDepthVisualizer = new RDXOpenCVVideoVisualizer("Segmented Depth", "Segmented Depth", false);
    private final RDXRawImagePointCloudVisualizer segmentedPointCloudVisualizer = new RDXRawImagePointCloudVisualizer("Segmented Point Cloud", true);
@@ -99,7 +99,7 @@ public class RDXYOLOv8PipelineDemo
 
    private final ImInt frameToGrab = new ImInt(0);
 
-   private RDXYOLOv8PipelineDemo()
+   private RDXYOLOv8PipelineDemo() throws Exception
    {
       for (URL yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
       {
@@ -111,6 +111,8 @@ public class RDXYOLOv8PipelineDemo
          yoloModels.add(model);
          availableModels.add(model.getName());
       }
+
+      depthImageSegmenter = new CUDADepthImageSegmenter();
 
       zedPlaybackSensor.useTrackedPose(false);
       zedPlaybackSensor.run(true);
@@ -463,7 +465,6 @@ public class RDXYOLOv8PipelineDemo
 
       zedPointCloudVisualizer.destroy();
       segmentedPointCloudVisualizer.destroy();
-      depthImageSegmenter.destroy();
       colorImageVisualizer.destroy();
       depthImageVisualizer.destroy();
       detectionMaskVisualizer.destroy();
@@ -471,13 +472,13 @@ public class RDXYOLOv8PipelineDemo
       segmentedDepthVisualizer.destroy();
       annotatedImageVisualizer.destroy();
 
-      depthImageSegmenter.destroy();
+      depthImageSegmenter.close();
       pointCloudExtractor.close();
       zedPlaybackSensor.close();
       ros2Node.destroy();
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws Exception
    {
       new RDXYOLOv8PipelineDemo();
    }

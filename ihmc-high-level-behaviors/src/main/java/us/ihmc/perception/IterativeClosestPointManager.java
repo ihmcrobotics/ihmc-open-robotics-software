@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
@@ -29,7 +29,7 @@ public class IterativeClosestPointManager
    private final ROS2Helper ros2Helper;
    private final SceneGraph sceneGraph;
 
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
+   private final CUDAPointCloudExtractor pointCloudExtractor = new CUDAPointCloudExtractor();
 
    private final Random random = new Random(System.nanoTime());
    private final ConcurrentHashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new ConcurrentHashMap<>();
@@ -141,6 +141,7 @@ public class IterativeClosestPointManager
    {
       nodeIDToWorkerMap.clear();
       workerThread.blockingKill();
+      pointCloudExtractor.close();
    }
 
    /**

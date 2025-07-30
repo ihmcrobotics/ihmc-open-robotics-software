@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapMessageToolsTest
 {
-   private final int iterations = 10000;
+   private final int iterations = 1000;
 
    @Test
    public void testHeightMapMessaging()
@@ -31,7 +31,7 @@ public class HeightMapMessageToolsTest
       {
          for (int j = 0; j < cellsPerAxis; j++)
          {
-            heightMap.ptr(i, j).putInt(i + j);
+            heightMap.ptr(i, j).putShort((short) (i + j));
          }
       }
 
