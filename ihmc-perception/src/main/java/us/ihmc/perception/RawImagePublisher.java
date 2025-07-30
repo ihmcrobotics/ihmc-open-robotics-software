@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.SRTStreamStatus;
 import sensor_msgs.msg.dds.CameraInfo;
@@ -15,7 +14,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
-import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.streaming.ROS2SRTSensorStreamer;
@@ -111,7 +109,7 @@ public class RawImagePublisher implements AutoCloseable
             break;
          case BGRA8: // BGRA image -> convert to BGR, then compress using nvJPEG
             GpuMat bgr8Image = new GpuMat();
-            safeCvtColor(imageToPublish, bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
+            opencv_cudaimgproc.cvtColor(imageToCompress, bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
             imageToCompress = bgr8Image;
          case BGR8: // BGR image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
@@ -120,7 +118,7 @@ public class RawImagePublisher implements AutoCloseable
             break;
          case RGBA8: // RGBA image -> convert to RGB, then compress using nvJPEG
             GpuMat rgb8Image = new GpuMat();
-            safeCvtColor(imageToPublish, rgb8Image, opencv_imgproc.COLOR_RGBA2RGB);
+            opencv_cudaimgproc.cvtColor(imageToCompress, rgb8Image, opencv_imgproc.COLOR_RGBA2RGB);
             imageToCompress = rgb8Image;
          case RGB8: // RGB image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress));
@@ -137,7 +135,6 @@ public class RawImagePublisher implements AutoCloseable
       }
 
       // Pack the message and send it off
-      System.out.println("Publishing");
       PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageMessage);
       ros2Helper.publish(imageTopic, imageMessage);
    }
@@ -177,19 +174,5 @@ public class RawImagePublisher implements AutoCloseable
       sensorStreamer.destroy();
       destroyed = true;
       System.out.println("Closed " + getClass().getSimpleName());
-   }
-
-   private void safeCvtColor(RawImage source, GpuMat result, int colorConversion)
-   {
-      if (CUDATools.runningOnJetson() || !CUDATools.hasCUDADevice())
-      {
-         Mat cpuResult = new Mat();
-         opencv_imgproc.cvtColor(source.getCpuImageMat(), cpuResult, colorConversion);
-         result.upload(cpuResult);
-      }
-      else
-      {
-         opencv_cudaimgproc.cvtColor(source.getGpuImageMat(), result, colorConversion);
-      }
    }
 }
