@@ -587,6 +587,16 @@
          ]
       },
       "/actions/main" : {
+         "skeleton" : [
+            {
+               "output" : "/actions/main/in/left_skeleton",
+               "path" : "/user/hand/left/input/skeleton/left"
+            },
+            {
+               "output" : "/actions/main/in/right_skeleton",
+               "path" : "/user/hand/right/input/skeleton/right"
+            }
+         ],
          "sources" : [
             {
                "inputs" : {
@@ -740,6 +750,11 @@
                },
                "mode" : "button",
                "path" : "/user/hand/right/input/b"
+            },
+            {
+               "inputs" : {},
+               "mode" : "none",
+               "path" : "/user/hand/left/input/pinch"
             }
          ]
       }
@@ -748,7 +763,7 @@
    "controller_type" : "knuckles",
    "description" : "Binding values for IHMC apps using the Index controller.",
    "interaction_profile" : "",
-   "name" : "IHMC Index Controller Bindings",
+   "name" : "Saved java configuration for Index Controller",
    "options" : {
       "mirror_actions" : false,
       "simulated_controller_type" : "none"

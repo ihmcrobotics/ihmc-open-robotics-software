@@ -130,6 +130,18 @@
          "name" : "/actions/main/in/right_grip",
          "requirement" : "mandatory",
          "type" : "vector1"
+      },
+      {
+         "name": "/actions/main/in/left_skeleton",
+         "type": "skeleton",
+         "skeleton": "/skeleton/hand/left",
+         "requirement" : "optional"
+      },
+      {
+         "name": "/actions/main/in/right_skeleton",
+         "type": "skeleton",
+         "skeleton": "/skeleton/hand/right",
+         "requirement" : "optional"
       }
    ],
    "default_bindings" : [
@@ -166,6 +178,8 @@
          "/actions/main/in/right_touchpad" : "Touchpad Right",
          "/actions/main/in/left_grip" : "Grip Left",
          "/actions/main/in/right_grip" : "Grip Right",
+         "/actions/main/in/left_skeleton" : "Skeleton Left",
+         "/actions/main/in/right_skeleton" : "Skeleton Right",
          "language_tag" : "en_us"
       }
    ]

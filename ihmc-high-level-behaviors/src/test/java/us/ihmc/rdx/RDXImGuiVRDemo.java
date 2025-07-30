@@ -109,7 +109,7 @@ public class RDXImGuiVRDemo
              leftGripValue.set(controller.getGripActionData().x());
              leftTriggerValue.set(controller.getTriggerActionData().x());
              leftTrigger = controller.getClickTriggerActionData();
-             leftSkeleton = controller.getSkeletalData();
+             leftSkeleton = controller.getSkeletalSummaryData();
             });
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
@@ -121,7 +121,7 @@ public class RDXImGuiVRDemo
               rightGripValue.set(controller.getGripActionData().x());
               rightTriggerValue.set(controller.getTriggerActionData().x());
               rightTrigger = controller.getClickTriggerActionData();
-              rightSkeleton = controller.getSkeletalData();
+              rightSkeleton = controller.getSkeletalSummaryData();
             });
          }
 
@@ -170,10 +170,6 @@ public class RDXImGuiVRDemo
                   ImGui.text("Left Middle Curl: " + leftSkeleton.flFingerCurl(2));
                   ImGui.text("Left Ring Curl: " + leftSkeleton.flFingerCurl(3));
                   ImGui.text("Left Pinky Curl: " + leftSkeleton.flFingerCurl(4));
-                  ImGui.text("Left Thumb-Index Splay: " + leftSkeleton.flFingerSplay(0));
-                  ImGui.text("Left Index-Middle Splay: " + leftSkeleton.flFingerSplay(1));
-                  ImGui.text("Left Middle-Ring Splay: " + leftSkeleton.flFingerSplay(2));
-                  ImGui.text("Left Ring-Pinky Splay: " + leftSkeleton.flFingerSplay(3));
                }
 
                ImGui.text("Right Joystick pressed: " + rightJoystick.bState());
@@ -182,6 +178,14 @@ public class RDXImGuiVRDemo
                ImGui.text("Right Trigger pressed: " + rightTrigger.bState());
                ImGui.text("Right Trigger: " + rightTriggerValue);
                ImGui.text("Right Grip: " + rightGripValue);
+               if (controllerModel == RDXVRHardwareModel.INDEX)
+               {
+                  ImGui.text("Right Thumb Curl: " + rightSkeleton.flFingerCurl(0));
+                  ImGui.text("Right Index Curl: " + rightSkeleton.flFingerCurl(1));
+                  ImGui.text("Right Middle Curl: " + rightSkeleton.flFingerCurl(2));
+                  ImGui.text("Right Ring Curl: " + rightSkeleton.flFingerCurl(3));
+                  ImGui.text("Right Pinky Curl: " + rightSkeleton.flFingerCurl(4));
+               }
             }
          }
 
