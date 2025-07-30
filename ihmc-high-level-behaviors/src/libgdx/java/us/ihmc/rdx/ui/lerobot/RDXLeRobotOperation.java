@@ -32,7 +32,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -90,7 +89,7 @@ public class RDXLeRobotOperation
       statusSubscription = ROS2Tools.createNotificationSubscription(ros2Node, LEROBOT_UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier()));
       commandPublisher = ros2Node.createPublisher(LEROBOT_UI.getTopic(ROS2ActorDesignation.OPERATOR.getOutgoingQualifier()));
 
-      actionHandPosesSubscription = ROS2Tools.createNotificationSubscription(ros2Node, LeRobotInferenceManager.ACTION_HAND_POSES);
+      actionHandPosesSubscription = ROS2Tools.createNotificationSubscription(ros2Node, LeRobotInferenceManager.ACTION);
    }
 
    public void create(RDXBaseUI baseUI)

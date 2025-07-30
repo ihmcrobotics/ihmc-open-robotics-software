@@ -61,6 +61,7 @@ import static us.ihmc.zed.global.zed.SL_MEM_CPU;
  * Part of the {@link LeRobotDataset} generation system from IHMC logs.
  * <p>
  * TODO: Pass the output actions through the IK preview for a more complete visualization.
+ * TODO: Add preview ghost for joint angle based policy visualization
  */
 public class RDXLeRobotTestSimulator
 {
@@ -108,25 +109,24 @@ public class RDXLeRobotTestSimulator
 
       RobotDefinition robotDefinition = logSession.getSession().getRobotDefinitions().get(0);
       YoRegistry registry = logSession.getSession().getRootRegistry();
-      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(robotDefinition);
-      for (RobotSide side : robotHandNames.sides())
+      if (LeRobotDatasetDataWriter.USE_HAND_POSES)
       {
-         if (LeRobotDatasetDataWriter.USE_HAND_POSES)
+         SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(robotDefinition);
+         for (RobotSide side : robotHandNames.sides())
          {
-            YoPose3D yoPose = LeRobotDatasetDataWriter.findYoPose(robotHandNames.get(side), "Current", registry);
-            YoDouble[] currentState = new YoDouble[] {
-                  yoPose.getYoX(), yoPose.getYoY(), yoPose.getYoZ(),
-                  yoPose.getYoQx(), yoPose.getYoQy(), yoPose.getYoQz(), yoPose.getYoQs()
-            };
-            logState.put(side, currentState);
+               YoPose3D yoPose = LeRobotDatasetDataWriter.findYoPose(robotHandNames.get(side), "Current", registry);
+               YoDouble[] currentState = new YoDouble[] {
+                     yoPose.getYoX(), yoPose.getYoY(), yoPose.getYoZ(),
+                     yoPose.getYoQx(), yoPose.getYoQy(), yoPose.getYoQz(), yoPose.getYoQs()
+               };
+               logState.put(side, currentState);
+
+            RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
+            actionHandPoses.put(side, graphic);
+            baseUI.getPrimaryScene().addRenderableProvider(graphic);
          }
-
-         RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
-         actionHandPoses.put(side, graphic);
-         baseUI.getPrimaryScene().addRenderableProvider(graphic);
       }
-
-      if (!LeRobotDatasetDataWriter.USE_HAND_POSES)
+      else
       {
          SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
          for (RobotSide side : robotArmJointNames.sides())
@@ -158,7 +158,12 @@ public class RDXLeRobotTestSimulator
 
          if (zedSVOTimestamp > 0 && zedSVOTimestamp != lastZEDTimestamp)
          {
-//            inferenceManager.publishHandPoses(logState.get(RobotSide.LEFT), logState.get(RobotSide.RIGHT)); // TODO publish state array
+            inferenceManager.publishState(messageData ->
+            {
+               for (RobotSide side : logState.sides())
+                  for (int i = 0; i < logState.get(side).length; i++)
+                     messageData.add((float) logState.get(side)[i].getValue());
+            });
 
             int imageHeight = zedScrubber.getImageHeight();
             int imageWidth = zedScrubber.getImageWidth();
@@ -175,10 +180,9 @@ public class RDXLeRobotTestSimulator
             }
          }
 
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            actionHandPoses.get(robotSide).setPoseInWorldFrame(inferenceManager.getActionHandPoses().get(robotSide));
-         }
+         if (LeRobotDatasetDataWriter.USE_HAND_POSES)
+            for (RobotSide robotSide : actionHandPoses.sides())
+               actionHandPoses.get(robotSide).setPoseInWorldFrame(inferenceManager.getActionHandPoses().get(robotSide));
       }
    }
 
