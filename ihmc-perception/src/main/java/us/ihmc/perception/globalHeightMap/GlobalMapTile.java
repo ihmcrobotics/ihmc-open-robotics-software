@@ -4,6 +4,8 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
+import java.nio.ShortBuffer;
+
 public class GlobalMapTile
 {
    private final double tileCenterX;
@@ -21,6 +23,11 @@ public class GlobalMapTile
       int cellsPerAxisLocal = 2 * centerIndexLocal + 1;
 
       tile = new Mat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
+
+      int totalCells = cellsPerAxisLocal * cellsPerAxisLocal;
+      short[] heightsAsFloats = new short[totalCells];
+      ShortBuffer buffer = tile.createBuffer();
+      buffer.put(heightsAsFloats);
 
    }
 

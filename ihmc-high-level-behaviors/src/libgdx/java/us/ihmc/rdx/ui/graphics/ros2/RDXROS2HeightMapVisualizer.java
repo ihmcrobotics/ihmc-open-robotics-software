@@ -21,9 +21,9 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Topic;
@@ -32,15 +32,13 @@ import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final RDXGlobalHeightMapGraphic globalHeightMapGraphic;
 
    private ROS2PublishSubscribeAPI ros2;
    private final ResettableExceptionHandlingExecutorService executorService;
@@ -62,61 +60,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private float latestHeightMapOffset;
    private float latestCellSizeInMeters;
 
-   private final Queue<GlobalTileInfo> globalMapTiles = new ConcurrentLinkedQueue<>();
-   private final int initialCapacity = 1;
-   private final List<RDXHeightMapRenderer> globalMapTileRenderers = new ArrayList<>(initialCapacity);
-
-   private static class GlobalTileInfo
-   {
-      private final Mat heightMapMat;
-      private final float latestHeightMapOffset;
-      private final float latestCellSizeInMeters;
-      private final Point3D heightMapCenter;
-      private final int cellsPerAxis;
-
-      public GlobalTileInfo(Mat heightMapMat, float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
-      {
-         this.heightMapMat = heightMapMat;
-         this.latestHeightMapOffset = latestHeightMapOffset;
-         this.latestCellSizeInMeters = latestCellSizeInMeters;
-         this.heightMapCenter = heightMapCenter;
-         this.cellsPerAxis = cellsPerAxis;
-      }
-
-      public Mat getHeightMapMat()
-      {
-         return heightMapMat;
-      }
-
-      public float getLatestHeightMapOffset()
-      {
-         return latestHeightMapOffset;
-      }
-
-      public float getLatestCellSizeInMeters()
-      {
-         return latestCellSizeInMeters;
-      }
-
-      public Point3D getHeightMapCenter()
-      {
-         return heightMapCenter;
-      }
-
-      public int getCellsPerAxis()
-      {
-         return cellsPerAxis;
-      }
-   }
-
    public RDXROS2HeightMapVisualizer(String title)
    {
       super(title);
 
-      for (int i = 0; i < initialCapacity; i++)
-      {
-         globalMapTileRenderers.add(new RDXHeightMapRenderer());
-      }
+      globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
 
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
@@ -151,13 +99,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          int centerIndex = HeightMapTools.computeCenterIndex(GlobalLattice.latticeWidth, 0.02);
          cellsPerAxis = 2 * centerIndex + 1;
 
-         GlobalTileInfo globalTileInfo = new GlobalTileInfo(latestGlobalMapTile,
-                                                            (float) heightMapMessage.getHeightOffset(),
-                                                            (float) heightMapMessage.getCellSizeInMeters(),
-                                                            new Point3D(globalMapTileMessage.getCenterX(), globalMapTileMessage.getCenterY(), 0),
-                                                            cellsPerAxis);
-
-         globalMapTiles.add(globalTileInfo);
+         globalHeightMapGraphic.addHeightMap(latestGlobalMapTile,
+                                             (float) heightMapMessage.getHeightOffset(),
+                                             (float) heightMapMessage.getCellSizeInMeters(),
+                                             new Point3D(globalMapTileMessage.getCenterX(), globalMapTileMessage.getCenterY(), 0),
+                                             cellsPerAxis,
+                                             globalMapTileMessage.getHashCodeOfTile());
       }
    }
 
@@ -285,18 +232,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          stopwatch.start();
       }
 
-      for (int i = 0; i < initialCapacity; i++)
+      if (cellsPerAxis > 0)
       {
-         if (cellsPerAxis > 0 && !globalMapTileRenderers.get(i).isHasBeenCreated())
-         {
-            globalMapTileRenderers.get(i).create(251 * 251);
-         }
+         globalHeightMapGraphic.create();
       }
-
-      //      if (enableGlobalHeightMapVisualizer.get())
-      //      {
-      //         globalHeightMapGraphic.update();
-      //      }
 
       if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
       {
@@ -314,28 +253,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          }
       }
 
-      for (int i = 0; i < initialCapacity; i++)
+      if (enableGlobalHeightMapVisualizer.get())
       {
-         if (enableGlobalHeightMapVisualizer.get() && globalMapTileRenderers.get(i).isHasBeenCreated())
-         {
-            GlobalTileInfo tileInfo = globalMapTiles.poll();
-
-            if (tileInfo != null)
-            {
-               if (tileInfo.getHeightMapMat() != null && tileInfo.getHeightMapMat().ptr(0) != null)
-               {
-                  float pixelScalingFactor = 10000.0f;
-                  globalMapTileRenderers.get(i)
-                                        .update(tileInfo.getHeightMapMat(),
-                                                tileInfo.getLatestHeightMapOffset(),
-                                                tileInfo.getHeightMapCenter().getX32(),
-                                                tileInfo.getHeightMapCenter().getY32(),
-                                                tileInfo.getCellsPerAxis() / 2,
-                                                tileInfo.getLatestCellSizeInMeters(),
-                                                pixelScalingFactor);
-               }
-            }
-         }
+         globalHeightMapGraphic.update();
       }
    }
 
@@ -350,13 +270,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       {
          if (enableGlobalHeightMapVisualizer.get())
          {
-            for (int i = 0; i < initialCapacity; i++)
-            {
-               if (globalMapTileRenderers.get(i).isHasBeenCreated())
-               {
-                  globalMapTileRenderers.get(i).getRenderables(renderables, pool);
-               }
-            }
+            globalHeightMapGraphic.getRenderables(renderables, pool);
          }
 
          if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
@@ -371,10 +285,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       super.destroy();
       executorService.destroy();
-      for (int i = 0; i < initialCapacity; i++)
-      {
-         globalMapTileRenderers.get(i).dispose();
-      }
+      globalHeightMapGraphic.destroy();
       heightMapRenderer.dispose();
    }
 
