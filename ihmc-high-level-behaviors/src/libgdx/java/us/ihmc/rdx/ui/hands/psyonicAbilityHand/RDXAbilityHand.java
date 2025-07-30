@@ -267,19 +267,16 @@ public class RDXAbilityHand implements RDXHandInterface
       float mappedValue;
       if (value < 0.05f)
       {
-         mappedValue = 100.0f;
+         mappedValue = 0.0f;
       }
       else if (value <= 0.85f)
       {
-         // Linear scale from 100 -> 0 as value goes 0.05 -> 0.85
-         // y = m * x + b
-         float m = (0.0f - 100.0f) / (0.85f - 0.05f); // slope
-         float b = 100.0f - m * 0.05f; // intercept
-         mappedValue = m * value + b;
+         // scale linearly from 0 at 0.05 to 100 at 0.85
+         mappedValue = (value - 0.05f) / (0.85f - 0.05f) * 100.0f;
       }
       else
       {
-         mappedValue = 0.0f;
+         mappedValue = 100.0f;
       }
 
       // 0-3 indices correspond to index-pinky finger curls, 4 is the thumb curl, 5 the thumb splay
