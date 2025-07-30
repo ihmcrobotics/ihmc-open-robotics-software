@@ -6,13 +6,11 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
+/**
+       * Most of the data we want is actually stored inside the HeightMapMessage, so we don't have to worry about storing it here, we just need a hash
+       */
 public class ChunkMessage extends Packet<ChunkMessage> implements Settable<ChunkMessage>, EpsilonComparable<ChunkMessage>
 {
-   /**
-            * This is the location in world of the center of the chunk
-            */
-   public double center_x_;
-   public double center_y_;
    /**
             * We have a hash to keep each chunk unique
             */
@@ -35,37 +33,9 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
    public void set(ChunkMessage other)
    {
-      center_x_ = other.center_x_;
-
-      center_y_ = other.center_y_;
-
       hash_code_of_chunk_ = other.hash_code_of_chunk_;
 
       perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.chunk_, chunk_);
-   }
-
-   /**
-            * This is the location in world of the center of the chunk
-            */
-   public void setCenterX(double center_x)
-   {
-      center_x_ = center_x;
-   }
-   /**
-            * This is the location in world of the center of the chunk
-            */
-   public double getCenterX()
-   {
-      return center_x_;
-   }
-
-   public void setCenterY(double center_y)
-   {
-      center_y_ = center_y;
-   }
-   public double getCenterY()
-   {
-      return center_y_;
    }
 
    /**
@@ -110,10 +80,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_x_, other.center_x_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_y_, other.center_y_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hash_code_of_chunk_, other.hash_code_of_chunk_, epsilon)) return false;
 
       if (!this.chunk_.epsilonEquals(other.chunk_, epsilon)) return false;
@@ -130,10 +96,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       ChunkMessage otherMyClass = (ChunkMessage) other;
 
-      if(this.center_x_ != otherMyClass.center_x_) return false;
-
-      if(this.center_y_ != otherMyClass.center_y_) return false;
-
       if(this.hash_code_of_chunk_ != otherMyClass.hash_code_of_chunk_) return false;
 
       if (!this.chunk_.equals(otherMyClass.chunk_)) return false;
@@ -147,10 +109,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
       StringBuilder builder = new StringBuilder();
 
       builder.append("ChunkMessage {");
-      builder.append("center_x=");
-      builder.append(this.center_x_);      builder.append(", ");
-      builder.append("center_y=");
-      builder.append(this.center_y_);      builder.append(", ");
       builder.append("hash_code_of_chunk=");
       builder.append(this.hash_code_of_chunk_);      builder.append(", ");
       builder.append("chunk=");

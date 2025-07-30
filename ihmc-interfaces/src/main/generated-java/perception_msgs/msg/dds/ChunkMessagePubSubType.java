@@ -15,7 +15,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "aa62a795e7bcc1bfea7779c3d8844f8e91aab03483baa94ba3f85ee670147398";
+   		return "2bf8f099bd8a8ff0a632f6c8991cef24358b5e0c1560c1387aef82724b7bc3b2";
    }
    
    @Override
@@ -52,10 +52,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -73,12 +69,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -90,10 +80,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
    public static void write(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_6(data.getCenterX());
-
-      cdr.write_type_6(data.getCenterY());
-
       cdr.write_type_2(data.getHashCodeOfChunk());
 
       perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getChunk(), cdr);
@@ -101,10 +87,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
    public static void read(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setCenterX(cdr.read_type_6());
-      	
-      data.setCenterY(cdr.read_type_6());
-      	
       data.setHashCodeOfChunk(cdr.read_type_2());
       	
       perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getChunk(), cdr);	
@@ -114,8 +96,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final void serialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_6("center_x", data.getCenterX());
-      ser.write_type_6("center_y", data.getCenterY());
       ser.write_type_2("hash_code_of_chunk", data.getHashCodeOfChunk());
       ser.write_type_a("chunk", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getChunk());
 
@@ -124,8 +104,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ChunkMessage data)
    {
-      data.setCenterX(ser.read_type_6("center_x"));
-      data.setCenterY(ser.read_type_6("center_y"));
       data.setHashCodeOfChunk(ser.read_type_2("hash_code_of_chunk"));
       ser.read_type_a("chunk", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getChunk());
 

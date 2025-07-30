@@ -109,7 +109,8 @@ public class HeightMapMessageTools
                                 double widthInMeters,
                                 double cellSizeInMeters,
                                 double heightOffset,
-                                double heightScaleFactor)
+                                double heightScaleFactor,
+                                int cellsPerAxis)
    {
       clear(messageToPack);
 
@@ -121,11 +122,9 @@ public class HeightMapMessageTools
       messageToPack.setCellSizeInMeters(cellSizeInMeters);
       messageToPack.setHeightOffset(heightOffset);
       messageToPack.setHeightScaleFactor(heightScaleFactor);
+      messageToPack.setCellsPerAxis(cellsPerAxis);
 
       // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
-      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
-      int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       // Make sure Mat type is correct

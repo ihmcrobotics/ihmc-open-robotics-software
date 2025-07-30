@@ -537,4 +537,9 @@ public class RapidHeightMapExtractor
    {
       return terrainCroppedHeightMap.clone();
    }
+
+   public int getCellsPerAxis()
+   {
+      return cellsPerAxisGlobal;
+   }
 }

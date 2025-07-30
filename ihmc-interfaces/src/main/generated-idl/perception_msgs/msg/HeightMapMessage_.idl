@@ -59,6 +59,10 @@ module perception_msgs
          */
         double cell_size_in_meters;
         /**
+         * Cells per axis
+         */
+        long cells_per_axis;
+        /**
          * List of height map keys. See HeightMapTools for converting keys to coordinates
          */
         sequence<long, 255000> keys;

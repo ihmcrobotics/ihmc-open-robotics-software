@@ -18,13 +18,13 @@ public class ChunkedMap
    {
    }
 
-   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double gridResolution)
+   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution, float heightOffset, float scalingFactor)
    {
       chunks.clear();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(gridSize, gridResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(gridSize, resolution);
 
-      int centerIndexOfIncomingHeightMap = HeightMapTools.computeCenterIndex(gridSize, gridResolution);
+      int centerIndexOfIncomingHeightMap = HeightMapTools.computeCenterIndex(gridSize, resolution);
       int cellsPerAxisOfIncomingHeightMap = 2 * centerIndexOfIncomingHeightMap + 1;
       int totalCellsOfIncomingHeightMap = cellsPerAxisOfIncomingHeightMap * cellsPerAxisOfIncomingHeightMap;
       // This is done for speed optimization
@@ -37,16 +37,16 @@ public class ChunkedMap
       {
          for (int j = 0; j < heightMap.cols(); j++)
          {
-            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), gridResolution, centerIndex);
-            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), gridResolution, centerIndex);
+            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndex);
+            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndex);
 
-            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.LATTICE_WIDTH, gridResolution);
+            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.LATTICE_WIDTH, resolution, heightOffset, (float) resolution, scalingFactor);
 
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
             short height = heightsArray[index];
 
-            int centerIndexOfChunk = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, gridResolution);
-            chunk.setHeightAt(XCord, YCord, height, gridResolution, centerIndexOfChunk);
+            int centerIndexOfChunk = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, resolution);
+            chunk.setHeightAt(XCord, YCord, height, resolution, centerIndexOfChunk);
 
             chunks.add(chunk);
          }
@@ -58,7 +58,13 @@ public class ChunkedMap
       return chunks;
    }
 
-   public Chunk getOrCreateChunk(double xCoordinate, double yCoordinate, double chunkSizeInMeters, double chunkResolution)
+   public Chunk getOrCreateChunk(double xCoordinate,
+                                 double yCoordinate,
+                                 double chunkSizeInMeters,
+                                 double chunkResolution,
+                                 float heightOffset,
+                                 float cellSize,
+                                 float scalingFactor)
    {
       int cellsPerAxis = (int) Math.round(chunkSizeInMeters / chunkResolution);
 
@@ -75,7 +81,7 @@ public class ChunkedMap
       Chunk chunk = chunksHashMap.get(hash);
       if (chunk == null)
       {
-         chunk = new Chunk(chunkResolution, chunkCenterX, chunkCenterY);
+         chunk = new Chunk(chunkResolution, chunkCenterX, chunkCenterY, heightOffset, scalingFactor);
          chunksHashMap.put(hash, chunk);
       }
 

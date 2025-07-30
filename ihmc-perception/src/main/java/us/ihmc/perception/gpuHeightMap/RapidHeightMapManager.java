@@ -112,48 +112,41 @@ public class RapidHeightMapManager
       double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
 
-      publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint);
+      publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint, rapidHeightMapExtractor.getCellsPerAxis());
 
       // -------------------------- Doing Map Tiles ---------------------
-      chunkedMap.addHeightMap(hostGlobalHeightMap, heightMapCenterPoint, heightMapParameters.getGridSizeXY(), heightMapParameters.getGridResolutionXY());
-      publishChunkedMap(chunkMessagePublisher,
-                        chunkedMap,
-                        heightMapCenterPoint,
-                        Chunk.LATTICE_WIDTH,
-                        heightMapParameters.getCellSize(),
-                        heightMapParameters.getHeightOffset(),
-                        heightMapParameters.getHeightScaleFactor());
+      chunkedMap.addHeightMap(hostGlobalHeightMap,
+                              heightMapCenterPoint,
+                              heightMapParameters.getGridSizeXY(),
+                              heightMapParameters.getGridResolutionXY(),
+                              (float) heightMapParameters.getHeightOffset(),
+                              (float) heightMapParameters.getHeightScaleFactor());
+      publishChunkedMap(chunkMessagePublisher, chunkedMap);
 
       hostGlobalHeightMap.close();
    }
 
-   private static void publishChunkedMap(ROS2Publisher<ChunkMessage> publisher,
-                                         ChunkedMap chunkedMap,
-                                         Point3D heightMapCenter,
-                                         double widthInMeters,
-                                         double cellSizeInMeters,
-                                         double heightOffset,
-                                         double heightScaleFactor)
+   private static void publishChunkedMap(ROS2Publisher<ChunkMessage> publisher, ChunkedMap chunkedMap)
    {
       Collection<Chunk> chunks = chunkedMap.getChunks();
       for (Chunk chunk : chunks)
       {
          ChunkMessage chunkMessage = new ChunkMessage();
-         chunkMessage.setCenterX(chunk.getCenterX());
-         chunkMessage.setCenterY(chunk.getCenterY());
          chunkMessage.setHashCodeOfChunk(chunk.hashCode());
+
          HeightMapMessageTools.toMessage(chunk.getChunk(),
                                          chunkMessage.getChunk(),
-                                         heightMapCenter,
-                                         widthInMeters,
-                                         cellSizeInMeters,
-                                         heightOffset,
-                                         heightScaleFactor);
+                                         new Point3D(chunk.getCenterX(), chunk.getCenterY(), 0),
+                                         Chunk.LATTICE_WIDTH,
+                                         chunk.getCellSize(),
+                                         chunk.getHeightMapOffset(),
+                                         chunk.getScalingFactor(),
+                                         chunk.getCellsPerAxis());
          publisher.publish(chunkMessage);
       }
    }
 
-   private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter)
+   private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter, int cellsPerAxis)
    {
       HeightMapMessageTools.toMessage(globalHeightMap,
                                       heightMapMessage,
@@ -161,7 +154,8 @@ public class RapidHeightMapManager
                                       heightMapParameters.getGlobalWidthInMeters(),
                                       heightMapParameters.getCellSize(),
                                       heightMapParameters.getHeightOffset(),
-                                      heightMapParameters.getHeightScaleFactor());
+                                      heightMapParameters.getHeightScaleFactor(),
+                                      cellsPerAxis);
 
       if (heightMapParameters.getLogHeightMap())
       {

@@ -9,14 +9,12 @@ module perception_msgs
     module dds
     {
 
+      /**
+       * Most of the data we want is actually stored inside the HeightMapMessage, so we don't have to worry about storing it here, we just need a hash
+       */
       @TypeCode(type="perception_msgs::msg::dds_::ChunkMessage_")
       struct ChunkMessage
       {
-        /**
-         * This is the location in world of the center of the chunk
-         */
-        double center_x;
-        double center_y;
         /**
          * We have a hash to keep each chunk unique
          */

@@ -5,100 +5,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.euclid.tuple3D.Point3D;
+import perception_msgs.msg.dds.HeightMapMessage;
+import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 public class RDXChunkedMapRenderer implements RenderableProvider
 {
-   private static class TileRenderer
-   {
-      private final GlobalTileInfo globalMapTiles;
-      private final RDXHeightMapRenderer globalMapTileRenderers;
-
-      public TileRenderer(float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
-      {
-         globalMapTileRenderers = new RDXHeightMapRenderer();
-         globalMapTiles = new GlobalTileInfo(latestHeightMapOffset, latestCellSizeInMeters, heightMapCenter, cellsPerAxis);
-      }
-
-      public GlobalTileInfo getGlobalMapTiles()
-      {
-         return globalMapTiles;
-      }
-
-      public RDXHeightMapRenderer getGlobalMapTileRenderers()
-      {
-         return globalMapTileRenderers;
-      }
-   }
-
-   private static class GlobalTileInfo
-   {
-      private Mat heightMapMat;
-      private float latestHeightMapOffset;
-      private float latestCellSizeInMeters;
-      private Point3D heightMapCenter;
-      private int cellsPerAxis;
-
-      public GlobalTileInfo(float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
-      {
-         this.latestHeightMapOffset = latestHeightMapOffset;
-         this.latestCellSizeInMeters = latestCellSizeInMeters;
-         this.heightMapCenter = heightMapCenter;
-         this.cellsPerAxis = cellsPerAxis;
-      }
-
-      public Mat getHeightMapMat()
-      {
-         return heightMapMat;
-      }
-
-      public float getLatestHeightMapOffset()
-      {
-         return latestHeightMapOffset;
-      }
-
-      public float getLatestCellSizeInMeters()
-      {
-         return latestCellSizeInMeters;
-      }
-
-      public Point3D getHeightMapCenter()
-      {
-         return heightMapCenter;
-      }
-
-      public int getCellsPerAxis()
-      {
-         return cellsPerAxis;
-      }
-
-      public void setHeightMapMat(Mat heightMapMat)
-      {
-         this.heightMapMat = heightMapMat;
-      }
-
-      public void setLatestHeightMapOffset(float latestHeightMapOffset)
-      {
-         this.latestHeightMapOffset = latestHeightMapOffset;
-      }
-
-      public void setLatestCellSizeInMeters(float latestCellSizeInMeters)
-      {
-         this.latestCellSizeInMeters = latestCellSizeInMeters;
-      }
-
-      public void setHeightMapCenter(Point3D heightMapCenter)
-      {
-         this.heightMapCenter = heightMapCenter;
-      }
-
-      public void setCellsPerAxis(int cellsPerAxis)
-      {
-         this.cellsPerAxis = cellsPerAxis;
-      }
-   }
-
-   private final IntMap<TileRenderer> globalMapRenderables = new IntMap<>();
+   private final IntMap<ChunkRenderer> chunkRenderers = new IntMap<>();
 
    public RDXChunkedMapRenderer()
    {
@@ -106,75 +19,99 @@ public class RDXChunkedMapRenderer implements RenderableProvider
 
    public void create()
    {
-      for (TileRenderer globalMapTileRenderer : globalMapRenderables.values())
+      for (ChunkRenderer chunkRenderer : chunkRenderers.values())
       {
-         if (!globalMapTileRenderer.getGlobalMapTileRenderers().isHasBeenCreated())
+         if (!chunkRenderer.getRenderer().isHasBeenCreated())
          {
-            int cellsPerAxis = globalMapTileRenderer.getGlobalMapTiles().getCellsPerAxis();
-            globalMapTileRenderer.getGlobalMapTileRenderers().create(cellsPerAxis * cellsPerAxis);
+            int cellsPerAxis = chunkRenderer.getChunk().getCellsPerAxis();
+            chunkRenderer.getRenderer().create(cellsPerAxis * cellsPerAxis);
          }
       }
    }
 
    public void update()
    {
-      for (TileRenderer globalMapTileRenderer : globalMapRenderables.values())
+      for (ChunkRenderer chunkRenderer : chunkRenderers.values())
       {
-         RDXHeightMapRenderer heightMapRenderer = globalMapTileRenderer.getGlobalMapTileRenderers();
+         RDXHeightMapRenderer heightMapRenderer = chunkRenderer.getRenderer();
          if (heightMapRenderer.isHasBeenCreated())
          {
-            GlobalTileInfo mapTile = globalMapTileRenderer.getGlobalMapTiles();
-            if (mapTile != null)
+            Chunk chunk = chunkRenderer.getChunk();
+            if (chunk != null)
             {
-               if (mapTile.getHeightMapMat() != null && mapTile.getHeightMapMat().ptr(0) != null)
+               if (chunk.getChunk() != null && chunk.getChunk().ptr(0) != null)
                {
-                  float pixelScalingFactor = 10000.0f;
-                  heightMapRenderer.update(mapTile.getHeightMapMat(),
-                                           mapTile.getLatestHeightMapOffset(),
-                                           mapTile.getHeightMapCenter().getX32(),
-                                           mapTile.getHeightMapCenter().getY32(),
-                                           mapTile.getCellsPerAxis() / 2,
-                                           mapTile.getLatestCellSizeInMeters(),
-                                           pixelScalingFactor);
+                  heightMapRenderer.update(chunk.getChunk(),
+                                           chunk.getHeightMapOffset(),
+                                           (float) chunk.getCenterX(),
+                                           (float) chunk.getCenterY(),
+                                           chunk.getCellsPerAxis() / 2,
+                                           (float) chunk.getCellSize(),
+                                           chunk.getScalingFactor());
                }
             }
          }
       }
    }
 
-   public void addHeightMap(Mat heightMapMat, float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis, int hash)
+   public void addHeightMap(HeightMapMessage heightMapMessage, int hash)
    {
-      TileRenderer currentMapTile = globalMapRenderables.get(hash);
-      if (currentMapTile == null)
+      ChunkRenderer chunkRenderer = chunkRenderers.get(hash);
+      if (chunkRenderer == null)
       {
-         currentMapTile = new TileRenderer(latestHeightMapOffset, latestCellSizeInMeters, heightMapCenter, cellsPerAxis);
-         globalMapRenderables.put(hash, currentMapTile);
+         chunkRenderer = new ChunkRenderer(heightMapMessage);
+         chunkRenderers.put(hash, chunkRenderer);
       }
 
-      GlobalTileInfo globalMapTiles = currentMapTile.getGlobalMapTiles();
-      globalMapTiles.setHeightMapMat(heightMapMat);
-      globalMapTiles.setLatestHeightMapOffset(latestHeightMapOffset);
-      globalMapTiles.setLatestCellSizeInMeters(latestCellSizeInMeters);
-      globalMapTiles.setHeightMapCenter(heightMapCenter);
-      globalMapTiles.setCellsPerAxis(cellsPerAxis);
+      Mat latestChunk = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
+
+      Chunk chunk = chunkRenderer.getChunk();
+      chunk.setChunk(latestChunk);
+      chunk.setCellSize(heightMapMessage.getCellSizeInMeters());
+      chunk.setHeightMapOffset((float) heightMapMessage.getHeightOffset());
+      chunk.setCenterX(heightMapMessage.getGridCenterX());
+      chunk.setCenterY(heightMapMessage.getGridCenterY());
+      chunk.setCellsPerAxis(heightMapMessage.getCellsPerAxis());
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (TileRenderer currentRenderer : globalMapRenderables.values())
+      for (ChunkRenderer currentRenderer : chunkRenderers.values())
       {
          // We can't guarantee that this has been created by the time this is called, so need to check
-         if (currentRenderer.getGlobalMapTileRenderers().isHasBeenCreated())
-            currentRenderer.getGlobalMapTileRenderers().getRenderables(renderables, pool);
+         if (currentRenderer.getRenderer().isHasBeenCreated())
+            currentRenderer.getRenderer().getRenderables(renderables, pool);
       }
    }
 
    public void destroy()
    {
-      for (TileRenderer currentRenderer : globalMapRenderables.values())
+      for (ChunkRenderer currentRenderer : chunkRenderers.values())
       {
-         currentRenderer.getGlobalMapTileRenderers().dispose();
+         currentRenderer.getRenderer().dispose();
+      }
+   }
+
+   private static class ChunkRenderer
+   {
+      private final Chunk chunk;
+      private final RDXHeightMapRenderer renderer;
+
+      public ChunkRenderer(HeightMapMessage heightMapMessage)
+      {
+         renderer = new RDXHeightMapRenderer();
+         chunk = new Chunk(heightMapMessage);
+      }
+
+      public Chunk getChunk()
+      {
+         return chunk;
+      }
+
+      public RDXHeightMapRenderer getRenderer()
+      {
+         return renderer;
       }
    }
 }
