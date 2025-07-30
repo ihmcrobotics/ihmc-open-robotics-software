@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.hands;
 
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface RDXHandInterface
@@ -21,4 +20,6 @@ public interface RDXHandInterface
    void renderImGuiWidgets();
 
    void sendCommand(HandAction action);
+
+   void sendFingerPosition(int index, float value);
 }

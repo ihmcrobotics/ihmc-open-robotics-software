@@ -255,4 +255,35 @@ public class RDXAbilityHand implements RDXHandInterface
       previousControl = ControlMode.GRIP;
       publishCommand();
    }
+
+   @Override
+   public void sendFingerPosition(int index, float value)
+   {
+      if(previousControl != ControlMode.POSITION)
+      {
+         previousControl = ControlMode.POSITION;
+      }
+
+      float mappedValue;
+      if (value < 0.05f)
+      {
+         mappedValue = 100.0f;
+      }
+      else if (value <= 0.85f)
+      {
+         // Linear scale from 100 -> 0 as value goes 0.05 -> 0.85
+         // y = m * x + b
+         float m = (0.0f - 100.0f) / (0.85f - 0.05f); // slope
+         float b = 100.0f - m * 0.05f; // intercept
+         mappedValue = m * value + b;
+      }
+      else
+      {
+         mappedValue = 0.0f;
+      }
+
+      communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
+      communication.getCommand(serialNumber).getGoalPositions()[index] = mappedValue;
+      commandNotification.set();
+   }
 }

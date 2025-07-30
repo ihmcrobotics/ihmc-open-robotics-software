@@ -331,4 +331,10 @@ public class RDXEZGripper implements RDXHandInterface
    {
       communication.publishCommand(handSide);
    }
+
+   @Override
+   public void sendFingerPosition(int index, float value)
+   {
+      //TODO implement
+   }
 }

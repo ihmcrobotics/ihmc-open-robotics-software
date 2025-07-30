@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import org.lwjgl.openvr.VRSkeletalSummaryData;
 import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -51,7 +52,9 @@ public class RDXVRHandControl
                   }
                   case  FINGER_STREAMING ->
                   {
-                     // TODO need to implement the logic for finger streaming
+                     VRSkeletalSummaryData skeleton = controller.getSkeletalSummaryData();
+                     for (int i = 0; i < 4; i++)
+                        handManager.getHand(side).sendFingerPosition(i, skeleton.flFingerCurl(i));
                   }
                }
             }
