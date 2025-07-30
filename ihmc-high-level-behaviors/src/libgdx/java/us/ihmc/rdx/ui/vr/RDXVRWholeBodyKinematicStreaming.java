@@ -137,6 +137,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final RDXReferenceFrameGraphic chestFrameGraphics = new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH);
+   private final SideDependentList<RDXReferenceFrameGraphic> wristFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
 
@@ -201,6 +202,7 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+         wristFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame()));
          Pose3D ikControlFramePose = new Pose3D();
          if (side == RobotSide.LEFT)
@@ -419,6 +421,8 @@ public class RDXVRWholeBodyKinematicStreaming
                   trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
                   if (segmentType == CHEST)
                      chestFrameGraphics.setToReferenceFrame(ghostFullRobotModel.getChest().getBodyFixedFrame());
+                  if (segmentType.isWristRelated())
+                     wristFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(ghostFullRobotModel.getForearm(segmentType.getSegmentSide()).getBodyFixedFrame());
                }
 
                if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
@@ -815,6 +819,7 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             controllerFrameGraphics.get(side).getRenderables(renderables, pool);
             handFrameGraphics.get(side).getRenderables(renderables, pool);
+            wristFrameGraphics.get(side).getRenderables(renderables, pool);
             if (armScaling.get())
             {
                motionRetargeting.getShoulderGraphic(side).getRenderables(renderables, pool);
@@ -848,10 +853,12 @@ public class RDXVRWholeBodyKinematicStreaming
          toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       miniGhost.destroy();
+      chestFrameGraphics.dispose();
       for (RobotSide side : RobotSide.values)
       {
          controllerFrameGraphics.get(side).dispose();
          handFrameGraphics.get(side).dispose();
+         wristFrameGraphics.get(side).dispose();
       }
    }
 }
