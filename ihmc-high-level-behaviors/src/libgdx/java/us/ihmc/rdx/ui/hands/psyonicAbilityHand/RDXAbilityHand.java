@@ -282,8 +282,13 @@ public class RDXAbilityHand implements RDXHandInterface
          mappedValue = 0.0f;
       }
 
+      // 0-3 indices correspond to index-pinky finger curls, 4 is the thumb curl, 5 the thumb splay
+      int mappedIndex = index - 1;
+      if (mappedIndex == -1)
+         mappedIndex = 4;
+
       communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
-      communication.getCommand(serialNumber).getGoalPositions()[index] = mappedValue;
+      communication.getCommand(serialNumber).getGoalPositions()[mappedIndex] = mappedValue;
       commandNotification.set();
    }
 }

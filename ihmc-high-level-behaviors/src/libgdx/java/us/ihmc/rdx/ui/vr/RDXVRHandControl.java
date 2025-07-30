@@ -53,7 +53,7 @@ public class RDXVRHandControl
                   case  FINGER_STREAMING ->
                   {
                      VRSkeletalSummaryData skeleton = controller.getSkeletalSummaryData();
-                     for (int i = 0; i < 4; i++)
+                     for (int i = 0; i < 5; i++)
                         handManager.getHand(side).sendFingerPosition(i, skeleton.flFingerCurl(i));
                   }
                }
