@@ -21,6 +21,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.function.Consumer;
 
 /**
  * Manages communication with the Python side, which is running the LeRobot code
@@ -32,8 +33,8 @@ public class LeRobotInferenceManager
    private static final ROS2Topic<std_msgs.msg.dds.String> CONNECT = LEROBOT.withSuffix("connect").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> COMMAND = LEROBOT.withSuffix("command").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = LEROBOT.withSuffix("status").withType(std_msgs.msg.dds.String.class);
-   private static final ROS2Topic<Float32MultiArray> STATE_HAND_POSES = LEROBOT.withSuffix("/lerobot/state/hand_poses").withType(Float32MultiArray.class);
-   public static final ROS2Topic<Float32MultiArray> ACTION_HAND_POSES = LEROBOT.withSuffix("/lerobot/action/hand_poses").withType(Float32MultiArray.class);
+   private static final ROS2Topic<Float32MultiArray> STATE = LEROBOT.withSuffix("/lerobot/state").withType(Float32MultiArray.class);
+   public static final ROS2Topic<Float32MultiArray> ACTION = LEROBOT.withSuffix("/lerobot/action").withType(Float32MultiArray.class);
 
    private final ROS2Helper ros2Helper;
 
@@ -41,9 +42,9 @@ public class LeRobotInferenceManager
    private final RepeatingTaskThread thread = new RepeatingTaskThread("LeRobotROS2Thread", this::update);
    private final std_msgs.msg.dds.String command = new std_msgs.msg.dds.String();
    private final std_msgs.msg.dds.String status = new std_msgs.msg.dds.String();
-   private final Float32MultiArray stateHandPosesMessage = new Float32MultiArray();
+   private final Float32MultiArray stateMessage = new Float32MultiArray();
    private final FrequencyCalculator statusFrequency = new FrequencyCalculator();
-   private final SideDependentList<Pose3D> actionHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<Pose3D> actionHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D()); // TODO
    private final SideDependentList<Image> zedImages = new SideDependentList<>(new Image(), new Image());
    private boolean running = false;
    private final LeRobotIKStreaming ikStreaming;
@@ -63,7 +64,7 @@ public class LeRobotInferenceManager
          status.set(message);
          statusFrequency.ping();
       });
-      ros2Helper.subscribeViaVolatileCallback(ACTION_HAND_POSES, message ->
+      ros2Helper.subscribeViaVolatileCallback(ACTION, message ->
       {
          // TODO: Add timestamp to /lerobot/action/hand_poses topic or something
          //   This should be calculated according to the policy output
@@ -88,15 +89,18 @@ public class LeRobotInferenceManager
       thread.startRepeating();
    }
 
-   public void publishState(float[] stateArray)
+   public void publishState(Consumer<IDLSequence.Float> stateSetter)
    {
-      // TODO
+      IDLSequence.Float messageData = stateMessage.getData();
+      messageData.resetQuick();
+      stateSetter.accept(messageData);
+      ros2Helper.publish(STATE, stateMessage);
    }
 
+   @Deprecated
    public void publishHandPoses(Pose3DReadOnly leftPose, Pose3DReadOnly rightPose)
    {
-      int i = 0;
-      IDLSequence.Float data = stateHandPosesMessage.getData();
+      IDLSequence.Float data = stateMessage.getData();
       data.resetQuick();
       for (RobotSide side : RobotSide.values)
       {
@@ -108,7 +112,7 @@ public class LeRobotInferenceManager
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getZ32());
          data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getS32());
       }
-      ros2Helper.publish(STATE_HAND_POSES, stateHandPosesMessage);
+      ros2Helper.publish(STATE, stateMessage);
    }
 
    public void publishImage(RobotSide side, Mat bgra8Mat)

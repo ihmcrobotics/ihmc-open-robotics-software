@@ -11,7 +11,9 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -19,11 +21,15 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 
+import java.util.List;
+
 /**
  * Autonomy process thread for managing a {@link LeRobotInferenceManager} and supporting remote UI.
  */
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
+   public static final boolean USE_HAND_POSES = false;
+
    public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> LEROBOT_UI
          = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(LerobotInferenceOperationMessage.class));
    public static final double HZ = 20.0; // TODO: Pick an appropriate frequency
@@ -37,6 +43,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lerobot_update_thread");
    private final LatestTimestampModifiable latestTimestampModifiable;
+   private final List<String> armJointNames;
    private long sequenceID = 0L;
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
@@ -48,6 +55,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
                                        String robotName,
                                        FullHumanoidRobotModel fullRobotModel,
                                        Object fullRobotModelSync,
+                                       HumanoidJointNameMap jointMap,
                                        ImageSensor zedSensor)
    {
       super(LeRobotInferenceUpdateThread.class.getSimpleName());
@@ -55,6 +63,8 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       this.fullRobotModel = fullRobotModel;
       this.fullRobotModelSync = fullRobotModelSync;
       this.zedSensor = zedSensor;
+
+      armJointNames = jointMap.getArmJointNamesAsStrings();
 
       latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator));
       latestTimestampModifiable.modify(); // On startup, we want the initial state to propagate
@@ -88,7 +98,12 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          {
             leftPose.set(fullRobotModel.getHand(RobotSide.LEFT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
             rightPose.set(fullRobotModel.getHand(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
-         }
+
+            for (String armJointName : armJointNames)
+            {
+               OneDoFJointBasics armJoint = fullRobotModel.getOneDoFJointByName(armJointName);
+            }
+         } // TODO: Support joint angles
          leRobotInferenceManager.publishHandPoses(leftPose, rightPose);
          leRobotInferenceManager.setRunning(running.getValue());
          leRobotInferenceManager.getIKStreaming().setControlRobot(controlRobot.getValue());
