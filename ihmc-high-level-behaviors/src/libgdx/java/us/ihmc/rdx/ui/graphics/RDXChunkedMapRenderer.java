@@ -5,28 +5,19 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
-import java.nio.ShortBuffer;
-import java.util.Arrays;
-
-/**
- * Creates a graphic for the GPU Height Map to be visualized in the RDX UI. Each height value from the height map is turned into a 2cm polygon that is then
- * visualized on the UI. The height value location will be in the center of the 2cm polygon that is visualized.
- */
-public class RDXGlobalHeightMapGraphic implements RenderableProvider
+public class RDXChunkedMapRenderer implements RenderableProvider
 {
    private static class TileRenderer
    {
       private final GlobalTileInfo globalMapTiles;
       private final RDXHeightMapRenderer globalMapTileRenderers;
 
-      public TileRenderer(Mat heightMapMat, float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
+      public TileRenderer(float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
       {
          globalMapTileRenderers = new RDXHeightMapRenderer();
-         globalMapTiles = new GlobalTileInfo(heightMapMat, latestHeightMapOffset, latestCellSizeInMeters, heightMapCenter, cellsPerAxis);
+         globalMapTiles = new GlobalTileInfo(latestHeightMapOffset, latestCellSizeInMeters, heightMapCenter, cellsPerAxis);
       }
 
       public GlobalTileInfo getGlobalMapTiles()
@@ -48,19 +39,8 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
       private Point3D heightMapCenter;
       private int cellsPerAxis;
 
-      public GlobalTileInfo(Mat heightMapMat, float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
+      public GlobalTileInfo(float latestHeightMapOffset, float latestCellSizeInMeters, Point3D heightMapCenter, int cellsPerAxis)
       {
-//         By default this array is filled with zeros
-//         int totalCells = cellsPerAxis * cellsPerAxis;
-//         short[] heightsAsFloats = new short[totalCells];
-
-//         Arrays.fill(heightsAsFloats, (short) 32768);
-//         ShortBuffer buffer = this.heightMapMat.createBuffer();
-//         buffer.put(heightsAsFloats);
-
-//         PerceptionDebugTools.printMat("s", heightMapMat, 10);
-
-//         this.heightMapMat = heightMapMat;
          this.latestHeightMapOffset = latestHeightMapOffset;
          this.latestCellSizeInMeters = latestCellSizeInMeters;
          this.heightMapCenter = heightMapCenter;
@@ -120,7 +100,7 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
 
    private final IntMap<TileRenderer> globalMapRenderables = new IntMap<>();
 
-   public RDXGlobalHeightMapGraphic()
+   public RDXChunkedMapRenderer()
    {
    }
 
@@ -167,7 +147,7 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
       TileRenderer currentMapTile = globalMapRenderables.get(hash);
       if (currentMapTile == null)
       {
-         currentMapTile = new TileRenderer(heightMapMat, latestHeightMapOffset, latestCellSizeInMeters, heightMapCenter, cellsPerAxis);
+         currentMapTile = new TileRenderer(latestHeightMapOffset, latestCellSizeInMeters, heightMapCenter, cellsPerAxis);
          globalMapRenderables.put(hash, currentMapTile);
       }
 

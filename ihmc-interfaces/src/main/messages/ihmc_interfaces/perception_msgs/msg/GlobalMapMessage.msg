@@ -1,1 +1,0 @@
-GlobalMapTileMessage[] global_map

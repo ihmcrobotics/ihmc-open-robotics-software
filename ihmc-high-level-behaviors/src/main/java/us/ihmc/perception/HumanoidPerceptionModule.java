@@ -1,7 +1,6 @@
 package us.ihmc.perception;
 
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.GlobalMapTileMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,15 +15,8 @@ import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.perception.globalHeightMap.GlobalHeightMap;
-import us.ihmc.perception.globalHeightMap.GlobalMapTile;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-
-import java.time.Instant;
-import java.util.Collection;
 
 public class HumanoidPerceptionModule
 {

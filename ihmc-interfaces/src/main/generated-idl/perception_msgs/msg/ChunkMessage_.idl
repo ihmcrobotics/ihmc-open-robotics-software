@@ -1,0 +1,33 @@
+#ifndef __perception_msgs__msg__ChunkMessage__idl__
+#define __perception_msgs__msg__ChunkMessage__idl__
+
+#include "perception_msgs/msg/./HeightMapMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::ChunkMessage_")
+      struct ChunkMessage
+      {
+        /**
+         * This is the location in world of the center of the chunk
+         */
+        double center_x;
+        double center_y;
+        /**
+         * We have a hash to keep each chunk unique
+         */
+        long hash_code_of_chunk;
+        /**
+         * How we store the data for the chunk
+         */
+        perception_msgs::msg::dds::HeightMapMessage chunk;
+      };
+    };
+  };
+};
+
+#endif

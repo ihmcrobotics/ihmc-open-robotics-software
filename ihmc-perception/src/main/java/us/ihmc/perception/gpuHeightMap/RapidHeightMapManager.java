@@ -3,7 +3,7 @@ package us.ihmc.perception.gpuHeightMap;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.GlobalMapTileMessage;
+import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
@@ -13,12 +13,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.globalHeightMap.GlobalHeightMap;
-import us.ihmc.perception.globalHeightMap.GlobalLattice;
-import us.ihmc.perception.globalHeightMap.GlobalMapTile;
+import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMap;
+import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -55,7 +53,7 @@ public class RapidHeightMapManager
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
-   private final ROS2Publisher<GlobalMapTileMessage> globalMapTileMessagePublisher;
+   private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
@@ -63,7 +61,7 @@ public class RapidHeightMapManager
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
    private long sequenceId = 0;
    private FileOutputStream heightMapOutputStream;
-   private GlobalHeightMap globalHeightMap;
+   private final ChunkedMap chunkedMap = new ChunkedMap();
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -84,13 +82,11 @@ public class RapidHeightMapManager
       footSoleFrames.add(rightFootSoleFrame);
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
-      globalHeightMap = new GlobalHeightMap();
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
-      globalMapTileMessagePublisher = ros2Node.createPublisher(PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE);
+      chunkMessagePublisher = ros2Node.createPublisher(PerceptionAPI.CHUNK);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
    }
@@ -119,42 +115,41 @@ public class RapidHeightMapManager
       publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint);
 
       // -------------------------- Doing Map Tiles ---------------------
-      globalHeightMap.addHeightMap(hostGlobalHeightMap, heightMapCenterPoint, heightMapParameters.getGridSizeXY(), heightMapParameters.getGridResolutionXY());
-      publishGlobalHeightMapTile(globalMapTileMessagePublisher,
-                                 globalHeightMap,
-                                 heightMapCenterPoint,
-                                 GlobalLattice.latticeWidth,
-                                 heightMapParameters.getCellSize(),
-                                 heightMapParameters.getHeightOffset(),
-                                 heightMapParameters.getHeightScaleFactor());
+      chunkedMap.addHeightMap(hostGlobalHeightMap, heightMapCenterPoint, heightMapParameters.getGridSizeXY(), heightMapParameters.getGridResolutionXY());
+      publishChunkedMap(chunkMessagePublisher,
+                        chunkedMap,
+                        heightMapCenterPoint,
+                        Chunk.LATTICE_WIDTH,
+                        heightMapParameters.getCellSize(),
+                        heightMapParameters.getHeightOffset(),
+                        heightMapParameters.getHeightScaleFactor());
 
       hostGlobalHeightMap.close();
    }
 
-   private static void publishGlobalHeightMapTile(ROS2Publisher<GlobalMapTileMessage> publisher,
-                                                  GlobalHeightMap globalHeightMap,
-                                                  Point3D heightMapCenter,
-                                                  double widthInMeters,
-                                                  double cellSizeInMeters,
-                                                  double heightOffset,
-                                                  double heightScaleFactor)
+   private static void publishChunkedMap(ROS2Publisher<ChunkMessage> publisher,
+                                         ChunkedMap chunkedMap,
+                                         Point3D heightMapCenter,
+                                         double widthInMeters,
+                                         double cellSizeInMeters,
+                                         double heightOffset,
+                                         double heightScaleFactor)
    {
-      // Get tiles (made out of modified cells) from the global height map class and publish them in a for loop
-      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
-      for (GlobalMapTile tile : modifiedCells)
+      Collection<Chunk> chunks = chunkedMap.getChunks();
+      for (Chunk chunk : chunks)
       {
-         GlobalMapTileMessage globalMapTileMessage = new GlobalMapTileMessage();
-         globalMapTileMessage.setCenterX(tile.getCenterX());
-         globalMapTileMessage.setCenterY(tile.getCenterY());
-         globalMapTileMessage.setHashCodeOfTile(tile.hashCode());
-         HeightMapMessageTools.toMessage(tile.getTile(),
-                                         globalMapTileMessage.getHeightMap(),
+         ChunkMessage chunkMessage = new ChunkMessage();
+         chunkMessage.setCenterX(chunk.getCenterX());
+         chunkMessage.setCenterY(chunk.getCenterY());
+         chunkMessage.setHashCodeOfChunk(chunk.hashCode());
+         HeightMapMessageTools.toMessage(chunk.getChunk(),
+                                         chunkMessage.getChunk(),
                                          heightMapCenter,
                                          widthInMeters,
                                          cellSizeInMeters,
                                          heightOffset,
                                          heightScaleFactor);
-         publisher.publish(globalMapTileMessage);
+         publisher.publish(chunkMessage);
       }
    }
 
@@ -353,7 +348,7 @@ public class RapidHeightMapManager
    {
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
-      globalMapTileMessagePublisher.remove();
+      chunkMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
    }
 }

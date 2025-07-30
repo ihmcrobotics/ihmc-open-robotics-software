@@ -92,7 +92,7 @@ __device__ float3 back_project_perspective(int2 pos, float Z, float *params)
     return point;
 }
 
-__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
+__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *chunkedMap, size_t pitchGlobal, float *params)
 {
     // perform a smoothing over neighboring cells
     float heightSum = 0.0f;
@@ -107,7 +107,7 @@ __device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *glo
 
             if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
             {
-                unsigned short *heightValue = (unsigned short *)((char *)globalHeightMap + nxIndex * pitchGlobal) + nyIndex;
+                unsigned short *heightValue = (unsigned short *)((char *)chunkedMap + nxIndex * pitchGlobal) + nyIndex;
                 heightSum += *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
                 count++;
             }
@@ -424,7 +424,7 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
 }
 
 extern "C"
-__global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGlobalHeightMap,
+__global__ void scalingHeightMapKernel(float *chunkedMap, size_t pitchGlobalHeightMap,
                                        unsigned short *scaledHeightMap, size_t pitchScaledHeightMap,
                                        float *params)
 {
@@ -438,7 +438,7 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
     if (xIndex >= globalCellsPerAxis || yIndex >= globalCellsPerAxis)
         return;
 
-    float *globalHeight = (float *)((char *)globalHeightMap + xIndex * pitchGlobalHeightMap) + yIndex;
+    float *globalHeight = (float *)((char *)chunkedMap + xIndex * pitchGlobalHeightMap) + yIndex;
     // Scale the value to be visualized an an unsigned short
     float heightClamped = fminf(fmaxf(*globalHeight, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
     heightClamped += params[HEIGHT_OFFSET];
@@ -449,7 +449,7 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, size_t pitchGlobal,
+__global__ void terrainCroppingHeightMapKernel(unsigned short *chunkedMap, size_t pitchGlobal,
                                                unsigned short *terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
@@ -465,7 +465,7 @@ __global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, 
     int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
 
     // Set the terrain map index to the equivalent index in the global map
-    unsigned short *globalRow = (unsigned short *)((char *)globalHeightMap + globalX * pitchGlobal);
+    unsigned short *globalRow = (unsigned short *)((char *)chunkedMap + globalX * pitchGlobal);
     unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
 
     terrainRow[yIndex] = globalRow[globalY];
