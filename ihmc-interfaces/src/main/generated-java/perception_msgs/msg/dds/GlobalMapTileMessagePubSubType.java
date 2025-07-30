@@ -15,7 +15,7 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "22cfac1fbe12319e7e65ee02d7886f7d5458b8e7eb775d41029fbfa9d43c32f4";
+   		return "6796b9dcf1db7bcba25f7cade06d6147d66318f71b6034588ab5b83fc292738d";
    }
    
    @Override
@@ -52,9 +52,9 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -73,10 +73,10 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -90,9 +90,9 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(perception_msgs.msg.dds.GlobalMapTileMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_2(data.getCenterX());
+      cdr.write_type_6(data.getCenterX());
 
-      cdr.write_type_2(data.getCenterY());
+      cdr.write_type_6(data.getCenterY());
 
       cdr.write_type_2(data.getHashCodeOfTile());
 
@@ -101,9 +101,9 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(perception_msgs.msg.dds.GlobalMapTileMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setCenterX(cdr.read_type_2());
+      data.setCenterX(cdr.read_type_6());
       	
-      data.setCenterY(cdr.read_type_2());
+      data.setCenterY(cdr.read_type_6());
       	
       data.setHashCodeOfTile(cdr.read_type_2());
       	
@@ -114,8 +114,8 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(perception_msgs.msg.dds.GlobalMapTileMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_2("center_x", data.getCenterX());
-      ser.write_type_2("center_y", data.getCenterY());
+      ser.write_type_6("center_x", data.getCenterX());
+      ser.write_type_6("center_y", data.getCenterY());
       ser.write_type_2("hash_code_of_tile", data.getHashCodeOfTile());
       ser.write_type_a("height_map", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMap());
 
@@ -124,8 +124,8 @@ public class GlobalMapTileMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.GlobalMapTileMessage data)
    {
-      data.setCenterX(ser.read_type_2("center_x"));
-      data.setCenterY(ser.read_type_2("center_y"));
+      data.setCenterX(ser.read_type_6("center_x"));
+      data.setCenterY(ser.read_type_6("center_y"));
       data.setHashCodeOfTile(ser.read_type_2("hash_code_of_tile"));
       ser.read_type_a("height_map", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getHeightMap());
 

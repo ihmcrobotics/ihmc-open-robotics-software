@@ -14,29 +14,29 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
  */
 public class RDXGlobalHeightMapGraphic implements RenderableProvider
 {
-   private final IntMap<RDXGridMapGraphic> globalMapRenderables = new IntMap<>();
+   private final IntMap<RDXHeightMapRenderer> globalMapRenderables = new IntMap<>();
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    public void update()
    {
-      for (RDXGridMapGraphic mapRenderables : globalMapRenderables.values())
-         mapRenderables.update();
+//      for (RDXHeightMapRenderer mapRenderables : globalMapRenderables.values())
+//         mapRenderables.update();
    }
 
-   public void generateMeshesAsync(HeightMapMessage heightMapMessage, int tileKey)
+   public void addHeightMap(HeightMapMessage heightMapMessage, int tileKey)
    {
 
-      RDXGridMapGraphic graphic = getOrCreateHeightMapGraphic(tileKey);
-      graphic.generateMeshesAsync(heightMapMessage);
+//      RDXHeightMapRenderer graphic = getOrCreateHeightMapGraphic(tileKey);
+//      graphic.generateMeshesAsync(heightMapMessage);
    }
 
-   private RDXGridMapGraphic getOrCreateHeightMapGraphic(int tileKey)
+   private RDXHeightMapRenderer getOrCreateHeightMapGraphic(int tileKey)
    {
-      RDXGridMapGraphic graphic = globalMapRenderables.get(tileKey);
+      RDXHeightMapRenderer graphic = globalMapRenderables.get(tileKey);
       if (graphic == null)
       {
-         graphic = new RDXGridMapGraphic();
+         graphic = new RDXHeightMapRenderer();
          globalMapRenderables.put(tileKey, graphic);
       }
 
@@ -46,15 +46,15 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXGridMapGraphic mapRenderables : globalMapRenderables.values())
-         mapRenderables.getRenderables(renderables, pool);
+//      for (RDXGridMapGraphic mapRenderables : globalMapRenderables.values())
+//         mapRenderables.getRenderables(renderables, pool);
    }
 
    public void destroy()
    {
-      executorService.destroy();
-      for (RDXGridMapGraphic mapRenderables : globalMapRenderables.values())
-         mapRenderables.destroy();
+//      executorService.destroy();
+//      for (RDXGridMapGraphic mapRenderables : globalMapRenderables.values())
+//         mapRenderables.destroy();
    }
 }
 

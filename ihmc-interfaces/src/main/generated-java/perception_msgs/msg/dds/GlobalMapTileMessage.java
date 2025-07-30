@@ -8,8 +8,8 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class GlobalMapTileMessage extends Packet<GlobalMapTileMessage> implements Settable<GlobalMapTileMessage>, EpsilonComparable<GlobalMapTileMessage>
 {
-   public int center_x_;
-   public int center_y_;
+   public double center_x_;
+   public double center_y_;
    public int hash_code_of_tile_;
    public perception_msgs.msg.dds.HeightMapMessage height_map_;
 
@@ -35,20 +35,20 @@ public class GlobalMapTileMessage extends Packet<GlobalMapTileMessage> implement
       perception_msgs.msg.dds.HeightMapMessagePubSubType.staticCopy(other.height_map_, height_map_);
    }
 
-   public void setCenterX(int center_x)
+   public void setCenterX(double center_x)
    {
       center_x_ = center_x;
    }
-   public int getCenterX()
+   public double getCenterX()
    {
       return center_x_;
    }
 
-   public void setCenterY(int center_y)
+   public void setCenterY(double center_y)
    {
       center_y_ = center_y;
    }
-   public int getCenterY()
+   public double getCenterY()
    {
       return center_y_;
    }

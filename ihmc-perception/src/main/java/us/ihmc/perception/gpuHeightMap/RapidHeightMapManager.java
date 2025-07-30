@@ -3,6 +3,7 @@ package us.ihmc.perception.gpuHeightMap;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.GlobalMapTileMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
@@ -12,8 +13,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.globalHeightMap.GlobalHeightMap;
+import us.ihmc.perception.globalHeightMap.GlobalLattice;
+import us.ihmc.perception.globalHeightMap.GlobalMapTile;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -30,6 +35,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -49,13 +55,15 @@ public class RapidHeightMapManager
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
+   private final ROS2Publisher<GlobalMapTileMessage> globalMapTileMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
-   private final Point3D gridCellLocation = new Point3D();
+   private final Point3D heightMapCenterPoint = new Point3D();
    // This is created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
    private long sequenceId = 0;
    private FileOutputStream heightMapOutputStream;
+   private GlobalHeightMap globalHeightMap;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -78,9 +86,11 @@ public class RapidHeightMapManager
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
 
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
+      globalHeightMap = new GlobalHeightMap();
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      globalMapTileMessagePublisher = ros2Node.createPublisher(PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
    }
@@ -100,22 +110,59 @@ public class RapidHeightMapManager
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      publishHeightMap(hostGlobalHeightMap, heightMapCenterOrigin);
+      // The center of this map should be centered in the world grid
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
+      double currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+
+      publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint);
+
+      // -------------------------- Doing Map Tiles ---------------------
+      globalHeightMap.addHeightMap(hostGlobalHeightMap, heightMapCenterPoint, heightMapParameters.getGridSizeXY(), heightMapParameters.getGridResolutionXY());
+      publishGlobalHeightMapTile(globalMapTileMessagePublisher,
+                                 globalHeightMap,
+                                 heightMapCenterPoint,
+                                 GlobalLattice.latticeWidth,
+                                 heightMapParameters.getCellSize(),
+                                 heightMapParameters.getHeightOffset(),
+                                 heightMapParameters.getHeightScaleFactor());
 
       hostGlobalHeightMap.close();
    }
 
+   private static void publishGlobalHeightMapTile(ROS2Publisher<GlobalMapTileMessage> publisher,
+                                                  GlobalHeightMap globalHeightMap,
+                                                  Point3D heightMapCenter,
+                                                  double widthInMeters,
+                                                  double cellSizeInMeters,
+                                                  double heightOffset,
+                                                  double heightScaleFactor)
+   {
+      // Get tiles (made out of modified cells) from the global height map class and publish them in a for loop
+      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
+      for (GlobalMapTile tile : modifiedCells)
+      {
+         GlobalMapTileMessage globalMapTileMessage = new GlobalMapTileMessage();
+         globalMapTileMessage.setCenterX(tile.getCenterX());
+         globalMapTileMessage.setCenterY(tile.getCenterY());
+         globalMapTileMessage.setHashCodeOfTile(tile.hashCode());
+         HeightMapMessageTools.toMessage(tile.getTile(),
+                                         globalMapTileMessage.getHeightMap(),
+                                         heightMapCenter,
+                                         widthInMeters,
+                                         cellSizeInMeters,
+                                         heightOffset,
+                                         heightScaleFactor);
+         publisher.publish(globalMapTileMessage);
+      }
+   }
+
    private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter)
    {
-      // The center of this map should be centered in the world grid
-      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      double currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      double currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
-      gridCellLocation.set(currentCellX, currentCellY, 0.0);
-
       HeightMapMessageTools.toMessage(globalHeightMap,
                                       heightMapMessage,
-                                      gridCellLocation,
+                                      heightMapCenter,
                                       heightMapParameters.getGlobalWidthInMeters(),
                                       heightMapParameters.getCellSize(),
                                       heightMapParameters.getHeightOffset(),
@@ -124,7 +171,7 @@ public class RapidHeightMapManager
       if (heightMapParameters.getLogHeightMap())
       {
          float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
-                                                               gridCellLocation,
+                                                               heightMapCenterPoint,
                                                                (float) heightMapParameters.getGlobalWidthInMeters(),
                                                                (float) heightMapParameters.getCellSize(),
                                                                heightMapParameters);
@@ -277,7 +324,7 @@ public class RapidHeightMapManager
 
       HeightMapTools.convertToHeightMapData(terrainHeightMap,
                                             latestTerrainHeightMapData,
-                                            gridCellLocation,
+                                            heightMapCenterPoint,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
                                             (float) heightMapParameters.getCellSize(),
                                             (float) heightMapParameters.getHeightScaleFactor(),
@@ -306,6 +353,7 @@ public class RapidHeightMapManager
    {
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
+      globalMapTileMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
    }
 }

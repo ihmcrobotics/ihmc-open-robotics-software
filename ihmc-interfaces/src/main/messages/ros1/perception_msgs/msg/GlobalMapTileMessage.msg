@@ -1,7 +1,7 @@
 
-int32 center_x
+float64 center_x
 
-int32 center_y
+float64 center_y
 
 int32 hash_code_of_tile
 

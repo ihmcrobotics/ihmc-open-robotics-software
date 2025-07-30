@@ -1,9 +1,11 @@
 package us.ihmc.perception.globalHeightMap;
 
 import com.esotericsoftware.kryo.util.IntMap;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.perception.heightMap.HeightMapData;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
+import java.nio.ShortBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -17,9 +19,6 @@ import java.util.HashSet;
 
 public class GlobalHeightMap
 {
-   // Zero value in world minus the thickness of the foot
-   private final static double MIN_GLOBAL_HEIGHT_MAP_VALUE = -0.02;
-
    // A map that stores GlobalMapTile objects using their hashed indices.
    private final IntMap<GlobalMapTile> heightMapDataIntMap = new IntMap<>();
    // A set to keep track of modified tiles.
@@ -29,31 +28,37 @@ public class GlobalHeightMap
    {
    }
 
-   // Adds a local height map to the global height map.
-   public void addHeightMap(HeightMapData heightMapData)
+   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double gridResolution)
    {
-      // Clear the set of modified cells before processing the new height map data
       modifiedCells.clear();
 
-      // Iterate over each occupied cell in the local height map
-      for (int occupiedCell = 0; occupiedCell < heightMapData.getNumberOfOccupiedCells(); occupiedCell++)
+      int centerIndex = HeightMapTools.computeCenterIndex(gridSize, gridResolution);
+
+      int centerIndexLocal = HeightMapTools.computeCenterIndex(4.0, gridResolution);
+      int cellsPerAxisLocal = 2 * centerIndexLocal + 1;
+      int totalCells = cellsPerAxisLocal * cellsPerAxisLocal;
+      // This is done for speed optimization
+      short[] heightsArray = new short[totalCells];
+
+      ShortBuffer shortBuffer = heightMap.createBuffer(); // or ByteBuffer -> ShortBuffer
+      shortBuffer.get(heightsArray);
+
+      for (int i = 0; i < heightMap.rows(); i++)
       {
-         double cellHeight = heightMapData.getHeight(occupiedCell);
-
-         // Get the height of the current occupied cell
-         Point2DReadOnly occupiedCellPosition = heightMapData.getCellPosition(occupiedCell);
-         // Get or create the GlobalMapTile that contains the current cell
-         GlobalMapTile globalMapTile = getOrCreateDataContainingCell(occupiedCellPosition, heightMapData.getGridResolutionXY());
-
-         if (Double.isNaN(globalMapTile.getEstimatedGroundHeight()))
+         for (int j = 0; j < heightMap.cols(); j++)
          {
-            globalMapTile.setEstimatedGroundHeight(MIN_GLOBAL_HEIGHT_MAP_VALUE);
+            double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), gridResolution, centerIndex);
+            double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), gridResolution, centerIndex);
+
+            GlobalMapTile globalMapTile = getOrCreateTileContainingCell(XCord, YCord, GlobalLattice.latticeWidth, gridResolution);
+
+            int index = i * cellsPerAxisLocal + j;
+            short height = heightsArray[index];
+
+            globalMapTile.setHeightAt(XCord, YCord, height, gridResolution, centerIndex);
+
+            modifiedCells.add(globalMapTile);
          }
-
-         // Set the height of the cell within the global map tile
-         globalMapTile.setHeightAt(occupiedCellPosition.getX(), occupiedCellPosition.getY(), cellHeight);
-
-         modifiedCells.add(globalMapTile);
       }
    }
 
@@ -62,23 +67,28 @@ public class GlobalHeightMap
       return modifiedCells;
    }
 
-   private GlobalMapTile getOrCreateDataContainingCell(Point2DReadOnly cellPosition, double resolution)
+   public GlobalMapTile getOrCreateTileContainingCell(double x, double y, double tileSizeMeters, double resolution)
    {
-      // Convert the cell position to global map tile indices
-      int xIndex = GlobalLattice.toIndex(cellPosition.getX());
-      int yIndex = GlobalLattice.toIndex(cellPosition.getY());
-      // Generate a hash code for the tile indices
-      int hashOfMap = GlobalLattice.hashCodeOfTileIndices(xIndex, yIndex);
-      // Retrieve the global map tile from the map, or create a new one if it doesn't exist
-      GlobalMapTile data = heightMapDataIntMap.get(hashOfMap);
+      int tileWidthInCells = (int) Math.round(tileSizeMeters / resolution); // e.g., 5 / 0.02 = 250
 
-      if (data == null)
+      int globalCellX = (int) Math.floor(x / resolution);
+      int globalCellY = (int) Math.floor(y / resolution);
+
+      int tileIndexX = (int) Math.floor((double) globalCellX / tileWidthInCells);
+      int tileIndexY = (int) Math.floor((double) globalCellY / tileWidthInCells);
+
+      double tileCenterX = (tileIndexX + 0.5) * tileSizeMeters;
+      double tileCenterY = (tileIndexY + 0.5) * tileSizeMeters;
+      int hash = GlobalLattice.hashCodeOfTileIndices(tileCenterX, tileCenterY);
+
+      GlobalMapTile tile = heightMapDataIntMap.get(hash);
+      if (tile == null)
       {
-         data = new GlobalMapTile(resolution, GlobalLattice.toPosition(xIndex), GlobalLattice.toPosition(yIndex));
-         heightMapDataIntMap.put(hashOfMap, data);
+         tile = new GlobalMapTile(resolution, tileCenterX, tileCenterY);
+         heightMapDataIntMap.put(hash, tile);
       }
 
-      return data;
+      return tile;
    }
 }
 

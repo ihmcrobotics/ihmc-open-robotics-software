@@ -8,7 +8,7 @@ public class GlobalLattice
 
    public static int toIndex(double value)
    {
-      return (int) (Math.round(value / latticeWidth));
+      return (int) (Math.floor(value / latticeWidth));
    }
 
    public static double toPosition(int index)
@@ -29,8 +29,11 @@ public class GlobalLattice
       return hashCodeOfTileIndices(x, y);
    }
 
-   public static int hashCodeOfTileIndices(int xIndex, int yIndex)
+   public static int hashCodeOfTileIndices(double xIndex, double yIndex)
    {
-      return 13 * xIndex + 17 * yIndex;
+      int ix = (int) Math.floor(xIndex);
+      int iy = (int) Math.floor(yIndex);
+
+      return 13 * ix + 17 * iy;
    }
 }

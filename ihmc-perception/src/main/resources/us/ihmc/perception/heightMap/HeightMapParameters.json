@@ -135,7 +135,7 @@
     "upperBound" : 0.5
   },
   "Grid resolution XY" : {
-    "value" : 0.03,
+    "value" : 0.02,
     "lowerBound" : 0.01,
     "upperBound" : 0.1,
     "description" : "Resolution of the height map grid"

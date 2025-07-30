@@ -51,9 +51,9 @@ public class HeightMapTools
       return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;
    }
 
-   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
+   public static double indexToCoordinate(int index, double mapCenter, double resolution, int centerIndex)
    {
-      return (index - centerIndex) * resolution + gridCenter;
+      return (index - centerIndex) * resolution + mapCenter;
    }
 
    public static int keyToXIndex(int key, int centerIndex)
