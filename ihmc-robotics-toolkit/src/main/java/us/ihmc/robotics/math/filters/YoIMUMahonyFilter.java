@@ -294,11 +294,6 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       hasBeenInitialized.set(value);
    }
 
-   public boolean hasBeenInitialized()
-   {
-      return hasBeenInitialized.getBooleanValue();
-   }
-
    private final Vector3D rotationUpdate = new Vector3D();
    private final Quaternion quaternionUpdate = new Quaternion();
    private final Vector3D angularVelocityUnbiased = new Vector3D();
