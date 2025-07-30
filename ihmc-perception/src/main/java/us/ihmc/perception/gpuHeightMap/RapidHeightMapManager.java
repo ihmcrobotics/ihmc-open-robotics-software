@@ -149,8 +149,9 @@ public class RapidHeightMapManager
          {
             throw new RuntimeException(e);
          }
-         catch (IOException ignored)
+         catch (IOException e)
          {
+            e.printStackTrace();
          }
 
          try

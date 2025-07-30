@@ -46,6 +46,9 @@ public class HeightMapMessageTools
       Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       ShortBuffer shortBuffer = heightMap.createBuffer();
 
+      int totalCells = cellsPerAxis * cellsPerAxis;
+      short[] heights = new short[totalCells];
+
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
          short height = (short) heightMapMessage.getHeights().get(i);
@@ -55,8 +58,10 @@ public class HeightMapMessageTools
          int yIndex = key / cellsPerAxis;
 
          int index = yIndex * cellsPerAxis + xIndex;
-         shortBuffer.put(index, height);
+         heights[index] = height;
       }
+
+      shortBuffer.put(heights);
 
       return heightMap;
    }
@@ -93,7 +98,7 @@ public class HeightMapMessageTools
       for (int i = 0; i < heightMapData.getNumberOfOccupiedCells() && i < messageToPack.getKeys().capacity(); i++)
       {
          int key = heightMapData.getKey(i);
-         messageToPack.getKeys().add((short) key);
+         messageToPack.getKeys().add((key));
          messageToPack.getHeights().add((short) heightMapData.getHeightAt(key));
       }
    }

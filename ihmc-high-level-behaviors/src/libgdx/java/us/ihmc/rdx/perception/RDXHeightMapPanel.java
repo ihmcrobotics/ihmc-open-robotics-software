@@ -13,6 +13,7 @@ import imgui.extension.imguifiledialog.flag.ImGuiFileDialogFlags;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapLogReader;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -26,11 +27,11 @@ import java.util.Set;
 
 public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
 {
-   RDXROS2HeightMapVisualizer heightMapVisualizer;
+   private final RDXROS2HeightMapVisualizer heightMapVisualizer;
 
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
    private HeightMapLogReader logReader;
-   int currentFrameIndex = 0;
+   private int currentFrameIndex = 0;
 
    private boolean isPlaying = false;
    private final float[] playbackSpeedSeconds = new float[] {0.1f};
@@ -66,7 +67,7 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
          if (ImGuiFileDialog.isOk())
          {
             String selectedFile = ImGuiFileDialog.getFilePathName();
-            System.out.println("Selected file: " + selectedFile);
+            LogTools.info("Selected file: " + selectedFile);
 
             if (selectedFile.endsWith(".json"))
             {
@@ -237,6 +238,14 @@ public class RDXHeightMapPanel extends RDXPanel implements RenderableProvider
    public void destroy()
    {
       heightMapVisualizer.destroy();
+      try
+      {
+         logReader.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    @Override

@@ -34,12 +34,8 @@ public class ContinuousHikingProcess
    private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
-
    private final SnappingTerrainManager snappingTerrainManager;
-
    private final RapidHeightMapThread rapidHeightMapThread;
-   @org.jetbrains.annotations.NotNull
-   private final ROS2ImageSensors ros2ImageSensors;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
@@ -47,8 +43,6 @@ public class ContinuousHikingProcess
                                   ROS2ImageSensors ros2ImageSensors,
                                   ROS2SyncedRobotModel ros2SyncedRobot)
    {
-      this.ros2ImageSensors = ros2ImageSensors;
-
       // Create a bunch of overhead for the ROS2 communication and the robot
       ros2SyncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
@@ -118,7 +112,6 @@ public class ContinuousHikingProcess
 
    public void destroy()
    {
-      ros2ImageSensors.destroy();
       rapidHeightMapThread.blockingKill();
       continuousPlannerSchedulingTask.destroy();
       snappingTerrainManager.close();
