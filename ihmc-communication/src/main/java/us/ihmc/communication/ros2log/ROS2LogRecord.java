@@ -50,8 +50,6 @@ public class ROS2LogRecord
          ROS2Topic<?> ros2Topic = topicsToLog.get(i);
          topicManagers.add(new RecordTopicManager<>(ros2Topic, ros2Node, timestampProvider));
       }
-
-      ThreadTools.sleepForever();
    }
 
    public void start()
@@ -99,6 +97,15 @@ public class ROS2LogRecord
             topicManagers.get(i).clear();
          }
       }
+   }
+
+   public void destroy()
+   {
+      if (executorService != null)
+      {
+         executorService.shutdownNow();
+      }
+      ros2Node.destroy();
    }
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()
