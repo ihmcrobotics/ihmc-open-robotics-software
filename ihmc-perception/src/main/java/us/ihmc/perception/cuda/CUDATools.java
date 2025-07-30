@@ -12,6 +12,8 @@ import org.bytedeco.javacpp.Pointer;
 import us.ihmc.log.LogTools;
 
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -123,6 +125,11 @@ public class CUDATools
       }
 
       return false;
+   }
+
+   public static boolean runningOnJetson()
+   {
+      return Files.exists(Path.of("/etc/nv_tegra_release"));
    }
 
    /**
