@@ -26,6 +26,8 @@ public class RDXAbilityHand implements RDXHandInterface
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
    private static final float GRIP_VELOCITY = 30.0f;
+   private static final float FINGER_POSITION_MAX = 90.0f;
+   private static final float FINGER_POSITION_MIN = 10.0f;
    private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
 
    private final String serialNumber;
@@ -264,28 +266,55 @@ public class RDXAbilityHand implements RDXHandInterface
          previousControl = ControlMode.POSITION;
       }
 
+      // 0-3 indices correspond to index-pinky finger curls, 4 is the thumb curl, 5 the thumb distal
+      int mappedIndex = switch (index)
+      {
+         case 0 -> 4;  // thumb curl
+         case 5 -> 5;  // thumb distal
+         default -> index - 1; // other fingers curl
+      };
+
       float mappedValue;
-      if (value < 0.05f)
+      if (mappedIndex != 5)
       {
-         mappedValue = 0.0f;
-      }
-      else if (value <= 0.85f)
-      {
-         // scale linearly from 0 at 0.05 to 100 at 0.85
-         mappedValue = (value - 0.05f) / (0.85f - 0.05f) * 100.0f;
+         if (value < 0.05f)
+         {
+            mappedValue = FINGER_POSITION_MIN;
+         }
+         else if (value <= 0.85f)
+         {
+            // scale linearly from MIN at 0.05 to MAX at 0.85
+            mappedValue = FINGER_POSITION_MIN + (value - 0.05f) / (0.85f - 0.05f) * (FINGER_POSITION_MAX - FINGER_POSITION_MIN);
+         }
+         else
+         {
+            mappedValue = FINGER_POSITION_MAX;
+         }
       }
       else
       {
-         mappedValue = 100.0f;
+         if (value < 0.05f)
+         {
+            mappedValue = -FINGER_POSITION_MAX;
+         }
+         else if (value <= 0.85f)
+         {
+            mappedValue = -FINGER_POSITION_MAX + (value - 0.05f) / (0.85f - 0.05f) * (FINGER_POSITION_MIN + FINGER_POSITION_MAX);
+         }
+         else
+         {
+            mappedValue = FINGER_POSITION_MIN;
+         }
       }
-
-      // 0-3 indices correspond to index-pinky finger curls, 4 is the thumb curl, 5 the thumb splay
-      int mappedIndex = index - 1;
-      if (mappedIndex == -1)
-         mappedIndex = 4;
 
       communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
       communication.getCommand(serialNumber).getGoalPositions()[mappedIndex] = mappedValue;
       commandNotification.set();
+   }
+
+   @Override
+   public float getFingerPosition(int index)
+   {
+      return actuatorPostions[index];
    }
 }

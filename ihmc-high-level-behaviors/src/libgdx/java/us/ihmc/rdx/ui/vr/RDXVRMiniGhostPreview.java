@@ -77,9 +77,9 @@ public class RDXVRMiniGhostPreview
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         float lateralJoystick  = controller.getJoystickActionData().x();
-         if (Math.abs(lateralJoystick) > CONTROL_JOYSTICK_THRESHOLD)
-            ghostPoseHeadsetOffset.getRotation().appendYawRotation(Math.signum(lateralJoystick) * Math.toRadians(DEGREE_JOYSTICK_INCREMENT));
+         float forwardJoystick  = controller.getJoystickActionData().y();
+         if (Math.abs(forwardJoystick) > CONTROL_JOYSTICK_THRESHOLD)
+            ghostPoseHeadsetOffset.getRotation().appendYawRotation(Math.signum(forwardJoystick) * Math.toRadians(DEGREE_JOYSTICK_INCREMENT));
          miniGhostFrame.update();
       });
    }

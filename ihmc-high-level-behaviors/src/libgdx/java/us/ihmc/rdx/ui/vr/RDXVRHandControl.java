@@ -18,6 +18,8 @@ public class RDXVRHandControl
    private final SideDependentList<RDXHandControlMode> handsControlModes;
    private final SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
    private final ImBoolean userIsControllingRobot;
+   private static final float CONTROL_JOYSTICK_THRESHOLD = 0.5f;
+   private static final float DISTAL_THUMB_JOYSTICK_INCREMENT = 1.0f;
 
    public RDXVRHandControl(RDXVRContext vrContext,
                            RDXHandManager handManager,
@@ -54,7 +56,19 @@ public class RDXVRHandControl
                   {
                      VRSkeletalSummaryData skeleton = controller.getSkeletalSummaryData();
                      for (int i = 0; i < 5; i++)
+                     {
                         handManager.getHand(side).sendFingerPosition(i, skeleton.flFingerCurl(i));
+                     }
+
+                     float lateralJoystick  = controller.getJoystickActionData().x();
+                     if (Math.abs(lateralJoystick) > CONTROL_JOYSTICK_THRESHOLD)
+                     {
+                        float newThumbDistal = handManager.getHand(side).getFingerPosition(5);
+                        newThumbDistal += Math.signum(lateralJoystick) * DISTAL_THUMB_JOYSTICK_INCREMENT;
+                        newThumbDistal = Math.max(0.0f, Math.min(newThumbDistal, 1.0f));
+                        handManager.getHand(side).sendFingerPosition(5, newThumbDistal);
+                     }
+
                   }
                }
             }

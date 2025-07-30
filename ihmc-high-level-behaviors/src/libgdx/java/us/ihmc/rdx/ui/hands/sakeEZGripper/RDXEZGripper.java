@@ -337,4 +337,11 @@ public class RDXEZGripper implements RDXHandInterface
    {
       //TODO implement
    }
+
+   @Override
+   public float getFingerPosition(int index)
+   {
+      //TODO implement
+      return 0.0f;
+   }
 }

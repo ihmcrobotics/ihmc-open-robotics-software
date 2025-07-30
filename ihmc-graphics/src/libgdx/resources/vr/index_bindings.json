@@ -665,6 +665,9 @@
                   },
                   "position" : {
                      "output" : "/actions/main/in/left_joystick"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_joysticktouched"
                   }
                },
                "mode" : "joystick",
@@ -677,6 +680,9 @@
                   },
                   "position" : {
                      "output" : "/actions/main/in/right_joystick"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/right_joysticktouched"
                   }
                },
                "mode" : "joystick",
