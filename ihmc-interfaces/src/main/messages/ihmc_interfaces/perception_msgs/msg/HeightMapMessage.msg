@@ -34,7 +34,7 @@ float64 cell_size_in_meters
 int32[<=255000] keys
 
 # List of heights, which correspond to the list of keys
-float32[<=255000] heights
+int32[<=255000] heights
 
 # List of variances, which correspond to the list of keys. May be empty.
 float32[<=255000] variances

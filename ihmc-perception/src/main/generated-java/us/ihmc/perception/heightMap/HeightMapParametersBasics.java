@@ -23,6 +23,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.enableVerticalFilter, enableVerticalFilter);
    }
 
+   default void setLogHeightMap(boolean logHeightMap)
+   {
+      set(HeightMapParameters.logHeightMap, logHeightMap);
+   }
+
    default void setSearchWindowHeight(int searchWindowHeight)
    {
       set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
@@ -98,9 +103,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxClampHeight, maxClampHeight);
    }
 
-   default void setCellSizeInMeters(double cellSizeInMeters)
+   default void setCellSize(double cellSize)
    {
-      set(HeightMapParameters.cellSizeInMeters, cellSizeInMeters);
+      set(HeightMapParameters.cellSize, cellSize);
    }
 
    default void setLocalWidthInMeters(double localWidthInMeters)

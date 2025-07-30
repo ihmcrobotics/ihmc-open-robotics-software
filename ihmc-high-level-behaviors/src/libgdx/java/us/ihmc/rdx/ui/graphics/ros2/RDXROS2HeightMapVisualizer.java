@@ -97,13 +97,14 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      // Even if the height map is publishing, we aren't going to update anything with that data unless it's active
       if (!isActive())
          return;
 
       executorService.clearQueueAndExecute(() ->
                                            {
                                               long sequenceId = heightMapMessage.getSequenceId();
+                                              //TODO this shouldn't have to be the case, it cause's problems if you want to visualize one message
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
@@ -115,9 +116,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestHeightMapOffset = (float) heightMapMessage.getHeightOffset();
                                               latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage,
-                                                                                                   latestHeightMapOffset,
-                                                                                                   (float) heightMapMessage.getHeightScaleFactor());
+                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 
                                               if (latestHeightMapData == null)
                                               {
@@ -134,7 +133,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                     (float) heightMapMessage.getHeightScaleFactor(),
                                                                                     (float) heightMapMessage.getHeightOffset());
 
-                                              // This prevents the rendering from happening to early, it was throwing exceptions
+                                              // This prevents the rendering from happening too early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)
                                                  updateHeightMapImage();
                                            });
@@ -170,7 +169,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
    {
-      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      // Even if the height map is publishing, we aren't going to update anything with that data unless it's active
       if (!isActive())
          return;
 
