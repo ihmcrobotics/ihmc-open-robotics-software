@@ -11,13 +11,9 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
 import us.ihmc.motionRetargeting.RetargetingParameters;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
@@ -26,7 +22,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
-import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
+import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRManager;
@@ -48,7 +44,7 @@ public class RDXVRModeManager
 
    private RDXVRStereoVision stereoVision;
    private RDXVRFootstepPlacement footstepPlacer;
-   private RDXHandConfigurationManager handManager;
+   private RDXHandManager handManager;
 
    @Nullable
    private RDXVRWholeBodyKinematicStreaming kinematicsStreaming;
