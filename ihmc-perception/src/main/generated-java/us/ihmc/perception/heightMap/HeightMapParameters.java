@@ -20,7 +20,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 
    public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
-   public static final BooleanStoredPropertyKey enableVerticalFilter = keys.addBooleanKey("Enable vertical filter");
    public static final BooleanStoredPropertyKey logHeightMap = keys.addBooleanKey("Log height map");
    public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
    public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
@@ -45,9 +44,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
-   public static final IntegerStoredPropertyKey fastSearchSize = keys.addIntegerKey("Fast search size");
-   public static final IntegerStoredPropertyKey verticalSearchSize = keys.addIntegerKey("Vertical search size");
-   public static final DoubleStoredPropertyKey verticalSearchResolution = keys.addDoubleKey("Vertical search resolution");
    /**
     * Resolution of the height map grid
     */
@@ -85,8 +81,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     */
    public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
    public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
-   public static final BooleanStoredPropertyKey denoiserEnabled = keys.addBooleanKey("Denoiser enabled");
-   public static final BooleanStoredPropertyKey statisticsLoggingEnabled = keys.addBooleanKey("Statistics logging enabled");
 
    /**
     * Loads this property set.

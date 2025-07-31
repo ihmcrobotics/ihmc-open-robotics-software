@@ -40,7 +40,7 @@ public class ChunkedMap
             double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndex);
             double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndex);
 
-            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.LATTICE_WIDTH, resolution, heightOffset, scalingFactor);
+            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.CHUNK_WIDTH, resolution, heightOffset, scalingFactor);
 
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
             short height = heightsArray[index];
@@ -72,8 +72,14 @@ public class ChunkedMap
       int chunkIndexX = (int) Math.floor((double) worldCellX / cellsPerAxis);
       int chunkIndexY = (int) Math.floor((double) worldCellY / cellsPerAxis);
 
-      double chunkOriginX = chunkIndexX * chunkSizeInMeters;
-      double chunkOriginY = chunkIndexY * chunkSizeInMeters;
+      /*
+       * Note: This is very important, the chunk maps need to align on the same grid layout as the height map
+       * We do this because the center of cell [0,0] for the height map is world is (0.0, 0.0).
+       * And so we need the center of cell [0,0] for the chunk map to also be at world (0.0, 0.0)
+       * So the (0.5 * resolution) shifts the origin to be aligned with the height map
+       */
+      double chunkOriginX = chunkIndexX * chunkSizeInMeters - 0.5 * chunkResolution;
+      double chunkOriginY = chunkIndexY * chunkSizeInMeters - 0.5 * chunkResolution;
 
       int hash = Chunk.generateHashForChunk(chunkOriginX, chunkOriginY);
 

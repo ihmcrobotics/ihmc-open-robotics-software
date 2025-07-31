@@ -2,7 +2,6 @@
   "title": "HeightMapParametersForFST",
   "Drift offset filter": true,
   "Flying points filter": true,
-  "Enable vertical filter": true,
   "Log height map" : false,
   "Search window height": {
     "value": 400,
@@ -119,21 +118,6 @@
     "lowerBound": 0.0,
     "upperBound": 1.0
   },
-  "Fast search size": {
-    "value": 20,
-    "lowerBound": 10,
-    "upperBound": 100
-  },
-  "Vertical search size": {
-    "value": 80,
-    "lowerBound": 10,
-    "upperBound": 100
-  },
-  "Vertical search resolution": {
-    "value": 0.01,
-    "lowerBound": 0.01,
-    "upperBound": 0.5
-  },
   "Grid resolution XY": {
     "value": 0.03,
     "lowerBound": 0.01,
@@ -187,7 +171,5 @@
     "upperBound": 0.2,
     "description": "This is the measurement variance when the robot is moving"
   },
-  "Estimate height with kalman filter": true,
-  "Denoiser enabled": false,
-  "Statistics logging enabled": true
+  "Estimate height with kalman filter": true
 }

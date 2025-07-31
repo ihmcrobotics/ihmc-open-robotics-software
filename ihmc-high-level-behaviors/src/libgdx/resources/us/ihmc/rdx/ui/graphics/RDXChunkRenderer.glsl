@@ -9,7 +9,8 @@ uniform mat4 u_viewTrans;
 uniform mat4 u_projTrans;
 uniform float u_screenWidth;
 
-uniform vec2 u_gridOrigin;          // (New) The lower-left corner of the chunk
+uniform int u_cellsPerAxis;
+uniform vec2 u_chunkOrigin;
 uniform float u_cellSize;
 uniform float u_heightScalingFactor;
 uniform float u_heightOffset;
@@ -71,13 +72,11 @@ vec4 getColor(float height)
 
 void main()
 {
-    int cellsPerAxis = int(1.0 / u_cellSize); // Or pass as a uniform if needed
+    int xIndex = gl_VertexID / u_cellsPerAxis;
+    int yIndex = gl_VertexID % u_cellsPerAxis;
 
-    int xIndex = gl_VertexID / cellsPerAxis;
-    int yIndex = gl_VertexID % cellsPerAxis;
-
-    float xPosition = u_gridOrigin.x + float(xIndex) * u_cellSize;
-    float yPosition = u_gridOrigin.y + float(yIndex) * u_cellSize;
+    float xPosition = u_chunkOrigin.x + float(xIndex) * u_cellSize;
+    float yPosition = u_chunkOrigin.y + float(yIndex) * u_cellSize;
     float zPosition = (a_height / u_heightScalingFactor) - u_heightOffset;
 
     vec4 pointInCameraFrame = u_viewTrans * vec4(xPosition, yPosition, zPosition, 1);

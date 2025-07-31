@@ -2,6 +2,7 @@ package us.ihmc.perception.heightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.IDLSequence.Integer;
@@ -35,13 +36,12 @@ public class HeightMapMessageTools
       return heightMapData;
    }
 
-   public static Mat unpackMessageToMatNotCentered(HeightMapMessage heightMapMessage)
+   public static Mat unpackMessageToMat(ChunkMessage chunkMessage)
    {
-      if (heightMapMessage == null)
+      if (chunkMessage == null)
          return null;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
-      int cellsPerAxis = 2 * centerIndex;
+      int cellsPerAxis = chunkMessage.getCellsPerAxis();
 
       Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       ShortBuffer shortBuffer = heightMap.createBuffer();
@@ -49,10 +49,10 @@ public class HeightMapMessageTools
       int totalCells = cellsPerAxis * cellsPerAxis;
       short[] heights = new short[totalCells];
 
-      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
+      for (int i = 0; i < chunkMessage.getHeights().size(); i++)
       {
-         short height = (short) heightMapMessage.getHeights().get(i);
-         int key = heightMapMessage.getKeys().get(i);
+         short height = (short) chunkMessage.getHeights().get(i);
+         int key = chunkMessage.getKeys().get(i);
 
          int xIndex = key % cellsPerAxis;
          int yIndex = key / cellsPerAxis;
@@ -132,6 +132,61 @@ public class HeightMapMessageTools
          messageToPack.getKeys().add((key));
          messageToPack.getHeights().add((short) heightMapData.getHeightAt(key));
       }
+   }
+
+   public static void toMessage(Mat chunkDataForMessage,
+                                ChunkMessage messageToPack,
+                                Point3D mapOrigin,
+                                double widthInMeters,
+                                double cellSizeInMeters,
+                                double heightOffset,
+                                double heightScaleFactor,
+                                int cellsPerAxis)
+   {
+      clear(messageToPack);
+
+      messageToPack.setGridSizeXy(widthInMeters);
+      messageToPack.setXyResolution(cellSizeInMeters);
+      messageToPack.setOriginX(mapOrigin.getX());
+      messageToPack.setOriginY(mapOrigin.getY());
+      messageToPack.setWidthInMeters(widthInMeters);
+      messageToPack.setCellSizeInMeters(cellSizeInMeters);
+      messageToPack.setHeightOffset(heightOffset);
+      messageToPack.setHeightScaleFactor(heightScaleFactor);
+      messageToPack.setCellsPerAxis(cellsPerAxis);
+
+      // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      // Make sure Mat type is correct
+      if (chunkDataForMessage.type() != opencv_core.CV_16UC1)
+         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+
+      ShortBuffer shortBuffer = chunkDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
+
+      // This is done for speed optimization
+      short[] heightsArray = new short[totalCells];
+      shortBuffer.get(heightsArray);
+      Integer keys = messageToPack.getKeys();
+      Integer heights = messageToPack.getHeights();
+
+      // No overhead for this loop, it's as fast as possible with the current message
+      for (int i = 0; i < totalCells; ++i)
+      {
+         keys.add(i);
+         heights.add(heightsArray[i]);
+      }
+   }
+
+   public static void clear(ChunkMessage messageToClear)
+   {
+      messageToClear.setGridSizeXy(-1.0);
+      messageToClear.setXyResolution(-1.0);
+      messageToClear.setOriginX(-1.0);
+      messageToClear.setOriginX(-1.0);
+      messageToClear.setEstimatedGroundHeight(-1.0);
+      messageToClear.getKeys().clear();
+      messageToClear.getHeights().clear();
    }
 
    public static void toMessage(Mat heightMapDataForMessage,

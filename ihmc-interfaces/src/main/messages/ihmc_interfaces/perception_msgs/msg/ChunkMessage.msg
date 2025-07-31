@@ -34,5 +34,8 @@ float64 cell_size_in_meters
 # Cells per axis
 int32 cells_per_axis
 
+# List of height map keys. See HeightMapTools for converting keys to coordinates
+int32[<=255000] keys
+
 # List of heights, which correspond to the list of keys
 int32[<=255000] heights

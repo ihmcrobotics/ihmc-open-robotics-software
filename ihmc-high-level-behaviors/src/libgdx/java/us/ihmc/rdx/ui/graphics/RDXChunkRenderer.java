@@ -16,8 +16,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
@@ -33,7 +31,7 @@ import java.nio.FloatBuffer;
  * To learn about OpenGL and figure out what this code is doing,
  * Tomasz recommends <a href="https://learnopengl.com/">LearnOpenGL.com</a>
  */
-public class RDXChunkMapRenderer implements RenderableProvider
+public class RDXChunkRenderer implements RenderableProvider
 {
    // The height map renderable
    private final Renderable renderable = new Renderable();
@@ -42,10 +40,11 @@ public class RDXChunkMapRenderer implements RenderableProvider
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Generic, 1, "a_height"));
 
    // Uniforms
-   private final Vector2 gridOrigin = new Vector2();
+   private final Vector2 chunkOrigin = new Vector2();
    private float cellSize;
    private float heightScalingFactor;
    private float heightOffset;
+   private int cellsPerAxis;
    private boolean hasBeenCreated;
 
    public void create(int maxCells)
@@ -87,11 +86,17 @@ public class RDXChunkMapRenderer implements RenderableProvider
       });
       rdxShader.registerUniform(screenWidthUniform);
 
-      RDXUniform gridOriginUniform = RDXUniform.createGlobalUniform("u_gridOrigin", (shader, inputID, renderable, combinedAttributes) ->
+      RDXUniform cellsPerAxisUniform = RDXUniform.createGlobalUniform("u_cellsPerAxis", (shader, inputID, renderable, combinedAttributes) ->
       {
-         shader.set(inputID, gridOrigin);
+         shader.set(inputID, cellsPerAxis);
       });
-      rdxShader.registerUniform(gridOriginUniform);
+      rdxShader.registerUniform(cellsPerAxisUniform);
+
+      RDXUniform chunkOriginUniform = RDXUniform.createGlobalUniform("u_chunkOrigin", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, chunkOrigin);
+      });
+      rdxShader.registerUniform(chunkOriginUniform);
 
       RDXUniform cellSizeUniform = RDXUniform.createGlobalUniform("u_cellSize", (shader, inputID, renderable, combinedAttributes) ->
       {
@@ -114,15 +119,16 @@ public class RDXChunkMapRenderer implements RenderableProvider
 
    public void update(Mat heightMapImage,
                       float heightOffset,
-                      float gridOriginX,
-                      float gridOriginY,
+                      float chunkOriginX,
+                      float chunkOriginY,
                       int cellsPerAxis,
                       float cellSize,
                       float heightScalingFactor)
    {
       // Update uniforms
       this.heightOffset = heightOffset;
-      this.gridOrigin.set(gridOriginX, gridOriginY);
+      this.cellsPerAxis = cellsPerAxis;
+      this.chunkOrigin.set(chunkOriginX, chunkOriginY);
       this.cellSize = cellSize;
       this.heightScalingFactor = heightScalingFactor;
 

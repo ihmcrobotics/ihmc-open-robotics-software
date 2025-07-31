@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
@@ -33,7 +33,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
    {
       for (ChunkRenderer chunkRenderer : chunkRenderers.values())
       {
-         RDXChunkMapRenderer heightMapRenderer = chunkRenderer.getRenderer();
+         RDXChunkRenderer heightMapRenderer = chunkRenderer.getRenderer();
          if (heightMapRenderer.isHasBeenCreated())
          {
             Chunk chunk = chunkRenderer.getChunk();
@@ -41,7 +41,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
             {
                if (chunk.getChunk() != null && chunk.getChunk().ptr(0) != null)
                {
-                  heightMapRenderer.update(chunk.getChunk(),
+                     heightMapRenderer.update(chunk.getChunk(),
                                            (float) chunk.getHeightMapOffset(),
                                            (float) chunk.getOriginX(),
                                            (float) chunk.getOriginY(),
@@ -54,25 +54,25 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       }
    }
 
-   public void addHeightMap(HeightMapMessage heightMapMessage, int hash)
+   public void addHeightMap(ChunkMessage chunkMessage, int hash)
    {
       ChunkRenderer chunkRenderer = chunkRenderers.get(hash);
       if (chunkRenderer == null)
       {
-         chunkRenderer = new ChunkRenderer(heightMapMessage);
+         chunkRenderer = new ChunkRenderer(chunkMessage);
          chunkRenderers.put(hash, chunkRenderer);
       }
 
-      Mat latestChunk = HeightMapMessageTools.unpackMessageToMatNotCentered(heightMapMessage);
+      Mat latestChunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);
 
       Chunk chunk = chunkRenderer.getChunk();
       chunk.setChunk(latestChunk);
-      chunk.setCellSize(heightMapMessage.getCellSizeInMeters());
-      //TODO should create a seperate chunk message, basically the same as the height map but now it would be independent
-      chunk.setHeightMapOffset((float) heightMapMessage.getHeightOffset());
-      chunk.setOriginX(heightMapMessage.getGridCenterX());
-      chunk.setOriginY(heightMapMessage.getGridCenterY());
-      chunk.setCellsPerAxis(heightMapMessage.getCellsPerAxis());
+      chunk.setCellSize(chunkMessage.getCellSizeInMeters());
+      chunk.setHeightMapOffset((float) chunkMessage.getHeightOffset());
+      chunk.setOriginX(chunkMessage.getOriginX());
+      chunk.setOriginY(chunkMessage.getOriginY());
+      chunk.setCellsPerAxis(chunkMessage.getCellsPerAxis());
+      chunk.setScalingFactor(chunkMessage.getHeightScaleFactor());
    }
 
    @Override
@@ -97,12 +97,12 @@ public class RDXChunkedMapRenderer implements RenderableProvider
    private static class ChunkRenderer
    {
       private final Chunk chunk;
-      private final RDXChunkMapRenderer renderer;
+      private final RDXChunkRenderer renderer;
 
-      public ChunkRenderer(HeightMapMessage heightMapMessage)
+      public ChunkRenderer(ChunkMessage chunkMessage)
       {
-         renderer = new RDXChunkMapRenderer();
-         chunk = new Chunk(heightMapMessage);
+         renderer = new RDXChunkRenderer();
+         chunk = new Chunk(chunkMessage);
       }
 
       public Chunk getChunk()
@@ -110,7 +110,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          return chunk;
       }
 
-      public RDXChunkMapRenderer getRenderer()
+      public RDXChunkRenderer getRenderer()
       {
          return renderer;
       }

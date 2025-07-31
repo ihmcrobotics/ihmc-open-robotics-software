@@ -17,7 +17,6 @@ import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMap;
 import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -136,9 +135,9 @@ public class RapidHeightMapManager
          chunkMessage.setHashCodeOfChunk(chunk.hashCode());
 
          HeightMapMessageTools.toMessage(chunk.getChunk(),
-                                         chunkMessage.getChunk(),
+                                         chunkMessage,
                                          new Point3D(chunk.getOriginX(), chunk.getOriginY(), 0),
-                                         Chunk.LATTICE_WIDTH,
+                                         Chunk.CHUNK_WIDTH,
                                          chunk.getCellSize(),
                                          chunk.getHeightMapOffset(),
                                          chunk.getScalingFactor(),

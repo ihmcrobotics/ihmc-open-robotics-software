@@ -15,7 +15,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2bf8f099bd8a8ff0a632f6c8991cef24358b5e0c1560c1387aef82724b7bc3b2";
+   		return "ad619f8d791f9b442c4e113943144c1559801d10b7a3e678f9dc5949f54b2eb7";
    }
    
    @Override
@@ -54,7 +54,31 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -72,7 +96,46 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += perception_msgs.msg.dds.HeightMapMessagePubSubType.getCdrSerializedSize(data.getChunk(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       return current_alignment - initial_alignment;
@@ -82,14 +145,66 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       cdr.write_type_2(data.getHashCodeOfChunk());
 
-      perception_msgs.msg.dds.HeightMapMessagePubSubType.write(data.getChunk(), cdr);
+      cdr.write_type_12(data.getSequenceId());
+
+      cdr.write_type_6(data.getXyResolution());
+
+      cdr.write_type_6(data.getGridSizeXy());
+
+      cdr.write_type_6(data.getOriginX());
+
+      cdr.write_type_6(data.getOriginY());
+
+      cdr.write_type_6(data.getHeightOffset());
+
+      cdr.write_type_6(data.getHeightScaleFactor());
+
+      cdr.write_type_6(data.getEstimatedGroundHeight());
+
+      cdr.write_type_6(data.getWidthInMeters());
+
+      cdr.write_type_6(data.getCellSizeInMeters());
+
+      cdr.write_type_2(data.getCellsPerAxis());
+
+      if(data.getKeys().size() <= 255000)
+      cdr.write_type_e(data.getKeys());else
+          throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 255000));
+
+      if(data.getHeights().size() <= 255000)
+      cdr.write_type_e(data.getHeights());else
+          throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 255000));
+
    }
 
    public static void read(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setHashCodeOfChunk(cdr.read_type_2());
       	
-      perception_msgs.msg.dds.HeightMapMessagePubSubType.read(data.getChunk(), cdr);	
+      data.setSequenceId(cdr.read_type_12());
+      	
+      data.setXyResolution(cdr.read_type_6());
+      	
+      data.setGridSizeXy(cdr.read_type_6());
+      	
+      data.setOriginX(cdr.read_type_6());
+      	
+      data.setOriginY(cdr.read_type_6());
+      	
+      data.setHeightOffset(cdr.read_type_6());
+      	
+      data.setHeightScaleFactor(cdr.read_type_6());
+      	
+      data.setEstimatedGroundHeight(cdr.read_type_6());
+      	
+      data.setWidthInMeters(cdr.read_type_6());
+      	
+      data.setCellSizeInMeters(cdr.read_type_6());
+      	
+      data.setCellsPerAxis(cdr.read_type_2());
+      	
+      cdr.read_type_e(data.getKeys());	
+      cdr.read_type_e(data.getHeights());	
 
    }
 
@@ -97,16 +212,38 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    public final void serialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_2("hash_code_of_chunk", data.getHashCodeOfChunk());
-      ser.write_type_a("chunk", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getChunk());
-
+      ser.write_type_12("sequence_id", data.getSequenceId());
+      ser.write_type_6("xy_resolution", data.getXyResolution());
+      ser.write_type_6("grid_size_xy", data.getGridSizeXy());
+      ser.write_type_6("origin_x", data.getOriginX());
+      ser.write_type_6("origin_y", data.getOriginY());
+      ser.write_type_6("height_offset", data.getHeightOffset());
+      ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
+      ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
+      ser.write_type_6("width_in_meters", data.getWidthInMeters());
+      ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
+      ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
+      ser.write_type_e("keys", data.getKeys());
+      ser.write_type_e("heights", data.getHeights());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ChunkMessage data)
    {
       data.setHashCodeOfChunk(ser.read_type_2("hash_code_of_chunk"));
-      ser.read_type_a("chunk", new perception_msgs.msg.dds.HeightMapMessagePubSubType(), data.getChunk());
-
+      data.setSequenceId(ser.read_type_12("sequence_id"));
+      data.setXyResolution(ser.read_type_6("xy_resolution"));
+      data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
+      data.setOriginX(ser.read_type_6("origin_x"));
+      data.setOriginY(ser.read_type_6("origin_y"));
+      data.setHeightOffset(ser.read_type_6("height_offset"));
+      data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
+      data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
+      data.setWidthInMeters(ser.read_type_6("width_in_meters"));
+      data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
+      data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
+      ser.read_type_e("keys", data.getKeys());
+      ser.read_type_e("heights", data.getHeights());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.ChunkMessage src, perception_msgs.msg.dds.ChunkMessage dest)

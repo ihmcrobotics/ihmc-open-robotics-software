@@ -2,7 +2,7 @@ package us.ihmc.perception.gpuHeightMap.worldModel;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
@@ -10,7 +10,10 @@ import java.nio.ShortBuffer;
 
 public class Chunk
 {
-   public static final double LATTICE_WIDTH = 2.0;
+   /**
+    * Width of a chunk in meters
+    */
+   public static final double CHUNK_WIDTH = 1.0;
 
    private double originX;
    private double originY;
@@ -28,7 +31,7 @@ public class Chunk
       this.heightMapOffset = heightMapOffset;
       this.scalingFactor = scalingFactor;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, cellSize);
+      int centerIndex = HeightMapTools.computeCenterIndex(Chunk.CHUNK_WIDTH, cellSize);
       cellsPerAxis = 2 * centerIndex;
 
       chunk = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
@@ -36,17 +39,17 @@ public class Chunk
       setDefaultHeight(cellsPerAxis);
    }
 
-   public Chunk(HeightMapMessage heightMapMessage)
+   public Chunk(ChunkMessage chunkMessage)
    {
-      this.originX = heightMapMessage.getGridCenterX();
-      this.originY = heightMapMessage.getGridCenterY();
-      this.heightMapOffset = (float) heightMapMessage.getHeightOffset();
-      this.cellSize = heightMapMessage.getCellSizeInMeters();
-      this.scalingFactor = heightMapMessage.getHeightScaleFactor();
+      this.originX = chunkMessage.getOriginX();
+      this.originY = chunkMessage.getOriginY();
+      this.heightMapOffset = (float) chunkMessage.getHeightOffset();
+      this.cellSize = chunkMessage.getCellSizeInMeters();
+      this.scalingFactor = chunkMessage.getHeightScaleFactor();
 
-      this.chunk = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
+      this.chunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+      int centerIndex = HeightMapTools.computeCenterIndex(chunkMessage.getGridSizeXy(), chunkMessage.getXyResolution());
       cellsPerAxis = 2 * centerIndex;
 
       setDefaultHeight(cellsPerAxis);

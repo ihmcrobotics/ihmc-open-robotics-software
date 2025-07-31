@@ -92,13 +92,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       if (enableChunkedMapRenderer.get())
       {
-         HeightMapMessage heightMapMessage = chunkMessage.getChunk();
-
-         // We add +1 here because the height map is
-         int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
-         cellsPerAxisOfChunks = 2 * centerIndex;
-
-         chunkedMapRenderer.addHeightMap(heightMapMessage, chunkMessage.getHashCodeOfChunk());
+         cellsPerAxisOfChunks = chunkMessage.getCellsPerAxis();
+         chunkedMapRenderer.addHeightMap(chunkMessage, chunkMessage.getHashCodeOfChunk());
       }
    }
 
