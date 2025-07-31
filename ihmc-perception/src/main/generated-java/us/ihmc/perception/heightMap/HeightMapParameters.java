@@ -20,6 +20,7 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 
    public static final BooleanStoredPropertyKey driftOffsetFilter = keys.addBooleanKey("Drift offset filter");
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
+   public static final BooleanStoredPropertyKey enableChunkedMap = keys.addBooleanKey("Enable chunked map");
    public static final BooleanStoredPropertyKey logHeightMap = keys.addBooleanKey("Log height map");
    public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
    public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");

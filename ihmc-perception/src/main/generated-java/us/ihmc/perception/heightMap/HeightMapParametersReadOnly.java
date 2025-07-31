@@ -20,6 +20,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(flyingPointsFilter);
    }
 
+   default boolean getEnableChunkedMap()
+   {
+      return get(enableChunkedMap);
+   }
+
    default boolean getLogHeightMap()
    {
       return get(logHeightMap);

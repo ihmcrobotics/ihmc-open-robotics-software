@@ -18,6 +18,11 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
+   default void setEnableChunkedMap(boolean enableChunkedMap)
+   {
+      set(HeightMapParameters.enableChunkedMap, enableChunkedMap);
+   }
+
    default void setLogHeightMap(boolean logHeightMap)
    {
       set(HeightMapParameters.logHeightMap, logHeightMap);

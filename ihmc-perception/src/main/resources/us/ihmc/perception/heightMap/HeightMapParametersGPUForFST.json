@@ -2,7 +2,7 @@
   "title": "HeightMapParametersForFST",
   "Drift offset filter": true,
   "Flying points filter": true,
-  "Log height map" : false,
+  "Log height map": false,
   "Search window height": {
     "value": 400,
     "lowerBound": 100,
@@ -48,20 +48,20 @@
     "lowerBound": 1.0,
     "upperBound": 100.0
   },
-  "Variance per meter" : {
-    "value" : 0.05,
-    "lowerBound" : 0.0,
-    "upperBound" : 1.0
+  "Variance per meter": {
+    "value": 0.05,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
   },
-  "Variance per translation speed" : {
-    "value" : 0.1,
-    "lowerBound" : 0.0,
-    "upperBound" : 1.0
+  "Variance per translation speed": {
+    "value": 0.1,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
   },
-  "Variance per rotation speed" : {
-    "value" : 0.2,
-    "lowerBound" : 0.0,
-    "upperBound" : 1.0
+  "Variance per rotation speed": {
+    "value": 0.2,
+    "lowerBound": 0.0,
+    "upperBound": 1.0
   },
   "Height offset": {
     "value": 3.2768,

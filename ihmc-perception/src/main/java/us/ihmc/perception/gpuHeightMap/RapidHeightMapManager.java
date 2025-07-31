@@ -114,14 +114,16 @@ public class RapidHeightMapManager
 
       publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint, rapidHeightMapExtractor.getCellsPerAxis());
 
-      // -------------------------- Doing Map Tiles ---------------------
-      chunkedMap.addHeightMap(hostGlobalHeightMap,
-                              heightMapCenterPoint,
-                              heightMapParameters.getGridSizeXY(),
-                              heightMapParameters.getGridResolutionXY(),
-                              heightMapParameters.getHeightOffset(),
-                              heightMapParameters.getHeightScaleFactor());
-      publishChunkedMap(chunkMessagePublisher, chunkedMap);
+      if (heightMapParameters.getEnableChunkedMap())
+      {
+         chunkedMap.addHeightMap(hostGlobalHeightMap,
+                                 heightMapCenterPoint,
+                                 heightMapParameters.getGridSizeXY(),
+                                 heightMapParameters.getGridResolutionXY(),
+                                 heightMapParameters.getHeightOffset(),
+                                 heightMapParameters.getHeightScaleFactor());
+         publishChunkedMap(chunkMessagePublisher, chunkedMap);
+      }
 
       hostGlobalHeightMap.close();
    }
