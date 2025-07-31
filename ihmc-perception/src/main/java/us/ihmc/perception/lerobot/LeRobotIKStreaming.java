@@ -1,5 +1,6 @@
 package us.ihmc.perception.lerobot;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
@@ -21,6 +22,8 @@ import us.ihmc.ros2.ROS2Publisher;
 public class LeRobotIKStreaming
 {
    private final SideDependentList<Pose3D> actionHandPoses;
+   private final TDoubleArrayList actionJointAngles;
+   private final boolean useHandPoses;
    private final FullHumanoidRobotModel fullRobotModel;
    private final Vector3D positionWeight = new Vector3D(-1.0, -1.0, -1.0); // default values are used
    private final Vector3D orientationWeight = new Vector3D(-1.0, -1.0, -1.0); // default values are used
@@ -28,9 +31,16 @@ public class LeRobotIKStreaming
    private final ROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    private boolean controlRobot = false;
 
-   public LeRobotIKStreaming(SideDependentList<Pose3D> actionHandPoses, String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel)
+   public LeRobotIKStreaming(SideDependentList<Pose3D> actionHandPoses,
+                             TDoubleArrayList actionJointAngles,
+                             boolean useHandPoses,
+                             String robotName,
+                             ROS2Node ros2Node,
+                             FullHumanoidRobotModel fullRobotModel)
    {
       this.actionHandPoses = actionHandPoses;
+      this.actionJointAngles = actionJointAngles;
+      this.useHandPoses = useHandPoses;
       this.fullRobotModel = fullRobotModel;
 
       configurationPublisher = ros2Node.createPublisher(ToolboxAPIs.getInputToolboxConfigurationTopic(robotName));
@@ -56,51 +66,58 @@ public class LeRobotIKStreaming
 
       for (RobotSide side : RobotSide.values)
       {
-         int endEffectorHashCode = fullRobotModel.getHand(side).hashCode();
+         if (useHandPoses)
+         {
+            int endEffectorHashCode = fullRobotModel.getHand(side).hashCode();
 
-         Pose3DReadOnly handControlPose = actionHandPoses.get(side);
+            Pose3DReadOnly handControlPose = actionHandPoses.get(side);
 
-         double linearMomentumLimit = -1.0; // default value is used
-         double angularMomentumLimit = -1.0; // default value is used
-         Vector3D desiredLinearVelocity = new Vector3D(); // TODO: These can probably be zero for moving slow
-         Vector3D desiredAngularVelocity = new Vector3D();
+            double linearMomentumLimit = -1.0; // default value is used
+            double angularMomentumLimit = -1.0; // default value is used
+            Vector3D desiredLinearVelocity = new Vector3D(); // TODO: These can probably be zero for moving slow
+            Vector3D desiredAngularVelocity = new Vector3D();
 
-         KinematicsToolboxRigidBodyMessage rigidBodyMessage = new KinematicsToolboxRigidBodyMessage();
-         rigidBodyMessage.setEndEffectorHashCode(endEffectorHashCode);
+            KinematicsToolboxRigidBodyMessage rigidBodyMessage = new KinematicsToolboxRigidBodyMessage();
+            rigidBodyMessage.setEndEffectorHashCode(endEffectorHashCode);
 
-         rigidBodyMessage.getDesiredOrientationInWorld().set(handControlPose.getOrientation());
-         rigidBodyMessage.getDesiredPositionInWorld().set(handControlPose.getPosition());
+            rigidBodyMessage.getDesiredOrientationInWorld().set(handControlPose.getOrientation());
+            rigidBodyMessage.getDesiredPositionInWorld().set(handControlPose.getPosition());
 
-         WeightMatrix3D linearWeightMatrix = new WeightMatrix3D();
-         rigidBodyMessage.getLinearSelectionMatrix().setXSelected(positionWeight.getX() != 0.0);
-         rigidBodyMessage.getLinearSelectionMatrix().setYSelected(positionWeight.getY() != 0.0);
-         linearWeightMatrix.setXAxisWeight(positionWeight.getX());
-         linearWeightMatrix.setYAxisWeight(positionWeight.getY());
-         rigidBodyMessage.getLinearSelectionMatrix().setZSelected(positionWeight.getZ() != 0.0);
-         linearWeightMatrix.setZAxisWeight(positionWeight.getZ());
-         rigidBodyMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(linearWeightMatrix));
+            WeightMatrix3D linearWeightMatrix = new WeightMatrix3D();
+            rigidBodyMessage.getLinearSelectionMatrix().setXSelected(positionWeight.getX() != 0.0);
+            rigidBodyMessage.getLinearSelectionMatrix().setYSelected(positionWeight.getY() != 0.0);
+            linearWeightMatrix.setXAxisWeight(positionWeight.getX());
+            linearWeightMatrix.setYAxisWeight(positionWeight.getY());
+            rigidBodyMessage.getLinearSelectionMatrix().setZSelected(positionWeight.getZ() != 0.0);
+            linearWeightMatrix.setZAxisWeight(positionWeight.getZ());
+            rigidBodyMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(linearWeightMatrix));
 
-         WeightMatrix3D angularWeightMatrix = new WeightMatrix3D();
-         rigidBodyMessage.getAngularSelectionMatrix().setXSelected(orientationWeight.getX() != 0.0);
-         angularWeightMatrix.setXAxisWeight(orientationWeight.getX());
-         rigidBodyMessage.getAngularSelectionMatrix().setYSelected(orientationWeight.getY() != 0.0);
-         angularWeightMatrix.setYAxisWeight(orientationWeight.getY());
-         rigidBodyMessage.getAngularSelectionMatrix().setZSelected(orientationWeight.getZ() != 0.0);
-         angularWeightMatrix.setZAxisWeight(orientationWeight.getZ());
-         rigidBodyMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(angularWeightMatrix));
+            WeightMatrix3D angularWeightMatrix = new WeightMatrix3D();
+            rigidBodyMessage.getAngularSelectionMatrix().setXSelected(orientationWeight.getX() != 0.0);
+            angularWeightMatrix.setXAxisWeight(orientationWeight.getX());
+            rigidBodyMessage.getAngularSelectionMatrix().setYSelected(orientationWeight.getY() != 0.0);
+            angularWeightMatrix.setYAxisWeight(orientationWeight.getY());
+            rigidBodyMessage.getAngularSelectionMatrix().setZSelected(orientationWeight.getZ() != 0.0);
+            angularWeightMatrix.setZAxisWeight(orientationWeight.getZ());
+            rigidBodyMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(angularWeightMatrix));
 
-         rigidBodyMessage.setLinearRateLimitation(linearMomentumLimit);
-         rigidBodyMessage.setAngularRateLimitation(angularMomentumLimit);
+            rigidBodyMessage.setLinearRateLimitation(linearMomentumLimit);
+            rigidBodyMessage.setAngularRateLimitation(angularMomentumLimit);
 
-         rigidBodyMessage.getControlFramePositionInEndEffector().setToZero(); // TODO: Make sure this is right
-         rigidBodyMessage.getControlFrameOrientationInEndEffector().setToZero();
+            rigidBodyMessage.getControlFramePositionInEndEffector().setToZero(); // TODO: Make sure this is right
+            rigidBodyMessage.getControlFrameOrientationInEndEffector().setToZero();
 
-         rigidBodyMessage.setHasDesiredLinearVelocity(true);
-         rigidBodyMessage.getDesiredLinearVelocityInWorld().set(desiredLinearVelocity);
-         rigidBodyMessage.setHasDesiredAngularVelocity(true);
-         rigidBodyMessage.getDesiredAngularVelocityInWorld().set(desiredAngularVelocity);
+            rigidBodyMessage.setHasDesiredLinearVelocity(true);
+            rigidBodyMessage.getDesiredLinearVelocityInWorld().set(desiredLinearVelocity);
+            rigidBodyMessage.setHasDesiredAngularVelocity(true);
+            rigidBodyMessage.getDesiredAngularVelocityInWorld().set(desiredAngularVelocity);
 
-         ikInputMessage.getInputs().add().set(rigidBodyMessage);
+            ikInputMessage.getInputs().add().set(rigidBodyMessage);
+         }
+         else
+         {
+            // TODO: Support joint angles, wait hold on this doesn't make any sense
+         }
       }
 
       ikInputMessage.setTimestamp(actionTimestampNanos);

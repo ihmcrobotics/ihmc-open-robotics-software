@@ -11,7 +11,6 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,7 +27,7 @@ import java.util.List;
  */
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
-   public static final boolean USE_HAND_POSES = false;
+   public static final boolean USE_HAND_POSES = true;
 
    public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> LEROBOT_UI
          = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(LerobotInferenceOperationMessage.class));
@@ -71,7 +70,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
-      leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node);
+      leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node, USE_HAND_POSES);
       leRobotInferenceManager.startPythonServer();
 
       commandSubscription = ROS2Tools.createNotificationSubscription(ros2Node, LEROBOT_UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier()));
@@ -94,17 +93,35 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          //TODO: Look at this and all zedSensor for LeRobot
          zedSensor.waitForGrab();
 
-         synchronized (fullRobotModelSync)
+         leRobotInferenceManager.publishState(messageData ->
          {
-            leftPose.set(fullRobotModel.getHand(RobotSide.LEFT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
-            rightPose.set(fullRobotModel.getHand(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
-
-            for (String armJointName : armJointNames)
+            synchronized (fullRobotModelSync)
             {
-               OneDoFJointBasics armJoint = fullRobotModel.getOneDoFJointByName(armJointName);
+               if (USE_HAND_POSES)
+               {
+                  leftPose.set(fullRobotModel.getHand(RobotSide.LEFT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
+                  rightPose.set(fullRobotModel.getHand(RobotSide.RIGHT).getParentJoint().getFrameAfterJoint().getTransformToWorldFrame());
+
+                  for (RobotSide side : RobotSide.values)
+                  {
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getX32());
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getY32());
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getZ32());
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getX32());
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getY32());
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getZ32());
+                     messageData.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getS32());
+                  }
+               }
+               else
+               {
+                  for (String armJointName : armJointNames)
+                  {
+                     messageData.add((float) fullRobotModel.getOneDoFJointByName(armJointName).getQ());
+                  }
+               }
             }
-         } // TODO: Support joint angles
-         leRobotInferenceManager.publishHandPoses(leftPose, rightPose);
+         });
          leRobotInferenceManager.setRunning(running.getValue());
          leRobotInferenceManager.getIKStreaming().setControlRobot(controlRobot.getValue());
          leRobotInferenceManager.update();
