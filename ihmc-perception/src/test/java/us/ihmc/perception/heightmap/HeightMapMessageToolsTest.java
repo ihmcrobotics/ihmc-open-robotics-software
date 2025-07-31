@@ -35,9 +35,9 @@ public class HeightMapMessageToolsTest
          }
       }
 
-      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000);
+      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000, cellsPerAxis);
 
-      // Inside the try-with-resouce to avoid memory leak
+      // Inside the try-with-resource to avoid memory leak
       try (Mat heightMapResult = HeightMapMessageTools.unpackMessageToMat(heightMapMessage))
       {
          for (int i = 0; i < cellsPerAxis; i++)
@@ -70,7 +70,7 @@ public class HeightMapMessageToolsTest
          }
       }
 
-      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000.0);
+      HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000.0, cellsPerAxis);
 
       long startTime = System.nanoTime();
 
@@ -162,7 +162,7 @@ public class HeightMapMessageToolsTest
 
       for (int i = 0; i < iterations; i++)
       {
-         HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000);
+         HeightMapMessageTools.toMessage(heightMap, heightMapMessage, new Point3D(0.0, 0.0, 0.0), widthInMeters, cellResolution, 3.2768, 10000, cellsPerAxis);
       }
 
       long endTime = System.nanoTime();

@@ -18,7 +18,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -96,7 +95,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          HeightMapMessage heightMapMessage = chunkMessage.getChunk();
 
          // We add +1 here because the height map is
-         int centerIndex = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, 0.02);
+         int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
          cellsPerAxisOfChunks = 2 * centerIndex + 1;
 
          chunkedMapRenderer.addHeightMap(heightMapMessage, chunkMessage.getHashCodeOfChunk());
@@ -116,7 +115,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(4.0, 0.02);
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
                                                  cellsPerAxisOfHeightMap = 2 * centerIndex + 1;
                                               }
 
