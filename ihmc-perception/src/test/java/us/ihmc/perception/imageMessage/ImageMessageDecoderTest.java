@@ -308,7 +308,15 @@ public class ImageMessageDecoderTest
 
    private void nvcompCompression(Mat image, ImageMessage message)
    {
-      CUDACompressionTools compressionTools = new CUDACompressionTools();
+      CUDACompressionTools compressionTools;
+      try
+      {
+         compressionTools = new CUDACompressionTools();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
 
       BytePointer compressedData = compressionTools.compress(image);
       PerceptionMessageTools.packImageMessageData(message, compressedData);
@@ -320,7 +328,15 @@ public class ImageMessageDecoderTest
 
    private void hybridDepthCompression(Mat image, ImageMessage message)
    {
-      CUDACompressionTools compressionTools = new CUDACompressionTools();
+      CUDACompressionTools compressionTools;
+      try
+      {
+         compressionTools = new CUDACompressionTools();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
 
       BytePointer compressedData = compressionTools.compressDepth(image);
       PerceptionMessageTools.packImageMessageData(message, compressedData);
