@@ -158,6 +158,8 @@ public class RDXLeRobotTestSimulator
 
          if (zedSVOTimestamp > 0 && zedSVOTimestamp != lastZEDTimestamp)
          {
+            lastZEDTimestamp = zedSVOTimestamp;
+
             inferenceManager.publishState(messageData ->
             {
                for (RobotSide side : logState.sides())
@@ -293,7 +295,10 @@ public class RDXLeRobotTestSimulator
                inferenceManager = new LeRobotInferenceManager(dataset.getName(),
                                                               syncedRobot.getRobotModel().getSimpleRobotName(),
                                                               syncedRobot.getFullRobotModel(),
-                                                              ros2Node);
+                                                              syncedRobot,
+                                                              syncedRobot.getRobotModel().createFullRobotModel(),
+                                                              ros2Node,
+                                                              LeRobotDatasetDataWriter.USE_HAND_POSES, armJointNames);
             }
 
             if (ImGui.checkbox(labels.get("Run model"), runInference))

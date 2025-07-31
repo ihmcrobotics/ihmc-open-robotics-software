@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
-   public static final boolean USE_HAND_POSES = true;
+   public static final boolean USE_HAND_POSES = false;
 
    public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> LEROBOT_UI
          = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(LerobotInferenceOperationMessage.class));
@@ -54,6 +54,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
                                        String robotName,
                                        FullHumanoidRobotModel fullRobotModel,
                                        Object fullRobotModelSync,
+                                       FullHumanoidRobotModel forwardKinematicsModel,
                                        HumanoidJointNameMap jointMap,
                                        ImageSensor zedSensor)
    {
@@ -70,7 +71,14 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
-      leRobotInferenceManager = new LeRobotInferenceManager(policyName, robotName, fullRobotModel, ros2Node, USE_HAND_POSES);
+      leRobotInferenceManager = new LeRobotInferenceManager(policyName,
+                                                            robotName,
+                                                            fullRobotModel,
+                                                            fullRobotModelSync,
+                                                            forwardKinematicsModel,
+                                                            ros2Node,
+                                                            USE_HAND_POSES,
+                                                            armJointNames);
       leRobotInferenceManager.startPythonServer();
 
       commandSubscription = ROS2Tools.createNotificationSubscription(ros2Node, LEROBOT_UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier()));
