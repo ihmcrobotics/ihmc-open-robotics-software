@@ -4,6 +4,7 @@ import imgui.type.ImBoolean;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import org.lwjgl.openvr.VRSkeletalSummaryData;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -66,7 +67,8 @@ public class RDXVRHandControl
                         float newThumbDistal = handManager.getHand(side).getFingerPosition(5);
                         newThumbDistal += Math.signum(lateralJoystick) * DISTAL_THUMB_JOYSTICK_INCREMENT;
                         newThumbDistal = Math.max(0.0f, Math.min(newThumbDistal, 1.0f));
-                        handManager.getHand(side).sendFingerPosition(5, newThumbDistal);
+//                        LogTools.info(newThumbDistal);
+//                        handManager.getHand(side).sendFingerPosition(5, newThumbDistal);
                      }
 
                   }

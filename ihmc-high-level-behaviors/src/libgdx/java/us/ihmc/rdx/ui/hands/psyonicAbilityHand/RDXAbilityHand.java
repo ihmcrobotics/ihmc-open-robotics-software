@@ -26,6 +26,8 @@ public class RDXAbilityHand implements RDXHandInterface
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
    private static final float GRIP_VELOCITY = 30.0f;
+   private static final float THUMB_POSITION_MAX = 90.0f;
+   private static final float THUMB_POSITION_MIN = 30.0f;
    private static final float FINGER_POSITION_MAX = 90.0f;
    private static final float FINGER_POSITION_MIN = 10.0f;
    private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
@@ -275,37 +277,22 @@ public class RDXAbilityHand implements RDXHandInterface
       };
 
       float mappedValue;
-      if (mappedIndex != 5)
+      float min = mappedIndex == 0 ? THUMB_POSITION_MIN : FINGER_POSITION_MIN;
+      float max = mappedIndex == 0 ? THUMB_POSITION_MAX : FINGER_POSITION_MAX;
+      if (value < 0.05f)
       {
-         if (value < 0.05f)
-         {
-            mappedValue = FINGER_POSITION_MIN;
-         }
-         else if (value <= 0.85f)
-         {
-            // scale linearly from MIN at 0.05 to MAX at 0.85
-            mappedValue = FINGER_POSITION_MIN + (value - 0.05f) / (0.85f - 0.05f) * (FINGER_POSITION_MAX - FINGER_POSITION_MIN);
-         }
-         else
-         {
-            mappedValue = FINGER_POSITION_MAX;
-         }
+         mappedValue = min;
+      }
+      else if (value <= 0.85f)
+      {
+         // scale linearly from MIN at 0.05 to MAX at 0.85
+         mappedValue = min + (value - 0.05f) / (0.85f - 0.05f) * (max - min);
       }
       else
       {
-         if (value < 0.05f)
-         {
-            mappedValue = -FINGER_POSITION_MAX;
-         }
-         else if (value <= 0.85f)
-         {
-            mappedValue = -FINGER_POSITION_MAX + (value - 0.05f) / (0.85f - 0.05f) * (FINGER_POSITION_MIN + FINGER_POSITION_MAX);
-         }
-         else
-         {
-            mappedValue = FINGER_POSITION_MIN;
-         }
+         mappedValue = max;
       }
+
 
       communication.getCommand(serialNumber).setControlMode(controlMode.toByte());
       communication.getCommand(serialNumber).getGoalPositions()[mappedIndex] = mappedValue;

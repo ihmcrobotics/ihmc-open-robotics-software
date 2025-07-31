@@ -92,16 +92,6 @@
          "type" : "boolean"
       },
       {
-         "name" : "/actions/main/in/left_joysticktouched",
-         "requirement" : "optional",
-         "type" : "boolean"
-      },
-      {
-         "name" : "/actions/main/in/right_joysticktouched",
-         "requirement" : "optional",
-         "type" : "boolean"
-      },
-      {
          "name" : "/actions/main/in/left_touchpadtouched",
          "requirement" : "optional",
          "type" : "boolean"
@@ -180,8 +170,6 @@
          "/actions/main/in/right_btouched" : "B Touched Right",
          "/actions/main/in/left_joystickpress" : "Joystick Press Left",
          "/actions/main/in/right_joystickpress" : "Joystick Press Right",
-         "/actions/main/in/left_joysticktouched" : "Joystick Touched Left",
-         "/actions/main/in/right_joysticktouched" : "Joystick Touched Right",
          "/actions/main/in/left_joystick" : "Joystick Left",
          "/actions/main/in/right_joystick" : "Joystick Right",
          "/actions/main/in/left_touchpadtouched" : "Touchpad Touched Left",
