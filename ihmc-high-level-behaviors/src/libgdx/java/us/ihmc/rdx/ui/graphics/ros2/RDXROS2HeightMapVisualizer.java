@@ -83,7 +83,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
-   public void setupForGlobalHeightMapTileMessage(ROS2PublishSubscribeAPI ros2)
+   public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.CHUNK, this::acceptChunkMessage);
