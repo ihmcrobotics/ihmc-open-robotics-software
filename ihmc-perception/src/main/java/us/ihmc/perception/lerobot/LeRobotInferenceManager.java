@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -21,6 +22,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -39,7 +41,11 @@ public class LeRobotInferenceManager
    private final ROS2Helper ros2Helper;
 
    private final String modelName;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final Object fullRobotModelSync;
+   private final FullHumanoidRobotModel forwardKinematicsModel;
    private final boolean useHandPoses;
+   private final List<String> armJointNames;
    private final RepeatingTaskThread thread = new RepeatingTaskThread("LeRobotROS2Thread", this::update);
    private final std_msgs.msg.dds.String command = new std_msgs.msg.dds.String();
    private final std_msgs.msg.dds.String status = new std_msgs.msg.dds.String();
@@ -53,13 +59,24 @@ public class LeRobotInferenceManager
    private long actionTimestampNanos = 0L;
    private long numberOfActionsReceived = 0L;
 
-   public LeRobotInferenceManager(String modelName, String robotName, FullHumanoidRobotModel fullRobotModel, ROS2Node ros2Node, boolean useHandPoses)
+   public LeRobotInferenceManager(String modelName,
+                                  String robotName,
+                                  FullHumanoidRobotModel fullRobotModel,
+                                  Object fullRobotModelSync,
+                                  FullHumanoidRobotModel forwardKinematicsModel,
+                                  ROS2Node ros2Node,
+                                  boolean useHandPoses,
+                                  List<String> armJointNames)
    {
       this.modelName = modelName;
+      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModelSync = fullRobotModelSync;
+      this.forwardKinematicsModel = forwardKinematicsModel;
       this.useHandPoses = useHandPoses;
+      this.armJointNames = armJointNames;
 
       actionHandPoses.forEach(Pose3D::setToNaN);
-      ikStreaming = new LeRobotIKStreaming(actionHandPoses, actionJointAngles, useHandPoses, robotName, ros2Node, fullRobotModel);
+      ikStreaming = new LeRobotIKStreaming(robotName, ros2Node, forwardKinematicsModel);
       ros2Helper = new ROS2Helper(ros2Node);
       ros2Helper.subscribeViaVolatileCallback(STATUS, message ->
       {
@@ -74,21 +91,24 @@ public class LeRobotInferenceManager
          ++numberOfActionsReceived;
 
          IDLSequence.Float data = message.getData();
-         if (useHandPoses)
+         synchronized (this)
          {
-            int i = 0;
-            for (RobotSide side : RobotSide.values)
+            if (useHandPoses)
             {
-               Pose3D pose = actionHandPoses.get(side);
-               pose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
-               pose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
+               int i = 0;
+               for (RobotSide side : RobotSide.values)
+               {
+                  Pose3D pose = actionHandPoses.get(side);
+                  pose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
+                  pose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
+               }
             }
-         }
-         else
-         {
-            actionJointAngles.clear();
-            for (int i = 0; i < data.size(); i++)
-               actionJointAngles.add(data.get(i));
+            else
+            {
+               actionJointAngles.clear();
+               for (int i = 0; i < data.size(); i++)
+                  actionJointAngles.add(data.get(i));
+            }
          }
       });
    }
@@ -136,6 +156,27 @@ public class LeRobotInferenceManager
 
       if (running)
       {
+         synchronized (fullRobotModelSync)
+         {
+            FullRobotModelUtils.copy(fullRobotModel, forwardKinematicsModel);
+         }
+
+         synchronized (this)
+         {
+            if (useHandPoses)
+            {
+               // TODO: I guess you would take a different approach here
+            }
+            else
+            {
+               for (int i = 0; i < armJointNames.size(); i++)
+               {
+                  forwardKinematicsModel.getOneDoFJointByName(armJointNames.get(i)).setQ(actionJointAngles.get(i));
+               }
+            }
+         }
+         forwardKinematicsModel.updateFrames();
+
          ikStreaming.update(actionTimestampNanos);
       }
    }
