@@ -12,24 +12,24 @@ public class Chunk
 {
    public static final double LATTICE_WIDTH = 2.0;
 
-   private double centerX;
-   private double centerY;
+   private double originX;
+   private double originY;
    private double heightMapOffset;
    private double cellSize;
    private double scalingFactor;
    private Mat chunk;
    private int cellsPerAxis;
 
-   public Chunk(double cellSize, double centerX, double centerY, double heightMapOffset, double scalingFactor)
+   public Chunk(double cellSize, double originX, double originY, double heightMapOffset, double scalingFactor)
    {
       this.cellSize = cellSize;
-      this.centerX = centerX;
-      this.centerY = centerY;
+      this.originX = originX;
+      this.originY = originY;
       this.heightMapOffset = heightMapOffset;
       this.scalingFactor = scalingFactor;
 
       int centerIndex = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, cellSize);
-      cellsPerAxis = 2 * centerIndex + 1;
+      cellsPerAxis = 2 * centerIndex;
 
       chunk = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
 
@@ -38,16 +38,16 @@ public class Chunk
 
    public Chunk(HeightMapMessage heightMapMessage)
    {
-      this.centerX = heightMapMessage.getGridCenterX();
-      this.centerY = heightMapMessage.getGridCenterY();
+      this.originX = heightMapMessage.getGridCenterX();
+      this.originY = heightMapMessage.getGridCenterY();
       this.heightMapOffset = (float) heightMapMessage.getHeightOffset();
       this.cellSize = heightMapMessage.getCellSizeInMeters();
       this.scalingFactor = heightMapMessage.getHeightScaleFactor();
 
       this.chunk = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, heightMapMessage.getXyResolution());
-      cellsPerAxis = 2 * centerIndex + 1;
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+      cellsPerAxis = 2 * centerIndex;
 
       setDefaultHeight(cellsPerAxis);
    }
@@ -66,14 +66,14 @@ public class Chunk
       return chunk;
    }
 
-   public double getCenterX()
+   public double getOriginX()
    {
-      return centerX;
+      return originX;
    }
 
-   public double getCenterY()
+   public double getOriginY()
    {
-      return centerY;
+      return originY;
    }
 
    public double getHeightMapOffset()
@@ -96,14 +96,14 @@ public class Chunk
       return cellsPerAxis;
    }
 
-   public void setCenterX(double centerX)
+   public void setOriginX(double originX)
    {
-      this.centerX = centerX;
+      this.originX = originX;
    }
 
-   public void setCenterY(double centerY)
+   public void setOriginY(double originY)
    {
-      this.centerY = centerY;
+      this.originY = originY;
    }
 
    public void setHeightMapOffset(float heightMapOffset)
@@ -131,10 +131,10 @@ public class Chunk
       this.cellsPerAxis = cellsPerAxis;
    }
 
-   public void setHeightAt(double xCord, double yCord, short height, double resolution, int centerIndex)
+   public void setHeightAt(double xCord, double yCord, short height, double resolution)
    {
-      int i = HeightMapTools.coordinateToIndex(xCord, centerX, resolution, centerIndex);
-      int j = HeightMapTools.coordinateToIndex(yCord, centerY, resolution, centerIndex);
+      int i = HeightMapTools.coordinateToIndex(xCord, this.originX, resolution);
+      int j = HeightMapTools.coordinateToIndex(yCord, this.originY, resolution);
 
       if (i >= 0 && i < chunk.rows() && j >= 0 && j < chunk.cols())
       {

@@ -45,8 +45,7 @@ public class ChunkedMap
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
             short height = heightsArray[index];
 
-            int centerIndexOfChunk = HeightMapTools.computeCenterIndex(Chunk.LATTICE_WIDTH, resolution);
-            chunk.setHeightAt(XCord, YCord, height, resolution, centerIndexOfChunk);
+            chunk.setHeightAt(XCord, YCord, height, resolution);
 
             chunks.add(chunk);
          }
@@ -73,14 +72,15 @@ public class ChunkedMap
       int chunkIndexX = (int) Math.floor((double) worldCellX / cellsPerAxis);
       int chunkIndexY = (int) Math.floor((double) worldCellY / cellsPerAxis);
 
-      double chunkCenterX = (chunkIndexX + 0.5) * chunkSizeInMeters;
-      double chunkCenterY = (chunkIndexY + 0.5) * chunkSizeInMeters;
-      int hash = Chunk.generateHashForChunk(chunkCenterX, chunkCenterY);
+      double chunkOriginX = chunkIndexX * chunkSizeInMeters;
+      double chunkOriginY = chunkIndexY * chunkSizeInMeters;
+
+      int hash = Chunk.generateHashForChunk(chunkOriginX, chunkOriginY);
 
       Chunk chunk = chunksHashMap.get(hash);
       if (chunk == null)
       {
-         chunk = new Chunk(chunkResolution, chunkCenterX, chunkCenterY, heightOffset, scalingFactor);
+         chunk = new Chunk(chunkResolution, chunkOriginX, chunkOriginY, heightOffset, scalingFactor);
          chunksHashMap.put(hash, chunk);
       }
 

@@ -46,6 +46,11 @@ public class HeightMapTools
       return indexToCoordinate(yIndex, yCenter, resolution, centerIndex);
    }
 
+   public static int coordinateToIndex(double coordinate, double origin, double resolution)
+   {
+      return (int) Math.floor((coordinate - origin) / resolution);
+   }
+
    public static int coordinateToIndex(double coordinate, double gridCenter, double resolution, int centerIndex)
    {
       return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;

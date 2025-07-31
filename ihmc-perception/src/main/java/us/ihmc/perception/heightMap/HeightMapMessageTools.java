@@ -35,6 +35,37 @@ public class HeightMapMessageTools
       return heightMapData;
    }
 
+   public static Mat unpackMessageToMatNotCentered(HeightMapMessage heightMapMessage)
+   {
+      if (heightMapMessage == null)
+         return null;
+
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+      int cellsPerAxis = 2 * centerIndex;
+
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      ShortBuffer shortBuffer = heightMap.createBuffer();
+
+      int totalCells = cellsPerAxis * cellsPerAxis;
+      short[] heights = new short[totalCells];
+
+      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
+      {
+         short height = (short) heightMapMessage.getHeights().get(i);
+         int key = heightMapMessage.getKeys().get(i);
+
+         int xIndex = key % cellsPerAxis;
+         int yIndex = key / cellsPerAxis;
+
+         int index = yIndex * cellsPerAxis + xIndex;
+         heights[index] = height;
+      }
+
+      shortBuffer.put(heights);
+
+      return heightMap;
+   }
+
    public static Mat unpackMessageToMat(HeightMapMessage heightMapMessage)
    {
       if (heightMapMessage == null)

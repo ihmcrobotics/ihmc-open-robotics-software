@@ -33,7 +33,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
    {
       for (ChunkRenderer chunkRenderer : chunkRenderers.values())
       {
-         RDXHeightMapRenderer heightMapRenderer = chunkRenderer.getRenderer();
+         RDXChunkMapRenderer heightMapRenderer = chunkRenderer.getRenderer();
          if (heightMapRenderer.isHasBeenCreated())
          {
             Chunk chunk = chunkRenderer.getChunk();
@@ -43,9 +43,9 @@ public class RDXChunkedMapRenderer implements RenderableProvider
                {
                   heightMapRenderer.update(chunk.getChunk(),
                                            (float) chunk.getHeightMapOffset(),
-                                           (float) chunk.getCenterX(),
-                                           (float) chunk.getCenterY(),
-                                           chunk.getCellsPerAxis() / 2,
+                                           (float) chunk.getOriginX(),
+                                           (float) chunk.getOriginY(),
+                                           chunk.getCellsPerAxis(),
                                            (float) chunk.getCellSize(),
                                            (float) chunk.getScalingFactor());
                }
@@ -63,14 +63,15 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          chunkRenderers.put(hash, chunkRenderer);
       }
 
-      Mat latestChunk = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
+      Mat latestChunk = HeightMapMessageTools.unpackMessageToMatNotCentered(heightMapMessage);
 
       Chunk chunk = chunkRenderer.getChunk();
       chunk.setChunk(latestChunk);
       chunk.setCellSize(heightMapMessage.getCellSizeInMeters());
+      //TODO should create a seperate chunk message, basically the same as the height map but now it would be independent
       chunk.setHeightMapOffset((float) heightMapMessage.getHeightOffset());
-      chunk.setCenterX(heightMapMessage.getGridCenterX());
-      chunk.setCenterY(heightMapMessage.getGridCenterY());
+      chunk.setOriginX(heightMapMessage.getGridCenterX());
+      chunk.setOriginY(heightMapMessage.getGridCenterY());
       chunk.setCellsPerAxis(heightMapMessage.getCellsPerAxis());
    }
 
@@ -96,11 +97,11 @@ public class RDXChunkedMapRenderer implements RenderableProvider
    private static class ChunkRenderer
    {
       private final Chunk chunk;
-      private final RDXHeightMapRenderer renderer;
+      private final RDXChunkMapRenderer renderer;
 
       public ChunkRenderer(HeightMapMessage heightMapMessage)
       {
-         renderer = new RDXHeightMapRenderer();
+         renderer = new RDXChunkMapRenderer();
          chunk = new Chunk(heightMapMessage);
       }
 
@@ -109,7 +110,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          return chunk;
       }
 
-      public RDXHeightMapRenderer getRenderer()
+      public RDXChunkMapRenderer getRenderer()
       {
          return renderer;
       }
