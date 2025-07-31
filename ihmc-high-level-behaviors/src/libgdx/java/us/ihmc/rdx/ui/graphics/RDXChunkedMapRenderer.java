@@ -42,12 +42,12 @@ public class RDXChunkedMapRenderer implements RenderableProvider
                if (chunk.getChunk() != null && chunk.getChunk().ptr(0) != null)
                {
                   heightMapRenderer.update(chunk.getChunk(),
-                                           chunk.getHeightMapOffset(),
+                                           (float) chunk.getHeightMapOffset(),
                                            (float) chunk.getCenterX(),
                                            (float) chunk.getCenterY(),
                                            chunk.getCellsPerAxis() / 2,
                                            (float) chunk.getCellSize(),
-                                           chunk.getScalingFactor());
+                                           (float) chunk.getScalingFactor());
                }
             }
          }

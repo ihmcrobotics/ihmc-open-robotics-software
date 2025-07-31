@@ -18,7 +18,7 @@ public class ChunkedMap
    {
    }
 
-   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution, float heightOffset, float scalingFactor)
+   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution, double heightOffset, double scalingFactor)
    {
       chunks.clear();
 
@@ -40,7 +40,7 @@ public class ChunkedMap
             double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndex);
             double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndex);
 
-            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.LATTICE_WIDTH, resolution, heightOffset, (float) resolution, scalingFactor);
+            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.LATTICE_WIDTH, resolution, heightOffset, scalingFactor);
 
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
             short height = heightsArray[index];
@@ -62,9 +62,8 @@ public class ChunkedMap
                                  double yCoordinate,
                                  double chunkSizeInMeters,
                                  double chunkResolution,
-                                 float heightOffset,
-                                 float cellSize,
-                                 float scalingFactor)
+                                 double heightOffset,
+                                 double scalingFactor)
    {
       int cellsPerAxis = (int) Math.round(chunkSizeInMeters / chunkResolution);
 

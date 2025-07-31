@@ -14,13 +14,13 @@ public class Chunk
 
    private double centerX;
    private double centerY;
-   private float heightMapOffset;
+   private double heightMapOffset;
    private double cellSize;
-   private float scalingFactor;
+   private double scalingFactor;
    private Mat chunk;
    private int cellsPerAxis;
 
-   public Chunk(double cellSize, double centerX, double centerY, float heightMapOffset, float scalingFactor)
+   public Chunk(double cellSize, double centerX, double centerY, double heightMapOffset, double scalingFactor)
    {
       this.cellSize = cellSize;
       this.centerX = centerX;
@@ -41,8 +41,8 @@ public class Chunk
       this.centerX = heightMapMessage.getGridCenterX();
       this.centerY = heightMapMessage.getGridCenterY();
       this.heightMapOffset = (float) heightMapMessage.getHeightOffset();
-      this.cellSize = (float) heightMapMessage.getCellSizeInMeters();
-      this.scalingFactor = (float) heightMapMessage.getHeightScaleFactor();
+      this.cellSize = heightMapMessage.getCellSizeInMeters();
+      this.scalingFactor = heightMapMessage.getHeightScaleFactor();
 
       this.chunk = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 
@@ -76,7 +76,7 @@ public class Chunk
       return centerY;
    }
 
-   public float getHeightMapOffset()
+   public double getHeightMapOffset()
    {
       return heightMapOffset;
    }
@@ -86,7 +86,7 @@ public class Chunk
       return cellSize;
    }
 
-   public float getScalingFactor()
+   public double getScalingFactor()
    {
       return scalingFactor;
    }
@@ -116,7 +116,7 @@ public class Chunk
       this.cellSize = cellSize;
    }
 
-   public void setScalingFactor(float scalingFactor)
+   public void setScalingFactor(double scalingFactor)
    {
       this.scalingFactor = scalingFactor;
    }

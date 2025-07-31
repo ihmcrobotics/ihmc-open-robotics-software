@@ -119,8 +119,8 @@ public class RapidHeightMapManager
                               heightMapCenterPoint,
                               heightMapParameters.getGridSizeXY(),
                               heightMapParameters.getGridResolutionXY(),
-                              (float) heightMapParameters.getHeightOffset(),
-                              (float) heightMapParameters.getHeightScaleFactor());
+                              heightMapParameters.getHeightOffset(),
+                              heightMapParameters.getHeightScaleFactor());
       publishChunkedMap(chunkMessagePublisher, chunkedMap);
 
       hostGlobalHeightMap.close();
