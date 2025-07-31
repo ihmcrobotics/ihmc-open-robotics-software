@@ -86,7 +86,7 @@ public class RDXAbilityHand implements RDXHandInterface
    public void renderImGuiWidgets()
    {
       ImGui.pushID(serialNumber);
-
+      ImGui.text(getSide().toString() + " serial number: " + serialNumber);
       if (!communication.getAvailableHandSerialNumbers().contains(serialNumber))
          return;
 
