@@ -60,29 +60,6 @@ public class HumanoidPerceptionModule
       }
    }
 
-//   private static void publishGlobalHeightMapTile(ROS2Helper ros2Helper,
-//                                                  GlobalHeightMap globalHeightMap,
-//                                                  Instant acquisitionTime,
-//                                                  ROS2Topic<GlobalMapTileMessage> topic)
-//   {
-//      // Get tiles (made out of modified cells) from the global height map class and publish them in a for loop
-//      Collection<GlobalMapTile> modifiedCells = globalHeightMap.getModifiedMapTiles();
-//      for (GlobalMapTile tile : modifiedCells)
-//      {
-//         GlobalMapTileMessage globalMapTileMessage = new GlobalMapTileMessage();
-//         packGlobalMapTileMessage(globalMapTileMessage, tile);
-//         ros2Helper.publish(topic, globalMapTileMessage);
-//      }
-//   }
-
-//   private static void packGlobalMapTileMessage(GlobalMapTileMessage messageToPack, GlobalMapTile tile)
-//   {
-//      messageToPack.setCenterX(tile.getCenterX());
-//      messageToPack.setCenterY(tile.getCenterY());
-//      messageToPack.setHashCodeOfTile(tile.hashCode());
-//      messageToPack.getHeightMap().set(HeightMapMessageTools.toMessage(tile));
-//   }
-
    private void updatePlanarRegions(ROS2Helper ros2Helper, ReferenceFrame cameraFrame)
    {
       long begin = System.nanoTime();
