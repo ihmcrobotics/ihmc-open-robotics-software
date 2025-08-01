@@ -298,7 +298,8 @@ public class RDXLeRobotTestSimulator
                                                               syncedRobot,
                                                               syncedRobot.getRobotModel().createFullRobotModel(),
                                                               ros2Node,
-                                                              LeRobotDatasetDataWriter.USE_HAND_POSES, armJointNames);
+                                                              LeRobotDatasetDataWriter.USE_HAND_POSES,
+                                                              syncedRobot.getRobotModel().getJointMap().getArmJointNamesAsStrings());
             }
 
             if (ImGui.checkbox(labels.get("Run model"), runInference))
