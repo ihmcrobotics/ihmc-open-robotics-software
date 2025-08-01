@@ -53,8 +53,9 @@ public class LeRobotIKStreaming
 
       for (RobotSide side : RobotSide.values)
       {
+         // control wrist too, which pretty much constrains a 7 DoF arm
          addRigidBodyInput(desiredRobotModel.getHand(side), ikInputMessage);
-         addRigidBodyInput(desiredRobotModel.getHand(side).getParentJoint().getPredecessor(), ikInputMessage); // wrist? TODO: is this right?
+         addRigidBodyInput(desiredRobotModel.getForearm(side), ikInputMessage);
       }
 
       ikInputMessage.setTimestamp(actionTimestampNanos);
