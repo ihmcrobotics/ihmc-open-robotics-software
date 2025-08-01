@@ -6,7 +6,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.rdx.AbstractRDXPointCloudRenderer.ColoringMethod;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
@@ -27,7 +26,6 @@ public class RDXRawImagePointCloudRendererDemo
    private final float[] defaultColor = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
 
    private RDXRawImagePointCloudRenderer pointCloudRenderer;
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
 
    private long lastGrabSequenceNumber = -1L;
    private ZEDColorDepthImageRetriever zed;
@@ -74,7 +72,7 @@ public class RDXRawImagePointCloudRendererDemo
                {
                   pointCloudRenderer.updateMesh(depthImage, colorImage);
                }
-               else // inputMethod == InputMethod.POINT_CLOUD
+               else
                {
                   pointCloudRenderer.updateMesh(depthImage);
                }
@@ -119,7 +117,6 @@ public class RDXRawImagePointCloudRendererDemo
          {
             zed.destroy();
             pointCloudRenderer.dispose();
-            pointCloudExtractor.destroy();
             baseUI.dispose();
          }
       });

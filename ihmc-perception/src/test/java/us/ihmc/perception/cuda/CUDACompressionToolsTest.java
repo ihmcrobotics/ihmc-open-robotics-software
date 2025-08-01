@@ -11,7 +11,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
 import us.ihmc.perception.opencv.OpenCVTools;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +30,7 @@ public class CUDACompressionToolsTest
    }
 
    @Test
-   public void testCPUDepthCompressionDecompression() throws IOException
+   public void testCPUDepthCompressionDecompression() throws Exception
    {
       byte[] depthBytes = Files.readAllBytes(zedDepth16UPath);
       long originalDataSize = depthBytes.length;
@@ -57,7 +56,7 @@ public class CUDACompressionToolsTest
    }
 
    @Test
-   public void testGPUDepthCompressionDecompression() throws IOException
+   public void testGPUDepthCompressionDecompression() throws Exception
    {
       byte[] depthBytes = Files.readAllBytes(zedDepth16UPath);
       long originalDataSize = depthBytes.length;
@@ -89,7 +88,7 @@ public class CUDACompressionToolsTest
    }
 
    @Test
-   public void testBasicCompression() throws IOException
+   public void testBasicCompression() throws Exception
    {
       CUDACompressionTools compressor = new CUDACompressionTools();
 
@@ -122,7 +121,7 @@ public class CUDACompressionToolsTest
    }
 
    @Test
-   public void testCPUMatCompression() throws IOException
+   public void testCPUMatCompression() throws Exception
    {
       // Read ZED depth image data
       byte[] depthImageData = Files.readAllBytes(zedDepth16UPath);
@@ -156,7 +155,7 @@ public class CUDACompressionToolsTest
    }
 
    @Test
-   public void testGPUMatCompression() throws IOException
+   public void testGPUMatCompression() throws Exception
    {
       // Read ZED depth image data
       byte[] depthImageData = Files.readAllBytes(zedDepth16UPath);

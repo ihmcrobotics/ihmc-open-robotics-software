@@ -36,7 +36,7 @@ float64 cell_size_in_meters
 int32[] keys
 
 # List of heights, which correspond to the list of keys
-float32[] heights
+int32[] heights
 
 # List of variances, which correspond to the list of keys. May be empty.
 float32[] variances

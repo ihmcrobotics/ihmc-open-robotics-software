@@ -81,7 +81,7 @@ public class PlanarRegionToHeightMapConverter
             if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()) && !MathTools.epsilonEquals(projectedPoint.getZ(), estimatedGroundHeight, 1e-2))
             {
                message.getKeys().add(key);
-               message.getHeights().add((float) projectedPoint.getZ());
+               message.getHeights().add((int) projectedPoint.getZ());
             }
          }
       }
