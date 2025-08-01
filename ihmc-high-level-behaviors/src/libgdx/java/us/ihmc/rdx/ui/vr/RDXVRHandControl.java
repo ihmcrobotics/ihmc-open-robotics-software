@@ -20,7 +20,7 @@ public class RDXVRHandControl
    private final SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
    private final ImBoolean userIsControllingRobot;
    private static final float CONTROL_JOYSTICK_THRESHOLD = 0.5f;
-   private static final float THUMB_OPPOSITION_JOYSTICK_INCREMENT = 0.01f;
+   private static final float THUMB_OPPOSITION_JOYSTICK_INCREMENT = 0.005f;
    private final SideDependentList<Float> thumbOpposition = new SideDependentList<>(0.5f, 0.5f);;
 
    public RDXVRHandControl(RDXVRContext vrContext,
