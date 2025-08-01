@@ -72,7 +72,7 @@ public class LeRobotDatasetDataWriter
          {
             String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "KinematicsStreamingToolboxModule");
             String kstController = kstModule + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
-            String capitalizedRobotName = StringUtils.capitalize(robotDefinition.getName());
+            String capitalizedRobotName = StringUtils.capitalize(session.getLogProperties().getModel().getNameAsString());
             String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
             String ikSolver = kstController + "WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.";
 
