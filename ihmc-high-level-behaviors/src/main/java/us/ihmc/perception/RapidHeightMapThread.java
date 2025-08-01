@@ -110,7 +110,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          // Update height map
          synchronized (heightMapLock)
          {
-            heightMapManager.updateAndPublishHeightMap(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+            heightMapManager.updateAndPublish(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
          }
 
          filteredDepthImage.close();

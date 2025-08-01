@@ -3,7 +3,6 @@ package us.ihmc.perception.gpuHeightMap;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
@@ -13,8 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMap;
-import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
+import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMapManager;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
@@ -33,7 +31,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -53,7 +50,6 @@ public class RapidHeightMapManager
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
-   private final ROS2Publisher<ChunkMessage> chunkMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
@@ -61,7 +57,7 @@ public class RapidHeightMapManager
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
    private long sequenceId = 0;
    private FileOutputStream heightMapOutputStream;
-   private final ChunkedMap chunkedMap = new ChunkedMap();
+   private final ChunkedMapManager chunkedMapManager;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -83,15 +79,15 @@ public class RapidHeightMapManager
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
+      chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
-      chunkMessagePublisher = ros2Node.createPublisher(PerceptionAPI.CHUNK);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
    }
 
-   public void updateAndPublishHeightMap(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       // Update the sensor origin here with the latest reference frame
       RigidBodyTransform heightMapFrameToWorldFrame = heightMapCenter.getTransformToWorldFrame();
@@ -116,36 +112,10 @@ public class RapidHeightMapManager
 
       if (heightMapParameters.getEnableChunkedMap())
       {
-         chunkedMap.addHeightMap(hostGlobalHeightMap,
-                                 heightMapCenterPoint,
-                                 heightMapParameters.getGridSizeXY(),
-                                 heightMapParameters.getGridResolutionXY(),
-                                 heightMapParameters.getHeightOffset(),
-                                 heightMapParameters.getHeightScaleFactor());
-         publishChunkedMap(chunkMessagePublisher, chunkedMap);
+         chunkedMapManager.updateAndPublish(hostGlobalHeightMap, heightMapCenterPoint);
       }
 
       hostGlobalHeightMap.close();
-   }
-
-   private static void publishChunkedMap(ROS2Publisher<ChunkMessage> publisher, ChunkedMap chunkedMap)
-   {
-      Collection<Chunk> chunks = chunkedMap.getChunks();
-      for (Chunk chunk : chunks)
-      {
-         ChunkMessage chunkMessage = new ChunkMessage();
-         chunkMessage.setHashCodeOfChunk(chunk.hashCode());
-
-         HeightMapMessageTools.toMessage(chunk.getChunk(),
-                                         chunkMessage,
-                                         new Point3D(chunk.getOriginX(), chunk.getOriginY(), 0),
-                                         Chunk.CHUNK_WIDTH,
-                                         chunk.getCellSize(),
-                                         chunk.getHeightMapOffset(),
-                                         chunk.getScalingFactor(),
-                                         chunk.getCellsPerAxis());
-         publisher.publish(chunkMessage);
-      }
    }
 
    private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter, int cellsPerAxis)
@@ -344,7 +314,7 @@ public class RapidHeightMapManager
    {
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
-      chunkMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
+      chunkedMapManager.destroy();
    }
 }

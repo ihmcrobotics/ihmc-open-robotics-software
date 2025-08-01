@@ -80,16 +80,14 @@ public class HeightMapMessageTools
       int totalCells = cellsPerAxis * cellsPerAxis;
       short[] heights = new short[totalCells];
 
+      // Optimization of caching the arrays
+      Integer heightsFromMessage = heightMapMessage.getHeights();
+      Integer keysFromMessage = heightMapMessage.getKeys();
+
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
-         short height = (short) heightMapMessage.getHeights().get(i);
-         int key = heightMapMessage.getKeys().get(i);
-
-         int xIndex = key % cellsPerAxis;
-         int yIndex = key / cellsPerAxis;
-
-         int index = yIndex * cellsPerAxis + xIndex;
-         heights[index] = height;
+         int key = keysFromMessage.get(i);
+         heights[key] = (short) heightsFromMessage.get(i);
       }
 
       shortBuffer.put(heights);
@@ -101,6 +99,7 @@ public class HeightMapMessageTools
     * This method is too slow, creating a new {@link HeightMapMessage} object is too slow when trying to
     * use this in the update loop. Especially when we start sending larger maps.
     * Please use {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double, int)}
+    * I'm going to say it one more time in case it wasn't clear the first time. THIS METHOD IS TOO SLOW, DO NOT USE!
     */
    @Deprecated
    public static HeightMapMessage toMessage(HeightMapData heightMapData)
@@ -143,8 +142,6 @@ public class HeightMapMessageTools
                                 double heightScaleFactor,
                                 int cellsPerAxis)
    {
-      clear(messageToPack);
-
       messageToPack.setGridSizeXy(widthInMeters);
       messageToPack.setXyResolution(cellSizeInMeters);
       messageToPack.setOriginX(mapOrigin.getX());
@@ -170,11 +167,18 @@ public class HeightMapMessageTools
       Integer keys = messageToPack.getKeys();
       Integer heights = messageToPack.getHeights();
 
-      // No overhead for this loop, it's as fast as possible with the current message
+      // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)
       {
-         keys.add(i);
-         heights.add(heightsArray[i]);
+         if (i < keys.size())
+            keys.set(i, i);
+         else
+            keys.add(i);
+
+         if (i < heights.size())
+            heights.set(i, heightsArray[i]);
+         else
+            heights.add(heightsArray[i]);
       }
    }
 
@@ -198,8 +202,6 @@ public class HeightMapMessageTools
                                 double heightScaleFactor,
                                 int cellsPerAxis)
    {
-      clear(messageToPack);
-
       messageToPack.setGridSizeXy(widthInMeters);
       messageToPack.setXyResolution(cellSizeInMeters);
       messageToPack.setGridCenterX(heightMapCenter.getX());
@@ -225,14 +227,25 @@ public class HeightMapMessageTools
       Integer keys = messageToPack.getKeys();
       Integer heights = messageToPack.getHeights();
 
-      // No overhead for this loop, it's as fast as possible with the current message
+      // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)
       {
-         keys.add(i);
-         heights.add(heightsArray[i]);
+         if (i < keys.size())
+            keys.set(i, i);
+         else
+            keys.add(i);
+
+         if (i < heights.size())
+            heights.set(i, heightsArray[i]);
+         else
+            heights.add(heightsArray[i]);
       }
    }
 
+   /**
+    * We don't want to do this unless we have too, it's too slow
+    */
+   @Deprecated
    public static void clear(HeightMapMessage messageToClear)
    {
       messageToClear.setGridSizeXy(-1.0);

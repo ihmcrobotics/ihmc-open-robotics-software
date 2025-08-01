@@ -17,6 +17,7 @@ import java.util.Queue;
 public class RDXChunkedMapRenderer implements RenderableProvider
 {
    private static final int MAX_ENTREES = 100;
+
    private final IntMap<ChunkRenderer> chunkRenderers = new IntMap<>();
    private final Queue<Integer> queueOfRenderers = new ArrayDeque<>();
    private final List<ChunkRenderer> renderersToRemove = new ArrayList<>();
@@ -33,7 +34,6 @@ public class RDXChunkedMapRenderer implements RenderableProvider
          renderer.getRenderer().dispose();
       }
    }
-
 
    public void create()
    {
@@ -71,7 +71,7 @@ public class RDXChunkedMapRenderer implements RenderableProvider
             {
                if (chunk.getChunk() != null && chunk.getChunk().ptr(0) != null)
                {
-                     heightMapRenderer.update(chunk.getChunk(),
+                  heightMapRenderer.update(chunk.getChunk(),
                                            (float) chunk.getHeightMapOffset(),
                                            (float) chunk.getOriginX(),
                                            (float) chunk.getOriginY(),
@@ -105,11 +105,11 @@ public class RDXChunkedMapRenderer implements RenderableProvider
 
       Chunk chunk = chunkRenderer.getChunk();
       chunk.setChunk(latestChunk);
-      chunk.setCellSize(chunkMessage.getCellSizeInMeters());
-      chunk.setHeightMapOffset((float) chunkMessage.getHeightOffset());
       chunk.setOriginX(chunkMessage.getOriginX());
       chunk.setOriginY(chunkMessage.getOriginY());
+      chunk.setCellSize(chunkMessage.getCellSizeInMeters());
       chunk.setCellsPerAxis(chunkMessage.getCellsPerAxis());
+      chunk.setHeightMapOffset((float) chunkMessage.getHeightOffset());
       chunk.setScalingFactor(chunkMessage.getHeightScaleFactor());
    }
 

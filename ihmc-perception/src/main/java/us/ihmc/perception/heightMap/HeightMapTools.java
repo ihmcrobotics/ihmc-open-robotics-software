@@ -206,7 +206,7 @@ public class HeightMapTools
          int height = major | minor;
 
          // Calculate cell height
-         float cellHeight = (float) (((float) height / heightScaleFactor) - heightOffset);
+         float cellHeight = (((float) height / heightScaleFactor) - heightOffset);
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
