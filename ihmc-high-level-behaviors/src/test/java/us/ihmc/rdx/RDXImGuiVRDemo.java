@@ -47,6 +47,8 @@ public class RDXImGuiVRDemo
 
    private VRSkeletalSummaryData leftSkeleton;
    private VRSkeletalSummaryData rightSkeleton;
+   private float leftThumbAbduction = 0.5f;
+   private float rightThumbAbduction = 0.5f;
 
    private final ImFloat leftForwardJoystickValue = new ImFloat();
    private final ImFloat leftLateralJoystickValue = new ImFloat();
@@ -57,6 +59,8 @@ public class RDXImGuiVRDemo
    private final ImFloat leftTriggerValue = new ImFloat();
    private final ImFloat rightTriggerValue = new ImFloat();
    private RDXVRHardwareModel controllerModel = RDXVRHardwareModel.UNKNOWN;
+   private static final float CONTROL_JOYSTICK_THRESHOLD = 0.5f;
+   private static final float THUMB_ABDUCTION_JOYSTICK_INCREMENT = 0.01f;
 
    public RDXImGuiVRDemo()
    {
@@ -110,6 +114,12 @@ public class RDXImGuiVRDemo
              leftTriggerValue.set(controller.getTriggerActionData().x());
              leftTrigger = controller.getClickTriggerActionData();
              leftSkeleton = controller.getSkeletalSummaryData();
+             float lateralJoystick  = controller.getJoystickActionData().x();
+             if (Math.abs(lateralJoystick) > CONTROL_JOYSTICK_THRESHOLD)
+             {
+                leftThumbAbduction += -1.0f * Math.signum(lateralJoystick) * THUMB_ABDUCTION_JOYSTICK_INCREMENT;
+                leftThumbAbduction = Math.max(0.0f, Math.min(leftThumbAbduction, 1.0f));
+             }
             });
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
@@ -122,6 +132,12 @@ public class RDXImGuiVRDemo
               rightTriggerValue.set(controller.getTriggerActionData().x());
               rightTrigger = controller.getClickTriggerActionData();
               rightSkeleton = controller.getSkeletalSummaryData();
+              float lateralJoystick  = controller.getJoystickActionData().x();
+              if (Math.abs(lateralJoystick) > CONTROL_JOYSTICK_THRESHOLD)
+              {
+                 rightThumbAbduction += Math.signum(lateralJoystick) * THUMB_ABDUCTION_JOYSTICK_INCREMENT;
+                 rightThumbAbduction = Math.max(0.0f, Math.min(rightThumbAbduction, 1.0f));
+              }
             });
          }
 
@@ -165,6 +181,7 @@ public class RDXImGuiVRDemo
                ImGui.text("Left Grip: " + leftGripValue);
                if (controllerModel == RDXVRHardwareModel.INDEX)
                {
+                  ImGui.text("Left Thumb Abduction: " + leftThumbAbduction);
                   ImGui.text("Left Thumb Curl: " + leftSkeleton.flFingerCurl(0));
                   ImGui.text("Left Index Curl: " + leftSkeleton.flFingerCurl(1));
                   ImGui.text("Left Middle Curl: " + leftSkeleton.flFingerCurl(2));
@@ -180,6 +197,7 @@ public class RDXImGuiVRDemo
                ImGui.text("Right Grip: " + rightGripValue);
                if (controllerModel == RDXVRHardwareModel.INDEX)
                {
+                  ImGui.text("Right Thumb Abduction: " + rightThumbAbduction);
                   ImGui.text("Right Thumb Curl: " + rightSkeleton.flFingerCurl(0));
                   ImGui.text("Right Index Curl: " + rightSkeleton.flFingerCurl(1));
                   ImGui.text("Right Middle Curl: " + rightSkeleton.flFingerCurl(2));

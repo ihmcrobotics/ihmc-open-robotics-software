@@ -90,6 +90,8 @@ public class RDXVRController extends RDXVRTrackedDevice
    private InputDigitalActionData bTouchedActionData;
    private final LongBuffer joystickPressActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData joystickPressActionData;
+   private final LongBuffer joystickTouchedActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData joystickTouchedActionData;
    private final LongBuffer touchpadTouchedActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData touchpadTouchedActionData;
    private final LongBuffer touchpadActionHandle = BufferUtils.newLongBuffer(1);
@@ -189,6 +191,8 @@ public class RDXVRController extends RDXVRTrackedDevice
       bTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joystickpress", joystickPressActionHandle);
       joystickPressActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joysticktouched", joystickTouchedActionHandle);
+      joystickTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_touchpadtouched", touchpadTouchedActionHandle);
       touchpadTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_touchpad", touchpadActionHandle);
@@ -262,6 +266,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(bButtonDoubleClickActionHandle.get(0), bButtonDoubleClickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(bTouchedActionHandle.get(0), bTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(joystickPressActionHandle.get(0), joystickPressActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(joystickTouchedActionHandle.get(0), joystickTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(touchpadActionHandle.get(0), touchpadActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
@@ -450,6 +455,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public InputDigitalActionData getJoystickPressActionData()
    {
       return joystickPressActionData;
+   }
+
+   public InputDigitalActionData getJoystickTouchedActionData()
+   {
+      return joystickTouchedActionData;
    }
 
    public InputAnalogActionData getTouchpadActionData()

@@ -20,7 +20,8 @@ public class RDXVRHandControl
    private final SideDependentList<MutableBoolean> handsAreOpen = new SideDependentList<>(new MutableBoolean(false), new MutableBoolean(false));
    private final ImBoolean userIsControllingRobot;
    private static final float CONTROL_JOYSTICK_THRESHOLD = 0.5f;
-   private static final float DISTAL_THUMB_JOYSTICK_INCREMENT = 1.0f;
+   private static final float THUMB_OPPOSITION_JOYSTICK_INCREMENT = 0.01f;
+   private final SideDependentList<Float> thumbOpposition = new SideDependentList<>(0.5f, 0.5f);;
 
    public RDXVRHandControl(RDXVRContext vrContext,
                            RDXHandManager handManager,
@@ -55,20 +56,28 @@ public class RDXVRHandControl
                   }
                   case  FINGER_STREAMING ->
                   {
+                     InputDigitalActionData touchJoystickButton = controller.getJoystickTouchedActionData();
+                     boolean joystickTouched = touchJoystickButton.bState();
+
                      VRSkeletalSummaryData skeleton = controller.getSkeletalSummaryData();
                      for (int i = 0; i < 5; i++)
                      {
-                        handManager.getHand(side).sendFingerPosition(i, skeleton.flFingerCurl(i));
+                        // Do not send thumb curl command when touching the joystick
+                        if (!(i == 0 && joystickTouched))
+                        {
+                           handManager.getHand(side).sendFingerPosition(i, skeleton.flFingerCurl(i));
+                        }
                      }
 
                      float lateralJoystick  = controller.getJoystickActionData().x();
                      if (Math.abs(lateralJoystick) > CONTROL_JOYSTICK_THRESHOLD)
                      {
-                        float newThumbDistal = handManager.getHand(side).getFingerPosition(5);
-                        newThumbDistal += Math.signum(lateralJoystick) * DISTAL_THUMB_JOYSTICK_INCREMENT;
-                        newThumbDistal = Math.max(0.0f, Math.min(newThumbDistal, 1.0f));
-//                        LogTools.info(newThumbDistal);
-//                        handManager.getHand(side).sendFingerPosition(5, newThumbDistal);
+                        float newThumbOpposition = thumbOpposition.get(side) + side.negateIfRightSide(1.0f) * Math.signum(lateralJoystick) * THUMB_OPPOSITION_JOYSTICK_INCREMENT;
+                        newThumbOpposition = Math.max(0.0f, Math.min(newThumbOpposition, 1.0f));
+                        thumbOpposition.put(side, newThumbOpposition);
+                        if (side==RobotSide.RIGHT)
+                           LogTools.info(thumbOpposition.get(side));
+                        handManager.getHand(side).sendFingerPosition(5, thumbOpposition.get(side));
                      }
 
                   }
