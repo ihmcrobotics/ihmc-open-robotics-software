@@ -223,6 +223,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       if (cellsPerAxisOfChunks > 0)
       {
+         chunkedMapRenderer.removeOldRenderers();
          chunkedMapRenderer.create();
       }
 

@@ -9,18 +9,42 @@ import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+
 public class RDXChunkedMapRenderer implements RenderableProvider
 {
+   private static final int MAX_ENTREES = 100;
    private final IntMap<ChunkRenderer> chunkRenderers = new IntMap<>();
+   private final Queue<Integer> queueOfRenderers = new ArrayDeque<>();
+   private final List<ChunkRenderer> renderersToRemove = new ArrayList<>();
 
    public RDXChunkedMapRenderer()
    {
    }
 
+   public void removeOldRenderers()
+   {
+      for (int i = 0; i < renderersToRemove.size(); i++)
+      {
+         ChunkRenderer renderer = renderersToRemove.remove(i);
+         renderer.getRenderer().dispose();
+      }
+   }
+
+
    public void create()
    {
       for (ChunkRenderer chunkRenderer : chunkRenderers.values())
       {
+         if (chunkRenderer == null)
+         {
+            // Different threads means this may be removed already which would make it null
+            continue;
+         }
+
          if (!chunkRenderer.getRenderer().isHasBeenCreated())
          {
             int cellsPerAxis = chunkRenderer.getChunk().getCellsPerAxis();
@@ -33,6 +57,12 @@ public class RDXChunkedMapRenderer implements RenderableProvider
    {
       for (ChunkRenderer chunkRenderer : chunkRenderers.values())
       {
+         if (chunkRenderer == null)
+         {
+            // Different threads means this may be removed already which would make it null
+            continue;
+         }
+
          RDXChunkRenderer heightMapRenderer = chunkRenderer.getRenderer();
          if (heightMapRenderer.isHasBeenCreated())
          {
@@ -59,8 +89,16 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       ChunkRenderer chunkRenderer = chunkRenderers.get(hash);
       if (chunkRenderer == null)
       {
+         if (chunkRenderers.size > MAX_ENTREES && !queueOfRenderers.isEmpty())
+         {
+            int oldestRenderer = queueOfRenderers.poll();
+            ChunkRenderer oldestChunkRenderer = chunkRenderers.remove(oldestRenderer);
+            renderersToRemove.add(oldestChunkRenderer);
+         }
+
          chunkRenderer = new ChunkRenderer(chunkMessage);
          chunkRenderers.put(hash, chunkRenderer);
+         queueOfRenderers.add(hash);
       }
 
       Mat latestChunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);

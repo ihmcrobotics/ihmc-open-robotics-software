@@ -55,6 +55,11 @@ public class Chunk
       setDefaultHeight(cellsPerAxis);
    }
 
+   /**
+    * We shouldn't have t odo this, but there is a memory problem where the new Mats are pointing to an old address or something
+    * and that is causing the new data to be filled with old data. Even though its a new object.
+    * So... TODO remove hehe
+    */
    private void setDefaultHeight(int cellsPerAxis)
    {
       // Set default height of the Mat
