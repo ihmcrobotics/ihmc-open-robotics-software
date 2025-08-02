@@ -284,6 +284,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       continuousHikingParameters.setStepPublisherEnabled(enableContinuousHiking.get());
 
+      ImGui.indent();
+      ImGui.checkbox("Use A* Planner", useAStarFootstepPlanner);
+      ImGui.checkbox("Monte Carlo Planner", useMonteCarloFootstepPlanner);
+      ImGui.unindent();
+
       if (ImGui.collapsingHeader("Continuous Hiking Parameters"))
       {
          continuousHikingParametersPanel.renderImGuiWidgets();
