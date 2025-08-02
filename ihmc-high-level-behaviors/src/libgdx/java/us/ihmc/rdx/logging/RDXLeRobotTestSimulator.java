@@ -340,7 +340,8 @@ public class RDXLeRobotTestSimulator
 
    public void destroy()
    {
-      inferenceManager.destroy();
+      if (inferenceManager != null)
+         inferenceManager.destroy();
       robotVisualizer.destroy();
       syncedRobot.destroy();
       ros2Node.destroy();
