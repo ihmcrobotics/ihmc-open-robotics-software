@@ -110,11 +110,7 @@ public class LeRobotDataset
 
    public void addEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
    {
-      if (!taskNames.contains(taskName))
-      {
-         taskNames.add(taskName);
-         writeTaskJsonlLine(taskName);
-      }
+      ensureTaskNameInJsonl(taskName);
 
       int episodeIndex = episodes.size();
       LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
@@ -129,59 +125,76 @@ public class LeRobotDataset
       episodes.add(episode);
    }
 
-   public void calculateEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public void addEpisodeAutomatically(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   {
+      ensureTaskNameInJsonl(taskName);
+
+      String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "KinematicsStreamingToolboxModule");
+      String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
+      if (session.getRootRegistry().findVariable(kstStreaming + "isDemonstrationEpisode") instanceof YoBoolean isDemonstrationEpisode)
+      {
+         LogTools.info("Found isDemonstrationEpisode variable.");
+
+         
+
+      }
+
+//      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
+//      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
+//      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
+//      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
+//      String timestampVarName = "root.LogDataReader.robotTime";
+//
+//      String s = "root.main.H1KinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTStreamingState.isDemonstrationEpisode";
+//
+//      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
+//      YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
+//
+//      LogDataReader reader = session.getLogDataReader();
+//      long totalFrames = reader.getNumberOfEntries();
+//
+//      boolean currentlyRecording = false;
+//      int episodeStart = -1;
+//
+//      for (long frame = 0; frame < totalFrames; frame++)
+//      {
+//         session.runTick();
+//
+//         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
+//
+//         if (flagValue && !currentlyRecording)
+//         {
+//            episodeStart = (int) frame;
+//            currentlyRecording = true;
+//         }
+//         else if (!flagValue && currentlyRecording)
+//         {
+//            int episodeEnd = (int) frame;
+//            int episodeLength = episodeEnd - episodeStart;
+//            System.out.println(episodeLength);
+//            currentlyRecording = false;
+//            episodeStart = -1;
+//         }
+//      }
+//
+//      if (currentlyRecording)
+//      {
+//         int episodeEnd = (int) totalFrames;
+//         int episodeLength = episodeEnd - episodeStart;
+//         System.out.println(episodeLength);
+//      }
+   }
+
+   private void ensureTaskNameInJsonl(String taskName)
    {
       if (!taskNames.contains(taskName))
       {
          taskNames.add(taskName);
          writeTaskJsonlLine(taskName);
       }
-
-      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
-      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
-      String timestampVarName = "root.LogDataReader.robotTime";
-
-      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
-      YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
-
-      LogDataReader reader = session.getLogDataReader();
-      long totalFrames = reader.getNumberOfEntries();
-
-      boolean currentlyRecording = false;
-      int episodeStart = -1;
-
-      for (long frame = 0; frame < totalFrames; frame++)
-      {
-         session.runTick();
-
-         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
-
-         if (flagValue && !currentlyRecording)
-         {
-            episodeStart = (int) frame;
-            currentlyRecording = true;
-         }
-         else if (!flagValue && currentlyRecording)
-         {
-            int episodeEnd = (int) frame;
-            int episodeLength = episodeEnd - episodeStart;
-            System.out.println(episodeLength);
-            currentlyRecording = false;
-            episodeStart = -1;
-         }
-      }
-
-      if (currentlyRecording)
-      {
-         int episodeEnd = (int) totalFrames;
-         int episodeLength = episodeEnd - episodeStart;
-         System.out.println(episodeLength);
-      }
    }
 
-   public void removeEpisode(int index) throws IOException
+   public void removeEpisode(int index)
    {
       if (episodes.isEmpty())
       {
@@ -221,10 +234,18 @@ public class LeRobotDataset
          }
       }
 
-      removeLineFromJsonl(episodesJsonlPath, index);
-      removeLineFromJsonl(episodeStatsJsonlPath, index);
-      shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
-      shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
+
+      try
+      {
+         removeLineFromJsonl(episodesJsonlPath, index);
+         removeLineFromJsonl(episodeStatsJsonlPath, index);
+         shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
+         shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
+      }
+      catch (IOException e)
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+      }
 
       episodes.remove(episodes.size() - 1);
       LogTools.info("Removed episode: " + episodeName);

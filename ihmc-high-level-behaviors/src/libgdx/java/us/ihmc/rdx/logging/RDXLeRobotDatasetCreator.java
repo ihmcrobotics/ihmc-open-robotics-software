@@ -22,7 +22,6 @@ import us.ihmc.scs2.session.log.LogDataReader;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Queue;
@@ -154,9 +153,32 @@ public class RDXLeRobotDatasetCreator
 
          ImGui.separator();
          ImGui.text("Episodes:");
-         for (LeRobotDatasetEpisode episode : dataset.getEpisodes())
+         for (int i = 0; i < dataset.getEpisodes().size(); i++)
          {
-            ImGui.text("%s length: %d".formatted(episode.getEpisodeName(), episode.getLength()));
+            LeRobotDatasetEpisode episode = dataset.getEpisodes().get(i);
+            String text = "%s length: %d".formatted(episode.getEpisodeName(), episode.getLength());
+
+            boolean mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getTextLineHeight());
+            if (mouseHoveringNodeLine)
+               ImGui.textColored(ImGuiTools.GRAY, text);
+            else
+               ImGui.text(text);
+            ImGuiTools.previousWidgetTooltip("Right click for options.");
+
+            String popupId = "episode_context_menu_" + i;
+            if (ImGui.isItemClicked(ImGuiMouseButton.Right))
+            {
+               ImGui.openPopup(popupId);
+            }
+            if (ImGui.beginPopup(popupId))
+            {
+               if (ImGui.menuItem(labels.get("Remove %s".formatted(episode.getEpisodeName()))))
+               {
+                  dataset.removeEpisode(i);
+                  ImGui.closeCurrentPopup();
+               }
+               ImGui.endPopup();
+            }
          }
 
          ImGuiTools.separatorText("New episode");
@@ -164,53 +186,29 @@ public class RDXLeRobotDatasetCreator
          ImGui.text("Current task name:");
          ImGuiTools.inputTextMultiline(labels.getHidden("taskName"), imTaskName);
 
-         ImGui.text("Episodes are created for the current SCS 2 in/out points.");
          ImGui.beginDisabled(imTaskName.get().trim().isEmpty());
          if (ImGui.button(labels.get("Add Episode")))
          {
             dataset.addEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add); // Use queue to maintain framerate
          }
-         if (ImGui.button(labels.get("Add Episodes from Boolean")))
+         ImGuiTools.previousWidgetTooltip("Add an episode from the current SCS 2 in/out points.");
+         if (ImGui.button(labels.get("Add Episode Automatically")))
          {
-            dataset.calculateEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add);
+            dataset.addEpisodeAutomatically(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add);
          }
-         if (ImGui.button(labels.get("Remove Episode")))
-         {
-            ImGui.openPopup("Choose Episode to Remove");
-         }
-         if (ImGui.beginPopup("Choose Episode to Remove"))
-         {
-            List<LeRobotDatasetEpisode> episodes = dataset.getEpisodes();
-            for (int i = 0; i < episodes.size(); i++)
-            {
-               LeRobotDatasetEpisode episode = episodes.get(i);
-               String name = episode.getEpisodeName();
-               String selectableLabel = String.format("%d: %s", i, name);
-               if (ImGui.selectable(selectableLabel))
-               {
-                  try
-                  {
-                     dataset.removeEpisode(i);
-                  }
-                  catch (IOException e)
-                  {
-                     throw new RuntimeException(e);
-                  }
-                  ImGui.closeCurrentPopup();
-                  break;
-               }
-            }
-            ImGui.endPopup();
-         }
+         ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the isDemonstrationEpisode variable.");
          ImGui.endDisabled();
 
-         if (ImGui.button(labels.get("Regenerate Metadata")))
+         if (ImGui.collapsingHeader(labels.get("Debug Operations")))
          {
-            dataset.regenerateAndRewriteMetadata();
-         }
-         if (ImGui.button(labels.get("Write Parquet Data")))
-         {
-            dataset.writeParquetData();
+            if (ImGui.button(labels.get("Regenerate Metadata")))
+            {
+               dataset.regenerateAndRewriteMetadata();
+            }
+            if (ImGui.button(labels.get("Write Parquet Data")))
+            {
+               dataset.writeParquetData();
+            }
          }
 
          testSimulator.renderImGuiWidgets(dataset);
