@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HeightMapMessageToolsTest
 {
    private final int iterations = 1000;
-   private final static float MILLISECOND_TOLERANCE = 2.0f;
+   private final static float MILLISECOND_TOLERANCE = 1.0f;
 
    @Test
    public void testHeightMapMessaging()
