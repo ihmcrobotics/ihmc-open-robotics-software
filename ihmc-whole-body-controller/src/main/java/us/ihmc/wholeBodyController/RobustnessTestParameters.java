@@ -5,7 +5,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public interface RobustnessTestParameters
 {
     RobustnessTestConfig getTestConfiguration();
-    RobustnessTestConfig getTestConfiguration(int testType);
     RobustnessTestConfig getTestConfigurationForLevel(int level);
 
     int getNumberOfTestLevels();
