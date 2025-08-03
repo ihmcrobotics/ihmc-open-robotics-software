@@ -110,19 +110,18 @@ public class LeRobotDataset
 
    public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
    {
+      createEpisode(taskName).generateFromActiveBuffer(session, this::writeMetaJson, usePerfectTimestamps);
+   }
+
+   private LeRobotDatasetEpisode createEpisode(String taskName)
+   {
       ensureTaskNameInJsonl(taskName);
 
       int episodeIndex = episodes.size();
-      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                taskName,
-                                                                0,
-                                                                totalFrames,
-                                                                episodesJsonlPath,
-                                                                episodeStatsJsonlPath,
-                                                                dataChunk0Path,
-                                                                zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetaJson, usePerfectTimestamps);
+      LeRobotDatasetEpisode episode
+            = new LeRobotDatasetEpisode(episodeIndex, taskName, 0, totalFrames, episodesJsonlPath, episodeStatsJsonlPath, dataChunk0Path, zedVideoDirs);
       episodes.add(episode);
+      return episode;
    }
 
    public BooleanSupplier addEpisodeAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
@@ -137,41 +136,50 @@ public class LeRobotDataset
          ThreadTools.startAThread(() ->
          {
             stillGoing.setValue(true);
+            LeRobotDatasetEpisode episode = null;
             int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
             while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
-               desiredLoadedIndex = scrubForDemonstration(session, isDemonstrationEpisode, desiredLoadedIndex);
+            {
+               // It's kinda weird to think about but current log position is actually referring to the next log index to read
+               // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
+               int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
+               int loadedIndex = indexToLoad - 1;
+               boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
+               if (desiredDataIsLoaded)
+               {
+                  LogTools.info("scrub {}", loadedIndex);
+                  if (isDemonstrationEpisode.getBooleanValue())
+//                  if (loadedIndex > 80920 && loadedIndex < 81970) // TODO Remove test code
+                  {
+                     if (episode == null)
+                     {
+                        episode = createEpisode(taskName);
+                        episode.initializeEpisode(session, this::writeMetaJson, usePerfectTimestamps);
+                     }
+
+                     episode.processFrame();
+                  }
+                  else if (episode != null)
+                  {
+                     episode.finalizeEpisodeGeneration();
+                     episode = null;
+                  }
+               }
+
+               if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
+               {
+                  session.submitLogPositionRequest(indexToLoad);
+                  desiredLoadedIndex = indexToLoad;
+               }
+               else // we hit the end
+               {
+                  break;
+               }
+            }
             stillGoing.setValue(false);
          }, "ScrubToNextEpisode");
       }
       return stillGoing::booleanValue;
-   }
-
-   private int scrubForDemonstration(SCS2LogSessionWithVideo session, YoBoolean isDemonstrationEpisode, int desiredLoadedIndex)
-   {
-      // It's kinda weird to think about but current log position is actually referring to the next log index to read
-      // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
-      int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
-      int loadedIndex = indexToLoad - 1;
-      boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
-      if (desiredDataIsLoaded)
-      {
-         LogTools.info("scrub {}", loadedIndex);
-         if (isDemonstrationEpisode.getBooleanValue())
-         {
-            // TODO start generating episode
-            return -1;
-         }
-      }
-
-      if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
-      {
-         session.submitLogPositionRequest(indexToLoad);
-         return indexToLoad;
-      }
-      else // we hit the end
-      {
-         return -1;
-      }
    }
 
    private void ensureTaskNameInJsonl(String taskName)
