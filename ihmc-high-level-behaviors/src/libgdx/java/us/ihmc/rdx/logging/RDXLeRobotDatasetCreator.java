@@ -15,7 +15,6 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -27,8 +26,6 @@ import java.awt.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -48,7 +45,6 @@ public class RDXLeRobotDatasetCreator
    private transient final ImInt logPosition = new ImInt();
    private List<Path> datasets;
    private LeRobotDataset dataset;
-   private final Queue<Runnable> frameTaskQueue = new ConcurrentLinkedQueue<>();
    private final RDXLeRobotTestSimulator testSimulator;
    private BooleanSupplier generating;
    private final ImBoolean keepGenerating = new ImBoolean(false);
@@ -76,9 +72,6 @@ public class RDXLeRobotDatasetCreator
 
    public void update()
    {
-      for (int i = 0; i < 50 && !frameTaskQueue.isEmpty(); i++)
-         frameTaskQueue.remove().run(); // Run n tasks per frame
-
       testSimulator.update();
    }
 
@@ -195,14 +188,14 @@ public class RDXLeRobotDatasetCreator
          ImGui.beginDisabled(imTaskName.get().trim().isEmpty());
          if (ImGui.button(labels.get("Add Episode")))
          {
-            dataset.addEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add); // Use queue to maintain framerate
+            dataset.addEpisode(imTaskName.get().trim(), logSession.getSession());
          }
          ImGuiTools.previousWidgetTooltip("Add an episode from the current SCS 2 in/out points.");
          ImGui.beginDisabled(generating != null && generating.getAsBoolean());
          if (ImGui.button(labels.get("Add Episode Automatically")))
          {
             keepGenerating.set(true);
-            generating = dataset.addEpisodeAutomatically(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add, keepGenerating::get);
+            generating = dataset.addEpisodeAutomatically(imTaskName.get().trim(), logSession.getSession(), keepGenerating::get);
          }
          ImGui.endDisabled();
          if (keepGenerating.get())
@@ -218,7 +211,6 @@ public class RDXLeRobotDatasetCreator
 
          if (ImGui.collapsingHeader(labels.get("Debug Operations")))
          {
-            ImGui.text("Frame task queue size: %d".formatted(frameTaskQueue.size()));
             if (ImGui.button(labels.get("Regenerate Metadata")))
             {
                dataset.regenerateAndRewriteMetadata();
