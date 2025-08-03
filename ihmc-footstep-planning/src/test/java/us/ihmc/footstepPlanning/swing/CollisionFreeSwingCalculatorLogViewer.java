@@ -46,11 +46,11 @@ public class CollisionFreeSwingCalculatorLogViewer
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 
-      IDLSequence.Float heights = heightMapMessage.getHeights();
+      IDLSequence.Integer heights = heightMapMessage.getHeights();
       double gridResolutionXY = heightMapMessage.getXyResolution();
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
 

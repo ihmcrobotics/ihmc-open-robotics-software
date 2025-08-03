@@ -16,18 +16,23 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.PoseReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -36,6 +41,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinem
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -129,7 +135,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * It is added to the x and y coordinates of the {@link #centerOfMassPositionToHold}.
     * It is intended to be expressed in the local frame of the feet, i.e., it accounts for the robot yaw.
     */
-   // TODO Add API to set this offset. It was only set from the SCS2 visualizer.
    private final YoVector2D centerOfMassOffset = new YoVector2D("centerOfMassOffset", registry);
    /**
     * Indicates whether the center of mass x and y coordinates should be held in place for this run. It
@@ -170,7 +175,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    private final StabilityMarginRegionCalculator multiContactRegionCalculator;
    private final WholeBodyContactState wholeBodyContactState;
-   private final StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
+   private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
 
@@ -231,12 +236,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       multiContactRegionCalculator.setupForStabilityMarginCalculation(() -> centerOfMass);
       wholeBodyContactState = new WholeBodyContactState(desiredOneDoFJoints, rootJoint);
 
-      stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
-                                                                            multiContactRegionCalculator,
-                                                                            desiredFullRobotModel,
-                                                                            isUpperBodyLoadBearing,
-                                                                            getCenterOfMassSafeMargin(),
-                                                                            registry);
+      if (desiredFullRobotModel.getChest() != null && desiredFullRobotModel.getHand(RobotSide.LEFT) != null
+          && desiredFullRobotModel.getHand(RobotSide.RIGHT) != null)
+      {
+         CentroidalMomentumCalculator centroidalMomentumCalculator = controllerCore.getToolbox().getCentroidalMomentumCalculator();
+         stabilityCostCalculator = new StabilityMarginKinematicsCostCalculator(wholeBodyContactState,
+                                                                               multiContactRegionCalculator,
+                                                                               desiredFullRobotModel,
+                                                                               isUpperBodyLoadBearing,
+                                                                               getCenterOfMassSafeMargin(),
+                                                                               centroidalMomentumCalculator,
+                                                                               registry);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -410,6 +421,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
+      getSolution().setLeftFootInContact(true);
+      getSolution().setRightFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -496,7 +509,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
+         if (stabilityCostCalculator != null)
+            stabilityCostCalculator.setEnabled(command.enableStabilityObjective());
 
          if (command.hasCustomJointRestrictionLimits())
          {
@@ -566,6 +580,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
          initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
+   }
+
+   public void updateInitialFootPose(RobotSide robotSide)
+   {
+      RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
+      double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
+      initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+      initialFootPoses.get(robotSide).getTranslation().setZ(initialFootHeight);
    }
 
    private final Point3D tempMidFeet = new Point3D();
@@ -805,6 +827,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       concurrentCapturabilityBasedStatusCopier.commit();
    }
 
+   public void setCenterOfMassOffset(Vector2DReadOnly offset)
+   {
+      centerOfMassOffset.set(offset);
+   }
+
    @Override
    protected RigidBodyBasics getEndEffectorPrimaryBase(RigidBodyBasics endEffector)
    {
@@ -816,7 +843,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       addHoldSupportEndEffectorCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
-      stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
+      if (stabilityCostCalculator != null)
+         stabilityCostCalculator.addPostureFeedbackCommands(bufferToPack);
    }
 
    @Override
@@ -838,5 +866,77 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return desiredReferenceFrames;
+   }
+
+   public void setIsFootInSupport(RobotSide side, boolean value)
+   {
+         isFootInSupport.get(side).set(value);
+         getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+         getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+   }
+
+   private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
+
+   /**
+    * Updates the support polygon based on the current foot contact states and foot dimensions.
+    * <p>
+    * The support polygon is constructed by considering each foot that is in contact with the ground
+    * (as indicated by {@code isFootInSupport}) or, if {@code overrideContactState} is {@code true},
+    * by including both feet regardless of their contact state. For each included foot, the four corners
+    * are computed in the local foot frame using the provided {@code footLength} and {@code footWidth},
+    * then transformed into the world frame and added to the set of active contact points.
+    * </p>
+    *
+    * <p>
+    * <b>Special behavior:</b> If {@code overrideContactState} is {@code true}, the support polygon is
+    * updated based solely on the nominal foot locations, ignoring the actual contact state. This is
+    * useful to avoid discrete jumps in the center of mass (CoM) control when foot contact states change,
+    * allowing the user to manually control the CoM position rather than relying on automatic updates
+    * triggered by contact transitions.
+    * </p>
+    *
+    * @param isFootInSupport       a {@link SideDependentList} indicating for each foot whether it is in support (contact with the ground)
+    * @param footLength            the length of the foot (used to define the support polygon corners)
+    * @param footWidth             the width of the foot (used to define the support polygon corners)
+    * @param overrideContactState  if {@code true}, the support polygon is updated based only on foot positions, not contact state
+    */
+   public void updateSupportPolygon(SideDependentList<Boolean> isFootInSupport, double footLength, double footWidth, boolean overrideContactState)
+   {
+      activeContactPointPositions.clear();
+
+      // Define the four corners of the foot in the local foot frame
+      double halfLength = footLength / 2.0;
+      double halfWidth = footWidth / 2.0;
+
+      // These are the four corners in the foot's local frame
+      Point2D[] footCorners = new Point2D[] {
+            new Point2D(-halfLength, -halfWidth),
+            new Point2D( halfLength, -halfWidth),
+            new Point2D( halfLength,  halfWidth),
+            new Point2D(-halfLength,  halfWidth)
+      };
+
+      for (RobotSide side : RobotSide.values)
+      {
+         if (isFootInSupport.get(side) || overrideContactState)
+         {
+            // Get the foot pose in the world frame
+            FramePose3D footPose = new FramePose3D(initialFootPoses.get(side));
+            desiredFootFrame.setPoseAndUpdate(footPose);
+
+            for (Point2D corner : footCorners)
+            {
+               // Create the corner in the foot frame
+               FramePoint3D cornerInFoot = new FramePoint3D(desiredFootFrame, corner.getX(), corner.getY(), initialFootPoses.get(side).getTranslationZ());
+               // Transform to world frame
+               cornerInFoot.changeFrame(worldFrame);
+               // Add to the active contact points
+               activeContactPointPositions.add().setIncludingFrame(cornerInFoot);
+            }
+         }
+      }
+
+      updateSupportPolygonConstraint(activeContactPointPositions);
+      updateCoMPositionToHold();
    }
 }

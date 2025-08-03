@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
@@ -50,7 +50,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
    private static final int CORRESPONDENCES = 1000;
 
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
+   private final CUDAPointCloudExtractor pointCloudExtractor = new CUDAPointCloudExtractor();
    private final Random random = new Random(System.nanoTime());
 
    private final ROS2Node node = new ROS2NodeBuilder().build("icp_worker_demo");
@@ -104,7 +104,7 @@ public class RDXIterativeClosestPointWorkerDemo
                                                           new ROS2DemandGraphNode(node, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded,
                                                           new ROS2DemandGraphNode(node, PerceptionAPI.REQUEST_ZED_PUBLICATION)::isDemanded);
       zedImageRetriever.start();
-      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED_COLOR_IMAGES, PerceptionAPI.ZED_DEPTH, PerceptionAPI.ZED_CUT_OUT_DEPTH);
 
       PrimitiveRigidBodyShape[] shapeArray = new PrimitiveRigidBodyShape[PrimitiveRigidBodyShape.values().length];
       Arrays.stream(PrimitiveRigidBodyShape.values()).toList().toArray(shapeArray);
@@ -219,14 +219,14 @@ public class RDXIterativeClosestPointWorkerDemo
 
             RDXROS2ImageMessageVisualizer zedDepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Depth Image",
                                                                                                       node,
-                                                                                                      PerceptionAPI.ZED2_DEPTH);
+                                                                                                      PerceptionAPI.ZED_DEPTH);
             zedDepthImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(zedDepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zedPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED2 Colored Point Cloud",
                                                                                                                 node,
-                                                                                                                PerceptionAPI.ZED2_DEPTH,
-                                                                                                                PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+                                                                                                                PerceptionAPI.ZED_DEPTH,
+                                                                                                                PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT));
             zedPointCloudVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
             perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer);
 
@@ -277,6 +277,7 @@ public class RDXIterativeClosestPointWorkerDemo
             zedImageRetriever.destroy();
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
+            pointCloudExtractor.close();
          }
 
          private void renderSettings()

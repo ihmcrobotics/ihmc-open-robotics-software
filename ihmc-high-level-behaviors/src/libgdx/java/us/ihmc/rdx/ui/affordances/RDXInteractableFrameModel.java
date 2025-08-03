@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.affordances;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.RigidBodyTransformMessage;
@@ -51,25 +50,25 @@ public class RDXInteractableFrameModel
    private ROS2TunedRigidBodyTransform syncedTransformForTuning;
    private boolean showing = true;
 
-   public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, ModelData modelData, RDXMousePickRayCollisionCalculator collisionCalculator)
+   public void create(ReferenceFrame parentFrame, RDX3DPanel panel3D, Model model, RDXMousePickRayCollisionCalculator collisionCalculator)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
-      create(referenceFrame, transform, panel3D, modelData, collisionCalculator);
+      create(referenceFrame, transform, panel3D, model, collisionCalculator);
    }
 
    public void create(ReferenceFrame referenceFrameToRepresent,
                       RigidBodyTransform transformToParentToModify,
                       RDX3DPanel panel3D,
-                      ModelData modelData,
+                      Model model,
                       RDXMousePickRayCollisionCalculator collisionCalculator)
    {
       representativeReferenceFrame = referenceFrameToRepresent;
       transformToParent = transformToParentToModify;
-      this.modelInstance = new RDXModelInstance(new Model(modelData));
+      this.modelInstance = new RDXModelInstance(model);
       this.collisionCalculator = collisionCalculator;
 
-      highlightModelInstance = new RDXInteractableHighlightModel(modelData);
+      highlightModelInstance = new RDXInteractableHighlightModel(model);
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this, this::calculate3DViewPick);

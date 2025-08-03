@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -103,8 +104,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
 
-      if (!MathTools.epsilonEquals(getPelvisHeightOffset(), 0.0, 1e-4))
-         sendPelvisHeightOffset(getPelvisHeightOffset());
+      sendPelvisHeightOffset(getPelvisHeightOffset());
 
       // pitch the chest forward towards the table.
       applyPitch(pelvisZUpFrame);
@@ -112,7 +112,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       // Position hand above table
       Quaternion handOrientation = new Quaternion();
       handOrientation.appendYawRotation(-Math.PI / 2.0);
-      //      handOrientation.appendPitchRotation(Math.PI / 2.0);
+//      handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage();
       handTrajectoryMessage1.setRobotSide(RobotSide.LEFT.toByte());
@@ -122,7 +122,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory1.getTaskspaceTrajectoryPoints()
                     .add()
                     .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0,
-                                                                              new Point3D(getHandForwardPositionInChest(), 0.3, 0.6),
+                                                                              new Point3D(getHandForwardPositionInChest(), 0.4, 0.5),
                                                                               handOrientation,
                                                                               new Vector3D(),
                                                                               new Vector3D()));
@@ -138,7 +138,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory2.getTaskspaceTrajectoryPoints()
                     .add()
                     .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0,
-                                                                              new Point3D(getHandForwardPositionInChest(), 0.3, 0.5),
+                                                                              new Point3D(getHandForwardPositionInChest(), 0.4, 0.5),
                                                                               handOrientation,
                                                                               new Vector3D(),
                                                                               new Vector3D()));
@@ -157,7 +157,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       // Now push the robot
-      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 0.0, -1.0);
       double percentWeight = 0.05;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 2.0;
@@ -165,9 +165,6 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
       success = simulationTestHelper.simulateNow(3.0);
       assertTrue(success);
-
-      // TODO GITHUB WORKFLOWS
-      //      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface

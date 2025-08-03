@@ -13,11 +13,13 @@ import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 
 public class ROS2LogRecord
 {
    private static final String MODULE_NAME = "ros2_log";
+   private static final int TIMEOUT_MILLIS = 10000;
 
    private final ROS2Node ros2Node;
    private final List<RecordTopicManager<?>> topicManagers = new ArrayList<>();
@@ -26,6 +28,7 @@ public class ROS2LogRecord
 
    private Runnable runnable = null;
    private ScheduledThreadPoolExecutor executorService;
+   private final AtomicLong lastReceivedTimestamp = new AtomicLong();
 
    public ROS2LogRecord(String robotName, List<ROS2Topic<?>> topicsToLog, ROS2LogTimeSource timeSource, ROS2LogSerialization serialization)
    {
@@ -47,8 +50,6 @@ public class ROS2LogRecord
          ROS2Topic<?> ros2Topic = topicsToLog.get(i);
          topicManagers.add(new RecordTopicManager<>(ros2Topic, ros2Node, timestampProvider));
       }
-
-      ThreadTools.sleepForever();
    }
 
    public void start()
@@ -62,12 +63,24 @@ public class ROS2LogRecord
 
       executorService = new ScheduledThreadPoolExecutor(1);
       executorService.scheduleAtFixedRate(runnable, 0, 1, TimeUnit.MILLISECONDS);
+      lastReceivedTimestamp.set(System.currentTimeMillis());
    }
 
    public void update()
    {
       if (runnable == null)
          return;
+
+      boolean hasData = false;
+      for (int i = 0; i < topicManagers.size(); i++)
+      {
+         hasData |= topicManagers.get(i).update();
+      }
+
+      if (hasData)
+         lastReceivedTimestamp.set(System.currentTimeMillis());
+      else if (System.currentTimeMillis() - lastReceivedTimestamp.get() > TIMEOUT_MILLIS)
+         stopRequested.set(true);
 
       if (stopRequested.getAndSet(false))
       {
@@ -83,14 +96,16 @@ public class ROS2LogRecord
          {
             topicManagers.get(i).clear();
          }
-
-         return;
       }
+   }
 
-      for (int i = 0; i < topicManagers.size(); i++)
+   public void destroy()
+   {
+      if (executorService != null)
       {
-         topicManagers.get(i).update();
+         executorService.shutdownNow();
       }
+      ros2Node.destroy();
    }
 
    public static ROS2Topic<ROS2LogMessage> getROS2LogTopic()

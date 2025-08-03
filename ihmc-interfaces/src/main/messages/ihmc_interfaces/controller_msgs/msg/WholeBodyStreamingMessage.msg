@@ -26,6 +26,17 @@ JointspaceStreamingMessage left_arm_streaming_message
 bool has_right_arm_streaming_message
 JointspaceStreamingMessage right_arm_streaming_message
 
+# Information for the spine joints
+bool has_spine_streaming_message
+JointspaceStreamingMessage spine_streaming_message
+
+# Information for the left leg joints
+bool has_left_leg_streaming_message
+JointspaceStreamingMessage left_leg_streaming_message
+# Information for the right leg joints
+bool has_right_leg_streaming_message
+JointspaceStreamingMessage right_leg_streaming_message
+
 # Information for the chest
 bool has_chest_streaming_message
 ihmc_common_msgs/SO3StreamingMessage chest_streaming_message

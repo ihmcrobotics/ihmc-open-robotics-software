@@ -77,7 +77,8 @@ public class StandingState extends WalkingState
          comHeightManager.setSupportLeg(RobotSide.LEFT);
       balanceManager.computeICPPlan();
       controllerToolbox.getWalkingTrajectoryPath().updateTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
-                                                                     feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+                                                                    feetManager.getCurrentConstraintType(RobotSide.RIGHT),
+                                                                    true);
    }
 
    @Override

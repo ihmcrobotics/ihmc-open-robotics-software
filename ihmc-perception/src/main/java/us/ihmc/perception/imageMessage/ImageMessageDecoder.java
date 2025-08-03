@@ -32,10 +32,15 @@ public class ImageMessageDecoder
    public ImageMessageDecoder()
    {
       if (CUDATools.hasCUDADevice() && CUDATools.hasNVJPEG())
-      {
          cudaJpegDecoder = new CUDAJPEGProcessor();
-         if (CUDATools.hasNVCOMP())
-            cudaCompressionTools = new CUDACompressionTools();
+
+      try
+      {
+         cudaCompressionTools = new CUDACompressionTools();
+      }
+      catch (Exception e)
+      {
+         LogTools.warn(e);
       }
    }
 

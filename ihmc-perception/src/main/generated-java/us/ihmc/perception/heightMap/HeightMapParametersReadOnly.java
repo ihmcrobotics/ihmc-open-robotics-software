@@ -25,6 +25,11 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(enableVerticalFilter);
    }
 
+   default boolean getLogHeightMap()
+   {
+      return get(logHeightMap);
+   }
+
    default int getSearchWindowHeight()
    {
       return get(searchWindowHeight);
@@ -100,9 +105,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxClampHeight);
    }
 
-   default double getCellSizeInMeters()
+   default double getCellSize()
    {
-      return get(cellSizeInMeters);
+      return get(cellSize);
    }
 
    default double getLocalWidthInMeters()

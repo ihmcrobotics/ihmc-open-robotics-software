@@ -135,7 +135,7 @@ public class YOLOv8Tools
          String text = String.format("%s: %.2f", detection.objectClass(), detection.confidence());
 
          // Draw the bounding box
-         Rect boundingBox = detection.boundingBox();
+         Rect boundingBox = detection.boundingBoxRect();
          opencv_imgproc.rectangle(annotatedImage, boundingBox, GREEN, 5, LINE_TYPE, 0);
 
          // Draw text background

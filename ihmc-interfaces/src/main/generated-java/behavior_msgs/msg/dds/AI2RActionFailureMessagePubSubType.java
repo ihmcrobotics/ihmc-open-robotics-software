@@ -15,7 +15,7 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "234e04af2f9471424e0423630a28ebaf6c4d5e6fdff47030ab98012fffe3e855";
+   		return "c181c2f12dab4d8380a62d4111166bc9e1f67a9d5a41abf10924ab1842659a67";
    }
    
    @Override
@@ -55,6 +55,9 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -81,6 +84,11 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getActionType().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getActionFrame().length() + 1;
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getCollisionName().length() + 1;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -110,6 +118,12 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_d(data.getActionFrame());else
           throw new RuntimeException("action_frame field exceeds the maximum length: %d > %d".formatted(data.getActionFrame().length(), 255));
 
+      cdr.write_type_7(data.getMissingFrame());
+
+      if(data.getCollisionName().length() <= 255)
+      cdr.write_type_d(data.getCollisionName());else
+          throw new RuntimeException("collision_name field exceeds the maximum length: %d > %d".formatted(data.getCollisionName().length(), 255));
+
       cdr.write_type_6(data.getPositionTolerance());
 
       cdr.write_type_6(data.getOrientationTolerance());
@@ -123,6 +137,9 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_d(data.getActionName());	
       cdr.read_type_d(data.getActionType());	
       cdr.read_type_d(data.getActionFrame());	
+      data.setMissingFrame(cdr.read_type_7());
+      	
+      cdr.read_type_d(data.getCollisionName());	
       data.setPositionTolerance(cdr.read_type_6());
       	
       data.setOrientationTolerance(cdr.read_type_6());
@@ -138,6 +155,8 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_d("action_name", data.getActionName());
       ser.write_type_d("action_type", data.getActionType());
       ser.write_type_d("action_frame", data.getActionFrame());
+      ser.write_type_7("missing_frame", data.getMissingFrame());
+      ser.write_type_d("collision_name", data.getCollisionName());
       ser.write_type_6("position_tolerance", data.getPositionTolerance());
       ser.write_type_6("orientation_tolerance", data.getOrientationTolerance());
       ser.write_type_a("position_error", new geometry_msgs.msg.dds.PointPubSubType(), data.getPositionError());
@@ -152,6 +171,8 @@ public class AI2RActionFailureMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_d("action_name", data.getActionName());
       ser.read_type_d("action_type", data.getActionType());
       ser.read_type_d("action_frame", data.getActionFrame());
+      data.setMissingFrame(ser.read_type_7("missing_frame"));
+      ser.read_type_d("collision_name", data.getCollisionName());
       data.setPositionTolerance(ser.read_type_6("position_tolerance"));
       data.setOrientationTolerance(ser.read_type_6("orientation_tolerance"));
       ser.read_type_a("position_error", new geometry_msgs.msg.dds.PointPubSubType(), data.getPositionError());

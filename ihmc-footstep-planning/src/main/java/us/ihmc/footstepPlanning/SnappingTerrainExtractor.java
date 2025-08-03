@@ -12,13 +12,11 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -135,7 +133,7 @@ public class SnappingTerrainExtractor
     */
    private void computeDerivedParameters()
    {
-      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
@@ -145,7 +143,8 @@ public class SnappingTerrainExtractor
 
       Point2D gridCenter = heightMapData.getGridCenter();
 
-      Mat heightMap = HeightMapMessageTools.convertHeightMapDataToMat(heightMapData, heightMapParameters);
+      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_16UC1);
+      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
       GpuMat gpuHeightMap = new GpuMat();
       gpuHeightMap.upload(heightMap);
 
@@ -221,6 +220,7 @@ public class SnappingTerrainExtractor
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
       // --------------------------- Download all the data from the GPU and set the terrain data object ----------------------------
       {
          Mat cpuTerrainCostMap = new Mat();
@@ -300,7 +300,7 @@ public class SnappingTerrainExtractor
    {
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
-                          (float) heightMapParameters.getCellSizeInMeters(),
+                          (float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),

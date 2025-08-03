@@ -83,7 +83,7 @@ public class RDXArmManager
    private final ImBoolean indicateWrenchOnScreen = new ImBoolean(false);
    private RDX3DPanelHandWrenchIndicator panelHandWrenchIndicator;
 
-   private final ImInt selectedArmConfiguration = new ImInt(PresetArmConfiguration.TUCKED_UP_ARMS.ordinal());
+   private final ImInt selectedArmConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal());
    private final String[] armConfigurationNames = new String[PresetArmConfiguration.values.length];
 
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
@@ -275,29 +275,6 @@ public class RDXArmManager
       {
          ImGui.openPopup(labels.get("Warning"));
       }
-
-      if (ImGui.beginPopupModal(labels.get("Warning")))
-      {
-         ImGui.text("""
-                          The hand is currently open.
-                                                    
-                          Continuing to door avoidance
-                          may cause the hand to collide
-                          with the body of the robot.""");
-
-         ImGui.separator();
-         if (ImGui.button("Continue"))
-         {
-            executeArmAngles(showWarningNotification.read(), PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
-            ImGui.closeCurrentPopup();
-         }
-         ImGui.sameLine();
-         if (ImGui.button("Cancel"))
-         {
-            ImGui.closeCurrentPopup();
-         }
-         ImGui.endPopup();
-      }
    }
 
    public void executeArmHome(RobotSide side)
@@ -312,22 +289,6 @@ public class RDXArmManager
 
       armHomeMessage.setTrajectoryTime(teleoperationParameters.getTrajectoryTime());
       communicationHelper.publishToController(armHomeMessage);
-   }
-
-   public void executeDoorAvoidanceArmAngles(RobotSide side)
-   {
-      // Warning pops up if fingers are more than 15 degrees from "zero" (zero = when fingertips are parallel)
-      // i.e. when the fingers are more than 30 degrees apart from each other
-      // This is an arbitrary value
-      if (syncedRobot.getRobotModel().getHandModels().toString().contains("SakeHand") &&
-           syncedRobot.getLatestHandJointAnglePacket(side).getJointAngles().get(0) > Math.toRadians(SAKE_HAND_SAFEE_FINGER_ANGLE))
-      {
-         showWarningNotification.set(side);
-      }
-      else
-      {
-         executeArmAngles(side, PresetArmConfiguration.DOOR_AVOIDANCE, teleoperationParameters.getTrajectoryTime());
-      }
    }
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)

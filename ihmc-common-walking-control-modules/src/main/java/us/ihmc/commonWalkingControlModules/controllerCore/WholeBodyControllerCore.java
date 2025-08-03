@@ -372,6 +372,11 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       return feedbackController.getWholeBodyFeedbackControllerDataHolder();
    }
 
+   public WholeBodyControlCoreToolbox getToolbox()
+   {
+      return toolbox;
+   }
+
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {

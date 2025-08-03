@@ -85,8 +85,6 @@ public class RapidHeightMapExtractor
    private int previousCellY;
    private float resetOffset;
 
-   private final FilteredVerticalSurfacesExtractor filteredVerticalSurfacesExtractor;
-
    public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
@@ -151,19 +149,17 @@ public class RapidHeightMapExtractor
       {
          throw new RuntimeException(e);
       }
-
-      filteredVerticalSurfacesExtractor = new FilteredVerticalSurfacesExtractor(stream, cellsPerAxisGlobal, cellsPerAxisGlobal);
    }
 
    private void computeDerivedParameters()
    {
-      centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisLocal = 2 * centerIndexLocal + 1;
 
-      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
 
-      centerIndexTerrain = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      centerIndexTerrain = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisTerrain = 2 * centerIndexTerrain + 1;
    }
 
@@ -186,7 +182,7 @@ public class RapidHeightMapExtractor
                       RigidBodyTransform sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
-                      Point3D sensorOrigin,
+                      Point3D heightMapFrameToWorldFrame,
                       double footHeight)
    {
       int error;
@@ -217,7 +213,7 @@ public class RapidHeightMapExtractor
 
       // --------- Run the update kernel ---------
       {
-         // Compute "speed" of the camera
+         // Compute "speed" of the point
          RigidBodyTransform previousToCurrentSensorOrigin = new RigidBodyTransform(previousSensorToWorld);
          previousToCurrentSensorOrigin.invert();
          previousToCurrentSensorOrigin.multiply(sensorToWorldTransform);
@@ -269,8 +265,8 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the translate kernel ---------
       {
-         int currentCellX = (int) Math.round(sensorOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-         int currentCellY = (int) Math.round(sensorOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
+         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSize());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
@@ -337,12 +333,6 @@ public class RapidHeightMapExtractor
 
          scalingKernelGridDim.close();
          checkCUDAError();
-      }
-
-      // Apply the vertical surfaces filter
-      if (heightMapParameters.getEnableVerticalFilter())
-      {
-         filteredVerticalSurfacesExtractor.update(scaledHeightMap);
       }
 
       // ---------- Run the Terrain cropping kernel ----------
@@ -439,7 +429,7 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
+      cudaFreeAsync(parametersDevicePointer, stream);
       cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       // Synchronize the stream so the cpu has the data when this method returns
       error = cudaStreamSynchronize(stream);
@@ -448,7 +438,7 @@ public class RapidHeightMapExtractor
 
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)
    {
-      return new float[] {(float) parameters.getCellSizeInMeters(),
+      return new float[] {(float) parameters.getCellSize(),
                           (float) centerIndexLocal,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
@@ -512,8 +502,6 @@ public class RapidHeightMapExtractor
       scaledHeightMap.close();
       emptyGlobalHeightMap.close();
 
-      filteredVerticalSurfacesExtractor.destroy();
-
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
    }
@@ -542,10 +530,10 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap.clone();
+      return scaledHeightMap;
    }
 
-   public GpuMat getTerrainHeightMap()
+   public GpuMat getTerrainCroppedHeightMap()
    {
       return terrainCroppedHeightMap.clone();
    }

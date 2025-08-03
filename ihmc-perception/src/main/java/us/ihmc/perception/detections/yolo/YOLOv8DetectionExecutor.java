@@ -20,11 +20,11 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.cuda.CUDADepthImageSegmenter;
 import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -46,8 +46,8 @@ public class YOLOv8DetectionExecutor
 {
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build("yolo_detection_manager");
 
-   private final CUDAPointCloudExtractor extractor = new CUDAPointCloudExtractor();
-   private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
+   private final CUDAPointCloudExtractor extractor;
+   private final CUDADepthImageSegmenter segmenter;
 
    private final Map<String, YOLOv8Model> availableModels = new LinkedHashMap<>();
    private final Map<YOLOv8Model, YOLOv8DetectionList> yoloDetectionResults = new ConcurrentHashMap<>();
@@ -72,6 +72,16 @@ public class YOLOv8DetectionExecutor
    public YOLOv8DetectionExecutor(CRDTInfo crdtInfo, BooleanSupplier annotatedImageDemanded)
    {
       this.annotatedImageDemanded = annotatedImageDemanded;
+
+      try
+      {
+         extractor = new CUDAPointCloudExtractor();
+         segmenter = new CUDADepthImageSegmenter();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
 
       // Read available YOLO models
       for (URL yoloModelDirectory : YOLOv8Tools.getYOLOModelDirectories())
@@ -108,7 +118,7 @@ public class YOLOv8DetectionExecutor
       updateThread.setDaemon(true);
       updateThread.startRepeating();
 
-      taskQueue = new ArrayBlockingQueue<>(2 * availableModels.size());
+      taskQueue = new ArrayBlockingQueue<>(4);
       taskExecutorThread.setDaemon(true);
       taskExecutorThread.startRepeating();
 
@@ -242,6 +252,7 @@ public class YOLOv8DetectionExecutor
                                                                                     bgrImage,
                                                                                     erodedObjectMask,
                                                                                     depthImage,
+                                                                                    detection.boundingBox(),
                                                                                     pointCloud);
                yoloInstantDetections.add(instantDetection);
                erodedObjectMask.release();
@@ -279,7 +290,7 @@ public class YOLOv8DetectionExecutor
          yoloResults.destroy();
 
       extractor.close();
-      segmenter.destroy();
+      segmenter.close();
 
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

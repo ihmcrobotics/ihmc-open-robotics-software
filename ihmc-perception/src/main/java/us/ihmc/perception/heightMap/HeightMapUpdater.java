@@ -3,7 +3,6 @@ package us.ihmc.perception.heightMap;
 import com.google.common.util.concurrent.AtomicDouble;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
-import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -72,7 +71,7 @@ public class HeightMapUpdater
    private final AtomicBoolean isPaused = new AtomicBoolean(false);
 
    private final TIntArrayList holeKeyList = new TIntArrayList();
-   private final TFloatArrayList holeHeights = new TFloatArrayList();
+   private final TIntArrayList holeHeights = new TIntArrayList();
 
    private final ConcurrentLinkedQueue<HeightMapInputData> pointCloudQueue = new ConcurrentLinkedQueue<>();
 
@@ -297,7 +296,7 @@ public class HeightMapUpdater
 
    public HeightMapData getLatestHeightMap()
    {
-      return HeightMapMessageTools.unpackMessage(buildMessage());
+      return HeightMapMessageTools.unpackMessageToHeightMapData(buildMessage());
    }
 
    private HeightMapMessage buildMessage()
@@ -314,8 +313,8 @@ public class HeightMapUpdater
          if (heightMap.cellHasUnfilteredData(i))
          {
             int key = heightMap.getKey(i);
-            message.getKeys().add(key);
-            message.getHeights().add((float) heightMap.getHeightAt(i));
+            message.getKeys().add((short) key);
+            message.getHeights().add((short) heightMap.getHeightAt(i));
          }
       }
 
@@ -392,8 +391,9 @@ public class HeightMapUpdater
                   float height = getHeightOfHole(xIndex, yIndex);
                   if (!Float.isNaN(height))
                   {
-                     holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
-                     holeHeights.add(height);
+                     // TODO this is definitly broken now cause of the short and float nonsense
+                     holeKeyList.add((short) HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
+                     holeHeights.add((short) height);
                   }
                }
             }

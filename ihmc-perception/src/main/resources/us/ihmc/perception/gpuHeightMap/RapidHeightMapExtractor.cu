@@ -392,7 +392,7 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
     float globalMeanF = static_cast<float>(*globalMean);
     float globalVarianceF = static_cast<float>(*globalVariance);
 
-    // If we have no real data, we don't apply an alpha filter, just take the new real data
+    // If we have no real data, we don't apply the kalman filter, just take the new real data
     if (globalMeanF == resetOffset || globalVarianceF <= 0.0f)
     {
         *globalMean = *localMean;

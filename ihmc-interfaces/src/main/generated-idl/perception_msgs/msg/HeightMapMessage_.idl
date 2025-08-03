@@ -48,30 +48,46 @@ module perception_msgs
          */
         double grid_center_y;
         /**
+         * Z height offset for converting between floats and shorts
+         */
+        double height_offset;
+        /**
+         * Z height scale factor for converting between floats and shorts
+         */
+        double height_scale_factor;
+        /**
          * Height of the ground plane, which is assumed to be flat
          */
         double estimated_ground_height;
         /**
+         * Width of the height map in meters
+         */
+        double width_in_meters;
+        /**
+         * Cell size in meters of an individual cell
+         */
+        double cell_size_in_meters;
+        /**
          * List of height map keys. See HeightMapTools for converting keys to coordinates
          */
-        sequence<long, 45000> keys;
+        sequence<long, 255000> keys;
         /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<float, 45000> heights;
+        sequence<long, 255000> heights;
         /**
          * List of variances, which correspond to the list of keys. May be empty.
          */
-        sequence<float, 45000> variances;
+        sequence<float, 255000> variances;
         /**
          * List of centroids for each cell, which correspond to the list of keys. May be empty
          * Note: The z coordinate of each point is ignored, but should correspond to the height.
          */
-        sequence<geometry_msgs::msg::dds::Point, 45000> centroids;
+        sequence<geometry_msgs::msg::dds::Point, 255000> centroids;
         /**
          * List of normals for each cell, which correspond to the list of keys. May be empty.
          */
-        sequence<geometry_msgs::msg::dds::Vector3, 45000> normals;
+        sequence<geometry_msgs::msg::dds::Vector3, 255000> normals;
       };
     };
   };

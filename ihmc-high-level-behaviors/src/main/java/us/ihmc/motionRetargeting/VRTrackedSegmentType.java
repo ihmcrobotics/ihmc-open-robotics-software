@@ -13,9 +13,12 @@ public enum VRTrackedSegmentType
    LEFT_ANKLE("Left Ankle", RobotSide.LEFT),
    RIGHT_ANKLE("Right Ankle", RobotSide.RIGHT);
 
-
    private final String segmentName;
    private final RobotSide robotSide;
+
+   public static VRTrackedSegmentType[] TRACKER_TYPES = new VRTrackedSegmentType[] {LEFT_WRIST, RIGHT_WRIST, CHEST, WAIST, LEFT_ANKLE, RIGHT_ANKLE};
+   public static VRTrackedSegmentType[] CONTROLLER_TYPES = new VRTrackedSegmentType[] {LEFT_HAND, RIGHT_HAND};
+   public static VRTrackedSegmentType[] FOOT_TYPES = new VRTrackedSegmentType[] {LEFT_ANKLE, RIGHT_ANKLE};
 
    VRTrackedSegmentType(String segmentName,
                         RobotSide robotSide)
@@ -42,15 +45,5 @@ public enum VRTrackedSegmentType
    public boolean isHandRelated()
    {
       return segmentName.contains("Hand");
-   }
-
-   public static VRTrackedSegmentType[] getTrackerTypes()
-   {
-      return new VRTrackedSegmentType[] {LEFT_WRIST, RIGHT_WRIST, CHEST, WAIST, LEFT_ANKLE, RIGHT_ANKLE};
-   }
-
-   public static VRTrackedSegmentType[] getControllerTypes()
-   {
-      return new VRTrackedSegmentType[] {LEFT_HAND, RIGHT_HAND};
    }
 }

@@ -6,8 +6,15 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+
 public abstract class ImageSensor implements AutoCloseable
 {
+   public static final int DEFAULT_IMAGE_QUEUE_CAPACITY = 8;
    private static final double SECONDS_BETWEEN_RETRIES = 1.0;  // Wait 1 second between retries for starting sensors
 
    private final String sensorName;
@@ -16,6 +23,7 @@ public abstract class ImageSensor implements AutoCloseable
 
    private final RepeatingTaskThread grabThread;
    private final Object grabNotification = new Object();
+   private final Map<Integer, List<BlockingQueue<RawImage>>> imageQueues = new HashMap<>();
 
    public ImageSensor(String sensorName)
    {
@@ -63,6 +71,8 @@ public abstract class ImageSensor implements AutoCloseable
     */
    protected abstract boolean grab();
 
+   public abstract int[] getImageKeys();
+
    /**
     * <p>
     * Get the latest image grabbed by the sensor, specifying the image to get using its key.
@@ -94,6 +104,29 @@ public abstract class ImageSensor implements AutoCloseable
     *       Image keys do not work on the returned array.
     */
    public abstract ReferenceFrame[] getImageFrames();
+
+   /**
+    * Register an image queue for images of a particular key.
+    * <p>
+    * Every image grabbed by the sensor will be added to the passed in queue.
+    * The code taking from the queue must call {@link RawImage#release()} on each image,
+    * once it's done using the image.
+    * <p>
+    * If the queue becomes full (i.e. when {@code BlockingQueue#remainingCapacity() == 0})
+    * the oldest image will be removed so the new image can be added.
+    * Ensure a reasonable queue capacity is set to prevent memory leaks.
+    * {@link #DEFAULT_IMAGE_QUEUE_CAPACITY} can be used as a good default value.
+    *
+    * @param imageQueue Blocking queue into which the images will be added.
+    * @param imageKey The key for images to be collected.
+    */
+   public void registerImageQueue(BlockingQueue<RawImage> imageQueue, int imageKey)
+   {
+      if (imageQueues.containsKey(imageKey))
+         imageQueues.get(imageKey).add(imageQueue);
+      else
+         imageQueues.put(imageKey, new ArrayList<>(List.of(imageQueue)));
+   }
 
    public String getSensorName()
    {
@@ -155,6 +188,33 @@ public abstract class ImageSensor implements AutoCloseable
       synchronized (grabNotification)
       {
          grabNotification.notifyAll();
+      }
+
+      for (int imageKey : getImageKeys())
+      {
+         if (imageQueues.containsKey(imageKey))
+         {
+            imageQueues.get(imageKey).forEach(queue ->
+            {
+               RawImage image = getImage(imageKey);
+
+               if (!queue.offer(image))
+               {
+                  // Meaning we couldn't add the image to the queue
+                  // We need to remove an item from the queue to create space
+                  RawImage oldestImage = queue.poll();
+                  if (oldestImage != null)
+                     oldestImage.release();
+
+                  // Try to add image one more...
+                  if (!queue.offer(image))
+                  {
+                     // Still couldn't add an image to the queue, release image and forget about it
+                     image.release();
+                  }
+               }
+            });
+         }
       }
    }
 }

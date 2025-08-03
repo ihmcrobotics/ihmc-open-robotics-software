@@ -11,12 +11,12 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-robot-data-logger:0.32.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.35.0")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.0")
    api("us.ihmc:ihmc-math-linear-dynamic-systems:0.15.0")
-   api("us.ihmc:scs2-examples:17-0.28.7")
+   api("us.ihmc:scs2-examples:17-0.30.0")
 
    api("us.ihmc:ihmc-simulation-toolkit:source")
 }
