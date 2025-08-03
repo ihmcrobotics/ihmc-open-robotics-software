@@ -9,6 +9,7 @@ import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -130,75 +131,50 @@ public class LeRobotDataset
                                                   Consumer<Runnable> frameProcessingQueue,
                                                   BooleanSupplier keepGoing)
    {
-      MutableBoolean stillGoing = new MutableBoolean(false);
-      BooleanSupplier stillGoingSupplier = stillGoing::booleanValue;
-
       ensureTaskNameInJsonl(taskName);
 
+      MutableBoolean stillGoing = new MutableBoolean(false);
       String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "KinematicsStreamingToolboxModule");
       String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
       if (session.getRootRegistry().findVariable(kstStreaming + "isDemonstrationEpisode") instanceof YoBoolean isDemonstrationEpisode)
       {
-         LogTools.info("Found isDemonstrationEpisode variable.");
-         stillGoing.setValue(true);
-         int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
-         frameProcessingQueue.accept(() -> scrubForDemonstration(session,
-                                                                 isDemonstrationEpisode,
-                                                                 desiredLoadedIndex,
-                                                                 stillGoing,
-                                                                 keepGoing,
-                                                                 frameProcessingQueue));
+         ThreadTools.startAThread(() ->
+         {
+            stillGoing.setValue(true);
+            int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
+            while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
+               desiredLoadedIndex = scrubForDemonstration(session, isDemonstrationEpisode, desiredLoadedIndex);
+            stillGoing.setValue(false);
+         }, "SCRUB");
       }
-
-      return stillGoingSupplier;
+      return stillGoing::booleanValue;
    }
 
-   private void scrubForDemonstration(SCS2LogSessionWithVideo session,
-                                      YoBoolean isDemonstrationEpisode,
-                                      int desiredLoadedIndex,
-                                      MutableBoolean stillGoing,
-                                      BooleanSupplier keepGoing,
-                                      Consumer<Runnable> frameProcessingQueue)
+   private int scrubForDemonstration(SCS2LogSessionWithVideo session, YoBoolean isDemonstrationEpisode, int desiredLoadedIndex)
    {
-      if (keepGoing.getAsBoolean()) // above all else make sure we are supposed to keep going
+      // It's kinda weird to think about but current log position is actually referring to the next log index to read
+      // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
+      int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
+      int loadedIndex = indexToLoad - 1;
+      boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
+      if (desiredDataIsLoaded)
       {
-         // It's kinda weird to think about but current log position is actually referring to the next log index to read
-         // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
-         int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
-         int loadedIndex = indexToLoad - 1;
-
-         boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
-
-         if (desiredDataIsLoaded)
+         LogTools.info("scrub {}", loadedIndex);
+         if (isDemonstrationEpisode.getBooleanValue())
          {
-            LogTools.info("scrub {}", loadedIndex);
-            if (isDemonstrationEpisode.getBooleanValue())
-            {
-               // TODO start generating episode
-               stillGoing.setValue(false);
-               return;
-            }
-         }
-
-         if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
-         {
-            //                  LogTools.info("requesting {}", currentLogPosition);
-            session.submitLogPositionRequest(indexToLoad);
-            frameProcessingQueue.accept(() -> scrubForDemonstration(session,
-                                                                    isDemonstrationEpisode,
-                                                                    indexToLoad,
-                                                                    stillGoing,
-                                                                    keepGoing,
-                                                                    frameProcessingQueue));
-         }
-         else // we hit the end
-         {
-            stillGoing.setValue(false);
+            // TODO start generating episode
+            return -1;
          }
       }
-      else // user asked us to stop
+
+      if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
       {
-         stillGoing.setValue(false);
+         session.submitLogPositionRequest(indexToLoad);
+         return indexToLoad;
+      }
+      else // we hit the end
+      {
+         return -1;
       }
    }
 
