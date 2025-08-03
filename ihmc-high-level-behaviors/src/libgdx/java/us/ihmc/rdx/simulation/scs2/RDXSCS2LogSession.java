@@ -13,7 +13,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
@@ -41,7 +40,7 @@ import static us.ihmc.zed.global.zed.SL_MEM_CPU;
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImInt logPosition = new ImInt();
+   private final ImInt desiredLoadedIndex = new ImInt();
    private final ImFloat zedDelayCompensation = new ImFloat();
    private final Notification scrubAnyway = new Notification();
    private int lastUpdatedLogPosition = -1;
@@ -177,20 +176,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             ExceptionTools.handle(() -> Desktop.getDesktop().open(logDirectory), DefaultExceptionHandler.PRINT_MESSAGE);
          }
 
-         int timeQueryTimestamp = MathTools.clamp(logPosition.get(), 0, logDataReader.getNumberOfEntries() - 1);
-         String format = "%d/%d %s".formatted(logPosition.get(),
-                                              logDataReader.getNumberOfEntries(),
-                                              DurationFormatter.formatHoursMinutesSecondsMillis(logDataReader.getRelativeTimestamp(timeQueryTimestamp)));
-
          ImGui.pushItemWidth(ImGui.getColumnWidth());
-         if (ImGui.sliderInt(labels.getHidden("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1, format))
-         {
-            logSession.submitLogPositionRequest(logPosition.get());
-         }
-         else
-         {
-            logPosition.set(logDataReader.getCurrentLogPosition());
-         }
+         renderLogScrubberWidgets(labels);
          if (!zedLogVideos.isEmpty())
          {
             ImGui.text("ZED delay compensation:");
@@ -204,6 +191,33 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       }
 
       super.renderImGuiWidgets();
+   }
+
+   public void renderLogScrubberWidgets(ImGuiUniqueLabelMap labels)
+   {
+      int logPosition = logDataReader.getCurrentLogPosition();
+      int loadedIndex = logPosition - 1;
+      boolean loadedIndexOutOfBounds = loadedIndex < 0 || loadedIndex >= logDataReader.getNumberOfEntries();
+      String format;
+      if (loadedIndexOutOfBounds)
+      {
+         format = "Not loaded.  Size: %d".formatted(logDataReader.getNumberOfEntries());
+      }
+      else
+      {
+         format = "Loaded index: %d %s  Size: %d".formatted(loadedIndex,
+                                                            DurationFormatter.formatHoursMinutesSecondsMillis(logDataReader.getRelativeTimestamp(loadedIndex)),
+                                                            logDataReader.getNumberOfEntries());
+      }
+
+      if (ImGui.sliderInt(this.labels.getHidden("Scrubber"), desiredLoadedIndex.getData(), 0, logDataReader.getNumberOfEntries() - 1, format))
+      {
+         logSession.submitLogPositionRequest(desiredLoadedIndex.get());
+      }
+      else
+      {
+         desiredLoadedIndex.set(loadedIndex);
+      }
    }
 
    public void destroy(RDXBaseUI baseUI)

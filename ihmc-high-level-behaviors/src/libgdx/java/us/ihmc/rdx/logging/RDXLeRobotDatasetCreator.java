@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetEpisode;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
+import us.ihmc.avatar.logProcessor.leRobot.LeRobotEpisodeRecord;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -167,7 +168,14 @@ public class RDXLeRobotDatasetCreator
             }
             else
                ImGui.text(text);
-            ImGuiTools.previousWidgetTooltip("Right click for options.");
+            List<LeRobotEpisodeRecord> records = episode.getRecords();
+            ImGuiTools.previousWidgetTooltip(
+               """
+               Buffer index: %d -> %d
+               Right click for options.
+               """.formatted(records.isEmpty() ? -1 : records.get(0).ihmcLogPosition(),
+                             records.isEmpty() ? -1 : records.get(records.size() - 1).ihmcLogPosition())
+            );
 
             String popupId = "episode_context_menu_" + i;
             if (ImGui.isItemClicked(ImGuiMouseButton.Right))
@@ -260,14 +268,7 @@ public class RDXLeRobotDatasetCreator
          }
       }
 
-      if (ImGui.sliderInt(labels.getHidden("Log position"), logPosition.getData(), 0, logDataReader.getNumberOfEntries() - 1))
-      {
-         logSession.getSession().submitLogPositionRequest(logPosition.get());
-      }
-      else
-      {
-         logPosition.set(logDataReader.getCurrentLogPosition());
-      }
+      logSession.renderLogScrubberWidgets(labels);
       ImGui.popItemWidth();
    }
 
