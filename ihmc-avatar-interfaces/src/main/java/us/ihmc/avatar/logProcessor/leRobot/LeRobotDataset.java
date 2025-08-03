@@ -23,7 +23,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 /**
  * Represents a LeRobot dataset (a huggingface format) in our system for generating datasets from IHMC logs.
@@ -109,7 +108,7 @@ public class LeRobotDataset
       });
    }
 
-   public void addEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
    {
       ensureTaskNameInJsonl(taskName);
 
@@ -122,14 +121,11 @@ public class LeRobotDataset
                                                                 episodeStatsJsonlPath,
                                                                 dataChunk0Path,
                                                                 zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue, usePerfectTimestamps);
+      episode.startGeneratingEpisode(session, this::writeMetaJson, usePerfectTimestamps);
       episodes.add(episode);
    }
 
-   public BooleanSupplier addEpisodeAutomatically(String taskName,
-                                                  SCS2LogSessionWithVideo session,
-                                                  Consumer<Runnable> frameProcessingQueue,
-                                                  BooleanSupplier keepGoing)
+   public BooleanSupplier addEpisodeAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
    {
       ensureTaskNameInJsonl(taskName);
 
@@ -145,7 +141,7 @@ public class LeRobotDataset
             while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
                desiredLoadedIndex = scrubForDemonstration(session, isDemonstrationEpisode, desiredLoadedIndex);
             stillGoing.setValue(false);
-         }, "SCRUB");
+         }, "ScrubToNextEpisode");
       }
       return stillGoing::booleanValue;
    }
