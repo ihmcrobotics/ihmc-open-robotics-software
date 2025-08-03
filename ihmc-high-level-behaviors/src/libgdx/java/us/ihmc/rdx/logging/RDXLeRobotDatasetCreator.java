@@ -1,7 +1,9 @@
 package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +15,7 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -26,6 +29,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -46,6 +50,8 @@ public class RDXLeRobotDatasetCreator
    private LeRobotDataset dataset;
    private final Queue<Runnable> frameTaskQueue = new ConcurrentLinkedQueue<>();
    private final RDXLeRobotTestSimulator testSimulator;
+   private BooleanSupplier generating;
+   private final ImBoolean keepGenerating = new ImBoolean(false);
 
    public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession,
                                    RDXBaseUI baseUI,
@@ -192,15 +198,27 @@ public class RDXLeRobotDatasetCreator
             dataset.addEpisode(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add); // Use queue to maintain framerate
          }
          ImGuiTools.previousWidgetTooltip("Add an episode from the current SCS 2 in/out points.");
+         ImGui.beginDisabled(generating != null && generating.getAsBoolean());
          if (ImGui.button(labels.get("Add Episode Automatically")))
          {
-            dataset.addEpisodeAutomatically(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add);
+            keepGenerating.set(true);
+            generating = dataset.addEpisodeAutomatically(imTaskName.get().trim(), logSession.getSession(), frameTaskQueue::add, keepGenerating::get);
+         }
+         ImGui.endDisabled();
+         if (keepGenerating.get())
+         {
+            ImGui.sameLine();
+            ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
+            if (ImGui.button(labels.get("X")))
+               keepGenerating.set(false);
+            ImGui.popStyleColor();
          }
          ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the isDemonstrationEpisode variable.");
          ImGui.endDisabled();
 
          if (ImGui.collapsingHeader(labels.get("Debug Operations")))
          {
+            ImGui.text("Frame task queue size: %d".formatted(frameTaskQueue.size()));
             if (ImGui.button(labels.get("Regenerate Metadata")))
             {
                dataset.regenerateAndRewriteMetadata();
