@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -11,10 +12,8 @@ import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 /**
@@ -125,8 +125,14 @@ public class LeRobotDataset
       episodes.add(episode);
    }
 
-   public void addEpisodeAutomatically(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public BooleanSupplier addEpisodeAutomatically(String taskName,
+                                                  SCS2LogSessionWithVideo session,
+                                                  Consumer<Runnable> frameProcessingQueue,
+                                                  BooleanSupplier keepGoing)
    {
+      MutableBoolean stillGoing = new MutableBoolean(false);
+      BooleanSupplier stillGoingSupplier = stillGoing::booleanValue;
+
       ensureTaskNameInJsonl(taskName);
 
       String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "KinematicsStreamingToolboxModule");
@@ -134,55 +140,66 @@ public class LeRobotDataset
       if (session.getRootRegistry().findVariable(kstStreaming + "isDemonstrationEpisode") instanceof YoBoolean isDemonstrationEpisode)
       {
          LogTools.info("Found isDemonstrationEpisode variable.");
-
-         
-
+         stillGoing.setValue(true);
+         int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
+         frameProcessingQueue.accept(() -> scrubForDemonstration(session,
+                                                                 isDemonstrationEpisode,
+                                                                 desiredLoadedIndex,
+                                                                 stillGoing,
+                                                                 keepGoing,
+                                                                 frameProcessingQueue));
       }
 
-//      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-//      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-//      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
-//      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
-//      String timestampVarName = "root.LogDataReader.robotTime";
-//
-//      String s = "root.main.H1KinematicsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTStreamingState.isDemonstrationEpisode";
-//
-//      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
-//      YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
-//
-//      LogDataReader reader = session.getLogDataReader();
-//      long totalFrames = reader.getNumberOfEntries();
-//
-//      boolean currentlyRecording = false;
-//      int episodeStart = -1;
-//
-//      for (long frame = 0; frame < totalFrames; frame++)
-//      {
-//         session.runTick();
-//
-//         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
-//
-//         if (flagValue && !currentlyRecording)
-//         {
-//            episodeStart = (int) frame;
-//            currentlyRecording = true;
-//         }
-//         else if (!flagValue && currentlyRecording)
-//         {
-//            int episodeEnd = (int) frame;
-//            int episodeLength = episodeEnd - episodeStart;
-//            System.out.println(episodeLength);
-//            currentlyRecording = false;
-//            episodeStart = -1;
-//         }
-//      }
-//
-//      if (currentlyRecording)
-//      {
-//         int episodeEnd = (int) totalFrames;
-//         int episodeLength = episodeEnd - episodeStart;
-//         System.out.println(episodeLength);
-//      }
+      return stillGoingSupplier;
+   }
+
+   private void scrubForDemonstration(SCS2LogSessionWithVideo session,
+                                      YoBoolean isDemonstrationEpisode,
+                                      int desiredLoadedIndex,
+                                      MutableBoolean stillGoing,
+                                      BooleanSupplier keepGoing,
+                                      Consumer<Runnable> frameProcessingQueue)
+   {
+      if (keepGoing.getAsBoolean()) // above all else make sure we are supposed to keep going
+      {
+         // It's kinda weird to think about but current log position is actually referring to the next log index to read
+         // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
+         int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
+         int loadedIndex = indexToLoad - 1;
+
+         boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
+
+         if (desiredDataIsLoaded)
+         {
+            LogTools.info("scrub {}", loadedIndex);
+            if (isDemonstrationEpisode.getBooleanValue())
+            {
+               // TODO start generating episode
+               stillGoing.setValue(false);
+               return;
+            }
+         }
+
+         if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
+         {
+            //                  LogTools.info("requesting {}", currentLogPosition);
+            session.submitLogPositionRequest(indexToLoad);
+            frameProcessingQueue.accept(() -> scrubForDemonstration(session,
+                                                                    isDemonstrationEpisode,
+                                                                    indexToLoad,
+                                                                    stillGoing,
+                                                                    keepGoing,
+                                                                    frameProcessingQueue));
+         }
+         else // we hit the end
+         {
+            stillGoing.setValue(false);
+         }
+      }
+      else // user asked us to stop
+      {
+         stillGoing.setValue(false);
+      }
    }
 
    private void ensureTaskNameInJsonl(String taskName)
