@@ -48,6 +48,7 @@ public class RDXLeRobotDatasetCreator
    private final RDXLeRobotTestSimulator testSimulator;
    private BooleanSupplier generating;
    private final ImBoolean keepGenerating = new ImBoolean(false);
+   private int mouseHoveringEpisode = -1;
 
    public RDXLeRobotDatasetCreator(RDXSCS2LogSession logSession,
                                    RDXBaseUI baseUI,
@@ -152,6 +153,7 @@ public class RDXLeRobotDatasetCreator
 
          ImGui.separator();
          ImGui.text("Episodes:");
+         mouseHoveringEpisode = -1;
          for (int i = 0; i < dataset.getEpisodes().size(); i++)
          {
             LeRobotDatasetEpisode episode = dataset.getEpisodes().get(i);
@@ -159,7 +161,10 @@ public class RDXLeRobotDatasetCreator
 
             boolean mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getTextLineHeight());
             if (mouseHoveringNodeLine)
+            {
+               mouseHoveringEpisode = i;
                ImGui.textColored(ImGuiTools.GRAY, text);
+            }
             else
                ImGui.text(text);
             ImGuiTools.previousWidgetTooltip("Right click for options.");
@@ -237,15 +242,20 @@ public class RDXLeRobotDatasetCreator
 
       if (dataset != null)
       {
-         for (LeRobotDatasetEpisode episode : dataset.getEpisodes())
+         for (int i = 0; i < dataset.getEpisodes().size(); i++)
          {
+            LeRobotDatasetEpisode episode = dataset.getEpisodes().get(i);
             var records = episode.getRecords();
             if (!records.isEmpty())
             {
+               float verticalExtents = i == mouseHoveringEpisode ? 5.0f : 3.0f;
+               float notchWidth = i == mouseHoveringEpisode ? 4.0f : 2.0f;
                int episodeStart = records.get(0).ihmcLogPosition();
-               ImGuiTools.renderSliderOrProgressNotch((episodeStart / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth, ImGuiTools.DARK_GREEN);
+               float x = (episodeStart / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth;
+               ImGuiTools.renderSliderOrProgressNotch(x, ImGuiTools.DARK_GREEN, verticalExtents, notchWidth);
                int episodeEnd = records.get(records.size() - 1).ihmcLogPosition();
-               ImGuiTools.renderSliderOrProgressNotch((episodeEnd / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth, ImGuiTools.DARK_RED);
+               x = (episodeEnd / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth;
+               ImGuiTools.renderSliderOrProgressNotch(x, ImGuiTools.DARK_RED, verticalExtents, notchWidth);
             }
          }
       }
