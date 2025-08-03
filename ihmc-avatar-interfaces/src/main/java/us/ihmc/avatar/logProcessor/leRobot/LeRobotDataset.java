@@ -147,7 +147,6 @@ public class LeRobotDataset
                boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
                if (desiredDataIsLoaded)
                {
-                  LogTools.info("scrub {}", loadedIndex);
                   if (isDemonstrationEpisode.getBooleanValue())
 //                  if (loadedIndex > 80920 && loadedIndex < 81970) // TODO Remove test code
                   {
