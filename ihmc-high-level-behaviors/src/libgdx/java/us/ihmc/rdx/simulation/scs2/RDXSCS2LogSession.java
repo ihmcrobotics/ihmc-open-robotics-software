@@ -149,18 +149,21 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          }
          for (ZEDLogVideo zedLogVideo : zedLogVideos)
          {
-            zedLogVideo.scrubber.scrub(yoTimestamp.getLongValue());
+            synchronized (zedLogVideo.scrubber)
+            {
+               zedLogVideo.scrubber.scrub(yoTimestamp.getLongValue());
 
-            int imageHeight = zedLogVideo.scrubber.getImageHeight();
-            int imageWidth = zedLogVideo.scrubber.getImageWidth();
-            zedLogVideo.visualizer.updateImageDimensions(imageWidth, imageHeight);
+               int imageHeight = zedLogVideo.scrubber.getImageHeight();
+               int imageWidth = zedLogVideo.scrubber.getImageWidth();
+               zedLogVideo.visualizer.updateImageDimensions(imageWidth, imageHeight);
 
-            Pointer leftColorImageSlMatPointer = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
-            Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
-                              sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
-                              sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
-            zedLogVideo.visualizer.setImage(mat, opencv_imgproc.COLOR_BGR2RGBA);
-            mat.close();
+               Pointer leftColorImageSlMatPointer = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
+               Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
+                                 sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
+                                 sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
+               zedLogVideo.visualizer.setImage(mat, opencv_imgproc.COLOR_BGR2RGBA);
+               mat.close();
+            }
          }
       }
    }

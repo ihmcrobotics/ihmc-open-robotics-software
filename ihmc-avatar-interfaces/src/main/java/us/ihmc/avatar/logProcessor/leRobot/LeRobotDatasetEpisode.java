@@ -81,6 +81,7 @@ public class LeRobotDatasetEpisode
       records.clear();
 
       int inPoint = session.getBufferProperties().getInPoint();
+      int outPoint = session.getBufferProperties().getOutPoint();
       double sessionDTSeconds = session.getSessionDTSeconds();
       LogTools.info("Generating episode {}: dt: {}", episodeName, sessionDTSeconds);
 
@@ -105,72 +106,78 @@ public class LeRobotDatasetEpisode
 
       ThreadTools.startAThread(() ->
       {
-         while (processFrame());
+         int bufferIndex = inPoint;
+         do
+         {
+            processFrame();
+
+            ++bufferIndex;
+            if (outPoint < inPoint && bufferIndex >= session.getBufferProperties().getSize())
+               bufferIndex = 0;
+
+            if (bufferIndex > outPoint)
+               break;
+
+            session.submitBufferIndexRequestAndWait(bufferIndex);
+         }
+         while (true);
+
+         finalizeEpisodeGeneration();
       }, "AddEpisode");
    }
 
-   private boolean processFrame()
+   private void processFrame()
    {
-      int previousIndex = session.getBufferProperties().getCurrentIndex();
+      int loadedIndex = session.getBufferProperties().getCurrentIndex();
+      int inPoint = session.getBufferProperties().getInPoint();
+      int outPoint = session.getBufferProperties().getOutPoint();
+      long timestamp = session.getLogDataReader().getTimestamp().getLongValue();
+      System.out.printf("\rIndex: %d  In: %d  Out: %d  Time: %d", loadedIndex, inPoint, outPoint, timestamp);
 
-      session.playbackTick();
-
-      int currentBufferIndex = session.getBufferProperties().getCurrentIndex();
-      boolean keepGoing = currentBufferIndex >= previousIndex;
-      if (keepGoing)
+      ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
+      long currentVideoTimestamp;
+      synchronized (zedSVOScrubber)
       {
-         int inPoint = session.getBufferProperties().getInPoint();
-         int outPoint = session.getBufferProperties().getOutPoint();
-         System.out.printf("\rTraversing buffer: %d -> %d / %d", inPoint, currentBufferIndex, outPoint);
-
-         long timestamp = session.getLogDataReader().getTimestamp().getLongValue();
-         ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
          zedSVOScrubber.scrub(timestamp);
-         long currentVideoTimestamp = zedSVOScrubber.getTimestampScrubber().getCurrentVideoTimestamp();
-         if (startVideoTimestamp < 0)
-            startVideoTimestamp = currentVideoTimestamp;
-
-         if (currentVideoTimestamp > lastVideoTimestamp) // Write only when a new frame is available
-         {
-            double frequency = lastVideoTimestamp >= 0 ?
-                  Conversions.secondsToHertz(Conversions.nanosecondsToSeconds(currentVideoTimestamp - lastVideoTimestamp)): Double.NaN;
-
-            lastVideoTimestamp = currentVideoTimestamp;
-
-            if (usePerfectTimestamps)
-            {
-               int round = Math.round(fps); // lerobot rounds fps to integer
-               double seconds = UnitConversions.hertzToSeconds(round);
-               double micros = seconds * 1000000.0;
-               episodeFrameTimestampMicros += micros; // important: acrue using double precision
-            }
-            else
-            {
-               episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-            }
-
-            long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
-
-   //         LogTools.info("Current timestamp: %.3f  Writing frame %d Frequency %.3f"
-   //                             .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
-   //                                        roundedTimestamp,
-   //                                        frequency));
-            for (RobotSide side : RobotSide.values)
-            {
-               ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics);
-            }
-
-            records.add(dataWriter.addFrame(roundedTimestamp, length, statistics, session.getLogDataReader().getCurrentLogPosition()));
-
-            ++length;
-         }
+         currentVideoTimestamp = zedSVOScrubber.getTimestampScrubber().getCurrentVideoTimestamp();
       }
-      else
+      if (startVideoTimestamp < 0)
+         startVideoTimestamp = currentVideoTimestamp;
+
+      if (currentVideoTimestamp > lastVideoTimestamp) // Write only when a new frame is available
       {
-         finalizeEpisodeGeneration();
-      }
+         double frequency =
+               lastVideoTimestamp >= 0 ? Conversions.secondsToHertz(Conversions.nanosecondsToSeconds(currentVideoTimestamp - lastVideoTimestamp)) : Double.NaN;
 
-      return keepGoing;
+         lastVideoTimestamp = currentVideoTimestamp;
+
+         if (usePerfectTimestamps)
+         {
+            int round = Math.round(fps); // lerobot rounds fps to integer
+            double seconds = UnitConversions.hertzToSeconds(round);
+            double micros = seconds * 1000000.0;
+            episodeFrameTimestampMicros += micros; // important: acrue using double precision
+         }
+         else
+         {
+            episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
+         }
+
+         long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
+
+         //         LogTools.info("Current timestamp: %.3f  Writing frame %d Frequency %.3f"
+         //                             .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
+         //                                        roundedTimestamp,
+         //                                        frequency));
+         for (RobotSide side : RobotSide.values)
+         {
+            ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics);
+         }
+
+         records.add(dataWriter.addFrame(roundedTimestamp, length, statistics, session.getLogDataReader().getCurrentLogPosition()));
+
+         ++length;
+      }
    }
 
    private void finalizeEpisodeGeneration()
