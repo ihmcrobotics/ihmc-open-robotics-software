@@ -205,10 +205,10 @@ public class RDXLeRobotDatasetCreator
          }
          ImGuiTools.previousWidgetTooltip("Add an episode from the current SCS 2 in/out points.");
          ImGui.beginDisabled(generating != null && generating.getAsBoolean());
-         if (ImGui.button(labels.get("Add Episode Automatically")))
+         if (ImGui.button(labels.get("Add Episodes Automatically")))
          {
             keepGenerating.set(true);
-            generating = dataset.addEpisodeAutomatically(imTaskName.get().trim(), logSession.getSession(), keepGenerating::get);
+            generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), logSession.getSession(), keepGenerating::get);
          }
          ImGui.endDisabled();
          if (keepGenerating.get())
