@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Plane3D;

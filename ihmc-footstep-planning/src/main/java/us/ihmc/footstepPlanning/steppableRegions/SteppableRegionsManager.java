@@ -1,7 +1,6 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 

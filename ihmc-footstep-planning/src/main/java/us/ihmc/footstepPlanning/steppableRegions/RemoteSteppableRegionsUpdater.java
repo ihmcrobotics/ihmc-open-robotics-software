@@ -1,10 +1,9 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.SteppableRegionDebugImagesMessage;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.tools.thread.ExecutorServiceTools;

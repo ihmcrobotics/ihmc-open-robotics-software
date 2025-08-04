@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.steppableRegions.SnapResult;
 
 import java.nio.ByteBuffer;
 

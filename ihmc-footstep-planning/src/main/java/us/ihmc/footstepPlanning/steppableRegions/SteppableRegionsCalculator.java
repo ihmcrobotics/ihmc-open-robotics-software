@@ -1,4 +1,4 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.RandomNumbers;
@@ -9,12 +9,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.steppableRegions.data.SteppableBorderRing;
-import us.ihmc.perception.steppableRegions.data.SteppableCell;
-import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
-import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableBorderRing;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableCell;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionDataHolder;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.perception.heightMap.HeightMapData;

@@ -1,4 +1,4 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import perception_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;

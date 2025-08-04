@@ -1,4 +1,4 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 public class SteppableRegionsListCollection
 {

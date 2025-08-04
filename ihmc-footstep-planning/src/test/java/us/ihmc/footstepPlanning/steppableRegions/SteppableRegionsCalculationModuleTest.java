@@ -1,10 +1,11 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
-import controller_msgs.msg.dds.SnapFootstepPacket;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -33,7 +34,11 @@ public class SteppableRegionsCalculationModuleTest
       double extremumValue = gridSizeXY / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
-      steppableRegionsCalculationModule.compute(heightMap);
+
+      SnappingTerrainManager snappingTerrainManager = new SnappingTerrainManager(new HeightMapParameters());
+      snappingTerrainManager.updateAndPublish(heightMap);
+      TerrainMapData terrainMapData = snappingTerrainManager.getTerrainMapData();
+      steppableRegionsCalculationModule.compute(terrainMapData);
       SteppableRegionsListCollection regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
 
       int yawDiscretizations = steppableRegionsCalculationModule.getYawDiscretizations();

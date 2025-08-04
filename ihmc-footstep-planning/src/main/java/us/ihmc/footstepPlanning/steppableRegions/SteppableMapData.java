@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 

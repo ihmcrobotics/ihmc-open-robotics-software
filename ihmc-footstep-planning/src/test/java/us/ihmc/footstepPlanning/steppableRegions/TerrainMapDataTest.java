@@ -1,16 +1,16 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.TerrainMapTools;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.TerrainMapData;
 
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
    private final HeightMapParameters parameters = new HeightMapParameters();
-   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset());
+   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset(), parameters.getGridResolutionXY(), parameters.getGridSizeXY());
 
    @Test
    public void testTerrainMapSurfaceNormals()

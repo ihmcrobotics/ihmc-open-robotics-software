@@ -1,4 +1,4 @@
-package us.ihmc.perception.steppableRegions;
+package us.ihmc.footstepPlanning.steppableRegions;
 
 import javafx.scene.paint.Color;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -10,13 +10,11 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.steppableRegions.data.SteppableCell;
-import us.ihmc.perception.steppableRegions.data.SteppableRegionDataHolder;
-import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableCell;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionDataHolder;
+import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 

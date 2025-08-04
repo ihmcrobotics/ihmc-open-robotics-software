@@ -1,8 +1,8 @@
-package us.ihmc.perception.steppableRegions.data;
+package us.ihmc.footstepPlanning.steppableRegions.data;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
