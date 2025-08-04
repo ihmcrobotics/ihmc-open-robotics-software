@@ -111,6 +111,8 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       chunk.setCellsPerAxis(chunkMessage.getCellsPerAxis());
       chunk.setHeightMapOffset((float) chunkMessage.getHeightOffset());
       chunk.setScalingFactor(chunkMessage.getHeightScaleFactor());
+
+      latestChunk.close();
    }
 
    @Override

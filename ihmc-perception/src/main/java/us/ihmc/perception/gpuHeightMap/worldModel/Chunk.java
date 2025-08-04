@@ -147,7 +147,8 @@ public class Chunk
 
    public void setChunk(Mat chunk)
    {
-      this.chunk = chunk;
+      // Deep copy here cause the original gets closed
+      this.chunk = chunk.clone();
    }
 
    public void setCellsPerAxis(int cellsPerAxis)
