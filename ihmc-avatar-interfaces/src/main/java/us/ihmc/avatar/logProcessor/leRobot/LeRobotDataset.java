@@ -124,7 +124,7 @@ public class LeRobotDataset
       return episode;
    }
 
-   public BooleanSupplier addEpisodeAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
+   public BooleanSupplier addEpisodesAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
    {
       ensureTaskNameInJsonl(taskName);
 
@@ -148,7 +148,7 @@ public class LeRobotDataset
                if (desiredDataIsLoaded)
                {
                   if (isDemonstrationEpisode.getBooleanValue())
-//                  if (loadedIndex > 80920 && loadedIndex < 81970) // TODO Remove test code
+//                  if ((loadedIndex > 80920 && loadedIndex < 81970) || (loadedIndex > 82220 && loadedIndex < 83220)) // TODO Remove test code
                   {
                      if (episode == null)
                      {
