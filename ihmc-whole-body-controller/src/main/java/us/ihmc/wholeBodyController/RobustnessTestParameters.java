@@ -16,6 +16,7 @@ public interface RobustnessTestParameters
     double getMaxDuration();
     double getPushInterval();
     Vector3D getPushDirection();
+    Vector3D getPushOffset();
 
     // Quick access methods for manual testing
     double getLightPushForce();
@@ -25,10 +26,12 @@ public interface RobustnessTestParameters
     Vector3D getDefaultPushDirection();
 
     record RobustnessTestConfig(double minForce, double maxForce, double minDuration,
-                                double maxDuration, double pushInterval, Vector3D pushDirection)
+                                double maxDuration, double pushInterval, Vector3D pushDirection,
+                                Vector3D pushOffset)
     {
         public RobustnessTestConfig(double minForce, double maxForce, double minDuration,
-                                    double maxDuration, double pushInterval, Vector3D pushDirection)
+                                    double maxDuration, double pushInterval, Vector3D pushDirection,
+                                    Vector3D pushOffset)
         {
             this.minForce = minForce;
             this.maxForce = maxForce;
@@ -37,6 +40,7 @@ public interface RobustnessTestParameters
             this.pushInterval = pushInterval;
             this.pushDirection = new Vector3D(pushDirection);
             this.pushDirection.normalize(); // Ensure unit vector
+            this.pushOffset = pushOffset;
         }
     }
 }
