@@ -48,7 +48,7 @@ cd ~/Downloads
 wget https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.2/ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
 chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
 ./ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
-
+./
 # Follow the ZED SDK installer prompts
 
 rm -f ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run

@@ -1,12 +1,11 @@
 package us.ihmc.avatar.mocapRetarget.bvh;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseKinematicsSolver;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.SkeletonHierarchy;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 
 public class BVHParser
 {
@@ -17,6 +16,12 @@ public class BVHParser
    public SkeletonHierarchy parseHierarchy(File bvhFile) throws IOException
    {
       SkeletonHierarchy hierarchy = new SkeletonHierarchy();
+      try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile))) {
+         String line;
+         while((line = reader.readLine()) != null) {
+
+         }
+      }
       // 1) open a BufferedReader on bvhFile
       // 2) read lines until you see "HIERARCHY"
       // 3) recursively parse each JOINT / End Site block:
