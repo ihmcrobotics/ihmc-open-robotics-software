@@ -20,9 +20,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(flyingPointsFilter);
    }
 
-   default boolean getEnableVerticalFilter()
+   default boolean getEnableChunkedMap()
    {
-      return get(enableVerticalFilter);
+      return get(enableChunkedMap);
    }
 
    default boolean getLogHeightMap()
@@ -145,21 +145,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(steppingCosineThreshold);
    }
 
-   default int getFastSearchSize()
-   {
-      return get(fastSearchSize);
-   }
-
-   default int getVerticalSearchSize()
-   {
-      return get(verticalSearchSize);
-   }
-
-   default double getVerticalSearchResolution()
-   {
-      return get(verticalSearchResolution);
-   }
-
    /**
     * Resolution of the height map grid
     */
@@ -235,15 +220,5 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default boolean getEstimateHeightWithKalmanFilter()
    {
       return get(estimateHeightWithKalmanFilter);
-   }
-
-   default boolean getDenoiserEnabled()
-   {
-      return get(denoiserEnabled);
-   }
-
-   default boolean getStatisticsLoggingEnabled()
-   {
-      return get(statisticsLoggingEnabled);
    }
 }

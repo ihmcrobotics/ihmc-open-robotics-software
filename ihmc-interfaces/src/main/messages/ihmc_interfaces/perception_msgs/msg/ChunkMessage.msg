@@ -1,13 +1,8 @@
-# This message is part of the IHMC height map module
+# We have a hash to keep each chunk unique
+int32 hash_code_of_chunk
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
-
-# Position of the focal point at sensor data acquisition
-geometry_msgs/Point position
-
-# Orientation of the focal point at sensor data acquisition
-geometry_msgs/Quaternion orientation
 
 # Discretization of the height map grid
 float64 xy_resolution -1.0
@@ -16,10 +11,10 @@ float64 xy_resolution -1.0
 float64 grid_size_xy -1.0
 
 # X coordinate of the center of the height map
-float64 grid_center_x 0.0
+float64 origin_x 0.0
 
 # Y coordinate of the center of the height map
-float64 grid_center_y 0.0
+float64 origin_y 0.0
 
 # Z height offset for converting between floats and shorts
 float64 height_offset 0.0
@@ -44,13 +39,3 @@ int32[<=255000] keys
 
 # List of heights, which correspond to the list of keys
 int32[<=255000] heights
-
-# List of variances, which correspond to the list of keys. May be empty.
-float32[<=255000] variances
-
-# List of centroids for each cell, which correspond to the list of keys. May be empty
-# Note: The z coordinate of each point is ignored, but should correspond to the height.
-geometry_msgs/Point[<=255000] centroids
-
-# List of normals for each cell, which correspond to the list of keys. May be empty.
-geometry_msgs/Vector3[<=255000] normals

@@ -34,7 +34,7 @@ public class ContinuousHikingProcess
 
    private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
-   private final ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
+   private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final SnappingTerrainManager snappingTerrainManager;
    private final RapidHeightMapThread rapidHeightMapThread;
    private final SteppableRegionsManager steppableRegionsManager;
@@ -77,12 +77,12 @@ public class ContinuousHikingProcess
 
          snappingTerrainManager = new SnappingTerrainManager(ros2Node, activeMappingParameterToolBox.getHeightMapParameters());
          steppableRegionsManager = new SteppableRegionsManager(ros2Node);
-         continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel,
-                                                                               ros2Node,
-                                                                               ros2SyncedRobot,
-                                                                               ros2SyncedRobot.getReferenceFrames(),
-                                                                               controllerFootstepQueueMonitor,
-                                                                               activeMappingParameterToolBox);
+         continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
+                                                                             ros2Node,
+                                                                             ros2SyncedRobot,
+                                                                             ros2SyncedRobot.getReferenceFrames(),
+                                                                             controllerFootstepQueueMonitor,
+                                                                             activeMappingParameterToolBox);
       }
 
       // Custom thread getting started
@@ -111,13 +111,13 @@ public class ContinuousHikingProcess
       snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
       environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
       steppableRegionsManager.update(environmentHandler.getTerrainMapData());
-      continuousPlannerSchedulingTask.setLatestEnvironmentHandler(environmentHandler);
+      continuousPlanningStateMachine.setLatestEnvironmentHandler(environmentHandler);
    }
 
    public void destroy()
    {
       rapidHeightMapThread.blockingKill();
-      continuousPlannerSchedulingTask.destroy();
+      continuousPlanningStateMachine.destroy();
       snappingTerrainManager.close();
       steppableRegionsManager.destroy();
    }
