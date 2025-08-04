@@ -2,6 +2,7 @@ package us.ihmc.perception.heightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.IDLSequence.Integer;
@@ -35,6 +36,36 @@ public class HeightMapMessageTools
       return heightMapData;
    }
 
+   public static Mat unpackMessageToMat(ChunkMessage chunkMessage)
+   {
+      if (chunkMessage == null)
+         return null;
+
+      int cellsPerAxis = chunkMessage.getCellsPerAxis();
+
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      ShortBuffer shortBuffer = heightMap.createBuffer();
+
+      int totalCells = cellsPerAxis * cellsPerAxis;
+      short[] heights = new short[totalCells];
+
+      for (int i = 0; i < chunkMessage.getHeights().size(); i++)
+      {
+         short height = (short) chunkMessage.getHeights().get(i);
+         int key = chunkMessage.getKeys().get(i);
+
+         int xIndex = key % cellsPerAxis;
+         int yIndex = key / cellsPerAxis;
+
+         int index = yIndex * cellsPerAxis + xIndex;
+         heights[index] = height;
+      }
+
+      shortBuffer.put(heights);
+
+      return heightMap;
+   }
+
    public static Mat unpackMessageToMat(HeightMapMessage heightMapMessage)
    {
       if (heightMapMessage == null)
@@ -49,16 +80,14 @@ public class HeightMapMessageTools
       int totalCells = cellsPerAxis * cellsPerAxis;
       short[] heights = new short[totalCells];
 
+      // Optimization of caching the arrays
+      Integer heightsFromMessage = heightMapMessage.getHeights();
+      Integer keysFromMessage = heightMapMessage.getKeys();
+
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
-         short height = (short) heightMapMessage.getHeights().get(i);
-         int key = heightMapMessage.getKeys().get(i);
-
-         int xIndex = key % cellsPerAxis;
-         int yIndex = key / cellsPerAxis;
-
-         int index = yIndex * cellsPerAxis + xIndex;
-         heights[index] = height;
+         int key = keysFromMessage.get(i);
+         heights[key] = (short) heightsFromMessage.get(i);
       }
 
       shortBuffer.put(heights);
@@ -69,7 +98,8 @@ public class HeightMapMessageTools
    /**
     * This method is too slow, creating a new {@link HeightMapMessage} object is too slow when trying to
     * use this in the update loop. Especially when we start sending larger maps.
-    * Please use {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double)}
+    * Please use {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double, int)}
+    * I'm going to say it one more time in case it wasn't clear the first time. THIS METHOD IS TOO SLOW, DO NOT USE!
     */
    @Deprecated
    public static HeightMapMessage toMessage(HeightMapData heightMapData)
@@ -81,8 +111,8 @@ public class HeightMapMessageTools
    }
 
    /**
-    * This methos is slow, its ok to use this if necessary, but going forward we should be using the
-    * {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double)} as its faster
+    * This method is slow, it's ok to use this if necessary, but going forward we should be using the
+    * {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double, int)} as its faster
     */
    @Deprecated
    public static void toMessage(HeightMapData heightMapData, HeightMapMessage messageToPack)
@@ -103,16 +133,75 @@ public class HeightMapMessageTools
       }
    }
 
+   public static void toMessage(Mat chunkDataForMessage,
+                                ChunkMessage messageToPack,
+                                Point3D mapOrigin,
+                                double widthInMeters,
+                                double cellSizeInMeters,
+                                double heightOffset,
+                                double heightScaleFactor,
+                                int cellsPerAxis)
+   {
+      messageToPack.setGridSizeXy(widthInMeters);
+      messageToPack.setXyResolution(cellSizeInMeters);
+      messageToPack.setOriginX(mapOrigin.getX());
+      messageToPack.setOriginY(mapOrigin.getY());
+      messageToPack.setWidthInMeters(widthInMeters);
+      messageToPack.setCellSizeInMeters(cellSizeInMeters);
+      messageToPack.setHeightOffset(heightOffset);
+      messageToPack.setHeightScaleFactor(heightScaleFactor);
+      messageToPack.setCellsPerAxis(cellsPerAxis);
+
+      // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      // Make sure Mat type is correct
+      if (chunkDataForMessage.type() != opencv_core.CV_16UC1)
+         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+
+      ShortBuffer shortBuffer = chunkDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
+
+      // This is done for speed optimization
+      short[] heightsArray = new short[totalCells];
+      shortBuffer.get(heightsArray);
+      Integer keys = messageToPack.getKeys();
+      Integer heights = messageToPack.getHeights();
+
+      // No overhead for this loop, it's as fast as possible (according to AI) with the current message
+      for (int i = 0; i < totalCells; ++i)
+      {
+         if (i < keys.size())
+            keys.set(i, i);
+         else
+            keys.add(i);
+
+         if (i < heights.size())
+            heights.set(i, heightsArray[i]);
+         else
+            heights.add(heightsArray[i]);
+      }
+   }
+
+   public static void clear(ChunkMessage messageToClear)
+   {
+      messageToClear.setGridSizeXy(-1.0);
+      messageToClear.setXyResolution(-1.0);
+      messageToClear.setOriginX(-1.0);
+      messageToClear.setOriginX(-1.0);
+      messageToClear.setEstimatedGroundHeight(-1.0);
+      messageToClear.getKeys().clear();
+      messageToClear.getHeights().clear();
+   }
+
    public static void toMessage(Mat heightMapDataForMessage,
                                 HeightMapMessage messageToPack,
                                 Point3D heightMapCenter,
                                 double widthInMeters,
                                 double cellSizeInMeters,
                                 double heightOffset,
-                                double heightScaleFactor)
+                                double heightScaleFactor,
+                                int cellsPerAxis)
    {
-      clear(messageToPack);
-
       messageToPack.setGridSizeXy(widthInMeters);
       messageToPack.setXyResolution(cellSizeInMeters);
       messageToPack.setGridCenterX(heightMapCenter.getX());
@@ -121,11 +210,9 @@ public class HeightMapMessageTools
       messageToPack.setCellSizeInMeters(cellSizeInMeters);
       messageToPack.setHeightOffset(heightOffset);
       messageToPack.setHeightScaleFactor(heightScaleFactor);
+      messageToPack.setCellsPerAxis(cellsPerAxis);
 
       // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
-      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
-      int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       // Make sure Mat type is correct
@@ -140,14 +227,25 @@ public class HeightMapMessageTools
       Integer keys = messageToPack.getKeys();
       Integer heights = messageToPack.getHeights();
 
-      // No overhead for this loop, it's as fast as possible with the current message
+      // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)
       {
-         keys.add(i);
-         heights.add(heightsArray[i]);
+         if (i < keys.size())
+            keys.set(i, i);
+         else
+            keys.add(i);
+
+         if (i < heights.size())
+            heights.set(i, heightsArray[i]);
+         else
+            heights.add(heightsArray[i]);
       }
    }
 
+   /**
+    * We don't want to do this unless we have too, it's too slow
+    */
+   @Deprecated
    public static void clear(HeightMapMessage messageToClear)
    {
       messageToClear.setGridSizeXy(-1.0);

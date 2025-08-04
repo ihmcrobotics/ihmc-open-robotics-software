@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * This class is responsible for scheduling the continuous hiking state machine. It is responsible for handling the state transitions and the logic of the
  * state machine.
  */
-public class ContinuousPlannerSchedulingTask
+public class ContinuousPlanningStateMachine
 {
    /**
     * This is the delay between each tick of the state machine. Set based on perception update rate.
@@ -43,12 +43,12 @@ public class ContinuousPlannerSchedulingTask
 
    private final AtomicBoolean resetStateMachine = new AtomicBoolean(false);
 
-   public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
-                                          ROS2Node ros2Node,
-                                          ROS2SyncedRobotModel syncedRobotModel,
-                                          HumanoidReferenceFrames referenceFrames,
-                                          ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                                          ActiveMappingParameterToolBox activeMappingParameterObject)
+   public ContinuousPlanningStateMachine(DRCRobotModel robotModel,
+                                         ROS2Node ros2Node,
+                                         ROS2SyncedRobotModel syncedRobotModel,
+                                         HumanoidReferenceFrames referenceFrames,
+                                         ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                                         ActiveMappingParameterToolBox activeMappingParameterObject)
    {
       String simpleRobotName = robotModel.getSimpleRobotName();
 
@@ -114,8 +114,8 @@ public class ContinuousPlannerSchedulingTask
       SquareUpTransitionCondition squareUpTransitionCondition = new SquareUpTransitionCondition(commandMessage);
 
       //NOTE: The transitions for the state machine are checked in the order they are added.
-      // And once one condition is true the other's don't get checked.
-      // In order to be able to always stop the state machine we add the stop condition first
+      // And once one condition is true, the others don't get checked.
+      // To be able to always stop the state machine, we add the stop condition first
 
       // From any given state we can go back to DO_NOTHING and stop ContinuousHiking
       stateMachineFactory.addTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.DO_NOTHING, stopContinuousHikingTransitionCondition);
@@ -127,10 +127,10 @@ public class ContinuousPlannerSchedulingTask
       // Add condition, this allows us to plan over and over again without sending any footsteps to the controller
       stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.READY_TO_PLAN, planAgainTransitionCondition);
 
-      // Add condition, this allows up to prepare to square the robot up to the goal
+      // Add condition, this allows us to prepare to square the robot up to the goal
       stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.JUST_WAIT, squareUpTransitionCondition);
 
-      // Add done conditions in order to go into the next state
+      // Add done conditions to go into the next state
       stateMachineFactory.addDoneTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.WAITING_TO_LAND);
       stateMachineFactory.addDoneTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.READY_TO_PLAN);
       stateMachineFactory.addDoneTransition(ContinuousHikingState.JUST_WAIT, ContinuousHikingState.DO_NOTHING);
@@ -183,8 +183,8 @@ public class ContinuousPlannerSchedulingTask
    }
 
    /**
-    * Runs the continuous hiking state machine every {@link #CONTINUOUS_PLANNING_DELAY_MS} milliseconds. The state is stored in the
-    * {@link ContinuousHikingState}
+    * Runs the continuous hiking state machine every {@link #CONTINUOUS_PLANNING_DELAY_MS} milliseconds.
+    * The state is stored in the {@link ContinuousHikingState}
     */
    private void tickStateMachine()
    {

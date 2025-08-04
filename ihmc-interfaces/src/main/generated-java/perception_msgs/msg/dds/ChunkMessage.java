@@ -6,11 +6,12 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-/**
-       * This message is part of the IHMC height map module
-       */
-public class HeightMapMessage extends Packet<HeightMapMessage> implements Settable<HeightMapMessage>, EpsilonComparable<HeightMapMessage>
+public class ChunkMessage extends Packet<ChunkMessage> implements Settable<ChunkMessage>, EpsilonComparable<ChunkMessage>
 {
+   /**
+            * We have a hash to keep each chunk unique
+            */
+   public int hash_code_of_chunk_;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -26,11 +27,11 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * X coordinate of the center of the height map
             */
-   public double grid_center_x_;
+   public double origin_x_;
    /**
             * Y coordinate of the center of the height map
             */
-   public double grid_center_y_;
+   public double origin_y_;
    /**
             * Z height offset for converting between floats and shorts
             */
@@ -63,50 +64,34 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             * List of heights, which correspond to the list of keys
             */
    public us.ihmc.idl.IDLSequence.Integer  heights_;
-   /**
-            * List of variances, which correspond to the list of keys. May be empty.
-            */
-   public us.ihmc.idl.IDLSequence.Float  variances_;
-   /**
-            * List of centroids for each cell, which correspond to the list of keys. May be empty
-            * Note: The z coordinate of each point is ignored, but should correspond to the height.
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  centroids_;
-   /**
-            * List of normals for each cell, which correspond to the list of keys. May be empty.
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  normals_;
 
-   public HeightMapMessage()
+   public ChunkMessage()
    {
       keys_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
       heights_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
-      variances_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
-
-      centroids_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (255000, new geometry_msgs.msg.dds.PointPubSubType());
-      normals_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (255000, new geometry_msgs.msg.dds.Vector3PubSubType());
-
    }
 
-   public HeightMapMessage(HeightMapMessage other)
+   public ChunkMessage(ChunkMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(HeightMapMessage other)
+   public void set(ChunkMessage other)
    {
+      hash_code_of_chunk_ = other.hash_code_of_chunk_;
+
       sequence_id_ = other.sequence_id_;
 
       xy_resolution_ = other.xy_resolution_;
 
       grid_size_xy_ = other.grid_size_xy_;
 
-      grid_center_x_ = other.grid_center_x_;
+      origin_x_ = other.origin_x_;
 
-      grid_center_y_ = other.grid_center_y_;
+      origin_y_ = other.origin_y_;
 
       height_offset_ = other.height_offset_;
 
@@ -122,9 +107,21 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       keys_.set(other.keys_);
       heights_.set(other.heights_);
-      variances_.set(other.variances_);
-      centroids_.set(other.centroids_);
-      normals_.set(other.normals_);
+   }
+
+   /**
+            * We have a hash to keep each chunk unique
+            */
+   public void setHashCodeOfChunk(int hash_code_of_chunk)
+   {
+      hash_code_of_chunk_ = hash_code_of_chunk;
+   }
+   /**
+            * We have a hash to keep each chunk unique
+            */
+   public int getHashCodeOfChunk()
+   {
+      return hash_code_of_chunk_;
    }
 
    /**
@@ -175,31 +172,31 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * X coordinate of the center of the height map
             */
-   public void setGridCenterX(double grid_center_x)
+   public void setOriginX(double origin_x)
    {
-      grid_center_x_ = grid_center_x;
+      origin_x_ = origin_x;
    }
    /**
             * X coordinate of the center of the height map
             */
-   public double getGridCenterX()
+   public double getOriginX()
    {
-      return grid_center_x_;
+      return origin_x_;
    }
 
    /**
             * Y coordinate of the center of the height map
             */
-   public void setGridCenterY(double grid_center_y)
+   public void setOriginY(double origin_y)
    {
-      grid_center_y_ = grid_center_y;
+      origin_y_ = origin_y;
    }
    /**
             * Y coordinate of the center of the height map
             */
-   public double getGridCenterY()
+   public double getOriginY()
    {
-      return grid_center_y_;
+      return origin_y_;
    }
 
    /**
@@ -311,50 +308,24 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    }
 
 
-   /**
-            * List of variances, which correspond to the list of keys. May be empty.
-            */
-   public us.ihmc.idl.IDLSequence.Float  getVariances()
+   public static Supplier<ChunkMessagePubSubType> getPubSubType()
    {
-      return variances_;
-   }
-
-
-   /**
-            * List of centroids for each cell, which correspond to the list of keys. May be empty
-            * Note: The z coordinate of each point is ignored, but should correspond to the height.
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getCentroids()
-   {
-      return centroids_;
-   }
-
-
-   /**
-            * List of normals for each cell, which correspond to the list of keys. May be empty.
-            */
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getNormals()
-   {
-      return normals_;
-   }
-
-
-   public static Supplier<HeightMapMessagePubSubType> getPubSubType()
-   {
-      return HeightMapMessagePubSubType::new;
+      return ChunkMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return HeightMapMessagePubSubType::new;
+      return ChunkMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(HeightMapMessage other, double epsilon)
+   public boolean epsilonEquals(ChunkMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hash_code_of_chunk_, other.hash_code_of_chunk_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
@@ -362,9 +333,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_size_xy_, other.grid_size_xy_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_x_, other.grid_center_x_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.origin_x_, other.origin_x_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_y_, other.grid_center_y_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.origin_y_, other.origin_y_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_offset_, other.height_offset_, epsilon)) return false;
 
@@ -382,22 +353,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.heights_, other.heights_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.variances_, other.variances_, epsilon)) return false;
-
-      if (this.centroids_.size() != other.centroids_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.centroids_.size(); i++)
-         {  if (!this.centroids_.get(i).epsilonEquals(other.centroids_.get(i), epsilon)) return false; }
-      }
-
-      if (this.normals_.size() != other.normals_.size()) { return false; }
-      else
-      {
-         for (int i = 0; i < this.normals_.size(); i++)
-         {  if (!this.normals_.get(i).epsilonEquals(other.normals_.get(i), epsilon)) return false; }
-      }
-
 
       return true;
    }
@@ -407,9 +362,11 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof HeightMapMessage)) return false;
+      if(!(other instanceof ChunkMessage)) return false;
 
-      HeightMapMessage otherMyClass = (HeightMapMessage) other;
+      ChunkMessage otherMyClass = (ChunkMessage) other;
+
+      if(this.hash_code_of_chunk_ != otherMyClass.hash_code_of_chunk_) return false;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -417,9 +374,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.grid_size_xy_ != otherMyClass.grid_size_xy_) return false;
 
-      if(this.grid_center_x_ != otherMyClass.grid_center_x_) return false;
+      if(this.origin_x_ != otherMyClass.origin_x_) return false;
 
-      if(this.grid_center_y_ != otherMyClass.grid_center_y_) return false;
+      if(this.origin_y_ != otherMyClass.origin_y_) return false;
 
       if(this.height_offset_ != otherMyClass.height_offset_) return false;
 
@@ -435,9 +392,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
-      if (!this.variances_.equals(otherMyClass.variances_)) return false;
-      if (!this.centroids_.equals(otherMyClass.centroids_)) return false;
-      if (!this.normals_.equals(otherMyClass.normals_)) return false;
 
       return true;
    }
@@ -447,17 +401,19 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("HeightMapMessage {");
+      builder.append("ChunkMessage {");
+      builder.append("hash_code_of_chunk=");
+      builder.append(this.hash_code_of_chunk_);      builder.append(", ");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("xy_resolution=");
       builder.append(this.xy_resolution_);      builder.append(", ");
       builder.append("grid_size_xy=");
       builder.append(this.grid_size_xy_);      builder.append(", ");
-      builder.append("grid_center_x=");
-      builder.append(this.grid_center_x_);      builder.append(", ");
-      builder.append("grid_center_y=");
-      builder.append(this.grid_center_y_);      builder.append(", ");
+      builder.append("origin_x=");
+      builder.append(this.origin_x_);      builder.append(", ");
+      builder.append("origin_y=");
+      builder.append(this.origin_y_);      builder.append(", ");
       builder.append("height_offset=");
       builder.append(this.height_offset_);      builder.append(", ");
       builder.append("height_scale_factor=");
@@ -473,13 +429,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append("keys=");
       builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");
-      builder.append(this.heights_);      builder.append(", ");
-      builder.append("variances=");
-      builder.append(this.variances_);      builder.append(", ");
-      builder.append("centroids=");
-      builder.append(this.centroids_);      builder.append(", ");
-      builder.append("normals=");
-      builder.append(this.normals_);
+      builder.append(this.heights_);
       builder.append("}");
       return builder.toString();
    }

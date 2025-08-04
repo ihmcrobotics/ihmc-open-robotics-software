@@ -76,8 +76,6 @@ public class HeightMapLogReader implements Closeable
       channel.read(frameBuffer);
       frameBuffer.flip();
 
-      double timestamp = frameBuffer.getDouble();
-
       int numFloats = (frameSize - 8) / Float.BYTES;
 
       float[] packedArray = new float[numFloats];
@@ -114,7 +112,7 @@ public class HeightMapLogReader implements Closeable
 
       Point3D center = new Point3D(centerX, centerY, 0.0);
       HeightMapMessage msg = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(mat, msg, center, widthInMeters, cellSizeInMeters, heightOffset, heightScaleFactor);
+      HeightMapMessageTools.toMessage(mat, msg, center, widthInMeters, cellSizeInMeters, heightOffset, heightScaleFactor, cellsPerAxis);
       msg.setSequenceId(index + 2);
       return msg;
    }

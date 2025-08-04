@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningStateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -10,7 +11,7 @@ public class StartContinuousHikingTransitionCondition implements StateTransition
    private final AtomicReference<ContinuousHikingCommandMessage> commandMessage;
 
    /**
-    * This transition is used in the {@link us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask} to determine whether the Continuous Hiking state
+    * This transition is used in the {@link ContinuousPlanningStateMachine} to determine whether the Continuous Hiking state
     * machine should be started.
     */
    public StartContinuousHikingTransitionCondition(AtomicReference<ContinuousHikingCommandMessage> commandMessage)

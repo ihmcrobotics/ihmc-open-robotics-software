@@ -1,8 +1,6 @@
-#ifndef __perception_msgs__msg__HeightMapMessage__idl__
-#define __perception_msgs__msg__HeightMapMessage__idl__
+#ifndef __perception_msgs__msg__ChunkMessage__idl__
+#define __perception_msgs__msg__ChunkMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
-#include "geometry_msgs/msg/./Vector3_.idl"
 module perception_msgs
 {
   module msg
@@ -10,12 +8,13 @@ module perception_msgs
     module dds
     {
 
-      /**
-       * This message is part of the IHMC height map module
-       */
-      @TypeCode(type="perception_msgs::msg::dds_::HeightMapMessage_")
-      struct HeightMapMessage
+      @TypeCode(type="perception_msgs::msg::dds_::ChunkMessage_")
+      struct ChunkMessage
       {
+        /**
+         * We have a hash to keep each chunk unique
+         */
+        long hash_code_of_chunk;
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
@@ -33,11 +32,11 @@ module perception_msgs
         /**
          * X coordinate of the center of the height map
          */
-        double grid_center_x;
+        double origin_x;
         /**
          * Y coordinate of the center of the height map
          */
-        double grid_center_y;
+        double origin_y;
         /**
          * Z height offset for converting between floats and shorts
          */
@@ -70,19 +69,6 @@ module perception_msgs
          * List of heights, which correspond to the list of keys
          */
         sequence<long, 255000> heights;
-        /**
-         * List of variances, which correspond to the list of keys. May be empty.
-         */
-        sequence<float, 255000> variances;
-        /**
-         * List of centroids for each cell, which correspond to the list of keys. May be empty
-         * Note: The z coordinate of each point is ignored, but should correspond to the height.
-         */
-        sequence<geometry_msgs::msg::dds::Point, 255000> centroids;
-        /**
-         * List of normals for each cell, which correspond to the list of keys. May be empty.
-         */
-        sequence<geometry_msgs::msg::dds::Vector3, 255000> normals;
       };
     };
   };

@@ -2,20 +2,20 @@ package perception_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "HeightMapMessage" defined in "HeightMapMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "ChunkMessage" defined in "ChunkMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from HeightMapMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit HeightMapMessage_.idl instead.
+* This file was automatically generated from ChunkMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ChunkMessage_.idl instead.
 *
 */
-public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.HeightMapMessage>
+public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perception_msgs.msg.dds.ChunkMessage>
 {
-   public static final java.lang.String name = "perception_msgs::msg::dds_::HeightMapMessage_";
+   public static final java.lang.String name = "perception_msgs::msg::dds_::ChunkMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b11850049153c2993a3e5c0f6daef28e208a34f411847191943de4cb19aae510";
+   		return "ad619f8d791f9b442c4e113943144c1559801d10b7a3e678f9dc5949f54b2eb7";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.HeightMapMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, perception_msgs.msg.dds.ChunkMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -51,6 +51,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -78,26 +80,21 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255000; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255000; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.HeightMapMessage data)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.ChunkMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(perception_msgs.msg.dds.HeightMapMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(perception_msgs.msg.dds.ChunkMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -140,35 +137,23 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getVariances().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getCentroids().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCentroids().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getNormals().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getNormals().get(i0), current_alignment);}
-
 
       return current_alignment - initial_alignment;
    }
 
-   public static void write(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_2(data.getHashCodeOfChunk());
+
       cdr.write_type_12(data.getSequenceId());
 
       cdr.write_type_6(data.getXyResolution());
 
       cdr.write_type_6(data.getGridSizeXy());
 
-      cdr.write_type_6(data.getGridCenterX());
+      cdr.write_type_6(data.getOriginX());
 
-      cdr.write_type_6(data.getGridCenterY());
+      cdr.write_type_6(data.getOriginY());
 
       cdr.write_type_6(data.getHeightOffset());
 
@@ -190,31 +175,21 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       cdr.write_type_e(data.getHeights());else
           throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 255000));
 
-      if(data.getVariances().size() <= 255000)
-      cdr.write_type_e(data.getVariances());else
-          throw new RuntimeException("variances field exceeds the maximum length: %d > %d".formatted(data.getVariances().size(), 255000));
-
-      if(data.getCentroids().size() <= 255000)
-      cdr.write_type_e(data.getCentroids());else
-          throw new RuntimeException("centroids field exceeds the maximum length: %d > %d".formatted(data.getCentroids().size(), 255000));
-
-      if(data.getNormals().size() <= 255000)
-      cdr.write_type_e(data.getNormals());else
-          throw new RuntimeException("normals field exceeds the maximum length: %d > %d".formatted(data.getNormals().size(), 255000));
-
    }
 
-   public static void read(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setHashCodeOfChunk(cdr.read_type_2());
+      	
       data.setSequenceId(cdr.read_type_12());
       	
       data.setXyResolution(cdr.read_type_6());
       	
       data.setGridSizeXy(cdr.read_type_6());
       	
-      data.setGridCenterX(cdr.read_type_6());
+      data.setOriginX(cdr.read_type_6());
       	
-      data.setGridCenterY(cdr.read_type_6());
+      data.setOriginY(cdr.read_type_6());
       	
       data.setHeightOffset(cdr.read_type_6());
       	
@@ -230,20 +205,18 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       cdr.read_type_e(data.getKeys());	
       cdr.read_type_e(data.getHeights());	
-      cdr.read_type_e(data.getVariances());	
-      cdr.read_type_e(data.getCentroids());	
-      cdr.read_type_e(data.getNormals());	
 
    }
 
    @Override
-   public final void serialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_2("hash_code_of_chunk", data.getHashCodeOfChunk());
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("xy_resolution", data.getXyResolution());
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
-      ser.write_type_6("grid_center_x", data.getGridCenterX());
-      ser.write_type_6("grid_center_y", data.getGridCenterY());
+      ser.write_type_6("origin_x", data.getOriginX());
+      ser.write_type_6("origin_y", data.getOriginY());
       ser.write_type_6("height_offset", data.getHeightOffset());
       ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
       ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
@@ -252,19 +225,17 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
       ser.write_type_e("keys", data.getKeys());
       ser.write_type_e("heights", data.getHeights());
-      ser.write_type_e("variances", data.getVariances());
-      ser.write_type_e("centroids", data.getCentroids());
-      ser.write_type_e("normals", data.getNormals());
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.HeightMapMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ChunkMessage data)
    {
+      data.setHashCodeOfChunk(ser.read_type_2("hash_code_of_chunk"));
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setXyResolution(ser.read_type_6("xy_resolution"));
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
-      data.setGridCenterX(ser.read_type_6("grid_center_x"));
-      data.setGridCenterY(ser.read_type_6("grid_center_y"));
+      data.setOriginX(ser.read_type_6("origin_x"));
+      data.setOriginY(ser.read_type_6("origin_y"));
       data.setHeightOffset(ser.read_type_6("height_offset"));
       data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
       data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
@@ -273,20 +244,17 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
       ser.read_type_e("keys", data.getKeys());
       ser.read_type_e("heights", data.getHeights());
-      ser.read_type_e("variances", data.getVariances());
-      ser.read_type_e("centroids", data.getCentroids());
-      ser.read_type_e("normals", data.getNormals());
    }
 
-   public static void staticCopy(perception_msgs.msg.dds.HeightMapMessage src, perception_msgs.msg.dds.HeightMapMessage dest)
+   public static void staticCopy(perception_msgs.msg.dds.ChunkMessage src, perception_msgs.msg.dds.ChunkMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public perception_msgs.msg.dds.HeightMapMessage createData()
+   public perception_msgs.msg.dds.ChunkMessage createData()
    {
-      return new perception_msgs.msg.dds.HeightMapMessage();
+      return new perception_msgs.msg.dds.ChunkMessage();
    }
    @Override
    public int getTypeSize()
@@ -300,24 +268,24 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       return name;
    }
    
-   public void serialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(perception_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(perception_msgs.msg.dds.ChunkMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(perception_msgs.msg.dds.HeightMapMessage src, perception_msgs.msg.dds.HeightMapMessage dest)
+   public void copy(perception_msgs.msg.dds.ChunkMessage src, perception_msgs.msg.dds.ChunkMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public HeightMapMessagePubSubType newInstance()
+   public ChunkMessagePubSubType newInstance()
    {
-      return new HeightMapMessagePubSubType();
+      return new ChunkMessagePubSubType();
    }
 }

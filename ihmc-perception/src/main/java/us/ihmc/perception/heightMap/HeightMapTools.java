@@ -46,14 +46,19 @@ public class HeightMapTools
       return indexToCoordinate(yIndex, yCenter, resolution, centerIndex);
    }
 
+   public static int coordinateToIndex(double coordinate, double origin, double resolution)
+   {
+      return (int) Math.floor((coordinate - origin) / resolution);
+   }
+
    public static int coordinateToIndex(double coordinate, double gridCenter, double resolution, int centerIndex)
    {
       return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;
    }
 
-   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
+   public static double indexToCoordinate(int index, double mapCenter, double resolution, int centerIndex)
    {
-      return (index - centerIndex) * resolution + gridCenter;
+      return (index - centerIndex) * resolution + mapCenter;
    }
 
    public static int keyToXIndex(int key, int centerIndex)
@@ -201,7 +206,7 @@ public class HeightMapTools
          int height = major | minor;
 
          // Calculate cell height
-         float cellHeight = (float) (((float) height / heightScaleFactor) - heightOffset);
+         float cellHeight = (((float) height / heightScaleFactor) - heightOffset);
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
