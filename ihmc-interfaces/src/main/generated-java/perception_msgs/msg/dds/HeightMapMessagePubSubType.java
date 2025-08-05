@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "468e523da6712c95a491f4a8b570a496f3a3f11cadd83ac7a2203807b738c94f";
+   		return "b11850049153c2993a3e5c0f6daef28e208a34f411847191943de4cb19aae510";
    }
    
    @Override
@@ -71,6 +71,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -128,6 +130,9 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -175,6 +180,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getCellSizeInMeters());
 
+      cdr.write_type_2(data.getCellsPerAxis());
+
       if(data.getKeys().size() <= 255000)
       cdr.write_type_e(data.getKeys());else
           throw new RuntimeException("keys field exceeds the maximum length: %d > %d".formatted(data.getKeys().size(), 255000));
@@ -219,6 +226,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setCellSizeInMeters(cdr.read_type_6());
       	
+      data.setCellsPerAxis(cdr.read_type_2());
+      	
       cdr.read_type_e(data.getKeys());	
       cdr.read_type_e(data.getHeights());	
       cdr.read_type_e(data.getVariances());	
@@ -240,6 +249,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
       ser.write_type_6("width_in_meters", data.getWidthInMeters());
       ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
+      ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
       ser.write_type_e("keys", data.getKeys());
       ser.write_type_e("heights", data.getHeights());
       ser.write_type_e("variances", data.getVariances());
@@ -260,6 +270,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
       data.setWidthInMeters(ser.read_type_6("width_in_meters"));
       data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
+      data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
       ser.read_type_e("keys", data.getKeys());
       ser.read_type_e("heights", data.getHeights());
       ser.read_type_e("variances", data.getVariances());

@@ -52,13 +52,17 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             */
    public double cell_size_in_meters_;
    /**
+            * Cells per axis
+            */
+   public int cells_per_axis_;
+   /**
             * List of height map keys. See HeightMapTools for converting keys to coordinates
             */
    public us.ihmc.idl.IDLSequence.Integer  keys_;
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  heights_;
+   public us.ihmc.idl.IDLSequence.Integer  heights_;
    /**
             * List of variances, which correspond to the list of keys. May be empty.
             */
@@ -77,7 +81,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    {
       keys_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
-      heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
       variances_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
@@ -113,6 +117,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       width_in_meters_ = other.width_in_meters_;
 
       cell_size_in_meters_ = other.cell_size_in_meters_;
+
+      cells_per_axis_ = other.cells_per_axis_;
 
       keys_.set(other.keys_);
       heights_.set(other.heights_);
@@ -271,6 +277,21 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       return cell_size_in_meters_;
    }
 
+   /**
+            * Cells per axis
+            */
+   public void setCellsPerAxis(int cells_per_axis)
+   {
+      cells_per_axis_ = cells_per_axis;
+   }
+   /**
+            * Cells per axis
+            */
+   public int getCellsPerAxis()
+   {
+      return cells_per_axis_;
+   }
+
 
    /**
             * List of height map keys. See HeightMapTools for converting keys to coordinates
@@ -284,7 +305,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  getHeights()
+   public us.ihmc.idl.IDLSequence.Integer  getHeights()
    {
       return heights_;
    }
@@ -355,9 +376,11 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.keys_, other.keys_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.heights_, other.heights_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.variances_, other.variances_, epsilon)) return false;
 
@@ -408,6 +431,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.cell_size_in_meters_ != otherMyClass.cell_size_in_meters_) return false;
 
+      if(this.cells_per_axis_ != otherMyClass.cells_per_axis_) return false;
+
       if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
       if (!this.variances_.equals(otherMyClass.variances_)) return false;
@@ -443,6 +468,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append(this.width_in_meters_);      builder.append(", ");
       builder.append("cell_size_in_meters=");
       builder.append(this.cell_size_in_meters_);      builder.append(", ");
+      builder.append("cells_per_axis=");
+      builder.append(this.cells_per_axis_);      builder.append(", ");
       builder.append("keys=");
       builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");

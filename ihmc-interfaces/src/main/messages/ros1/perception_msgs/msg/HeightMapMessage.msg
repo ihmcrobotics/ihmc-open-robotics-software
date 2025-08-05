@@ -32,11 +32,14 @@ float64 width_in_meters
 # Cell size in meters of an individual cell
 float64 cell_size_in_meters
 
+# Cells per axis
+int32 cells_per_axis
+
 # List of height map keys. See HeightMapTools for converting keys to coordinates
 int32[] keys
 
 # List of heights, which correspond to the list of keys
-float32[] heights
+int32[] heights
 
 # List of variances, which correspond to the list of keys. May be empty.
 float32[] variances

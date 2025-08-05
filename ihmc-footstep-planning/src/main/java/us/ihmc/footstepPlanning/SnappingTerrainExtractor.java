@@ -132,7 +132,7 @@ public class SnappingTerrainExtractor
     */
    private void computeDerivedParameters()
    {
-      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSizeInMeters());
+      int terrainCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
@@ -299,7 +299,7 @@ public class SnappingTerrainExtractor
    {
       return new float[] {(float) gridCenter.getX(),
                           (float) gridCenter.getY(),
-                          (float) heightMapParameters.getCellSizeInMeters(),
+                          (float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) heightMapParameters.getHeightScaleFactor(),
                           (float) heightMapParameters.getHeightOffset(),

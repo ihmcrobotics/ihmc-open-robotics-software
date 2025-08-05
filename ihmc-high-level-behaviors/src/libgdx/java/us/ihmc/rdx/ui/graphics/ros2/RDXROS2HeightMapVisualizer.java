@@ -10,7 +10,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
-import perception_msgs.msg.dds.GlobalMapTileMessage;
+import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
@@ -23,11 +23,10 @@ import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXChunkedMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.perception.globalHeightMap.GlobalLattice;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -44,10 +43,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
-   private final RDXGlobalHeightMapGraphic globalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
+   private final RDXChunkedMapRenderer chunkedMapRenderer;
 
-   private final ImBoolean enableGlobalHeightMapVisualizer = new ImBoolean(false);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
+   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(true);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
 
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
@@ -56,13 +55,16 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final Point3D heightMapCenter = new Point3D();
 
    private final Stopwatch stopwatch = new Stopwatch();
-   private int cellsPerAxis;
+   private int cellsPerAxisOfHeightMap;
+   private int cellsPerAxisOfChunks;
    private float latestHeightMapOffset;
    private float latestCellSizeInMeters;
 
    public RDXROS2HeightMapVisualizer(String title)
    {
       super(title);
+
+      chunkedMapRenderer = new RDXChunkedMapRenderer();
 
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
@@ -80,44 +82,43 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
-   public void setupForGlobalHeightMapTileMessage(ROS2PublishSubscribeAPI ros2)
+   public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
-      ros2.subscribeViaCallback(PerceptionAPI.GLOBAL_HEIGHT_MAP_TILE, this::acceptGlobalMapTileMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.CHUNK, this::acceptChunkMessage);
    }
 
-   public void acceptGlobalMapTileMessage(GlobalMapTileMessage globalMapTileMessage)
+   public void acceptChunkMessage(ChunkMessage chunkMessage)
    {
-      if (enableGlobalHeightMapVisualizer.get())
+      if (enableChunkedMapRenderer.get())
       {
-         int hashCode = GlobalLattice.hashCodeOfTileIndices(globalMapTileMessage.getCenterX(), globalMapTileMessage.getCenterY());
-         globalHeightMapGraphic.generateMeshesAsync(globalMapTileMessage.getHeightMap(), hashCode);
+         cellsPerAxisOfChunks = chunkMessage.getCellsPerAxis();
+         chunkedMapRenderer.addHeightMap(chunkMessage, chunkMessage.getHashCodeOfChunk());
       }
    }
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      // Even if the height map is publishing, we aren't going to update anything with that data unless it's active
       if (!isActive())
          return;
 
       executorService.clearQueueAndExecute(() ->
                                            {
                                               long sequenceId = heightMapMessage.getSequenceId();
+                                              //TODO this shouldn't have to be the case, it cause's problems if you want to visualize one message
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(4.0, 0.02);
-                                                 cellsPerAxis = 2 * centerIndex + 1;
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+                                                 cellsPerAxisOfHeightMap = 2 * centerIndex + 1;
                                               }
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestHeightMapOffset = (float) heightMapMessage.getHeightOffset();
                                               latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage,
-                                                                                                   latestHeightMapOffset,
-                                                                                                   (float) heightMapMessage.getHeightScaleFactor());
+                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 
                                               if (latestHeightMapData == null)
                                               {
@@ -134,7 +135,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                     (float) heightMapMessage.getHeightScaleFactor(),
                                                                                     (float) heightMapMessage.getHeightOffset());
 
-                                              // This prevents the rendering from happening to early, it was throwing exceptions
+                                              // This prevents the rendering from happening too early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)
                                                  updateHeightMapImage();
                                            });
@@ -170,7 +171,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
    {
-      // Even if the height map is publishing, we aren't going to update anything with that data unless its active
+      // Even if the height map is publishing, we aren't going to update anything with that data unless it's active
       if (!isActive())
          return;
 
@@ -199,7 +200,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       if (ImGui.collapsingHeader(labels.get("Visualization Options")))
       {
-         ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
+         ImGui.checkbox(labels.get("Enable Height Map"), enableHeightMapRenderer);
+         ImGui.checkbox(labels.get("Enable Chunked Map"), enableChunkedMapRenderer);
       }
       ImGui.unindent();
    }
@@ -213,14 +215,16 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (cellsPerAxis > 0 && !heightMapRenderer.isHasBeenCreated())
+      if (cellsPerAxisOfHeightMap > 0 && !heightMapRenderer.isHasBeenCreated())
       {
-         heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
+         heightMapRenderer.create(cellsPerAxisOfHeightMap * cellsPerAxisOfHeightMap);
          stopwatch.start();
       }
-      if (enableGlobalHeightMapVisualizer.get())
+
+      if (cellsPerAxisOfChunks > 0)
       {
-         globalHeightMapGraphic.update();
+         chunkedMapRenderer.removeOldRenderers();
+         chunkedMapRenderer.create();
       }
 
       if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
@@ -233,10 +237,15 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                      latestHeightMapOffset,
                                      heightMapCenter.getX32(),
                                      heightMapCenter.getY32(),
-                                     cellsPerAxis / 2,
+                                     cellsPerAxisOfHeightMap / 2,
                                      latestCellSizeInMeters,
                                      pixelScalingFactor);
          }
+      }
+
+      if (enableChunkedMapRenderer.get())
+      {
+         chunkedMapRenderer.update();
       }
    }
 
@@ -249,9 +258,9 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
       if (sceneLevelCheck(sceneLevels))
       {
-         if (enableGlobalHeightMapVisualizer.get())
+         if (enableChunkedMapRenderer.get())
          {
-            globalHeightMapGraphic.getRenderables(renderables, pool);
+            chunkedMapRenderer.getRenderables(renderables, pool);
          }
 
          if (enableHeightMapRenderer.get() && heightMapRenderer.isHasBeenCreated())
@@ -266,7 +275,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       super.destroy();
       executorService.destroy();
-      globalHeightMapGraphic.destroy();
+      chunkedMapRenderer.destroy();
       heightMapRenderer.dispose();
    }
 

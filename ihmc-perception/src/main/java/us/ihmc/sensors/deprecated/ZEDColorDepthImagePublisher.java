@@ -34,7 +34,7 @@ public class ZEDColorDepthImagePublisher
    private final ROS2Publisher<ImageMessage> ros2CutOutDepthImagePublisher;
 
    private final SideDependentList<CUDAJPEGProcessor> imageEncoders = new SideDependentList<>();
-   private final CUDACompressionTools dataCompressor = new CUDACompressionTools();
+   private final CUDACompressionTools dataCompressor;
 
    private long lastDepthSequenceNumber = -1L;
    private long lastCutOutDepthSequenceNumber = -1L;
@@ -61,6 +61,15 @@ public class ZEDColorDepthImagePublisher
                                       ROS2Topic<ImageMessage> depthTopic,
                                       ROS2Topic<ImageMessage> cutoutDepthTopic)
    {
+      try
+      {
+         dataCompressor = new CUDACompressionTools();
+      }
+      catch (Exception e)
+      {
+         throw new RuntimeException(e);
+      }
+
       ros2Node = new ROS2NodeBuilder().build("zed_color_depth_publisher");
       ros2ColorImagePublishers = new SideDependentList<>(ros2Node.createPublisher(colorTopics.get(RobotSide.LEFT)),
                                                          ros2Node.createPublisher(colorTopics.get(RobotSide.RIGHT)));
