@@ -13,6 +13,7 @@ import us.ihmc.footstepPlanning.steppableRegions.data.SteppableBorderRing;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableCell;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -46,6 +47,7 @@ public class SteppableRegionsCalculatorTools
                                                                                                    snappedNormalZ,
                                                                                                    connections);
 
+      PerceptionDebugTools.printMat("w", steppability, 1);
       if (steppability.rows() != steppability.cols())
          throw new RuntimeException("The input steppability should be square");
 
