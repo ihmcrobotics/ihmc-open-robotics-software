@@ -6,6 +6,7 @@ import java.util.Set;
 
 public class SkeletonHierarchy {
    Map<String, JointInfo> joints = new LinkedHashMap<>();
+   String rootName;
 
    public void addJoint(JointInfo joint) {
       joints.put(joint.name(), joint);
@@ -17,6 +18,10 @@ public class SkeletonHierarchy {
 
    public Set<String> getJointNames(){
       return joints.keySet();
+   }
+
+   public void setRootName(String name) {
+      rootName = name;
    }
 }
 

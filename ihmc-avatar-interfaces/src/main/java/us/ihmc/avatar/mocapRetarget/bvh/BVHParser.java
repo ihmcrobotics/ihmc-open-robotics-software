@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.rmi.server.Skeleton;
 
 public class BVHParser
 {
@@ -15,22 +16,28 @@ public class BVHParser
     */
    public SkeletonHierarchy parseHierarchy(File bvhFile) throws IOException
    {
-      SkeletonHierarchy hierarchy = new SkeletonHierarchy();
+      SkeletonHierarchy skeleton = new SkeletonHierarchy();
       try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile))) {
          String line;
          while((line = reader.readLine()) != null) {
+            if (line.equals("HIERARCHY")) {continue;}
 
+            else if (line.equals("MOTION")) {break;}
          }
       }
-      // 1) open a BufferedReader on bvhFile
-      // 2) read lines until you see "HIERARCHY"
+
       // 3) recursively parse each JOINT / End Site block:
       //      - read OFFSET x y z
       //      - read CHANNELS count {channel names}
       //      - for each child JOINT, call yourself
       // 4) stop when you hit "MOTION"
-      return hierarchy;
+      return skeleton;
    }
+
+      private void parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, String parentName) {
+
+      }
+
 
    /**
     * Parses the MOTION section after hierarchy, returning a list of frames:
