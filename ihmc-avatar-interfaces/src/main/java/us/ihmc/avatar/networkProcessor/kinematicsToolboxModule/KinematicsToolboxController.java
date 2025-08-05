@@ -488,6 +488,8 @@ public class KinematicsToolboxController extends ToolboxController
       spatialGains.setOrientationProportionalGains(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       spatialGains.setOrientationMaxFeedbackAndFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
+      spatialGains.getPositionGains().setMaxProportionalError(0.05);
+
       jointGains.setKp(GLOBAL_PROPORTIONAL_GAIN); // Gains used for everything. It is as high as possible to reduce the convergence time.
       jointGains.setMaximumFeedbackAndMaximumFeedbackRate(1500.0, Double.POSITIVE_INFINITY);
 
@@ -1295,7 +1297,7 @@ public class KinematicsToolboxController extends ToolboxController
          return;
       }
 
-      if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
+//      if (!newSupportPolygon.epsilonEquals(supportPolygon, 5.0e-3))
       { // Update the polygon only if there is an actual update.
          supportPolygon.set(newSupportPolygon);
          convexPolygonScaler.scaleConvexPolygon(supportPolygon, centerOfMassSafeMargin.getValue(), shrunkSupportPolygon);
