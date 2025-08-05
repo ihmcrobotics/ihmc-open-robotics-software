@@ -1,17 +1,13 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-// TODO: Fix or remove
-@Disabled
 public class SteppableRegionsCalculationModuleTest
 {
    private static final double gridResolution = 0.05;

@@ -115,10 +115,12 @@ public class SteppableRegionDataHolder
          sumY += memberPoint.getY();
       }
 
-      // we're setting the centroid to be the average of all the points, which is how centroids works.
-      regionCentroid.set(sumX, sumY);
-      regionCentroid.scale(1.0 / memberPoints.size());
+      // Compute average (centroid)
+      int numPoints = memberPoints.size();
+      double avgX = sumX / numPoints;
+      double avgY = sumY / numPoints;
 
+      regionCentroid.set(avgX, avgY);
       isPlaneUpToDate = true;
    }
 
