@@ -251,8 +251,6 @@ public class SnappingTerrainExtractor
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYMat.download(cpuSnapNormalYMap);
-
-         PerceptionDebugTools.printMat("s", cpuSnapNormalXMap, 10);
          terrainMapData.setSnapNormalYMat(cpuSnapNormalYMap);
          cpuSnapNormalYMap.close();
 

@@ -103,7 +103,6 @@ public class SteppableRegionsCalculatorTools
       {
          for (int y = 0; y < cellsPerSide; y++)
          {
-//            PerceptionDebugTools.printMat("s", steppability, 1);
             // this cell is steppable. Also remember the image x-y is switched
             if (steppability.ptr(x, y).get() == SnapResult.VALID.ordinal())
             {

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
@@ -24,7 +25,7 @@ public class SteppableRegionsCalculationModuleTest
    public void testSimpleFlatGround()
    {
       int cellsPerAxis = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolution);
-      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32768));
       HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenter.getX(), gridCenter.getY());
       HeightMapTools.convertToHeightMapData(heightMapMat,
                                             heightMapData,
