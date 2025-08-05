@@ -27,7 +27,8 @@ public class SteppableRegionsCalculationModuleTest
       heightMapParameters.setCellSize(gridResolution);
       heightMapParameters.setTerrainWidthInMeters(gridSizeXY);
 
-      int cellsPerAxis = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolution);
+      int cellsPerAxis = 2 * centerIndex + 1;
       Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
       PerceptionDebugTools.printMat("ii", heightMapMat, 1);
       HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenter.getX(), gridCenter.getY());
@@ -42,6 +43,11 @@ public class SteppableRegionsCalculationModuleTest
       double extremumValue = gridSizeXY / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
+
+      Mat newestMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      HeightMapTools.convertHeightMapDataToMat(newestMat, heightMapData, heightMapParameters);
+
+      PerceptionDebugTools.printMat("s", newestMat, 1);
 
       SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
       snappingTerrainExtractor.update(heightMapData);

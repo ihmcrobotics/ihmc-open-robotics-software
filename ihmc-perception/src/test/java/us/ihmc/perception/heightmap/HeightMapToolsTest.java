@@ -2,6 +2,7 @@ package us.ihmc.perception.heightmap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -12,10 +13,51 @@ import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Random;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class HeightMapToolsTest
 {
    private final int iterations = 1000;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
+
+   @Test
+   public void testRoundTripConvertMatToHeightMapDataAndBack()
+   {
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
+
+
+      double cellSize = heightMapParameters.getCellSize();
+      double terrainWidth = heightMapParameters.getTerrainWidthInMeters();
+      double heightScaleFactor = heightMapParameters.getHeightScaleFactor();
+      double heightOffset = heightMapParameters.getHeightOffset();
+      double centerX = 0.0;
+      double centerY = 0.0;
+
+      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      Point3D centerLocation = new Point3D(centerX, centerY, 0.0);
+
+      Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
+      HeightMapData heightMapData = new HeightMapData(cellSize, terrainWidth, centerX, centerY);
+      HeightMapTools.convertToHeightMapData(originalMat,
+                                            heightMapData,
+                                            centerLocation,
+                                            (float) terrainWidth,
+                                            (float) cellSize,
+                                            (float) heightScaleFactor,
+                                            (float) heightOffset);
+
+      Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      HeightMapTools.convertHeightMapDataToMat(newData,  heightMapData, heightMapParameters);
+
+      for (int x = 0; x < cellsPerAxis; x++)
+      {
+         for (int y = 0; y < cellsPerAxis; y++)
+         {
+            assertEquals(originalMat.ptr(x, y).getShort(), newData.ptr(x, y).getShort());
+         }
+      }
+   }
 
    @Test
    public void testSpeedConvertHeightMapDataToMat()
@@ -96,7 +138,7 @@ public class HeightMapToolsTest
          int centerIndex = 1 + random.nextInt(50);
          double gridSizeXY = 2.0 * centerIndex * resolution;
 
-         Assertions.assertEquals(centerIndex, HeightMapTools.computeCenterIndex(gridSizeXY, resolution), "Invalid cell per axis calculation");
+         assertEquals(centerIndex, HeightMapTools.computeCenterIndex(gridSizeXY, resolution), "Invalid cell per axis calculation");
 
          double xCoordinate = gridCenterX + EuclidCoreRandomTools.nextDouble(random, 0.5 * gridSizeXY);
          double yCoordinate = gridCenterY + EuclidCoreRandomTools.nextDouble(random, 0.5 * gridSizeXY);
