@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.steppableRegions.data;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsCalculator;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsCalculatorTools;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +52,7 @@ public class SteppableRegionDataHolder
 
    public void addCell(SteppableCell cell, double gridCenterX, double gridCenterY, double resolutionXY, int centerIndex)
    {
-      addCell(cell, SteppableRegionsCalculator.convertCellToPoint(cell, gridCenterX, gridCenterY, resolutionXY, centerIndex));
+      addCell(cell, SteppableRegionsCalculatorTools.convertCellToPoint(cell, gridCenterX, gridCenterY, resolutionXY, centerIndex));
    }
 
    public void addCell(SteppableCell cell, Point2DReadOnly point)

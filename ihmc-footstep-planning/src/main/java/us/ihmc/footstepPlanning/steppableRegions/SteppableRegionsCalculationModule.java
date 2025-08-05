@@ -35,7 +35,7 @@ public class SteppableRegionsCalculationModule
    private final SteppableRegionCalculatorParameters parameters;
 
    private final SteppableRegionsListCollection regionCollection;
-   private final List<SteppableRegionsEnvironmentModel> regionEnvironments = new ArrayList<>();
+   private SteppableRegionsEnvironmentModel regionEnvironments;
 
    private final int cellsPerSide;
 
@@ -87,33 +87,33 @@ public class SteppableRegionsCalculationModule
       regionCollection.clear();
       regionCollection.resizeCollection(parameters.getYawDiscretizations());
 
-      regionEnvironments.clear();
+      SteppableRegionsEnvironmentModel environment;
+      environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(terrainMapData.getSteppabilityMat(),
+                                                                                               terrainMapData.getSnapHeightMat(),
+                                                                                               terrainMapData.getSnapNormalXMat(),
+                                                                                               terrainMapData.getSnapNormalYMat(),
+                                                                                               terrainMapData.getSnapNormalZMat(),
+                                                                                               terrainMapData.getSteppabilityConnectionsMat(),
+                                                                                               parameters,
+                                                                                               terrainMapData.getTerrainMapCenter().getX(),
+                                                                                               terrainMapData.getTerrainMapCenter().getY(),
+                                                                                               terrainMapData.getGridResolutionXY(),
+                                                                                               terrainMapData.getCenterIndex());
+      this.regionEnvironments = environment;
+
       for (int yawValue = 0; yawValue < parameters.getYawDiscretizations(); yawValue++)
       {
          double yawAngle = 0.0;
          if (parameters.getYawDiscretizations() > 1)
             yawAngle = ((double) yawValue) / (parameters.getYawDiscretizations() - 1) * Math.PI;
 
-         SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculator.createEnvironmentByMergingCellsIntoRegions(terrainMapData.getSteppabilityMat(),
-                                                                                                                              terrainMapData.getSnapHeightMat(),
-                                                                                                                              terrainMapData.getSnapNormalXMat(),
-                                                                                                                              terrainMapData.getSnapNormalYMat(),
-                                                                                                                              terrainMapData.getSnapNormalZMat(),
-                                                                                                                              terrainMapData.getSteppabilityConnectionsMat(),
-                                                                                                                              parameters,
-                                                                                                                              terrainMapData.getTerrainMapCenter().getX(),
-                                                                                                                              terrainMapData.getTerrainMapCenter().getY(),
-                                                                                                                              terrainMapData.getGridResolutionXY(),
-                                                                                                                              terrainMapData.getCenterIndex());
+         SteppableRegionsList regions = SteppableRegionsCalculatorTools.createSteppableRegions(concaveHullParameters,
+                                                                                               polygonizerParameters,
+                                                                                               parameters,
+                                                                                               environment,
+                                                                                               terrainMapData,
+                                                                                               yawAngle);
 
-         SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
-                                                                                          polygonizerParameters,
-                                                                                          parameters,
-                                                                                          environment,
-                                                                                          terrainMapData,
-                                                                                          yawAngle);
-
-         this.regionEnvironments.add(environment);
          this.regionCollection.setSteppableRegions(yawValue, regions);
       }
 
@@ -123,8 +123,8 @@ public class SteppableRegionsCalculationModule
       SteppableRegionDebugImagesMessage debugImagesMessage = new SteppableRegionDebugImagesMessage();
       for (int i = 0; i < parameters.getYawDiscretizations(); i++)
       {
-//         generateSteppableRegionDebugImage(i, debugImagesMessage.getRegionImages().add());
-//         generateSteppabilityDebugImage(debugImagesMessage.getSteppabilityImages().add());
+         //         generateSteppableRegionDebugImage(i, debugImagesMessage.getRegionImages().add());
+         //         generateSteppabilityDebugImage(debugImagesMessage.getSteppabilityImages().add());
       }
 
       SteppableRegionsListCollectionMessage message = SteppableRegionMessageConverter.convertToSteppableRegionsListCollectionMessage(regionCollection);
@@ -187,9 +187,9 @@ public class SteppableRegionsCalculationModule
       messageToPack.setImageWidth(cellsPerSide);
    }
 
-   private void generateSteppableRegionDebugImage(int yawIndex, SteppableRegionDebugImageMessage messageToPack)
+   private void generateSteppableRegionDebugImage(SteppableRegionDebugImageMessage messageToPack)
    {
-      SteppableRegionsEnvironmentModel environmentModel = regionEnvironments.get(yawIndex);
+      SteppableRegionsEnvironmentModel environmentModel = regionEnvironments;
       int totalSize = 3 * cellsPerSide * cellsPerSide;
       ByteBuffer uncompressedByteBuffer = NativeMemoryTools.allocate(totalSize);
       uncompressedByteBuffer.order(ByteOrder.nativeOrder());
@@ -239,7 +239,6 @@ public class SteppableRegionsCalculationModule
    {
       return regionCollection;
    }
-
 
    public static void main(String[] args)
    {

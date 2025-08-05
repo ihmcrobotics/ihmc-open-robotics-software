@@ -18,14 +18,11 @@ public class SteppableRegionsEnvironmentModel
    private int activeColumnIndex = 0;
    private final DMatrixRMaj cellVisitedMatrix;
 
-   public SteppableRegionsEnvironmentModel(int cellsPerSide)
+   public SteppableRegionsEnvironmentModel(int cellsPerAxis)
    {
-      this.cellsPerSide = cellsPerSide;
-      cellVisitedMatrix = new DMatrixRMaj(cellsPerSide, cellsPerSide);
-
-      steppableCellsGrid = new SteppableCell[cellsPerSide][];
-      for (int i = 0; i < cellsPerSide; i++)
-         steppableCellsGrid[i] = new SteppableCell[cellsPerSide];
+      this.cellsPerSide = cellsPerAxis;
+      cellVisitedMatrix = new DMatrixRMaj(cellsPerAxis, cellsPerAxis);
+      steppableCellsGrid = new SteppableCell[cellsPerAxis][cellsPerAxis];
    }
 
    public int getCellsPerSide()

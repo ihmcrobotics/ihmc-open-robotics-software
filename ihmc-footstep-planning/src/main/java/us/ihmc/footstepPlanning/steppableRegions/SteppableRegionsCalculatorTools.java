@@ -13,7 +13,6 @@ import us.ihmc.footstepPlanning.steppableRegions.data.SteppableBorderRing;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableCell;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -24,7 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-public class SteppableRegionsCalculator
+public class SteppableRegionsCalculatorTools
 {
    private static final int maxRecursionDepth = 500;
 
@@ -98,13 +97,13 @@ public class SteppableRegionsCalculator
    {
 
       int cellsPerSide = steppability.rows();
-      SteppableRegionsEnvironmentModel steppableRegionsToConvert = new SteppableRegionsEnvironmentModel(cellsPerSide);
+      SteppableRegionsEnvironmentModel steppableRegionsEnvironmentModel = new SteppableRegionsEnvironmentModel(cellsPerSide);
 
       for (int x = 0; x < cellsPerSide; x++)
       {
          for (int y = 0; y < cellsPerSide; y++)
          {
-            PerceptionDebugTools.printMat("s", steppability, 1);
+//            PerceptionDebugTools.printMat("s", steppability, 1);
             // this cell is steppable. Also remember the image x-y is switched
             if (steppability.ptr(x, y).get() == SnapResult.VALID.ordinal())
             {
@@ -121,7 +120,7 @@ public class SteppableRegionsCalculator
                                               normalValueAsFloat(snappedNormalY, x, y),
                                               normalValueAsFloat(snappedNormalZ, x, y));
                SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
-               steppableRegionsToConvert.addUnexpandedSteppableCell(cell);
+               steppableRegionsEnvironmentModel.addUnexpandedSteppableCell(cell);
             }
          }
       }
@@ -130,20 +129,20 @@ public class SteppableRegionsCalculator
       {
          for (int y = 0; y < cellsPerSide; y++)
          {
-            SteppableCell cell = steppableRegionsToConvert.getCellAt(x, y);
+            SteppableCell cell = steppableRegionsEnvironmentModel.getCellAt(x, y);
             if (cell != null)
-               collectConnectedCellNeighbors(cell, steppableRegionsToConvert, connections);
+               collectCellNeighborsInEnvironment(cell, steppableRegionsEnvironmentModel, connections);
          }
       }
 
-      return steppableRegionsToConvert;
+      return steppableRegionsEnvironmentModel;
    }
 
    /**
     * This collects a list of all the cells that are in a circle around {@param cell}, as long as they are contained within the "environment". It does not
     * check for connection.
     */
-   private static void collectConnectedCellNeighbors(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, Mat connections)
+   public static void collectCellNeighborsInEnvironment(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, Mat connections)
    {
       List<SteppableCell> cellNeighborsToPack = cell.getValidNeighbors();
       int cellsPerSide = environmentModel.getCellsPerSide();
@@ -156,7 +155,7 @@ public class SteppableRegionsCalculator
       {
          for (int y_offset = -1; y_offset <= 1; y_offset++)
          {
-            // we don't want to increment here, because this doesn't count, since it is the current row
+            // we don't want to increment here, because this doesn't count, since it is the current cell we are trying to find the neighbors of
             if (x_offset == 0 && y_offset == 0)
                continue;
 
@@ -179,6 +178,15 @@ public class SteppableRegionsCalculator
             neighborId++;
          }
       }
+   }
+
+   public static boolean isConnected(int neighborIndexAroundCell, int numberOfCellConnections)
+   {
+      // Set the bit for the value of the neighbor
+      int mask = (1 << neighborIndexAroundCell);
+      // If the bit of mask and the bit of the cell connections are the same, we know its connected
+      int maskedValue = mask & numberOfCellConnections;
+      return maskedValue > 0;
    }
 
    public static SteppableRegionsList createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
@@ -389,7 +397,7 @@ public class SteppableRegionsCalculator
       return regionHeightMap;
    }
 
-   private static float normalValueAsFloat(Mat image, int x, int y)
+   public static float normalValueAsFloat(Mat image, int x, int y)
    {
       return ((float) ((image.ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
    }
@@ -510,12 +518,5 @@ public class SteppableRegionsCalculator
       double y = HeightMapTools.indexToCoordinate(cell.getYIndex(), gridCenterY, gridResolutionXY, centerIndex);
 
       return new Point2D(x, y);
-   }
-
-   private static boolean isConnected(int counter, int connectionValue)
-   {
-      int mask = (1 << counter);
-      int maskedValue = mask & connectionValue;
-      return maskedValue > 0;
    }
 }

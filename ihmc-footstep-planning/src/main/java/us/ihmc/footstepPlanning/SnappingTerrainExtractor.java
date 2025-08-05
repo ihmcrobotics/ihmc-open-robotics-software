@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParame
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -250,6 +251,8 @@ public class SnappingTerrainExtractor
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYMat.download(cpuSnapNormalYMap);
+
+         PerceptionDebugTools.printMat("s", cpuSnapNormalXMap, 10);
          terrainMapData.setSnapNormalYMat(cpuSnapNormalYMap);
          cpuSnapNormalYMap.close();
 
