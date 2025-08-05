@@ -18,7 +18,7 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class SimpleSteppableRegionsCalculatorTest
+public class SimpleStepAdjustmentCalculatorTest
 {
    private static final double minRegionArea = 0.005;
    private static final double maxRegionAngle = Math.toRadians(45.0);

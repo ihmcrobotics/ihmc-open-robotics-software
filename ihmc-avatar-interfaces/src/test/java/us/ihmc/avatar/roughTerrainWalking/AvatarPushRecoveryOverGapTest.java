@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
+import us.ihmc.avatar.stepAdjustment.StepAdjustmentCalculator;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -32,9 +32,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
-import us.ihmc.simulationConstructionSetTools.tools.TerrainObjectDefinitionTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
@@ -85,7 +83,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       ((YoBoolean) simulationTestHelper.findVariable("switchPlanarRegionConstraintsAutomatically")).set(true);
 
-      SteppableRegionsCalculator stepConstraintCalculator = new SteppableRegionsCalculator(4.0, simulationTestHelper.getControllerRegistry());
+      StepAdjustmentCalculator stepConstraintCalculator = new StepAdjustmentCalculator(4.0, simulationTestHelper.getControllerRegistry());
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
 

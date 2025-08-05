@@ -1,38 +1,50 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SteppableRegionsCalculationModuleTest
 {
+   // Based on this resolution, 200 / 5 = 40, so we should have 40 * 40 = 1600 points
    private static final double gridResolution = 0.05;
-   private static final double gridSizeXY = 5.0;
+   private static final double gridSizeXY = 2.0;
+   private static final Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
+   private static final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    @Test
    public void testSimpleFlatGround()
    {
-      HeightMapData heightMap = new HeightMapData(gridResolution, gridSizeXY, 0.0, 0.0);
-      double groundHeight = 0.05;
-
-      for (double x = -gridSizeXY / 2.0; x <= gridSizeXY / 2.0; x += gridResolution)
-      {
-         for (double y = -gridSizeXY / 2.0; y <= gridSizeXY / 2.0; y += gridResolution)
-         {
-            heightMap.setHeightAt(x, y, groundHeight);
-         }
-      }
+      int cellsPerAxis = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolution);
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenter.getX(), gridCenter.getY());
+      HeightMapTools.convertToHeightMapData(heightMapMat,
+                                            heightMapData,
+                                            gridCenter,
+                                            (float) gridSizeXY,
+                                            (float) gridResolution,
+                                            (float) heightMapParameters.getHeightScaleFactor(),
+                                            (float) heightMapParameters.getHeightOffset());
 
       double extremumValue = gridSizeXY / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
 
-      SnappingTerrainManager snappingTerrainManager = new SnappingTerrainManager(new HeightMapParameters());
-      snappingTerrainManager.updateAndPublish(heightMap);
+
+      HeightMapParameters smallerParametersForTest = new HeightMapParameters();
+      smallerParametersForTest.setCellSize(gridResolution);
+      smallerParametersForTest.setTerrainWidthInMeters(gridSizeXY);
+
+      SnappingTerrainManager snappingTerrainManager = new SnappingTerrainManager(smallerParametersForTest);
+      snappingTerrainManager.updateAndPublish(heightMapData);
       TerrainMapData terrainMapData = snappingTerrainManager.getTerrainMapData();
       steppableRegionsCalculationModule.compute(terrainMapData);
       SteppableRegionsListCollection regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
@@ -51,6 +63,7 @@ public class SteppableRegionsCalculationModuleTest
          assertEquals(1, regions.getSteppableRegions(i).getSteppableRegionsAsList().size());
       }
 
+      heightMapMat.close();
       LogTools.info("Tests passed!");
    }
 }

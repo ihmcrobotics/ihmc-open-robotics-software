@@ -112,8 +112,8 @@ public class SnappingTerrainExtractor
                                           cellsPerAxisTerrain,
                                           heightMapParameters.getHeightScaleFactor(),
                                           heightMapParameters.getHeightOffset(),
-                                          heightMapParameters.getGridResolutionXY(),
-                                          heightMapParameters.getGridSizeXY());
+                                          heightMapParameters.getCellSize(),
+                                          heightMapParameters.getTerrainWidthInMeters());
 
       // Initialize matrices and images
       terrainCostMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);

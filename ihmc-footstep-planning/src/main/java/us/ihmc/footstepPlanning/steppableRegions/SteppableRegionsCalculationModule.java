@@ -101,7 +101,10 @@ public class SteppableRegionsCalculationModule
                                                                                                                               terrainMapData.getSnapNormalZMat(),
                                                                                                                               terrainMapData.getSteppabilityConnectionsMat(),
                                                                                                                               parameters,
-                                                                                                                              terrainMapData);
+                                                                                                                              terrainMapData.getTerrainMapCenter().getX(),
+                                                                                                                              terrainMapData.getTerrainMapCenter().getY(),
+                                                                                                                              terrainMapData.getGridResolutionXY(),
+                                                                                                                              terrainMapData.getCenterIndex());
 
          SteppableRegionsList regions = SteppableRegionsCalculator.createSteppableRegions(concaveHullParameters,
                                                                                           polygonizerParameters,

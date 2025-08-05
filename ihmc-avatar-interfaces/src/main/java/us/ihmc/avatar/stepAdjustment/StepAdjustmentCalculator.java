@@ -22,7 +22,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
@@ -35,7 +34,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SteppableRegionsCalculator
+public class StepAdjustmentCalculator
 {
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
 
@@ -113,7 +112,7 @@ public class SteppableRegionsCalculator
       }
    };
 
-   public SteppableRegionsCalculator(double maximumReach, YoRegistry registry)
+   public StepAdjustmentCalculator(double maximumReach, YoRegistry registry)
    {
       maxAngleForSteppable = new YoDouble("maxAngleForSteppable", registry);
       minimumAreaForSteppable = new YoDouble("minimumAreaForSteppable", registry);
