@@ -17,8 +17,10 @@ public class YoJointAccelerationIntegrationParameters
    private final YoBoolean resetIntegrators;
    private final YoDouble desiredPositionNotClamped;
    private final YoDouble desiredPositionClamped;
+   private final YoDouble desriedPositionClampedJointLimits;
    private final YoDouble desiredVelocityNotClamped;
    private final YoDouble desiredVelocityClamped;
+   
    
    public YoJointAccelerationIntegrationParameters(String jointName, YoRegistry registry)
    {
@@ -34,10 +36,23 @@ public class YoJointAccelerationIntegrationParameters
       
       desiredPositionNotClamped = new YoDouble(jointName + "DesiredPositionNotClamped", registry);
       desiredPositionClamped = new YoDouble(jointName + "DesiredPositionClamped", registry);
+      desriedPositionClampedJointLimits = new YoDouble(jointName + "DesiredPositionClampedJointLimits", registry);
       desiredVelocityNotClamped = new YoDouble(jointName + "DesiredVelocityNotClamped", registry);
       desiredVelocityClamped = new YoDouble(jointName + "DesiredVelocityClamped", registry);
    }
    
+   public void setParameters(double alphaPosition, double alphaVelocity, double maxPositionError, double maxVelocityError,
+                             double velocityReferenceAlpha, double velocityReference, double positionReference, boolean resetIntegrators)
+   {
+      this.alphaPosition.set(alphaPosition);
+      this.alphaVelocity.set(alphaVelocity);
+      this.maxPositionError.set(maxPositionError);
+      this.masVelocityError.set(maxVelocityError);
+      this.velocityReferenceAlpha.set(velocityReferenceAlpha);
+      this.velocityReference.set(velocityReference);
+      this.positionReference.set(positionReference);
+      this.resetIntegrators.set(resetIntegrators);
+   }
    public void setMaxPositionError(double maxPositionError)
    {
       this.maxPositionError.set(maxPositionError);
@@ -70,6 +85,29 @@ public class YoJointAccelerationIntegrationParameters
    {
       this.resetIntegrators.set(resetIntegrators);
    }
+   public void setDesiredPositionNotClamped(double desiredPositionNotClamped)
+   {
+      this.desiredPositionNotClamped.set(desiredPositionNotClamped);
+   }
+   public void setDesiredPositionClamped(double desiredPositionClamped)
+   {
+      this.desiredPositionClamped.set(desiredPositionClamped);
+   }
+   public void setDesiredPositionClampedJointLimits(double desiredPositionClampedJointLimits)
+   {
+      this.desriedPositionClampedJointLimits.set(desiredPositionClampedJointLimits);
+   }
+   public void setDesiredVelocityNotClamped(double desiredVelocityNotClamped)
+   {
+      this.desiredVelocityNotClamped.set(desiredVelocityNotClamped);
+   }
+   public void setDesiredVelocityClamped(double desiredVelocityClamped)
+   {
+      this.desiredVelocityClamped.set(desiredVelocityClamped);
+   }
+   /**
+    * Getters for the parameters.
+    */
       
    public YoDouble getAlphaPosition()
    {

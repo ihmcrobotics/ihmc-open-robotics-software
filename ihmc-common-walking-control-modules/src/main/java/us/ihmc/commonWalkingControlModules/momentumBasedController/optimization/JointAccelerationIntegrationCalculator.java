@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegratorResetMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.YoJointAccelerationIntegrationParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -39,6 +40,8 @@ public class JointAccelerationIntegrationCalculator
    private final YoEnum<JointVelocityIntegratorResetMode> defaultVelocityResetMode = new YoEnum<>("defaultVelocityResetMode",
                                                                                                   registry,
                                                                                                   JointVelocityIntegratorResetMode.class);
+   
+   private final YoJointAccelerationIntegrationParameters[] yoJointAccelerationIntegrationParametersList;
 
    private final double controlDT;
 
@@ -55,6 +58,14 @@ public class JointAccelerationIntegrationCalculator
       joints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).toList();
       jointParametersList = joints.stream().map(j -> new JointParameters()).toList();
 
+      yoJointAccelerationIntegrationParametersList = new YoJointAccelerationIntegrationParameters[joints.size()];
+      
+      for (int i = 0; i < joints.size(); i++)
+      {
+         OneDoFJointBasics joint = joints.get(i);
+         yoJointAccelerationIntegrationParametersList[i] = new YoJointAccelerationIntegrationParameters(joint.getName(), registry);
+      }
+      
       parentRegistry.addChild(registry);
    }
 
@@ -95,6 +106,10 @@ public class JointAccelerationIntegrationCalculator
          double positionReference = joint.getQ();
 
          boolean resetIntegrators = lowLevelJointData.pollResetIntegratorsRequest();
+         
+         yoJointAccelerationIntegrationParametersList[jointIndex].setParameters(alphaPosition, alphaVelocity, maxPositionError, maxVelocityError,
+                                                                           velocityReferenceAlpha, velocityReference, positionReference, resetIntegrators);
+         
          if (!lowLevelJointData.hasDesiredVelocity() || resetIntegrators)
          {
             JointVelocityIntegratorResetMode velocityResetMode = parameters.getVelocityResetMode();
@@ -126,16 +141,22 @@ public class JointAccelerationIntegrationCalculator
          // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
          desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
          desiredVelocity += desiredAcceleration * controlDT;
+         //save unclamped desiredVelocity for debugging purposes
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredVelocityNotClamped(desiredVelocity);
+         
          desiredVelocity = MathTools.clamp(desiredVelocity, velocityReference - maxVelocityError, velocityReference + maxVelocityError);
-
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredVelocityClamped(desiredVelocity);
+         
          // Decay desiredPosition towards the positionReference and then predict the desired position.
          desiredPosition = desiredPosition * alphaPosition + (1.0 - alphaPosition) * positionReference;
          desiredPosition += desiredVelocity * controlDT;
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredPositionNotClamped(desiredPosition);
          desiredPosition = MathTools.clamp(desiredPosition, positionReference - maxPositionError, positionReference + maxPositionError);
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredPositionClamped(desiredPosition);
 
          // Limit the desired position to the joint range and recompute the desired velocity.
          desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
-
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredPositionClampedJointLimits(desiredPosition);
          // June 20, 2018: Removed this as is seems to cause instability.
          //         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
