@@ -719,6 +719,22 @@ public class RDXVRWholeBodyKinematicStreaming
          reinitializeToolboxRobotConfiguration();
       }
       ImGui.checkbox(labels.get("Control Arms Only"), controlArmsOnly);
+      if (ImGui.checkbox(labels.get("Control Arms Only"), controlArmsOnly))
+      {
+         KinematicsStreamingToolboxConfigurationMessage newConfiguration = kstParameters.getDefaultConfiguration();
+         newConfiguration.setLockPelvis(controlArmsOnly.get());
+         newConfiguration.setLockChest(controlArmsOnly.get());
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
+                                      newConfiguration);
+      }
+      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
+      {
+         reinitializeToolboxRobotConfiguration();
+      }
+      if (ImGui.button(labels.get("Wakeup Toolbox")))
+      {
+         wakeUpToolbox();
+      }
 
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
       if (connectedTrackers.contains(CHEST.getSegmentName()))
@@ -768,6 +784,7 @@ public class RDXVRWholeBodyKinematicStreaming
          ghostRobotGraphic.setActive(false);
          miniGhost.setActive(false);
          setStreamToController(false, false);
+         controlArmsOnly.set(false);
       }
 
       isKSTEnabled.set(enabled);

@@ -5,6 +5,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang.StringUtils;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -12,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetDataWriter;
+import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
@@ -35,14 +37,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;
 import us.ihmc.yoVariables.euclid.YoPose3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.nio.file.Files;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -56,6 +61,7 @@ import static us.ihmc.zed.global.zed.SL_MEM_CPU;
  * Part of the {@link LeRobotDataset} generation system from IHMC logs.
  * <p>
  * TODO: Pass the output actions through the IK preview for a more complete visualization.
+ * TODO: Add preview ghost for joint angle based policy visualization
  */
 public class RDXLeRobotTestSimulator
 {
@@ -63,7 +69,7 @@ public class RDXLeRobotTestSimulator
    private final Supplier<KinematicsStreamingToolboxModule> ikStreamingSupplier;
    private final RDXSCS2LogSession logSession;
    private final ZEDSVOScrubber zedScrubber;
-   private final SideDependentList<YoPose3D> logHandPoses = new SideDependentList<>();
+   private final SideDependentList<YoDouble[]> logState = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoses = new SideDependentList<>();
    private long lastZEDTimestamp = -1;
    private final ROS2Node ros2Node;
@@ -101,13 +107,43 @@ public class RDXLeRobotTestSimulator
       robotVisualizer.createAndSetupStandalone(baseUI);
       robotVisualizer.setActive(false);
 
-      for (RobotSide side : RobotSide.values)
+      RobotDefinition robotDefinition = logSession.getSession().getRobotDefinitions().get(0);
+      YoRegistry registry = logSession.getSession().getRootRegistry();
+      if (LeRobotDatasetDataWriter.USE_HAND_POSES)
       {
-         logHandPoses.put(side, LeRobotDatasetDataWriter.findYoPose(side, "Current", logSession.getSession().getRootRegistry()));
+         SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(robotDefinition);
+         for (RobotSide side : robotHandNames.sides())
+         {
+               YoPose3D yoPose = LeRobotDatasetDataWriter.findYoPose(robotHandNames.get(side), "Current", registry);
+               YoDouble[] currentState = new YoDouble[] {
+                     yoPose.getYoX(), yoPose.getYoY(), yoPose.getYoZ(),
+                     yoPose.getYoQx(), yoPose.getYoQy(), yoPose.getYoQz(), yoPose.getYoQs()
+               };
+               logState.put(side, currentState);
 
-         RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
-         actionHandPoses.put(side, graphic);
-         baseUI.getPrimaryScene().addRenderableProvider(graphic);
+            RDXReferenceFrameGraphic graphic = new RDXReferenceFrameGraphic(0.3);
+            actionHandPoses.put(side, graphic);
+            baseUI.getPrimaryScene().addRenderableProvider(graphic);
+         }
+      }
+      else
+      {
+         SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
+         for (RobotSide side : robotArmJointNames.sides())
+         {
+            String kstModule = LeRobotDatasetTools.findRegistry(registry, "root.main", "KinematicsStreamingToolboxModule");
+            String capitalizedRobotName = StringUtils.capitalize(robotDefinition.getName());
+            String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
+
+            List<String> armJointNames = robotArmJointNames.get(side);
+            YoDouble[] currentState = new YoDouble[armJointNames.size()];
+            for (int i = 0; i < armJointNames.size(); i++)
+               if (registry.findVariable("%sMotorState_Position_%s_%s".formatted(hwPosition,
+                                                                                 armJointNames.get(i),
+                                                                                 capitalizedRobotName)) instanceof YoDouble variable)
+                  currentState[i] = variable;
+            logState.put(side, currentState);
+         }
       }
    }
 
@@ -122,7 +158,14 @@ public class RDXLeRobotTestSimulator
 
          if (zedSVOTimestamp > 0 && zedSVOTimestamp != lastZEDTimestamp)
          {
-            inferenceManager.publishHandPoses(logHandPoses.get(RobotSide.LEFT), logHandPoses.get(RobotSide.RIGHT));
+            lastZEDTimestamp = zedSVOTimestamp;
+
+            inferenceManager.publishState(messageData ->
+            {
+               for (RobotSide side : logState.sides())
+                  for (int i = 0; i < logState.get(side).length; i++)
+                     messageData.add((float) logState.get(side)[i].getValue());
+            });
 
             int imageHeight = zedScrubber.getImageHeight();
             int imageWidth = zedScrubber.getImageWidth();
@@ -139,10 +182,9 @@ public class RDXLeRobotTestSimulator
             }
          }
 
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            actionHandPoses.get(robotSide).setPoseInWorldFrame(inferenceManager.getActionHandPoses().get(robotSide));
-         }
+         if (LeRobotDatasetDataWriter.USE_HAND_POSES)
+            for (RobotSide robotSide : actionHandPoses.sides())
+               actionHandPoses.get(robotSide).setPoseInWorldFrame(inferenceManager.getActionHandPoses().get(robotSide));
       }
    }
 
@@ -252,7 +294,12 @@ public class RDXLeRobotTestSimulator
 
                inferenceManager = new LeRobotInferenceManager(dataset.getName(),
                                                               syncedRobot.getRobotModel().getSimpleRobotName(),
-                                                              syncedRobot.getFullRobotModel());
+                                                              syncedRobot.getFullRobotModel(),
+                                                              syncedRobot,
+                                                              syncedRobot.getRobotModel().createFullRobotModel(),
+                                                              ros2Node,
+                                                              LeRobotDatasetDataWriter.USE_HAND_POSES,
+                                                              syncedRobot.getRobotModel().getJointMap().getArmJointNamesAsStrings());
             }
 
             if (ImGui.checkbox(labels.get("Run model"), runInference))
@@ -293,7 +340,8 @@ public class RDXLeRobotTestSimulator
 
    public void destroy()
    {
-      inferenceManager.destroy();
+      if (inferenceManager != null)
+         inferenceManager.destroy();
       robotVisualizer.destroy();
       syncedRobot.destroy();
       ros2Node.destroy();

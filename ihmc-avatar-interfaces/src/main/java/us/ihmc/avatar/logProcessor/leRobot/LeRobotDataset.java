@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BooleanSupplier;
 
 /**
  * Represents a LeRobot dataset (a huggingface format) in our system for generating datasets from IHMC logs.
@@ -108,80 +108,89 @@ public class LeRobotDataset
       });
    }
 
-   public void addEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
    {
-      if (!taskNames.contains(taskName))
-      {
-         taskNames.add(taskName);
-         writeTaskJsonlLine(taskName);
-      }
+      createEpisode(taskName).generateFromActiveBuffer(session, this::writeMetaJson, usePerfectTimestamps);
+   }
+
+   private LeRobotDatasetEpisode createEpisode(String taskName)
+   {
+      ensureTaskNameInJsonl(taskName);
 
       int episodeIndex = episodes.size();
-      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                taskName,
-                                                                0,
-                                                                totalFrames,
-                                                                episodesJsonlPath,
-                                                                episodeStatsJsonlPath,
-                                                                dataChunk0Path,
-                                                                zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue, usePerfectTimestamps);
+      LeRobotDatasetEpisode episode
+            = new LeRobotDatasetEpisode(episodeIndex, taskName, 0, totalFrames, episodesJsonlPath, episodeStatsJsonlPath, dataChunk0Path, zedVideoDirs);
       episodes.add(episode);
+      return episode;
    }
 
-   public void calculateEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public BooleanSupplier addEpisodesAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
+   {
+      ensureTaskNameInJsonl(taskName);
+
+      MutableBoolean stillGoing = new MutableBoolean(false);
+      String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "KinematicsStreamingToolboxModule");
+      String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
+      if (session.getRootRegistry().findVariable(kstStreaming + "isDemonstrationEpisode") instanceof YoBoolean isDemonstrationEpisode)
+      {
+         ThreadTools.startAThread(() ->
+         {
+            stillGoing.setValue(true);
+            LeRobotDatasetEpisode episode = null;
+            int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
+            while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
+            {
+               // It's kinda weird to think about but current log position is actually referring to the next log index to read
+               // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
+               int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
+               int loadedIndex = indexToLoad - 1;
+               boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
+               if (desiredDataIsLoaded)
+               {
+                  if (isDemonstrationEpisode.getBooleanValue())
+//                  if ((loadedIndex > 80920 && loadedIndex < 81970) || (loadedIndex > 82220 && loadedIndex < 83220)) // TODO Remove test code
+                  {
+                     if (episode == null)
+                     {
+                        episode = createEpisode(taskName);
+                        episode.initializeEpisode(session, this::writeMetaJson, usePerfectTimestamps);
+                     }
+
+                     episode.processFrame();
+                  }
+                  else if (episode != null)
+                  {
+                     episode.finalizeEpisodeGeneration();
+                     episode = null;
+                  }
+               }
+
+               if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
+               {
+                  session.submitLogPositionRequest(indexToLoad);
+                  desiredLoadedIndex = indexToLoad;
+               }
+               else // we hit the end
+               {
+                  break;
+               }
+            }
+            stillGoing.setValue(false);
+         }, "ScrubToNextEpisode");
+      }
+      return stillGoing::booleanValue;
+   }
+
+   private void ensureTaskNameInJsonl(String taskName)
    {
       if (!taskNames.contains(taskName))
       {
          taskNames.add(taskName);
          writeTaskJsonlLine(taskName);
       }
-
-      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
-      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
-      String timestampVarName = "root.LogDataReader.robotTime";
-
-      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
-      YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
-
-      LogDataReader reader = session.getLogDataReader();
-      long totalFrames = reader.getNumberOfEntries();
-
-      boolean currentlyRecording = false;
-      int episodeStart = -1;
-
-      for (long frame = 0; frame < totalFrames; frame++)
-      {
-         session.runTick();
-
-         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
-
-         if (flagValue && !currentlyRecording)
-         {
-            episodeStart = (int) frame;
-            currentlyRecording = true;
-         }
-         else if (!flagValue && currentlyRecording)
-         {
-            int episodeEnd = (int) frame;
-            int episodeLength = episodeEnd - episodeStart;
-            System.out.println(episodeLength);
-            currentlyRecording = false;
-            episodeStart = -1;
-         }
-      }
-
-      if (currentlyRecording)
-      {
-         int episodeEnd = (int) totalFrames;
-         int episodeLength = episodeEnd - episodeStart;
-         System.out.println(episodeLength);
-      }
    }
 
-   public void removeEpisode(int index) throws IOException
+   public void removeEpisode(int index)
    {
       if (episodes.isEmpty())
       {
@@ -221,10 +230,18 @@ public class LeRobotDataset
          }
       }
 
-      removeLineFromJsonl(episodesJsonlPath, index);
-      removeLineFromJsonl(episodeStatsJsonlPath, index);
-      shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
-      shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
+
+      try
+      {
+         removeLineFromJsonl(episodesJsonlPath, index);
+         removeLineFromJsonl(episodeStatsJsonlPath, index);
+         shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
+         shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
+      }
+      catch (IOException e)
+      {
+         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+      }
 
       episodes.remove(episodes.size() - 1);
       LogTools.info("Removed episode: " + episodeName);
