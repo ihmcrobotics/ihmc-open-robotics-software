@@ -24,21 +24,22 @@ public class YoJointAccelerationIntegrationParameters
    
    public YoJointAccelerationIntegrationParameters(String jointName, YoRegistry registry)
    {
-      alphaPosition = new YoDouble(jointName + "AlphaPosition", registry);
-      alphaVelocity = new YoDouble(jointName + "AlphaVelocity", registry);
-      maxPositionError = new YoDouble(jointName + "MaxPositionError", registry);
-      masVelocityError = new YoDouble(jointName + "MaxVelocityError", registry);
-      velocityReferenceAlpha = new YoDouble(jointName + "VelocityReferenceAlpha", registry);
-      
-      velocityReference = new YoDouble(jointName + "VelocityReference", registry);
-      positionReference = new YoDouble(jointName + "PositionReference", registry);
-      resetIntegrators = new YoBoolean(jointName + "ResetIntegrators", registry);
-      
-      desiredPositionNotClamped = new YoDouble(jointName + "DesiredPositionNotClamped", registry);
-      desiredPositionClamped = new YoDouble(jointName + "DesiredPositionClamped", registry);
-      desriedPositionClampedJointLimits = new YoDouble(jointName + "DesiredPositionClampedJointLimits", registry);
-      desiredVelocityNotClamped = new YoDouble(jointName + "DesiredVelocityNotClamped", registry);
-      desiredVelocityClamped = new YoDouble(jointName + "DesiredVelocityClamped", registry);
+      String prefix = "JointAccelerationIntegrationParameters_";
+      alphaPosition = new YoDouble(prefix + jointName + "_AlphaPosition", registry);
+      alphaVelocity = new YoDouble(prefix + jointName + "_AlphaVelocity", registry);
+      maxPositionError = new YoDouble(prefix + jointName + "_MaxPositionError", registry);
+      masVelocityError = new YoDouble(prefix + jointName + "_MaxVelocityError", registry);
+      velocityReferenceAlpha = new YoDouble(prefix + jointName + "_VelocityReferenceAlpha", registry);
+
+      velocityReference = new YoDouble(prefix + jointName + "_VelocityReference", registry);
+      positionReference = new YoDouble(prefix + jointName + "_PositionReference", registry);
+      resetIntegrators = new YoBoolean(prefix + jointName + "_ResetIntegrators", registry);
+
+      desiredPositionNotClamped = new YoDouble(prefix + jointName + "_DesiredPositionNotClamped", registry);
+      desiredPositionClamped = new YoDouble(prefix + jointName + "_DesiredPositionClamped", registry);
+      desriedPositionClampedJointLimits = new YoDouble(prefix + jointName + "_DesiredPositionClampedJointLimits", registry);
+      desiredVelocityNotClamped = new YoDouble(prefix + jointName + "_DesiredVelocityNotClamped", registry);
+      desiredVelocityClamped = new YoDouble(prefix + jointName + "_DesiredVelocityClamped", registry);
    }
    
    public void setParameters(double alphaPosition, double alphaVelocity, double maxPositionError, double maxVelocityError,
