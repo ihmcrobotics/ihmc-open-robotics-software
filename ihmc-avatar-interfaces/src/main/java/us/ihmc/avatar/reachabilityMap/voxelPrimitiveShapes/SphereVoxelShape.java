@@ -22,7 +22,7 @@ public class SphereVoxelShape
    public enum SphereVoxelType
    {
       graspOrigin, graspAroundSphere
-   };
+   }
 
    private final Quaternion[][] rotations;
    private final Point3D[] pointsOnSphere;
