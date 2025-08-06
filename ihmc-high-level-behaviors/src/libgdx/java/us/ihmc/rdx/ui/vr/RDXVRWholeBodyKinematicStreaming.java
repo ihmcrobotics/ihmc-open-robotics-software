@@ -111,7 +111,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
 
-   private final ImBoolean enableDemonstrationButton = new ImBoolean(false);
+   private final ImBoolean enableDemonstrationButton = new ImBoolean(true);
    private final ImBoolean performingDemonstration = new ImBoolean(false);
    private final ROS2Publisher<ROS2LogMessage> ros2LogMessagePublisher;
    private boolean recordRequest = false;
@@ -142,7 +142,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
 
-   private final ImBoolean controlArmsOnly = new ImBoolean(false);
+   private final ImBoolean controlArmsOnly = new ImBoolean(true);
    private final ImBoolean armScaling = new ImBoolean(false);
    private final ImBoolean comTracking = new ImBoolean(true);
 
@@ -280,7 +280,6 @@ public class RDXVRWholeBodyKinematicStreaming
       });
 
       // Handle right joystick input
-      performingDemonstration.set(false); // add robustness to the hold function
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          controller.setAButtonText(isKSTEnabled.get() ? "Stop preview" : "Start preview");
@@ -344,7 +343,7 @@ public class RDXVRWholeBodyKinematicStreaming
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
-      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(100));
 
       toolboxInputMessage.getInputs().add().set(message);
    }
@@ -364,8 +363,8 @@ public class RDXVRWholeBodyKinematicStreaming
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(100));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(100));
 
       toolboxInputMessage.getInputs().add().set(message);
    }
@@ -393,7 +392,11 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (enableDemonstrationButton.get())
       {
-         performingDemonstration.set(rightBButtonState);
+         if(rightBButtonPressed)
+         {
+            System.out.println(performingDemonstration.get() ? "performing" : " stopped");
+            performingDemonstration.set(!performingDemonstration.get());
+         }
       }
       else if (rightBButtonPressed)
       {
