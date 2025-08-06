@@ -29,7 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
-import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
+import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -72,7 +72,7 @@ public class RDXArmManager
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
-   private final RDXHandConfigurationManager handManager;
+   private final RDXHandManager handManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -120,14 +120,14 @@ public class RDXArmManager
          armConfigurationNames[i] = PresetArmConfiguration.values[i].name();
       }
 
-      handManager = new RDXHandConfigurationManager();
+      handManager = new RDXHandManager();
    }
 
    public void create(RDXBaseUI baseUI)
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
-      handManager.create(baseUI, communicationHelper, syncedRobot);
+      handManager.create(baseUI);
    }
 
    public void update(boolean interactablesEnabled)
@@ -279,6 +279,11 @@ public class RDXArmManager
       }
    }
 
+   public void destroy()
+   {
+      handManager.destroy();
+   }
+
    public void executeArmHome(RobotSide side)
    {
       GoHomeMessage armHomeMessage = new GoHomeMessage();
@@ -364,7 +369,7 @@ public class RDXArmManager
       }
    }
 
-   public RDXHandConfigurationManager getHandManager()
+   public RDXHandManager getHandManager()
    {
       return handManager;
    }

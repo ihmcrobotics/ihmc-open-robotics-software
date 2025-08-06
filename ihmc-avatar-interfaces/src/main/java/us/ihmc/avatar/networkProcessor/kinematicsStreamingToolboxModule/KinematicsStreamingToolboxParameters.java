@@ -79,6 +79,7 @@ public class KinematicsStreamingToolboxParameters
     * Weight used to hold the center of mass in place.
     */
    protected double centerOfMassHoldWeight;
+   protected double centerOfMassTrackingWeight;
    /**
     * Period at which the kinematics solution is published to the controller.
     * The faster, the better, but it also increases the communication load.
@@ -313,6 +314,7 @@ public class KinematicsStreamingToolboxParameters
 
       centerOfMassSafeMargin = 0.05;
       centerOfMassHoldWeight = 0.001;
+      centerOfMassTrackingWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
 
       lockPelvisWeight = 1000.0;
@@ -419,6 +421,12 @@ public class KinematicsStreamingToolboxParameters
    {
       return centerOfMassHoldWeight;
    }
+
+   public double getCenterOfMassTrackingWeight()
+   {
+      return centerOfMassTrackingWeight;
+   }
+
 
    public double getPublishingSolutionPeriod()
    {
