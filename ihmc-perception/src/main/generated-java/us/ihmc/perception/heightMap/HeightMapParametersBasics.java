@@ -18,9 +18,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setEnableVerticalFilter(boolean enableVerticalFilter)
+   default void setEnableChunkedMap(boolean enableChunkedMap)
    {
-      set(HeightMapParameters.enableVerticalFilter, enableVerticalFilter);
+      set(HeightMapParameters.enableChunkedMap, enableChunkedMap);
    }
 
    default void setLogHeightMap(boolean logHeightMap)
@@ -143,21 +143,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
    }
 
-   default void setFastSearchSize(int fastSearchSize)
-   {
-      set(HeightMapParameters.fastSearchSize, fastSearchSize);
-   }
-
-   default void setVerticalSearchSize(int verticalSearchSize)
-   {
-      set(HeightMapParameters.verticalSearchSize, verticalSearchSize);
-   }
-
-   default void setVerticalSearchResolution(double verticalSearchResolution)
-   {
-      set(HeightMapParameters.verticalSearchResolution, verticalSearchResolution);
-   }
-
    /**
     * Resolution of the height map grid
     */
@@ -233,15 +218,5 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
    {
       set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
-   }
-
-   default void setDenoiserEnabled(boolean denoiserEnabled)
-   {
-      set(HeightMapParameters.denoiserEnabled, denoiserEnabled);
-   }
-
-   default void setStatisticsLoggingEnabled(boolean statisticsLoggingEnabled)
-   {
-      set(HeightMapParameters.statisticsLoggingEnabled, statisticsLoggingEnabled);
    }
 }

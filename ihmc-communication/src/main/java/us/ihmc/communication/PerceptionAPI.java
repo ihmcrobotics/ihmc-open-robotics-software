@@ -246,8 +246,8 @@ public final class PerceptionAPI
 
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
 
-   public static final ROS2Topic<GlobalMapMessage> GLOBAL_HEIGHT_MAP = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapMessage.class).withSuffix("global_height_map");
-   public static final ROS2Topic<GlobalMapTileMessage> GLOBAL_HEIGHT_MAP_TILE = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapTileMessage.class).withSuffix("global_height_map_tile");
+   public static final ROS2Topic<ChunkMessage> CHUNK = PERCEPTION_MODULE.withOutput().withTypeName(ChunkMessage.class).withSuffix("chunk");
+   public static final ROS2Topic<ChunkedMapMessage> CHUNKED_MAP = PERCEPTION_MODULE.withOutput().withTypeName(ChunkedMapMessage.class).withSuffix("chunked_map");
 
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);

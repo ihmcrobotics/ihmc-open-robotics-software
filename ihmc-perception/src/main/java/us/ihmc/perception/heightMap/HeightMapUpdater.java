@@ -1,6 +1,8 @@
 package us.ihmc.perception.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import gnu.trove.list.TShortList;
+import gnu.trove.list.array.TShortArrayList;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TIntArrayList;

@@ -18,7 +18,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
-import static us.ihmc.openAlexander.parameters.controller.HighLevelParametersTools.getLeftAndRightJointNames;
+import static us.ihmc.wholeBodyController.parameters.HighLevelParametersTools.getLeftAndRightJointNames;
 
 public class AlexanderDiagnosticParameters extends DiagnosticParameters
 {
