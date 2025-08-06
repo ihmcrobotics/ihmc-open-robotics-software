@@ -1,12 +1,15 @@
 package us.ihmc.avatar.mocapRetarget.bvh;
 
 import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.SkeletonHierarchy;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.server.Skeleton;
+import java.util.List;
+import java.util.Stack;
 
 public class BVHParser
 {
@@ -20,23 +23,52 @@ public class BVHParser
       try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile))) {
          String line;
          while((line = reader.readLine()) != null) {
+            line = line.trim();
             if (line.equals("HIERARCHY")) {continue;}
 
-            else if (line.equals("MOTION")) {break;}
+            else if (line.startsWith("ROOT")) {
+               Stack<String> parents = new Stack<>();
+               String name = line.split("\\s+")[1];
+               //List<String> channels = reader.readLine()
+               parseJoints(reader, skeleton, parents);
+            }
+
+            else if (line.trim().equals("MOTION")) {break;}
          }
       }
-
+      return skeleton;
       // 3) recursively parse each JOINT / End Site block:
       //      - read OFFSET x y z
       //      - read CHANNELS count {channel names}
       //      - for each child JOINT, call yourself
       // 4) stop when you hit "MOTION"
-      return skeleton;
    }
 
-      private void parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, String parentName) {
+      private void parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, Stack<String> parents)
+      {
 
+         //String name = joint;
+         double [] offsetArray = new double[3];
+         List<String> channels;
+         boolean endSite = false;
+
+         //parents.push(joint);
+
+
+         Vector3D offset = new Vector3D();
+
+
+         //while(false){}
+         return;
       }
+
+//      private List<String> getChannels(String line) {
+//         String[] lineSplit = line.split("\\s+");
+//         //while(list)
+//         return new List<String>()
+//         {
+//         }
+//      }
 
 
    /**
