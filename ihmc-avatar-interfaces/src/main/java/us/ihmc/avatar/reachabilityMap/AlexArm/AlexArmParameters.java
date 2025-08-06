@@ -25,11 +25,11 @@ public class AlexArmParameters
 
     public enum AlexArmJointParameters
     {
-        SHOULDER_YAW, SHOULDER_PITCH, SHOULDER_ROLL, ELBOW_YAW, ELBOW_PITCH, WRIST_YAW, WRIST_ROLL, WRIST_PITCH;
+        SHOULDER_PITCH, SHOULDER_ROLL, SHOULDER_YAW, ELBOW_PITCH, WRIST_YAW, WRIST_ROLL, WRIST_PITCH;
 
         public static AlexArmJointParameters getRootJoint()
         {
-            return SHOULDER_YAW;
+            return SHOULDER_PITCH;
         }
 
         public Vector3D getJointAxis()
@@ -37,6 +37,8 @@ public class AlexArmParameters
             String name = this.toString();
             if (name.endsWith("YAW"))
                 return new Vector3D(0.0, 0.0, 1.0);
+            else if (name.endsWith("SHOULDER_PITCH"))
+                return new Vector3D(0.0, 0.128, 0.0908);
             else if (name.endsWith("PITCH"))
                 return new Vector3D(0.0, 1.0, 0.0);
             else if (name.endsWith("ROLL"))
@@ -53,52 +55,48 @@ public class AlexArmParameters
         public Vector3D getJointOffset()
         {
             switch (this)
+            // All offsets measured in mm and scaled down by a 1000
+
+            // Closing Bias Configuration
             {
-                case SHOULDER_YAW:
-                    return new Vector3D(0.0, 0.0, 1.5);
                 case SHOULDER_PITCH:
-                    return new Vector3D(0.0, 0.0, 0.0);
+                    return new Vector3D(0.0, 0.0, 1.5);
                 case SHOULDER_ROLL:
-                    return new Vector3D(0.0, 0.0, 0.0);
-                case ELBOW_YAW:
-                    return new Vector3D(0.0, 0.0, -0.5);
+                    return new Vector3D(0.0, 0.128, 0.0908);
+                case SHOULDER_YAW:
+                    return new Vector3D(0.0, 0.035, 0.0);
                 case ELBOW_PITCH:
-                    return new Vector3D(0.0, 0.0, 0.0);
+                    return new Vector3D(0.015, 0.0, -0.4);
                 case WRIST_YAW:
-                    return new Vector3D(0.0, 0.0, -0.5);
+                    return new Vector3D(-0.015, 0.0, 0.0);
                 case WRIST_ROLL:
-                    return new Vector3D(0.0, 0.0, 0.0);
+                    return new Vector3D(0.0, 0.0, -0.25026);
                 case WRIST_PITCH:
-                    return new Vector3D(0.0, 0.0, 0.0);
+                    return new Vector3D(0.0, 0.0, 0.018);
                 default:
                     throw new RuntimeException("Should not get there.");
             }
+
         }
 
         public double getJointLowerLimit()
         {
             switch (this)
             {
-                case SHOULDER_YAW:
-                    return -1.22173;
-                    //return 0.0;
                 case SHOULDER_PITCH:
                     return -Math.PI;
-                    //return 0.0;
                 case SHOULDER_ROLL:
                     return -0.34907;
-                    //return 0.0;
-                case ELBOW_YAW:
-                    return 0.0;  // Keep 0.0
+                case SHOULDER_YAW:
+                    return -1.22173;
                 case ELBOW_PITCH:
                     return -2.35619;
                 case WRIST_YAW:
                     return -2.61799;
                 case WRIST_ROLL:
-                    return -0.61087;
+                    return -1.91986;
                 case WRIST_PITCH:
-                    return -2.61799;
-
+                    return -Math.PI/2;
                 default:
                     throw new RuntimeException("Should not get there.");
             }
@@ -108,25 +106,20 @@ public class AlexArmParameters
         {
             switch (this)
             {
-                case SHOULDER_YAW:
-                    return 1.91986;
-                    //return 0.0;
                 case SHOULDER_PITCH:
                     return 1.22173;
-                    //return 0.0;
                 case SHOULDER_ROLL:
                     return 2.79253;
-                    //return 0.0;
-                case ELBOW_YAW:
-                    return 1.0; // Keep 0.0
+                case SHOULDER_YAW:
+                    return 1.91986;
                 case ELBOW_PITCH:
                     return 0.17453;
                 case WRIST_YAW:
                     return 2.61799;
                 case WRIST_ROLL:
-                    return 1.83260;
+                    return 0.31416;
                 case WRIST_PITCH:
-                    return 2.61799;
+                    return 0.0;
                 default:
                     throw new RuntimeException("Should not get there.");
             }
@@ -136,16 +129,14 @@ public class AlexArmParameters
         {
             switch (this)
             {
-                case SHOULDER_YAW:
-                    return null;
                 case SHOULDER_PITCH:
-                    return SHOULDER_YAW;
+                    return null;
                 case SHOULDER_ROLL:
                     return SHOULDER_PITCH;
-                case ELBOW_YAW:
+                case SHOULDER_YAW:
                     return SHOULDER_ROLL;
                 case ELBOW_PITCH:
-                    return ELBOW_YAW;
+                    return SHOULDER_YAW;
                 case WRIST_YAW:
                     return ELBOW_PITCH;
                 case WRIST_ROLL:
@@ -161,13 +152,11 @@ public class AlexArmParameters
         {
             switch (this)
             {
-                case SHOULDER_YAW:
-                    return SHOULDER_PITCH;
-                case SHOULDER_PITCH:
+                case SHOULDER_PITCH :
                     return SHOULDER_ROLL;
                 case SHOULDER_ROLL:
-                    return ELBOW_YAW;
-                case ELBOW_YAW:
+                    return SHOULDER_YAW;
+                case SHOULDER_YAW:
                     return ELBOW_PITCH;
                 case ELBOW_PITCH:
                     return WRIST_YAW;
@@ -186,14 +175,12 @@ public class AlexArmParameters
         {
             switch (this)
             {
-                case SHOULDER_YAW:
-                    return AlexArmLinkParameters.UPPER_SHOULDER;
                 case SHOULDER_PITCH:
-                    return AlexArmLinkParameters.LOWER_SHOULDER;
+                    return AlexArmLinkParameters.UPPER_SHOULDER;
                 case SHOULDER_ROLL:
+                    return AlexArmLinkParameters.LOWER_SHOULDER;
+                case SHOULDER_YAW:
                     return AlexArmLinkParameters.UPPER_ARM;
-                case ELBOW_YAW:
-                    return AlexArmLinkParameters.ELBOW;
                 case ELBOW_PITCH:
                     return AlexArmLinkParameters.LOWER_ARM;
                 case WRIST_YAW:
@@ -210,7 +197,7 @@ public class AlexArmParameters
 
     public enum AlexArmLinkParameters
     {
-        UPPER_SHOULDER, LOWER_SHOULDER, UPPER_ARM, ELBOW, LOWER_ARM, UPPER_WRIST, LOWER_WRIST, HAND;
+        UPPER_SHOULDER, LOWER_SHOULDER, UPPER_ARM, LOWER_ARM, UPPER_WRIST, LOWER_WRIST, HAND;
 
         public static AlexArmLinkParameters getEndEffector()
         {
@@ -241,10 +228,6 @@ public class AlexArmParameters
                     upperArmGraphics.translate(0.0, 0.0, zOffsetUpperArm);
                     upperArmGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetUpperArm), YoAppearance.DarkBlue());
                     return upperArmGraphics;
-                case ELBOW:
-                    Graphics3DObject elbowGraphics = new Graphics3DObject();
-                    elbowGraphics.addSphere(0.04, YoAppearance.White());
-                    return elbowGraphics;
                 case LOWER_ARM:
                     Graphics3DObject lowerArmGraphics = new Graphics3DObject();
                     double zOffsetLowerArm = getChildJoint().getJointOffset().getZ() / 2.0;
@@ -274,42 +257,70 @@ public class AlexArmParameters
         {
             switch (this)
             {
-                case UPPER_SHOULDER:
+
+                case UPPER_SHOULDER: // Child Joint = Shoulder_Roll
                     VisualDefinitionFactory upperShoulderGraphics = new VisualDefinitionFactory();
-                    upperShoulderGraphics.addSphere(0.05, ColorDefinitions.White());
+                    upperShoulderGraphics.addSphere(0.05, ColorDefinitions.Gray());
+                    //double xOffsetUpperShoulder = getChildJoint().getJointOffset().getX() / 2.0;
+                    double yOffsetUpperShoulder = getChildJoint().getJointOffset().getY() / 2.0;
+                    double zOffsetUpperShoulder = getChildJoint().getJointOffset().getZ() / 2.0;
+                    upperShoulderGraphics.appendTranslation(0.0, yOffsetUpperShoulder, zOffsetUpperShoulder);
+                    upperShoulderGraphics.addEllipsoid(0.05, Math.abs(yOffsetUpperShoulder), Math.abs(zOffsetUpperShoulder), ColorDefinitions.Gray());
                     return upperShoulderGraphics.getVisualDefinitions();
-                case LOWER_SHOULDER:
+                case LOWER_SHOULDER: // Child Joint = Shoulder_Yaw
                     VisualDefinitionFactory lowerShoulderGraphics = new VisualDefinitionFactory();
-                    lowerShoulderGraphics.addSphere(0.05, ColorDefinitions.White());
+                    lowerShoulderGraphics.addSphere(0.05, ColorDefinitions.Gray());
+                    //double xOffsetLowerShoulder = getChildJoint().getJointOffset().getX() / 2.0;
+                    double yOffsetLowerShoulder = getChildJoint().getJointOffset().getY() / 2.0;
+                    //double zOffsetLowerShoulder = getChildJoint().getJointOffset().getZ() / 2.0;
+                    lowerShoulderGraphics.appendTranslation(0.0, yOffsetLowerShoulder, 0.0);
+                    lowerShoulderGraphics.addEllipsoid(0.05, 0.05, 0.05, ColorDefinitions.Gray());
                     return lowerShoulderGraphics.getVisualDefinitions();
-                case UPPER_ARM:
+                case UPPER_ARM: // Child Joint = Elbow_Pitch
                     VisualDefinitionFactory upperArmGraphics = new VisualDefinitionFactory();
+                    upperArmGraphics.addSphere(0.05, ColorDefinitions.Gray());
+                    double xOffsetUpperArm = getChildJoint().getJointOffset().getX() / 2.0;
+                    //double yOffsetUpperArm = getChildJoint().getJointOffset().getY() / 2.0;
                     double zOffsetUpperArm = getChildJoint().getJointOffset().getZ() / 2.0;
-                    upperArmGraphics.appendTranslation(0.0, 0.0, zOffsetUpperArm);
-                    upperArmGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetUpperArm), ColorDefinitions.DarkBlue());
+                    upperArmGraphics.appendTranslation(xOffsetUpperArm, 0.0, zOffsetUpperArm);
+                    upperArmGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetUpperArm), ColorDefinitions.White());
                     return upperArmGraphics.getVisualDefinitions();
-                case ELBOW:
-                    VisualDefinitionFactory elbowGraphics = new VisualDefinitionFactory();
-                    elbowGraphics.addSphere(0.04, ColorDefinitions.White());
-                    return elbowGraphics.getVisualDefinitions();
-                case LOWER_ARM:
+                case LOWER_ARM: // Child joint = Wrist_Yaw
                     VisualDefinitionFactory lowerArmGraphics = new VisualDefinitionFactory();
+                    lowerArmGraphics.addSphere(0.05, ColorDefinitions.Gray());
+                    double xOffsetLowerArm = getChildJoint().getJointOffset().getX() / 2.0;
+                    //double yOffsetLowerArm = getChildJoint().getJointOffset().getY() / 2.0;
                     double zOffsetLowerArm = getChildJoint().getJointOffset().getZ() / 2.0;
-                    lowerArmGraphics.appendTranslation(0.0, 0.0, zOffsetLowerArm);
-                    lowerArmGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetLowerArm), ColorDefinitions.DarkGreen());
+                    //lowerArmGraphics.appendTranslation(xOffsetLowerArm, 0.0, zOffsetLowerArm);
+                    //lowerArmGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetLowerArm), ColorDefinitions.DarkBlue());
                     return lowerArmGraphics.getVisualDefinitions();
-                case UPPER_WRIST:
+                case UPPER_WRIST: // Child joint = Wrist_Roll
                     VisualDefinitionFactory upperWristGraphics = new VisualDefinitionFactory();
-                    upperWristGraphics.addSphere(0.03, ColorDefinitions.White());
+                    upperWristGraphics.addSphere(0.03, ColorDefinitions.Gray());
+                    double xOffsetUpperWrist = getChildJoint().getJointOffset().getX() / 2.0;
+                    //double yOffsetUpperWrist = getChildJoint().getJointOffset().getY() / 2.0;
+                    double zOffsetUpperWrist = getChildJoint().getJointOffset().getZ() / 2.0;
+                    upperWristGraphics.appendTranslation(xOffsetUpperWrist, 0.0, zOffsetUpperWrist);
+                    upperWristGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetUpperWrist), ColorDefinitions.DarkBlue());
                     return upperWristGraphics.getVisualDefinitions();
-                case LOWER_WRIST:
+                case LOWER_WRIST: // Child joint = Wrist_Pitch
                     VisualDefinitionFactory lowerWristGraphics = new VisualDefinitionFactory();
-                    lowerWristGraphics.addSphere(0.03, ColorDefinitions.White());
+                    lowerWristGraphics.addSphere(0.03, ColorDefinitions.Gray());
+                    double xOffsetLowerWrist = getChildJoint().getJointOffset().getX() / 2.0;
+                    //double yOffsetLowerWrist = getChildJoint().getJointOffset().getY() / 2.0;
+                    double zOffsetLowerWrist = getChildJoint().getJointOffset().getZ() / 2.0;
+                    lowerWristGraphics.appendTranslation(xOffsetLowerWrist, 0.0, zOffsetLowerWrist);
+                    //lowerWristGraphics.addEllipsoid(0.05, 0.05, Math.abs(zOffsetLowerWrist), ColorDefinitions.DarkBlue());
                     return lowerWristGraphics.getVisualDefinitions();
                 case HAND:
                     VisualDefinitionFactory handGraphics = new VisualDefinitionFactory();
+                    handGraphics.addSphere(0.03, ColorDefinitions.Gray());
+                    double zOffsetHand = -0.122314 / 2.0;
+                    handGraphics.appendTranslation(0.0, 0.0, zOffsetHand);
+                    handGraphics.addEllipsoid(0.03, 0.03, Math.abs(zOffsetHand), ColorDefinitions.Red());
+                    handGraphics.appendTranslation(0.0, 0.0, zOffsetHand);
                     handGraphics.appendTransform(endEffectorTransformToWrist);
-                    handGraphics.addEllipsoid(0.08, 0.03, 0.06, ColorDefinitions.Gray());
+                    handGraphics.addEllipsoid(0.05, 0.03, 0.06, ColorDefinitions.Red());
                     handGraphics.addCoordinateSystem(0.25);
                     return handGraphics.getVisualDefinitions();
                 default:
@@ -322,12 +333,10 @@ public class AlexArmParameters
             switch (this)
             {
                 case UPPER_SHOULDER:
-                    return AlexArmJointParameters.SHOULDER_PITCH;
-                case LOWER_SHOULDER:
                     return AlexArmJointParameters.SHOULDER_ROLL;
+                case LOWER_SHOULDER:
+                    return AlexArmJointParameters.SHOULDER_YAW;
                 case UPPER_ARM:
-                    return AlexArmJointParameters.ELBOW_YAW;
-                case ELBOW:
                     return AlexArmJointParameters.ELBOW_PITCH;
                 case LOWER_ARM:
                     return AlexArmJointParameters.WRIST_YAW;

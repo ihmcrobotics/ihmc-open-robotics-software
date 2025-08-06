@@ -13,7 +13,20 @@ public class AlexArmReachabilitySphereMap
                 robotDefinition.getRootBodyDefinition().getName(),
                 AlexArmLinkParameters.getEndEffector().getLinkName());
         ReachabilitySphereMapSimulationHelper simHelper = new ReachabilitySphereMapSimulationHelper(robotInformation);
-        simHelper.setGridParameters(25, 0.025, 50, 3);
+
+        /* Voxel grid dimensions */
+        int gridSizeInNumberOfVoxels = 40;
+        double voxelSize = 0.025;
+
+        /* Ray Reachability */
+        int numberOfRays = 50;
+        simHelper.setEvaluateRReachability(true);
+
+        /* Pose Reachability */
+        simHelper.setEvaluateR2Reachability(true);
+        int numberOfRotationsAroundRay = 3;
+
+        simHelper.setGridParameters(gridSizeInNumberOfVoxels, voxelSize, numberOfRays, numberOfRotationsAroundRay);
 
         simHelper.start();
     }
