@@ -1,5 +1,6 @@
 package us.ihmc.perception.lerobot;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -7,20 +8,22 @@ import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Float32MultiArray;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Manages communication with the Python side, which is running the LeRobot code
@@ -32,73 +35,97 @@ public class LeRobotInferenceManager
    private static final ROS2Topic<std_msgs.msg.dds.String> CONNECT = LEROBOT.withSuffix("connect").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> COMMAND = LEROBOT.withSuffix("command").withType(std_msgs.msg.dds.String.class);
    private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = LEROBOT.withSuffix("status").withType(std_msgs.msg.dds.String.class);
-   private static final SideDependentList<ROS2Topic<Image>> ZED_IMAGES = new SideDependentList<>(LEROBOT.withSuffix("/zed/left/color").withType(Image.class),
-                                                                                                 LEROBOT.withSuffix("/zed/right/color").withType(Image.class));
-   private static final ROS2Topic<Float32MultiArray> STATE_HAND_POSES = LEROBOT.withSuffix("/lerobot/state/hand_poses").withType(Float32MultiArray.class);
-   private static final ROS2Topic<Float32MultiArray> ACTION_HAND_POSES = LEROBOT.withSuffix("/lerobot/action/hand_poses").withType(Float32MultiArray.class);
+   private static final ROS2Topic<Float32MultiArray> STATE = LEROBOT.withSuffix("/lerobot/state").withType(Float32MultiArray.class);
+   public static final ROS2Topic<Float32MultiArray> ACTION = LEROBOT.withSuffix("/lerobot/action").withType(Float32MultiArray.class);
+
+   private final ROS2Helper ros2Helper;
 
    private final String modelName;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final Object fullRobotModelSync;
+   private final FullHumanoidRobotModel forwardKinematicsModel;
+   private final boolean useHandPoses;
+   private final List<String> armJointNames;
    private final RepeatingTaskThread thread = new RepeatingTaskThread("LeRobotROS2Thread", this::update);
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().domainId(185).build("lerobot_java_side");
-   private final ROS2Helper ros2 = new ROS2Helper(ros2Node);
    private final std_msgs.msg.dds.String command = new std_msgs.msg.dds.String();
    private final std_msgs.msg.dds.String status = new std_msgs.msg.dds.String();
-   private final Float32MultiArray stateHandPosesMessage = new Float32MultiArray();
+   private final Float32MultiArray stateMessage = new Float32MultiArray();
    private final FrequencyCalculator statusFrequency = new FrequencyCalculator();
-   private final SideDependentList<Pose3D> actionHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<Pose3D> actionHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D()); // TODO
+   private final TDoubleArrayList actionJointAngles = new TDoubleArrayList();
    private final SideDependentList<Image> zedImages = new SideDependentList<>(new Image(), new Image());
    private boolean running = false;
    private final LeRobotIKStreaming ikStreaming;
    private long actionTimestampNanos = 0L;
+   private long numberOfActionsReceived = 0L;
 
-   public LeRobotInferenceManager(String modelName, String robotName, FullHumanoidRobotModel fullRobotModel)
+   public LeRobotInferenceManager(String modelName,
+                                  String robotName,
+                                  FullHumanoidRobotModel fullRobotModel,
+                                  Object fullRobotModelSync,
+                                  FullHumanoidRobotModel forwardKinematicsModel,
+                                  ROS2Node ros2Node,
+                                  boolean useHandPoses,
+                                  List<String> armJointNames)
    {
       this.modelName = modelName;
+      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModelSync = fullRobotModelSync;
+      this.forwardKinematicsModel = forwardKinematicsModel;
+      this.useHandPoses = useHandPoses;
+      this.armJointNames = armJointNames;
 
       actionHandPoses.forEach(Pose3D::setToNaN);
-      ikStreaming = new LeRobotIKStreaming(actionHandPoses, robotName, ros2Node, fullRobotModel);
-
-      ros2.subscribeViaVolatileCallback(STATUS, message ->
+      ikStreaming = new LeRobotIKStreaming(robotName, ros2Node, forwardKinematicsModel);
+      ros2Helper = new ROS2Helper(ros2Node);
+      ros2Helper.subscribeViaVolatileCallback(STATUS, message ->
       {
          status.set(message);
          statusFrequency.ping();
       });
-      ros2.subscribeViaVolatileCallback(ACTION_HAND_POSES, message ->
+      ros2Helper.subscribeViaVolatileCallback(ACTION, message ->
       {
          // TODO: Add timestamp to /lerobot/action/hand_poses topic or something
          //   This should be calculated according to the policy output
          actionTimestampNanos = System.nanoTime();
+         ++numberOfActionsReceived;
 
          IDLSequence.Float data = message.getData();
-         int i = 0;
-         for (RobotSide side : RobotSide.values)
+         synchronized (this)
          {
-            Pose3D pose = actionHandPoses.get(side);
-            pose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
-            pose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
+            if (useHandPoses)
+            {
+               int i = 0;
+               for (RobotSide side : RobotSide.values)
+               {
+                  Pose3D pose = actionHandPoses.get(side);
+                  pose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
+                  pose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
+               }
+            }
+            else
+            {
+               actionJointAngles.clear();
+               for (int i = 0; i < data.size(); i++)
+                  actionJointAngles.add(data.get(i));
+            }
          }
       });
+   }
 
+   /** Optionally start a thread for calling update. */
+   public void startUpdateThread()
+   {
       thread.setFrequencyLimit(20.0);
       thread.startRepeating();
    }
 
-   public void publishHandPoses(Pose3DReadOnly leftPose, Pose3DReadOnly rightPose)
+   public void publishState(Consumer<IDLSequence.Float> stateSetter)
    {
-      int i = 0;
-      IDLSequence.Float data = stateHandPosesMessage.getData();
-      data.resetQuick();
-      for (RobotSide side : RobotSide.values)
-      {
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getX32());
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getY32());
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getPosition().getZ32());
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getX32());
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getY32());
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getZ32());
-         data.add((side == RobotSide.LEFT ? leftPose : rightPose).getOrientation().getS32());
-      }
-      ros2.publish(STATE_HAND_POSES, stateHandPosesMessage);
+      IDLSequence.Float messageData = stateMessage.getData();
+      messageData.resetQuick();
+      stateSetter.accept(messageData);
+      ros2Helper.publish(STATE, stateMessage);
    }
 
    public void publishImage(RobotSide side, Mat bgra8Mat)
@@ -119,15 +146,39 @@ public class LeRobotInferenceManager
 
       bgr8Mat.close();
 
-      ros2.publish(ZED_IMAGES.get(side), message);
+      ros2Helper.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(side), message);
    }
 
-   private void update()
+   public void update()
    {
       command.setData(running ? "diffusion" : ""); // TODO: In future, possibly request model name
-      ros2.publish(COMMAND, command);
+      ros2Helper.publish(COMMAND, command);
 
-      ikStreaming.update(actionTimestampNanos);
+      if (running)
+      {
+         synchronized (fullRobotModelSync)
+         {
+            FullRobotModelUtils.copy(fullRobotModel, forwardKinematicsModel);
+         }
+
+         synchronized (this)
+         {
+            if (useHandPoses)
+            {
+               // TODO: I guess you would take a different approach here
+            }
+            else
+            {
+               for (int i = 0; i < armJointNames.size(); i++)
+               {
+                  forwardKinematicsModel.getOneDoFJointByName(armJointNames.get(i)).setQ(actionJointAngles.get(i));
+               }
+            }
+         }
+         forwardKinematicsModel.updateFrames();
+
+         ikStreaming.update(actionTimestampNanos);
+      }
    }
 
    public void setRunning(boolean running)
@@ -135,16 +186,31 @@ public class LeRobotInferenceManager
       this.running = running;
    }
 
+   public LeRobotIKStreaming getIKStreaming()
+   {
+      return ikStreaming;
+   }
+
    public void startPythonServer()
    {
       std_msgs.msg.dds.String startServer = new std_msgs.msg.dds.String();
       startServer.setData("connect");
-      ros2.publish(CONNECT, startServer);
+      ros2Helper.publish(CONNECT, startServer);
    }
 
    public double getStatusFrequency()
    {
       return statusFrequency.getFrequencyDecaying();
+   }
+
+   public String getStatusMessage()
+   {
+      return status.getDataAsString();
+   }
+
+   public long getNumberOfActionsReceived()
+   {
+      return numberOfActionsReceived;
    }
 
    public SideDependentList<Pose3D> getActionHandPoses()
@@ -154,7 +220,6 @@ public class LeRobotInferenceManager
 
    public void destroy()
    {
-      ros2Node.destroy();
       thread.kill();
    }
 
