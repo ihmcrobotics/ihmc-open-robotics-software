@@ -5,7 +5,8 @@ import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -32,6 +33,20 @@ public class LeRobotIKStreaming
 
       configurationPublisher = ros2Node.createPublisher(ToolboxAPIs.getInputToolboxConfigurationTopic(robotName));
       inputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotName));
+   }
+
+   public void update(long actionTimestampNanos, Pose3D leftPose, Pose3D rightPose)
+   {
+      KinematicsStreamingToolboxInputMessage ikInputMessage = new KinematicsStreamingToolboxInputMessage();
+
+      ikInputMessage.setStreamToController(controlRobot);
+
+      addRigidBodyInput(desiredRobotModel.getHand(RobotSide.LEFT).hashCode(), leftPose, ikInputMessage);
+      addRigidBodyInput(desiredRobotModel.getHand(RobotSide.RIGHT).hashCode(), rightPose, ikInputMessage);
+
+      ikInputMessage.setTimestamp(actionTimestampNanos);
+
+      inputPublisher.publish(ikInputMessage);
    }
 
    public void update(long actionTimestampNanos)
@@ -65,9 +80,11 @@ public class LeRobotIKStreaming
 
    private void addRigidBodyInput(RigidBodyBasics rigidBody, KinematicsStreamingToolboxInputMessage ikInputMessage)
    {
-      int endEffectorHashCode = rigidBody.hashCode();
-      RigidBodyTransform pose = rigidBody.getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
+      addRigidBodyInput(rigidBody.hashCode(), rigidBody.getBodyFixedFrame().getTransformToWorldFrame(), ikInputMessage);
+   }
 
+   private void addRigidBodyInput(int endEffectorHashCode, RigidBodyTransformReadOnly pose, KinematicsStreamingToolboxInputMessage ikInputMessage)
+   {
       double linearMomentumLimit = -1.0; // default value is used
       double angularMomentumLimit = -1.0; // default value is used
       Vector3D desiredLinearVelocity = new Vector3D(); // TODO: These can probably be zero for moving slow
