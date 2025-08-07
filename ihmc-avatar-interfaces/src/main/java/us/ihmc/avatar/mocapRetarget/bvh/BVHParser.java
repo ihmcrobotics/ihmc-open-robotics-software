@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.server.Skeleton;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -62,16 +64,22 @@ public class BVHParser
          return;
       }
 
-//      private List<String> getChannels(String line) {
-//         String[] lineSplit = line.split("\\s+");
-//         //while(list)
-//         return new List<String>()
-//         {
-//         }
-//      }
+      private List<String> getChannels(String line) {
+         String[] lineSplit = line.split("\\s+");
+         return new ArrayList<String>(Arrays.asList(lineSplit).subList(2, lineSplit.length));
+      }
+
+      private Vector3D getOffset(String line) {
+         String[] lineSplit = line.split("\\s+");
+         double[] vectorArray = new double[3];
+         for (int i = 1; lineSplit.length > i; i++) {
+            vectorArray[i-1] = Double.parseDouble(lineSplit[i]);
+         }
+         return new Vector3D(vectorArray);
+      }
 
 
-   /**
+   /*
     * Parses the MOTION section after hierarchy, returning a list of frames:
     *   - frameCount
     *   - frameTime (dt)
