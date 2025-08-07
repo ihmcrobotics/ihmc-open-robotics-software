@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class LeRobotDatasetDataWriter
 {
-   public static final boolean USE_HAND_POSES = false;
+   public static final boolean USE_HAND_POSES = true;
 
    private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
    private record StateVariables(YoDouble[] current, YoDouble[] desired) { }
@@ -122,7 +122,7 @@ public class LeRobotDatasetDataWriter
          for (int i = 0; i < stateVariables.get(side).current().length; i++)
             state.add((float) stateVariables.get(side).current()[i].getDoubleValue());
          for (int i = 0; i < stateVariables.get(side).desired().length; i++)
-            state.add((float) stateVariables.get(side).desired()[i].getDoubleValue());
+            action.add((float) stateVariables.get(side).desired()[i].getDoubleValue());
       }
 
       float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s

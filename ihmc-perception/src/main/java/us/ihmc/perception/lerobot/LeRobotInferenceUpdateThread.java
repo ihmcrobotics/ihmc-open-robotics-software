@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 {
-   public static final boolean USE_HAND_POSES = false;
+   public static final boolean USE_HAND_POSES = true;
 
    public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> LEROBOT_UI
          = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(LerobotInferenceOperationMessage.class));
