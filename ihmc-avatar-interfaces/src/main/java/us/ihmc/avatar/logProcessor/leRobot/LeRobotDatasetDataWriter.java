@@ -31,7 +31,6 @@ public class LeRobotDatasetDataWriter
 {
    public static final boolean USE_HAND_POSES = false;
 
-   private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
    private record StateVariables(YoDouble[] current, YoDouble[] desired) { }
    private final SideDependentList<StateVariables> stateVariables = new SideDependentList<>();
    private final long episodeIndex;
@@ -138,25 +137,7 @@ public class LeRobotDatasetDataWriter
                                                              datasetLengthSoFar + frameIndex,
                                                              taskIndex);
       statistics.processParquetRecord(record);
-      records.add(record);
       return record;
-   }
-
-   public void writeFile(Path parquetPath)
-   {
-      // Mark the last frame
-      LeRobotEpisodeRecord last = records.get(records.size() - 1);
-      records.set(records.size() - 1, new LeRobotEpisodeRecord(last.state(),
-                                                               last.action(),
-                                                               last.episodeIndex(),
-                                                               last.frameIndex(),
-                                                               last.timestamp(),
-                                                               last.ihmcLogPosition(),
-                                                               true, // <-- Main thing we're doing here
-                                                               last.index(),
-                                                               last.taskIndex()));
-
-      writeParquetFile(parquetPath, records);
    }
 
    public static void writeParquetFile(Path parquetPath, List<LeRobotEpisodeRecord> records)

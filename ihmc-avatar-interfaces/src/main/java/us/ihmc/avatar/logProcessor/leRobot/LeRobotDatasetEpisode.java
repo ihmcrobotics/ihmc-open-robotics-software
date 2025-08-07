@@ -197,7 +197,7 @@ public class LeRobotDatasetEpisode
       }
 
       Path parquetPath = dataChunk0Path.resolve(episodeName + ".parquet");
-      dataWriter.writeFile(parquetPath);
+      LeRobotDatasetDataWriter.writeParquetFile(parquetPath, records);
 
       writeEpisodeJsonlLine();
       writeMetaJson.run();
