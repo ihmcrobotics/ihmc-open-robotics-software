@@ -176,9 +176,9 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(canOfSoup);
                   }
-                  if (ImGui.button(labels.get("Add Cereal")))
+                  if (ImGui.button(labels.get("Add Cereal Box")))
                   {
-                     RDXPredefinedRigidBodySceneNode cereal = predefinedRigidBodySceneNodeBuilder.build("Cereal");
+                     RDXPredefinedRigidBodySceneNode cereal = predefinedRigidBodySceneNodeBuilder.build("CerealBox");
                      modificationQueue.accept(new SceneGraphNodeAddition(cereal.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent(), sceneGraph));
                      addUISceneNode(cereal);
                   }
