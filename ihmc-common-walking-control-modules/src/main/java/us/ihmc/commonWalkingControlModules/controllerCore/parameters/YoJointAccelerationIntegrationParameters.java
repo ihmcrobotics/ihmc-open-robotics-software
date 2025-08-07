@@ -15,9 +15,11 @@ public class YoJointAccelerationIntegrationParameters
    private final YoDouble velocityReference;
    private final YoDouble positionReference;
    private final YoBoolean resetIntegrators;
+   private final YoDouble desiredPosition;
    private final YoDouble desiredPositionNotClamped;
    private final YoDouble desiredPositionClamped;
    private final YoDouble desriedPositionClampedJointLimits;
+   private final YoDouble desiredVelocity;
    private final YoDouble desiredVelocityNotClamped;
    private final YoDouble desiredVelocityClamped;
    
@@ -35,9 +37,11 @@ public class YoJointAccelerationIntegrationParameters
       positionReference = new YoDouble(prefix + jointName + "_PositionReference", registry);
       resetIntegrators = new YoBoolean(prefix + jointName + "_ResetIntegrators", registry);
 
+      desiredPosition = new YoDouble(prefix + jointName + "_DesiredPosition", registry);
       desiredPositionNotClamped = new YoDouble(prefix + jointName + "_DesiredPositionNotClamped", registry);
       desiredPositionClamped = new YoDouble(prefix + jointName + "_DesiredPositionClamped", registry);
       desriedPositionClampedJointLimits = new YoDouble(prefix + jointName + "_DesiredPositionClampedJointLimits", registry);
+      desiredVelocity = new YoDouble(prefix + jointName +"_DesiredVelocity", registry);
       desiredVelocityNotClamped = new YoDouble(prefix + jointName + "_DesiredVelocityNotClamped", registry);
       desiredVelocityClamped = new YoDouble(prefix + jointName + "_DesiredVelocityClamped", registry);
    }
@@ -86,6 +90,10 @@ public class YoJointAccelerationIntegrationParameters
    {
       this.resetIntegrators.set(resetIntegrators);
    }
+   public void setDesiredPosition(double desiredPosition)
+{
+   this.desiredPosition.set(desiredPosition);
+}
    public void setDesiredPositionNotClamped(double desiredPositionNotClamped)
    {
       this.desiredPositionNotClamped.set(desiredPositionNotClamped);
@@ -97,6 +105,10 @@ public class YoJointAccelerationIntegrationParameters
    public void setDesiredPositionClampedJointLimits(double desiredPositionClampedJointLimits)
    {
       this.desriedPositionClampedJointLimits.set(desiredPositionClampedJointLimits);
+   }
+   public void setDesiredVelocity (double desiredVelocity)
+   {
+      this.desiredVelocity.set(desiredVelocity);
    }
    public void setDesiredVelocityNotClamped(double desiredVelocityNotClamped)
    {

@@ -137,6 +137,8 @@ public class JointAccelerationIntegrationCalculator
          double desiredAcceleration = lowLevelJointData.getDesiredAcceleration();
          double desiredVelocity = lowLevelJointData.getDesiredVelocity();
          double desiredPosition = lowLevelJointData.getDesiredPosition();
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredPosition(desiredPosition);
+         yoJointAccelerationIntegrationParametersList[jointIndex].setDesiredVelocity(desiredVelocity);
 
          // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
          desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
