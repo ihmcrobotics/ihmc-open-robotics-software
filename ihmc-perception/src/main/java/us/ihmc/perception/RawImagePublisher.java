@@ -137,6 +137,11 @@ public class RawImagePublisher implements AutoCloseable
       // Pack the message and send it off
       PerceptionMessageTools.packImageMessage(imageToPublish, compressedImage, compressionType, imageMessage);
       ros2Helper.publish(imageTopic, imageMessage);
+
+      // Close stuff
+      compressedImage.close();
+      if (imageToCompress != imageToPublish.getGpuImageMat()) // Only close the imageToCompress if it's a newly allocated GpuMat
+         imageToCompress.close();
    }
 
    private void publishAsROS2Image(ROS2Topic<Image> imageTopic, RawImage imageToPublish, ReferenceFrame sensorFrame)
