@@ -156,28 +156,28 @@ public class LeRobotInferenceManager
 
       if (running)
       {
-         synchronized (fullRobotModelSync)
+         if (useHandPoses)
          {
-            FullRobotModelUtils.copy(fullRobotModel, forwardKinematicsModel);
+            ikStreaming.update(actionTimestampNanos, actionHandPoses.get(RobotSide.LEFT), actionHandPoses.get(RobotSide.RIGHT));
          }
-
-         synchronized (this)
+         else
          {
-            if (useHandPoses)
+            synchronized (fullRobotModelSync)
             {
-               // TODO: I guess you would take a different approach here
+               FullRobotModelUtils.copy(fullRobotModel, forwardKinematicsModel);
             }
-            else
+
+            synchronized (this)
             {
                for (int i = 0; i < armJointNames.size(); i++)
                {
                   forwardKinematicsModel.getOneDoFJointByName(armJointNames.get(i)).setQ(actionJointAngles.get(i));
                }
             }
-         }
-         forwardKinematicsModel.updateFrames();
+            forwardKinematicsModel.updateFrames();
 
-         ikStreaming.update(actionTimestampNanos);
+            ikStreaming.update(actionTimestampNanos);
+         }
       }
    }
 
