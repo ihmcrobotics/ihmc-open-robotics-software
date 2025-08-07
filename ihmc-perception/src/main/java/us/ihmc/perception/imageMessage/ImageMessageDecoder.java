@@ -49,8 +49,6 @@ public class ImageMessageDecoder
       Mat image = new Mat();
       decodeMessage(messageToDecode, image);
 
-      PixelFormat pixelFormat = PixelFormat.fromByte(messageToDecode.getPixelFormat());
-
       CameraIntrinsics intrinsics = new CameraIntrinsics();
       intrinsics.setWidth(messageToDecode.getImageWidth());
       intrinsics.setHeight(messageToDecode.getImageHeight());
@@ -65,7 +63,7 @@ public class ImageMessageDecoder
       long sequenceNumber = messageToDecode.getSequenceNumber();
       float depthDiscretization = messageToDecode.getDepthDiscretization();
 
-      return new RawImage(image, null, pixelFormat, intrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+      return new RawImage(image, null, getDecodedImagePixelFormat(), intrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
    }
 
    /**
