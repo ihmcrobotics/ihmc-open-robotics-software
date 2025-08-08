@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -26,6 +27,8 @@ public class LeRobotIKStreaming
    private final ROS2Publisher<KinematicsToolboxConfigurationMessage> configurationPublisher;
    private final ROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    private boolean controlRobot = false;
+   private final Pose3D leftPosePrev = new Pose3D();
+   private final Pose3D rightPosePrev = new Pose3D();
 
    public LeRobotIKStreaming(String robotName, ROS2Node ros2Node, FullHumanoidRobotModel desiredRobotModel)
    {
@@ -41,12 +44,20 @@ public class LeRobotIKStreaming
 
       ikInputMessage.setStreamToController(controlRobot);
 
-      addRigidBodyInput(desiredRobotModel.getHand(RobotSide.LEFT).hashCode(), leftPose, ikInputMessage);
-      addRigidBodyInput(desiredRobotModel.getHand(RobotSide.RIGHT).hashCode(), rightPose, ikInputMessage);
+      Pose3D filteredLeft = new Pose3D();
+      filteredLeft.interpolate(leftPose, leftPosePrev, 0.9);
+
+      Pose3D filteredRight = new Pose3D();
+      filteredRight.interpolate(rightPose, rightPosePrev, 0.9);
+
+      addRigidBodyInput(desiredRobotModel.getHand(RobotSide.LEFT).hashCode(), filteredLeft, ikInputMessage);
+      addRigidBodyInput(desiredRobotModel.getHand(RobotSide.RIGHT).hashCode(), filteredRight, ikInputMessage);
 
       ikInputMessage.setTimestamp(actionTimestampNanos);
 
       inputPublisher.publish(ikInputMessage);
+      leftPosePrev.set(filteredLeft);
+      rightPosePrev.set(filteredRight);
    }
 
    public void update(long actionTimestampNanos)
