@@ -158,7 +158,8 @@ public class LeRobotInferenceManager
       {
          if (useHandPoses)
          {
-            ikStreaming.update(actionTimestampNanos, actionHandPoses.get(RobotSide.LEFT), actionHandPoses.get(RobotSide.RIGHT));
+            if (!actionHandPoses.get(RobotSide.LEFT).containsNaN() && !actionHandPoses.get(RobotSide.RIGHT).containsNaN())
+               ikStreaming.update(actionTimestampNanos, actionHandPoses.get(RobotSide.LEFT), actionHandPoses.get(RobotSide.RIGHT));
          }
          else
          {
