@@ -1,5 +1,6 @@
 package us.ihmc.avatar.mocapRetarget.bvh;
 
+import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.JointInfo;
 import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.SkeletonHierarchy;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -17,50 +18,50 @@ public class BVHParser
 {
    /**
     * Parses the HIERARCHY section and returns a skeleton description
-    * (joint names, parent relationships, offsets, channel orders).
     */
    public SkeletonHierarchy parseHierarchy(File bvhFile) throws IOException
    {
       SkeletonHierarchy skeleton = new SkeletonHierarchy();
       try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile))) {
          String line;
-         while((line = reader.readLine()) != null) {
-            line = line.trim();
-            if (line.equals("HIERARCHY")) {continue;}
-
-            else if (line.startsWith("ROOT")) {
-               Stack<String> parents = new Stack<>();
-               String name = line.split("\\s+")[1];
-               //List<String> channels = reader.readLine()
-               parseJoints(reader, skeleton, parents);
+         while((line=reader.readLine()) != null && !(line.trim()).equals("MOTION")) {
+            if (line.trim().equals("HIERARCHY")) {
+               if ((line=reader.readLine().trim()).startsWith("ROOT")) {
+                  Stack<String> parents = new Stack<>();
+                  parents.push(null);
+                  parseJoints(reader, skeleton, line.trim(), parents);
+                  break;
+               }
             }
-
-            else if (line.trim().equals("MOTION")) {break;}
          }
       }
       return skeleton;
-      // 3) recursively parse each JOINT / End Site block:
-      //      - read OFFSET x y z
-      //      - read CHANNELS count {channel names}
-      //      - for each child JOINT, call yourself
-      // 4) stop when you hit "MOTION"
    }
 
-      private void parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, Stack<String> parents)
+      private void parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, String line, Stack<String> parents) throws IOException
       {
-
-         //String name = joint;
-         double [] offsetArray = new double[3];
-         List<String> channels;
-         boolean endSite = false;
-
-         //parents.push(joint);
+         String name = line.split("\\s+")[1];
+         List<String> channels = new ArrayList<>();
+         String parentName = parents.peek();
 
 
-         Vector3D offset = new Vector3D();
+         reader.readLine();
+         Vector3D offset = getOffset(reader.readLine().trim());
 
 
-         //while(false){}
+         if (!(name.equals("End Site"))) {
+            channels = getChannels(reader.readLine().trim());
+         }
+
+         skeleton.addJoint(new JointInfo(name, parentName, offset, channels));
+         parents.push(name);
+         line = reader.readLine().trim();
+         while (line.startsWith("JOINT") || line.startsWith("End Site")) {
+            parseJoints(reader, skeleton, line, parents);
+            line = reader.readLine().trim();
+         }
+
+         parents.pop();
          return;
       }
 
@@ -97,4 +98,24 @@ public class BVHParser
 
    }
    */
+
+   public static void main(String[] args) {
+      try {
+         File bvhFile = new File(args[0]);
+         BVHParser parser = new BVHParser();
+         SkeletonHierarchy hierarchy = parser.parseHierarchy(bvhFile);
+
+         System.out.println("Hierarchy:");
+         for (String jointName: hierarchy.getJointNames()) {
+            JointInfo joint = hierarchy.getJoint(jointName);
+            System.out.println(joint.parentName());
+            System.out.println(jointName + ", Offset: " + joint.offset() + ", Channels: " + joint.channels()  );
+         }
+
+      }
+      catch (IOException e) {
+         e.printStackTrace();
+      }
+   }
 }
+
