@@ -131,10 +131,10 @@ public class LeRobotIKStreaming
       rigidBodyMessage.getControlFramePositionInEndEffector().setToZero(); // TODO: Make sure this is right
       rigidBodyMessage.getControlFrameOrientationInEndEffector().setToZero();
 
-      rigidBodyMessage.setHasDesiredLinearVelocity(true);
-      rigidBodyMessage.getDesiredLinearVelocityInWorld().set(desiredLinearVelocity);
-      rigidBodyMessage.setHasDesiredAngularVelocity(true);
-      rigidBodyMessage.getDesiredAngularVelocityInWorld().set(desiredAngularVelocity);
+      rigidBodyMessage.setHasDesiredLinearVelocity(false);
+//      rigidBodyMessage.getDesiredLinearVelocityInWorld().set(desiredLinearVelocity);
+      rigidBodyMessage.setHasDesiredAngularVelocity(false);
+//      rigidBodyMessage.getDesiredAngularVelocityInWorld().set(desiredAngularVelocity);
 
       ikInputMessage.getInputs().add().set(rigidBodyMessage);
    }
