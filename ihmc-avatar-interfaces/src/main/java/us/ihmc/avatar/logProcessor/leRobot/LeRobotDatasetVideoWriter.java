@@ -5,10 +5,10 @@ import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -16,6 +16,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 
+import java.nio.Buffer;
 import java.nio.file.Path;
 
 import static us.ihmc.zed.global.zed.*;
@@ -31,7 +32,6 @@ public class LeRobotDatasetVideoWriter
    private final RobotSide side;
    private final FFmpegFrameRecorder recorder;
    private final ZEDSVOScrubber zedSVOScrubber;
-   private final OpenCVFrameConverter.ToMat frameConverter = new OpenCVFrameConverter.ToMat();
 
    // Stats
    private final TIntArrayList redMeans = new TIntArrayList();
@@ -81,37 +81,43 @@ public class LeRobotDatasetVideoWriter
                              sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
 
       // Resize smaller for better transformer training
-      Size size = new Size(853, 480);
-      Mat resized = new Mat(size, opencv_core.CV_8UC4);
-      opencv_imgproc.resize(bgra8Mat, resized, size);
-      size.close();
+      Size scaleDownSize = new Size(853, 480);
+      Mat resized = new Mat(scaleDownSize, opencv_core.CV_8UC4);
+      opencv_imgproc.resize(bgra8Mat, resized, scaleDownSize);
+      scaleDownSize.close();
 
       // Crop the sides of for a minimal 640x480 to make training faster (work?)
-      int cropWidth = 640;
-      int cropHeight = 480;
-      int x = (resized.cols() - cropWidth) / 2;  // Center crop horizontally
-      int y = (resized.rows() - cropHeight) / 2; // Center crop vertically
-      Rect roi = new Rect(x, y, cropWidth, cropHeight);
-      Mat cropped = new Mat(resized, roi);
+      Size cropSize = new Size(640, 480);
+      Point cropOffset = new Point((resized.cols() - cropSize.width()) / 2,   // Center crop horizontally
+                                   (resized.rows() - cropSize.height()) / 2); // Center crop vertically
+      Rect roi = new Rect(cropOffset, cropSize);
+      Mat croppedBgra8 = new Mat(resized, roi);
       resized.close();
+      cropOffset.close();
 
-      statistics.submitFrame(side, cropped);
+      statistics.submitFrame(side, croppedBgra8); // Wants bgra
 
-      // ZED outputs bgra but frame recorder wants rgba
-      opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_BGR2RGBA);
-      opencv_imgproc.cvtColor(cropped, cropped, opencv_imgproc.COLOR_RGBA2BGR);
+      Mat croppedYuv420 = new Mat();
+      opencv_imgproc.cvtColor(croppedBgra8, croppedYuv420, opencv_imgproc.COLOR_BGRA2YUV_I420);
+      croppedBgra8.close();
 
-      Frame frame = frameConverter.convert(cropped);
-      cropped.close();
+      Frame frame = new Frame();
+      frame.imageWidth = cropSize.width();
+      frame.imageHeight = cropSize.height();
+      frame.imageDepth = Frame.DEPTH_UBYTE;
+      frame.imageChannels = 1;
+      frame.imageStride = cropSize.width();
+      frame.image = new Buffer[] { croppedYuv420.createBuffer() };
+      frame.opaque = croppedYuv420;
+      cropSize.close();
 
       recorder.setTimestamp(videoTimestampMs);
-      ExceptionTools.handle(() -> recorder.record(frame), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      ExceptionTools.handle(() -> recorder.record(frame, avutil.AV_PIX_FMT_YUV420P), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       frame.close();
    }
 
    public void close()
    {
       ExceptionTools.handle(recorder::stop, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      frameConverter.close();
    }
 }
