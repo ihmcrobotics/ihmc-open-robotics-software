@@ -2,12 +2,14 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 public class HeadingAndVelocityEvaluationScriptParameters
 {
-   private double acceleration = 0.25;
-   private double maxVelocity = 1.0;
-   private double cruiseVelocity = 0.6;
+   private double acceleration = 0.25; // 0.25
+   private double maxVelocity = 0.6; // 1
+   private double cruiseVelocity = 0.3; // 6
    private double headingDot = 0.5;
    private double sideStepVelocity = 0.4;
    private double maxHeadingDot = 0.1;
+   private double maxTurningVelocity = 10.0 * maxHeadingDot;
+   private double turningAcceleration = 1.0;
 
    public double getAcceleration()
    {
@@ -68,5 +70,10 @@ public class HeadingAndVelocityEvaluationScriptParameters
    {
       this.maxHeadingDot = maxHeadingDot;
    }
+
+   public double getMaxTurningVelocity(){ return maxTurningVelocity;}
+
+   public double getTurningAcceleration(){ return turningAcceleration;}
+
 
 }
