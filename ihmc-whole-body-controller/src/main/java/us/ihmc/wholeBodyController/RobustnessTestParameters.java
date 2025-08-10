@@ -9,7 +9,7 @@ public abstract class RobustnessTestParameters
                                        double maxDuration, double pushInterval, Vector3D pushDirection, Vector3D pushOffset) {}
 
     // Abstract methods - robot-specific configuration
-    protected abstract RobustnessTestConfig getTestConfiguration();
+    public abstract RobustnessTestConfig getTestConfiguration();
     public abstract double getLightPushForce();
     public abstract double getLightPushDuration();
     public abstract double getHeavyPushForce();
