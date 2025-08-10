@@ -280,13 +280,11 @@ public class RDXVRWholeBodyKinematicStreaming
          controllerLastPollTimeNanos = controller.getLastPollTimeNanos();
       });
 
-      // Handle right joystick input
-      performingDemonstration.set(false); // add robustness to the hold function
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          controller.setAButtonText(isKSTEnabled.get() ? "Stop preview" : "Start preview");
         if (enableDemonstrationButton.get())
-            controller.setBButtonText("Mark demonstration (hold)");
+            controller.setBButtonText(performingDemonstration.get() ? "Stop demonstration" : "Start demonstration");
          else
             controller.setBButtonText("Record motion");
 
@@ -351,17 +349,16 @@ public class RDXVRWholeBodyKinematicStreaming
          setKSTEnabled(!isKSTEnabled.get());
       }
 
-      if (enableDemonstrationButton.get())
+      if (rightBButtonPressed)
       {
-         if(rightBButtonPressed)
+         if (enableDemonstrationButton.get())
          {
-            System.out.println(performingDemonstration.get() ? "performing" : " stopped");
             performingDemonstration.set(!performingDemonstration.get());
          }
-      }
-      else if (rightBButtonPressed)
-      {
-         handleRecordRequest();
+         else
+         {
+            handleRecordRequest();
+         }
       }
    }
 
@@ -789,6 +786,7 @@ public class RDXVRWholeBodyKinematicStreaming
             robotVisualizer.setActive(true);
             ghostRobotGraphic.setActive(true);
             miniGhost.setActive(true);
+            performingDemonstration.set(false);
          }
       }
 
