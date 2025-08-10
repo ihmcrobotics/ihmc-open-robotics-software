@@ -2,45 +2,47 @@ package us.ihmc.wholeBodyController;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public interface RobustnessTestParameters
+public abstract class RobustnessTestParameters
 {
-    RobustnessTestConfig getTestConfiguration();
-    RobustnessTestConfig getTestConfigurationForLevel(int level);
+    // Record for test configuration
+    public record RobustnessTestConfig(double minForce, double maxForce, double minDuration,
+                                       double maxDuration, double pushInterval, Vector3D pushDirection, Vector3D pushOffset) {}
 
-    int getNumberOfTestLevels();
+    // Abstract methods - robot-specific configuration
+    protected abstract RobustnessTestConfig getTestConfiguration();
+    public abstract double getLightPushForce();
+    public abstract double getLightPushDuration();
+    public abstract double getHeavyPushForce();
+    public abstract double getHeavyPushDuration();
+    public abstract int getNumberOfTestLevels();
 
-    // Individual parameter access
-    double getMinForce();
-    double getMaxForce();
-    double getMinDuration();
-    double getMaxDuration();
-    double getPushInterval();
-    Vector3D getPushDirection();
-    Vector3D getPushOffset();
+    // Concrete methods - generic logic
+    public double getMinForce() { return getTestConfiguration().minForce(); }
+    public double getMaxForce() { return getTestConfiguration().maxForce(); }
+    public double getMinDuration() { return getTestConfiguration().minDuration(); }
+    public double getMaxDuration() { return getTestConfiguration().maxDuration(); }
+    public double getPushInterval() { return getTestConfiguration().pushInterval(); }
+    public Vector3D getPushDirection() { return getTestConfiguration().pushDirection(); }
+    public Vector3D getDefaultPushDirection() { return getTestConfiguration().pushDirection(); }
+    public Vector3D getPushOffset() { return getTestConfiguration().pushOffset(); }
 
-    // Quick access methods for manual testing
-    double getLightPushForce();
-    double getLightPushDuration();
-    double getHeavyPushForce();
-    double getHeavyPushDuration();
-    Vector3D getDefaultPushDirection();
-
-    record RobustnessTestConfig(double minForce, double maxForce, double minDuration,
-                                double maxDuration, double pushInterval, Vector3D pushDirection,
-                                Vector3D pushOffset)
+    /**
+     * Calculates progressive test configuration for a specific level
+     */
+    public RobustnessTestConfig getTestConfigurationForLevel(int level)
     {
-        public RobustnessTestConfig(double minForce, double maxForce, double minDuration,
-                                    double maxDuration, double pushInterval, Vector3D pushDirection,
-                                    Vector3D pushOffset)
-        {
-            this.minForce = minForce;
-            this.maxForce = maxForce;
-            this.minDuration = minDuration;
-            this.maxDuration = maxDuration;
-            this.pushInterval = pushInterval;
-            this.pushDirection = new Vector3D(pushDirection);
-            this.pushDirection.normalize(); // Ensure unit vector
-            this.pushOffset = pushOffset;
+        if (level < 1 || level > getNumberOfTestLevels()) {
+            throw new IllegalArgumentException("Level must be between 1 and " + getNumberOfTestLevels());
         }
+
+        RobustnessTestConfig baseConfig = getTestConfiguration();
+        double forceIncrement = (baseConfig.maxForce() - baseConfig.minForce()) / (getNumberOfTestLevels() - 1);
+        double durationIncrement = (baseConfig.maxDuration() - baseConfig.minDuration()) / (getNumberOfTestLevels() - 1);
+
+        double currentForce = baseConfig.minForce() + ((level - 1) * forceIncrement);
+        double currentDuration = baseConfig.minDuration() + ((level - 1) * durationIncrement);
+
+        return new RobustnessTestConfig(currentForce, currentForce, currentDuration,
+                currentDuration, baseConfig.pushInterval(), baseConfig.pushDirection(), baseConfig.pushOffset());
     }
 }
