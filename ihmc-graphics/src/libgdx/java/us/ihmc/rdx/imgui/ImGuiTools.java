@@ -389,10 +389,13 @@ public class ImGuiTools
 
    public static void renderSliderOrProgressNotch(float x, int color)
    {
+      renderSliderOrProgressNotch(x, color, 3.0f, 2.0f);
+   }
+
+   public static void renderSliderOrProgressNotch(float x, int color, float verticalExtents, float notchWidth)
+   {
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();
-      float verticalExtents = 3.0f;
-      float notchWidth = 2.0f;
 
       ImGui.getWindowDrawList().addRectFilled(cursorScreenPosX + x,
                                               ImGui.getCursorScreenPosY() - verticalExtents,
