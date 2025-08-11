@@ -22,14 +22,19 @@ public class BVHParser
    public SkeletonHierarchy parseHierarchy(File bvhFile) throws IOException
    {
       SkeletonHierarchy skeleton = new SkeletonHierarchy();
-      try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile))) {
+      int indexTracker = 0;
+      try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile)))
+      {
          String line;
-         while((line=reader.readLine()) != null && !(line.trim()).equals("MOTION")) {
-            if (line.trim().equals("HIERARCHY")) {
-               if ((line=reader.readLine().trim()).startsWith("ROOT")) {
+         while ((line = reader.readLine()) != null && !(line.trim()).equals("MOTION"))
+         {
+            if (line.trim().equals("HIERARCHY"))
+            {
+               if ((line = reader.readLine().trim()).startsWith("ROOT"))
+               {
                   Stack<String> parents = new Stack<>();
                   parents.push(null);
-                  parseJoints(reader, skeleton, line.trim(), parents);
+                  indexTracker = parseJoints(reader, skeleton, line.trim(), parents, indexTracker);
                   break;
                }
             }
@@ -38,48 +43,87 @@ public class BVHParser
       return skeleton;
    }
 
-      private void parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, String line, Stack<String> parents) throws IOException
+   private int parseJoints(BufferedReader reader, SkeletonHierarchy skeleton, String line, Stack<String> parents, int startIndex) throws IOException
+   {
+      String[] splitLine = line.split("\\s+");
+      String name;
+      List<String> channels = new ArrayList<>();
+      int channelCount = 0;
+      int indexTracker = startIndex;
+      String parentName = parents.peek();
+
+      if (line.startsWith("End Site"))
       {
-         String name = line.split("\\s+")[1];
-         List<String> channels = new ArrayList<>();
-         String parentName = parents.peek();
+         name = splitLine[0] + " " + splitLine[1] + "-" + parentName;
+      }
+      else
+      {
+         name = splitLine[1];
+      }
 
+      reader.readLine();
+      Vector3D offset = getOffset(reader.readLine().trim());
 
-         reader.readLine();
-         Vector3D offset = getOffset(reader.readLine().trim());
+      if (!(name.startsWith("End Site")))
+      {
+         channels = getChannels(reader.readLine().trim());
+         channelCount = channels.size();
+         indexTracker += channelCount;
+      }
 
-
-         if (!(name.equals("End Site"))) {
-            channels = getChannels(reader.readLine().trim());
-         }
-
-         skeleton.addJoint(new JointInfo(name, parentName, offset, channels));
-         parents.push(name);
+      skeleton.addJoint(new JointInfo(name, parentName, offset, channels, channelCount, startIndex));
+      parents.push(name);
+      line = reader.readLine().trim();
+      while (line.startsWith("JOINT") || line.startsWith("End Site"))
+      {
+         indexTracker = parseJoints(reader, skeleton, line, parents, indexTracker);
          line = reader.readLine().trim();
-         while (line.startsWith("JOINT") || line.startsWith("End Site")) {
-            parseJoints(reader, skeleton, line, parents);
-            line = reader.readLine().trim();
+      }
+
+      parents.pop();
+      return indexTracker;
+   }
+
+   private List<String> getChannels(String line)
+   {
+      String[] lineSplit = line.split("\\s+");
+      return new ArrayList<String>(Arrays.asList(lineSplit).subList(2, lineSplit.length));
+   }
+
+   private Vector3D getOffset(String line)
+   {
+      String[] lineSplit = line.split("\\s+");
+      double[] vectorArray = new double[3];
+      for (int i = 1; lineSplit.length > i; i++)
+      {
+         vectorArray[i - 1] = Double.parseDouble(lineSplit[i]);
+      }
+      return new Vector3D(vectorArray);
+   }
+
+   public List<MotionFrame> parseMotion(File bvhFile, SkeletonHierarchy hierarchy) throws IOException
+   {
+
+      try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile)))
+      {
+         String line;
+         while ((line = reader.readLine()) != null)
+         {
+            if (line.trim().equals("MOTION"))
+            {
+               //            if ((line=reader.readLine().trim()).startsWith("ROOT")) {
+               //               Stack<String> parents = new Stack<>();
+               //               parents.push(null);
+               //               parseJoints(reader, skeleton, line.trim(), parents);
+               //               break;
+               //           }
+            }
          }
-
-         parents.pop();
-         return;
       }
 
-      private List<String> getChannels(String line) {
-         String[] lineSplit = line.split("\\s+");
-         return new ArrayList<String>(Arrays.asList(lineSplit).subList(2, lineSplit.length));
-      }
-
-      private Vector3D getOffset(String line) {
-         String[] lineSplit = line.split("\\s+");
-         double[] vectorArray = new double[3];
-         for (int i = 1; lineSplit.length > i; i++) {
-            vectorArray[i-1] = Double.parseDouble(lineSplit[i]);
-         }
-         return new Vector3D(vectorArray);
-      }
-
-
+      List<MotionFrame> frames = new ArrayList<MotionFrame>();
+      return frames;
+   }
    /*
     * Parses the MOTION section after hierarchy, returning a list of frames:
     *   - frameCount
@@ -99,21 +143,25 @@ public class BVHParser
    }
    */
 
-   public static void main(String[] args) {
-      try {
+   public static void main(String[] args)
+   {
+      try
+      {
          File bvhFile = new File(args[0]);
          BVHParser parser = new BVHParser();
          SkeletonHierarchy hierarchy = parser.parseHierarchy(bvhFile);
 
          System.out.println("Hierarchy:");
-         for (String jointName: hierarchy.getJointNames()) {
+         for (String jointName : hierarchy.getJointNames())
+         {
             JointInfo joint = hierarchy.getJoint(jointName);
-            System.out.println(joint.parentName());
-            System.out.println(jointName + ", Offset: " + joint.offset() + ", Channels: " + joint.channels()  );
+            System.out.println("\n" + joint.parentName());
+            System.out.println(jointName + "\nOffset: " + joint.offset() + "\nChannels: " + joint.channels() + "\nChannel Count: " + joint.channelCount()
+            + "\nChannel Start Index: " + joint.channelStartIndex());
          }
-
       }
-      catch (IOException e) {
+      catch (IOException e)
+      {
          e.printStackTrace();
       }
    }
