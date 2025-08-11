@@ -494,11 +494,11 @@ public class KSTTools
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
 
-         if (areLegJointspaceOutputsEnabled.get(robotSide).getValue())
+//         if (areLegJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeLegStreamingMessage(robotSide);
       }
 
-      if (isSpineJointspaceOutputEnabled.getValue())
+//      if (isSpineJointspaceOutputEnabled.getValue())
          streamingMessageFactory.computeSpineStreamingMessage();
       if (isNeckJointspaceOutputEnabled.getValue())
          streamingMessageFactory.computeNeckStreamingMessage();
