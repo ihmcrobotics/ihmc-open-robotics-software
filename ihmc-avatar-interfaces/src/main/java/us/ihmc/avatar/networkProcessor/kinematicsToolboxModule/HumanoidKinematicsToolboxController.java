@@ -921,7 +921,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (isFootInSupport.get(side) || overrideContactState)
          {
             // Get the foot pose in the world frame
-            FramePose3D footPose = new FramePose3D(initialFootPoses.get(side));
+            FramePose3D footPose = new FramePose3D();
+            if (isFootInSupport.get(side))
+            {
+               footPose.set(initialFootPoses.get(side));
+            }
+            else if (overrideContactState)
+            {
+               RigidBodyBasics foot = desiredFullRobotModel.getFoot(side);
+               footPose.setFromReferenceFrame(foot.getBodyFixedFrame());
+            }
             desiredFootFrame.setPoseAndUpdate(footPose);
 
             for (Point2D corner : footCorners)
