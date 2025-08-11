@@ -71,16 +71,25 @@ public class HeadingAndVelocityEvaluationScriptParameters
       this.maxHeadingDot = maxHeadingDot;
    }
 
-   public double getMaxTurningVelocity(){ return maxTurningVelocity;}
+   public double getMaxTurningVelocity()
+   {
+      return maxTurningVelocity;
+   }
 
-   public double getTurningAcceleration(){ return turningAcceleration;}
+   public double getTurningAcceleration()
+   {
+      return turningAcceleration;
+   }
 
    public void setTurningAcceleration(double turningAcceleration)
    {
       this.turningAcceleration = turningAcceleration;
    }
 
-   public void setMaxTurningVelocity(double maxTurningVelocity){this.maxTurningVelocity = maxTurningVelocity; }
+   public void setMaxTurningVelocity(double maxTurningVelocity)
+   {
+      this.maxTurningVelocity = maxTurningVelocity;
+   }
 
 
 }

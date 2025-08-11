@@ -4,10 +4,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public abstract class RobustnessTestParameters
 {
-    // Record for test configuration
-    public record RobustnessTestConfig(double minForce, double maxForce, double minDuration,
-                                       double maxDuration, double pushInterval, Vector3D pushDirection, Vector3D pushOffset) {}
-
     // Abstract methods - robot-specific configuration
     public abstract RobustnessTestConfig getTestConfiguration();
     public abstract double getLightPushForce();
@@ -26,9 +22,11 @@ public abstract class RobustnessTestParameters
     public Vector3D getDefaultPushDirection() { return getTestConfiguration().pushDirection(); }
     public Vector3D getPushOffset() { return getTestConfiguration().pushOffset(); }
 
-    /**
-     * Calculates progressive test configuration for a specific level
-     */
+    public record RobustnessTestConfig(double minForce, double maxForce, double minDuration,
+                                       double maxDuration, double pushInterval, Vector3D pushDirection, Vector3D pushOffset)
+    {
+    }
+
     public RobustnessTestConfig getTestConfigurationForLevel(int level)
     {
         if (level < 1 || level > getNumberOfTestLevels()) {
