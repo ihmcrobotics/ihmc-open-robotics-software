@@ -42,6 +42,11 @@ public enum VRTrackedSegmentType
       return segmentName.contains("Ankle") || segmentName.contains("Foot");
    }
 
+   public boolean isWristRelated()
+   {
+      return segmentName.contains("Wrist");
+   }
+
    public boolean isHandRelated()
    {
       return segmentName.contains("Hand");
