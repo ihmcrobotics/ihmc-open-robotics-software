@@ -2,7 +2,7 @@ package us.ihmc.openAlexander;
 
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.robotics.partNames.HandJointName;
 
 public class AlexanderNubHandModel implements HandModel
 {
