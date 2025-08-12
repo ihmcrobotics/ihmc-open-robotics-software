@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,7 +23,7 @@ public class RDXStereoImagePanel
       this.vrModeManager = vrModeManager;
       for (RobotSide side : RobotSide.values)
       {
-         panels.put(side, new RDX3DSituatedImagePanel(context, vrModeManager));
+         panels.put(side, new RDX3DSituatedImagePanel(context, vrModeManager, side == RobotSide.LEFT));
       }
    }
 
@@ -60,5 +61,8 @@ public class RDXStereoImagePanel
       }
    }
 
-   public RDX3DSituatedImagePanel getPanel(RobotSide side) { return panels.get(side); }
+   public boolean isVRControllerInFOV(RobotSide side)
+   {
+      return panels.get(RobotSide.LEFT).isVRControllerInFOV().get(side);
+   }
 }
