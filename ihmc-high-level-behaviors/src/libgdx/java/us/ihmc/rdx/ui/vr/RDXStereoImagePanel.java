@@ -14,9 +14,11 @@ public class RDXStereoImagePanel
 {
    private final RDX3DSituatedImagePanel leftPanel;
    private final RDX3DSituatedImagePanel rightPanel;
+   private RDXVRModeManager vrModeManager;
 
    public RDXStereoImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
    {
+      this.vrModeManager = vrModeManager;
       leftPanel = new RDX3DSituatedImagePanel(context, vrModeManager);
       rightPanel = new RDX3DSituatedImagePanel(context, vrModeManager);
    }
@@ -37,7 +39,7 @@ public class RDXStereoImagePanel
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
+      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT) && vrModeManager.getControls().getUseStereoVision().get())
       {
          leftPanel.getRenderables(renderables, pool, sceneLevels);
       }

@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.awt.*;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
@@ -43,7 +43,7 @@ public class RDX3DSituatedImagePanel
    private static final float VERTICAL_FOV_CAMERA = 52.0f; // https://support.stereolabs.com/hc/en-us/articles/360007395634-What-is-the-camera-focal-length-and-field-of-view
    private static final double JOYSTICK_CONTROL_THRESHOLD = 0.7;
    private static final float JOYSTICK_INCREMENT = 0.01f;
-   private float panelDistance = 1.0f;
+   private float panelDistance = 0.77f;
 
    private ModelInstance modelInstance;
    private ModelInstance hoverBoxMesh;
@@ -224,6 +224,7 @@ public class RDX3DSituatedImagePanel
                   {
                      panelDistance = panelDistance + ((float) Math.signum(joystickForwardValue) * JOYSTICK_INCREMENT);
                      panelDistance = Math.max(0.0f, Math.min(panelDistance, 1.5f));
+                     LogTools.info(panelDistance);
                   }
                }
             });
