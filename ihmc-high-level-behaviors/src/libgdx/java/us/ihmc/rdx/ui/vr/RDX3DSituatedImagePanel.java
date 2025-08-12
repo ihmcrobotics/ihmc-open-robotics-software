@@ -32,6 +32,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.awt.*;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
@@ -40,7 +41,9 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinate
 public class RDX3DSituatedImagePanel
 {
    private static final float VERTICAL_FOV_CAMERA = 52.0f; // https://support.stereolabs.com/hc/en-us/articles/360007395634-What-is-the-camera-focal-length-and-field-of-view
-   private static final float X_PANEL_DISTANCE = 1.0f;
+   private static final double JOYSTICK_CONTROL_THRESHOLD = 0.7;
+   private static final float JOYSTICK_INCREMENT = 0.01f;
+   private float panelDistance = 1.0f;
 
    private ModelInstance modelInstance;
    private ModelInstance hoverBoxMesh;
@@ -171,7 +174,7 @@ public class RDX3DSituatedImagePanel
       {
          boolean flipY = false;
          // Calculate panel size in meters from FOV
-         float panelHeightMeters = 2.0f * X_PANEL_DISTANCE * (float) Math.tan(Math.toRadians(VERTICAL_FOV_CAMERA) / 2.0f);
+         float panelHeightMeters = 2.0f * panelDistance * (float) Math.tan(Math.toRadians(VERTICAL_FOV_CAMERA) / 2.0f);
          float aspectRatio = imageTexture.getWidth() / (float) imageTexture.getHeight();
          float panelWidthMeters = panelHeightMeters * aspectRatio;
          float halfWidth = panelWidthMeters * 0.5f;
@@ -181,7 +184,7 @@ public class RDX3DSituatedImagePanel
          floatingPanelTransformToWorld.set(cameraFrame.getTransformToRoot());
          RigidBodyTransform camToPanel = new RigidBodyTransform();
          camToPanel.setIdentity();
-         camToPanel.getTranslation().set(X_PANEL_DISTANCE, 0.0, 0.0); // move distanceMeters along X in camera frame
+         camToPanel.getTranslation().set(panelDistance, 0.0, 0.0); // move distanceMeters along X in camera frame
          floatingPanelTransformToWorld.multiply(camToPanel); // floatingPanel now at (distanceMeters,0,0) in camera frame
          floatingPanelTransformToWorld.invert();
          floatingPanelFrame.update();
@@ -212,6 +215,16 @@ public class RDX3DSituatedImagePanel
                {
                   vrPickResult.get(side).setHoveringCollsion(controller.getPickPointPose().getPosition(), pointCollidable.getClosestPointOnSurface());
                   controller.addPickResult(vrPickResult.get(side));
+               }
+
+               if (side == RobotSide.LEFT)
+               {
+                  double joystickForwardValue = controller.getJoystickActionData().y();
+                  if (Math.abs(joystickForwardValue) > JOYSTICK_CONTROL_THRESHOLD)
+                  {
+                     panelDistance = panelDistance + ((float) Math.signum(joystickForwardValue) * JOYSTICK_INCREMENT);
+                     panelDistance = Math.max(0.0f, Math.min(panelDistance, 1.5f));
+                  }
                }
             });
          }
@@ -286,5 +299,10 @@ public class RDX3DSituatedImagePanel
    public Texture getTexture()
    {
       return texture;
+   }
+
+   public boolean isVRHovering()
+   {
+      return isVRHovering;
    }
 }
