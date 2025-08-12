@@ -32,6 +32,27 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * <p>
+ * This class computes the reachability sphere for a robot's end effector, giving a number of reachability measures for that envelope. This consists of a
+ * discretized space, where the score is computed at each discrete point in that space.
+ * </p>
+ * <p>
+ * The robot itself is contained in {@link ReachabilityMapRobotInformation}. This consists of a {@link RobotDefinition} in the
+ * {@link ReachabilityMapRobotInformation#robotDefinition}, name for the "base link" contained in {@link ReachabilityMapRobotInformation#baseName}, and name for
+ * the "end effector" contained in {@link ReachabilityMapRobotInformation#endEffectorName}. This defines what the reachability will be calculated for. This
+ * reachability score will respect the joint limits defined in the {@link ReachabilityMapRobotInformation#robotDefinition}. Additionally, it will consider any
+ * collision models defined in {@link ReachabilityMapRobotInformation#robotDefinition}. A user can also add additional collisions that the robot should consider
+ * using {@link #addRobotCollisionModel(RobotDefinition)}, including potential external objects.
+ * </p>
+ * <p>
+ * The discretization of the environment is defined in the {@link #voxel3DGrid}, which can be set using {@link #setVoxel3DGrid(Voxel3DGrid)}. This consists of a
+ * 3D grid in the world, with each edge of a length of {@link Voxel3DGrid#getGridSizeMeters()}, with {@link Voxel3DGrid#getGridSizeVoxels()} voxels along each
+ * axis. Then, at each point, there are a number of different orientation axes defined in the object {@link Voxel3DGrid#getSphereVoxelShape()}, which has the
+ * field {@link SphereVoxelShape#getNumberOfRays()}, which dictate the alignment of the hand for grasping an object. This is then further discretized with
+ * rotations about each ray, which can be seen at {@link SphereVoxelShape#getNumberOfRotationsAroundRay()}.
+ * </p>
+ */
 public class ReachabilitySphereMapCalculator implements Controller
 {
    private static final boolean VISUALIZE_ALL_SOLVERS = false;
@@ -45,7 +66,6 @@ public class ReachabilitySphereMapCalculator implements Controller
    private Consumer<Voxel3DData> voxelCompletedListener = null;
 
    private final FramePose3D[] solverInputs;
-   private final FrameVector3D[] translationFromVoxelOrigin;
    private final ReachabilityMapSolver[] solvers;
    private final boolean[] solverResults;
    private final Voxel3DData[] solverVoxels;
@@ -67,7 +87,6 @@ public class ReachabilitySphereMapCalculator implements Controller
       solverResults = new boolean[numberOfThreads];
       solverVoxels = new Voxel3DData[numberOfThreads];
       solverInputs = new FramePose3D[numberOfThreads];
-      translationFromVoxelOrigin = new FrameVector3D[numberOfThreads];
 
       RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       ReferenceFrame robotRootFrame = Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame()); // This allows to visualize YoGraphics in frames other than world
@@ -110,7 +129,6 @@ public class ReachabilitySphereMapCalculator implements Controller
             solverYoGraphicGroupDefinitions.add(solverYoGraphicGroup);
          }
          solverInputs[i] = new FramePose3D();
-         translationFromVoxelOrigin[i] = new FrameVector3D();
       }
 
       for (ReachabilityMapSolver solver : solvers)
@@ -128,12 +146,37 @@ public class ReachabilitySphereMapCalculator implements Controller
       setGridFramePose(gridFramePose);
    }
 
-   public void setRobotCollisionModel(RobotDefinition robotDefinition)
+   /**
+    * Adds a collision model for the underlying inverse kinematics solver to use. Using this, the robot will not return motions that result in self
+    * collisions. To use this, the collisions must be defined as part of the robot definition. Note that this does not override the underlying robot model, but
+    * simply copies the collisions from the argument into the internal model.
+    *
+    * <p>
+    *    Note that this does not remove the previously added collision models, and simply adds to them.
+    * </p>
+    *
+    * <p>
+    * If the rigid body contained in the argument {@param robotDefinition} is not part of the robot model, its collision model is added as a static collidable
+    * to the environment. This allows for adding external collidables (e.g. other robots) that must be avoided to the solver.
+    * </p>
+    * @param robotDefinition container for the collisions to use.
+    */
+   public void addRobotCollisionModel(RobotDefinition robotDefinition)
    {
       for (ReachabilityMapSolver solver : solvers)
       {
-         solver.setCollisionModel(robotDefinition);
+         solver.addCollisionModel(robotDefinition);
       }
+   }
+
+   /**
+    * Please use {@link #addRobotCollisionModel(RobotDefinition)} instead. The method name was changed for clarity, but the old method was retained for backward
+    * compatibility.
+    */
+   @Deprecated
+   public void setRobotCollisionModel(RobotDefinition robotDefinition)
+   {
+      addRobotCollisionModel(robotDefinition);
    }
 
    public void setVoxel3DGrid(Voxel3DGrid voxel3DGrid)
@@ -142,6 +185,10 @@ public class ReachabilitySphereMapCalculator implements Controller
       voxel3DGrid.setGridPose(gridFramePose);
    }
 
+   /**
+    * Sets whether to evaluate R Reachability. R reachability evaluates whether the pose is reachable along
+    * @param enable
+    */
    public void setEvaluateRReachability(boolean enable)
    {
       evaluateRReachability.set(enable);
@@ -212,36 +259,44 @@ public class ReachabilitySphereMapCalculator implements Controller
 
       Arrays.fill(solverResults, false);
 
+      // This is solving in parallel, on a multi-threaded approach. Each solverIndex is equivalent to stating the thread index. It performs a single
+      // batch-update on a new set of voxels, and packs whether the solve was successful into the solverResults array.
       IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
       {
          int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
          if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
          {
+            // We are out of voxels to test. There's no need to proceed.
             solverVoxels[solverIndex] = null;
+            solverResults[solverIndex] = false;
             return;
          }
 
          Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
          solverVoxels[solverIndex] = voxel;
 
-         if (solverIndex == 0)
-         {
-            evaluatedPose.getPosition().setMatchingFrame(voxel.getPosition());
-            evaluatedPose.getOrientation().setToZero();
-         }
-
+         // Set the solver input pose to the position of the voxel, with zero orientation. The orientation of the input is not currently used.
          FramePose3D solverInput = solverInputs[solverIndex];
-         solverInput.setReferenceFrame(ReferenceFrame.getWorldFrame());
+         solverInput.setToZero(ReferenceFrame.getWorldFrame());
          solverInput.getPosition().setMatchingFrame(voxel.getPosition());
 
+         if (solverIndex == 0)
+         {
+            // We are visualizing the solver on thread 0. Update the pose that's evaluated.
+            evaluatedPose.set(solverInput);
+         }
+
+         // Compute the solution configuration to reach the desired voxel position. Success is false if the point is unreachable. This must respect the joint
+         // limits and collisions that have been previously defined.
          boolean success = solvers[solverIndex].solveFor(solverInput.getPosition());
          solverResults[solverIndex] = success;
 
          if (success)
          {
+            //
             voxel.registerReachablePosition(solverInput.getPosition(), solvers[solverIndex].getRobotArmJoints());
             if (solverIndex == 0)
-               writeSolverSolution(solvers[solverIndex], controllerOutput);
+               writeSolverSolutionToRobotForViz(solvers[solverIndex], controllerOutput); // Update visualization
             computeVoxel(voxel, solverIndex);
          }
       });
@@ -292,7 +347,7 @@ public class ReachabilitySphereMapCalculator implements Controller
                voxel.registerReachableRay(rayIndex, solverInput, solver.getRobotArmJoints());
 
                if (solverIndex == 0)
-                  writeSolverSolution(solver, controllerOutput);
+                  writeSolverSolutionToRobotForViz(solver, controllerOutput);
             }
             else
             {
@@ -316,14 +371,17 @@ public class ReachabilitySphereMapCalculator implements Controller
                   voxel.registerReachablePose(rayIndex, rotationAroundRayIndex, solverInput, solver.getRobotArmJoints());
 
                   if (solverIndex == 0)
-                     writeSolverSolution(solver, controllerOutput);
+                     writeSolverSolutionToRobotForViz(solver, controllerOutput);
                }
             }
          }
       }
    }
 
-   public static void writeSolverSolution(ReachabilityMapSolver solver, ControllerOutput controllerOutput)
+   /**
+    * Sets the solution configuration of the solver to the robot to allow it to update the visualizer.
+    */
+   public static void writeSolverSolutionToRobotForViz(ReachabilityMapSolver solver, ControllerOutput controllerOutput)
    {
       for (OneDoFJointBasics joint : solver.getRobotArmJoints())
       {

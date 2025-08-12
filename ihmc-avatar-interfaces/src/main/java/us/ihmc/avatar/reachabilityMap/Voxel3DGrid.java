@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
 {
@@ -207,6 +208,14 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          positionExtraData.jointTorques = jointTorques;
       }
 
+      /**
+       * Records the information about this voxel, if it's reachable. Specifically, records the desired position of the voxel, which should max the voxel
+       * position itself, as well as the joints and torques necessary to achieve that position.
+       *
+       * FIXME how are these torques computed? What are the loading conditions.
+       * @param desiredPosition desired position
+       * @param joints vector of joints, which contain the necessary configuration and torques.
+       */
       public void registerReachablePosition(Point3DReadOnly desiredPosition, OneDoFJointReadOnly[] joints)
       {
          positionExtraData = new VoxelExtraData();

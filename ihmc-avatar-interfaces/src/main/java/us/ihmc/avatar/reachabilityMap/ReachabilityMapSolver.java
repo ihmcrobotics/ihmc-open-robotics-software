@@ -107,7 +107,16 @@ public class ReachabilityMapSolver
       parentRegistry.addChild(registry);
    }
 
+   /**
+    * Deprecated. Please use {@link #addCollisionModel(RobotDefinition)}.
+    */
+   @Deprecated
    public void setCollisionModel(RobotDefinition robotDefinition)
+   {
+      addCollisionModel(robotDefinition);
+   }
+
+   public void addCollisionModel(RobotDefinition robotDefinition)
    {
       Set<RigidBodyBasics> solverRigidBodies = Arrays.stream(robotArmJoints).map(JointBasics::getSuccessor).collect(Collectors.toSet());
       //    solverRigidBodies.add(robotArmJoints[0].getPredecessor());
@@ -203,22 +212,48 @@ public class ReachabilityMapSolver
       kinematicsToolboxController.requestInitialize();
 
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      // Set the hash code of the end effector.
       message.setEndEffectorHashCode(endEffector.hashCode());
+      // Set the desired pose of the end effector.
       pose.get(message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
+      // Set the control frame pose in the end effector frame.
+      controlFramePoseInEndEffector.get(message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
 
+      // Set a uniform weight for the solver.
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
-      message.getControlFramePositionInEndEffector().set(controlFramePoseInEndEffector.getPosition());
-      message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getOrientation());
+
       if (solverForRay)
+      {
+         // If doing a ray solution, we select the y and z orientation, but not the x orientation, as well as set a null frame to the selection. The x-axis is
+         // pointed along the ray, so rotation about the x-axis is left free.
          MessageTools.packSelectionMatrix3DMessage(rayAngularSelection, message.getAngularSelectionMatrix());
+      }
       else
+      {
+         // If doing not a ray selection, we're doing a pose selection, and we care about all of the axes of the orientations.
          MessageTools.packSelectionMatrix3DMessage(true, message.getAngularSelectionMatrix());
+      }
       commandInputManager.submitMessage(message);
 
       return solveAndRetry(maximumNumberOfIterations.getIntegerValue());
    }
 
+   /**
+    * This computes the necessary kinematic configuration of the system to reach the desired position. This configuration must respect the joint limits and
+    * collisions defined in the robot definition. It will perform up to 50 iterations to find the right solution.
+    *
+    * <p>
+    *    This desired position must be defined for the control frame in the end effector. To change this control frame, please use
+    *    {@link #setControlFramePoseInParentJoint(Pose3DReadOnly)}. This can be thought of as the "palm" frame if the end effector is the hand.
+    * </p>
+    * <p>
+    *    Any orientation is acceptable.
+    * </p>
+    *
+    * @param position desired position of the control frame of the end effector.
+    * @return true if valid solution was found, false otherwise.
+    */
    public boolean solveFor(FramePoint3DReadOnly position)
    {
       kinematicsToolboxController.requestInitialize();

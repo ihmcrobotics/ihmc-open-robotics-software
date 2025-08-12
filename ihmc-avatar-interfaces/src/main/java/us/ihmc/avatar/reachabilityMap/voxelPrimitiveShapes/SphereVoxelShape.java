@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
@@ -60,7 +61,7 @@ public class SphereVoxelShape
       return numberOfRotationsAroundRay;
    }
 
-   public void getRay(Vector3D rayToPack, int rayIndex)
+   public void getRay(Vector3DBasics rayToPack, int rayIndex)
    {
       MathTools.checkIntervalContains(rayIndex, 0, numberOfRays - 1);
 
@@ -76,22 +77,34 @@ public class SphereVoxelShape
       orientation.setIncludingFrame(referenceFrame, rotations[rayIndex][rotationAroundRayIndex]);
    }
 
-   public void getPose(FramePose3DBasics pose, int rayIndex, int rotationAroundRayIndex)
+   /**
+    * This computes a pose that matches the ray index orientation and a zero position. The orientation is set such that the x-forward direction is aligned with
+    * ray {@param rayIndex} that is uniformly sampled on the surface of a sphere around this position. The y-and-z axes are set using a rotation about the
+    * x-forward direction, with a rotation set by {@param rotationAroundRayIndex}.
+    * @param poseToPack pose of this ray
+    * @param rayIndex index of the ray that we want.
+    * @param rotationAroundRayIndex index of the rotation about the ray that we want.
+    */
+   public void getPose(FramePose3DBasics poseToPack, int rayIndex, int rotationAroundRayIndex)
    {
       MathTools.checkIntervalContains(rayIndex, 0, numberOfRays - 1);
       MathTools.checkIntervalContains(rotationAroundRayIndex, 0, numberOfRotationsAroundRay - 1);
 
       if (type == SphereVoxelType.graspAroundSphere)
       {
-         pose.setIncludingFrame(referenceFrame, pointsOnSphere[rayIndex], rotations[rayIndex][rotationAroundRayIndex]);
+         poseToPack.setIncludingFrame(referenceFrame, pointsOnSphere[rayIndex], rotations[rayIndex][rotationAroundRayIndex]);
       }
       else
       {
-         pose.setToZero(referenceFrame);
-         pose.getOrientation().set(rotations[rayIndex][rotationAroundRayIndex]);
+         poseToPack.setToZero(referenceFrame);
+         poseToPack.getOrientation().set(rotations[rayIndex][rotationAroundRayIndex]);
       }
    }
 
+   /**
+    * This is hte set of points on the sphere that are used to get all of the rays.
+    * @return points on the surface of the spheres.
+    */
    public Point3D[] getPointsOnSphere()
    {
       return pointsOnSphere;

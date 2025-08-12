@@ -48,7 +48,7 @@ public class ReachabilitySphereMapSimulationHelper
       Robot robot = session.addRobot(robotDefinition);
       calculator = new ReachabilitySphereMapCalculator(robotInformation, robot.getControllerOutput(), 20);
       calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
-      calculator.setRobotCollisionModel(robotDefinition);
+      calculator.addRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
 
       previousVisualizationType.set(VisualizationType.RayReach);
@@ -77,7 +77,7 @@ public class ReachabilitySphereMapSimulationHelper
 
    public void setGridPosition(double x, double y, double z)
    {
-      calculator.getGridFramePose().set(x, y, z, 0, 0, 0);
+      calculator.getGridFramePose().getPosition().set(x, y, z);
    }
 
    public void setGridParameters(int gridSizeInNumberOfVoxels, double voxelSize, int numberOfRays, int numberOfRotationsAroundRay)
@@ -94,7 +94,7 @@ public class ReachabilitySphereMapSimulationHelper
       guiControls = SessionVisualizer.startSessionVisualizer(session);
       guiControls.waitUntilVisualizerFullyUp();
       session.stopSessionThread(); // We'll run the simulation in the current thread.
-      guiControls.setCameraFocusPosition(calculator.getGridFramePose().getX(), calculator.getGridFramePose().getY(), calculator.getGridFramePose().getZ());
+      guiControls.setCameraFocalPosition(calculator.getGridFramePose().getPosition());
       guiControls.setCameraOrientation(Math.toRadians(15.0), Math.toRadians(170.0));
       setupVisualization();
 
