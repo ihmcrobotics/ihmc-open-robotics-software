@@ -7,20 +7,23 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 
 public class RDXStereoImagePanel
 {
-   private final RDX3DSituatedImagePanel leftPanel;
-   private final RDX3DSituatedImagePanel rightPanel;
+   private final SideDependentList<RDX3DSituatedImagePanel> panels = new SideDependentList<>();
    private RDXVRModeManager vrModeManager;
 
    public RDXStereoImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
    {
       this.vrModeManager = vrModeManager;
-      leftPanel = new RDX3DSituatedImagePanel(context, vrModeManager);
-      rightPanel = new RDX3DSituatedImagePanel(context, vrModeManager);
+      for (RobotSide side : RobotSide.values)
+      {
+         panels.put(side, new RDX3DSituatedImagePanel(context, vrModeManager));
+      }
    }
 
    /**
@@ -33,29 +36,29 @@ public class RDXStereoImagePanel
     */
    public void update(Texture leftImage, Texture rightImage, ReferenceFrame leftCameraFrame, ReferenceFrame rightCameraFrame)
    {
-      leftPanel.update(leftImage, leftCameraFrame);
-      rightPanel.update(rightImage, rightCameraFrame);
+      panels.get(RobotSide.LEFT).update(leftImage, leftCameraFrame);
+      panels.get(RobotSide.RIGHT).update(rightImage, rightCameraFrame);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT) && vrModeManager.getControls().getUseStereoVision().get())
       {
-         leftPanel.getRenderables(renderables, pool, sceneLevels);
+         panels.get(RobotSide.RIGHT).getRenderables(renderables, pool, sceneLevels);
       }
       else if (sceneLevels.contains(RDXSceneLevel.VR_EYE_LEFT) || sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         rightPanel.getRenderables(renderables, pool, sceneLevels);
+         panels.get(RobotSide.LEFT).getRenderables(renderables, pool, sceneLevels);
       }
    }
 
    public void destroy()
    {
-      leftPanel.destroy();
-      rightPanel.destroy();
+      for (RobotSide side : RobotSide.values)
+      {
+         panels.get(side).destroy();
+      }
    }
 
-   public RDX3DSituatedImagePanel getLeftPanel() { return leftPanel; }
-
-   public RDX3DSituatedImagePanel getRightPanel() { return rightPanel; }
+   public RDX3DSituatedImagePanel getPanel(RobotSide side) { return panels.get(side); }
 }
