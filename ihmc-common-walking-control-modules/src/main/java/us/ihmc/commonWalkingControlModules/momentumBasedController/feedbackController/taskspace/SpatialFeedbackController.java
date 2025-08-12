@@ -22,6 +22,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -611,7 +612,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       if (yoAchievedVelocity == null)
          return;
 
-      endEffectorAchievedTwist.setIncludingFrame(rigidBodyTwistProvider.getRelativeTwist(base, endEffector));
+      TwistReadOnly twist = rigidBodyTwistProvider.getRelativeTwist(base, endEffector);
+      if (twist == null)
+         return;
+
+      endEffectorAchievedTwist.setIncludingFrame(twist);
       endEffectorAchievedTwist.changeFrame(controlFrame);
       achievedAngularVelocity.setIncludingFrame(endEffectorAchievedTwist.getAngularPart());
       achievedLinearVelocity.setIncludingFrame(endEffectorAchievedTwist.getLinearPart());

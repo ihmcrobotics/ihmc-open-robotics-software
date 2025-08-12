@@ -14,6 +14,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.log.LogTools;
 
 public interface ReachabilityMapFileWriter
 {
@@ -22,6 +23,7 @@ public interface ReachabilityMapFileWriter
       File outputStream = newFile(robotInformation.getRobotDefinition().getName(), classForFilePath, getFileExtension());
       if (outputStream == null)
          return;
+      LogTools.info("Writing reachability map to: {}", outputStream.getAbsolutePath());
       write(outputStream, robotInformation, reachabilityMap);
    }
 

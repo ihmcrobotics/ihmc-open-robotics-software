@@ -52,6 +52,21 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * field {@link SphereVoxelShape#getNumberOfRays()}, which dictate the alignment of the hand for grasping an object. This is then further discretized with
  * rotations about each ray, which can be seen at {@link SphereVoxelShape#getNumberOfRotationsAroundRay()}.
  * </p>
+ * <p>
+ * The score of reachability is broken into two separate metrics: R and R2. Each of these is computed for each voxel in the grid, and then stored in the
+ * {@link #voxel3DGrid} object, which can be accessed using {@link #getVoxel3DGrid()} and then {@link Voxel3DGrid#getVoxel(int)} and then
+ * {@link Voxel3DData#getR()} or {@link Voxel3DData#getR2()}.
+ * </p>
+ * <p>
+ * The R metric is the ratio of the axis-aligned pose of the end effector compared to the total number of rays to be considered. That is, it checks to see if
+ * the end effector can reach the position of the voxel while staying axially aligned with a ray along pointed towards that voxel. The end-effector is allowed
+ * to freely rotate around the ray, but must be aligned with it. This is useful for grasping objects that are aligned with the robot's end effector. The ratio
+ * comes in by determining the ratio of rays that can be achieved to the total number of rays that were attempted.
+ * </p>
+ * <p>
+ * The R2 metric is similar to the R metric, but removes the freedom of the end-effector to rotate around the ray. Instead, it checks to see if the end-effector
+ * can fully achieve the pose, both position and orientation, of the voxel.
+ * </p>
  */
 public class ReachabilitySphereMapCalculator implements Controller
 {
@@ -186,8 +201,9 @@ public class ReachabilitySphereMapCalculator implements Controller
    }
 
    /**
-    * Sets whether to evaluate R Reachability. R reachability evaluates whether the pose is reachable along
-    * @param enable
+    * Sets whether to evaluate R Reachability. R reachability evaluates whether the position is reachable by the end effector while aligning the end effector
+    * along a ray. The R factor is the ratio of achievable rays and positions to the total number of rays.
+    * @param enable if true, R reachability is evaluated, otherwise it is not.
     */
    public void setEvaluateRReachability(boolean enable)
    {

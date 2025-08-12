@@ -297,6 +297,10 @@ public class ReachabilityMapSolver
          KinematicsToolboxOutputStatus solution = kinematicsToolboxController.getSolution();
          solutionQuality = solution.getSolutionQuality();
 
+         // If the quality is negative, no solution was found. Return, and start from a new random configuration.
+         if (solutionQuality < 0.0)
+            return false;
+
          if (!Double.isNaN(solutionQualityLast))
          {
             double deltaSolutionQualityLast = Math.abs(solutionQuality - solutionQualityLast);

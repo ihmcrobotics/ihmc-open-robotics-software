@@ -151,6 +151,7 @@ public class ReachabilityMapVisualizer
    {
       ReachabilityMapMatlabImporter matlabImporter = new ReachabilityMapMatlabImporter();
       File file = matlabImporter.findLatestFile(classForFilePath, robotInformation);
+      LogTools.info("Loading reachability map from latest file: {}", file);
       if (file != null)
          return loadReachabilityMapFromFile(matlabImporter, file);
 
