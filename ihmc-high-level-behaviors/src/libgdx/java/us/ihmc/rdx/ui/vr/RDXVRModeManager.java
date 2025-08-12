@@ -40,9 +40,9 @@ public class RDXVRModeManager
 
    private RDXVRManager vrManager;
    private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
+
    private ImBoolean interactablesEnabled;
 
-   private RDXVRStereoVision stereoVision;
    private RDXVRFootstepPlacement footstepPlacer;
    private RDXHandConfigurationManager handManager;
 
@@ -91,7 +91,6 @@ public class RDXVRModeManager
          }
       }
       footstepPlacer = new RDXVRFootstepPlacement(baseUI.getVRManager().getContext(), syncedRobot, controllerHelper);
-      stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) ||
           syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
@@ -248,11 +247,6 @@ public class RDXVRModeManager
       }
    }
 
-   public void render()
-   {
-      stereoVision.renderProjection();
-   }
-
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
@@ -268,9 +262,6 @@ public class RDXVRModeManager
             case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
          }
 
-         if (stereoVision.isEnabled())
-            stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
-
          if (vrModeControls.getRenderOnLeftHand().get())
             vrModeControls3DPanel.getRenderables(renderables, pool);
       }
@@ -282,7 +273,6 @@ public class RDXVRModeManager
       if (kinematicsStreaming != null)
          kinematicsStreaming.destroy();
       joystickBasedStepping.destroy();
-      stereoVision.getDualBlackflySphericalProjection().shutdown();
       footstepPlacer.destroy();
       footstepStreaming.destroy();
    }
@@ -313,8 +303,8 @@ public class RDXVRModeManager
       return joystickBasedStepping;
    }
 
-   public RDXVRStereoVision getStereoVision()
+   public RDXVRModeControls getControls()
    {
-      return stereoVision;
+      return vrModeControls;
    }
 }

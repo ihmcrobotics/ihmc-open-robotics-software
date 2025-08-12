@@ -278,6 +278,38 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
+   public static RDXSimulatedImageSensor createZEDMiniImageSensor()
+   {
+      ZEDModelData modelData = ZEDModelData.ZED_MINI;
+      RDXSimulatedImageSensor zed = new RDXSimulatedImageSensor(modelData.name(), 15.0);
+      zed.addCamera("left",
+                    1280,
+                    720,
+                    52.0f,
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                    true,
+                    ZEDImageSensor.DEPTH_IMAGE_KEY,
+                    15,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, modelData.getCenterToCameraDistance(), 0.0)));
+      zed.addCamera("right",
+                    1280,
+                    720,
+                    52.0f,
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                    false,
+                    -1,
+                    0,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, -modelData.getCenterToCameraDistance(), 0.0)));
+
+      return zed;
+   }
+
    public static RDXSimulatedImageSensor createZED2iImageSensor()
    {
       ZEDModelData modelData = ZEDModelData.ZED_2I;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics;
+package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
@@ -7,43 +7,40 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.interaction.PointCollidable;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
-import static us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
 public class RDX3DSituatedImagePanel
 {
-   private static final double FOLLOW_HEADSET_OFFSET_Y = 0.0;
-   private static final double FOLLOW_HEADSET_OFFSET_Z = 0.17;
+   private static final float VERTICAL_FOV_CAMERA = 52.0f; // https://support.stereolabs.com/hc/en-us/articles/360007395634-What-is-the-camera-focal-length-and-field-of-view
+   private static final float X_PANEL_DISTANCE = 1.0f;
 
    private ModelInstance modelInstance;
    private ModelInstance hoverBoxMesh;
@@ -62,41 +59,22 @@ public class RDX3DSituatedImagePanel
    private final Vector2 bottomRightUV = new Vector2();
    private final Vector2 topRightUV = new Vector2();
 
-   private RDXVRPanelPlacementMode placementMode = MANUAL_PLACEMENT;
-   private final MutableReferenceFrame floatingPanelFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
-   private final FramePose3D floatingPanelFramePose = new FramePose3D();
-   private double panelDistanceFromHeadset = 0.5;
+   private final RigidBodyTransform floatingPanelTransformToWorld = new RigidBodyTransform();
+   private final ReferenceFrame floatingPanelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                            floatingPanelTransformToWorld);
    private boolean isShowing = false;
    private final FrameBox3D selectionCollisionBox = new FrameBox3D();
    private final PointCollidable pointCollidable = new PointCollidable(selectionCollisionBox);
    private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    /** If either VR controller is hovering the panel. */
    private boolean isVRHovering = false;
+   private final RDXVRModeManager vrModeManager;
 
-   public RDX3DSituatedImagePanel()
+   public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
    {
-
-   }
-
-   /**
-    * Create and enable VR interaction.
-    */
-   public RDX3DSituatedImagePanel(RDXVRContext context)
-   {
+      this.vrModeManager = vrModeManager;
       context.addVRPickCalculator(this::calculateVRPick);
       context.addVRInputProcessor(this::processVRInput);
-   }
-
-   public void create(Texture texture, Frustum frustum, ReferenceFrame centerOfPanelFrame, boolean flipY)
-   {
-      // Counter clockwise order
-      // Draw so thumb faces away and index right
-      Vector3[] planePoints = frustum.planePoints;
-      topLeftPosition.set(planePoints[7]);
-      bottomLeftPosition.set(planePoints[4]);
-      bottomRightPosition.set(planePoints[5]);
-      topRightPosition.set(planePoints[6]);
-      create(texture, centerOfPanelFrame, flipY);
    }
 
    public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY)
@@ -105,17 +83,6 @@ public class RDX3DSituatedImagePanel
       bottomLeftPosition.set(points[1]);
       bottomRightPosition.set(points[2]);
       topRightPosition.set(points[3]);
-      create(texture, centerOfPanelFrame, flipY);
-   }
-
-   public void create(Texture texture, double panelWidth, double panelHeight, ReferenceFrame centerOfPanelFrame, boolean flipY)
-   {
-      float halfPanelHeight = (float) panelHeight / 2.0f;
-      float halfPanelWidth = (float) panelWidth / 2.0f;
-      topLeftPosition.set(halfPanelHeight, halfPanelWidth, 0.0f);
-      bottomLeftPosition.set(-halfPanelHeight, halfPanelWidth, 0.0f);
-      bottomRightPosition.set(-halfPanelHeight, -halfPanelWidth, 0.0f);
-      topRightPosition.set(halfPanelHeight, -halfPanelWidth, 0.0f);
       create(texture, centerOfPanelFrame, flipY);
    }
 
@@ -165,7 +132,7 @@ public class RDX3DSituatedImagePanel
       Material material = new Material();
 
       material.set(PBRTextureAttribute.createBaseColorTexture(texture));
-      material.set(PBRColorAttribute.createBaseColorFactor(new Color(0.68235f, 0.688235f, 0.688235f, 1.0f)));
+      material.set(PBRColorAttribute.createDiffuse(new Color(0.68235f, 0.688235f, 0.688235f, 1.0f)));
       modelBuilder.part(meshPart, material);
 
       // TODO: Rebuild the model if the camera parameters change.
@@ -192,29 +159,44 @@ public class RDX3DSituatedImagePanel
       LibGDXTools.toLibGDX(tempFramePoint, positionToTransform);
    }
 
-   public void update(Texture imageTexture)
+   public void update(Texture imageTexture, ReferenceFrame cameraFrame)
    {
+      // Prevent ever having an invisible panel out there, which is very confusing
+      // to the VR user when the controllers are colliding with and invisible box.
+      boolean somethingToShow = imageTexture != null || texture != null;
+      isShowing = somethingToShow && vrModeManager.getControls().getShowFloatingVideoPanel().get();
+
       // Update the texture if necessary
-      if (isShowing && imageTexture != null && imageTexture != texture)
+      if (isShowing && imageTexture != null)
       {
          boolean flipY = false;
-         float multiplier = 2.0f;
-         float halfWidth = imageTexture.getWidth() / 10000.0f * multiplier;
-         float halfHeight = imageTexture.getHeight() / 10000.0f * multiplier;
+         // Calculate panel size in meters from FOV
+         float panelHeightMeters = 2.0f * X_PANEL_DISTANCE * (float) Math.tan(Math.toRadians(VERTICAL_FOV_CAMERA) / 2.0f);
+         float aspectRatio = imageTexture.getWidth() / (float) imageTexture.getHeight();
+         float panelWidthMeters = panelHeightMeters * aspectRatio;
+         float halfWidth = panelWidthMeters * 0.5f;
+         float halfHeight = panelHeightMeters * 0.5f;
+
+         // Build the transform: start with identity, translate by +distanceMeters along X, then apply cameraFrame transform
+         floatingPanelTransformToWorld.set(cameraFrame.getTransformToRoot());
+         RigidBodyTransform camToPanel = new RigidBodyTransform();
+         camToPanel.setIdentity();
+         camToPanel.getTranslation().set(X_PANEL_DISTANCE, 0.0, 0.0); // move distanceMeters along X in camera frame
+         floatingPanelTransformToWorld.multiply(camToPanel); // floatingPanel now at (distanceMeters,0,0) in camera frame
+         floatingPanelTransformToWorld.invert();
+         floatingPanelFrame.update();
+         setPoseToReferenceFrame();
+
          create(imageTexture,
                 new Vector3[] {new Vector3(0.0f, halfWidth, halfHeight),
                                new Vector3(0.0f, halfWidth, -halfHeight),
                                new Vector3(0.0f, -halfWidth, -halfHeight),
                                new Vector3(0.0f, -halfWidth, halfHeight)},
-                floatingPanelFrame.getReferenceFrame(),
+                floatingPanelFrame,
                 flipY);
       }
-
-      setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
-      selectionCollisionBox.getPose().set(floatingPanelFramePose);
-      floatingPanelFramePose.setFromReferenceFrame(floatingPanelFrame.getReferenceFrame());
+      selectionCollisionBox.getPose().set(floatingPanelFrame.getTransformToRoot());
       isVRHovering = false;
-      updatePoses();
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -243,29 +225,10 @@ public class RDX3DSituatedImagePanel
          for (RobotSide side : RobotSide.values)
          {
             context.getController(side).runIfConnected(controller ->
-            {
-               boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
-               isVRHovering |= isHovering;
-
-               if (placementMode == MANUAL_PLACEMENT)
-               {
-                  RDXVRDragData gripDragData = controller.getGripDragData();
-
-                  if (isHovering && gripDragData.getDragJustStarted())
-                  {
-                     gripDragData.setObjectBeingDragged(this);
-                     gripDragData.setInteractableFrameOnDragStart(floatingPanelFrame.getReferenceFrame());
-                  }
-
-                  if (gripDragData.isBeingDragged(this))
-                  {
-                     gripDragData.getDragFrame()
-                                 .getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(), floatingPanelFrame.getReferenceFrame().getParent());
-                     floatingPanelFrame.getReferenceFrame().update();
-                     updatePoses();
-                  }
-               }
-            });
+             {
+                boolean isHovering = controller.getSelectedPick() == vrPickResult.get(side);
+                isVRHovering |= isHovering;
+             });
          }
       }
    }
@@ -281,17 +244,38 @@ public class RDX3DSituatedImagePanel
       }
    }
 
-   private void updatePoses()
-   {
-      setPoseToReferenceFrame(floatingPanelFrame.getReferenceFrame());
-   }
-
-   public void setPoseToReferenceFrame(ReferenceFrame referenceFrame)
+   private void setPoseToReferenceFrame()
    {
       if (modelInstance != null)
-         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), modelInstance.transform);
+         LibGDXTools.toLibGDX(floatingPanelFrame.getTransformToRoot(), modelInstance.transform);
       if (hoverBoxMesh != null)
-         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), hoverBoxMesh.transform);
+         LibGDXTools.toLibGDX(floatingPanelFrame.getTransformToRoot(), hoverBoxMesh.transform);
+   }
+
+   public void destroy()
+   {
+      // Dispose the texture if we own it
+      if (texture != null)
+      {
+         texture.dispose();
+         texture = null;
+      }
+
+      // Dispose the main model
+      if (modelInstance != null)
+      {
+         if (modelInstance.model != null)
+            modelInstance.model.dispose();
+         modelInstance = null;
+      }
+
+      // Dispose the hover box mesh model
+      if (hoverBoxMesh != null)
+      {
+         if (hoverBoxMesh.model != null)
+            hoverBoxMesh.model.dispose();
+         hoverBoxMesh = null;
+      }
    }
 
    public ModelInstance getModelInstance()
@@ -302,15 +286,5 @@ public class RDX3DSituatedImagePanel
    public Texture getTexture()
    {
       return texture;
-   }
-
-   public RDXVRPanelPlacementMode getPlacementMode()
-   {
-      return placementMode;
-   }
-
-   public void setPlacementMode(RDXVRPanelPlacementMode placementMode)
-   {
-      this.placementMode = placementMode;
    }
 }

@@ -12,6 +12,7 @@ public class RDXVRModeControls
    private final RDXVRModeManager vrModeManager;
    private boolean wasVRReady = false;
    private final ImBoolean renderOnLeftHand = new ImBoolean(false);
+   private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
    private final RDXBaseUI baseUI;
 
    public RDXVRModeControls(RDXVRModeManager vrModeManager)
@@ -55,7 +56,7 @@ public class RDXVRModeControls
       }
 
       ImGuiTools.separatorText("Stereo vision");
-      vrModeManager.getStereoVision().renderControls();
+      ImGui.checkbox("Floating Stereo Panel", showFloatingVideoPanel);
 
       ImGuiTools.separatorText("Mode");
       vrModeManager.renderImGuiWidgets();
@@ -94,5 +95,10 @@ public class RDXVRModeControls
    public ImBoolean getRenderOnLeftHand()
    {
       return renderOnLeftHand;
+   }
+
+   public ImBoolean getShowFloatingVideoPanel()
+   {
+      return showFloatingVideoPanel;
    }
 }
