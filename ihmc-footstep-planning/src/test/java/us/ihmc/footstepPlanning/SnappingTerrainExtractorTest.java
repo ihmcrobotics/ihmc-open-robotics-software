@@ -101,4 +101,67 @@ public class SnappingTerrainExtractorTest
 
       snappingTerrainExtractor.close();
    }
+
+   @Test
+   public void testSteppableConnectionsIsCorrect()
+   {
+      // Based on this resolution, 200 / 5 = 40, so we should have 40 * 40 = 1600 points
+      double gridResolution = 0.1;
+      double terrainWidthXY = 1.0;
+
+      Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
+      heightMapParameters.setCellSize(gridResolution);
+      heightMapParameters.setTerrainWidthInMeters(terrainWidthXY);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
+      int cellsPerAxis = (centerIndex * 2) + 1;
+
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+
+      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      fakeHeightMap.setTo(new Scalar(32767));
+      Mat inputDataShorts = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
+      fakeHeightMap.download(inputDataShorts);
+
+      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
+                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
+                                                      gridCenter.getX(),
+                                                      gridCenter.getY());
+
+      HeightMapTools.convertToHeightMapData(inputDataShorts,
+                                            heightMapData,
+                                            gridCenter,
+                                            (float) heightMapParameters.getTerrainWidthInMeters(),
+                                            (float) heightMapParameters.getCellSize(),
+                                            (float) heightMapParameters.getHeightScaleFactor(),
+                                            (float) heightMapParameters.getHeightOffset());
+
+      snappingTerrainExtractor.update(heightMapData);
+
+      TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
+      Mat actualResult = terrainMapData.getSteppabilityConnectionsMat();
+
+      // We expect all the middle since its fully connected, to be filled with 255, all the bits are set
+      for (int i = 1; i < actualResult.rows() - 1; i++)
+      {
+         for (int j = 1; j < actualResult.cols() - 1; j++)
+         {
+            assertEquals(255, actualResult.row(i).col(j).ptr().get() & 0xFF);
+         }
+      }
+
+      // The corners will all be different because they will have different bits set
+      // These values are the expected bits to be set based on there surrounding neighbors
+      assertEquals(208, actualResult.row(0).col(0).ptr().get() & 0xFF);
+      assertEquals(11, actualResult.row(actualResult.rows() - 1).col(actualResult.cols() - 1).ptr().get() & 0xFF);
+      assertEquals(22, actualResult.row(actualResult.rows() - 1).col(0).ptr().get() & 0xFF);
+      assertEquals(104, actualResult.row(0).col(actualResult.cols() - 1).ptr().get() & 0xFF);
+
+      if (DEBUG)
+      {
+         PerceptionDebugTools.printMat("result", actualResult, 1);
+      }
+
+      snappingTerrainExtractor.close();
+   }
 }

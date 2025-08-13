@@ -47,7 +47,6 @@ public class SteppableRegionsCalculatorTools
                                                                                                    snappedNormalZ,
                                                                                                    connections);
 
-      PerceptionDebugTools.printMat("w", steppability, 1);
       if (steppability.rows() != steppability.cols())
          throw new RuntimeException("The input steppability should be square");
 
@@ -65,8 +64,7 @@ public class SteppableRegionsCalculatorTools
             borderRing.addCell(unexpandedCell);
          }
 
-         recursivelyAddBorderNeighbors(unexpandedCell, environmentModel,
-                                       maxRecursionDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         recursivelyAddBorderNeighbors(unexpandedCell, environmentModel, maxRecursionDepth, 0, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
       }
 
       while (environmentModel.hasUnexpandedInteriorCells())
@@ -116,7 +114,7 @@ public class SteppableRegionsCalculatorTools
                else
                   isBorderCell = false;
 
-               double z = snappedHeight.ptr(x, y).getFloat();
+               double z = snappedHeight.ptr(x, y).getShort();
                Vector3D normal = new Vector3D(normalValueAsFloat(snappedNormalX, x, y),
                                               normalValueAsFloat(snappedNormalY, x, y),
                                               normalValueAsFloat(snappedNormalZ, x, y));
@@ -457,14 +455,7 @@ public class SteppableRegionsCalculatorTools
             if (!cellToExpand.cellHasBeenAssigned())
                throw new RuntimeException("Somehow the assignment operation failed.");
 
-            recursivelyAddNeighbors(neighbor,
-                                    environmentModel,
-                                    maxDepth,
-                                    currentDepth + 1,
-                                    gridCenterX,
-                                    gridCenterY,
-                                    gridResolutionXY,
-                                    centerIndex);
+            recursivelyAddNeighbors(neighbor, environmentModel, maxDepth, currentDepth + 1, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
          }
       }
    }
@@ -517,14 +508,7 @@ public class SteppableRegionsCalculatorTools
 
          if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
          {
-            recursivelyAddBorderNeighbors(neighbor,
-                                          environmentModel,
-                                          maxDepth,
-                                          currentDepth + 1,
-                                          gridCenterX,
-                                          gridCenterY,
-                                          gridResolutionXY,
-                                          centerIndex);
+            recursivelyAddBorderNeighbors(neighbor, environmentModel, maxDepth, currentDepth + 1, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
          }
       }
    }
