@@ -11,13 +11,13 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.UnitConversions;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -26,8 +26,8 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
+import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXRobotPerceptionVisualizersPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -39,7 +39,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -69,7 +68,9 @@ public class RDXVRModeManager
    private RDXRobotPerceptionVisualizersPanel perceptionVisualizers;
    private ROS2SyncedRobotModel syncedRobot;
    private RDXStereoImagePanel stereoPanel;
-   private final SideDependentList<List<RigidBodyBasics>> armRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final Throttler panelOcclusionRateLimiter = new Throttler();
+   private final SideDependentList<List<RigidBodyBasics>> syncedRobotArmRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final SideDependentList<List<RigidBodyBasics>> ghostIKRobotArmRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -159,8 +160,13 @@ public class RDXVRModeManager
          ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames(side);
          for (ArmJointName jointName : armJointNames)
          {
-            OneDoFJointBasics armJoint = syncedRobot.getFullRobotModel().getArmJoint(side, jointName);
-            armRigidBodies.get(side).add(armJoint.getSuccessor());
+            OneDoFJointBasics syncedRobotArmJoint = syncedRobot.getFullRobotModel().getArmJoint(side, jointName);
+            syncedRobotArmRigidBodies.get(side).add(syncedRobotArmJoint.getSuccessor());
+            if (kinematicsStreaming != null)
+            {
+               OneDoFJointBasics ghostIKRobotArmJoint = kinematicsStreaming.getGhostFullRobotModel().getArmJoint(side, jointName);
+               ghostIKRobotArmRigidBodies.get(side).add(ghostIKRobotArmJoint.getSuccessor());
+            }
          }
       }
    }
@@ -238,20 +244,32 @@ public class RDXVRModeManager
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.LEFT),
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.RIGHT));
 
-         for (RobotSide side : RobotSide.values)
+         if (panelOcclusionRateLimiter.run(UnitConversions.hertzToSeconds(10.0)))
          {
-            for (RigidBodyBasics rigidBody : armRigidBodies.get(side))
+            for (RobotSide side : RobotSide.values)
             {
-               Point3D rigidBodyPosition = new Point3D(rigidBody.getBodyFixedFrame().getTransformToRoot().getTranslation());
-               if (stereoPanel.isOccludingView(rigidBodyPosition))
+               checkStereoPanelOcclusions(syncedRobotArmRigidBodies.get(side), perceptionVisualizers.getRobotVisualizer().getMultiBodyGraphic());
+               if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && kinematicsStreaming != null)
                {
-                  perceptionVisualizers.getRobotVisualizer().getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().add(rigidBody.getName());
-               }
-               else
-               {
-                  perceptionVisualizers.getRobotVisualizer().getMultiBodyGraphic().getMultiBody().getRigidBodiesToHide().remove(rigidBody.getName());
+                  checkStereoPanelOcclusions(ghostIKRobotArmRigidBodies.get(side), kinematicsStreaming.getGhostRobotGraphic());
                }
             }
+         }
+      }
+   }
+
+   private void checkStereoPanelOcclusions(List<RigidBodyBasics> rigidBodyList, RDXMultiBodyGraphic robotGraphics)
+   {
+      for (RigidBodyBasics rigidBody : rigidBodyList)
+      {
+         Point3D rigidBodyPosition = new Point3D(rigidBody.getBodyFixedFrame().getTransformToRoot().getTranslation());
+         if (stereoPanel.isOccludingView(rigidBodyPosition))
+         {
+            robotGraphics.getMultiBody().getRigidBodiesToHide().add(rigidBody.getName());
+         }
+         else
+         {
+            robotGraphics.getMultiBody().getRigidBodiesToHide().remove(rigidBody.getName());
          }
       }
    }
