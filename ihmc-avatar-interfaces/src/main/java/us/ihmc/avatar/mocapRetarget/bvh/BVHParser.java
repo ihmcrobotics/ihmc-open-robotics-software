@@ -103,6 +103,10 @@ public class BVHParser
 
    public List<MotionFrame> parseMotion(File bvhFile, SkeletonHierarchy hierarchy) throws IOException
    {
+      int frameCount = 0;
+      double frameTime = 0;
+      int channelCount = hierarchy.getTotalChannels();
+      List<MotionFrame> frames = new ArrayList<MotionFrame>();
 
       try (BufferedReader reader = new BufferedReader(new FileReader(bvhFile)))
       {
@@ -111,37 +115,22 @@ public class BVHParser
          {
             if (line.trim().equals("MOTION"))
             {
-               //            if ((line=reader.readLine().trim()).startsWith("ROOT")) {
-               //               Stack<String> parents = new Stack<>();
-               //               parents.push(null);
-               //               parseJoints(reader, skeleton, line.trim(), parents);
-               //               break;
-               //           }
+               frameCount = Integer.parseInt(reader.readLine().trim().split("\\s+")[1]);
+               frameTime = Double.parseDouble(reader.readLine().trim().split("\\s+")[2]);
+               for (int i = 0; i < frameCount; i++) {
+                  int index = 0;
+                  double[] channelData = new double[channelCount];
+                  String[] stringData = reader.readLine().trim().split("\\s+");
+                  for (String num : stringData) {
+                     channelData[index++] = Double.parseDouble(num);
+                  }
+                  frames.add(new MotionFrame(i+1, frameTime*i, channelData));
+               }
             }
          }
       }
-
-      List<MotionFrame> frames = new ArrayList<MotionFrame>();
       return frames;
    }
-   /*
-    * Parses the MOTION section after hierarchy, returning a list of frames:
-    *   - frameCount
-    *   - frameTime (dt)
-    *   - for each frame, the flat float[] of channel values
-    */
- /*  public List<MotionFrame> parseMotion(File bvhFile, SkeletonHierarchy hierarchy) throws IOException
-   {
-      // 1) skip ahead to "MOTION"
-      // 2) read "Frames: N"  → int frameCount
-      // 3) read "Frame Time: dt" → double frameTime
-      // 4) for i=0..N-1:
-      //      - read a line, split on whitespace → float[channelCount]
-      //      - new MotionFrame(i * dt, array)
-      // 5) return list of MotionFrame
-
-   }
-   */
 
    public static void main(String[] args)
    {
@@ -150,6 +139,7 @@ public class BVHParser
          File bvhFile = new File(args[0]);
          BVHParser parser = new BVHParser();
          SkeletonHierarchy hierarchy = parser.parseHierarchy(bvhFile);
+         List<MotionFrame> frames = parser.parseMotion(bvhFile, hierarchy);
 
          System.out.println("Hierarchy:");
          for (String jointName : hierarchy.getJointNames())
@@ -159,6 +149,10 @@ public class BVHParser
             System.out.println(jointName + "\nOffset: " + joint.offset() + "\nChannels: " + joint.channels() + "\nChannel Count: " + joint.channelCount()
             + "\nChannel Start Index: " + joint.channelStartIndex());
          }
+         System.out.println(hierarchy.getTotalChannels());
+         System.out.println("\nMOTION:\n");
+         System.out.println(frames.get(43241));
+         System.out.println(frames.get(43241).channelData()[0]);
       }
       catch (IOException e)
       {

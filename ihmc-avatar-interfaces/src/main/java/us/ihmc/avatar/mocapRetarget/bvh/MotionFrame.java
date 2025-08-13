@@ -1,5 +1,5 @@
 package us.ihmc.avatar.mocapRetarget.bvh;
 
-public class MotionFrame
+public record MotionFrame(int count, double timeSeconds, double[] channelData)
 {
 }
