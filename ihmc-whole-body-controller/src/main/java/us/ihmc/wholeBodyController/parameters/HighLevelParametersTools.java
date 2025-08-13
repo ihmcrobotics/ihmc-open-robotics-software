@@ -85,7 +85,7 @@ public class HighLevelParametersTools
       return jointNames;
    }
 
-   public static void configureNeckBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
+   public static JointDesiredBehavior configureNeckBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
                                             HumanoidJointNameMap jointMap,
                                             NeckJointName jointName,
                                             JointDesiredControlMode controlMode,
@@ -95,5 +95,6 @@ public class HighLevelParametersTools
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
+      return jointBehavior;
    }
 }
