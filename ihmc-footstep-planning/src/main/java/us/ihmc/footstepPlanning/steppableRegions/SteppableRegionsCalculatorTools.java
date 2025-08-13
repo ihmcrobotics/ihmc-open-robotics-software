@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -19,9 +18,12 @@ import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class SteppableRegionsCalculatorTools
 {
@@ -376,7 +378,7 @@ public class SteppableRegionsCalculatorTools
       if (outerRing != null)
          pointsInWorld.addAll(outerRing);
 
-      List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder, steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(), new Random());
+      List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder, outerRing, steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(), new Random());
       if (interiorPoints != null)
          pointsInWorld.addAll(interiorPoints);
 
@@ -416,55 +418,60 @@ public class SteppableRegionsCalculatorTools
       return point;
    }
 
-   private static List<Point2D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder,
-                                                   double gridCenterX,
-                                                   double gridCenterY,
-                                                   double gridResolutionXY,
-                                                   int centerIndex,
-                                                   double inflationFraction)
+   public static List<Point2D> getOuterRingPoints(SteppableRegionDataHolder regionDataHolder,
+                                                  double gridCenterX,
+                                                  double gridCenterY,
+                                                  double gridResolutionXY,
+                                                  int centerIndex,
+                                                  double inflationFraction)
    {
       if (regionDataHolder.getBorderRings().isEmpty())
-         return null;
+         return Collections.emptyList();
 
-      List<SteppableBorderRing> ringList = new ArrayList<>(regionDataHolder.getBorderRings());
-      ringList.sort(Comparator.comparingInt(SteppableBorderRing::size));
+      // Get the largest ring
+      SteppableBorderRing longestRing = Collections.max(regionDataHolder.getBorderRings(), Comparator.comparingInt(SteppableBorderRing::size));
 
-      double inflationSize = inflationFraction * gridResolutionXY / 2.0;
+      List<Point2D> points = new ArrayList<>(longestRing.size());
 
-      SteppableBorderRing longestRing = ringList.get(ringList.size() - 1);
-      List<Point2D> points = new ArrayList<>();
       for (SteppableCell cell : longestRing)
       {
-         Point2D point = convertCellToPoint(cell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
-
-         if (longestRing.size() > 100)
-         {
-            points.add(point);
-         }
-         else
-         {
-            points.add(new Point2D(point.getX() + inflationSize, point.getY() + inflationSize));
-            points.add(new Point2D(point.getX() + inflationSize, point.getY() - inflationSize));
-            points.add(new Point2D(point.getX() - inflationSize, point.getY() - inflationSize));
-            points.add(new Point2D(point.getX() - inflationSize, point.getY() + inflationSize));
-         }
+         Point2D basePoint = convertCellToPoint(cell, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         points.add(basePoint);
       }
+
       return points;
    }
 
-   private static List<Point2D> getInteriorPoints(SteppableRegionDataHolder regionDataHolder, int cellsToSample, Random random)
+   public static List<Point2D> getInteriorPoints(SteppableRegionDataHolder regionDataHolder,
+                                                 List<Point2D> outerRingPoints,
+                                                 int cellsToSample,
+                                                 Random random)
    {
       if (regionDataHolder.getMemberCells().isEmpty())
-         return null;
+         return Collections.emptyList();
 
-      List<Point2DReadOnly> memberPoints = new ArrayList<>(regionDataHolder.getMemberPoints());
-      List<Point2D> points = new ArrayList<>();
+      // Put outer ring points into a set for fast lookup
+      Set<Point2DReadOnly> outerRingSet = new HashSet<>(outerRingPoints);
 
-      for (int i = 0; i < Math.min(memberPoints.size(), cellsToSample); i++)
+      // Filter out outer ring points
+      List<Point2DReadOnly> interiorPoints = new ArrayList<>();
+      for (Point2DReadOnly p : regionDataHolder.getMemberPoints())
       {
-         Point2DReadOnly cell = memberPoints.remove(RandomNumbers.nextInt(random, 0, memberPoints.size() - 1));
-         points.add(new Point2D(cell));
+         if (!outerRingSet.contains(p))
+            interiorPoints.add(p);
       }
+
+      // Shuffle for random sampling
+      Collections.shuffle(interiorPoints, random);
+
+      // Pick up to cellsToSample points
+      int limit = Math.min(interiorPoints.size(), cellsToSample);
+      List<Point2D> points = new ArrayList<>();
+      for (int i = 0; i < limit; i++)
+      {
+         points.add(new Point2D(interiorPoints.get(i)));
+      }
+
       return points;
    }
 

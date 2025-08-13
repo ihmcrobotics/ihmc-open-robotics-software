@@ -4,6 +4,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableCell;
@@ -13,6 +14,8 @@ import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -152,5 +155,92 @@ public class SteppableRegionsCalculatorToolsTest
       assertFalse(SteppableRegionsCalculatorTools.isConnected(3, 0));
       assertFalse(SteppableRegionsCalculatorTools.isConnected(8, 7));
       assertFalse(SteppableRegionsCalculatorTools.isConnected(1, 5));
+   }
+
+   @Test
+   public void testGetOuterRingPoints()
+   {
+      double gridResolution = 0.1;
+      double terrainWidthXY = 1.0;
+
+      Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
+      heightMapParameters.setCellSize(gridResolution);
+      heightMapParameters.setTerrainWidthInMeters(terrainWidthXY);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
+      int cellsPerAxis = (centerIndex * 2) + 1;
+
+      Mat steppability = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(4));
+      Mat snappedHeight = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
+      Mat snappedNormalX = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(127));
+      Mat snappedNormalY = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(127));
+      Mat snappedNormalZ = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(255));
+      Mat connections = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
+
+      int[][] values = {{208, 248, 248, 248, 248, 248, 248, 248, 248, 248, 104},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {214, 255, 255, 255, 255, 255, 255, 255, 255, 255, 107},
+                        {22, 31, 31, 31, 31, 31, 31, 31, 31, 31, 11}};
+
+      // Copy into Mat
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            connections.ptr(i, j).put((byte) values[i][j]);
+         }
+      }
+
+      SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
+      parameters.setMaxInteriorPointsToInclude(cellsPerAxis * cellsPerAxis);
+      SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(steppability,
+                                                                                                                                snappedHeight,
+                                                                                                                                snappedNormalX,
+                                                                                                                                snappedNormalY,
+                                                                                                                                snappedNormalZ,
+                                                                                                                                connections,
+                                                                                                                                parameters,
+                                                                                                                                gridCenter.getX(),
+                                                                                                                                gridCenter.getY(),
+                                                                                                                                gridResolution,
+                                                                                                                                centerIndex);
+
+      Collection<SteppableRegionDataHolder> regions = environment.getRegions();
+      SteppableRegionDataHolder firstRegion = regions.stream().findFirst().orElseThrow();
+
+      assertEquals((cellsPerAxis - 1) * 4, firstRegion.getBorderRings().get(0).size());
+      assertEquals(1, regions.size());
+      assertEquals(cellsPerAxis, environment.getCellsPerSide());
+
+      List<Point2D> outerRingPoints = SteppableRegionsCalculatorTools.getOuterRingPoints(firstRegion,
+                                                                                         gridCenter.getX(),
+                                                                                         gridCenter.getY(),
+                                                                                         gridResolution,
+                                                                                         centerIndex,
+                                                                                         parameters.getFractionOfCellToExpandSmallRegions());
+
+      int outerRingPointsSize = outerRingPoints.size();
+
+      // The map is 11 by 11, so there are 40 cells on the border
+      assertEquals(40, outerRingPointsSize);
+
+      List<Point2D> interiorPoints = SteppableRegionsCalculatorTools.getInteriorPoints(firstRegion, outerRingPoints, parameters.getMaxInteriorPointsToInclude(), new Random());
+      int interiorPointsSize = interiorPoints.size();
+
+      // The map is 11 by 11, so there should be 121 - 40 interior points
+      assertEquals(81, interiorPointsSize);
+      steppability.close();
+      snappedHeight.close();
+      snappedNormalX.close();
+      snappedNormalY.close();
+      snappedNormalZ.close();
+      connections.close();
    }
 }
