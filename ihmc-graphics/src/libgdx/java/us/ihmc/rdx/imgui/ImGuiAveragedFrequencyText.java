@@ -1,6 +1,6 @@
 package us.ihmc.rdx.imgui;
 
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.commons.time.FrequencyCalculator;
 
 public class ImGuiAveragedFrequencyText

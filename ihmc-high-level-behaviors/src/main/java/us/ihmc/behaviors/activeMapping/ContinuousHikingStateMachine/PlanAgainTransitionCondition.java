@@ -2,6 +2,7 @@ package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanningStateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class PlanAgainTransitionCondition implements StateTransitionCondition
@@ -10,7 +11,7 @@ public class PlanAgainTransitionCondition implements StateTransitionCondition
    private final ContinuousHikingParameters continuousHikingParameters;
 
    /**
-    * This transition is used in the {@link us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask} to determine whether the Continuous Hiking state
+    * This transition is used in the {@link ContinuousPlanningStateMachine} to determine whether the Continuous Hiking state
     * machine should plan again or not. We allow planning over and over to see if things need to be tuned. This means we can plan without walking, tune some
     * parameters, and plan again to see how things have changed.
     */

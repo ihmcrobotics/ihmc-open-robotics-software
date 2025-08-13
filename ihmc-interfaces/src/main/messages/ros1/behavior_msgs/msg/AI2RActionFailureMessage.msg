@@ -9,6 +9,12 @@ string action_type
 # Reference frame of the action
 string action_frame
 
+# Whether the reference frame of the failed action was missing
+bool missing_frame
+
+# Name of the object the action would collide with in not interrupted (marked as failed)
+string collision_name
+
 # Position tolerance for the action [m]
 float64 position_tolerance
 

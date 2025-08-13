@@ -32,6 +32,10 @@ module behavior_msgs
          */
         sequence<string, 200> available_behaviors;
         /**
+         * Name of the behavior that is in progress
+         */
+        string behavior_in_progress;
+        /**
          * Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
          */
         string completed_behavior;
@@ -40,6 +44,23 @@ module behavior_msgs
          */
         string failed_behavior;
         behavior_msgs::msg::dds::AI2RActionFailureMessage failure;
+        /**
+         * Name of the object that the robot is handling
+         */
+        string object_grasped;
+        /**
+         * Which hand is handling the object
+         */
+        @defaultValue(value=255)
+        octet grasp_side;
+        /**
+         * Relative transform of the grasped object in hand frame
+         */
+        geometry_msgs::msg::dds::Pose transform_grasped_object_hand;
+        /**
+         * Name of the object that the robot has released
+         */
+        string object_placed;
       };
     };
   };

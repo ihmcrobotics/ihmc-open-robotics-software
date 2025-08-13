@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import com.jme3.terrain.heightmap.HeightMap;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -8,9 +7,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 
@@ -35,12 +32,12 @@ public class SnappingTerrainExtractorTest
       Point3D heightMapCenter = new Point3D();
       heightMapCenter.set(new Point3D(0.0, 0.0, 0.0));
 
-      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                       (float) heightMapParameters.getTerrainWidthInMeters(),
                                                       0,
                                                       0);
 
-      HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F, heightMapParameters);
+      HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F, 10000, 3.2768f);
 
       snappingTerrainExtractor.update(heightMapData);
       snappingTerrainExtractor.close();

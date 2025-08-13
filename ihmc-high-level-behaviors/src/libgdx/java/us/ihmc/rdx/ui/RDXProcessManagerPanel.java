@@ -12,9 +12,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.processes.FootstepPlanningModuleProcess;
-import us.ihmc.rdx.ui.processes.LidarREAProcess;
-import us.ihmc.rdx.ui.processes.MapSenseHeadlessProcess;
 import us.ihmc.rdx.ui.processes.ObjectDetectionProcess;
 import us.ihmc.rdx.ui.processes.RestartableProcess;
 
@@ -35,10 +32,7 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
 
    protected final ArrayList<RestartableProcess> processes = new ArrayList<>();
 
-   private final FootstepPlanningModuleProcess footstepPlanningModuleProcess;
-   private final MapSenseHeadlessProcess mapsenseHeadlessProcess;
    private final ObjectDetectionProcess objectDetectionProcess;
-   private final LidarREAProcess lidarREAProcess;
    protected final EnvironmentInitialSetup environmentInitialSetup;
 
    public RDXProcessManagerPanel(Pose3DReadOnly startingPose)
@@ -56,16 +50,9 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       setRenderMethod(this::renderImGuiWidgets);
       this.environmentInitialSetup = environmentInitialSetup;
 
-      // TODO: GUI selection
-      footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::getRobotModel);
-      mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
       objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getRobotTarget);
-      lidarREAProcess = new LidarREAProcess();
 
-      processes.add(footstepPlanningModuleProcess);
-      processes.add(mapsenseHeadlessProcess);
       processes.add(objectDetectionProcess);
-      processes.add(lidarREAProcess);
    }
 
    private RobotTarget getRobotTarget()
@@ -110,10 +97,7 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
    public void dispose()
    {
       // Destroy in a reasonable order
-      mapsenseHeadlessProcess.destroy();
-      footstepPlanningModuleProcess.destroy();
       objectDetectionProcess.destroy();
-      lidarREAProcess.destroy();
 
       // destroy em all just in case
       for (RestartableProcess process : processes)

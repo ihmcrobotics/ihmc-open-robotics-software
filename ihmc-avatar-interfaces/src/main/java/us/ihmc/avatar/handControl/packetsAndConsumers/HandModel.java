@@ -1,6 +1,6 @@
 package us.ihmc.avatar.handControl.packetsAndConsumers;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
+import us.ihmc.robotics.partNames.HandJointName;
 
 public interface HandModel
 {

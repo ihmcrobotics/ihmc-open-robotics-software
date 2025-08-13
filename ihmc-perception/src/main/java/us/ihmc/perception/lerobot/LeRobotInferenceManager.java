@@ -7,6 +7,7 @@ import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Float32MultiArray;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.time.FrequencyCalculator;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -119,7 +120,7 @@ public class LeRobotInferenceManager
 
       bgr8Mat.close();
 
-      ros2.publish(ZED_IMAGES.get(side), message);
+      ros2.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(side), message);
    }
 
    private void update()

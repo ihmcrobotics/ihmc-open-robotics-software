@@ -17,7 +17,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools;
 @Tag("humanoid-flat-ground")
 public class AlexanderICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTest
 {
-   private final DRCRobotModel robotModel = new TestModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final DRCRobotModel robotModel = new TestModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Disabled

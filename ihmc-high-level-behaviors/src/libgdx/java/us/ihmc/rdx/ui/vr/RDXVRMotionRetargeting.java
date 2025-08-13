@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.vr;
 
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,6 +12,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
-import static us.ihmc.rdx.ui.vr.RDXVRKinematicsStreamingMode.FRAME_AXIS_GRAPHICS_LENGTH;
+import static us.ihmc.rdx.ui.vr.RDXVRWholeBodyKinematicStreaming.FRAME_AXIS_GRAPHICS_LENGTH;
 
 /**
  * Class responsible for motion retargeting from VR tracked segments to a robot model.
@@ -40,23 +41,28 @@ public class RDXVRMotionRetargeting
          add(RIGHT_WRIST);
       }
    };
-   private final ROS2SyncedRobotModel syncedRobot;
+   private final FullHumanoidRobotModel realRobotModel;
+   private final FullHumanoidRobotModel ghostRobotModel;
    private final SideDependentList<MutableReferenceFrame> controllerReferenceFrames;
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames;
    private final MutableReferenceFrame headsetReferenceFrame;
    private final RetargetingParameters retargetingParameters;
-
-   private final RigidBodyTransform initialWaistTrackerTransformToWorld = new RigidBodyTransform();
-   private final FramePose3D newPelvisFramePose = new FramePose3D();
    private final Map<VRTrackedSegmentType, ReferenceFrame> retargetedFrames = new HashMap<>();
+   private final Map<VRTrackedSegmentType, Point3D> ikControlFrameOffsetPosition = new HashMap<>();
+   private final Map<VRTrackedSegmentType, FrameVector3D> desiredLinearVelocities = new HashMap<>();
+   private final Map<VRTrackedSegmentType, FrameVector3D> desiredAngularVelocities = new HashMap<>();
+
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
-   private Point3D centerOfMassDesiredXYInWorld;
    private ReferenceFrame initialPelvisFrame;
-   private ReferenceFrame scaledPelvisFrame;
-   private final SideDependentList<Point3D> initialHandPositionsInWorld = new SideDependentList<>(null, null);
+   private ReferenceFrame constrainedPelvisFrame;
+   private final FramePose3D newPelvisFramePose = new FramePose3D();
+
+   private boolean comTracking = true;
+   private Point3D centerOfMassDesiredXYInWorld;
+   private double previousOffsetValue = 0.5;
+   private final SideDependentList<Point3D> initialHandPositionsInWorld = new SideDependentList<>();
    private boolean controlArmsOnly = false;
    private boolean armScaling = false;
-   private boolean comTracking = false;
    private double armLengthScaleFactor = 1.0;
    private final SideDependentList<RDXReferenceFrameGraphic> shoulderFrameGraphics = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> scaledHandsFrameGraphics = new SideDependentList<>();
@@ -64,21 +70,34 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<ReferenceFrame> scaledHandFrames = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> shoulderToScaledHandTransforms = new SideDependentList<>();
 
+   private final SideDependentList<RigidBodyTransform> initialFootTrackerTransformsToWorld = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> initialFootTransformsToWorld = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> initialFootFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> constrainedFootFrames =  new SideDependentList<>();
+   private final SideDependentList<FramePose3D> newFootFramePoses = new SideDependentList<>();
+
+   private final RDXVRSteppingTracker steppingTracker = new RDXVRSteppingTracker();
+   private final SideDependentList<Boolean> isFootInContact = new SideDependentList<>();
+   private boolean controllingFeet = false;
+
    /**
     * Constructor for the motion retargeting class.
     *
-    * @param syncedRobot the synchronized robot model
+    * @param realRobotModel the real robot model
+    * @param ghostRobotModel the KST robot model
     * @param controllerReferenceFrames the reference frames of the controllers
     * @param trackerReferenceFrames the reference frames of the trackers
     * @param retargetingParameters the retargeting parameters
     */
-   public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot,
+   public RDXVRMotionRetargeting(FullHumanoidRobotModel realRobotModel,
+                                 FullHumanoidRobotModel ghostRobotModel,
                                  SideDependentList<MutableReferenceFrame> controllerReferenceFrames,
                                  Map<String, MutableReferenceFrame> trackerReferenceFrames,
                                  MutableReferenceFrame headsetReferenceFrame,
                                  RetargetingParameters retargetingParameters)
    {
-      this.syncedRobot = syncedRobot;
+      this.realRobotModel = realRobotModel;
+      this.ghostRobotModel = ghostRobotModel;
       this.retargetingParameters = retargetingParameters;
       this.controllerReferenceFrames = controllerReferenceFrames;
       this.trackerReferenceFrames = trackerReferenceFrames;
@@ -89,6 +108,10 @@ public class RDXVRMotionRetargeting
          shoulderFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          scaledHandsFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          shoulderToScaledHandTransforms.put(side, new RigidBodyTransform());
+         initialFootTrackerTransformsToWorld.put(side, new RigidBodyTransform());
+         initialFootTransformsToWorld.put(side, new RigidBodyTransform());
+         newFootFramePoses.put(side, new FramePose3D());
+         isFootInContact.put(side, true);
       }
    }
 
@@ -102,11 +125,13 @@ public class RDXVRMotionRetargeting
       retargetPelvis();
       retargetCoM();
       retargetHands();
+      retargetFeet();
    }
 
    /**
     * Compute the desired pose of pelvis.
-    * Scale the pelvis height based on ratio user/robot height and use incremental retargeting.
+    * Offset the pelvis control frame based on the initial user/robot height mismatch.
+    *
     */
    private void retargetPelvis()
    {
@@ -114,36 +139,32 @@ public class RDXVRMotionRetargeting
       {
          if (initialPelvisFrame == null)
          {
-            initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+            RigidBodyTransform initialWaistTrackerTransform  = trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame();
+            initialPelvisTransformToWorld.set(realRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
             initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                           initialPelvisTransformToWorld);
-            initialWaistTrackerTransformToWorld.set(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame());
 
-            scaledPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
+            constrainedPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
+
+            Vector3D offset = new Vector3D();
+            offset.sub(initialWaistTrackerTransform.getTranslation(), initialPelvisTransformToWorld.getTranslation());
+            ikControlFrameOffsetPosition.put(WAIST, new Point3D(offset));
          }
          // Calculate the variation of the tracker's frame from its initial value
-         RigidBodyTransform waistTrackerVariationFromInitialValue = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
+         RigidBodyTransform waistTrackerTransform = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
                                                                                                                  .getReferenceFrame()
                                                                                                                  .getTransformToWorldFrame());
-         // Get variation from initial value
-         initialWaistTrackerTransformToWorld.inverseTransform(waistTrackerVariationFromInitialValue);
-         // Scale the z waist variation
-         double scalingRobotHumanWaistHeight = retargetingParameters.getPelvisHeightExtendedLegs() / initialWaistTrackerTransformToWorld.getTranslationZ();
-         waistTrackerVariationFromInitialValue.getTranslation()
-                                              .setZ(scalingRobotHumanWaistHeight * waistTrackerVariationFromInitialValue.getTranslationZ());
 
-         // Concatenate the initial pelvis transform with the variation
-         RigidBodyTransform combinedTransformToWorld = new RigidBodyTransform(initialPelvisTransformToWorld);
-         combinedTransformToWorld.multiply(waistTrackerVariationFromInitialValue);
-
-         newPelvisFramePose.set(combinedTransformToWorld);
-         // Zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
+         newPelvisFramePose.set(waistTrackerTransform);
+         // Zero roll and pitch orientation variation as it can lead to very unnatural motions (at least when in double support)
          newPelvisFramePose.changeFrame(initialPelvisFrame);
-         newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), 0.0,0.0);
+         newPelvisFramePose.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         scaledPelvisFrame.update();
+         double midFeetYaw = 0.5 * (ghostRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getRotation().getYaw() + ghostRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getRotation().getYaw());
+         newPelvisFramePose.getRotation().setYawPitchRoll(midFeetYaw, newPelvisFramePose.getRotation().getPitch(), newPelvisFramePose.getRotation().getRoll());
+         constrainedPelvisFrame.update();
 
-         retargetedFrames.put(WAIST, scaledPelvisFrame);
+         retargetedFrames.put(WAIST, constrainedPelvisFrame);
       }
    }
 
@@ -158,10 +179,20 @@ public class RDXVRMotionRetargeting
          if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()) && trackerReferenceFrames.containsKey(LEFT_ANKLE.getSegmentName())
              && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName()) && !controlArmsOnly)
          {
+            Point3D leftFootXYInWorld = null;
+            Point3D rightFootXYInWorld = null;
             if (centerOfMassDesiredXYInWorld == null)
             {
-               centerOfMassDesiredXYInWorld = new Point3D();
-               centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
+               Point3D leftSole = new Point3D(realRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
+               Point3D rightSole = new Point3D(realRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
+               // Compute the midpoint
+               double midX = 0.5 * (leftSole.getX() + rightSole.getX());
+               double midY = 0.5 * (leftSole.getY() + rightSole.getY());
+               // Set the COM to the midpoint between the two soles
+               centerOfMassDesiredXYInWorld = new Point3D(midX, midY, 0.0);
+
+               leftFootXYInWorld = new Point3D(realRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
+               rightFootXYInWorld = new Point3D(realRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
             }
             // Fetch the current frames for left and right ankle
             ReferenceFrame leftAnkleFrame = trackerReferenceFrames.get(LEFT_ANKLE.getSegmentName()).getReferenceFrame();
@@ -189,28 +220,41 @@ public class RDXVRMotionRetargeting
 
             // Calculate normalized offset along the line connecting the feet
             double normalizedOffset = dotProduct / normSqFeetVector;
-            // Filter value
-            double filteredNormalizedOffset = normalizedOffset;
-            if (filteredNormalizedOffset >= 1.0)
-               filteredNormalizedOffset = 1.0;
-            else if (filteredNormalizedOffset <= 0.0)
+            if (normalizedOffset >= 1.0)
+               normalizedOffset = 1.0;
+            else if (normalizedOffset <= 0.0)
             {
-               filteredNormalizedOffset = 0.0;
+               normalizedOffset = 0.0;
             }
-            //         else
-            //         { //logit function
-            //            filteredNormalizedOffset = 0.5- 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
-            //         }
+            // Filter value
+//            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
+//            if (filteredNormalizedOffset >= 1.0)
+//               filteredNormalizedOffset = 1.0;
+//            else if (filteredNormalizedOffset <= 0.0)
+//            {
+//               filteredNormalizedOffset = 0.0;
+//            }
+//            if (Double.isNaN(filteredNormalizedOffset))
+//            {
+//               filteredNormalizedOffset = previousOffsetValue;
+//            }
+            else
+            {
+               previousOffsetValue = normalizedOffset;
+            }
 
-            Point3D leftFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
-            Point3D rightFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
+            if (leftFootXYInWorld == null || rightFootXYInWorld == null)
+            {
+               leftFootXYInWorld = new Point3D(leftAnkleTrackerXYInWorld);
+               rightFootXYInWorld = new Point3D(rightAnkleTrackerXYInWorld);
+            }
 
             // Reconstruct robot CoM based on the normalized offset and its feet position
             Vector3D feetVector = new Vector3D();
             feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
             centerOfMassDesiredXYInWorld.set(feetVector);
-            centerOfMassDesiredXYInWorld.scale(filteredNormalizedOffset);
+            centerOfMassDesiredXYInWorld.scale(normalizedOffset);
             centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
          }
       }
@@ -290,6 +334,64 @@ public class RDXVRMotionRetargeting
       }
    }
 
+   /**
+    * Compute the desired pose of the feet.
+    * Offset the feet control frames based the initial user/robot position mismatch.
+    */
+   private void retargetFeet()
+   {
+      if (trackerReferenceFrames.containsKey(LEFT_ANKLE.getSegmentName())
+              && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName())
+              && !controlArmsOnly)
+      {
+         controllingFeet = true;
+         for (RobotSide side : RobotSide.values())
+         {
+            VRTrackedSegmentType footSegment = side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE;
+            String footName = footSegment.getSegmentName();
+            if (initialFootFrames.get(side) == null)
+            {
+               ReferenceFrame trackerFootFrame = trackerReferenceFrames.get(footName).getReferenceFrame();
+               initialFootTrackerTransformsToWorld.get(side).set(trackerFootFrame.getTransformToWorldFrame());
+
+               initialFootTransformsToWorld.get(side).set(realRobotModel.getSoleFrame(side).getTransformToWorldFrame());
+               initialFootFrames.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                    initialFootTransformsToWorld.get(side)));
+
+               constrainedFootFrames.put(side, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newFootFramePoses.get(side)));
+
+               Vector3D offset = new Vector3D();
+               offset.sub(initialFootTrackerTransformsToWorld.get(side).getTranslation(), initialFootTransformsToWorld.get(side).getTranslation());
+               ikControlFrameOffsetPosition.put(footSegment, new Point3D(offset));
+            }
+
+            // Concatenate the initial foot transform with the variation
+            RigidBodyTransform footTrackerTransform = new RigidBodyTransform(trackerReferenceFrames.get(footName)
+                                                                                                   .getReferenceFrame()
+                                                                                                   .getTransformToWorldFrame());
+
+            newFootFramePoses.get(side).set(footTrackerTransform);
+            // Zero roll and pitch orientation variation as it can lead to unfeasible robot foot motions
+            newFootFramePoses.get(side).changeFrame(initialFootFrames.get(side));
+            newFootFramePoses.get(side).getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
+            newFootFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            constrainedFootFrames.get(side).update();
+
+            steppingTracker.processVRInput(side, trackerReferenceFrames.get(footName).getReferenceFrame().getTransformToWorldFrame());
+            isFootInContact.put(side, steppingTracker.isFootInContact(side));
+
+            if (!steppingTracker.isFootInContact(side))
+            {
+               retargetedFrames.put(side == RobotSide.LEFT ? LEFT_ANKLE : RIGHT_ANKLE, constrainedFootFrames.get(side));
+            }
+         }
+      }
+      else
+      {
+         controllingFeet = false;
+      }
+   }
+
    public void setControlArmsOnly(boolean controlArmsOnly)
    {
       this.controlArmsOnly = controlArmsOnly;
@@ -309,9 +411,18 @@ public class RDXVRMotionRetargeting
    {
       initialPelvisFrame = null;
       for (RobotSide side : RobotSide.values)
+      {
          initialHandPositionsInWorld.put(side, null);
+         initialFootFrames.put(side, null);
+         isFootInContact.put(side, true);
+      }
       retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;
+      previousOffsetValue = 0.5;
+      controllingFeet = false;
+      steppingTracker.reset();
+      desiredLinearVelocities.clear();
+      desiredAngularVelocities.clear();
    }
 
    public Set<VRTrackedSegmentType> getRetargetedSegments()
@@ -319,9 +430,25 @@ public class RDXVRMotionRetargeting
       return retargetedFrames.keySet();
    }
 
+   public void setDesiredVelocities(VRTrackedSegmentType segment, FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearVelocity)
+   {
+      desiredAngularVelocities.put(segment, desiredAngularVelocity);
+      desiredLinearVelocities.put(segment, desiredLinearVelocity);
+   }
+
    public ReferenceFrame getDesiredFrame(VRTrackedSegmentType segment)
    {
       return retargetedFrames.get(segment);
+   }
+
+   public FrameVector3D getDesiredLinearVelocity(VRTrackedSegmentType segment)
+   {
+      return desiredLinearVelocities.get(segment);
+   }
+
+   public FrameVector3D getDesiredAngularVelocity(VRTrackedSegmentType segment)
+   {
+      return desiredAngularVelocities.get(segment);
    }
 
    public Point3D getDesiredCenterOfMassXYInWorld()
@@ -347,5 +474,20 @@ public class RDXVRMotionRetargeting
    public RDXReferenceFrameGraphic getScaledHandGraphic(RobotSide side)
    {
       return scaledHandsFrameGraphics.get(side);
+   }
+
+   public boolean isFootInContact(RobotSide side)
+   {
+      return isFootInContact.get(side);
+   }
+
+   public boolean isControllingFeet()
+   {
+      return controllingFeet;
+   }
+
+   public Point3D getIKControlFramePosition(VRTrackedSegmentType segmentType)
+   {
+      return ikControlFrameOffsetPosition.get(segmentType);
    }
 }

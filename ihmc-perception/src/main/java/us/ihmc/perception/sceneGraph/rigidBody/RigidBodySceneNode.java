@@ -32,7 +32,7 @@ public class RigidBodySceneNode extends SceneNode
       setNodeToParentFrameTransformAndUpdate(initialTransformToParent);
    }
 
-   public void setTrackInitialParent(boolean trackInitialParent, SceneGraphModificationQueue modificationQueue)
+   public void setTrackInitialParent(boolean trackInitialParent, SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       boolean previousTrackingInitialParent = getTrackingInitialParent();
       if (previousTrackingInitialParent != trackInitialParent)
@@ -42,7 +42,7 @@ public class RigidBodySceneNode extends SceneNode
 
          SceneNode previousParent = trackInitialParent ? rootNode : initialParentNode;
          SceneNode newParent = trackInitialParent ? initialParentNode : rootNode;
-         modificationQueue.accept(new SceneGraphNodeMove(this, previousParent, newParent));
+         modificationQueue.accept(new SceneGraphNodeMove(this, previousParent, newParent, sceneGraph));
       }
    }
 

@@ -94,7 +94,7 @@ public class HeightMapVisualizer extends AnimationTimer
    {
       /* Compute mesh */
       meshBuilder.clear();
-      IDLSequence.Float heights = heightMapMessage.getHeights();
+      IDLSequence.Integer heights = heightMapMessage.getHeights();
       double gridResolutionXY = heightMapMessage.getXyResolution();
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
 

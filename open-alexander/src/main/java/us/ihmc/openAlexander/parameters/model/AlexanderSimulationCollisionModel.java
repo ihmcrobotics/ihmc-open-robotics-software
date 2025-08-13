@@ -86,7 +86,7 @@ public class AlexanderSimulationCollisionModel implements RobotCollisionModel
       {
          MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
          // Capsule along the forward axis covering the bottom part of the "abdomen" and of the chest.
-         FrameCapsule3D torsoShapeBottomCenter = new FrameCapsule3D(torsoFrame, 0.1, 0.17);
+         FrameCapsule3D torsoShapeBottomCenter = new FrameCapsule3D(torsoFrame, 0.1, 0.10);
          torsoShapeBottomCenter.getPosition().set(-0.01, 0.0, 0.22);
          torsoShapeBottomCenter.getAxis().set(Axis3D.Z);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomCenter));

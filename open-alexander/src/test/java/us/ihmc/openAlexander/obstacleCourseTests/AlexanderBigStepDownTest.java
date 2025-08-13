@@ -21,7 +21,7 @@ public class AlexanderBigStepDownTest extends AvatarBigStepDownTest
    @Override
    public DRCRobotModel getRobotModel()
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT)
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()

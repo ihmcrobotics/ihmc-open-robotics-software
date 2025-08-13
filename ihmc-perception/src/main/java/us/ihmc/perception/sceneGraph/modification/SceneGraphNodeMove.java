@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.modification;
 
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 
 /**
@@ -12,9 +13,9 @@ public class SceneGraphNodeMove extends SceneGraphNodeAddition implements SceneG
 {
    private final SceneNode previousParent;
 
-   public SceneGraphNodeMove(SceneNode nodeToMove, SceneNode previousParent, SceneNode newParent)
+   public SceneGraphNodeMove(SceneNode nodeToMove, SceneNode previousParent, SceneNode newParent, SceneGraph sceneGraph)
    {
-      super(nodeToMove, newParent);
+      super(nodeToMove, newParent, sceneGraph);
       this.previousParent = previousParent;
    }
 

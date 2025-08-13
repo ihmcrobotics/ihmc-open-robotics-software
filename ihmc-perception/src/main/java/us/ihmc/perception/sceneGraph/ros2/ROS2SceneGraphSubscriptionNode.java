@@ -4,11 +4,11 @@ import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
+import perception_msgs.msg.dds.FoundationPoseNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
-import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class ROS2SceneGraphSubscriptionNode
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
    private DoorNodeMessage doorNodeMessage;
-   private TrashCanNodeMessage trashCanNodeMessage;
+   private FoundationPoseNodeMessage foundationPoseNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -44,7 +44,7 @@ public class ROS2SceneGraphSubscriptionNode
       yoloNodeMessage = null;
       staticRelativeSceneNodeMessage = null;
       doorNodeMessage = null;
-      trashCanNodeMessage = null;
+      foundationPoseNodeMessage = null;
       children.clear();
    }
 
@@ -148,14 +148,14 @@ public class ROS2SceneGraphSubscriptionNode
       this.doorNodeMessage = doorNodeMessage;
    }
 
-   public TrashCanNodeMessage getTrashCanNodeMessage()
+   public FoundationPoseNodeMessage getFoundationPoseNodeMessage()
    {
-      return trashCanNodeMessage;
+      return foundationPoseNodeMessage;
    }
 
-   public void setTrashCanNodeMessage(TrashCanNodeMessage trashCanNodeMessage)
+   public void setFoundationPoseNodeMessage(FoundationPoseNodeMessage foundationPoseNodeMessage)
    {
-      this.trashCanNodeMessage = trashCanNodeMessage;
+      this.foundationPoseNodeMessage = foundationPoseNodeMessage;
    }
 
    public List<ROS2SceneGraphSubscriptionNode> getChildren()

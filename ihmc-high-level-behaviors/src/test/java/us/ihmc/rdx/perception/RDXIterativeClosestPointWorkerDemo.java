@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointWorker;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.perception.cuda.CUDAPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
@@ -50,7 +50,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
    private static final int CORRESPONDENCES = 1000;
 
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
+   private final CUDAPointCloudExtractor pointCloudExtractor = new CUDAPointCloudExtractor();
    private final Random random = new Random(System.nanoTime());
 
    private final ROS2Node node = new ROS2NodeBuilder().build("icp_worker_demo");
@@ -277,6 +277,7 @@ public class RDXIterativeClosestPointWorkerDemo
             zedImageRetriever.destroy();
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
+            pointCloudExtractor.close();
          }
 
          private void renderSettings()

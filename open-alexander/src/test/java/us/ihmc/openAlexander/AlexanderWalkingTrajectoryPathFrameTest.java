@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
-import us.ihmc.commons.AngleTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -33,8 +32,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
@@ -116,7 +113,7 @@ public class AlexanderWalkingTrajectoryPathFrameTest
    {
       if (robotModel == null)
       {
-         robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+         robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       }
       return robotModel;
    }

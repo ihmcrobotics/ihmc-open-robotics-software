@@ -33,4 +33,14 @@ public class RDXEnvironmentObject extends RDXSimpleObject
    {
       return centerOfMassInModelFrame;
    }
+
+   public String getName()
+   {
+      return titleCasedName;
+   }
+
+   public int getObjectIndex()
+   {
+      return objectIndex;
+   }
 }
