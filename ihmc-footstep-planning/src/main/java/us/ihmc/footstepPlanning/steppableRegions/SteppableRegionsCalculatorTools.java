@@ -13,7 +13,6 @@ import us.ihmc.footstepPlanning.steppableRegions.data.SteppableBorderRing;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableCell;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionDataHolder;
 import us.ihmc.footstepPlanning.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -109,10 +108,8 @@ public class SteppableRegionsCalculatorTools
                boolean isBorderCell;
                int connection = connections.ptr(x, y).get() & 0xFF;
 
-               if (Integer.bitCount(connection) != 8) // 8 bits is fully connected
-                  isBorderCell = true;
-               else
-                  isBorderCell = false;
+               // 8 bits is fully connected
+               isBorderCell = Integer.bitCount(connection) != 8;
 
                double z = snappedHeight.ptr(x, y).getShort();
                Vector3D normal = new Vector3D(normalValueAsFloat(snappedNormalX, x, y),
@@ -202,6 +199,107 @@ public class SteppableRegionsCalculatorTools
       // If the bit of mask and the bit of the cell connections are the same, we know its connected
       int maskedValue = mask & numberOfCellConnections;
       return maskedValue > 0;
+   }
+
+   public static float normalValueAsFloat(Mat image, int x, int y)
+   {
+      return ((float) ((image.ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
+   }
+
+   private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
+                                               SteppableRegionsEnvironmentModel environmentModel,
+                                               int maxDepth,
+                                               int currentDepth,
+                                               double gridCenterX,
+                                               double gridCenterY,
+                                               double gridResolutionXY,
+                                               int centerIndex)
+   {
+      if (!cellToExpand.cellHasBeenAssigned())
+         throw new RuntimeException("Should only be expanding assigned cells.");
+
+      environmentModel.markCellAsExpanded(cellToExpand);
+
+      for (SteppableCell neighbor : cellToExpand.getValidNeighbors())
+      {
+         if (neighbor.cellHasBeenAssigned())
+         {
+            // The neighboring cell that we're connected to has already been assigned to another region. Since these regions are connected, we should merge them.
+            SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
+            if (cellToExpand.getRegion().mergeRegion(neighborRegion))
+            {
+               // If the regions we're successfully merged, we need to remove the other region from the environment.
+               // The only reason it wouldn't be successful is if they're the same region.
+               environmentModel.getRegions().remove(neighborRegion);
+            }
+         }
+         else
+         {
+            // the cell has not been assigned already, so we can directly add it to the region contained by the parent cell.
+            cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         }
+
+         if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
+         {
+            if (!cellToExpand.cellHasBeenAssigned())
+               throw new RuntimeException("Somehow the assignment operation failed.");
+
+            recursivelyAddNeighbors(neighbor, environmentModel, maxDepth, currentDepth + 1, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         }
+      }
+   }
+
+   private static void recursivelyAddBorderNeighbors(SteppableCell cellToExpand,
+                                                     SteppableRegionsEnvironmentModel environmentModel,
+                                                     int maxDepth,
+                                                     int currentDepth,
+                                                     double gridCenterX,
+                                                     double gridCenterY,
+                                                     double gridResolutionXY,
+                                                     int centerIndex)
+   {
+      if (!cellToExpand.cellHasBeenAssigned())
+         throw new RuntimeException("Should only be expanding assigned cells.");
+
+      environmentModel.markCellAsExpanded(cellToExpand);
+
+      for (SteppableCell neighbor : cellToExpand.getValidNeighbors())
+      {
+         if (neighbor.cellHasBeenAssigned())
+         {
+            SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
+            if (neighbor.isBorderCell())
+            {
+               // If the neighbor has already been assigned, and is contained as part of a border ring, those rings should be merged together.
+               SteppableBorderRing neighborRing = neighbor.getBorderRing();
+               if (cellToExpand.getBorderRing().mergeRing(neighborRing))
+               {
+                  // the only reason that the merge ring operation should fail is if the rings were already the same, so we wouldn't want it to remove.
+                  neighborRegion.removeBorderRing(neighborRing);
+               }
+            }
+
+            // The neighbor is connected, so the regions are connected, and should be merged together.
+            if (cellToExpand.getRegion().mergeRegion(neighborRegion))
+               environmentModel.removeRegion(neighborRegion);
+         }
+         else
+         {
+            // the neighboring cell has not been assigned already. This means we should add it to the current region.
+            cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+            if (neighbor.isBorderCell())
+            {
+               // If the neighboring cell is a border cell, it is part of the border ring.
+               cellToExpand.getBorderRing().addCell(neighbor);
+               neighbor.setBorderRing(cellToExpand.getBorderRing());
+            }
+         }
+
+         if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
+         {
+            recursivelyAddBorderNeighbors(neighbor, environmentModel, maxDepth, currentDepth + 1, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
+         }
+      }
    }
 
    public static SteppableRegionsList createSteppableRegions(ConcaveHullFactoryParameters concaveHullFactoryParameters,
@@ -410,107 +508,6 @@ public class SteppableRegionsCalculatorTools
       }
 
       return regionHeightMap;
-   }
-
-   public static float normalValueAsFloat(Mat image, int x, int y)
-   {
-      return ((float) ((image.ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
-   }
-
-   private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
-                                               SteppableRegionsEnvironmentModel environmentModel,
-                                               int maxDepth,
-                                               int currentDepth,
-                                               double gridCenterX,
-                                               double gridCenterY,
-                                               double gridResolutionXY,
-                                               int centerIndex)
-   {
-      if (!cellToExpand.cellHasBeenAssigned())
-         throw new RuntimeException("Should only be expanding assigned cells.");
-
-      environmentModel.markCellAsExpanded(cellToExpand);
-
-      for (SteppableCell neighbor : cellToExpand.getValidNeighbors())
-      {
-         if (neighbor.cellHasBeenAssigned())
-         {
-            // The neighboring cell that we're connected to has already been assigned to another region. Since these regions are connected, we should merge them.
-            SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
-            if (cellToExpand.getRegion().mergeRegion(neighborRegion))
-            {
-               // If the regions we're successfully merged, we need to remove the other region from the environment.
-               // The only reason it wouldn't be successful is if they're the same region.
-               environmentModel.getRegions().remove(neighborRegion);
-            }
-         }
-         else
-         {
-            // the cell has not been assigned already, so we can directly add it to the region contained by the parent cell.
-            cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
-         }
-
-         if (!neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
-         {
-            if (!cellToExpand.cellHasBeenAssigned())
-               throw new RuntimeException("Somehow the assignment operation failed.");
-
-            recursivelyAddNeighbors(neighbor, environmentModel, maxDepth, currentDepth + 1, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
-         }
-      }
-   }
-
-   private static void recursivelyAddBorderNeighbors(SteppableCell cellToExpand,
-                                                     SteppableRegionsEnvironmentModel environmentModel,
-                                                     int maxDepth,
-                                                     int currentDepth,
-                                                     double gridCenterX,
-                                                     double gridCenterY,
-                                                     double gridResolutionXY,
-                                                     int centerIndex)
-   {
-      if (!cellToExpand.cellHasBeenAssigned())
-         throw new RuntimeException("Should only be expanding assigned cells.");
-
-      environmentModel.markCellAsExpanded(cellToExpand);
-
-      for (SteppableCell neighbor : cellToExpand.getValidNeighbors())
-      {
-         if (neighbor.cellHasBeenAssigned())
-         {
-            SteppableRegionDataHolder neighborRegion = neighbor.getRegion();
-            if (neighbor.isBorderCell())
-            {
-               // If the neighbor has already been assigned, and is contained as part of a border ring, those rings should be merged together.
-               SteppableBorderRing neighborRing = neighbor.getBorderRing();
-               if (cellToExpand.getBorderRing().mergeRing(neighborRing))
-               {
-                  // the only reason that the merge ring operation should fail is if the rings were already the same, so we wouldn't want it to remove.
-                  neighborRegion.removeBorderRing(neighborRing);
-               }
-            }
-
-            // The neighbor is connected, so the regions are connected, and should be merged together.
-            if (cellToExpand.getRegion().mergeRegion(neighborRegion))
-               environmentModel.removeRegion(neighborRegion);
-         }
-         else
-         {
-            // the neighboring cell has not been assigned already. This means we should add it to the current region.
-            cellToExpand.getRegion().addCell(neighbor, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
-            if (neighbor.isBorderCell())
-            {
-               // If the neighboring cell is a border cell, it is part of the border ring.
-               cellToExpand.getBorderRing().addCell(neighbor);
-               neighbor.setBorderRing(cellToExpand.getBorderRing());
-            }
-         }
-
-         if (neighbor.isBorderCell() && !neighbor.cellHasBeenExpanded() && currentDepth < maxDepth)
-         {
-            recursivelyAddBorderNeighbors(neighbor, environmentModel, maxDepth, currentDepth + 1, gridCenterX, gridCenterY, gridResolutionXY, centerIndex);
-         }
-      }
    }
 
    public static Point2D convertCellToPoint(SteppableCell cell, double gridCenterX, double gridCenterY, double gridResolutionXY, int centerIndex)

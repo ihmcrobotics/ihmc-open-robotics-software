@@ -20,8 +20,8 @@ public class SteppableRegionsCalculationModuleTest
    public void testSimpleFlatGround()
    {
       // Based on this resolution, 200 / 5 = 40, so we should have 40 * 40 = 1600 points
-      double gridResolution = 0.05;
-      double terrainWidth = 2.0;
+      double gridResolution = 0.1;
+      double terrainWidth = 1.0;
       Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       heightMapParameters.setCellSize(gridResolution);
@@ -30,7 +30,6 @@ public class SteppableRegionsCalculationModuleTest
       int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, gridResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
       Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
-      PerceptionDebugTools.printMat("ii", heightMapMat, 1);
       HeightMapData heightMapData = new HeightMapData(gridResolution, terrainWidth, gridCenter.getX(), gridCenter.getY());
       HeightMapTools.convertToHeightMapData(heightMapMat,
                                             heightMapData,
@@ -43,11 +42,6 @@ public class SteppableRegionsCalculationModuleTest
       double extremumValue = terrainWidth / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
-
-      Mat newestMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
-      HeightMapTools.convertHeightMapDataToMat(newestMat, heightMapData, heightMapParameters);
-
-      PerceptionDebugTools.printMat("s", newestMat, 1);
 
       SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
       snappingTerrainExtractor.update(heightMapData);
