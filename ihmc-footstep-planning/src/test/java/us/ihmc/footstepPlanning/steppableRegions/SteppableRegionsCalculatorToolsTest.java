@@ -36,7 +36,7 @@ public class SteppableRegionsCalculatorToolsTest
     * {@link SteppableRegionsCalculatorTools#collectCellNeighborsInEnvironment(SteppableCell, SteppableRegionsEnvironmentModel, Mat)} is working properly
     */
    @Test
-   public void testFullyConnectedCell()
+   public void testConnectedCells()
    {
       int cellsPerAxis = 3;
       SteppableRegionsEnvironmentModel environmentModel = new SteppableRegionsEnvironmentModel(cellsPerAxis);
@@ -52,14 +52,22 @@ public class SteppableRegionsCalculatorToolsTest
 
       // The center cell will have a full connections list - 11111111 — all connected
       Mat connections = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
-      connections.ptr(1, 1).put((byte) 0xFF);
+      // ----------------------------------------------------------------------------
 
+      connections.ptr(1, 1).put((byte) 0xFF);
       SteppableCell center = environmentModel.getCellAt(1, 1);
       SteppableRegionsCalculatorTools.collectCellNeighborsInEnvironment(center, environmentModel, connections);
 
       // Expect all 8 neighbors because the cell is surrounded
-      int expectedNeighbors = 8;
-      assertEquals(expectedNeighbors, center.getValidNeighbors().size());
+      int expectedNeighborsCenter = 8;
+      assertEquals(expectedNeighborsCenter, center.getValidNeighbors().size());
+
+      // This time we are picking a corner, so we don't expect to have full neighbors
+      connections.ptr(0, 0).put((byte) 0xD0);
+      SteppableCell corner = environmentModel.getCellAt(0, 0);
+      SteppableRegionsCalculatorTools.collectCellNeighborsInEnvironment(corner, environmentModel, connections);
+      int expectedNeighborsCorner = 3;
+      assertEquals(expectedNeighborsCorner, corner.getValidNeighbors().size());
    }
 
    @Test

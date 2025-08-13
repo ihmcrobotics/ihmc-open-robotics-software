@@ -119,18 +119,6 @@
     "lowerBound": 0.0,
     "upperBound": 1.0
   },
-  "Grid resolution XY": {
-    "value": 0.02,
-    "lowerBound": 0.01,
-    "upperBound": 0.1,
-    "description": "Resolution of the height map grid"
-  },
-  "Grid size XY": {
-    "value": 4.0,
-    "lowerBound": 1.0,
-    "upperBound": 10.0,
-    "description": "Length of the side of the square height map grid"
-  },
   "Max Z": {
     "value": 0.6,
     "lowerBound": 0.1,

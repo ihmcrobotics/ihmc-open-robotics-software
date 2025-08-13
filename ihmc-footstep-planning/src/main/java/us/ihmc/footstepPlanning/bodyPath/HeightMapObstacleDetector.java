@@ -118,14 +118,14 @@ public class HeightMapObstacleDetector
       /* Computes traversibility */
       terrainOffsets.clear();
       terrainOffsetCosts.clear();
-      int maxOffset = (int) Math.round(rLarge / heightMapData.getGridResolutionXY());
+      int maxOffset = (int) Math.round(rLarge / heightMapData.getCellSize());
 
       for (int xi = -maxOffset; xi <= maxOffset; xi++)
       {
          for (int yi = -maxOffset; yi < maxOffset; yi++)
          {
-            double x = xi * heightMapData.getGridResolutionXY();
-            double y = yi * heightMapData.getGridResolutionXY();
+            double x = xi * heightMapData.getCellSize();
+            double y = yi * heightMapData.getCellSize();
             double theta = Math.atan2(y, x);
             double r = EuclidCoreTools.norm(x, y);
             double alpha = Math.abs(theta) / Math.PI;
@@ -152,8 +152,8 @@ public class HeightMapObstacleDetector
                transform.getRotation().setToYawOrientation(intensityGradientOrientation.get(i, j));
                offset.applyTransform(transform);
 
-               int offsetX = (int) Math.round(offset.getX() / heightMapData.getGridResolutionXY());
-               int offsetY = (int) Math.round(offset.getY() / heightMapData.getGridResolutionXY());
+               int offsetX = (int) Math.round(offset.getX() / heightMapData.getCellSize());
+               int offsetY = (int) Math.round(offset.getY() / heightMapData.getCellSize());
                int qX = i + offsetX;
                int qY = j + offsetY;
                if (qX < 0 || qY < 0 || qX >= gridWidth || qY >= gridWidth)

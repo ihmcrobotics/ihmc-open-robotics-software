@@ -146,22 +146,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    }
 
    /**
-    * Resolution of the height map grid
-    */
-   default double getGridResolutionXY()
-   {
-      return get(gridResolutionXY);
-   }
-
-   /**
-    * Length of the side of the square height map grid
-    */
-   default double getGridSizeXY()
-   {
-      return get(gridSizeXY);
-   }
-
-   /**
     * Max z relative to robot mid foot z. Points above this threshold are ignored.
     */
    default double getMaxZ()

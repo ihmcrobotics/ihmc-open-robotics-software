@@ -18,25 +18,25 @@ public class HeightMapData
 
    private int centerIndex;
    private int cellsPerAxis;
-   private double gridResolutionXY;
-   private double gridSizeXY;
+   private double cellSize;
+   private double mapWidth;
    private final Point2D gridCenter = new Point2D();
    private double estimatedGroundHeight = Double.NaN;
 
    private double minX, maxX, minY, maxY;
 
-   public HeightMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
+   public HeightMapData(double cellSize, double mapWidth, double gridCenterX, double gridCenterY)
    {
-      this.gridResolutionXY = gridResolutionXY;
-      this.gridSizeXY = gridSizeXY;
-      this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
+      this.cellSize = cellSize;
+      this.mapWidth = mapWidth;
+      this.centerIndex = HeightMapTools.computeCenterIndex(mapWidth, cellSize);
       this.cellsPerAxis = 2 * centerIndex + 1;
       this.heights = new double[cellsPerAxis * cellsPerAxis];
       this.normals = new Vector3D[cellsPerAxis * cellsPerAxis];
       this.gridCenter.set(gridCenterX, gridCenterY);
 
       double epsilon = 1e-8;
-      double halfWidth = 0.5 * (gridSizeXY + gridResolutionXY) - epsilon;
+      double halfWidth = 0.5 * (mapWidth + cellSize) - epsilon;
       minX = gridCenterX - halfWidth;
       maxX = gridCenterX + halfWidth;
       minY = gridCenterY - halfWidth;
@@ -52,9 +52,9 @@ public class HeightMapData
 
    public void set(HeightMapData latestHeightMapData)
    {
-      this.gridResolutionXY = latestHeightMapData.getGridResolutionXY();
-      this.gridSizeXY = latestHeightMapData.getGridSizeXY();
-      this.centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getGridSizeXY(), latestHeightMapData.getGridResolutionXY());
+      this.cellSize = latestHeightMapData.getCellSize();
+      this.mapWidth = latestHeightMapData.getMapWidth();
+      this.centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapWidth(), latestHeightMapData.getCellSize());
       this.cellsPerAxis = 2 * latestHeightMapData.getCenterIndex() + 1;
       this.estimatedGroundHeight = latestHeightMapData.getEstimatedGroundHeight();
 
@@ -72,7 +72,7 @@ public class HeightMapData
       occupiedCells.addAll(latestHeightMapData.occupiedCells);
 
       double epsilon = 1e-8;
-      double halfWidth = 0.5 * (this.gridSizeXY + this.gridResolutionXY) - epsilon;
+      double halfWidth = 0.5 * (this.mapWidth + this.cellSize) - epsilon;
       minX = this.gridCenter.getX() - halfWidth;
       maxX = this.gridCenter.getX() + halfWidth;
       minY = this.gridCenter.getY() - halfWidth;
@@ -92,14 +92,14 @@ public class HeightMapData
       return occupiedCells.isEmpty();
    }
 
-   public double getGridResolutionXY()
+   public double getCellSize()
    {
-      return gridResolutionXY;
+      return cellSize;
    }
 
-   public double getGridSizeXY()
+   public double getMapWidth()
    {
-      return gridSizeXY;
+      return mapWidth;
    }
 
    public int getNumberOfOccupiedCells()
@@ -115,8 +115,8 @@ public class HeightMapData
    public Point2D getCellPosition(int i)
    {
       int key = occupiedCells.get(i);
-      return new Point2D(HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), gridResolutionXY, centerIndex),
-                         HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), gridResolutionXY, centerIndex));
+      return new Point2D(HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), cellSize, centerIndex),
+                         HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), cellSize, centerIndex));
    }
 
    /**
@@ -130,7 +130,7 @@ public class HeightMapData
          return Double.NaN;
       }
 
-      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), cellSize, centerIndex);
       return Double.isNaN(heights[key]) ? estimatedGroundHeight : heights[key];
    }
 
@@ -166,7 +166,7 @@ public class HeightMapData
          return;
       }
 
-      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), cellSize, centerIndex);
       if (Double.isNaN(heights[key]))
       {
          occupiedCells.add(key);
@@ -253,7 +253,7 @@ public class HeightMapData
       gridCenter.set(x, y);
 
       double epsilon = 1e-8;
-      double halfWidth = 0.5 * (gridSizeXY + gridResolutionXY) - epsilon;
+      double halfWidth = 0.5 * (mapWidth + cellSize) - epsilon;
       minX = gridCenter.getX() - halfWidth;
       maxX = gridCenter.getX() + halfWidth;
       minY = gridCenter.getY() - halfWidth;

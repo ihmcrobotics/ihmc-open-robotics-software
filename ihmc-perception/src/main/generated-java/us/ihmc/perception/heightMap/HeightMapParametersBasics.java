@@ -144,22 +144,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    }
 
    /**
-    * Resolution of the height map grid
-    */
-   default void setGridResolutionXY(double gridResolutionXY)
-   {
-      set(HeightMapParameters.gridResolutionXY, gridResolutionXY);
-   }
-
-   /**
-    * Length of the side of the square height map grid
-    */
-   default void setGridSizeXY(double gridSizeXY)
-   {
-      set(HeightMapParameters.gridSizeXY, gridSizeXY);
-   }
-
-   /**
     * Max z relative to robot mid foot z. Points above this threshold are ignored.
     */
    default void setMaxZ(double maxZ)

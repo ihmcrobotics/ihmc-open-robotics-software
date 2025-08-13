@@ -46,14 +46,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
    /**
-    * Resolution of the height map grid
-    */
-   public static final DoubleStoredPropertyKey gridResolutionXY = keys.addDoubleKey("Grid resolution XY");
-   /**
-    * Length of the side of the square height map grid
-    */
-   public static final DoubleStoredPropertyKey gridSizeXY = keys.addDoubleKey("Grid size XY");
-   /**
     * Max z relative to robot mid foot z. Points above this threshold are ignored.
     */
    public static final DoubleStoredPropertyKey maxZ = keys.addDoubleKey("Max Z");

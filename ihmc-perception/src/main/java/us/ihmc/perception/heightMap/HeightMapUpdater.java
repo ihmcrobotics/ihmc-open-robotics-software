@@ -85,7 +85,7 @@ public class HeightMapUpdater
    {
       parameters = new HeightMapParameters();
       filterParameters = new HeightMapFilterParameters();
-      heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
+      heightMap = new HeightMapManager(parameters, parameters.getCellSize(), parameters.getTerrainWidthInMeters());
    }
 
    public HeightMapParametersBasics getHeightMapParameters()
@@ -247,7 +247,7 @@ public class HeightMapUpdater
 
       Point2D snappedGridCenter = new Point2D(gridCenter);
       if (snapCenterToGrid)
-         snapPointToGrid(snappedGridCenter, parameters.getGridResolutionXY());
+         snapPointToGrid(snappedGridCenter, parameters.getCellSize());
 
       if (clearRequested.getAndSet(false))
       {
@@ -264,8 +264,8 @@ public class HeightMapUpdater
 
       // Update height map
       heightMap.setMaxHeight(gridCenter.getZ() + parameters.getMaxZ());
-      heightMap.updateGridSizeXY(parameters.getGridSizeXY());
-      heightMap.updateGridResolutionXY(parameters.getGridResolutionXY());
+      heightMap.updateGridSizeXY(parameters.getTerrainWidthInMeters());
+      heightMap.updateGridResolutionXY(parameters.getCellSize());
       heightMap.update(pointCloud, verticalVarianceMeasurement);
       totalUpdateCount.incrementAndGet();
 
@@ -305,8 +305,8 @@ public class HeightMapUpdater
    {
       // Copy and report over messager
       HeightMapMessage message = new HeightMapMessage();
-      message.setGridSizeXy(parameters.getGridSizeXY());
-      message.setXyResolution(parameters.getGridResolutionXY());
+      message.setGridSizeXy(parameters.getTerrainWidthInMeters());
+      message.setXyResolution(parameters.getCellSize());
       message.setGridCenterX(heightMap.getGridCenterXY().getX());
       message.setGridCenterY(heightMap.getGridCenterXY().getY());
 

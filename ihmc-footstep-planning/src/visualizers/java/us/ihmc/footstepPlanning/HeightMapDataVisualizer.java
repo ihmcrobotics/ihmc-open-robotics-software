@@ -134,7 +134,7 @@ public class HeightMapDataVisualizer
       Graphics3DObject graphics3DObject = new Graphics3DObject();
 
       graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
-      graphics3DObject.addCube(heightMapData.getGridSizeXY(), heightMapData.getGridSizeXY(), 0.01, YoAppearance.Blue());
+      graphics3DObject.addCube(heightMapData.getMapWidth(), heightMapData.getMapWidth(), 0.01, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
       double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();
@@ -146,11 +146,11 @@ public class HeightMapDataVisualizer
       {
          Point2D cellPosition = new Point2D(HeightMapTools.keyToXCoordinate(key,
                                                                             heightMapData.getGridCenter().getX(),
-                                                                            heightMapData.getGridResolutionXY(),
+                                                                            heightMapData.getCellSize(),
                                                                             heightMapData.getCenterIndex()),
                                             HeightMapTools.keyToYCoordinate(key,
                                                                             heightMapData.getGridCenter().getY(),
-                                                                            heightMapData.getGridResolutionXY(),
+                                                                            heightMapData.getCellSize(),
                                                                             heightMapData.getCenterIndex()));
          double height = heightMapData.getHeightAt(HeightMapTools.keyToXIndex(key, heightMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex()));
 
@@ -178,7 +178,7 @@ public class HeightMapDataVisualizer
                color = defaultColor;
             }
 
-            graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, color);
+            graphics3DObject.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), renderedHeight, true, color);
 
             if (SHOW_NORMALS)
             {

@@ -4,13 +4,16 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.TerrainMapData;
-
 public class TerrainMapDataTest
 {
    int size = 100; // 2 m x 2 m
    private final HeightMapParameters parameters = new HeightMapParameters();
-   private final TerrainMapData terrainMapData = new TerrainMapData(size, size, parameters.getHeightScaleFactor(), parameters.getHeightOffset(), parameters.getGridResolutionXY(), parameters.getGridSizeXY());
+   private final TerrainMapData terrainMapData = new TerrainMapData(size,
+                                                                    size,
+                                                                    parameters.getHeightScaleFactor(),
+                                                                    parameters.getHeightOffset(),
+                                                                    parameters.getCellSize(),
+                                                                    parameters.getTerrainWidthInMeters());
 
    @Test
    public void testTerrainMapSurfaceNormals()
@@ -20,7 +23,7 @@ public class TerrainMapDataTest
       {
          for (int j = size / 2 - 10; j < size / 2 + 10; j++)
          {
-            terrainMapData.setHeightLocal(i * (1 / 50.0f), i,j);
+            terrainMapData.setHeightLocal(i * (1 / 50.0f), i, j);
          }
       }
 

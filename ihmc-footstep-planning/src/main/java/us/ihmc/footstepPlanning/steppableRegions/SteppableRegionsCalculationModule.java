@@ -51,7 +51,7 @@ public class SteppableRegionsCalculationModule
    public SteppableRegionsCalculationModule(SteppableRegionCalculatorParametersReadOnly defaultParameters, HeightMapParameters heightMapParameters)
    {
       this.parameters = new SteppableRegionCalculatorParameters(defaultParameters);
-      this.cellsPerSide = (HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getGridResolutionXY()) * 2) + 1;
+      this.cellsPerSide = (HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSize()) * 2) + 1;
 
       concaveHullParameters.setEdgeLengthThreshold(1.0);
 

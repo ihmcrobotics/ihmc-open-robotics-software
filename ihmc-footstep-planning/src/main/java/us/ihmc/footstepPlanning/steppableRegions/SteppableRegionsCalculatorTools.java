@@ -140,8 +140,24 @@ public class SteppableRegionsCalculatorTools
    }
 
    /**
-    * This collects a list of all the cells that are in a circle around {@param cell}, as long as they are contained within the "environment". It does not
-    * check for connection.
+    * Collects a list of all the cells in a circle around the given {@code cell},
+    * as long as they are contained within the environment.
+    * <p>
+    * This method does not check for connection beyond the provided bitmask.
+    * When iterating through the indices of the current cell, each of its eight
+    * possible neighbors (numbered 1–8) is examined. The bits that are set to 1
+    * in the bitmask indicate valid neighbors.
+    * </p>
+    *
+    * Neighbor index mapping (with relative coordinates):
+    * <pre>
+    *   1 |  2  |  3      (-1,-1) | (-1, 0) | (-1, 1)
+    *  ---+-----+---
+    *   4 |  C  |  5      ( 0,-1) | ( 0, 0) | ( 0, 1)
+    *  ---+-----+---
+    *   6 |  7  |  8      ( 1,-1) | ( 1, 0) | ( 1, 1)
+    * </pre>
+    * Where {@code C} is the current cell.
     */
    public static void collectCellNeighborsInEnvironment(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, Mat connections)
    {
