@@ -19,8 +19,9 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -66,16 +67,13 @@ public class RDX3DSituatedImagePanel
    private CameraPanelFrustumCollision frustumCollidable;
    private boolean frustumInitialized = false;
    private final RigidBodyTransform frustumTransformOriginInWorld = new RigidBodyTransform();
-   /** If either VR controller is inside the camera frustum. */
-   private SideDependentList<Boolean> isVRControllerInFOV = new SideDependentList<>(false, false);
-   private final RDXVRModeManager vrModeManager;
+   private final RDXVRModeControls vrControls;
 
-   public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager, boolean checkCollision)
+   public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeControls vrControls, boolean checkCollision)
    {
-      this.vrModeManager = vrModeManager;
+      this.vrControls = vrControls;
       this.checkCollison = checkCollision;
-      if (checkCollision)
-         context.addVRInputProcessor(this::processVRInput);
+      context.addVRInputProcessor(this::processVRInput);
    }
 
    public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, ReferenceFrame cameraFrame, boolean flipY)
@@ -234,7 +232,7 @@ public class RDX3DSituatedImagePanel
       // Prevent ever having an invisible panel out there, which is very confusing
       // to the VR user when the controllers are colliding with and invisible box.
       boolean somethingToShow = imageTexture != null || texture != null;
-      isShowing = somethingToShow && vrModeManager.getControls().getShowFloatingVideoPanel().get();
+      isShowing = somethingToShow && vrControls.getShowFloatingVideoPanel().get();
 
       // Update the texture if necessary
       if (isShowing && imageTexture != null)
@@ -280,26 +278,16 @@ public class RDX3DSituatedImagePanel
    {
       if (isShowing)
       {
-         for (RobotSide side : RobotSide.values)
+         vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
          {
-            vrContext.getController(side).runIfConnected(controller ->
+            double joystickForwardValue = controller.getJoystickActionData().y();
+            if (Math.abs(joystickForwardValue) > JOYSTICK_CONTROL_THRESHOLD)
             {
-               Vector3 pickPos = new Vector3();
-               LibGDXTools.toLibGDX(controller.getPickPointPose().getPosition(), pickPos);
-               isVRControllerInFOV.put(side,  frustumCollidable != null && frustumCollidable.isPointInside(pickPos));
-
-               if (side == RobotSide.LEFT)
-               {
-                  double joystickForwardValue = controller.getJoystickActionData().y();
-                  if (Math.abs(joystickForwardValue) > JOYSTICK_CONTROL_THRESHOLD)
-                  {
-                     panelDistance =
-                           panelDistance + ((float) Math.signum(joystickForwardValue) * JOYSTICK_INCREMENT);
-                     panelDistance = Math.max(0.0f, Math.min(panelDistance, 1.5f));
-                  }
-               }
-            });
-         }
+               panelDistance =
+                     panelDistance + ((float) Math.signum(joystickForwardValue) * JOYSTICK_INCREMENT);
+               panelDistance = Math.max(0.0f, Math.min(panelDistance, 1.5f));
+            }
+         });
       }
    }
 
@@ -350,8 +338,10 @@ public class RDX3DSituatedImagePanel
       return texture;
    }
 
-   public SideDependentList<Boolean> isVRControllerInFOV()
+   public boolean isOccludingView(Point3DReadOnly point)
    {
-      return isVRControllerInFOV;
+      Vector3 pickPos = new Vector3();
+      LibGDXTools.toLibGDX(point, pickPos);
+      return frustumCollidable != null && frustumCollidable.isPointInside(pickPos);
    }
 }

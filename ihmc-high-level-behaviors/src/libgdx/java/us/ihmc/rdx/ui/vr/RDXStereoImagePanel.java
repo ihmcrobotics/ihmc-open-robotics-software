@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,25 +16,17 @@ import java.util.Set;
 public class RDXStereoImagePanel
 {
    private final SideDependentList<RDX3DSituatedImagePanel> panels = new SideDependentList<>();
-   private RDXVRModeManager vrModeManager;
+   private final RDXVRModeControls vrControls;
 
-   public RDXStereoImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
+   public RDXStereoImagePanel(RDXVRContext context, RDXVRModeControls vrControls)
    {
-      this.vrModeManager = vrModeManager;
+      this.vrControls = vrControls;
       for (RobotSide side : RobotSide.values)
       {
-         panels.put(side, new RDX3DSituatedImagePanel(context, vrModeManager, side == RobotSide.LEFT));
+         panels.put(side, new RDX3DSituatedImagePanel(context, vrControls, side == RobotSide.LEFT));
       }
    }
 
-   /**
-    * Update left and right panels for stereo viewing.
-    *
-    * @param leftImage    Left-eye image (Texture)
-    * @param rightImage   Right-eye image (Texture)
-    * @param leftCameraFrame  ReferenceFrame of the left camera
-    * @param rightCameraFrame  ReferenceFrame of the right camera
-    */
    public void update(Texture leftImage, Texture rightImage, ReferenceFrame leftCameraFrame, ReferenceFrame rightCameraFrame)
    {
       panels.get(RobotSide.LEFT).update(leftImage, leftCameraFrame);
@@ -43,7 +35,7 @@ public class RDXStereoImagePanel
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT) && vrModeManager.getControls().getUseStereoVision().get())
+      if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT) && vrControls.getUseStereoVision().get())
       {
          panels.get(RobotSide.RIGHT).getRenderables(renderables, pool, sceneLevels);
       }
@@ -61,8 +53,8 @@ public class RDXStereoImagePanel
       }
    }
 
-   public boolean isVRControllerInFOV(RobotSide side)
+   public boolean isOccludingView(Point3DReadOnly point)
    {
-      return panels.get(RobotSide.LEFT).isVRControllerInFOV().get(side);
+      return panels.get(RobotSide.LEFT).isOccludingView(point);
    }
 }
