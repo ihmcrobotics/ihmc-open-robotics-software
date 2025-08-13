@@ -19,7 +19,6 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
@@ -28,7 +27,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 
@@ -63,6 +61,8 @@ public class RDX3DSituatedImagePanel
    private final ReferenceFrame floatingPanelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                             floatingPanelTransformToWorld);
    private boolean isShowing = false;
+
+   private static final boolean RENDER_FRUSTUM = false;
    private final boolean checkCollison;
    private CameraPanelFrustumCollision frustumCollidable;
    private boolean frustumInitialized = false;
@@ -168,8 +168,11 @@ public class RDX3DSituatedImagePanel
       };
 
       frustumCollidable = new CameraPanelFrustumCollision(nearCorners, farCorners);
-      hoverFrustumMesh = new ModelInstance(getFrustumModel(nearCorners, farCorners));
-      LibGDXTools.toEuclid(hoverFrustumMesh.transform, frustumTransformOriginInWorld);
+      if (RENDER_FRUSTUM)
+      {
+         hoverFrustumMesh = new ModelInstance(getFrustumModel(nearCorners, farCorners));
+         LibGDXTools.toEuclid(hoverFrustumMesh.transform, frustumTransformOriginInWorld);
+      }
    }
 
    private Model getFrustumModel(Vector3[] nearCorners, Vector3[] farCorners)
@@ -263,12 +266,14 @@ public class RDX3DSituatedImagePanel
                 cameraFrame,
                 flipY);
 
-         if (hoverFrustumMesh != null && frustumCollidable != null)
+         RigidBodyTransform newFrustumTransform = new RigidBodyTransform(cameraFrame.getTransformToRoot());
+         newFrustumTransform.multiplyInvertOther(frustumTransformOriginInWorld);
+         if (hoverFrustumMesh != null)
          {
-            RigidBodyTransform newFrustumTransform = new RigidBodyTransform(cameraFrame.getTransformToRoot());
-            newFrustumTransform.multiplyInvertOther(frustumTransformOriginInWorld);
             LibGDXTools.toLibGDX(newFrustumTransform, hoverFrustumMesh.transform);
-
+         }
+         if (frustumCollidable != null)
+         {
             frustumCollidable.updateCorners(newFrustumTransform);
          }
       }

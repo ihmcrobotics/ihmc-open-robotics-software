@@ -40,6 +40,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -68,7 +69,7 @@ public class RDXVRModeManager
    private RDXRobotPerceptionVisualizersPanel perceptionVisualizers;
    private ROS2SyncedRobotModel syncedRobot;
    private RDXStereoImagePanel stereoPanel;
-   private final SideDependentList<List<RigidBodyBasics>> armRigidBodies = new SideDependentList<>();
+   private final SideDependentList<List<RigidBodyBasics>> armRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
