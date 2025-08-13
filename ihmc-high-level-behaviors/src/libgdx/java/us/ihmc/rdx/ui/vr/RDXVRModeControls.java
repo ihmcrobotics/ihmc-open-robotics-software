@@ -18,6 +18,9 @@ public class RDXVRModeControls
    {
       this.vrModeManager = vrModeManager;
       baseUI = RDXBaseUI.getInstance();
+
+      // Optionally accessible as a normal panel
+      baseUI.getImGuiPanelManager().addPanel(PANEL_NAME, this::render);
    }
 
    public void update()

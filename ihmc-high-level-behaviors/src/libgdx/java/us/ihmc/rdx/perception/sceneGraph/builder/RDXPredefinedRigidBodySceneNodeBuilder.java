@@ -157,7 +157,7 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  sceneGraph.getCRDTInfo());
             return new RDXPredefinedRigidBodySceneNode(book, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
-         case "Cereal" ->
+         case "CerealBox" ->
          {
             PredefinedRigidBodySceneNode cereal = new PredefinedRigidBodySceneNode(nextID,
                                                                                    name,

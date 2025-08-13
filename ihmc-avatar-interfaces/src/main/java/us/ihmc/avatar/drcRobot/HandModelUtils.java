@@ -3,9 +3,9 @@ package us.ihmc.avatar.drcRobot;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.HandJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

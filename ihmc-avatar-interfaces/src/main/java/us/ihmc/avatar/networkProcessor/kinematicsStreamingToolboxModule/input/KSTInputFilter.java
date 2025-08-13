@@ -143,10 +143,16 @@ public class KSTInputFilter
          }
          double linearVelocity = input.getDesiredVelocity().getLinearPart().norm();
          if (linearVelocity > maxLinearVelocity.getValue())
+         {
+            LogTools.warn("Linear velocity limit exceeded for end-effector: {}", input.getEndEffector().getName());
             return false;
+         }
          double angularVelocity = input.getDesiredVelocity().getAngularPart().norm();
          if (angularVelocity > maxAngularVelocity.getValue())
+         {
+            LogTools.warn("Angular velocity limit exceeded for end-effector: {}", input.getEndEffector().getName());
             return false;
+         }
       }
 
       return true;
