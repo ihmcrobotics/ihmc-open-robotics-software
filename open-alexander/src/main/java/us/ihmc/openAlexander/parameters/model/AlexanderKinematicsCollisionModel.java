@@ -119,16 +119,6 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
             shinShape.getPosition().set(0.015, 0.0, -0.2);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
-
-//            collisionMask = helper.getCollisionMask(jointMap.getFootName(robotSide));
-//            JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
-//            MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
-//            RigidBodyBasics foot = ankleRoll.getSuccessor();
-//            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-//            FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.26, 0.14, 0.055);
-//            footShape.getPosition().set(0.045, 0.0, -0.05);
-//            footShape.setMargins(1.0e-5, 4.0e-4);
-//            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
          }
       }
 
