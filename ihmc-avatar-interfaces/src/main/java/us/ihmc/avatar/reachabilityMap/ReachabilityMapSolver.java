@@ -50,19 +50,27 @@ import java.util.stream.Collectors;
 
 public class ReachabilityMapSolver
 {
+   private static final int DEFAULT_MAX_TRIALS = 10;
+   private static final int DEFAULT_POSITION_MAX_ITERATIONS = 50;
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 100;
+   private static final int DEFAULT_MAX_NUMBER_OF_TOTAL_ITERATIONS = 250;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.001;
    private static final double DEFAULT_STABILITY_THRESHOLD = 0.00002;
    private static final double DEFAULT_MIN_PROGRESSION = 0.0005;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   /** This is the number of iterations the solver will run to attempt to reach the desired goal */
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
+   private final YoInteger maximumNumberOfTotalIterations = new YoInteger("maximumNumberOfTotalIterations", registry);
+   /** This is the number of trials the solver will run to attempt to reach the desired goal, where each trial starts from a random configuration and then
+    *  iterates*/
+   private final YoInteger maximumNumberOfTrials = new YoInteger("maximumNumberOfTrials", registry);
+   private final YoInteger numberOfTrials = new YoInteger("numberOfTrials", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoDouble solutionQualityThreshold = new YoDouble("solutionQualityThreshold", registry);
    private final YoDouble solutionStabilityThreshold = new YoDouble("solutionStabilityThreshold", registry);
    private final YoDouble solutionMinimumProgression = new YoDouble("solutionProgressionThreshold", registry);
 
-   private final int numberOfTrials = 10;
    private final Random random = new Random(645216L);
 
    private final KinematicsToolboxController kinematicsToolboxController;
@@ -100,6 +108,8 @@ public class ReachabilityMapSolver
       kinematicsToolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(defaultArmConfiguration));
 
       maximumNumberOfIterations.set(DEFAULT_MAX_NUMBER_OF_ITERATIONS);
+      maximumNumberOfTotalIterations.set(DEFAULT_MAX_NUMBER_OF_TOTAL_ITERATIONS);
+      maximumNumberOfTrials.set(DEFAULT_MAX_TRIALS);
       solutionQualityThreshold.set(DEFAULT_QUALITY_THRESHOLD);
       solutionStabilityThreshold.set(DEFAULT_STABILITY_THRESHOLD);
       solutionMinimumProgression.set(DEFAULT_MIN_PROGRESSION);
@@ -265,23 +275,26 @@ public class ReachabilityMapSolver
       message.getControlFrameOrientationInEndEffector().set(controlFramePoseInEndEffector.getOrientation());
       commandInputManager.submitMessage(message);
 
-      return solveAndRetry(50);
+      return solveAndRetry(DEFAULT_POSITION_MAX_ITERATIONS);
    }
 
    private boolean solveAndRetry(int maximumNumberOfIterations)
    {
+      numberOfTrials.set(0);
       numberOfIterations.set(0);
       boolean success = false;
-      while (!success && numberOfIterations.getValue() < numberOfTrials)
+      while (!success && numberOfTrials.getValue() < maximumNumberOfTrials.getValue() && numberOfIterations.getValue() < maximumNumberOfTotalIterations.getValue())
       {
          MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, robotArmJoints);
-         success = solveOnce(maximumNumberOfIterations);
-         numberOfIterations.increment();
+         TrialResult result = solveOnce(maximumNumberOfIterations);
+         success = result.isSolutionGood;
+         numberOfTrials.increment();
+         numberOfIterations.add(result.iterations);
       }
       return success;
    }
 
-   private boolean solveOnce(int maximumNumberOfIterations)
+   private TrialResult solveOnce(int maximumNumberOfIterations)
    {
       boolean isSolutionGood = false;
       boolean isSolverStuck = false;
@@ -299,7 +312,7 @@ public class ReachabilityMapSolver
 
          // If the quality is negative, no solution was found. Return, and start from a new random configuration.
          if (solutionQuality < 0.0)
-            return false;
+            return new TrialResult(false, solutionQuality, iteration);
 
          if (!Double.isNaN(solutionQualityLast))
          {
@@ -346,7 +359,7 @@ public class ReachabilityMapSolver
          }
       }
 
-      return isSolutionGood;
+      return new TrialResult(isSolutionGood, solutionQuality, iteration);
    }
 
    public OneDoFJointBasics[] getRobotArmJoints()
@@ -358,4 +371,8 @@ public class ReachabilityMapSolver
    {
       return controlFramePoseInEndEffector;
    }
+
+   private record TrialResult(boolean isSolutionGood, double solutionQuality, int iterations)
+      {
+      }
 }

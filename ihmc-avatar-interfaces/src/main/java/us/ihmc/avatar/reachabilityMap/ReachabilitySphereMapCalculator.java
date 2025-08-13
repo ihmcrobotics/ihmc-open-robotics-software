@@ -20,6 +20,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -85,6 +86,7 @@ public class ReachabilitySphereMapCalculator implements Controller
    private final boolean[] solverResults;
    private final Voxel3DData[] solverVoxels;
 
+   private final ExecutionTimer[] solverTimers;
    private final YoFramePose3D gridFramePose = new YoFramePose3D("gridFramePose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D evaluatedPose = new YoFramePose3D("evaluatedPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
@@ -102,6 +104,7 @@ public class ReachabilitySphereMapCalculator implements Controller
       solverResults = new boolean[numberOfThreads];
       solverVoxels = new Voxel3DData[numberOfThreads];
       solverInputs = new FramePose3D[numberOfThreads];
+      solverTimers = new ExecutionTimer[numberOfThreads];
 
       RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       ReferenceFrame robotRootFrame = Robot.createRobotRootFrame(robotDefinition, ReferenceFrame.getWorldFrame()); // This allows to visualize YoGraphics in frames other than world
@@ -136,6 +139,7 @@ public class ReachabilitySphereMapCalculator implements Controller
 
          YoGraphicsListRegistry solverGraphicsRegistry = new YoGraphicsListRegistry();
          solvers[i] = new ReachabilityMapSolver(cloneSuffix, solverJoints, solverGraphicsRegistry, solverRegistry);
+         solverTimers[i] = new ExecutionTimer("solverTimer" + i, registry);
 
          if (i == 0 || VISUALIZE_ALL_SOLVERS)
          {
@@ -247,7 +251,16 @@ public class ReachabilitySphereMapCalculator implements Controller
       return solvers[0].getControlFramePoseInEndEffector();
    }
 
+   /**
+    * Please use {@link #setConsiderJointTorqueLimits(boolean)}. This has been renamed for clarity, but deprecated for backwards compatibility.
+    * @param considerJointTorqueLimits
+    */
+   @Deprecated
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
+   {
+      setConsiderJointTorqueLimits(considerJointTorqueLimits);
+   }
+   public void setConsiderJointTorqueLimits(boolean considerJointTorqueLimits)
    {
       for (ReachabilityMapSolver solver : solvers)
       {
@@ -302,6 +315,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             evaluatedPose.set(solverInput);
          }
 
+         solverTimers[solverIndex].startMeasurement();
          // Compute the solution configuration to reach the desired voxel position. Success is false if the point is unreachable. This must respect the joint
          // limits and collisions that have been previously defined.
          boolean success = solvers[solverIndex].solveFor(solverInput.getPosition());
@@ -315,6 +329,7 @@ public class ReachabilitySphereMapCalculator implements Controller
                writeSolverSolutionToRobotForViz(solvers[solverIndex], controllerOutput); // Update visualization
             computeVoxel(voxel, solverIndex);
          }
+         solverTimers[solverIndex].stopMeasurement();
       });
 
       for (int solverIndex = 0; solverIndex < solverResults.length; solverIndex++)

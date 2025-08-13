@@ -38,6 +38,11 @@ public class ReachabilitySphereMapSimulationHelper
 
    public ReachabilitySphereMapSimulationHelper(ReachabilityMapRobotInformation robotInformation)
    {
+      this(robotInformation, 20);
+   }
+
+   public ReachabilitySphereMapSimulationHelper(ReachabilityMapRobotInformation robotInformation, int numberOfThreads)
+   {
       this.robotInformation = robotInformation;
       RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
@@ -46,7 +51,7 @@ public class ReachabilitySphereMapSimulationHelper
       session.initializeBufferSize(16000);
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
-      calculator = new ReachabilitySphereMapCalculator(robotInformation, robot.getControllerOutput(), 20);
+      calculator = new ReachabilitySphereMapCalculator(robotInformation, robot.getControllerOutput(), numberOfThreads);
       calculator.setVoxel3DGrid(Voxel3DGrid.newVoxel3DGrid(25, 0.05, 50, 1));
       calculator.addRobotCollisionModel(robotDefinition);
       robot.addController(calculator);
@@ -55,9 +60,18 @@ public class ReachabilitySphereMapSimulationHelper
       currentVisualizationType.set(VisualizationType.RayReach);
    }
 
+   /**
+    * Please use {@link #setConsiderJointTorqueLimits(boolean)}. It has been renamed for clarity, but the old method is maintained for backward compatibility.
+    */
+   @Deprecated
    public void enableJointTorqueAnalysis(boolean considerJointTorqueLimits)
    {
-      calculator.enableJointTorqueAnalysis(considerJointTorqueLimits);
+      setConsiderJointTorqueLimits(considerJointTorqueLimits);
+   }
+
+   public void setConsiderJointTorqueLimits(boolean considerJointTorqueLimits)
+   {
+      calculator.setConsiderJointTorqueLimits(considerJointTorqueLimits);
    }
 
    public void setEvaluateRReachability(boolean enable)
