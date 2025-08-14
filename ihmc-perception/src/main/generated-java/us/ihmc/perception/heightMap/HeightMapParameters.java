@@ -45,34 +45,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
    public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
    public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
-   /**
-    * Max z relative to robot mid foot z. Points above this threshold are ignored.
-    */
-   public static final DoubleStoredPropertyKey maxZ = keys.addDoubleKey("Max Z");
-   /**
-    * When calibrated on flat ground, this is the average standard deviation observed
-    * for a grid cell.
-    */
-   public static final DoubleStoredPropertyKey nominalStandardDeviation = keys.addDoubleKey("Nominal standard deviation");
-   public static final IntegerStoredPropertyKey maxPointsPerCell = keys.addIntegerKey("Max points per cell");
-   /**
-    * If a grid cell is at height h, points below (h - s * m) are ignored, and points
-    * above (h + s * m) will cause the cell to throw out old data and reset. where s
-    * is getNominalStandardDeviation() and m is this value.
-    */
-   public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
-   /**
-    * This is the variance added to all past measurements when a cell is translated
-    */
-   public static final DoubleStoredPropertyKey varianceAddedWhenTranslating = keys.addDoubleKey("Variance added when translating");
-   /**
-    * This is the measurement variance when the robot is standing
-    */
-   public static final DoubleStoredPropertyKey sensorVarianceWhenStanding = keys.addDoubleKey("Sensor variance when standing");
-   /**
-    * This is the measurement variance when the robot is moving
-    */
-   public static final DoubleStoredPropertyKey sensorVarianceWhenMoving = keys.addDoubleKey("Sensor variance when moving");
    public static final BooleanStoredPropertyKey estimateHeightWithKalmanFilter = keys.addBooleanKey("Estimate height with kalman filter");
 
    /**
