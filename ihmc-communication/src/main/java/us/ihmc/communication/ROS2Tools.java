@@ -1,6 +1,7 @@
 package us.ihmc.communication;
 
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -80,5 +81,12 @@ public final class ROS2Tools
    public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2Node ros2Node, ROS2Topic<T> topic, Notification callback)
    {
       return createSwapReferenceSubscription(ros2Node, topic, message -> callback.set());
+   }
+
+   public static <T> TypedNotification<T> createNotificationSubscription(ROS2Node ros2Node, ROS2Topic<T> topic)
+   {
+      TypedNotification<T> typedNotification = new TypedNotification<>();
+      ros2Node.createSubscription2(topic, typedNotification::set);
+      return typedNotification;
    }
 }
