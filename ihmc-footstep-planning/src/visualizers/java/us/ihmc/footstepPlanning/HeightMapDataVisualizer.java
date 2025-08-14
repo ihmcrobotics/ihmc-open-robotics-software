@@ -134,7 +134,7 @@ public class HeightMapDataVisualizer
       Graphics3DObject graphics3DObject = new Graphics3DObject();
 
       graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
-      graphics3DObject.addCube(heightMapData.getMapWidth(), heightMapData.getMapWidth(), 0.01, YoAppearance.Blue());
+      graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), 0.01, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
       double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();

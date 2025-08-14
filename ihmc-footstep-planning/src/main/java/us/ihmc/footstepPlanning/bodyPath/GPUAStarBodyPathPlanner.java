@@ -350,7 +350,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       if (cellsPerSide != heightMapData.getCellsPerAxis())
       {
          this.cellsPerSide = heightMapData.getCellsPerAxis();
-         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapWidth(), BodyPathLatticePoint.gridSizeXY);
+         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), BodyPathLatticePoint.gridSizeXY);
          this.nodesPerSide = 2 * nodeCenterIndex + 1;
          resizeOpenCLObjects();
          smoother.resizeOpenCLObjects(cellsPerSide);
@@ -1168,7 +1168,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
          double bodyY = 0.5 * (neighbor.getY() + node.getY());
 
          // ensure that this body position is within bounds. Sometimes rounding errors cause this to fail.
-         double halfWidth = heightMapData.getMapWidth() / 2.0;
+         double halfWidth = heightMapData.getMapSize() / 2.0;
          bodyX = MathTools.clamp(bodyX, heightMapData.getGridCenter().getX() - halfWidth, heightMapData.getGridCenter().getX() + halfWidth);
          bodyY = MathTools.clamp(bodyY, heightMapData.getGridCenter().getY() - halfWidth, heightMapData.getGridCenter().getY() + halfWidth);
 

@@ -460,7 +460,7 @@ public class GPUAStarBodyPathSmootherWaypoint
 
    private void computeHeight(HeightMapData heightMapData, OpenCLFloatBuffer snappedHeightBuffer)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapWidth(), BodyPathLatticePoint.gridSizeXY);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), BodyPathLatticePoint.gridSizeXY);
       int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, centerIndex);
       int planKey = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);

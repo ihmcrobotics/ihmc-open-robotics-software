@@ -335,7 +335,7 @@ public class AStarBodyPathSmootherVisualizer
       double groundPlaneThickness = 0.01;
       graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
       graphics3DObject.translate(0.0, 0.0, - groundPlaneThickness);
-      graphics3DObject.addCube(heightMapData.getMapWidth(), heightMapData.getMapWidth(), groundPlaneThickness, YoAppearance.Blue());
+      graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), groundPlaneThickness, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
       double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();

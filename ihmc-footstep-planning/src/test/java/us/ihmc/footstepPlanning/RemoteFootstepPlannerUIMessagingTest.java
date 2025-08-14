@@ -587,7 +587,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       assertEquals(dataA.getCenterIndex(), dataB.getCenterIndex());
       assertEquals(dataA.getCellSize(), dataB.getCellSize(), epsilon);
-      assertEquals(dataA.getMapWidth(), dataB.getMapWidth(), epsilon);
+      assertEquals(dataA.getMapSize(), dataB.getMapSize(), epsilon);
       EuclidCoreTestTools.assertEquals(dataA.getGridCenter(), dataB.getGridCenter(), epsilon);
 
       int cellsPerSide = 2 * dataA.getCenterIndex() + 1;

@@ -119,7 +119,7 @@ public class HeightMapMessageTools
    {
       clear(messageToPack);
 
-      messageToPack.setGridSizeXy(heightMapData.getMapWidth());
+      messageToPack.setGridSizeXy(heightMapData.getMapSize());
       messageToPack.setXyResolution(heightMapData.getCellSize());
       messageToPack.setGridCenterX(heightMapData.getGridCenter().getX());
       messageToPack.setGridCenterY(heightMapData.getGridCenter().getY());
