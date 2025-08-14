@@ -12,6 +12,7 @@ public class AlexArmReachabilitySphereMap
         ReachabilityMapRobotInformation robotInformation = new ReachabilityMapRobotInformation(robotDefinition,
                 robotDefinition.getRootBodyDefinition().getName(),
                 AlexArmLinkParameters.getEndEffector().getLinkName());
+        robotInformation.setControlFramePoseInParentJoint(robotDefinition.getArmParameters().getPalmTransformToWrist());
         ReachabilitySphereMapSimulationHelper simHelper = new ReachabilitySphereMapSimulationHelper(robotInformation);
 
         /* Voxel grid dimensions */
