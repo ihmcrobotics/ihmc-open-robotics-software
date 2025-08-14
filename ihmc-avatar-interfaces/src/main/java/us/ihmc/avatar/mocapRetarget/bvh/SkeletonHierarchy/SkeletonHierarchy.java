@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SkeletonHierarchy {
-   Map<String, JointInfo> joints = new LinkedHashMap<>();
+   public Map<String, JointInfo> joints = new LinkedHashMap<>();
    String rootName;
 
    public void addJoint(JointInfo joint) {
@@ -19,6 +19,8 @@ public class SkeletonHierarchy {
    public Set<String> getJointNames(){
       return joints.keySet();
    }
+
+
 
    public int getTotalChannels() {
       int channelCount = 0;

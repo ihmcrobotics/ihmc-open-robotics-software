@@ -14,8 +14,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
+
+
 public class BVHParser
 {
+   private double frameTimeSeconds;
    /**
     * Parses the HIERARCHY section and returns a skeleton description
     */
@@ -104,7 +107,6 @@ public class BVHParser
    public List<MotionFrame> parseMotion(File bvhFile, SkeletonHierarchy hierarchy) throws IOException
    {
       int frameCount = 0;
-      double frameTime = 0;
       int channelCount = hierarchy.getTotalChannels();
       List<MotionFrame> frames = new ArrayList<MotionFrame>();
 
@@ -116,7 +118,7 @@ public class BVHParser
             if (line.trim().equals("MOTION"))
             {
                frameCount = Integer.parseInt(reader.readLine().trim().split("\\s+")[1]);
-               frameTime = Double.parseDouble(reader.readLine().trim().split("\\s+")[2]);
+               frameTimeSeconds = Double.parseDouble(reader.readLine().trim().split("\\s+")[2]);
                for (int i = 0; i < frameCount; i++) {
                   int index = 0;
                   double[] channelData = new double[channelCount];
@@ -124,12 +126,18 @@ public class BVHParser
                   for (String num : stringData) {
                      channelData[index++] = Double.parseDouble(num);
                   }
-                  frames.add(new MotionFrame(i+1, frameTime*i, channelData));
+                  frames.add(new MotionFrame(i+1, frameTimeSeconds*i, channelData));
                }
             }
          }
       }
       return frames;
+   }
+
+   // Getter method
+   public double getFrameTimeSeconds()
+   {
+      return frameTimeSeconds;
    }
 
    public static void main(String[] args)
