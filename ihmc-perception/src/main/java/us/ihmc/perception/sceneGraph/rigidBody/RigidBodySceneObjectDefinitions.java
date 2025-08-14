@@ -43,10 +43,7 @@ public class RigidBodySceneObjectDefinitions
    public static final double CAN_OF_SOUP_HEIGHT = 0.082388;
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/canOfSoup/CanOfSoup.g3dj";
    public static final RigidBodyTransform CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(CAN_OF_SOUP_HEIGHT / 2.0);
-   }
+
    public static final double MARKER_TO_CAN_OF_SOUP_X_WORLD = 0.5;
    public static final double CAN_OF_SOUP_FROM_TABLE_EDGE = 0.03;
    public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
@@ -101,39 +98,18 @@ public class RigidBodySceneObjectDefinitions
    public static final String BOOK_NAME = "Book";
    public static final String BOOK_VISUAL_MODEL_FILE_PATH = "environmentObjects/book/book.g3dj";
    public static final RigidBodyTransform BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
-   }
 
    public static final String CEREAL_NAME = "Cereal";
    public static final String CEREAL_VISUAL_MODEL_FILE_PATH = "environmentObjects/cereal/cereal.g3dj";
    public static final RigidBodyTransform CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
-      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.2);
-      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
-   }
 
    public static final String MUG_NAME = "Mug";
    public static final String MUG_VISUAL_MODEL_FILE_PATH = "environmentObjects/mug/mug.g3dj";
    public static final RigidBodyTransform MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, -90, -90);
-      MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.1);
-   }
 
    public static final String BIKE_NAME = "Bike";
    public static final String BIKE_VISUAL_MODEL_FILE_PATH = "environmentObjects/bike/bike.g3dj";
    public static final RigidBodyTransform BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      //      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
-      //      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.2);
-      //      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
-   }
 
    public static final String DRILL_NAME = "Drill";
    public static final String DRILL_VISUAL_MODEL_FILE_PATH = "environmentObjects/drill/drill.g3dj";

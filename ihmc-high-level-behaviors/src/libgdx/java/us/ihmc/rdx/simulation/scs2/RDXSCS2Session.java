@@ -50,7 +50,6 @@ public class RDXSCS2Session
    protected final ImInt dtHz = new ImInt(-1);
    private final ImInt bufferRecordTickPeriod = new ImInt(1);
    private final ImFloat bufferDuration = new ImFloat(5.0f);
-   private String bufferSizeFormatString;
    protected final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
    private final ArrayList<Pair<ImBoolean, String>> showRobotPairs = new ArrayList<>();
    private final HashMap<String, ImBoolean> showRobotMap = new HashMap<>();
@@ -352,7 +351,10 @@ public class RDXSCS2Session
       ImGui.pushItemWidth(sliderWidth);
       ImGuiTools.renderSliderOrProgressNotch(yoManager.getInPoint() / (float) yoManager.getBufferSize() * sliderWidth, ImGuiTools.DARK_GREEN);
       ImGuiTools.renderSliderOrProgressNotch(yoManager.getOutPoint() / (float) yoManager.getBufferSize() * sliderWidth, ImGuiTools.DARK_RED);
-      if (ImGui.sliderInt(labels.getHidden("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize(), bufferSizeFormatString))
+      String format = "Index: %d  Active size: %d  Total size: %d".formatted(yoManager.getCurrentIndex(),
+                                                                             session.getBuffer().getProperties().getActiveBufferLength(),
+                                                                             yoManager.getBufferSize());
+      if (ImGui.sliderInt(labels.getHidden("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize(), format))
       {
          session.submitBufferIndexRequest(bufferIndex.get());
       }
@@ -361,6 +363,7 @@ public class RDXSCS2Session
          bufferIndex.set(yoManager.getCurrentIndex());
       }
       ImGui.popItemWidth();
+      ImGui.text("In: %d  Out: %d".formatted(yoManager.getInPoint(), yoManager.getOutPoint()));
       ImGui.checkbox(labels.get("Pause and end of buffer"), pauseAtEndOfBuffer);
       if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
       {
@@ -407,7 +410,6 @@ public class RDXSCS2Session
    {
       this.bufferDuration.set((float) bufferDuration);
       int bufferSizeRequest = (int) (bufferDuration / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
-      bufferSizeFormatString = "%i / " + bufferSizeRequest;
       session.submitBufferSizeRequest(bufferSizeRequest);
    }
 

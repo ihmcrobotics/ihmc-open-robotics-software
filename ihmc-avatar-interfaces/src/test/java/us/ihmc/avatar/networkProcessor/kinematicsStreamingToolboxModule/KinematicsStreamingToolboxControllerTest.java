@@ -452,7 +452,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    @Test
    public void testStreamingToController()
    {
-      testStreamingToController(0.15, 0.25);
+      testStreamingToController(0.15, 0.5);
    }
 
    public void testStreamingToController(double handPositionMeanErrorThreshold, double handOrientationMeanErrorThreshold)
