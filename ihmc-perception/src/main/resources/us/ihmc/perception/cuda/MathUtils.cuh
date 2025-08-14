@@ -13,6 +13,13 @@ __device__ float dot2D(const float2 a, const float2 b)
     return a.x * b.x + a.y * b.y;
 }
 
+__device__ float angle(float x1, float y1, float x2, float y2)
+{
+   float cosTheta = x1 * x2 + y1 * y2;
+   float sinTheta = x1 * y2 - y1 * x2;
+   return atan2(sinTheta, cosTheta);
+}
+
 __device__ float3 transformPoint3D(float3 point, const float* transform)
 {
     return make_float3(dot(make_float3(transform[0], transform[1], transform[2]), point) + transform[3],
@@ -20,9 +27,10 @@ __device__ float3 transformPoint3D(float3 point, const float* transform)
                        dot(make_float3(transform[8], transform[9], transform[10]), point) + transform[11]);
 }
 
-__device__ float clamp(float value, float minVal, float maxVal)
+template  <typename T>
+__device__ T clamp(const T& value, const T& min, const T& max)
 {
-    return fminf(fmaxf(value, minVal), maxVal);
+    return min > value ? min : max < value ? max : value;
 }
 
 __device__ float length2D(float2 vec)
@@ -59,7 +67,7 @@ __device__ float3 cross3(const float3 &a, const float3 &b)
  * Returns a 9 element array that is the inverse of a 9 element argument. The data is expected to be row major,
  * or [row1, row2, row3];
  **/
-__device__ float* invert3x3Matrix(float* matrix)
+__device__ float* invert3x3Matrix(float* matrix, float* result)
 {
     float m00 = matrix[0];
     float m01 = matrix[1];
@@ -73,7 +81,6 @@ __device__ float* invert3x3Matrix(float* matrix)
 
     // compute the determinant
    float det = m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
-   float ret[9];
 
    float detMinor00 = m11 * m22 - m12 * m21;
    float detMinor01 = m10 * m22 - m12 * m20;
@@ -87,25 +94,24 @@ __device__ float* invert3x3Matrix(float* matrix)
    float detMinor21 = m00 * m12 - m02 * m10;
    float detMinor22 = m00 * m11 - m01 * m10;
 
-   ret[0] = detMinor00 / det;
-   ret[1] = -detMinor10 / det;
-   ret[2] = detMinor20 / det;
+   result[0] = detMinor00 / det;
+   result[1] = -detMinor10 / det;
+   result[2] = detMinor20 / det;
 
-   ret[3] = -detMinor01 / det;
-   ret[4] = detMinor11 / det;
-   ret[5] = -detMinor21 / det;
+   result[3] = -detMinor01 / det;
+   result[4] = detMinor11 / det;
+   result[5] = -detMinor21 / det;
 
-   ret[6] = detMinor02 / det;
-   ret[7] = -detMinor12 / det;
-   ret[8] = detMinor22 / det;
-
-   return ret;
+   result[6] = detMinor02 / det;
+   result[7] = -detMinor12 / det;
+   result[8] = detMinor22 / det;
 }
 
 __device__ void solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector, float* coefficients)
 {
     // Invert the 3x3 covariance matrix (this should be done on the device as well)
-    float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);  // Assuming this is a device function
+    float inverse_covariance_matrix[9];
+    invert3x3Matrix(covariance_matrix, inverse_covariance_matrix);  // Assuming this is a device function
 
     // Simple matrix multiplication: coefficients = inverse_covariance_matrix * z_variance_vector
     for (int row = 0; row < 3; row++)

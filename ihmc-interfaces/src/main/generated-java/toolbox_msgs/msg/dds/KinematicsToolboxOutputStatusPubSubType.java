@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "624cc92872f1d8473b47e098815669b6fb9c0a5c2459a80441afc9913a518f73";
+   		return "b6756fbfadd699bb4cd53a05a66011bb576a58a383413dcf5f0725de3305811e";
    }
    
    @Override
@@ -73,6 +73,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -118,6 +122,12 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSupportRegion().get(i0), current_alignment);}
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -149,6 +159,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getSupportRegion());else
           throw new RuntimeException("support_region field exceeds the maximum length: %d > %d".formatted(data.getSupportRegion().size(), 32));
 
+      cdr.write_type_7(data.getLeftFootInContact());
+
+      cdr.write_type_7(data.getRightFootInContact());
+
       cdr.write_type_6(data.getSolutionQuality());
 
    }
@@ -168,6 +182,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
       cdr.read_type_e(data.getSupportRegion());	
+      data.setLeftFootInContact(cdr.read_type_7());
+      	
+      data.setRightFootInContact(cdr.read_type_7());
+      	
       data.setSolutionQuality(cdr.read_type_6());
       	
 
@@ -190,6 +208,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.write_type_e("support_region", data.getSupportRegion());
+      ser.write_type_7("left_foot_in_contact", data.getLeftFootInContact());
+      ser.write_type_7("right_foot_in_contact", data.getRightFootInContact());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
@@ -210,6 +230,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.read_type_e("support_region", data.getSupportRegion());
+      data.setLeftFootInContact(ser.read_type_7("left_foot_in_contact"));
+      data.setRightFootInContact(ser.read_type_7("right_foot_in_contact"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 

@@ -9,7 +9,7 @@ import us.ihmc.avatar.networkProcessor.walkingPreview.AvatarWalkingControllerPre
 
 public class AlexanderWalkingControllerPreviewToolboxControllerTest extends AvatarWalkingControllerPreviewToolboxControllerTest
 {
-   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+   private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
    @Override
    @Test

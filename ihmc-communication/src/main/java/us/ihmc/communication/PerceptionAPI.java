@@ -246,8 +246,8 @@ public final class PerceptionAPI
 
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_MESSAGE = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
 
-   public static final ROS2Topic<GlobalMapMessage> GLOBAL_HEIGHT_MAP = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapMessage.class).withSuffix("global_height_map");
-   public static final ROS2Topic<GlobalMapTileMessage> GLOBAL_HEIGHT_MAP_TILE = PERCEPTION_MODULE.withOutput().withTypeName(GlobalMapTileMessage.class).withSuffix("global_height_map_tile");
+   public static final ROS2Topic<ChunkMessage> CHUNK = PERCEPTION_MODULE.withOutput().withTypeName(ChunkMessage.class).withSuffix("chunk");
+   public static final ROS2Topic<ChunkedMapMessage> CHUNKED_MAP = PERCEPTION_MODULE.withOutput().withTypeName(ChunkedMapMessage.class).withSuffix("chunked_map");
 
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
@@ -299,8 +299,12 @@ public final class PerceptionAPI
    private static final ROS2Topic<?> ROS2_ZED = new ROS2Topic<>().withPrefix("zed").withQoS(ROS2QosProfile.RELIABLE());
 
    private static final ROS2Topic<?> ROS2_ZED_COLOR = ROS2_ZED.withModule("color");
-   public static final ROS2Topic<Image> ROS2_ZED_COLOR_IMAGE = ROS2_ZED_COLOR.withSuffix("image").withType(Image.class);
-   public static final ROS2Topic<CameraInfo> ROS2_ZED_COLOR_CAMERA_INFO = ROS2_ZED_COLOR.withSuffix("camera_info").withType(CameraInfo.class);
+   public static final SideDependentList<ROS2Topic<Image>> ROS2_ZED_COLOR_IMAGES
+         = new SideDependentList<>(ROS2_ZED_COLOR.withSuffix("left/image").withType(Image.class),
+                                   ROS2_ZED_COLOR.withSuffix("right/image").withType(Image.class));
+   public static final SideDependentList<ROS2Topic<CameraInfo>> ROS2_ZED_COLOR_CAMERA_INFOS
+      = new SideDependentList<>(ROS2_ZED_COLOR.withSuffix("left/camera_info").withType(CameraInfo.class),
+                                ROS2_ZED_COLOR.withSuffix("right/camera_info").withType(CameraInfo.class));
 
    private static final ROS2Topic<?> ROS2_ZED_DEPTH = ROS2_ZED.withModule("depth");
    public static final ROS2Topic<Image> ROS2_ZED_DEPTH_IMAGE = ROS2_ZED_DEPTH.withSuffix("image").withType(Image.class);

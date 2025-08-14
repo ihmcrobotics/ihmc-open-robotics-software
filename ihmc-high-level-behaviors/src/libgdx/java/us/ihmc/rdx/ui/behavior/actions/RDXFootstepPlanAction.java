@@ -460,26 +460,29 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.areFramesInWorld())
+      if (state.getIsNextForExecution())
       {
-         if (definition.getIsManuallyPlaced())
+         if (state.areFramesInWorld())
          {
-            for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+            if (definition.getIsManuallyPlaced())
             {
-               footstep.getVirtualRenderables(renderables, pool);
+               for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
+               {
+                  footstep.getVirtualRenderables(renderables, pool);
+               }
             }
-         }
-         else
-         {
-            goalArrowGraphic.getRenderables(renderables, pool);
+            else
+            {
+               goalArrowGraphic.getRenderables(renderables, pool);
 
-            goalStancePointGizmo.getVirtualRenderables(renderables, pool);
-            goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
-            for (RobotSide side : RobotSide.values)
-               goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
+               goalStancePointGizmo.getVirtualRenderables(renderables, pool);
+               goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
+               for (RobotSide side : RobotSide.values)
+                  goalFeet.get(side).getRenderables(renderables, pool, footstepsWidget.getIsHovered().get(side));
 
-            if (state.getIsNextForExecution())
-               previewFootstepPlan.getRenderables(renderables, pool);
+               if (state.getIsNextForExecution())
+                  previewFootstepPlan.getRenderables(renderables, pool);
+            }
          }
       }
    }

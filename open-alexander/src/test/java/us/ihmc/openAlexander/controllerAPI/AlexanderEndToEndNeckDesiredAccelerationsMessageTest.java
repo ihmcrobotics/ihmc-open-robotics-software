@@ -11,7 +11,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
 public class AlexanderEndToEndNeckDesiredAccelerationsMessageTest extends EndToEndNeckDesiredAccelerationsMessageTest
 {
-   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT);
+   private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT);
 
    @Override
    public DRCRobotModel getRobotModel()

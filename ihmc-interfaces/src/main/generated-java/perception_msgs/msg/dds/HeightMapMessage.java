@@ -32,9 +32,29 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             */
    public double grid_center_y_;
    /**
+            * Z height offset for converting between floats and shorts
+            */
+   public double height_offset_;
+   /**
+            * Z height scale factor for converting between floats and shorts
+            */
+   public double height_scale_factor_;
+   /**
             * Height of the ground plane, which is assumed to be flat
             */
    public double estimated_ground_height_;
+   /**
+            * Width of the height map in meters
+            */
+   public double width_in_meters_;
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double cell_size_in_meters_;
+   /**
+            * Cells per axis
+            */
+   public int cells_per_axis_;
    /**
             * List of height map keys. See HeightMapTools for converting keys to coordinates
             */
@@ -42,7 +62,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  heights_;
+   public us.ihmc.idl.IDLSequence.Integer  heights_;
    /**
             * List of variances, which correspond to the list of keys. May be empty.
             */
@@ -61,7 +81,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    {
       keys_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
-      heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
 
       variances_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
@@ -88,7 +108,17 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       grid_center_y_ = other.grid_center_y_;
 
+      height_offset_ = other.height_offset_;
+
+      height_scale_factor_ = other.height_scale_factor_;
+
       estimated_ground_height_ = other.estimated_ground_height_;
+
+      width_in_meters_ = other.width_in_meters_;
+
+      cell_size_in_meters_ = other.cell_size_in_meters_;
+
+      cells_per_axis_ = other.cells_per_axis_;
 
       keys_.set(other.keys_);
       heights_.set(other.heights_);
@@ -173,6 +203,36 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    }
 
    /**
+            * Z height offset for converting between floats and shorts
+            */
+   public void setHeightOffset(double height_offset)
+   {
+      height_offset_ = height_offset;
+   }
+   /**
+            * Z height offset for converting between floats and shorts
+            */
+   public double getHeightOffset()
+   {
+      return height_offset_;
+   }
+
+   /**
+            * Z height scale factor for converting between floats and shorts
+            */
+   public void setHeightScaleFactor(double height_scale_factor)
+   {
+      height_scale_factor_ = height_scale_factor;
+   }
+   /**
+            * Z height scale factor for converting between floats and shorts
+            */
+   public double getHeightScaleFactor()
+   {
+      return height_scale_factor_;
+   }
+
+   /**
             * Height of the ground plane, which is assumed to be flat
             */
    public void setEstimatedGroundHeight(double estimated_ground_height)
@@ -185,6 +245,51 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    public double getEstimatedGroundHeight()
    {
       return estimated_ground_height_;
+   }
+
+   /**
+            * Width of the height map in meters
+            */
+   public void setWidthInMeters(double width_in_meters)
+   {
+      width_in_meters_ = width_in_meters;
+   }
+   /**
+            * Width of the height map in meters
+            */
+   public double getWidthInMeters()
+   {
+      return width_in_meters_;
+   }
+
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public void setCellSizeInMeters(double cell_size_in_meters)
+   {
+      cell_size_in_meters_ = cell_size_in_meters;
+   }
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double getCellSizeInMeters()
+   {
+      return cell_size_in_meters_;
+   }
+
+   /**
+            * Cells per axis
+            */
+   public void setCellsPerAxis(int cells_per_axis)
+   {
+      cells_per_axis_ = cells_per_axis;
+   }
+   /**
+            * Cells per axis
+            */
+   public int getCellsPerAxis()
+   {
+      return cells_per_axis_;
    }
 
 
@@ -200,7 +305,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Float  getHeights()
+   public us.ihmc.idl.IDLSequence.Integer  getHeights()
    {
       return heights_;
    }
@@ -261,11 +366,21 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_y_, other.grid_center_y_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_offset_, other.height_offset_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_scale_factor_, other.height_scale_factor_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.estimated_ground_height_, other.estimated_ground_height_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.keys_, other.keys_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.heights_, other.heights_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.variances_, other.variances_, epsilon)) return false;
 
@@ -306,7 +421,17 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.grid_center_y_ != otherMyClass.grid_center_y_) return false;
 
+      if(this.height_offset_ != otherMyClass.height_offset_) return false;
+
+      if(this.height_scale_factor_ != otherMyClass.height_scale_factor_) return false;
+
       if(this.estimated_ground_height_ != otherMyClass.estimated_ground_height_) return false;
+
+      if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
+
+      if(this.cell_size_in_meters_ != otherMyClass.cell_size_in_meters_) return false;
+
+      if(this.cells_per_axis_ != otherMyClass.cells_per_axis_) return false;
 
       if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
@@ -333,8 +458,18 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append(this.grid_center_x_);      builder.append(", ");
       builder.append("grid_center_y=");
       builder.append(this.grid_center_y_);      builder.append(", ");
+      builder.append("height_offset=");
+      builder.append(this.height_offset_);      builder.append(", ");
+      builder.append("height_scale_factor=");
+      builder.append(this.height_scale_factor_);      builder.append(", ");
       builder.append("estimated_ground_height=");
       builder.append(this.estimated_ground_height_);      builder.append(", ");
+      builder.append("width_in_meters=");
+      builder.append(this.width_in_meters_);      builder.append(", ");
+      builder.append("cell_size_in_meters=");
+      builder.append(this.cell_size_in_meters_);      builder.append(", ");
+      builder.append("cells_per_axis=");
+      builder.append(this.cells_per_axis_);      builder.append(", ");
       builder.append("keys=");
       builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");

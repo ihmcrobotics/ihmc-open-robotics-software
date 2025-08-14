@@ -6,11 +6,11 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
+import perception_msgs.msg.dds.FoundationPoseNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
-import perception_msgs.msg.dds.TrashCanNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
@@ -25,6 +25,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
@@ -33,7 +34,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
-import us.ihmc.perception.sceneGraph.rigidBody.trashcan.TrashCanNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -208,9 +208,9 @@ public class ROS2SceneGraphSubscription
                }
             }
          }
-         if (localNode instanceof TrashCanNode trashCanNode)
+         if (localNode instanceof FoundationPoseNode foundationPoseNode)
          {
-            trashCanNode.updateFromMessage(subscriptionNode.getTrashCanNodeMessage());
+            foundationPoseNode.fromMessage(subscriptionNode.getFoundationPoseNodeMessage());
          }
 
          if (localParentNode != null) // Parent of root node is null
@@ -315,12 +315,12 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setDetectableSceneNodeMessage(doorNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(doorNodeMessage.getDetectableSceneNode().getSceneNode());
          }
-         case SceneGraphMessage.TRASH_CAN_NODE_TYPE ->
+         case SceneGraphMessage.FOUNDATION_POSE_NODE_TYPE ->
          {
-            TrashCanNodeMessage trashCanNodeMessage = sceneGraphMessage.getTrashCanNodes().get(indexInTypesList);
-            subscriptionNode.setTrashCanNodeMessage(trashCanNodeMessage);
-            subscriptionNode.setDetectableSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode());
-            subscriptionNode.setSceneNodeMessage(trashCanNodeMessage.getDetectableSceneNode().getSceneNode());
+            FoundationPoseNodeMessage foundationPoseNodeMessage = sceneGraphMessage.getFoundationPoseSceneNodes().get(indexInTypesList);
+            subscriptionNode.setFoundationPoseNodeMessage(foundationPoseNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(foundationPoseNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(foundationPoseNodeMessage.getDetectableSceneNode().getSceneNode());
          }
       }
 

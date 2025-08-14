@@ -40,8 +40,8 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
          {
             checkPoints.add(checkPoint);
          }
-         if (child instanceof ActionSequenceState sequence)
-            updateSubtree(sequence);
+         else
+            updateSubtree(child);
       }
    }
 

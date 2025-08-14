@@ -57,6 +57,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final YoRegistry registry = new YoRegistry(name);
+   protected long serverTime = 0L;
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final String robotName;
    protected final FullHumanoidRobotModel fullRobotModel;
@@ -257,16 +258,14 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
       return new Runnable()
       {
-         double serverTime = 0.0;
-
          @Override
          public void run()
          {
             if (Thread.interrupted())
                return;
 
-            serverTime += Conversions.millisecondsToSeconds(updatePeriodMilliseconds);
-            yoVariableServer.update(Conversions.secondsToNanoseconds(serverTime));
+            serverTime += Conversions.millisecondsToNanoseconds(updatePeriodMilliseconds);
+            yoVariableServer.update(serverTime);
          }
       };
    }
@@ -545,4 +544,9 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    public abstract ROS2Topic<?> getOutputTopic();
 
    public abstract ROS2Topic<?> getInputTopic();
+
+   public long getServerTime()
+   {
+      return serverTime;
+   }
 }

@@ -47,7 +47,7 @@ public class AlexanderAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsT
    @Override
    public DRCRobotModel getRobotModel()
    {
-      AlexanderVersionInterface robotVersion = OpenAlexanderVersion.V0_FULL_ROBOT;
+      AlexanderVersionInterface robotVersion = OpenAlexanderVersion.V1_FULL_ROBOT;
       return new OpenAlexanderRobotModel(robotVersion, RobotTarget.SCS)
       {
          @Override

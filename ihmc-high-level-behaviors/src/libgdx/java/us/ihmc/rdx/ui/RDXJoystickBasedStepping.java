@@ -169,7 +169,7 @@ public class RDXJoystickBasedStepping
       });
    }
 
-   public void update(boolean enabled)
+   public void update()
    {
       while (!queuedTasksToProcess.isEmpty())
          queuedTasksToProcess.poll().run();
@@ -177,7 +177,7 @@ public class RDXJoystickBasedStepping
       currentController = Controllers.getCurrent();
       currentControllerConnected = currentController != null;
 
-      if (enabled && (currentControllerConnected || (leftVRController.isConnected() && rightVRController.isConnected())))
+      if (currentControllerConnected || (leftVRController.isConnected() && rightVRController.isConnected()))
       {
          if (currentControllerConnected)
          {

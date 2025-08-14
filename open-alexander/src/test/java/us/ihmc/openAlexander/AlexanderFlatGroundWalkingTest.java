@@ -8,8 +8,6 @@ import org.opentest4j.TestAbortedException;
 import us.ihmc.avatar.DRCFlatGroundWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 
 // This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
@@ -34,7 +32,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test
    public void testFlatGroundWalking()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       setDoPelvisWarmup(true);
       super.testFlatGroundWalking();
    }
@@ -44,7 +42,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test
    public void testFlatGroundWalkingBullet()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       setDoPelvisWarmup(false);
       super.testFlatGroundWalkingBullet();
    }
@@ -54,7 +52,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
    @Test
    public void testReset()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       super.testReset();
    }
 
@@ -68,7 +66,7 @@ public class AlexanderFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
          Assumptions.assumeTrue(CITools.isNightlyBuild());
          CITools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
 
-         robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+         robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
 
          setupAndTestFlatGroundSimulationTrackTwice(robotModel);
       }

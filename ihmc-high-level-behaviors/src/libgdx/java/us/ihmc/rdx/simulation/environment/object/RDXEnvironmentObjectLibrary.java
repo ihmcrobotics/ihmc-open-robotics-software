@@ -18,10 +18,25 @@ public class RDXEnvironmentObjectLibrary
       objectFactories.add(RDXWorkPlatformObject.FACTORY);
       objectFactories.add(RDXArUcoBoxObject.FACTORY);
       objectFactories.add(RDXPointLightObject.FACTORY);
+      objectFactories.add(RDXPersonObject.FACTORY);
+      objectFactories.add(RDXDoorPanelObject.FACTORY);
       objectFactories.add(RDXDirectionalLightObject.FACTORY);
       objectFactories.add(RDXL515SensorObject.FACTORY);
       objectFactories.add(RDXRightJerseyBarrierObject.FACTORY);
       objectFactories.add(RDXLeftJerseyBarrierObject.FACTORY);
+      objectFactories.add(RDXCenteredJerseyBarrierObject.FACTORY);
+      objectFactories.add(RDXChargeObject.FACTORY);
+      objectFactories.add(RDXCouchObject.FACTORY);
+      objectFactories.add(RDXTableObject.FACTORY);
+      objectFactories.add(RDXTrashCanObject.FACTORY);
+      objectFactories.add(RDXDrillObject.FACTORY);
+      objectFactories.add(RDXShoeObject.FACTORY);
+      objectFactories.add(RDXBikeObject.FACTORY);
+      objectFactories.add(RDXBookObject.FACTORY);
+      objectFactories.add(RDXMugObject.FACTORY);
+      objectFactories.add(RDXCanObject.FACTORY);
+      objectFactories.add(RDX2x4Object.FACTORY);
+      objectFactories.add(RDXCerealBoxObject.FACTORY);
    }
 
    public static ArrayList<RDXEnvironmentObjectFactory> getObjectFactories()

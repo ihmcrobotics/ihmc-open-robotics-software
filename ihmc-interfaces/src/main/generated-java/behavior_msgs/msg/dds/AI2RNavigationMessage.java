@@ -9,23 +9,34 @@ import us.ihmc.pubsub.TopicDataType;
 public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> implements Settable<AI2RNavigationMessage>, EpsilonComparable<AI2RNavigationMessage>
 {
    /**
-            * Goto action - Reference frame for the action
-            */
-   public java.lang.StringBuilder reference_frame_name_;
+          * SPATIAL RELATION TYPE
+          */
+   public static final byte DEFAULT = (byte) 0;
+   public static final byte FRONT = (byte) 1;
+   public static final byte BEHIND = (byte) 2;
+   public static final byte LEFT = (byte) 3;
+   public static final byte RIGHT = (byte) 4;
    /**
-            * Goto action - The position to which the goal stance is aligned
+            * The type of spatial relation with the secondary reference object as defined above
             */
-   public us.ihmc.euclid.tuple3D.Point3D goal_stance_point_;
+   public byte spatial_relation_;
    /**
-            * Goto action - The point that the robot should be facing in the goal stance
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public us.ihmc.euclid.tuple3D.Point3D goal_focal_point_;
+   public java.lang.StringBuilder pov_object_;
+   /**
+            * Target reference frame (object) to go to
+            */
+   public java.lang.StringBuilder target_object_;
+   /**
+            * The distance to the reference frame (located at the object's centroid)
+            */
+   public double distance_to_object_;
 
    public AI2RNavigationMessage()
    {
-      reference_frame_name_ = new java.lang.StringBuilder(255);
-      goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
+      pov_object_ = new java.lang.StringBuilder(255);
+      target_object_ = new java.lang.StringBuilder(255);
    }
 
    public AI2RNavigationMessage(AI2RNavigationMessage other)
@@ -36,53 +47,94 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
    public void set(AI2RNavigationMessage other)
    {
-      reference_frame_name_.setLength(0);
-      reference_frame_name_.append(other.reference_frame_name_);
+      spatial_relation_ = other.spatial_relation_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_stance_point_, goal_stance_point_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_focal_point_, goal_focal_point_);
+      pov_object_.setLength(0);
+      pov_object_.append(other.pov_object_);
+
+      target_object_.setLength(0);
+      target_object_.append(other.target_object_);
+
+      distance_to_object_ = other.distance_to_object_;
+
    }
 
    /**
-            * Goto action - Reference frame for the action
+            * The type of spatial relation with the secondary reference object as defined above
             */
-   public void setReferenceFrameName(java.lang.String reference_frame_name)
+   public void setSpatialRelation(byte spatial_relation)
    {
-      reference_frame_name_.setLength(0);
-      reference_frame_name_.append(reference_frame_name);
+      spatial_relation_ = spatial_relation;
+   }
+   /**
+            * The type of spatial relation with the secondary reference object as defined above
+            */
+   public byte getSpatialRelation()
+   {
+      return spatial_relation_;
    }
 
    /**
-            * Goto action - Reference frame for the action
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public java.lang.String getReferenceFrameNameAsString()
+   public void setPovObject(java.lang.String pov_object)
    {
-      return getReferenceFrameName().toString();
-   }
-   /**
-            * Goto action - Reference frame for the action
-            */
-   public java.lang.StringBuilder getReferenceFrameName()
-   {
-      return reference_frame_name_;
+      pov_object_.setLength(0);
+      pov_object_.append(pov_object);
    }
 
-
    /**
-            * Goto action - The position to which the goal stance is aligned
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
             */
-   public us.ihmc.euclid.tuple3D.Point3D getGoalStancePoint()
+   public java.lang.String getPovObjectAsString()
    {
-      return goal_stance_point_;
+      return getPovObject().toString();
+   }
+   /**
+            * Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
+            */
+   public java.lang.StringBuilder getPovObject()
+   {
+      return pov_object_;
    }
 
+   /**
+            * Target reference frame (object) to go to
+            */
+   public void setTargetObject(java.lang.String target_object)
+   {
+      target_object_.setLength(0);
+      target_object_.append(target_object);
+   }
 
    /**
-            * Goto action - The point that the robot should be facing in the goal stance
+            * Target reference frame (object) to go to
             */
-   public us.ihmc.euclid.tuple3D.Point3D getGoalFocalPoint()
+   public java.lang.String getTargetObjectAsString()
    {
-      return goal_focal_point_;
+      return getTargetObject().toString();
+   }
+   /**
+            * Target reference frame (object) to go to
+            */
+   public java.lang.StringBuilder getTargetObject()
+   {
+      return target_object_;
+   }
+
+   /**
+            * The distance to the reference frame (located at the object's centroid)
+            */
+   public void setDistanceToObject(double distance_to_object)
+   {
+      distance_to_object_ = distance_to_object;
+   }
+   /**
+            * The distance to the reference frame (located at the object's centroid)
+            */
+   public double getDistanceToObject()
+   {
+      return distance_to_object_;
    }
 
 
@@ -103,10 +155,14 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.reference_frame_name_, other.reference_frame_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.spatial_relation_, other.spatial_relation_, epsilon)) return false;
 
-      if (!this.goal_stance_point_.epsilonEquals(other.goal_stance_point_, epsilon)) return false;
-      if (!this.goal_focal_point_.epsilonEquals(other.goal_focal_point_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.pov_object_, other.pov_object_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.target_object_, other.target_object_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_object_, other.distance_to_object_, epsilon)) return false;
+
 
       return true;
    }
@@ -120,10 +176,14 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
 
       AI2RNavigationMessage otherMyClass = (AI2RNavigationMessage) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.reference_frame_name_, otherMyClass.reference_frame_name_)) return false;
+      if(this.spatial_relation_ != otherMyClass.spatial_relation_) return false;
 
-      if (!this.goal_stance_point_.equals(otherMyClass.goal_stance_point_)) return false;
-      if (!this.goal_focal_point_.equals(otherMyClass.goal_focal_point_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.pov_object_, otherMyClass.pov_object_)) return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.target_object_, otherMyClass.target_object_)) return false;
+
+      if(this.distance_to_object_ != otherMyClass.distance_to_object_) return false;
+
 
       return true;
    }
@@ -134,12 +194,14 @@ public class AI2RNavigationMessage extends Packet<AI2RNavigationMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("AI2RNavigationMessage {");
-      builder.append("reference_frame_name=");
-      builder.append(this.reference_frame_name_);      builder.append(", ");
-      builder.append("goal_stance_point=");
-      builder.append(this.goal_stance_point_);      builder.append(", ");
-      builder.append("goal_focal_point=");
-      builder.append(this.goal_focal_point_);
+      builder.append("spatial_relation=");
+      builder.append(this.spatial_relation_);      builder.append(", ");
+      builder.append("pov_object=");
+      builder.append(this.pov_object_);      builder.append(", ");
+      builder.append("target_object=");
+      builder.append(this.target_object_);      builder.append(", ");
+      builder.append("distance_to_object=");
+      builder.append(this.distance_to_object_);
       builder.append("}");
       return builder.toString();
    }

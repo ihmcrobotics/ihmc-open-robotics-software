@@ -11,6 +11,9 @@ behavior_msgs/AI2RObjectMessage[] objects
 # List of available behaviors (checkpoints from a pre-loaded behavior)
 string[] available_behaviors
 
+# Name of the behavior that is in progress
+string behavior_in_progress
+
 # Name of the behavior that has succeeded (name of the checkpoint in the pre-loaded behavior collection)
 string completed_behavior
 
@@ -18,5 +21,18 @@ string completed_behavior
 string failed_behavior
 
 behavior_msgs/AI2RActionFailureMessage failure
+
+# Name of the object that the robot is handling
+string object_grasped
+
+# Which hand is handling the object
+# Field default value 255
+int8 grasp_side
+
+# Relative transform of the grasped object in hand frame
+geometry_msgs/Pose transform_grasped_object_hand
+
+# Name of the object that the robot has released
+string object_placed
 
 

@@ -6,8 +6,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCBumpyAndShallowRampsWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -18,7 +16,7 @@ public class AlexanderBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallow
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
    }
 
    @Override

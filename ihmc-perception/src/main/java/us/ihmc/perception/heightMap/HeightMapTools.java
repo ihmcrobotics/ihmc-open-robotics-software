@@ -1,5 +1,6 @@
 package us.ihmc.perception.heightMap;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -45,14 +46,19 @@ public class HeightMapTools
       return indexToCoordinate(yIndex, yCenter, resolution, centerIndex);
    }
 
+   public static int coordinateToIndex(double coordinate, double origin, double resolution)
+   {
+      return (int) Math.floor((coordinate - origin) / resolution);
+   }
+
    public static int coordinateToIndex(double coordinate, double gridCenter, double resolution, int centerIndex)
    {
       return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;
    }
 
-   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
+   public static double indexToCoordinate(int index, double mapCenter, double resolution, int centerIndex)
    {
-      return (index - centerIndex) * resolution + gridCenter;
+      return (index - centerIndex) * resolution + mapCenter;
    }
 
    public static int keyToXIndex(int key, int centerIndex)
@@ -174,7 +180,8 @@ public class HeightMapTools
                                              Point3D gridCenter,
                                              float widthInMeters,
                                              float cellSizeInMeters,
-                                             HeightMapParameters heightMapParameters)
+                                             float heightScaleFactor,
+                                             float heightOffset)
    {
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
@@ -199,11 +206,57 @@ public class HeightMapTools
          int height = major | minor;
 
          // Calculate cell height
-         float cellHeight = (float) (((float) height / heightMapParameters.getHeightScaleFactor()) - heightMapParameters.getHeightOffset());
+         float cellHeight = (((float) height / heightScaleFactor) - heightOffset);
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
          heightMapDataToPack.setHeightAt(key, cellHeight);
       }
+   }
+
+   public static float[] packArrayForFile(Mat heightMap,
+                                          Point3D gridCenter,
+                                          float widthInMeters,
+                                          float cellSizeInMeters,
+                                          HeightMapParameters heightMapParameters)
+   {
+      // Snap to cell resolution
+      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      // Ensure the Mat is a 16-bit unsigned single channel
+      if (heightMap.type() != opencv_core.CV_16UC1)
+         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+
+      // Read the short values from the Mat
+      ShortBuffer shortBuffer = heightMap.createBuffer();
+      short[] shortHeights = new short[totalCells];
+      shortBuffer.get(shortHeights);
+
+      // Retrieve scale/offset to convert shorts → floats (real heights)
+      float heightOffset = (float) heightMapParameters.getHeightOffset();
+      float scaleFactor = (float) heightMapParameters.getHeightScaleFactor();
+
+      // Prepare an output array with a header
+      final int headerFloats = 6;
+      float[] packedArray = new float[headerFloats + totalCells];
+
+      // Write header
+      packedArray[0] = widthInMeters;
+      packedArray[1] = cellSizeInMeters;
+      packedArray[2] = (float) gridCenter.getX();
+      packedArray[3] = (float) gridCenter.getY();
+      packedArray[4] = heightOffset;
+      packedArray[5] = scaleFactor;
+
+      // Convert shorts to floats and copy into a packed array
+      for (int i = 0; i < totalCells; ++i)
+      {
+         packedArray[headerFloats + i] = shortHeights[i];
+      }
+
+      return packedArray;
    }
 }
