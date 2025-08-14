@@ -49,13 +49,18 @@ public class RDX3DOverlayPanel
       int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove;
       ImGui.begin(labels.get(panelName), windowFlags);
 
+
       boolean hovered = ImGui.isWindowHovered(
             ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup);
 
-      if (hovered)
-         windowActiveLerp = 0.9f;
+      if (ImGui.isWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
+      {
+            windowActiveLerp = 0.9f;
+      }
       else
+      {
          windowActiveLerp = (float) InterpolationTools.linearInterpolate(windowActiveLerp, 0.2f, 0.05f);
+      }
 
       imGuiRender.run();
 
