@@ -10,6 +10,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensors.zed.ZEDModelData;
 
 import java.util.Set;
 
@@ -27,10 +28,10 @@ public class RDXStereoImagePanel
       }
    }
 
-   public void update(Texture leftImage, Texture rightImage, ReferenceFrame leftCameraFrame, ReferenceFrame rightCameraFrame)
+   public void update(Texture leftImage, Texture rightImage, ReferenceFrame leftCameraFrame, ReferenceFrame rightCameraFrame, float verticalFOV)
    {
-      panels.get(RobotSide.LEFT).update(leftImage, leftCameraFrame);
-      panels.get(RobotSide.RIGHT).update(rightImage, rightCameraFrame);
+      panels.get(RobotSide.LEFT).update(leftImage, leftCameraFrame, verticalFOV);
+      panels.get(RobotSide.RIGHT).update(rightImage, rightCameraFrame, verticalFOV);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)

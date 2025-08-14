@@ -15,6 +15,7 @@ import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensors.zed.ZEDModelData;
 
 public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVisualizersPanel
 {
@@ -73,6 +74,11 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
     * Subclasses override this to set up interactable sensors or config
     */
    protected void setupAdditionalSensors(RDXBaseUI baseUI) { }
+
+   public ZEDModelData getZEDModelData()
+   {
+      return ZEDModelData.ZED;
+   }
 
    public void destroy()
    {

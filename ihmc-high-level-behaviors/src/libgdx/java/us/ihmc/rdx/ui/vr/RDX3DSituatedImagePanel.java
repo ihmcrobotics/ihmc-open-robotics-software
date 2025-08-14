@@ -35,7 +35,6 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinate
 
 public class RDX3DSituatedImagePanel
 {
-   private static final float VERTICAL_FOV_CAMERA = 52.0f; // https://support.stereolabs.com/hc/en-us/articles/360007395634-What-is-the-camera-focal-length-and-field-of-view
    private static final double JOYSTICK_CONTROL_THRESHOLD = 0.7;
    private static final float JOYSTICK_INCREMENT = 0.01f;
    private float panelDistance = 0.77f;
@@ -76,16 +75,16 @@ public class RDX3DSituatedImagePanel
       context.addVRInputProcessor(this::processVRInput);
    }
 
-   public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, ReferenceFrame cameraFrame, boolean flipY)
+   public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
       topLeftPosition.set(points[0]);
       bottomLeftPosition.set(points[1]);
       bottomRightPosition.set(points[2]);
       topRightPosition.set(points[3]);
-      create(texture, centerOfPanelFrame, cameraFrame, flipY);
+      create(texture, centerOfPanelFrame, flipY, verticalFOV);
    }
 
-   private void create(Texture texture, ReferenceFrame centerOfPanelFrame, ReferenceFrame cameraFrame, boolean flipY)
+   private void create(Texture texture, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
       this.texture = texture;
       ModelBuilder modelBuilder = new ModelBuilder();
@@ -138,20 +137,20 @@ public class RDX3DSituatedImagePanel
 
       if (!frustumInitialized && checkCollison)
       {
-         buildFrustum();
+         buildFrustum(verticalFOV);
          frustumInitialized = true;
       }
    }
 
-   private void buildFrustum()
+   private void buildFrustum(float verticalFOV)
    {
       float closeToCamera = 0.01f;
       float farFromCamera = 1.0f;
       float aspect = texture.getWidth() / (float) texture.getHeight();
 
-      float minImageHeight = 2.0f * closeToCamera * (float) Math.tan(Math.toRadians(VERTICAL_FOV_CAMERA) / 2.0f);
+      float minImageHeight = 2.0f * closeToCamera * (float) Math.tan(Math.toRadians(verticalFOV) / 2.0f);
       float minImageWidth = minImageHeight * aspect;
-      float maxImageHeight = 2.0f * farFromCamera * (float) Math.tan(Math.toRadians(VERTICAL_FOV_CAMERA) / 2.0f);
+      float maxImageHeight = 2.0f * farFromCamera * (float) Math.tan(Math.toRadians(verticalFOV) / 2.0f);
       float maxImageWidth = maxImageHeight * aspect;
 
       Vector3[] nearCorners = {
@@ -230,7 +229,7 @@ public class RDX3DSituatedImagePanel
       LibGDXTools.toLibGDX(tempFramePoint, positionToTransform);
    }
 
-   public void update(Texture imageTexture, ReferenceFrame cameraFrame)
+   public void update(Texture imageTexture, ReferenceFrame cameraFrame, float verticalFOV)
    {
       // Prevent ever having an invisible panel out there, which is very confusing
       // to the VR user when the controllers are colliding with and invisible box.
@@ -242,7 +241,7 @@ public class RDX3DSituatedImagePanel
       {
          boolean flipY = false;
          // Calculate panel size in meters from FOV
-         float panelHeightMeters = 2.0f * panelDistance * (float) Math.tan(Math.toRadians(VERTICAL_FOV_CAMERA) / 2.0f);
+         float panelHeightMeters = 2.0f * panelDistance * (float) Math.tan(Math.toRadians(verticalFOV) / 2.0f);
          float aspectRatio = imageTexture.getWidth() / (float) imageTexture.getHeight();
          float panelWidthMeters = panelHeightMeters * aspectRatio;
          float halfWidth = panelWidthMeters * 0.5f;
@@ -263,8 +262,8 @@ public class RDX3DSituatedImagePanel
                                new Vector3(0.0f, -halfWidth, -halfHeight),
                                new Vector3(0.0f, -halfWidth, halfHeight)},
                 floatingPanelFrame,
-                cameraFrame,
-                flipY);
+                flipY,
+                verticalFOV);
 
          RigidBodyTransform newFrustumTransform = new RigidBodyTransform(cameraFrame.getTransformToRoot());
          newFrustumTransform.multiplyInvertOther(frustumTransformOriginInWorld);

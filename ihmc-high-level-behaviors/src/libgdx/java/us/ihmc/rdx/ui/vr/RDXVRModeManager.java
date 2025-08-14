@@ -242,7 +242,8 @@ public class RDXVRModeManager
          stereoPanel.update(perceptionVisualizers.getZedLeftColorImageVisualizer().getOpenCVVideoVisualizer().getTexture(),
                             perceptionVisualizers.getZedRightColorImageVisualizer().getOpenCVVideoVisualizer().getTexture(),
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.LEFT),
-                            syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.RIGHT));
+                            syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.RIGHT),
+                            perceptionVisualizers.getZEDModelData().getVerticalFOV());
 
          if (panelOcclusionRateLimiter.run(UnitConversions.hertzToSeconds(10.0)))
          {
