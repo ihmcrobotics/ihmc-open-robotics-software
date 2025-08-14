@@ -183,7 +183,10 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
 
    public abstract double getForceInPercentOfWeightThresholdToTrustFoot();
 
-   public abstract double getForceInPercentOfWeightThresholdToNotTrustFoot();
+   public double getForceInPercentOfWeightThresholdToNotTrustFoot()
+   {
+      return getForceInPercentOfWeightThresholdToTrustFoot();
+   }
 
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
 
