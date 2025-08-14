@@ -55,7 +55,7 @@ public class RDX3DOverlayPanel
 
       if (ImGui.isWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
       {
-            windowActiveLerp = 0.9f;
+         windowActiveLerp = 0.9f;
       }
       else
       {
