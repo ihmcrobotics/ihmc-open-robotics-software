@@ -14,11 +14,6 @@ public class SnappingTerrainManager
    private final SnappingTerrainExtractor snappingTerrainExtractor;
    private ROS2Publisher<TerrainMapMessage> snappingTerrainPublisher;
 
-   public SnappingTerrainManager(HeightMapParameters heightMapParameters)
-   {
-      this(null, heightMapParameters);
-   }
-
    public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
       if (ros2Node != null)

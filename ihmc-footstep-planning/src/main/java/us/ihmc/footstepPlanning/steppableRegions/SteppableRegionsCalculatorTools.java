@@ -394,8 +394,9 @@ public class SteppableRegionsCalculatorTools
       double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
       double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
-      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+      //TODO this needs some love, if you un-comment the filters, the system crash's, not sure what that's about, ripppppppppp so far
+//      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+//      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
       //      if (polygonizerParameters.getCutNarrowPassage())
       //         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
