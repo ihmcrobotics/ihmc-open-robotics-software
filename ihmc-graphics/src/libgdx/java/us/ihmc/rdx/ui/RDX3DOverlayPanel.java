@@ -49,10 +49,6 @@ public class RDX3DOverlayPanel
       int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove;
       ImGui.begin(labels.get(panelName), windowFlags);
 
-
-      boolean hovered = ImGui.isWindowHovered(
-            ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup);
-
       if (ImGui.isWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
       {
          windowActiveLerp = 0.9f;
