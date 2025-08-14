@@ -7,7 +7,7 @@ import us.ihmc.ros2.ROS2Publisher;
 public class SteppableRegionsManager
 {
    private final ROS2Publisher<SteppableRegionsListCollectionMessage> publisher;
-   SteppableRegionsCalculationModule steppableRegionsCalculationModule;
+   private final SteppableRegionsCalculationModule steppableRegionsCalculationModule;
 
    public SteppableRegionsManager(ROS2Node ros2Node)
    {

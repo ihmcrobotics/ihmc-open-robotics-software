@@ -375,12 +375,10 @@ public class SteppableRegionsCalculatorTools
                                                    gridResolutionXY,
                                                    centerIndex,
                                                    steppableRegionCalculatorParameters.getFractionOfCellToExpandSmallRegions());
-      if (outerRing != null)
-         pointsInWorld.addAll(outerRing);
+      pointsInWorld.addAll(outerRing);
 
       List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder, outerRing, steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(), new Random());
-      if (interiorPoints != null)
-         pointsInWorld.addAll(interiorPoints);
+      pointsInWorld.addAll(interiorPoints);
 
       Point2DReadOnly centroid = regionDataHolder.getCentroidInWorld();
       Pose3D pose = new Pose3D(new Point3D(centroid), new AxisAngle());
