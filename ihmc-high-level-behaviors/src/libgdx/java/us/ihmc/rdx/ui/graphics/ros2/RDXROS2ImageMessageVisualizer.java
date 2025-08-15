@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import imgui.ImGui;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
