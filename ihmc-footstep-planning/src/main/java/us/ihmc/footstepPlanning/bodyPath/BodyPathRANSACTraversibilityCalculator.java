@@ -60,9 +60,9 @@ public class BodyPathRANSACTraversibilityCalculator
    {
       this.heightMapData = heightMapData;
       double size = parameters.getTraversibilitySearchWidth() / 2.0;
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), zeroDegCollisionOffsetsX, zeroDegCollisionOffsetsY, size, size, 0.0);
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), fourtyFiveDegCollisionOffsetsX, fourtyFiveDegCollisionOffsetsY, size, size, Math.toRadians(45.0));
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), twentyTwoDegCollisionOffsetsX, twentyTwoDegCollisionOffsetsY, size, size, Math.toRadians(22.5));
+      BodyPathCollisionDetector.packOffsets(heightMapData.getCellSize(), zeroDegCollisionOffsetsX, zeroDegCollisionOffsetsY, size, size, 0.0);
+      BodyPathCollisionDetector.packOffsets(heightMapData.getCellSize(), fourtyFiveDegCollisionOffsetsX, fourtyFiveDegCollisionOffsetsY, size, size, Math.toRadians(45.0));
+      BodyPathCollisionDetector.packOffsets(heightMapData.getCellSize(), twentyTwoDegCollisionOffsetsX, twentyTwoDegCollisionOffsetsY, size, size, Math.toRadians(22.5));
    }
 
    void initialize(BodyPathLatticePoint startNode)
@@ -128,8 +128,8 @@ public class BodyPathRANSACTraversibilityCalculator
       stepPose.set(node.getX(), node.getY(), getYaw(yawIndex));
       stepPose.appendTranslation(0.0, side.negateIfRightSide(parameters.getHalfStanceWidth()));
 
-      int xIndex = HeightMapTools.coordinateToIndex(stepPose.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-      int yIndex = HeightMapTools.coordinateToIndex(stepPose.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      int xIndex = HeightMapTools.coordinateToIndex(stepPose.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
+      int yIndex = HeightMapTools.coordinateToIndex(stepPose.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
 
       TIntArrayList xOffsets = getXOffsets(yawIndex);
       TIntArrayList yOffsets = getYOffsets(yawIndex);

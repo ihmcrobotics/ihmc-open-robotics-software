@@ -26,8 +26,8 @@ class BodyPathCollisionDetector
    boolean collisionDetected(HeightMapData heightMapData, BodyPathLatticePoint latticePoint, int yawIndex, double height, double groundClearance)
    {
       int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
+      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
       double heightThreshold = height + groundClearance;
 
       TIntArrayList xOffsets = getOffsets(yawIndex, this.xOffsets);
