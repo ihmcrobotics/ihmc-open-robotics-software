@@ -67,52 +67,12 @@ __device__ int2 perspective_projection(float3 point, const float *params)
     return make_int2(static_cast<int>(x), static_cast<int>(y));
 }
 
-__device__ float3 back_project_spherical(int yaw_index, int pitch_index, float depth, const float *params)
-{
-    int yawCountsFromCenter = -yaw_index - (params[DEPTH_INPUT_WIDTH] / 2);
-    int pitchCountsFromCenter = -(pitch_index - (params[DEPTH_INPUT_HEIGHT] / 2));
-
-    float yaw = yawCountsFromCenter / (float)params[DEPTH_INPUT_WIDTH] * HORIZONTAL_FOV;
-    float pitch = pitchCountsFromCenter / (float)params[DEPTH_INPUT_HEIGHT] * VERTICAL_FOV;
-
-    float r = depth * cos(pitch);
-
-    float px = r * cos(yaw);
-    float py = r * sin(yaw);
-    float pz = depth * sin(pitch);
-
-    return make_float3(px, py, pz);
-}
-
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
     float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
     float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
     float3 point = make_float3(Z, -X, -Y);
     return point;
-}
-
-__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalHeightMap, size_t pitchGlobal, const float *params)
-{
-    float heightSum = 0.0f;
-    int count = 0;
-    int globalCellsPerAxis = (int)params[GLOBAL_CELLS_PER_AXIS];
-    for (int i = -1; i < 2; i++)
-    {
-        for (int j = -1; j < 2; j++)
-        {
-            int nxIndex = xIndex + i;
-            int nyIndex = yIndex + j;
-
-            if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
-            {
-                unsigned short *heightValue = (unsigned short *)((char *)globalHeightMap + nxIndex * pitchGlobal) + nyIndex;
-                heightSum += *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-                count++;
-            }
-        }
-    }
-    return heightSum / (float)count;
 }
 
 __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCameraToWorldAlignedGround, const float* params)
