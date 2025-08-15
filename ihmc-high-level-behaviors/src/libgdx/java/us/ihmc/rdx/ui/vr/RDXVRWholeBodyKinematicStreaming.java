@@ -911,4 +911,14 @@ public class RDXVRWholeBodyKinematicStreaming
          wristFrameGraphics.get(side).dispose();
       }
    }
+
+   public FullHumanoidRobotModel getGhostFullRobotModel()
+   {
+      return ghostFullRobotModel;
+   }
+
+   public RDXMultiBodyGraphic getGhostRobotGraphic()
+   {
+      return ghostRobotGraphic;
+   }
 }

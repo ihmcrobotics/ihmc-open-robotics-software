@@ -304,32 +304,40 @@ public class RDXVRContext
          controllers.get(side).update(newTrackedDevicePosesParsed);
       }
 
-      while (VRSystem.VRSystem_PollNextEvent(event)) // a tracker is connected/disconnected after initialization
-      {
-         int deviceIndex = event.trackedDeviceIndex();
-         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
-         {
-            if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceActivated)
-            {
-               if (!trackers.containsKey(getSerialNumber(deviceIndex)))
-               {
-                  trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
-                  newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
-                  LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
-                  loadTrackerRolesFromFile();
-               }
-            }
-            else if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceDeactivated)
-            {
-               if (trackers.containsKey(getSerialNumber(event.trackedDeviceIndex())))
-               {
-                  removedTrackerSerialNumber.add(getSerialNumber(deviceIndex));
-                  LogTools.warn("Tracker {} disconnected", getSerialNumber(deviceIndex));
-               }
-            }
-         }
-      }
+//      while (VRSystem.VRSystem_PollNextEvent(event)) // a tracker is connected/disconnected after initialization
+//      {
+//         int eventType = event.eventType();
+//         if (eventType != VR.EVREventType_VREvent_TrackedDeviceActivated &&
+//             eventType != VR.EVREventType_VREvent_TrackedDeviceDeactivated)
+//         {
+//            continue;
+//         }
+//
+//         int deviceIndex = event.trackedDeviceIndex();
+//         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+//         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
+//         {
+//            String serial = getSerialNumber(deviceIndex);
+//            if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceActivated)
+//            {
+//               if (!trackers.containsKey(serial))
+//               {
+//                  trackers.put(serial, new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
+//                  newTrackerSerialNumber.add(serial);
+//                  LogTools.info("Tracker {} connected", serial);
+//                  loadTrackerRolesFromFile();
+//               }
+//            }
+//            else if (event.eventType() == VR.EVREventType_VREvent_TrackedDeviceDeactivated)
+//            {
+//               if (trackers.containsKey(serial))
+//               {
+//                  removedTrackerSerialNumber.add(getSerialNumber(deviceIndex));
+//                  LogTools.warn("Tracker {} disconnected", getSerialNumber(deviceIndex));
+//               }
+//            }
+//         }
+//      }
 
       for (var tracker : trackers.entrySet())
       {
