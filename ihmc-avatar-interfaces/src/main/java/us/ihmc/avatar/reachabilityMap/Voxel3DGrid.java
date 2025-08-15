@@ -17,7 +17,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 
 public class Voxel3DGrid implements ReferenceFrameHolder
 {
@@ -348,6 +347,16 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return n;
       }
 
+      /**
+       * Computes a score for this voxel based on the number of reachable poses in the 6-neighborhood. The six neighborhood can be thought of as the center of
+       * the 6 faces of a cube surrounding the voxel. The reachability is determined for each possible ray and each rotation about the ray (a.k.a. the R2
+       * reachability). This score is then normalized by the number of reachable poses at this voxel, multiplied by the number of neighbors checked.
+       * <p>
+       *    This provides an estimate of the reachability of this voxel compared to its neighbors. A high score means that the voxel is in a region of space
+       *    where many neighboring voxels are more reachable. A low score means this is the most reachable voxel in its neighborhood. A score of one means that
+       *    the space in the area is similar to reachable.
+       * </p>
+       */
       public double computeD06()
       {
          int nCommOrientations = 0;
@@ -363,6 +372,17 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return (double) nCommOrientations / (6.0 * getNumberOfReachablePoses());
       }
 
+      /**
+       * Computes a score for this voxel based on the number of reachable poses in the 18-neighborhood. The eighteen neighborhood can be thought of as the center
+       * of the 6 faces of a cube surrounding the voxel, plus each of the corners at the different levels. The reachability is determined for each possible ray
+       * and each rotation about the ray (a.k.a. the R2 reachability). This score is then normalized by the number of reachable poses at this voxel, multiplied
+       * by the number of neighbors checked.
+       * <p>
+       *    This provides an estimate of the reachability of this voxel compared to its neighbors. A high score means that the voxel is in a region of space
+       *    where many neighboring voxels are more reachable. A low score means this is the most reachable voxel in its neighborhood. A score of one means that
+       *    the space in the area is similar to reachable.
+       * </p>
+       */
       public double computeD018()
       {
          int nCommOrientations = 0;
@@ -378,6 +398,16 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return (double) nCommOrientations / (18.0 * getNumberOfReachablePoses());
       }
 
+      /**
+       * Computes a score for this voxel based on the number of reachable poses in the 26-neighborhood. The reachability is determined for each possible ray
+       * and each rotation about the ray (a.k.a. the R2 reachability). This score is then normalized by the number of reachable poses at this voxel, multiplied
+       * by the number of neighbors checked.
+       * <p>
+       *    This provides an estimate of the reachability of this voxel compared to its neighbors. A high score means that the voxel is in a region of space
+       *    where many neighboring voxels are more reachable. A low score means this is the most reachable voxel in its neighborhood. A score of one means that
+       *    the space in the area is similar to reachable.
+       * </p>
+       */
       public double computeD026()
       {
          int nCommOrientations = 0;
@@ -393,61 +423,61 @@ public class Voxel3DGrid implements ReferenceFrameHolder
          return (double) nCommOrientations / (26.0 * getNumberOfReachablePoses());
       }
 
-      public int compute6NeighborCommonOrientation(int rayIndex, int rotationIndex)
+      private int compute6NeighborCommonOrientation(int rayIndex, int rotationIndex)
       {
          int n = 0;
-         n += isNeightPoseReachable(+1, 0, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, 0, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, 0, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, 0, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
          return n;
       }
 
-      public int compute18NeighborCommonOrientation(int rayIndex, int rotationIndex)
+      private int compute18NeighborCommonOrientation(int rayIndex, int rotationIndex)
       {
          int n = compute6NeighborCommonOrientation(rayIndex, rotationIndex);
-         n += isNeightPoseReachable(+1, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(+1, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, +1, 0, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, -1, 0, rayIndex, rotationIndex) ? 1 : 0;
 
-         n += isNeightPoseReachable(0, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(0, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(0, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
 
-         n += isNeightPoseReachable(+1, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(+1, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, 0, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, 0, -1, rayIndex, rotationIndex) ? 1 : 0;
 
          return n;
       }
 
-      public int compute26NeighborCommonOrientation(int rayIndex, int rotationIndex)
+      private int compute26NeighborCommonOrientation(int rayIndex, int rotationIndex)
       {
          int n = compute18NeighborCommonOrientation(rayIndex, rotationIndex);
-         n += isNeightPoseReachable(+1, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(+1, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(+1, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(+1, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
-         n += isNeightPoseReachable(-1, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(+1, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, +1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, +1, -1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, -1, +1, rayIndex, rotationIndex) ? 1 : 0;
+         n += isNeighborPoseReachable(-1, -1, -1, rayIndex, rotationIndex) ? 1 : 0;
 
          return n;
       }
 
-      public boolean isNeightPoseReachable(int xShift, int yShift, int zShift, int rayIndex, int rotationIndex)
+      private boolean isNeighborPoseReachable(int xShift, int yShift, int zShift, int rayIndex, int rotationIndex)
       {
-         Voxel3DData neighbor = getNeighbor(1, 0, 0);
+         Voxel3DData neighbor = getNeighbor(xShift, yShift, zShift);
          return neighbor != null && neighbor.isPoseReachable(rayIndex, rotationIndex);
       }
 
-      public Voxel3DData getNeighbor(int xShift, int yShift, int zShift)
+      private Voxel3DData getNeighbor(int xShift, int yShift, int zShift)
       {
          return getVoxel(key.getX() + xShift, key.getY() + yShift, key.getZ() + zShift);
       }

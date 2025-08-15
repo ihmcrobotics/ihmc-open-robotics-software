@@ -78,6 +78,46 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+/**
+ * This is a visualizer for viewing a stored reachability map. It is meant for loading data stored in either a Matlab file or spreadsheet that was generated
+ * using the {@link ReachabilitySphereMapCalculator}. It will show reachability maps of different types, as well as the robot that was used to generate the
+ * data in the experiment.
+ * <p>
+ * You can set a number of different visualization elements to true at start. These include:
+ * <ul>
+ *    <li> {@link #setVisualizePositionReach(boolean)}, which will show the robot's configurations at each of the reachable positions.</li>
+ *    <li> {@link #setVisualizeRayReach(boolean)}, which will show the robot's configurations at each of the reachable positions, along with the
+ *    solutions at each reachable ray around that position.</li>
+ *    <li> {@link #setVisualizePoseReach(boolean)}, which will show the robot's configurations at each of the reachable positions, along with the
+ *    solutions at each reachable pose around that position.</li>
+ * </ul>
+ * If you use these, the simulation will then run showing the robot at each of these values.
+ * </p>
+ *
+ * <p>
+ *    After the visualizer has started, you can then toggle a number of different visualization elements. These include:
+ *    <ul>
+ *    <li>Reach, which visualizes the reachability score itself. The type of reachability can be selected using the Visualization Type. If "Position" is
+ *     selected, only the voxels whose position can be reached are shown, and are assigned a uniform score of 1.0. If the "Ray" type is selected, the positions
+ *     who can be reached are shown, and their score is assigned as the {@link Voxel3DData#getR()} value. If the "Pose" type is selected, the positions who can
+ *     be reached are shown, and their score is assigned as the {@link Voxel3DData#getR2()} value.</li>
+ *    <li>Neighborhood Dexterity 6, which provides a comparison of this voxel compared to its 6 neighbors. High score means neighbors are more reachable, 1
+ *    means neighbors are as reachable. See {@link Voxel3DData#computeD06()}.</li>
+ *    <li>Neighborhood Dexterity 18, which provides a comparison of this voxel compared to its 18 neighbors. High score means neighbors are more reachable, 1
+ *    means neighbors are as reachable. See {@link Voxel3DData#computeD018()}. </li>
+ *    <li>Neighborhood Dexterity 26, which provides a comparison of this voxel compared to its 26 neighbors. High score means neighbors are more reachable, 1
+ *    means neighbors are as reachable. See {@link Voxel3DData#computeD026()}. </li>
+ *    <li>Full Singularity, which allows viewing how close the robot is to a singular value at a configuration. The singularity score is computed as the ratio
+ *    between the minimum and maximum eigenvalues of the Jacobian. This means that, if the score is low, the minimum eigenvalue is low or the maximum is much
+ *    larger. If this is the case, it is singular. If "Position" is selected, this is only done for the position configuration. If "Ray" is selected, this is
+ *    done for the average value for all the rays. If "Pose" is selected, this is done for the average value of all the poses.</li>
+ *    <li>Linear Singularity, which allows viewing how close the robot is to a singular value at a configuration, using just the linear component. This performs
+ *    the same scoring computation as the Full Singularity metric, but only on the rows of the Jacobian corresponding to linear velocity. </li>
+ *    <li>Angular Singularity, which allows viewing how close the robot is to a singular value at a configuration, using just the angular component. This
+ *    performs the same scoring computation as the Full Singularity metric, but only on the rows of the Jacobian corresponding to angular velocity. </li>
+ *    </ul>
+ * </p>
+ */
 public class ReachabilityMapVisualizer
 {
    private static final double bufferGrowthFactor = 1.1;
