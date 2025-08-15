@@ -312,7 +312,7 @@ public class KinematicsStreamingToolboxParameters
       holdArmWeight = 10.0;
       holdNeckWeight = 10.0;
 
-      centerOfMassSafeMargin = 0.05;
+      centerOfMassSafeMargin = 0.01;
       centerOfMassHoldWeight = 0.001;
       centerOfMassTrackingWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
@@ -321,7 +321,7 @@ public class KinematicsStreamingToolboxParameters
       lockChestWeight = 1000.0;
 
       defaultLinearWeight.set(20.0, 20.0, 20.0);
-      defaultAngularWeight.set(1.0, 1.0, 1.0); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
+      defaultAngularWeight.set(2.5, 2.5, 2.5);
       defaultPelvisLinearWeight.set(defaultLinearWeight);
       defaultPelvisAngularWeight.set(defaultAngularWeight);
       defaultChestLinearWeight.set(defaultLinearWeight);

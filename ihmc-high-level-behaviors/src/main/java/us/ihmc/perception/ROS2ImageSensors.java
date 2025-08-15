@@ -1,9 +1,9 @@
 package us.ihmc.perception;
 
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
@@ -14,7 +14,6 @@ import java.util.concurrent.BlockingQueue;
 public class ROS2ImageSensors
 {
    private final ROS2Node ros2Node;
-   private final ROS2SyncedRobotModel syncedRobot;
 
    // Realsense
    private ImageSensor realsenseSensor;
@@ -27,17 +26,16 @@ public class ROS2ImageSensors
    private ROS2DemandGraphNode zedPublishDemandNode;
    private ImageSensorPublishThread zedPublishThread;
 
-   public ROS2ImageSensors(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
+   public ROS2ImageSensors(ROS2Node ros2Node)
    {
       this.ros2Node = ros2Node;
-      this.syncedRobot = syncedRobot;
    }
 
-   public void addRealsenseSensor(ImageSensor realsenseSensor)
+   public void addRealsenseSensor(ImageSensor realsenseSensor, ReferenceFrame sensorFrame)
    {
       this.realsenseSensor = realsenseSensor;
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
-      realsenseSensor.setSensorFrame(syncedRobot.getReferenceFrames().getSteppingCameraFrame());
+      realsenseSensor.setSensorFrame(sensorFrame);
       setupCallbackForDemandNode(realsenseSensor.getGrabThread(), realsenseDemandNode);
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
@@ -49,10 +47,10 @@ public class ROS2ImageSensors
       setupCallbackForDemandNode(realsensePublishThread, realsensePublishDemandNode);
    }
 
-   public void addZEDSensor(ImageSensor zedSensor)
+   public void addZEDSensor(ImageSensor zedSensor, ReferenceFrame sensorFrame)
    {
       this.zedSensor = zedSensor;
-      zedSensor.setSensorFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
+      zedSensor.setSensorFrame(sensorFrame);
       zedPublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_ZED_PUBLICATION);
       zedSensor.run(true); // Always start ZED, do not wait for any demand node
 

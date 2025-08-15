@@ -50,8 +50,8 @@ public class ChunkedMapManager
       {
          addHeightMap(latestHeightMap,
                       heightMapCenterPoint,
-                      heightMapParameters.getGridSizeXY(),
-                      heightMapParameters.getGridResolutionXY(),
+                      heightMapParameters.getGlobalWidthInMeters(),
+                      heightMapParameters.getCellSize(),
                       heightMapParameters.getHeightOffset(),
                       heightMapParameters.getHeightScaleFactor());
 

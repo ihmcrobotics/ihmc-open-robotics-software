@@ -34,12 +34,6 @@ public class AlexanderInitialSetup extends HumanoidRobotInitialSetup
          setJoint(robotSide, ArmJointName.ELBOW_YAW, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_ROLL, 0.0);
          setJoint(robotSide, ArmJointName.WRIST_YAW, 0.0);
-
-         double[] jointAngles = AlexanderPresetArmConfigurations.getPresetArmConfiguration(version, robotSide, PresetArmConfiguration.INITIAL_SETUP);
-         for (int i = 0; i < jointMap.getArmJointNamesAsStrings(robotSide).size(); i++)
-         {
-            setJoint(robotSide, jointMap.getArmJointNames()[i], jointAngles[i]);
-         }
       }
 
       setJoint(SpineJointName.SPINE_YAW, 0.0);

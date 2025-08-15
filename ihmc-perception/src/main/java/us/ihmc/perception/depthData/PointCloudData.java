@@ -1,7 +1,6 @@
 package us.ihmc.perception.depthData;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.Conversions;
@@ -11,7 +10,6 @@ import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
@@ -104,16 +102,6 @@ public class PointCloudData
       pointCloud = MessageTools.unpackScanPoint3ds(sensorData);
       numberOfPoints = sensorData.getNumberOfPoints();
       colors = null;
-   }
-
-   public PointCloudData(HeightMapKernel heightMapKernel, ImageMessage sensorData)
-   {
-      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch())
-                  + sensorData.getAcquisitionTime().getAdditionalNanos();
-      numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
-      colors = null;
-
-      pointCloud = heightMapKernel.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
    }
 
    public PointCloudData(Instant instant, int numberOfPoints, FloatBuffer pointCloudBuffer)
