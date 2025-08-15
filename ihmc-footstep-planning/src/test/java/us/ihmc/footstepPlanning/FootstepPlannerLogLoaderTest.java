@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
-import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.io.File;

@@ -305,27 +305,27 @@ public class AStarBodyPathSmootherWaypoint
       }
 
       int minYTraversibilityGradWindow = (int) Math.round(
-            (yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
+            (yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getCellSize());
       int maxYTraversibilityGradWindow = (int) Math.round(
-            (yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
-      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int minMaxYTraversibilityNomWindow = (int) Math.round(0.5 * yOffsetTraversibilityNominalWindow / heightMapData.getGridResolutionXY());
+            (yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getCellSize());
+      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getCellSize());
+      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getCellSize());
+      int minMaxYTraversibilityNomWindow = (int) Math.round(0.5 * yOffsetTraversibilityNominalWindow / heightMapData.getCellSize());
 
       for (int xi = minXTraversibilityGradWindow; xi <= maxXTraversibilityGradWindow; xi++)
       {
          for (int yi = minYTraversibilityGradWindow; yi <= maxYTraversibilityGradWindow; yi++)
          {
-            double dx = xi * heightMapData.getGridResolutionXY();
-            double dy = yi * heightMapData.getGridResolutionXY();
+            double dx = xi * heightMapData.getCellSize();
+            double dy = yi * heightMapData.getCellSize();
             xTraversibilityGradientOffsets.add(dx);
             yTraversibilityGradientOffsets.add(dy);
          }
 
          for (int yi = -minMaxYTraversibilityNomWindow; yi <= minMaxYTraversibilityNomWindow; yi++)
          {
-            double dx = xi * heightMapData.getGridResolutionXY();
-            double dy = yi * heightMapData.getGridResolutionXY();
+            double dx = xi * heightMapData.getCellSize();
+            double dy = yi * heightMapData.getCellSize();
             xTraversibilityNominalOffsets.add(dx);
             yTraversibilityNominalOffsets.add(dy);
          }
@@ -401,7 +401,7 @@ public class AStarBodyPathSmootherWaypoint
    public Vector2D computeCollisionGradient()
    {
       int maxOffset = (int) Math.round(0.5 * EuclidCoreTools.norm(plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY())
-                                       / heightMapData.getGridResolutionXY());
+                                       / heightMapData.getCellSize());
 
       double waypointX = waypoint.getX();
       double waypointY = waypoint.getY();
@@ -413,11 +413,11 @@ public class AStarBodyPathSmootherWaypoint
 
       int indexX = HeightMapTools.coordinateToIndex(waypointX,
                                                     heightMapData.getGridCenter().getX(),
-                                                    heightMapData.getGridResolutionXY(),
+                                                    heightMapData.getCellSize(),
                                                     heightMapData.getCenterIndex());
       int indexY = HeightMapTools.coordinateToIndex(waypointY,
                                                     heightMapData.getGridCenter().getY(),
-                                                    heightMapData.getGridResolutionXY(),
+                                                    heightMapData.getCellSize(),
                                                     heightMapData.getCenterIndex());
 
       Vector2D gradient = new Vector2D();
@@ -439,11 +439,11 @@ public class AStarBodyPathSmootherWaypoint
 
             double px = HeightMapTools.indexToCoordinate(indexXI,
                                                          heightMapData.getGridCenter().getX(),
-                                                         heightMapData.getGridResolutionXY(),
+                                                         heightMapData.getCellSize(),
                                                          heightMapData.getCenterIndex());
             double py = HeightMapTools.indexToCoordinate(indexYI,
                                                          heightMapData.getGridCenter().getY(),
-                                                         heightMapData.getGridResolutionXY(),
+                                                         heightMapData.getCellSize(),
                                                          heightMapData.getCenterIndex());
 
             double dx = px - waypointX;
@@ -491,7 +491,7 @@ public class AStarBodyPathSmootherWaypoint
                                                waypoint.getY(),
                                                heightMapData.getGridCenter().getX(),
                                                heightMapData.getGridCenter().getY(),
-                                               heightMapData.getGridResolutionXY(),
+                                               heightMapData.getCellSize(),
                                                heightMapData.getCenterIndex());
       UnitVector3DBasics surfaceNormal = leastSquaresSurfaceNormalCalculator.getSurfaceNormal(key);
 
@@ -616,17 +616,17 @@ public class AStarBodyPathSmootherWaypoint
          for (int i = 0; i < groundPlaneXOffsets.size(); i++)
          {
             tempPoint.setToZero(nominalStepFrames.get(side));
-            tempPoint.addX(heightMapData.getGridResolutionXY() * groundPlaneXOffsets.get(i));
-            tempPoint.addY(side.negateIfRightSide(heightMapData.getGridResolutionXY() * groundPlaneYOffsets.get(i)));
+            tempPoint.addX(heightMapData.getCellSize() * groundPlaneXOffsets.get(i));
+            tempPoint.addY(side.negateIfRightSide(heightMapData.getCellSize() * groundPlaneYOffsets.get(i)));
 
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
             int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(),
                                                           heightMapData.getGridCenter().getX(),
-                                                          heightMapData.getGridResolutionXY(),
+                                                          heightMapData.getCellSize(),
                                                           heightMapData.getCenterIndex());
             int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(),
                                                           heightMapData.getGridCenter().getY(),
-                                                          heightMapData.getGridResolutionXY(),
+                                                          heightMapData.getCellSize(),
                                                           heightMapData.getCenterIndex());
 
             if (xQuery < 0 || xQuery >= heightMapData.getCellsPerAxis() || yQuery < 0 || yQuery >= heightMapData.getCellsPerAxis())
@@ -687,11 +687,11 @@ public class AStarBodyPathSmootherWaypoint
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(),
                                                        heightMapData.getGridCenter().getX(),
-                                                       heightMapData.getGridResolutionXY(),
+                                                       heightMapData.getCellSize(),
                                                        heightMapData.getCenterIndex());
          int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(),
                                                        heightMapData.getGridCenter().getY(),
-                                                       heightMapData.getGridResolutionXY(),
+                                                       heightMapData.getCellSize(),
                                                        heightMapData.getCenterIndex());
          double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
 
@@ -750,7 +750,7 @@ public class AStarBodyPathSmootherWaypoint
                                                       waypoint.getY(),
                                                       heightMapData.getGridCenter().getX(),
                                                       heightMapData.getGridCenter().getY(),
-                                                      heightMapData.getGridResolutionXY(),
+                                                      heightMapData.getCellSize(),
                                                       heightMapData.getCenterIndex());
       previousCellKey = cellKey;
       cellKey = currentKey;
@@ -798,8 +798,8 @@ public class AStarBodyPathSmootherWaypoint
    private void computeHeight()
    {
       int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
+      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
 
       double previousHeight = waypoint.getZ();
       double heightSampleDelta = plannerParameters.getMinSnapHeightThreshold();

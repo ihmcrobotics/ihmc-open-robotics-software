@@ -462,9 +462,9 @@ public class GPUAStarBodyPathSmoother
 
    private void populateTraversibilityOffsetsForNominalBuffer(HeightMapData heightMapData)
    {
-      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int minMaxYTraversibilityNomWindow = (int) Math.round(0.5 * yOffsetTraversibilityNominalWindow / heightMapData.getGridResolutionXY());
+      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getCellSize());
+      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getCellSize());
+      int minMaxYTraversibilityNomWindow = (int) Math.round(0.5 * yOffsetTraversibilityNominalWindow / heightMapData.getCellSize());
 
       TDoubleArrayList xTraversibilityNominalOffsets = new TDoubleArrayList();
       TDoubleArrayList yTraversibilityNominalOffsets = new TDoubleArrayList();
@@ -473,8 +473,8 @@ public class GPUAStarBodyPathSmoother
       {
          for (int yi = -minMaxYTraversibilityNomWindow; yi <= minMaxYTraversibilityNomWindow; yi++)
          {
-            double dx = xi * heightMapData.getGridResolutionXY();
-            double dy = yi * heightMapData.getGridResolutionXY();
+            double dx = xi * heightMapData.getCellSize();
+            double dy = yi * heightMapData.getCellSize();
             xTraversibilityNominalOffsets.add(dx);
             yTraversibilityNominalOffsets.add(dy);
          }
@@ -514,10 +514,10 @@ public class GPUAStarBodyPathSmoother
 
    private void populateTraversibilityOffsetsForGradientBuffer(HeightMapData heightMapData)
    {
-      int minYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
-      int maxYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
-      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
+      int minYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getCellSize());
+      int maxYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getCellSize());
+      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getCellSize());
+      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getCellSize());
 
       TDoubleArrayList xTraversibilityGradientOffsets = new TDoubleArrayList();
       TDoubleArrayList yTraversibilityGradientOffsets = new TDoubleArrayList();
@@ -526,8 +526,8 @@ public class GPUAStarBodyPathSmoother
       {
          for (int yi = minYTraversibilityGradWindow; yi <= maxYTraversibilityGradWindow; yi++)
          {
-            double dx = xi * heightMapData.getGridResolutionXY();
-            double dy = yi * heightMapData.getGridResolutionXY();
+            double dx = xi * heightMapData.getCellSize();
+            double dy = yi * heightMapData.getCellSize();
             xTraversibilityGradientOffsets.add(dx);
             yTraversibilityGradientOffsets.add(dy);
          }

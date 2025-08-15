@@ -179,9 +179,9 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      if (this.heightMapData == null || !EuclidCoreTools.epsilonEquals(this.heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), 1e-3))
+      if (this.heightMapData == null || !EuclidCoreTools.epsilonEquals(this.heightMapData.getCellSize(), heightMapData.getCellSize(), 1e-3))
       {
-         collisionDetector.initialize(heightMapData.getGridResolutionXY(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
+         collisionDetector.initialize(heightMapData.getCellSize(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
       }
 
       this.heightMapData = heightMapData;
@@ -200,7 +200,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
    static void packRadialOffsets(HeightMapData heightMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
    {
-      int minMaxOffsetXY = (int) Math.round(radius / heightMapData.getGridResolutionXY());
+      int minMaxOffsetXY = (int) Math.round(radius / heightMapData.getCellSize());
 
       xOffsets.clear();
       yOffsets.clear();
@@ -209,8 +209,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       {
          for (int j = -minMaxOffsetXY; j <= minMaxOffsetXY; j++)
          {
-            double x = i * heightMapData.getGridResolutionXY();
-            double y = j * heightMapData.getGridResolutionXY();
+            double x = i * heightMapData.getCellSize();
+            double y = j * heightMapData.getCellSize();
             if (EuclidCoreTools.norm(x, y) < radius && !(i == 0 && j == 0))
             {
                xOffsets.add(i);
@@ -459,7 +459,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                                                                                                                  bodyPose.getY(),
                                                                                                                  heightMapData.getGridCenter().getX(),
                                                                                                                  heightMapData.getGridCenter().getY(),
-                                                                                                                 heightMapData.getGridResolutionXY(),
+                                                                                                                 heightMapData.getCellSize(),
                                                                                                                  heightMapData.getCenterIndex()));
 
       if (surfaceNormal != null)
@@ -628,8 +628,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       }
 
       int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
+      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
 
       TDoubleArrayList heights = new TDoubleArrayList();
       for (int i = 0; i < xSnapOffsets.size(); i++)

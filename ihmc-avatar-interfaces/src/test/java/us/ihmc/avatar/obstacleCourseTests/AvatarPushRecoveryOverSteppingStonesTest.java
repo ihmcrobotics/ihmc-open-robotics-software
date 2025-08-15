@@ -11,7 +11,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.stepAdjustment.SteppableRegionsCalculator;
+import us.ihmc.avatar.stepAdjustment.StepAdjustmentCalculator;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -127,12 +127,12 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    {
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
-      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(100.0, new YoRegistry("test"));
-      steppableRegionsCalculator.setPlanarRegions(createPlanarRegionsList());
+      StepAdjustmentCalculator stepAdjustmentCalculator = new StepAdjustmentCalculator(100.0, new YoRegistry("test"));
+      stepAdjustmentCalculator.setPlanarRegions(createPlanarRegionsList());
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
       footstepDataList.setAreFootstepsAdjustable(true);
-      footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(steppableRegionsCalculator.computeSteppableRegions()));
+      footstepDataList.getDefaultStepConstraints().set(StepConstraintMessageConverter.convertToStepConstraintsListMessage(stepAdjustmentCalculator.computeSteppableRegions()));
       simulationTestHelper.publishToController(footstepDataList);
 
       return footstepDataList;
