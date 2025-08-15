@@ -40,9 +40,7 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    protected RDXDetectionManagerSettings detectionManagerSettings;
    protected RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
 
-   protected RDXRobotPerceptionVisualizersPanel(ROS2Node ros2Node,
-                                                ROS2SyncedRobotModel syncedRobot,
-                                                ROS2PeerClockOffsetEstimator peerClockOffsetEstimator)
+   protected RDXRobotPerceptionVisualizersPanel(ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator)
    {
       this.syncedRobot = syncedRobot;
       this.peerClockOffsetEstimator = peerClockOffsetEstimator;
@@ -54,7 +52,9 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       robotVisualizer.setActive(true);
       addVisualizer(robotVisualizer);
 
-      videoStreamImageMessageRelay = new ROS2SRTVideoStreamImageMessageRelay(PerceptionAPI.SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS, ros2Node, CompressionType.UNCOMPRESSED);
+      videoStreamImageMessageRelay = new ROS2SRTVideoStreamImageMessageRelay(PerceptionAPI.SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS,
+                                                                             ros2Node,
+                                                                             CompressionType.UNCOMPRESSED);
 
       // Additional visualizers instantiated in robot specific class
    }
@@ -73,13 +73,16 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    /**
     * Subclasses override this to set up interactable sensors or config
     */
-   protected void setupAdditionalSensors(RDXBaseUI baseUI) { }
+   protected void setupAdditionalSensors(RDXBaseUI baseUI)
+   {
+   }
 
    public ZEDModelData getZEDModelData()
    {
       return ZEDModelData.ZED;
    }
 
+   @Override
    public void destroy()
    {
       super.destroy();
@@ -87,16 +90,56 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    }
 
    // Getters for common/optional visualizers
-   public RDXROS2RobotVisualizer getRobotVisualizer() { return robotVisualizer; }
-   public RDXROS2ColoredPointCloudVisualizer getZedColoredPointCloudVisualizer() { return zedColoredPointCloudVisualizer; }
-   public RDXROS2ImageMessageVisualizer getZedLeftColorImageVisualizer() { return zedLeftColorImageVisualizer; }
-   public RDXROS2ImageMessageVisualizer getZedRightColorImageVisualizer() { return zedRightColorImageVisualizer; }
-   public RDXROS2ImageMessageVisualizer getZedDepthImageVisualizer() { return zedDepthImageVisualizer; }
-   public RDXROS2ColoredPointCloudVisualizer getRealsenseColoredPointCloudVisualizer() { return realsenseColoredPointCloudVisualizer; }
-   public RDXROS2ImageMessageVisualizer getRealsenseDepthImageVisualizer() { return realsenseDepthImageVisualizer; }
-   public RDXROS2ImageMessageVisualizer getRealsenseColorImageVisualizer() { return realsenseColorImageVisualizer; }
-   public RDXROS2YOLOv8Visualizer getYoloVisualizer() { return yoloVisualizer; }
-   public RDXROS2HeightMapVisualizer getHeightMapVisualizer() { return heightMapVisualizer; }
+   public RDXROS2RobotVisualizer getRobotVisualizer()
+   {
+      return robotVisualizer;
+   }
+
+   public RDXROS2ColoredPointCloudVisualizer getZedColoredPointCloudVisualizer()
+   {
+      return zedColoredPointCloudVisualizer;
+   }
+
+   public RDXROS2ImageMessageVisualizer getZedLeftColorImageVisualizer()
+   {
+      return zedLeftColorImageVisualizer;
+   }
+
+   public RDXROS2ImageMessageVisualizer getZedRightColorImageVisualizer()
+   {
+      return zedRightColorImageVisualizer;
+   }
+
+   public RDXROS2ImageMessageVisualizer getZedDepthImageVisualizer()
+   {
+      return zedDepthImageVisualizer;
+   }
+
+   public RDXROS2ColoredPointCloudVisualizer getRealsenseColoredPointCloudVisualizer()
+   {
+      return realsenseColoredPointCloudVisualizer;
+   }
+
+   public RDXROS2ImageMessageVisualizer getRealsenseDepthImageVisualizer()
+   {
+      return realsenseDepthImageVisualizer;
+   }
+
+   public RDXROS2ImageMessageVisualizer getRealsenseColorImageVisualizer()
+   {
+      return realsenseColorImageVisualizer;
+   }
+
+   public RDXROS2YOLOv8Visualizer getYoloVisualizer()
+   {
+      return yoloVisualizer;
+   }
+
+   public RDXROS2HeightMapVisualizer getHeightMapVisualizer()
+   {
+      return heightMapVisualizer;
+   }
+
    public RDXROS2FramePlanarRegionsVisualizer getPlanarRegionsVisualizer()
    {
       return planarRegionsVisualizer;
