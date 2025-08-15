@@ -27,7 +27,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractor
 {
-   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   private static final boolean PRINT_TIMING_FOR_KERNELS = true;
    /**
     * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
@@ -223,16 +223,17 @@ public class RapidHeightMapExtractor
          previousToCurrentSensorOrigin.multiply(sensorToWorldTransform);
 
          Vector3DBasics translation = previousToCurrentSensorOrigin.getTranslation();
-         double linearMotionMagnitude = translation.norm();
+         float linearMotionMagnitude = (float) translation.norm();
 
          RotationMatrixBasics rotation = previousToCurrentSensorOrigin.getRotation();
          AxisAngle axisAngle = new AxisAngle(rotation);
-         double angularMotionMagnitude = Math.abs(axisAngle.getAngle());
+         float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         // Compute the inverse transforms for later use
+         // Prepare transforms (sensor <-> ground)
          RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
          groundToSensorTransform.invert();
 
+         // Upload transforms to device
          sensorToGroundTransform.get(sensorToGroundTransformArray);
          sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
          CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
@@ -243,24 +244,35 @@ public class RapidHeightMapExtractor
          CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
          CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
 
+         // Kernel launch parameters
          int updateKernelGridSizeXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
 
-         updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
-         updateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
-         updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
-         updateKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
-         updateKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
-         updateKernel.withPointer(parametersDevicePointer);
-         updateKernel.withPointer(sensorToGroundTransformDevicePointer);
-         updateKernel.withPointer(groundToSensorTransformDevicePointer);
-         updateKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
-         updateKernel.withFloat((float) linearMotionMagnitude).withFloat((float) angularMotionMagnitude);
-         updateKernel.withFloat(resetOffset);
+         // Set kernel arguments
+         updateKernel.withPointer(latestDepthImageGPU.data())
+                     .withLong(latestDepthImageGPU.step())
+                     .withPointer(globalMeanMap.data())
+                     .withLong(globalMeanMap.step())
+                     .withPointer(localMeanMap.data())
+                     .withLong(localMeanMap.step())
+                     .withPointer(localVarianceMap.data())
+                     .withLong(localVarianceMap.step())
+                     .withPointer(localMotionVarianceMap.data())
+                     .withLong(localMotionVarianceMap.step())
+                     .withPointer(localSampleCountMap.data())
+                     .withLong(localSampleCountMap.step())
+                     .withPointer(parametersDevicePointer)                     // const float* params
+                     .withPointer(sensorToGroundTransformDevicePointer)
+                     .withPointer(groundToSensorTransformDevicePointer)
+                     .withPointer(zUpCameraToWorldAlignedGroundDevicePointer)
+                     .withFloat(linearMotionMagnitude)
+                     .withFloat(angularMotionMagnitude)
+                     .withFloat(resetOffset);
 
+         // Launch kernel
          updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
 
+         // Cleanup
          updateKernelGridDim.close();
          cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
          cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
