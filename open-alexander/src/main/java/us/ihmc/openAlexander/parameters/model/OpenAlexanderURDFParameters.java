@@ -29,7 +29,7 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
    public static final String URDF_LOWER_BODY = "alexander_V1_description/urdf/alexander_v1.lowerBody.urdf";
    public static final String URDF_HEAD = "alexander_V1_description/urdf/alexander_v1.head.urdf";
 
-   public static final String URDF_LOWER_BODY_ONLY = "alexander_V1_description/urdf/alexander_v1.lowerBodyOnly.urdf";
+   public static final String URDF_LOWER_BODY_ONLY = "alexander_V1_description/urdf/alexander_v1.lowerBody.urdf";
    
    public static final String URDF_LEFT_ARM_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v0.leftArmFixedForearm.urdf";
    public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v0.rightArmFixedForearm.urdf";
