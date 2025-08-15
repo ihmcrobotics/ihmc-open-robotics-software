@@ -21,7 +21,7 @@ public class BodyPathCollisionDetectorTest
 
       double boxSizeX = 0.25;
       double boxSizeY = 0.45;
-      collisionDetector.initialize(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
+      collisionDetector.initialize(heightMapData.getCellSize(), boxSizeX, boxSizeY);
 
       double randomHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);
       heightMapData.setHeightAt(0.0, 0.0, randomHeight + 0.1);
@@ -48,7 +48,7 @@ public class BodyPathCollisionDetectorTest
       Assertions.assertFalse(collision, "Body path collision detector failed");
 
       heightMapData.reset();
-      collisionDetector.initialize(heightMapData.getGridResolutionXY(), 0.15, 0.3);
+      collisionDetector.initialize(heightMapData.getCellSize(), 0.15, 0.3);
 
       heightMapData.reset();
       randomHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);

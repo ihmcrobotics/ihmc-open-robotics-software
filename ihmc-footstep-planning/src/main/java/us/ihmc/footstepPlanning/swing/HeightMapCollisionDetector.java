@@ -19,7 +19,7 @@ public class HeightMapCollisionDetector
    {
       EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
-      double resolution = heightMap.getGridResolutionXY();
+      double resolution = heightMap.getCellSize();
       int centerIndex = heightMap.getCenterIndex();
       double centerX = heightMap.getGridCenter().getX();
       double centerY = heightMap.getGridCenter().getY();
@@ -107,7 +107,7 @@ public class HeightMapCollisionDetector
    {
       EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
-      double resolution = heightMap.getGridResolutionXY();
+      double resolution = heightMap.getCellSize();
       int centerIndex = heightMap.getCenterIndex();
       double centerX = heightMap.getGridCenter().getX();
       double centerY = heightMap.getGridCenter().getY();
@@ -461,7 +461,7 @@ public class HeightMapCollisionDetector
                                                                        HeightMapData heightMapData)
    {
       double closestDistance = Double.POSITIVE_INFINITY;
-      double xyResolution = heightMapData.getGridResolutionXY();
+      double xyResolution = heightMapData.getCellSize();
 
       int closestX = -1;
       int closestY = -1;
@@ -525,11 +525,11 @@ public class HeightMapCollisionDetector
    {
       int xIndex = HeightMapTools.coordinateToIndex(point.getX(),
                                                     heightMap.getGridCenter().getX(),
-                                                    heightMap.getGridResolutionXY(),
+                                                    heightMap.getCellSize(),
                                                     heightMap.getCenterIndex());
       int yIndex = HeightMapTools.coordinateToIndex(point.getY(),
                                                     heightMap.getGridCenter().getY(),
-                                                    heightMap.getGridResolutionXY(),
+                                                    heightMap.getCellSize(),
                                                     heightMap.getCenterIndex());
 
       Vector3D normalSum = new Vector3D();
@@ -553,11 +553,11 @@ public class HeightMapCollisionDetector
 
             double neighborx = HeightMapTools.indexToCoordinate(neighborXIndex,
                                                                 heightMap.getGridCenter().getX(),
-                                                                heightMap.getGridResolutionXY(),
+                                                                heightMap.getCellSize(),
                                                                 heightMap.getCenterIndex());
             double neighbory = HeightMapTools.indexToCoordinate(neighborYIndex,
                                                                 heightMap.getGridCenter().getY(),
-                                                                heightMap.getGridResolutionXY(),
+                                                                heightMap.getCellSize(),
                                                                 heightMap.getCenterIndex());
             double neighborZ = heightMap.getHeightAt(neighborXIndex, neighborYIndex);
 

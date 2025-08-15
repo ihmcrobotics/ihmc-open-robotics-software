@@ -86,8 +86,8 @@ public class HeightMapPlanarRegionCalculator
             }
 
             planeEstimate.getPoint()
-                         .set(HeightMapTools.indexToCoordinate(xi, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex),
-                              HeightMapTools.indexToCoordinate(yi, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex),
+                         .set(HeightMapTools.indexToCoordinate(xi, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex),
+                              HeightMapTools.indexToCoordinate(yi, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex),
                               heightMapData.getHeightAt(xi, yi));
             planeEstimate.getNormal().set(surfaceNormals.apply(key));
 
@@ -108,8 +108,8 @@ public class HeightMapPlanarRegionCalculator
                }
 
                getPlaneEstimate(neighborKey, surfaceNormals, heightMapData);
-               double euclideanDistance = planeEstimate.distance(HeightMapTools.indexToCoordinate(xi, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex),
-                                                                 HeightMapTools.indexToCoordinate(yi, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex),
+               double euclideanDistance = planeEstimate.distance(HeightMapTools.indexToCoordinate(xi, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex),
+                                                                 HeightMapTools.indexToCoordinate(yi, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex),
                                                                  heightMapData.getHeightAt(xi, yi));
                double angularDistance = Math.abs(planeEstimate.getNormal().angle(surfaceNormals.apply(key)));
                boolean neighborIsAssigned = regionIds[neighborKey] >= 0;
@@ -181,8 +181,8 @@ public class HeightMapPlanarRegionCalculator
          int yIndex = HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex());
 
          planeEstimate.getPoint()
-                      .set(HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex()),
-                           HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex()),
+                      .set(HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex()),
+                           HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex()),
                            heightMapData.getHeightAt(xIndex, yIndex));
          planeEstimate.getNormal().set(surfaceNormals.apply(key));
       }
@@ -206,8 +206,8 @@ public class HeightMapPlanarRegionCalculator
       {
          int xIndex = HeightMapTools.keyToXIndex(region.get(i), heightMapData.getCenterIndex());
          int yIndex = HeightMapTools.keyToYIndex(region.get(i), heightMapData.getCenterIndex());
-         tempPoints.add().set(HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex()),
-                              HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex()),
+         tempPoints.add().set(HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex()),
+                              HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex()),
                               heightMapData.getHeightAt(xIndex, yIndex));
       }
 

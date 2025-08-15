@@ -22,9 +22,9 @@ public class HeightMapTools
    /**
     * The xy-indices of the center, of the grid.
     */
-   public static int computeCenterIndex(double gridSize, double resolution)
+   public static int computeCenterIndex(double mapSize, double cellSize)
    {
-      return (int) Math.round(0.5 * gridSize / resolution);
+      return (int) Math.round(0.5 * mapSize / cellSize);
    }
 
    public static int coordinateToKey(double x, double y, double xCenter, double yCenter, double resolution, int centerIndex)

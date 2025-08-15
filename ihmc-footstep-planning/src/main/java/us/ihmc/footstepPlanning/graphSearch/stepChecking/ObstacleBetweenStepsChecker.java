@@ -98,7 +98,7 @@ public class ObstacleBetweenStepsChecker
 
       double maxZofGroundForCollision = Math.max(stepPosition.getZ(), previousStepPosition.getZ()) + groundClearance;
 
-      int pointsToCheck = computePointsToCheck(stepPosition, previousStepPosition, heightMapData.getGridResolutionXY());
+      int pointsToCheck = computePointsToCheck(stepPosition, previousStepPosition, heightMapData.getCellSize());
 
       for (int i = 0; i <= pointsToCheck; i++)
       {

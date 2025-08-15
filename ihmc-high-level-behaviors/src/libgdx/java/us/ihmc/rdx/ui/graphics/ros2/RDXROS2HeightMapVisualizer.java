@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXChunkedMapRenderer;
