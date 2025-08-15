@@ -68,8 +68,8 @@ public class HeightMapLeastSquaresNormalCalculator
             if (xIndex > 0 && yIndex > 0 && xIndex < gridWidth - 1 && yIndex < gridWidth - 1)
             {
                ConvexPolygon2D translatedPatch = new ConvexPolygon2D(polygonToSnap);
-               double px = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-               double py = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+               double px = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
+               double py = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
                translatedPatch.translate(px, py);
 
                RigidBodyTransform transform = heightMapSnapper.snapPolygonToHeightMap(translatedPatch, internalEnvironmentHandler, snapHeightThreshold, maxIncline);

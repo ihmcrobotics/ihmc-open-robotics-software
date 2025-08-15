@@ -586,8 +586,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static void checkHeightMapDataAreEqual(HeightMapData dataA, HeightMapData dataB)
    {
       assertEquals(dataA.getCenterIndex(), dataB.getCenterIndex());
-      assertEquals(dataA.getGridResolutionXY(), dataB.getGridResolutionXY(), epsilon);
-      assertEquals(dataA.getGridSizeXY(), dataB.getGridSizeXY(), epsilon);
+      assertEquals(dataA.getCellSize(), dataB.getCellSize(), epsilon);
+      assertEquals(dataA.getMapSize(), dataB.getMapSize(), epsilon);
       EuclidCoreTestTools.assertEquals(dataA.getGridCenter(), dataB.getGridCenter(), epsilon);
 
       int cellsPerSide = 2 * dataA.getCenterIndex() + 1;

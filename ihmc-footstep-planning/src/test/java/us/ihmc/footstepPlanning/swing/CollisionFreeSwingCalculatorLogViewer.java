@@ -63,7 +63,7 @@ public class CollisionFreeSwingCalculatorLogViewer
          double height = heights.get(i);
 
          terrainGraphics.translate(x, y, 0.5 * height);
-         terrainGraphics.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), height, true, computeColorFromHeight(height));
+         terrainGraphics.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), height, true, computeColorFromHeight(height));
          terrainGraphics.identity();
       }
       

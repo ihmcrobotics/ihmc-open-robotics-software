@@ -12,12 +12,12 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -112,7 +112,9 @@ public class SnappingTerrainExtractor
       terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
                                           cellsPerAxisTerrain,
                                           heightMapParameters.getHeightScaleFactor(),
-                                          heightMapParameters.getHeightOffset());
+                                          heightMapParameters.getHeightOffset(),
+                                          heightMapParameters.getCellSize(),
+                                          heightMapParameters.getTerrainWidthInMeters());
 
       // Initialize matrices and images
       terrainCostMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);

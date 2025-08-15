@@ -137,7 +137,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
          computeKernel.withPointer(gpuHeights)
                       .withPointer(gpuGridCenter)
                       .withInt(currentHeightMapData.getCenterIndex())
-                      .withFloat((float) currentHeightMapData.getGridResolutionXY())
+                      .withFloat((float) currentHeightMapData.getCellSize())
                       .withPointer(gpuInitialPose)
                       .withFloat(footLength)
                       .withFloat(footWidth)
