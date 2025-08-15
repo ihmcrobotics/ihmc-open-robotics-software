@@ -136,7 +136,7 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
             float2 point_query = make_float2(offset.x + foot_position.x, offset.y + foot_position.y);
 
             float2 localXY = make_float2(point_query.x, point_query.y);
-            int2 query_key  = coordinate_to_indices(localXY, terrain_map_center, resolution, terrain_map_center_index);
+            int2 query_key  = coordinate_to_indices(localXY, terrain_map_center, map_resolution, terrain_map_center_index);
 
             if (query_key.x < 0 || query_key.x > cells_per_axis_for_checking || query_key.y < 0 || query_key.y > cells_per_axis_for_checking)
                 continue;

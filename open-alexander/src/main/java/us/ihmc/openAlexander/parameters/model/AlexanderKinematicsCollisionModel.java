@@ -7,7 +7,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -65,11 +64,6 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
          if (torso != null)
          {
             MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
-            // Sideway capsule covering the shoulders and "pecs"-part
-            FrameCapsule3D torsoShapeFrontShoulder = new FrameCapsule3D(torsoFrame, 0.15, 0.145);
-            torsoShapeFrontShoulder.getPosition().set(-0.02, 0.0, 0.28);
-            torsoShapeFrontShoulder.getAxis().set(Axis3D.Y);
-            collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeFrontShoulder));
             // Capsule along the forward axis covering the bottom part of the "abdomen" and of the chest.
             FrameCapsule3D torsoShapeBottomCenter = new FrameCapsule3D(torsoFrame, 0.15, 0.17);
             torsoShapeBottomCenter.getPosition().set(-0.01, 0.0, 0.22);
@@ -90,8 +84,6 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
          // Legs ---------------------------------------------------------------------
          for (RobotSide robotSide : RobotSide.values)
          {
-            collisionMask = helper.getCollisionMask(robotSide.getCamelCaseName() + "Leg");
-            collisionGroup = helper.createCollisionGroup(robotSide.getCamelCaseName() + "Leg", jointMap.getFootName(robotSide));
             JointBasics hipYawJoint = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), multiBodySystem);
             RigidBodyBasics hip = hipYawJoint.getSuccessor();
             ReferenceFrame hipFrame = hipYawJoint.getFrameAfterJoint();
@@ -127,17 +119,6 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
             shinShape.getPosition().set(0.015, 0.0, -0.2);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
-
-            collisionMask = helper.getCollisionMask(jointMap.getFootName(robotSide));
-            JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
-            MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
-            RigidBodyBasics foot = ankleRoll.getSuccessor();
-            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-            FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.26, 0.14, 0.055);
-            footShape.getPosition().set(0.045, 0.0, -0.05);
-            footShape.setMargins(1.0e-5, 4.0e-4);
-            collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
-
          }
       }
 
@@ -151,7 +132,7 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
          {
             RigidBodyBasics upperArm = shoulderJoint.getSuccessor();
             ReferenceFrame shoulderFrame = shoulderJoint.getFrameAfterJoint();
-            FrameCapsule3D upperArmShape = new FrameCapsule3D(shoulderFrame, 0.34, 0.06);
+            FrameCapsule3D upperArmShape = new FrameCapsule3D(shoulderFrame, 0.20, 0.06);
             upperArmShape.getPosition().set(0.01, 0.0, -0.16);
             upperArmShape.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(upperArm, collisionMask, collisionGroup, upperArmShape));

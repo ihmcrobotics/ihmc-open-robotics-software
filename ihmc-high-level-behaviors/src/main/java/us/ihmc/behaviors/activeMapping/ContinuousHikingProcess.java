@@ -9,6 +9,7 @@ import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsManager;
 import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.RawImage;
@@ -36,6 +37,7 @@ public class ContinuousHikingProcess
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final SnappingTerrainManager snappingTerrainManager;
    private final RapidHeightMapThread rapidHeightMapThread;
+//   private final SteppableRegionsManager steppableRegionsManager;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
@@ -74,6 +76,7 @@ public class ContinuousHikingProcess
                                                          activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
          snappingTerrainManager = new SnappingTerrainManager(ros2Node, activeMappingParameterToolBox.getHeightMapParameters());
+//         steppableRegionsManager = new SteppableRegionsManager(ros2Node);
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
                                                                              ros2SyncedRobot,
@@ -107,6 +110,7 @@ public class ContinuousHikingProcess
       environmentHandler.setHeightMapData(rapidHeightMapThread.getLatestHeightMapData());
       snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
       environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
+//      steppableRegionsManager.update(environmentHandler.getTerrainMapData());
       continuousPlanningStateMachine.setLatestEnvironmentHandler(environmentHandler);
    }
 
@@ -115,5 +119,6 @@ public class ContinuousHikingProcess
       rapidHeightMapThread.blockingKill();
       continuousPlanningStateMachine.destroy();
       snappingTerrainManager.close();
+//      steppableRegionsManager.destroy();
    }
 }

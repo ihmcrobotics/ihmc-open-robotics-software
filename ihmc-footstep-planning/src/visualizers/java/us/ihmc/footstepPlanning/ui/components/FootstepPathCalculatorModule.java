@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.perception.heightMap.HeightMapData;
