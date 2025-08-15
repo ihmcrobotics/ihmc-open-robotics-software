@@ -5,17 +5,21 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYo
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
@@ -81,8 +85,8 @@ public class ReachabilitySphereMapCalculator implements Controller
    private Consumer<Voxel3DData> voxelUnreachableListener = null;
    private Consumer<Voxel3DData> voxelCompletedListener = null;
 
-   private final FramePose3D[] solverInputs;
    private final ReachabilityMapSolver[] solvers;
+   private final FramePose3D[] solverInputs;
    private final boolean[] solverResults;
    private final Voxel3DData[] solverVoxels;
 
@@ -286,77 +290,87 @@ public class ReachabilitySphereMapCalculator implements Controller
       if (isDone.getValue())
          return;
 
-      Arrays.fill(solverResults, false);
-
       // This is solving in parallel, on a multi-threaded approach. Each solverIndex is equivalent to stating the thread index. It performs a single
       // batch-update on a new set of voxels, and packs whether the solve was successful into the solverResults array.
       IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
       {
          int voxelIndex = currentVoxelIndex.getValue() + solverIndex;
-         if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
-         {
-            // We are out of voxels to test. There's no need to proceed.
-            solverVoxels[solverIndex] = null;
-            solverResults[solverIndex] = false;
-            return;
-         }
-
-         Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
-         solverVoxels[solverIndex] = voxel;
-
-         // Set the solver input pose to the position of the voxel, with zero orientation. The orientation of the input is not currently used.
-         FramePose3D solverInput = solverInputs[solverIndex];
-         solverInput.setToZero(ReferenceFrame.getWorldFrame());
-         solverInput.getPosition().setMatchingFrame(voxel.getPosition());
-
-         if (solverIndex == 0)
-         {
-            // We are visualizing the solver on thread 0. Update the pose that's evaluated.
-            evaluatedPose.set(solverInput);
-         }
-
-         solverTimers[solverIndex].startMeasurement();
-         // Compute the solution configuration to reach the desired voxel position. Success is false if the point is unreachable. This must respect the joint
-         // limits and collisions that have been previously defined.
-         boolean success = solvers[solverIndex].solveFor(solverInput.getPosition());
-         solverResults[solverIndex] = success;
-
-         if (success)
-         {
-            //
-            voxel.registerReachablePosition(solverInput.getPosition(), solvers[solverIndex].getRobotArmJoints());
-            if (solverIndex == 0)
-               writeSolverSolutionToRobotForViz(solvers[solverIndex], controllerOutput); // Update visualization
-            computeVoxel(voxel, solverIndex);
-         }
-         solverTimers[solverIndex].stopMeasurement();
+         compute(solverIndex, voxelIndex);
       });
 
-      for (int solverIndex = 0; solverIndex < solverResults.length; solverIndex++)
-      {
-         boolean solverResult = solverResults[solverIndex];
-
-         if (solverResult)
-         {
-            if (voxelCompletedListener != null)
-               voxelCompletedListener.accept(solverVoxels[solverIndex]);
-         }
-         else if (solverVoxels[solverIndex] != null)
-         {
-            if (voxelUnreachableListener != null)
-               voxelUnreachableListener.accept(solverVoxels[solverIndex]);
-
-            voxel3DGrid.destroy(solverVoxels[solverIndex]);
-         }
-
-         solverVoxels[solverIndex] = null;
-      }
+      IntStream.range(0, solverResults.length).forEach(this::recordResult);
 
       currentVoxelIndex.add(solvers.length);
 
       if (currentVoxelIndex.getValue() >= voxel3DGrid.getNumberOfVoxels())
          isDone.set(true);
    }
+
+   private void compute(int solverIndex, int voxelIndex)
+   {
+      solverResults[solverIndex] = false;
+      if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
+      {
+         // We are out of voxels to test. There's no need to proceed.
+         solverVoxels[solverIndex] = null;
+         return;
+      }
+
+      Voxel3DData voxel = voxel3DGrid.getOrCreateVoxel(voxelIndex);
+      solverVoxels[solverIndex] = voxel;
+
+      // Set the solver input pose to the position of the voxel, with zero orientation. The orientation of the input is not currently used.
+      FramePose3D solverInput = solverInputs[solverIndex];
+      solverInput.setToZero(ReferenceFrame.getWorldFrame());
+      solverInput.getPosition().setMatchingFrame(voxel.getPosition());
+
+      if (solverIndex == 0)
+      {
+         // We are visualizing the solver on thread 0. Update the pose that's evaluated.
+         evaluatedPose.set(solverInput);
+      }
+
+      solverTimers[solverIndex].startMeasurement();
+      // Compute the solution configuration to reach the desired voxel position. Success is false if the point is unreachable. This must respect the joint
+      // limits and collisions that have been previously defined.
+      boolean success = solvers[solverIndex].solveFor(solverInput.getPosition());
+      solverResults[solverIndex] = success;
+
+      if (success)
+      {
+         //
+         voxel.registerReachablePosition(solverInput.getPosition(), solvers[solverIndex].getRobotArmJoints());
+         if (solverIndex == 0 && controllerOutput != null)
+            writeSolverSolutionToRobotForViz(solvers[solverIndex], controllerOutput); // Update visualization
+         computeVoxel(voxel, solverIndex);
+      }
+      solverTimers[solverIndex].stopMeasurement();
+   }
+
+   private void recordResult(int solverIndex)
+   {
+      boolean solverResult = solverResults[solverIndex];
+      recordResult(solverResult, solverVoxels[solverIndex]);
+
+      solverVoxels[solverIndex] = null;
+   }
+
+   private void recordResult(boolean solverResult, Voxel3DData voxel)
+   {
+      if (solverResult)
+      {
+         if (voxelCompletedListener != null)
+            voxelCompletedListener.accept(voxel);
+      }
+      else if (voxel != null)
+      {
+         if (voxelUnreachableListener != null)
+            voxelUnreachableListener.accept(voxel);
+
+         voxel3DGrid.destroy(voxel);
+      }
+   }
+
 
    private void computeVoxel(Voxel3DData voxel, int solverIndex)
    {
@@ -377,7 +391,7 @@ public class ReachabilitySphereMapCalculator implements Controller
             {
                voxel.registerReachableRay(rayIndex, solverInput, solver.getRobotArmJoints());
 
-               if (solverIndex == 0)
+               if (solverIndex == 0 && controllerOutput != null)
                   writeSolverSolutionToRobotForViz(solver, controllerOutput);
             }
             else
@@ -401,7 +415,7 @@ public class ReachabilitySphereMapCalculator implements Controller
                {
                   voxel.registerReachablePose(rayIndex, rotationAroundRayIndex, solverInput, solver.getRobotArmJoints());
 
-                  if (solverIndex == 0)
+                  if (solverIndex == 0 && controllerOutput != null)
                      writeSolverSolutionToRobotForViz(solver, controllerOutput);
                }
             }
@@ -428,6 +442,52 @@ public class ReachabilitySphereMapCalculator implements Controller
    {
       while (!isDone())
          doControl();
+   }
+
+   public void buildReachabilitySpaceEfficiently()
+   {
+      int voxelsPerThread = (int) Math.ceil(((double) voxel3DGrid.getNumberOfVoxels()) / solverInputs.length);
+      int voxelsPerFivePercent = voxelsPerThread / 20;
+
+      boolean[] allResults = new boolean[voxel3DGrid.getNumberOfVoxels()];
+      TIntArrayList allVoxels = new TIntArrayList(IntStream.rangeClosed(0, voxel3DGrid.getNumberOfVoxels()).toArray());
+      int[][] voxelAssignment = new int[solverInputs.length][];
+      Random random = new Random(1738L);
+      for (int i = 0; i < solverInputs.length; i++)
+      {
+         voxelAssignment[i] = new int[voxelsPerThread];
+         for (int j = 0; j < voxelsPerThread; j++)
+         {
+            if (allVoxels.isEmpty())
+               break;
+            voxelAssignment[i][j] = allVoxels.removeAt(RandomNumbers.nextInt(random, 0, allVoxels.size() - 1));
+         }
+      }
+
+      // This is solving in parallel, on a multi-threaded approach. Each solverIndex is equivalent to stating the thread index. It performs a single
+      // batch-update on a new set of voxels, and packs whether the solve was successful into the solverResults array.
+      IntStream.range(0, solvers.length).parallel().forEach(solverIndex ->
+                                                            {
+                                                               int printCount = 0;
+                                                               for (int i = 0; i < voxelAssignment[solverIndex].length; i++)
+                                                               {
+                                                                  int voxelIndex = voxelAssignment[solverIndex][i];
+                                                                  if (voxelIndex >= voxel3DGrid.getNumberOfVoxels())
+                                                                     continue;
+
+                                                                  if (voxelIndex % voxelsPerFivePercent == 0)
+                                                                     LogTools.info("Solver {} is {} % through.", solverIndex, printCount++ * 5);
+                                                                  compute(solverIndex, voxelIndex);
+                                                                  allResults[voxelIndex] = solverResults[solverIndex];
+                                                               }
+                                                               LogTools.info("Solver {} is done!", solverIndex);
+                                                            });
+
+      for (int voxelIndex = 0 ; voxelIndex < allResults.length; voxelIndex++)
+      {
+         recordResult(allResults[voxelIndex], voxel3DGrid.getVoxel(voxelIndex));
+      }
+      LogTools.info("Finished populating the reachability map.");
    }
 
    public double getGridSizeInMeters()
