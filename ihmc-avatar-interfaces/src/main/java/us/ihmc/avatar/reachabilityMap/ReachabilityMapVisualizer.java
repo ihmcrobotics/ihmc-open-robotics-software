@@ -95,7 +95,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * </p>
  *
  * <p>
- *    After the visualizer has started, you can then toggle a number of different visualization elements. These include:
+ *    After the visualizer has started, you can then toggle a number of different visualization elements. These can be shown by using the "Type" drop down.
+ *    Whether you visualize "Position", "Ray", "Pose" can be selected with the neighboring dropdown. When a new selection is made, the visualization can be
+ *    updated by pressing "Update Viz".
+ *    </p>
+ * <p>The components that can be visualized include::
  *    <ul>
  *    <li>Reach, which visualizes the reachability score itself. The type of reachability can be selected using the Visualization Type. If "Position" is
  *     selected, only the voxels whose position can be reached are shown, and are assigned a uniform score of 1.0. If the "Ray" type is selected, the positions
