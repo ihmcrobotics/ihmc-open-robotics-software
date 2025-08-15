@@ -195,10 +195,7 @@ public class JointMap
 
    /**
     * Build a KinematicsStreamingToolboxInputMessage by creating a RigidBody message
-    * for each mapped end-effector. Desired poses are taken from BVH globals (optionally aligned
-    * by bvhToWorld) and expressed in WORLD frame as required by the toolbox.
-    *
-    * You typically add hands, feet, pelvis, chest, head, etc., as end-effectors.
+    * for each mapped end-effector. Desired poses are taken from BVH globals and expressed in WORLD frame as required by the toolbox.
     */
    public KinematicsStreamingToolboxInputMessage toStreamingMessage(Map<String, RigidBodyTransform> bvhGlobals,
                                                                     long sequenceId,

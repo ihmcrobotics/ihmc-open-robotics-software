@@ -1,13 +1,19 @@
 package us.ihmc.avatar.mocapRetarget;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessagePubSubType;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.mocapRetarget.bvh.BVHParser;
 import us.ihmc.avatar.mocapRetarget.bvh.MotionFrame;
 import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.SkeletonHierarchy;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -20,8 +26,19 @@ import java.util.function.Consumer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2QosProfile;
+
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.unitree.rdx.apps.H1RDXSimulationUI;
+import us.ihmc.unitree.robotModel.H1RobotModel;
+import us.ihmc.unitree.robotModel.H1Version;
+
+
 
 /**
  * End-to-end runner:
@@ -61,38 +78,39 @@ public class BVHStreamingRunner
       this.jointMap = jointMap;
    }
 
-   /** Factory: parse BVH, set up transformer + joint map, add end-effector mappings, and calibrate pelvis. */
+   /** Process: parse BVH, set up transformer + joint map, add end-effector mappings, and calibrate pelvis. */
    public static BVHStreamingRunner create(FullHumanoidRobotModel model, File bvhFile) throws Exception
    {
       Objects.requireNonNull(model, "FullHumanoidRobotModel required");
       Objects.requireNonNull(bvhFile, "BVH file required");
 
-      // 1) Parse BVH
+      // Parse BVH
       BVHParser parser = new BVHParser();
       SkeletonHierarchy skeleton = parser.parseHierarchy(bvhFile);
       List<MotionFrame> frames = parser.parseMotion(bvhFile, skeleton);
       if (frames.isEmpty())
          throw new IllegalArgumentException("BVH contains zero frames: " + bvhFile);
 
-      // 2) Frame time (seconds). If your parser exposes it, prefer that. Else default to 60 Hz.
       double frameTimeSeconds = 1.0 / 60.0;
-      try
-      {
-         frameTimeSeconds = parser.getFrameTimeSeconds(); // add this getter in your BVHParser if not present
-      }
-      catch (Throwable ignore) { /* fallback OK */ }
+     // try
+     // {
+      //   frameTimeSeconds = parser.getFrameTimeSeconds();
+     // }
+     // catch (Throwable ignore) { /* fallback OK */ }
 
-      // 3) FK transformer
+      // FK transformer
       CoordinateTransformer transformer = new CoordinateTransformer(skeleton);
 
-      // 4) JointMap + exact end-effector mappings for your BVH
+      // JointMap + exact end-effector mappings for typical Captury BVH
       JointMap jointMap = new JointMap(skeleton, model);
+
+      // TO-DO: walkthrough to see if I need this scaling (cm -> m)
+      jointMap.setPositionScale(.01);
       addEndEffectorMappingsForWalkingBVH(jointMap, model); // <<<<<<<<<<<<<< EXACT MAPPINGS
 
-      // Optional: if your actor height differs from robot height, set a scale:
       // jointMap.setPositionScale(robotHeight / bvhActorHeight);
 
-      // 5) Calibrate BVH->WORLD once using pelvis at frame 0 (yaw-only to avoid BVH tilt)
+      // Calibrate BVH->WORLD once using pelvis at frame 0 (yaw-only to avoid BVH tilt)
       Map<String, RigidBodyTransform> globals0 = transformer.buildGlobalTransforms(frames.get(0));
       RigidBodyTransform pelvisWorld = getBodyWorldTransform(model.getPelvis());
       jointMap.calibrateBvhToWorldFromPelvis("Hips", pelvisWorld, globals0, /*alignYawOnly=*/true);
@@ -113,37 +131,35 @@ public class BVHStreamingRunner
          Map<String, RigidBodyTransform> bvhGlobals = transformer.buildGlobalTransforms(frame);
 
          KinematicsStreamingToolboxInputMessage msg =
-               jointMap.toStreamingMessage(bvhGlobals, sequenceId++, /*timestamp*/ t0, /*streamToController*/ true);
+               jointMap.toStreamingMessage(bvhGlobals, sequenceId++, t0, true);
 
          sender.accept(msg);
 
          // Sleep best-effort to match BVH rate
-         long elapsed = System.nanoTime() - t0;
-         long remaining = nanosPerFrame - elapsed;
-         if (remaining > 0)
-            Thread.sleep(remaining / 1_000_000L, (int) (remaining % 1_000_000L));
+         //long elapsed = System.nanoTime() - t0;
+         //long remaining = nanosPerFrame - elapsed;
+//         if (remaining > 0)
+//            Thread.sleep(remaining / 1_000_000L, (int) (remaining % 1_000_000L));
       }
    }
 
-   // ------------------------
-   // EXACT end-effector mapping for your walking.bvh
-   // ------------------------
+   /**
+    * Hard-coded for typical CapturyLive .bvh file and available end-effectors on robot model
+    */
    private static void addEndEffectorMappingsForWalkingBVH(JointMap jointMap, FullHumanoidRobotModel model)
    {
-      // Pelvis & a chest proxy (Spine4 is the highest spine joint present)
+      // Pelvis & chest proxy (Spine4 is the highest spine joint present)
       safeAddEndEffector(jointMap, "Hips",   model.getPelvis());
       safeAddEndEffector(jointMap, "Spine4", model.getChest()); // if chest control is desired
 
-      // Hands & feet (BVH names from your file)
-      safeAddEndEffector(jointMap, "LeftHand",  model.getHand(RobotSide.LEFT));
-      safeAddEndEffector(jointMap, "RightHand", model.getHand(RobotSide.RIGHT));
+      // BVH names from file
+      //safeAddEndEffector(jointMap, "LeftHand",  model.getHand(RobotSide.LEFT));
+      //safeAddEndEffector(jointMap, "RightHand", model.getHand(RobotSide.RIGHT));
       safeAddEndEffector(jointMap, "LeftFoot",  model.getFoot(RobotSide.LEFT));
       safeAddEndEffector(jointMap, "RightFoot", model.getFoot(RobotSide.RIGHT));
 
-      // Optional: Head control (if your robot exposes a head rigid body)
       // safeAddEndEffector(jointMap, "Head", model.getHead());
 
-      // Optional: Forearms (if you want more constraints)
       // safeAddEndEffector(jointMap, "LeftForeArm",  model.getForearm(RobotSide.LEFT));
       // safeAddEndEffector(jointMap, "RightForeArm", model.getForearm(RobotSide.RIGHT));
    }
@@ -163,23 +179,35 @@ public class BVHStreamingRunner
       return out;
    }
 
-
    public static void main(String[] args) throws Exception
    {
-     // FullHumanoidRobotModel model = ;
+      DRCRobotModel h1 = new H1RobotModel(H1Version.HANDLESS, RobotTarget.SCS);
+      FullHumanoidRobotModel fullModel = h1.createFullRobotModel();
 
-      File bvhFile = new File("/home/gwalrath/Downloads/walking.bvh");
-      //BVHStreamingRunner runner = BVHStreamingRunner.create(model, bvhFile);
 
-     // ROS2Node ros2 = ROS2Tools.createROS2Node("bvh_streaming_runner");
+      File bvhFile = new File("/home/gwalrath/Downloads/walk_100.bvh");
+      BVHStreamingRunner runner = BVHStreamingRunner.create(fullModel, bvhFile);
 
-      // Publisher
-      //ROS2Publisher<KinematicsStreamingToolboxInputMessage> pub =
-      //      ros2.createPublisher(KinematicsStreamingToolboxInputMessage.class,
-                               //  "/ihmc/kinematics_streaming_toolbox/input",
-                               //  ROS2QosProfile.DEFAULT());
+     ROS2Node ros2 = new ROS2NodeBuilder().build("bvh_streaming_runner");
+     ROS2Publisher<KinematicsStreamingToolboxInputMessage> pub =
+            ros2.createPublisher(KinematicsStreamingToolboxInputMessage.class,
+                                 "/ihmc/" + h1.getSimpleRobotName() + "/kinematics_streaming_toolbox/input",
+                                 ROS2QosProfile.RELIABLE());
 
-      //runner.run(pub::publish);
+      ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2, h1);
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
+
+
+      Thread.sleep(1500);
+
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(h1.getSimpleRobotName()), toolboxStateMessage);
+
+      Thread.sleep(500);
+
+      runner.run(pub::publish);
+
+      Thread.sleep(1000);
 
    }
 
