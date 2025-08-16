@@ -14,6 +14,7 @@ public class RDXImagePanel extends RDXPanel
    private float mouseXRightFromLeft;
    private float mouseYDownFromTop;
    private Runnable userImGuiImageInteraction;
+   private boolean isActive = true;
 
    public RDXImagePanel(String name, boolean flipY)
    {
@@ -42,7 +43,7 @@ public class RDXImagePanel extends RDXPanel
          userImGuiImageInteraction.run();
       }
 
-      if (texture != null)
+      if (texture != null && isActive)
       {
          //      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
          //      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
@@ -77,6 +78,11 @@ public class RDXImagePanel extends RDXPanel
 
          ImGui.getWindowDrawList().addImage(texture.getTextureObjectHandle(), startX, startY, endX, endY);
       }
+   }
+
+   public void setActive(boolean value)
+   {
+      isActive = value;
    }
 
    public void setUserImGuiImageInteraction(Runnable userImGuiImageInteraction)
