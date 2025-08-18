@@ -105,7 +105,6 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCa
 // Back-project these points to the 3D space and transform them back to the Z-Up frame.
 // Compute the average height for points within the grid cell while filtering outliers.
 extern "C"
-extern "C"
 __global__ void heightMapUpdateKernel(const unsigned short *__restrict__ depthImage, size_t pitchDepth,
                                       float *__restrict__ previousGlobalHeightMap, size_t pitchGlobal,
                                       float *__restrict__ localMeanMap, size_t pitchLocalMean,
