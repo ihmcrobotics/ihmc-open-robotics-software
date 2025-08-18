@@ -36,6 +36,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -69,6 +70,7 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetBooleanWidget performAStarSearchCheckbox;
    private ImGuiStoredPropertySetBooleanWidget planSwingTrajectoriesCheckbox;
    private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget planBodyPathCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private ImGuiSliderDouble stepAggressivenessSlider;
@@ -152,6 +154,7 @@ public class RDXLocomotionManager
       areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.areFootstepsAdjustable);
       planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planSwingTrajectories);
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.replanSwingTrajectoriesOnChange);
+      planBodyPathCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planWidthBodyPath);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f");
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f");
       stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
@@ -366,6 +369,7 @@ public class RDXLocomotionManager
          areFootstepsAdjustableCheckbox.renderImGuiWidget();
          planSwingTrajectoriesCheckbox.renderImGuiWidget();
          replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+         planBodyPathCheckbox.renderImGuiWidget();
          ImGui.unindent();
       }
 
