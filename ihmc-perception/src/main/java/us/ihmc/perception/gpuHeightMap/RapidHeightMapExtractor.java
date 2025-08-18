@@ -27,7 +27,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractor
 {
-   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   private static final boolean PRINT_TIMING_FOR_KERNELS = true;
    /**
     * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
@@ -44,7 +44,6 @@ public class RapidHeightMapExtractor
    private final GpuMat localMeanMap;
    private final GpuMat localVarianceMap;
    private final GpuMat localMotionVarianceMap;
-   private final GpuMat localSampleCountMap;
 
    // These are the mats required to keep a global map
    private final GpuMat globalMeanMap;
@@ -126,7 +125,6 @@ public class RapidHeightMapExtractor
          localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
 
          globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
@@ -245,18 +243,11 @@ public class RapidHeightMapExtractor
          int updateKernelGridSizeXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 updateKernelGridDim = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
 
-         updateKernel.withPointer(latestDepthImageGPU.data());
-         updateKernel.withLong(latestDepthImageGPU.step());
-         updateKernel.withPointer(globalMeanMap.data());
-         updateKernel.withLong(globalMeanMap.step());
-         updateKernel.withPointer(localMeanMap.data());
-         updateKernel.withLong(localMeanMap.step());
-         updateKernel.withPointer(localVarianceMap.data());
-         updateKernel.withLong(localVarianceMap.step());
-         updateKernel.withPointer(localMotionVarianceMap.data());
-         updateKernel.withLong(localMotionVarianceMap.step());
-         updateKernel.withPointer(localSampleCountMap.data());
-         updateKernel.withLong(localSampleCountMap.step());
+         updateKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
+         updateKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+         updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+         updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
+         updateKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          updateKernel.withPointer(parametersDevicePointer);
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
@@ -317,7 +308,6 @@ public class RapidHeightMapExtractor
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
-         registerKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
@@ -502,7 +492,6 @@ public class RapidHeightMapExtractor
       localMeanMap.close();
       localVarianceMap.close();
       localMotionVarianceMap.close();
-      localSampleCountMap.close();
 
       globalMeanMap.close();
       globalVarianceMap.close();

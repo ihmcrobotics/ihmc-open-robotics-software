@@ -107,17 +107,17 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCa
 extern "C"
 extern "C"
 __global__ void heightMapUpdateKernel(
-    unsigned short *__restrict__ depthImage, size_t pitchDepth,
+    const unsigned short *__restrict__ depthImage, size_t pitchDepth,
     float *__restrict__ previousGlobalHeightMap, size_t pitchGlobal,
     float *__restrict__ localMeanMap, size_t pitchLocalMean,
     float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
     float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
-    unsigned short *__restrict__ localSampleCountMap, size_t pitchLocalSampleCount,
     const float *__restrict__ params,
     const float *__restrict__ sensorToZUpFrameTf,
     const float *__restrict__ zUpToSensorFrameTf,
     const float *__restrict__ zUpCameraToWorldAlignedGround,
-    float linearMotionMagnitude, float angularMotionMagnitude,
+    const float linearMotionMagnitude,
+    const float angularMotionMagnitude,
     float resetOffset)
 {
     // Thread indices
@@ -205,21 +205,32 @@ __global__ void heightMapUpdateKernel(
     float motionVarianceF = distance * varPerMeter + linearMotionMagnitude * varPerTranslationSpeed +
                             angularMotionMagnitude * distance * varPerRotationSpeed;
 
+    int searchWindowHeightHalf = (int)(searchWindowHeight * 0.5f);
+    int searchWindowWidthHalf = (int)(searchWindowWidth * 0.5f);
+
     // Search depth image
-    for (int pitchOffset = -searchWindowHeight / 2; pitchOffset <= searchWindowHeight / 2; pitchOffset += searchSkip)
+    for (int pitchOffset = -searchWindowHeightHalf; pitchOffset <= searchWindowHeightHalf; pitchOffset += searchSkip)
     {
         int pitchIdx = projectedPoint.y + pitchOffset;
-        if (pitchIdx < 0 || pitchIdx >= depthHeight) continue;
 
+        //  Exit the loop early if we can, optimize for performance
+        if (pitchIdx < 0 || pitchIdx >= depthHeight)
+            continue;
+
+        // This is created outside the inner loop because its cheaper to only create once per loop
         unsigned short *rowPtr = (unsigned short *)((char *)depthImage + pitchIdx * pitchDepth);
 
-        for (int yawOffset = -searchWindowWidth / 2; yawOffset <= searchWindowWidth / 2; yawOffset += searchSkip)
+        for (int yawOffset = -searchWindowWidthHalf; yawOffset <= searchWindowWidthHalf; yawOffset += searchSkip)
         {
             int yawIdx = projectedPoint.x + yawOffset;
-            if (yawIdx < 0 || yawIdx >= depthWidth) continue;
+
+            // Again, exit the loop early if we can
+            if (yawIdx < 0 || yawIdx >= depthWidth)
+                continue;
 
             float depth = rowPtr[yawIdx] * 0.001f; // scale to meters
-            if (depth < 0.5f) continue;
+            if (depth < 0.5f)
+                continue;
 
             float3 queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
             float3 queryPointInZUp = transformPoint3D(queryPointInSensor, sensorToZUpFrameTf);
@@ -237,18 +248,17 @@ __global__ void heightMapUpdateKernel(
     }
 
     float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
-    if (count == 0) meanZ = 0.0f;
+    if (count == 0)
+        meanZ = 0.0f;
 
     // Write results
     float *meanHeight = (float *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
     float *variance = (float *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
     float *motionVariance = (float *)((char *)localMotionVarianceMap + xIndex * pitchLocalMotionVariance) + yIndex;
-    unsigned short *numberOfSamples = (unsigned short *)((char *)localSampleCountMap + xIndex * pitchLocalSampleCount) + yIndex;
 
     *meanHeight = meanZ;
     *variance = currentVariance;
     *motionVariance = motionVarianceF;
-    *numberOfSamples = count;
 }
 
 extern "C"
@@ -298,7 +308,6 @@ extern "C"
 __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLocalMean,
                                             float *localVarianceMap, size_t pitchLocalVariance,
                                             float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
-                                            unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
                                             float *globalMeanMap, size_t pitchGlobalMean,
                                             float *globalVarianceMap, size_t pitchGlobalVariance,
                                             float *zUpCameraToWorldAlignedGround,

@@ -174,7 +174,7 @@ public class CUDAKernel implements AutoCloseable
     */
    private class CUDAKernelTimings
    {
-      private static final int MAX_ENTRIES = 250;
+      private static final int MAX_ENTRIES = 1000;
       private final LinkedList<Float> executionTimes = new LinkedList<>();
       private final float[] milliseconds = new float[1];
 
