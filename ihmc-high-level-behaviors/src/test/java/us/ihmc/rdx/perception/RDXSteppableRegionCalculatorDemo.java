@@ -1,149 +1,140 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.heightMap.RemoteHeightMapUpdater;
-import us.ihmc.perception.steppableRegions.RemoteSteppableRegionsUpdater;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.footstepPlanning.SnappingTerrainManager;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsManager;
+import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.perception.ROS2ImageSensors;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
-import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
+import us.ihmc.rdx.simulation.sensors.RDXSimulatedImageSensor;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
-import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 public class RDXSteppableRegionCalculatorDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private RDXHighLevelDepthSensorSimulator ousterLidarSimulator;
-   private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
-   private RDXPose3DGizmo ousterPoseGizmo = new RDXPose3DGizmo();
-   private RDXEnvironmentBuilder environmentBuilder;
-
-   private final RemoteHeightMapUpdater heightMap;
-   private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
-   private final RDXRemoteHeightMapPanel heightMapUI;
-   private final RDXSteppableRegionsPanel steppableRegionsUI;
-   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
+   private final ROS2Node ros2Node;
+   private final BlockingQueue<RawImage> rawImageCollection;
+   private final RapidHeightMapManager rapidHeightMapManager;
+   private final RDXSimulatedImageSensor zedImageSensor;
+   private final SnappingTerrainManager snappingTerrainManager;
+   private final SteppableRegionsManager steppableRegionsManager;
 
    public RDXSteppableRegionCalculatorDemo()
    {
-      RealtimeROS2Node realtimeRos2Node = new ROS2NodeBuilder().buildRealtime("simulation_ui_realtime");
-      ROS2Node ros2Node = new ROS2NodeBuilder().build("simulation_ui_realtime");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      ros2Node = new ROS2NodeBuilder().build("steppable_regions_demo");
 
-      heightMap = new RemoteHeightMapUpdater("", ReferenceFrame::getWorldFrame, realtimeRos2Node);
-      heightMap.getParameters().setMaxZ(1.5);
+      // World frame reference
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      heightMapUI = new RDXRemoteHeightMapPanel(ros2Helper);
+      // Experimental camera frame: +1m forward (x), +1m up (z)
+      ReferenceFrame experimentalCameraFrame = new ReferenceFrame("experimentalCameraFrame", worldFrame, false, true)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.setIdentity();
+            transformToParent.getTranslation().set(1.0, 0.0, 1.0);
+         }
+      };
 
-      SteppableRegionCalculatorParametersReadOnly defaultSteppableParameters = new SteppableRegionCalculatorParameters();
-      steppableRegionsUpdater = new RemoteSteppableRegionsUpdater(ros2Node, defaultSteppableParameters);
-      steppableRegionsUpdater.start();
-      steppableRegionsUI = new RDXSteppableRegionsPanel(ros2Helper, defaultSteppableParameters);
+      // Height map center: same x/y as camera, z=0
+      ReferenceFrame heightMapCenter = new ReferenceFrame("heightMapCenter", worldFrame, false, true)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.setIdentity();
+            transformToParent.getTranslation().set(1.0, 0.0, 0.0);
+         }
+      };
 
-      baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
+      // Left foot frame: same x/y as camera, z=0, +0.12m in y
+      ReferenceFrame leftFootFrame = new ReferenceFrame("leftFootFrame", worldFrame, false, true)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.setIdentity();
+            transformToParent.getTranslation().set(1.0, 0.12, 0.0);
+         }
+      };
 
-      // Configure the height map visualizer
-      perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
+      // Right foot frame: same x/y as camera, z=0, -0.12m in y
+      ReferenceFrame rightFootFrame = new ReferenceFrame("rightFootFrame", worldFrame, false, true)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.setIdentity();
+            transformToParent.getTranslation().set(1.0, -0.12, 0.0);
+         }
+      };
 
-      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map", new HeightMapParameters());
-      heightMapVisualizer.setActive(true);
-      RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
-      steppableRegionsVisualizer.setActive(true);
+      // Important: Update transforms after creation
+      experimentalCameraFrame.update();
+      heightMapCenter.update();
+      leftFootFrame.update();
+      rightFootFrame.update();
+
+      ROS2ImageSensors ros2ImageSensors = new ROS2ImageSensors(ros2Node);
+      zedImageSensor = RDXSimulatedSensorFactory.createZED2iImageSensor();
+      ros2ImageSensors.addZEDSensor(zedImageSensor, experimentalCameraFrame);
+      rawImageCollection = new LinkedBlockingQueue<>();
+      ros2ImageSensors.registerImageQueueForZED(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
+
+      HeightMapParameters heightMapParameters = new HeightMapParameters();
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, "what");
+      rapidHeightMapManager = new RapidHeightMapManager(ros2Node,
+                                                        leftFootFrame,
+                                                        rightFootFrame,
+                                                        heightMapCenter,
+                                                        controllerFootstepQueueMonitor,
+                                                        heightMapParameters);
+
+      snappingTerrainManager = new SnappingTerrainManager(ros2Node, heightMapParameters);
+      steppableRegionsManager = new SteppableRegionsManager(ros2Node);
+
+      ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("STEPPABLE_REGIONS_UPDATE").build();
+      ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, threadFactory);
+      scheduler.scheduleAtFixedRate(this::updateAlgorithms, 500, 100, TimeUnit.MILLISECONDS);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-            heightMapUI.create();
-            steppableRegionsUI.create();
-            perceptionVisualizerPanel.create(baseUI);
             baseUI.create();
+            baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(3.0, 1.0, 2.5);
 
-            environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
-            environmentBuilder.create();
-            baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("HarderTerrain.json");
-
-            heightMapVisualizer.create();
-            steppableRegionsVisualizer.create();
-            //            baseUI.getImGuiPanelManager().addPanel(heightMapVisualizer.getPanel());
-            perceptionVisualizerPanel.addVisualizer(heightMapVisualizer);
-            perceptionVisualizerPanel.addVisualizer(steppableRegionsVisualizer);
-
-            steppableRegionsUI.getEnabled().set(true);
-
-            heightMapVisualizer.setupForImageMessage(ros2Helper);
-            ros2Node.createSubscription2(PerceptionAPI.HEIGHT_MAP_OUTPUT, message ->
-            {
-               heightMapUI.acceptHeightMapMessage(message);
-
-               steppableRegionsUpdater.submitLatestHeightMapMessage(message);
-            });
-
-            steppableRegionsVisualizer.setUpForNetworking(ros2Node);
-            steppableRegionsUI.setUpForNetworking(ros2Node);
-
-            robotInteractableReferenceFrame = new RDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
-            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 1.25, 1.0);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-            ousterPoseGizmo = new RDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            ousterPoseGizmo.create(baseUI.getPrimary3DPanel());
-            ousterPoseGizmo.setResizeAutomatically(false);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(ousterPoseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ousterPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(ousterPoseGizmo, RDXSceneLevel.VIRTUAL);
-            ousterPoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
-
-            ousterLidarSimulator = RDXSimulatedSensorFactory.createOusterLidar(ousterPoseGizmo.getGizmoFrame(), () -> 0L);
-            ousterLidarSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN);
-            ousterLidarSimulator.setSensorEnabled(true);
-            ousterLidarSimulator.setRenderPointCloudDirectly(true);
-            ousterLidarSimulator.setPublishPointCloudROS2(true);
-            ousterLidarSimulator.setDebugCoordinateFrame(false);
-
-            RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
-                                                                                                     ros2Node,
-                                                                                                     PerceptionAPI.OUSTER_LIDAR_SCAN);
-            perceptionVisualizerPanel.addVisualizer(ousterPointCloudVisualizer);
-
-            baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
-            baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
-
-            baseUI.getImGuiPanelManager().addPanel(steppableRegionsUI.getBasePanel());
-
-            realtimeRos2Node.spin();
-            heightMap.start();
+            zedImageSensor.create(baseUI.getPrimaryScene());
+            zedImageSensor.run(true);
          }
 
          @Override
          public void render()
          {
-            ousterLidarSimulator.render(baseUI.getPrimaryScene());
-
-            heightMap.update();
-            heightMapVisualizer.update();
-            steppableRegionsVisualizer.update();
-
-            perceptionVisualizerPanel.update();
-            heightMapUI.update();
-            steppableRegionsUI.update();
+            zedImageSensor.render();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -152,22 +143,40 @@ public class RDXSteppableRegionCalculatorDemo
          @Override
          public void dispose()
          {
-            baseUI.dispose();
-            environmentBuilder.destroy();
-            realtimeRos2Node.destroy();
+            zedImageSensor.close();
+            rapidHeightMapManager.destroy();
+            snappingTerrainManager.close();
+            steppableRegionsManager.destroy();
             ros2Node.destroy();
-            perceptionVisualizerPanel.destroy();
-            heightMapVisualizer.destroy();
-            heightMapUI.destroy();
-            steppableRegionsUpdater.destroy();
-            steppableRegionsUI.destroy();
-            ousterLidarSimulator.dispose();
-
-            super.dispose();
+            baseUI.dispose();
          }
       });
+   }
 
-      Runtime.getRuntime().addShutdownHook(new Thread(baseUI::dispose));
+   public void updateAlgorithms()
+   {
+      try
+      {
+         RawImage depthImage = rawImageCollection.take();
+
+         RigidBodyTransformReadOnly transformToWorld = depthImage.getTransformToWorld();
+         ReferenceFrame cameraFrameInWorld = new FixedReferenceFrame("FrameInWorld", ReferenceFrame.getWorldFrame(), transformToWorld);
+         ZUpFrame cameraZUpFrameInWorld = new ZUpFrame(cameraFrameInWorld, "ZUpFrameInWorld");
+         // Need to update this due to how its implemented, other the transform to world will be all zeros
+         cameraZUpFrameInWorld.update();
+
+         GpuMat latestDepthImage = depthImage.getGpuImageMat();
+         CameraIntrinsics depthIntrinsicsCopy = depthImage.getIntrinsicsCopy();
+         rapidHeightMapManager.updateAndPublish(latestDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+         snappingTerrainManager.updateAndPublish(rapidHeightMapManager.getLatestHeightMapData());
+
+         // This is what we are trying to test, the rest is just to get here...
+         steppableRegionsManager.update(snappingTerrainManager.getTerrainMapData());
+      }
+      catch (InterruptedException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    public static void main(String[] args)

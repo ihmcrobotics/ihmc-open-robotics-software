@@ -277,22 +277,7 @@ public class RDXVRManager
       {
          if (vrEnabled.get())
          {
-            RDXBaseUI.pushNotification("Enabling VR...");
-
-            ThreadTools.startAThread(() ->
-            {
-               ThreadTools.sleep(5000);
-
-               if (isVRReady())
-               {
-                  RDXBaseUI.pushNotification("VR enabled");
-               }
-               else
-               {
-                  RDXBaseUI.pushNotification("Unable to enable VR");
-                  vrEnabled.set(false);
-               }
-            }, getClass().getName() + "VREnableMonitor");
+            enableVR();
          }
          else
          {
@@ -385,6 +370,27 @@ public class RDXVRManager
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);
       }
+   }
+
+   public void enableVR()
+   {
+      vrEnabled.set(true);
+      RDXBaseUI.pushNotification("Enabling VR...");
+
+      ThreadTools.startAThread(() ->
+      {
+          ThreadTools.sleep(5000);
+
+          if (isVRReady())
+          {
+             RDXBaseUI.pushNotification("VR enabled");
+          }
+          else
+          {
+             RDXBaseUI.pushNotification("Unable to enable VR");
+             vrEnabled.set(false);
+          }
+      }, getClass().getName() + "VREnableMonitor");
    }
 
    public RDXVRContext getContext()

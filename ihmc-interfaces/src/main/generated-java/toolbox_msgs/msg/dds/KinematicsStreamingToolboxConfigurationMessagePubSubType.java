@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "12c19c5d8e16609b02d593cfb2510fa58c63822608160d642a0f31a98d898293";
+   		return "e5154b523273ce3b47eb4ed481338c8b78dbf37c56a0501d23b47120c70a2b8e";
    }
    
    @Override
@@ -53,6 +53,12 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       int initial_alignment = current_alignment;
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -128,6 +134,15 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -155,6 +170,12 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       cdr.write_type_7(data.getEnableLeftArmJointspace());
 
       cdr.write_type_7(data.getEnableRightArmJointspace());
+
+      cdr.write_type_7(data.getEnableSpineJointspace());
+
+      cdr.write_type_7(data.getEnableLeftLegJointspace());
+
+      cdr.write_type_7(data.getEnableRightLegJointspace());
 
       cdr.write_type_7(data.getEnableNeckJointspace());
 
@@ -190,6 +211,12 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       	
       data.setEnableRightArmJointspace(cdr.read_type_7());
       	
+      data.setEnableSpineJointspace(cdr.read_type_7());
+      	
+      data.setEnableLeftLegJointspace(cdr.read_type_7());
+      	
+      data.setEnableRightLegJointspace(cdr.read_type_7());
+      	
       data.setEnableNeckJointspace(cdr.read_type_7());
       	
       data.setEnableLeftHandTaskspace(cdr.read_type_7());
@@ -221,6 +248,9 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       ser.write_type_7("lock_chest", data.getLockChest());
       ser.write_type_7("enable_left_arm_jointspace", data.getEnableLeftArmJointspace());
       ser.write_type_7("enable_right_arm_jointspace", data.getEnableRightArmJointspace());
+      ser.write_type_7("enable_spine_jointspace", data.getEnableSpineJointspace());
+      ser.write_type_7("enable_left_leg_jointspace", data.getEnableLeftLegJointspace());
+      ser.write_type_7("enable_right_leg_jointspace", data.getEnableRightLegJointspace());
       ser.write_type_7("enable_neck_jointspace", data.getEnableNeckJointspace());
       ser.write_type_7("enable_left_hand_taskspace", data.getEnableLeftHandTaskspace());
       ser.write_type_7("enable_right_hand_taskspace", data.getEnableRightHandTaskspace());
@@ -241,6 +271,9 @@ public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements
       data.setLockChest(ser.read_type_7("lock_chest"));
       data.setEnableLeftArmJointspace(ser.read_type_7("enable_left_arm_jointspace"));
       data.setEnableRightArmJointspace(ser.read_type_7("enable_right_arm_jointspace"));
+      data.setEnableSpineJointspace(ser.read_type_7("enable_spine_jointspace"));
+      data.setEnableLeftLegJointspace(ser.read_type_7("enable_left_leg_jointspace"));
+      data.setEnableRightLegJointspace(ser.read_type_7("enable_right_leg_jointspace"));
       data.setEnableNeckJointspace(ser.read_type_7("enable_neck_jointspace"));
       data.setEnableLeftHandTaskspace(ser.read_type_7("enable_left_hand_taskspace"));
       data.setEnableRightHandTaskspace(ser.read_type_7("enable_right_hand_taskspace"));

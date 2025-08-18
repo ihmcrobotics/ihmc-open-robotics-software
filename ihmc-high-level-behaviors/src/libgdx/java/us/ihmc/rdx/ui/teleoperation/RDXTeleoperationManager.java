@@ -16,8 +16,11 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -120,6 +123,13 @@ public class RDXTeleoperationManager extends RDXPanel
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
+
+   /** For post-processing WBMPC commands */
+   private final ImBoolean CoMDirectControlEnabled = new ImBoolean(false);
+   private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
+   private final FramePoint3D tempDesiredPelvisPosition = new FramePoint3D();
+   private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
+   private static final double HEIGHT_TOLERANCE = 0.01;
 
    /**
     * For use without interactables available. May crash if a YoVariableClient is needed.
@@ -257,9 +267,10 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                      RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
-                      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                        interactablePelvis.getPose()));
+                        if (CoMDirectControlEnabled.get())
+                           processCoMDirectCommand();
+                        else
+                           processPelvis6DCommand();
                      }
                   });
                   allInteractableRobotLinks.add(interactablePelvis);
@@ -339,7 +350,7 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
-
+         CoMDirectControlEnabled.set(false);
          demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
          addChild(demoPoses);
       }
@@ -471,6 +482,58 @@ public class RDXTeleoperationManager extends RDXPanel
       }
    }
 
+   /**
+    * Function that routes the corresponding height displacement as CoM Trajectory Command, and the orientation
+    * as a Pelvis Trajectory Command
+    * @comment: For now, it can only process z displacements, it will be easy to extend it's funcionality for
+    *  displacements in the other directions
+    * @comment: Investigate which cases causes it to freak out
+    */
+   private void processCoMDirectCommand()
+   {
+      FramePose3DReadOnly desiredOrientation = interactablePelvis.getPose();
+
+      // Get all positions in world frame
+      tempCurrentCoMPosition.setToZero(syncedRobot.getReferenceFrames().getCenterOfMassFrame());
+      tempCurrentCoMPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
+
+      tempDesiredPelvisPosition.setIncludingFrame(desiredOrientation.getPosition());
+      tempDesiredPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
+
+      tempCurrentPelvisPosition.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
+      tempCurrentPelvisPosition.changeFrame(syncedRobot.getReferenceFrames().getWorldFrame());
+
+      // Calculate desired CoM height maintaining current offset
+      double currentComToPelvisOffset = tempCurrentCoMPosition.getZ() - tempCurrentPelvisPosition.getZ();
+      double desiredCoMHeight = tempDesiredPelvisPosition.getZ() + currentComToPelvisOffset;
+      double deltaZ = Math.abs(desiredCoMHeight - tempCurrentCoMPosition.getZ());
+
+      if (deltaZ > HEIGHT_TOLERANCE)
+      {
+         // Send center of mass height trajectory
+         RDXBaseUI.pushNotification("Commanding CoM height trajectory...");
+         ros2Helper.publishToController(HumanoidMessageTools.createCenterOfMassTrajectoryMessage(
+               teleoperationParameters.getTrajectoryTime(),
+               new Point3D(tempCurrentCoMPosition.getX(), tempCurrentCoMPosition.getY(), desiredCoMHeight)));
+      }
+      else
+      {
+         // Send orientation-only trajectory for other movements
+         RDXBaseUI.pushNotification("Commanding pelvis trajectory...");
+         ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
+               teleoperationParameters.getTrajectoryTime(),
+               desiredOrientation));
+      }
+   }
+
+   private void processPelvis6DCommand()
+   {
+      RDXBaseUI.pushNotification("Commanding pelvis  trajectory...");
+      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(
+            teleoperationParameters.getTrajectoryTime(),
+            interactablePelvis.getPose()));
+   }
+
    private void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
@@ -540,6 +603,8 @@ public class RDXTeleoperationManager extends RDXPanel
       {
          ImGui.checkbox("Interactables Enabled", interactablesEnabled);
       }
+
+      ImGui.checkbox("CoM Direct Commands Enabled", CoMDirectControlEnabled);
 
       if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
       {

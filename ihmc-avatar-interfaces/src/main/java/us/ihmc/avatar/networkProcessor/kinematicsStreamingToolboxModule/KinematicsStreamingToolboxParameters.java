@@ -7,15 +7,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.output.KSTFBOutputProcessor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import java.util.HashMap;
@@ -73,9 +72,14 @@ public class KinematicsStreamingToolboxParameters
     */
    protected double centerOfMassSafeMargin;
    /**
+    * Center of mass offset with respect to center of support region
+    */
+   protected final Vector2D centerOfMassOffset = new Vector2D();
+   /**
     * Weight used to hold the center of mass in place.
     */
    protected double centerOfMassHoldWeight;
+   protected double centerOfMassTrackingWeight;
    /**
     * Period at which the kinematics solution is published to the controller.
     * The faster, the better, but it also increases the communication load.
@@ -283,7 +287,7 @@ public class KinematicsStreamingToolboxParameters
    protected double solverPrivilegedDefaultWeight;
    protected double solverPrivilegedDefaultGain;
 
-   private final List<String> inactiveJoints = new ArrayList<>();
+   protected final List<String> inactiveJoints = new ArrayList<>();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -294,18 +298,13 @@ public class KinematicsStreamingToolboxParameters
 
    public void setDefault()
    {
-      setDefault(false);
-   }
-
-   public void setDefault(boolean usingRealtimePlugin)
-   {
       clockType = ClockType.CPU_CLOCK;
       toolboxUpdatePeriod = 0.003;
       timeThresholdForSleeping = 3.0;
 
       useStreamingPublisher = true;
       publishingPeriod = 0.006;
-      streamIntegrationDuration = usingRealtimePlugin ? 2.0 * publishingPeriod : 0.1;
+      streamIntegrationDuration = 2.0 * publishingPeriod;
 
       holdChestAngularWeight.set(1.0, 1.0, 0.5);
       holdPelvisLinearWeight.set(10.0, 10.0, 20.0);
@@ -313,15 +312,16 @@ public class KinematicsStreamingToolboxParameters
       holdArmWeight = 10.0;
       holdNeckWeight = 10.0;
 
-      centerOfMassSafeMargin = 0.05;
+      centerOfMassSafeMargin = 0.01;
       centerOfMassHoldWeight = 0.001;
+      centerOfMassTrackingWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
 
       lockPelvisWeight = 1000.0;
       lockChestWeight = 1000.0;
 
       defaultLinearWeight.set(20.0, 20.0, 20.0);
-      defaultAngularWeight.set(1.0, 1.0, 1.0); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
+      defaultAngularWeight.set(2.5, 2.5, 2.5);
       defaultPelvisLinearWeight.set(defaultLinearWeight);
       defaultPelvisAngularWeight.set(defaultAngularWeight);
       defaultChestLinearWeight.set(defaultLinearWeight);
@@ -420,6 +420,11 @@ public class KinematicsStreamingToolboxParameters
    public double getCenterOfMassHoldWeight()
    {
       return centerOfMassHoldWeight;
+   }
+
+   public double getCenterOfMassTrackingWeight()
+   {
+      return centerOfMassTrackingWeight;
    }
 
    public double getPublishingSolutionPeriod()
@@ -730,6 +735,16 @@ public class KinematicsStreamingToolboxParameters
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
    {
       this.centerOfMassSafeMargin = centerOfMassSafeMargin;
+   }
+
+   public void setCenterOfMassOffset(Vector2D offset)
+   {
+      this.centerOfMassOffset.set(offset);
+   }
+
+   public Vector2D getCenterOfMassOffset()
+   {
+      return centerOfMassOffset;
    }
 
    public void setCenterOfMassHoldWeight(double centerOfMassHoldWeight)
@@ -1128,6 +1143,22 @@ public class KinematicsStreamingToolboxParameters
          if (jointCustomPositionUpperLimits == null)
             jointCustomPositionUpperLimits = new HashMap<>();
          jointCustomPositionUpperLimits.put(jointName, -tolerance);
+      }
+   }
+
+   public void setJointLimit(String jointName, boolean isUpperLimit, double value)
+   {
+      if (isUpperLimit)
+      {
+         if (jointCustomPositionUpperLimits == null)
+            jointCustomPositionUpperLimits = new HashMap<>();
+         jointCustomPositionUpperLimits.put(jointName, value);
+      }
+      else
+      {
+         if (jointCustomPositionLowerLimits == null)
+            jointCustomPositionLowerLimits = new HashMap<>();
+         jointCustomPositionLowerLimits.put(jointName, value);
       }
    }
 

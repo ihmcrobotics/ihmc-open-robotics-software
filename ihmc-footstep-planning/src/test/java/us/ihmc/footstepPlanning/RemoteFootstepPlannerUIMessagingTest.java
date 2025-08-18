@@ -218,7 +218,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
       HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
       int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startLeftFootPose);
@@ -262,7 +262,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(plannerRequestId, packet.getPlannerRequestId(), epsilon, "Planner Request Ids aren't equal.");
       assertEquals(horizonLength, packet.getHorizonLength(), epsilon, "Planner horizon lengths aren't equal.");
 
-      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessage(packet.getHeightMapMessage()));
+      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessageToHeightMapData(packet.getHeightMapMessage()));
    }
 
    private void runPlannerRequestToUI()
@@ -586,8 +586,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    private static void checkHeightMapDataAreEqual(HeightMapData dataA, HeightMapData dataB)
    {
       assertEquals(dataA.getCenterIndex(), dataB.getCenterIndex());
-      assertEquals(dataA.getGridResolutionXY(), dataB.getGridResolutionXY(), epsilon);
-      assertEquals(dataA.getGridSizeXY(), dataB.getGridSizeXY(), epsilon);
+      assertEquals(dataA.getCellSize(), dataB.getCellSize(), epsilon);
+      assertEquals(dataA.getMapSize(), dataB.getMapSize(), epsilon);
       EuclidCoreTestTools.assertEquals(dataA.getGridCenter(), dataB.getGridCenter(), epsilon);
 
       int cellsPerSide = 2 * dataA.getCenterIndex() + 1;

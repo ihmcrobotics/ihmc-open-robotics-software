@@ -15,7 +15,7 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2bc0b69b27903f8c287db6257198a34daf6af535f33de7ea2a0ff6e140f4aad3";
+   		return "9a1f68365a5dc863ef5c0e75dd5477a0a58065d487755cd90bdd0d5cfd117e3f";
    }
    
    @Override
@@ -65,6 +65,18 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ihmc_common_msgs.msg.dds.SE3StreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -137,6 +149,21 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getCdrSerializedSize(data.getSpineStreamingMessage(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getCdrSerializedSize(data.getLeftLegStreamingMessage(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.getCdrSerializedSize(data.getRightLegStreamingMessage(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType.getCdrSerializedSize(data.getChestStreamingMessage(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -181,6 +208,15 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       cdr.write_type_7(data.getHasRightArmStreamingMessage());
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.write(data.getRightArmStreamingMessage(), cdr);
+      cdr.write_type_7(data.getHasSpineStreamingMessage());
+
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.write(data.getSpineStreamingMessage(), cdr);
+      cdr.write_type_7(data.getHasLeftLegStreamingMessage());
+
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.write(data.getLeftLegStreamingMessage(), cdr);
+      cdr.write_type_7(data.getHasRightLegStreamingMessage());
+
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.write(data.getRightLegStreamingMessage(), cdr);
       cdr.write_type_7(data.getHasChestStreamingMessage());
 
       ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType.write(data.getChestStreamingMessage(), cdr);
@@ -217,6 +253,15 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setHasRightArmStreamingMessage(cdr.read_type_7());
       	
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.read(data.getRightArmStreamingMessage(), cdr);	
+      data.setHasSpineStreamingMessage(cdr.read_type_7());
+      	
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.read(data.getSpineStreamingMessage(), cdr);	
+      data.setHasLeftLegStreamingMessage(cdr.read_type_7());
+      	
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.read(data.getLeftLegStreamingMessage(), cdr);	
+      data.setHasRightLegStreamingMessage(cdr.read_type_7());
+      	
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.read(data.getRightLegStreamingMessage(), cdr);	
       data.setHasChestStreamingMessage(cdr.read_type_7());
       	
       ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType.read(data.getChestStreamingMessage(), cdr);	
@@ -252,6 +297,15 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_7("has_right_arm_streaming_message", data.getHasRightArmStreamingMessage());
       ser.write_type_a("right_arm_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getRightArmStreamingMessage());
 
+      ser.write_type_7("has_spine_streaming_message", data.getHasSpineStreamingMessage());
+      ser.write_type_a("spine_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getSpineStreamingMessage());
+
+      ser.write_type_7("has_left_leg_streaming_message", data.getHasLeftLegStreamingMessage());
+      ser.write_type_a("left_leg_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getLeftLegStreamingMessage());
+
+      ser.write_type_7("has_right_leg_streaming_message", data.getHasRightLegStreamingMessage());
+      ser.write_type_a("right_leg_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getRightLegStreamingMessage());
+
       ser.write_type_7("has_chest_streaming_message", data.getHasChestStreamingMessage());
       ser.write_type_a("chest_streaming_message", new ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType(), data.getChestStreamingMessage());
 
@@ -284,6 +338,15 @@ public class WholeBodyStreamingMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setHasRightArmStreamingMessage(ser.read_type_7("has_right_arm_streaming_message"));
       ser.read_type_a("right_arm_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getRightArmStreamingMessage());
+
+      data.setHasSpineStreamingMessage(ser.read_type_7("has_spine_streaming_message"));
+      ser.read_type_a("spine_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getSpineStreamingMessage());
+
+      data.setHasLeftLegStreamingMessage(ser.read_type_7("has_left_leg_streaming_message"));
+      ser.read_type_a("left_leg_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getLeftLegStreamingMessage());
+
+      data.setHasRightLegStreamingMessage(ser.read_type_7("has_right_leg_streaming_message"));
+      ser.read_type_a("right_leg_streaming_message", new controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType(), data.getRightLegStreamingMessage());
 
       data.setHasChestStreamingMessage(ser.read_type_7("has_chest_streaming_message"));
       ser.read_type_a("chest_streaming_message", new ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType(), data.getChestStreamingMessage());

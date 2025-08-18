@@ -47,10 +47,10 @@ public class HeightMapRANSACNormalCalculator implements NormalProvider
 
    public void initialize(HeightMapData heightMapData)
    {
-      if (xRansacOffsets == null || !EuclidCoreTools.epsilonEquals(gridResolution, heightMapData.getGridResolutionXY(), 1e-3))
+      if (xRansacOffsets == null || !EuclidCoreTools.epsilonEquals(gridResolution, heightMapData.getCellSize(), 1e-3))
       {
-         gridResolution = heightMapData.getGridResolutionXY();
-         int maxOffset = (int) Math.round(maxRansacRadius / heightMapData.getGridResolutionXY());
+         gridResolution = heightMapData.getCellSize();
+         int maxOffset = (int) Math.round(maxRansacRadius / heightMapData.getCellSize());
 
          xRansacOffsets = new TIntArrayList();
          yRansacOffsets = new TIntArrayList();
@@ -61,7 +61,7 @@ public class HeightMapRANSACNormalCalculator implements NormalProvider
          {
             for (int yi = -maxOffset; yi <= maxOffset; yi++)
             {
-               double radius = heightMapData.getGridResolutionXY() * EuclidCoreTools.norm(xi, yi);
+               double radius = heightMapData.getCellSize() * EuclidCoreTools.norm(xi, yi);
                if (radius > minRansacRadius && radius < maxRansacRadius)
                {
                   xRansacOffsets.add(xi);
@@ -99,8 +99,8 @@ public class HeightMapRANSACNormalCalculator implements NormalProvider
       int maxConsensus = -1;
       samples.clear();
 
-      point.set(HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex),
-                HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex),
+      point.set(HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex),
+                HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex),
                 heightMapData.getHeightAt(xIndex, yIndex));
 
       for (int i = 0; i < iterations; i++)
@@ -143,11 +143,11 @@ public class HeightMapRANSACNormalCalculator implements NormalProvider
             break;
          }
 
-         point0.set(HeightMapTools.indexToCoordinate(xIndex0, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex),
-                    HeightMapTools.indexToCoordinate(yIndex0, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex),
+         point0.set(HeightMapTools.indexToCoordinate(xIndex0, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex),
+                    HeightMapTools.indexToCoordinate(yIndex0, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex),
                     heightMapData.getHeightAt(xIndex0, yIndex0));
-         point1.set(HeightMapTools.indexToCoordinate(xIndex1, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex),
-                    HeightMapTools.indexToCoordinate(yIndex1, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex),
+         point1.set(HeightMapTools.indexToCoordinate(xIndex1, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex),
+                    HeightMapTools.indexToCoordinate(yIndex1, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex),
                     heightMapData.getHeightAt(xIndex1, yIndex1));
 
          candidatePlane.set(point, point0, point1);
@@ -167,9 +167,9 @@ public class HeightMapRANSACNormalCalculator implements NormalProvider
                continue;
             }
 
-            if (candidatePlane.distance(HeightMapTools.indexToCoordinate(xj, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(),
+            if (candidatePlane.distance(HeightMapTools.indexToCoordinate(xj, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(),
                                                                          centerIndex),
-                                        HeightMapTools.indexToCoordinate(yj, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(),
+                                        HeightMapTools.indexToCoordinate(yj, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(),
                                                                          centerIndex),
                                         heightMapData.getHeightAt(xj, yj)) < distanceEpsilon)
             {

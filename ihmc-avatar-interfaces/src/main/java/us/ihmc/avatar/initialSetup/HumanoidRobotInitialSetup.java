@@ -297,4 +297,8 @@ public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloa
    {
       return rootJointLinearVelocityInWorld;
    }
+   public HumanoidJointNameMap getJointMap()
+   {
+      return jointMap;
+   }
 }

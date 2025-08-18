@@ -56,9 +56,9 @@ public class PlanarRegionToHeightMapConverterTest
          planarRegion.set(transformToWorld, polygons);
 
          // get the planar region as a height map
-         HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
-                                                                                                                                                PlanarRegionToHeightMapConverter.defaultResolution,
-                                                                                                                                                Double.NaN));
+         HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList,
+                                                                                                                                                               PlanarRegionToHeightMapConverter.defaultResolution,
+                                                                                                                                                               Double.NaN));
 
 
 
@@ -104,8 +104,8 @@ public class PlanarRegionToHeightMapConverterTest
       {
          for (int yIndex = 0; yIndex < heightMapData.getCellsPerAxis(); yIndex++)
          {
-            double x = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            double y = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+            double x = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
+            double y = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
             double height = heightMapData.getHeightAt(xIndex, yIndex);
 
             if (Double.isFinite(height))

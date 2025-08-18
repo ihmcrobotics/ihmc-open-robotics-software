@@ -48,6 +48,21 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    public boolean has_right_arm_streaming_message_;
    public controller_msgs.msg.dds.JointspaceStreamingMessage right_arm_streaming_message_;
    /**
+            * Information for the spine joints
+            */
+   public boolean has_spine_streaming_message_;
+   public controller_msgs.msg.dds.JointspaceStreamingMessage spine_streaming_message_;
+   /**
+            * Information for the left leg joints
+            */
+   public boolean has_left_leg_streaming_message_;
+   public controller_msgs.msg.dds.JointspaceStreamingMessage left_leg_streaming_message_;
+   /**
+            * Information for the right leg joints
+            */
+   public boolean has_right_leg_streaming_message_;
+   public controller_msgs.msg.dds.JointspaceStreamingMessage right_leg_streaming_message_;
+   /**
             * Information for the chest
             */
    public boolean has_chest_streaming_message_;
@@ -78,6 +93,9 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       right_hand_streaming_message_ = new ihmc_common_msgs.msg.dds.SE3StreamingMessage();
       left_arm_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
       right_arm_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
+      spine_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
+      left_leg_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
+      right_leg_streaming_message_ = new controller_msgs.msg.dds.JointspaceStreamingMessage();
       chest_streaming_message_ = new ihmc_common_msgs.msg.dds.SO3StreamingMessage();
       pelvis_streaming_message_ = new ihmc_common_msgs.msg.dds.SE3StreamingMessage();
       center_of_mass_trajectory_message_ = new ihmc_common_msgs.msg.dds.EuclideanStreamingMessage();
@@ -110,6 +128,15 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       has_right_arm_streaming_message_ = other.has_right_arm_streaming_message_;
 
       controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.right_arm_streaming_message_, right_arm_streaming_message_);
+      has_spine_streaming_message_ = other.has_spine_streaming_message_;
+
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.spine_streaming_message_, spine_streaming_message_);
+      has_left_leg_streaming_message_ = other.has_left_leg_streaming_message_;
+
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.left_leg_streaming_message_, left_leg_streaming_message_);
+      has_right_leg_streaming_message_ = other.has_right_leg_streaming_message_;
+
+      controller_msgs.msg.dds.JointspaceStreamingMessagePubSubType.staticCopy(other.right_leg_streaming_message_, right_leg_streaming_message_);
       has_chest_streaming_message_ = other.has_chest_streaming_message_;
 
       ihmc_common_msgs.msg.dds.SO3StreamingMessagePubSubType.staticCopy(other.chest_streaming_message_, chest_streaming_message_);
@@ -262,6 +289,69 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
    }
 
    /**
+            * Information for the spine joints
+            */
+   public void setHasSpineStreamingMessage(boolean has_spine_streaming_message)
+   {
+      has_spine_streaming_message_ = has_spine_streaming_message;
+   }
+   /**
+            * Information for the spine joints
+            */
+   public boolean getHasSpineStreamingMessage()
+   {
+      return has_spine_streaming_message_;
+   }
+
+
+   public controller_msgs.msg.dds.JointspaceStreamingMessage getSpineStreamingMessage()
+   {
+      return spine_streaming_message_;
+   }
+
+   /**
+            * Information for the left leg joints
+            */
+   public void setHasLeftLegStreamingMessage(boolean has_left_leg_streaming_message)
+   {
+      has_left_leg_streaming_message_ = has_left_leg_streaming_message;
+   }
+   /**
+            * Information for the left leg joints
+            */
+   public boolean getHasLeftLegStreamingMessage()
+   {
+      return has_left_leg_streaming_message_;
+   }
+
+
+   public controller_msgs.msg.dds.JointspaceStreamingMessage getLeftLegStreamingMessage()
+   {
+      return left_leg_streaming_message_;
+   }
+
+   /**
+            * Information for the right leg joints
+            */
+   public void setHasRightLegStreamingMessage(boolean has_right_leg_streaming_message)
+   {
+      has_right_leg_streaming_message_ = has_right_leg_streaming_message;
+   }
+   /**
+            * Information for the right leg joints
+            */
+   public boolean getHasRightLegStreamingMessage()
+   {
+      return has_right_leg_streaming_message_;
+   }
+
+
+   public controller_msgs.msg.dds.JointspaceStreamingMessage getRightLegStreamingMessage()
+   {
+      return right_leg_streaming_message_;
+   }
+
+   /**
             * Information for the chest
             */
    public void setHasChestStreamingMessage(boolean has_chest_streaming_message)
@@ -396,6 +486,15 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_right_arm_streaming_message_, other.has_right_arm_streaming_message_, epsilon)) return false;
 
       if (!this.right_arm_streaming_message_.epsilonEquals(other.right_arm_streaming_message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_spine_streaming_message_, other.has_spine_streaming_message_, epsilon)) return false;
+
+      if (!this.spine_streaming_message_.epsilonEquals(other.spine_streaming_message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_left_leg_streaming_message_, other.has_left_leg_streaming_message_, epsilon)) return false;
+
+      if (!this.left_leg_streaming_message_.epsilonEquals(other.left_leg_streaming_message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_right_leg_streaming_message_, other.has_right_leg_streaming_message_, epsilon)) return false;
+
+      if (!this.right_leg_streaming_message_.epsilonEquals(other.right_leg_streaming_message_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_chest_streaming_message_, other.has_chest_streaming_message_, epsilon)) return false;
 
       if (!this.chest_streaming_message_.epsilonEquals(other.chest_streaming_message_, epsilon)) return false;
@@ -441,6 +540,15 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       if(this.has_right_arm_streaming_message_ != otherMyClass.has_right_arm_streaming_message_) return false;
 
       if (!this.right_arm_streaming_message_.equals(otherMyClass.right_arm_streaming_message_)) return false;
+      if(this.has_spine_streaming_message_ != otherMyClass.has_spine_streaming_message_) return false;
+
+      if (!this.spine_streaming_message_.equals(otherMyClass.spine_streaming_message_)) return false;
+      if(this.has_left_leg_streaming_message_ != otherMyClass.has_left_leg_streaming_message_) return false;
+
+      if (!this.left_leg_streaming_message_.equals(otherMyClass.left_leg_streaming_message_)) return false;
+      if(this.has_right_leg_streaming_message_ != otherMyClass.has_right_leg_streaming_message_) return false;
+
+      if (!this.right_leg_streaming_message_.equals(otherMyClass.right_leg_streaming_message_)) return false;
       if(this.has_chest_streaming_message_ != otherMyClass.has_chest_streaming_message_) return false;
 
       if (!this.chest_streaming_message_.equals(otherMyClass.chest_streaming_message_)) return false;
@@ -487,6 +595,18 @@ public class WholeBodyStreamingMessage extends Packet<WholeBodyStreamingMessage>
       builder.append(this.has_right_arm_streaming_message_);      builder.append(", ");
       builder.append("right_arm_streaming_message=");
       builder.append(this.right_arm_streaming_message_);      builder.append(", ");
+      builder.append("has_spine_streaming_message=");
+      builder.append(this.has_spine_streaming_message_);      builder.append(", ");
+      builder.append("spine_streaming_message=");
+      builder.append(this.spine_streaming_message_);      builder.append(", ");
+      builder.append("has_left_leg_streaming_message=");
+      builder.append(this.has_left_leg_streaming_message_);      builder.append(", ");
+      builder.append("left_leg_streaming_message=");
+      builder.append(this.left_leg_streaming_message_);      builder.append(", ");
+      builder.append("has_right_leg_streaming_message=");
+      builder.append(this.has_right_leg_streaming_message_);      builder.append(", ");
+      builder.append("right_leg_streaming_message=");
+      builder.append(this.right_leg_streaming_message_);      builder.append(", ");
       builder.append("has_chest_streaming_message=");
       builder.append(this.has_chest_streaming_message_);      builder.append(", ");
       builder.append("chest_streaming_message=");

@@ -15,7 +15,7 @@ public class SteppableRegionMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "43161ab62bde03c9d65fb7fa546fcdc311f79ddb1768b8a5110c9a0cda5465ce";
+   		return "1d7846cc8b6d9b4f6da9add6a48ef6fd278a11c4c37f308bbe77b7fb317b8988";
    }
    
    @Override

@@ -15,7 +15,7 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "52c0176456fddf7cfb4a2175dee30067034bf657c7df03570daa77073acc6d6d";
+   		return "794e00e31ec4c049131447afba3b15ae0203adf2ce44665948dce992b0f393ba";
    }
    
    @Override
@@ -60,6 +60,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,6 +87,12 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +105,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_7(data.getRequestResetContext());
 
+      cdr.write_type_6(data.getCurrentDistance());
+
+      cdr.write_type_7(data.getMissingFrame());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ConditionNodeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -104,6 +118,10 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
       data.setCount(cdr.read_type_4());
       	
       data.setRequestResetContext(cdr.read_type_7());
+      	
+      data.setCurrentDistance(cdr.read_type_6());
+      	
+      data.setMissingFrame(cdr.read_type_7());
       	
 
    }
@@ -117,6 +135,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_4("count", data.getCount());
       ser.write_type_7("request_reset_context", data.getRequestResetContext());
+      ser.write_type_6("current_distance", data.getCurrentDistance());
+      ser.write_type_7("missing_frame", data.getMissingFrame());
    }
 
    @Override
@@ -128,6 +148,8 @@ public class ConditionNodeStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setCount(ser.read_type_4("count"));
       data.setRequestResetContext(ser.read_type_7("request_reset_context"));
+      data.setCurrentDistance(ser.read_type_6("current_distance"));
+      data.setMissingFrame(ser.read_type_7("missing_frame"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ConditionNodeStateMessage src, behavior_msgs.msg.dds.ConditionNodeStateMessage dest)

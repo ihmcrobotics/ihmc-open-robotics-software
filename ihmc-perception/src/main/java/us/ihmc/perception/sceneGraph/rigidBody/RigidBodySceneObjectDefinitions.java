@@ -43,10 +43,7 @@ public class RigidBodySceneObjectDefinitions
    public static final double CAN_OF_SOUP_HEIGHT = 0.082388;
    public static final String CAN_OF_SOUP_VISUAL_MODEL_FILE_PATH = "environmentObjects/canOfSoup/CanOfSoup.g3dj";
    public static final RigidBodyTransform CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(CAN_OF_SOUP_HEIGHT / 2.0);
-   }
+
    public static final double MARKER_TO_CAN_OF_SOUP_X_WORLD = 0.5;
    public static final double CAN_OF_SOUP_FROM_TABLE_EDGE = 0.03;
    public static final RigidBodyTransform MARKER_TO_CAN_OF_SOUP_TRANSFORM = new RigidBodyTransform();
@@ -101,58 +98,26 @@ public class RigidBodySceneObjectDefinitions
    public static final String BOOK_NAME = "Book";
    public static final String BOOK_VISUAL_MODEL_FILE_PATH = "environmentObjects/book/book.g3dj";
    public static final RigidBodyTransform BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
-   }
 
    public static final String CEREAL_NAME = "Cereal";
    public static final String CEREAL_VISUAL_MODEL_FILE_PATH = "environmentObjects/cereal/cereal.g3dj";
    public static final RigidBodyTransform CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
-      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.2);
-      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
-   }
 
    public static final String MUG_NAME = "Mug";
    public static final String MUG_VISUAL_MODEL_FILE_PATH = "environmentObjects/mug/mug.g3dj";
    public static final RigidBodyTransform MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, -90, -90);
-      MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.1);
-   }
 
    public static final String BIKE_NAME = "Bike";
    public static final String BIKE_VISUAL_MODEL_FILE_PATH = "environmentObjects/bike/bike.g3dj";
    public static final RigidBodyTransform BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-//      EuclidCoreMissingTools.setYawPitchRollDegrees(CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 90, 0);
-//      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.2);
-//      CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(-0.05);
-   }
 
    public static final String DRILL_NAME = "Drill";
    public static final String DRILL_VISUAL_MODEL_FILE_PATH = "environmentObjects/drill/drill.g3dj";
    public static final RigidBodyTransform DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 0, 90, -90);
-      DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.05);
-   }
 
    public static final String COUCH_NAME = "Couch";
    public static final String COUCH_VISUAL_MODEL_FILE_PATH = "environmentObjects/couch/Couch.g3dj";
    public static final RigidBodyTransform COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      EuclidCoreMissingTools.setYawPitchRollDegrees(COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getRotation(), 90, 0, 0);
-      COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-1);
-      COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(-0.5);
-   }
 
    public static final String TRASHCAN_NAME = "TrashCan";
    public static final String TRASHCAN_VISUAL_MODEL_FILE_PATH = "environmentObjects/trashCan/TrashCan.g3dj";
@@ -173,12 +138,6 @@ public class RigidBodySceneObjectDefinitions
    public static final String TABLE_NAME = "Table";
    public static final String TABLE_VISUAL_MODEL_FILE_PATH = "environmentObjects/table/Table.g3dj";
    public static final RigidBodyTransform TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
-   static
-   {
-      TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addX(-1.0);
-      TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.35);
-      TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addZ(0.85);
-   }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
@@ -217,7 +176,7 @@ public class RigidBodySceneObjectDefinitions
                                                 BOX_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                 sceneGraph.getCRDTInfo());
          LogTools.info("Adding {} to scene graph.", BOX_NAME);
-         modificationQueue.accept(new SceneGraphNodeAddition(box, parentNode));
+         modificationQueue.accept(new SceneGraphNodeAddition(box, parentNode, sceneGraph));
       }
    }
 
@@ -233,7 +192,7 @@ public class RigidBodySceneObjectDefinitions
                                                              CAN_OF_SOUP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                              sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", CAN_OF_SOUP_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode, sceneGraph));
    }
 
    /**
@@ -250,7 +209,7 @@ public class RigidBodySceneObjectDefinitions
                                                              DEBRIS_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                              sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", DEBRIS_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(canOfSoup, parentNode, sceneGraph));
    }
 
    public static void ensureShoeNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -264,7 +223,7 @@ public class RigidBodySceneObjectDefinitions
                                                         SHOE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                         sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", SHOE_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(shoe, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(shoe, parentNode, sceneGraph));
    }
 
    public static void ensureLaptopNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -278,7 +237,7 @@ public class RigidBodySceneObjectDefinitions
                                                           LAPTOP_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                           sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", LAPTOP_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(laptop, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(laptop, parentNode, sceneGraph));
    }
 
    public static void ensureBookNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -292,7 +251,7 @@ public class RigidBodySceneObjectDefinitions
                                                         BOOK_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                         sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", BOOK_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(book, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(book, parentNode, sceneGraph));
    }
 
    public static void ensureCerealNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -306,7 +265,7 @@ public class RigidBodySceneObjectDefinitions
                                                           CEREAL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                           sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", CEREAL_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(cereal, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(cereal, parentNode, sceneGraph));
    }
 
    public static void ensureMugNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -320,7 +279,7 @@ public class RigidBodySceneObjectDefinitions
                                                        MUG_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                        sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", MUG_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(mug, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(mug, parentNode, sceneGraph));
    }
 
    public static void ensureBikeNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -334,7 +293,7 @@ public class RigidBodySceneObjectDefinitions
                                                         BIKE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                         sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", BIKE_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(bike, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(bike, parentNode, sceneGraph));
    }
 
    public static void ensureDrillNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -348,7 +307,7 @@ public class RigidBodySceneObjectDefinitions
                                                          DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                          sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", DRILL_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(drill, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(drill, parentNode, sceneGraph));
    }
 
    public static void ensureCouchNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -362,7 +321,7 @@ public class RigidBodySceneObjectDefinitions
                                                          COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                          sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", COUCH_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(couch, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(couch, parentNode, sceneGraph));
    }
 
    public static void ensureTrashCanNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -376,7 +335,7 @@ public class RigidBodySceneObjectDefinitions
                                                             TRASHCAN_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                             sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", TRASHCAN_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(trashCan, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(trashCan, parentNode, sceneGraph));
    }
 
    public static void ensureChargeNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -390,7 +349,7 @@ public class RigidBodySceneObjectDefinitions
                                                           CHARGE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                           sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", CHARGE_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(charge, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(charge, parentNode, sceneGraph));
    }
 
    public static void ensurePersonNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -404,7 +363,7 @@ public class RigidBodySceneObjectDefinitions
                                                           PERSON_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                           sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", PERSON_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(person, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(person, parentNode, sceneGraph));
    }
 
    public static void ensureTableNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
@@ -418,20 +377,20 @@ public class RigidBodySceneObjectDefinitions
                                                          TABLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
                                                          sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", TABLE_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(table, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(table, parentNode, sceneGraph));
    }
 
    public static void ensureBarrierNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
    {
       SceneNode barrier = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                          BARRIER_NAME,
-                                                          sceneGraph.getIDToNodeMap(),
-                                                          parentNode.getID(),
-                                                          new RigidBodyTransform(),
-                                                          BARRIER_VISUAL_MODEL_FILE_PATH,
-                                                          BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                          sceneGraph.getCRDTInfo());
+                                                           BARRIER_NAME,
+                                                           sceneGraph.getIDToNodeMap(),
+                                                           parentNode.getID(),
+                                                           new RigidBodyTransform(),
+                                                           BARRIER_VISUAL_MODEL_FILE_PATH,
+                                                           BARRIER_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                           sceneGraph.getCRDTInfo());
       LogTools.info("Adding {} to scene graph.", BARRIER_NAME);
-      modificationQueue.accept(new SceneGraphNodeAddition(barrier, parentNode));
+      modificationQueue.accept(new SceneGraphNodeAddition(barrier, parentNode, sceneGraph));
    }
 }

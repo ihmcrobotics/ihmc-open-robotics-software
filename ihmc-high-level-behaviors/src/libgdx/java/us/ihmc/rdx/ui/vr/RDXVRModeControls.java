@@ -12,12 +12,17 @@ public class RDXVRModeControls
    private final RDXVRModeManager vrModeManager;
    private boolean wasVRReady = false;
    private final ImBoolean renderOnLeftHand = new ImBoolean(false);
+   private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
+   private final ImBoolean useStereoVision = new ImBoolean(false);
    private final RDXBaseUI baseUI;
 
    public RDXVRModeControls(RDXVRModeManager vrModeManager)
    {
       this.vrModeManager = vrModeManager;
       baseUI = RDXBaseUI.getInstance();
+
+      // Optionally accessible as a normal panel
+      baseUI.getImGuiPanelManager().addPanel(PANEL_NAME, this::render);
    }
 
    public void update()
@@ -40,50 +45,67 @@ public class RDXVRModeControls
    {
       ImGui.checkbox("Render on left hand", renderOnLeftHand);
 
-      ImGuiTools.separatorText("Trackers");
-      if (ImGui.button("Save roles"))
+      if (ImGui.collapsingHeader("Bindings"))
       {
-         baseUI.getVRManager().getContext().saveTrackerRolesToFile();
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Load roles"))
-      {
-         baseUI.getVRManager().getContext().loadTrackerRolesFromFile();
-      }
-
-      ImGuiTools.separatorText("Stereo vision");
-      vrModeManager.getStereoVision().renderControls();
-
-      ImGuiTools.separatorText("Mode");
-      vrModeManager.renderImGuiWidgets();
-
-      ImGuiTools.separatorText("Controls");
-      RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRModeManager.class.getSimpleName());
-      switch (vrModeManager.getMode())
-      {
-         case FOOTSTEP_PLACEMENT -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRFootstepPlacement.class.getSimpleName());
-         case WHOLE_BODY_IK_STREAMING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRKinematicsStreamingMode.class.getSimpleName());
-         case JOYSTICK_WALKING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXJoystickBasedStepping.class.getSimpleName());
-      }
-
-      // Render options for VR modes that have options
-      if (vrModeManager.getMode() == RDXVRMode.WHOLE_BODY_IK_STREAMING || vrModeManager.getMode() == RDXVRMode.JOYSTICK_WALKING)
-      {
-         ImGuiTools.separatorText(vrModeManager.getMode().getReadableName() + " options");
-
+         RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRModeManager.class.getSimpleName());
          switch (vrModeManager.getMode())
          {
-            case WHOLE_BODY_IK_STREAMING -> {
-               if (vrModeManager.getKinematicsStreamingMode() != null)
+            case FOOTSTEP_PLACEMENT -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRFootstepPlacement.class.getSimpleName());
+            case WHOLE_BODY_IK_STREAMING ->
+                  RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXVRWholeBodyKinematicStreaming.class.getSimpleName());
+            case JOYSTICK_WALKING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXJoystickBasedStepping.class.getSimpleName());
+         }
+      }
+
+      if (ImGui.collapsingHeader("Trackers"))
+      {
+         if (ImGui.button("Save roles"))
+         {
+            baseUI.getVRManager().getContext().saveTrackerRolesToFile();
+         }
+         ImGui.sameLine();
+         if (ImGui.button("Load roles"))
+         {
+            baseUI.getVRManager().getContext().loadTrackerRolesFromFile();
+         }
+      }
+
+      if (ImGui.collapsingHeader("Visual Feedback"))
+      {
+         ImGui.checkbox("Floating Video Panel", showFloatingVideoPanel);
+         if (showFloatingVideoPanel.get())
+         {
+            ImGui.checkbox("Stereo Enabled", useStereoVision);
+         }
+      }
+
+      if (ImGui.collapsingHeader("VR Mode"))
+      {
+         vrModeManager.renderImGuiWidgets();
+      }
+
+      if (ImGui.collapsingHeader("VR Mode Options"))
+      {
+         // Render options for VR modes that have options
+         if (vrModeManager.getMode() == RDXVRMode.WHOLE_BODY_IK_STREAMING || vrModeManager.getMode() == RDXVRMode.JOYSTICK_WALKING)
+         {
+            ImGuiTools.separatorText(vrModeManager.getMode().getReadableName() + " options");
+
+            switch (vrModeManager.getMode())
+            {
+               case WHOLE_BODY_IK_STREAMING ->
                {
-                  vrModeManager.getKinematicsStreamingMode().renderImGuiWidgets();
+                  if (vrModeManager.getKinematicsStreaming() != null)
+                  {
+                     vrModeManager.getKinematicsStreaming().renderImGuiWidgets();
+                  }
+                  else
+                  {
+                     ImGui.text("Kinematics streaming mode not available");
+                  }
                }
-               else
-               {
-                  ImGui.text("Kinematics streaming mode not available");
-               }
+               case JOYSTICK_WALKING -> vrModeManager.getJoystickBasedStepping().renderImGuiWidgets();
             }
-            case JOYSTICK_WALKING -> vrModeManager.getJoystickBasedStepping().renderImGuiWidgets();
          }
       }
    }
@@ -91,5 +113,15 @@ public class RDXVRModeControls
    public ImBoolean getRenderOnLeftHand()
    {
       return renderOnLeftHand;
+   }
+
+   public ImBoolean getShowFloatingVideoPanel()
+   {
+      return showFloatingVideoPanel;
+   }
+
+   public ImBoolean getUseStereoVision()
+   {
+      return useStereoVision;
    }
 }

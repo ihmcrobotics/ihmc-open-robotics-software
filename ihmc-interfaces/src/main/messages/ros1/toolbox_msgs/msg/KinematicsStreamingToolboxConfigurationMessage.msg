@@ -12,21 +12,36 @@ bool lock_pelvis
 # Default value is false.
 bool lock_chest
 
-# Whether the left arm should be controller in joint-space.
+# Whether the left arm should be controlled in joint-space.
 # This is compatible with the hand task-space control.
 # Default value is true.
 # Field default value True
 bool enable_left_arm_jointspace
 
-# Whether the right arm should be controller in joint-space.
+# Whether the right arm should be controlled in joint-space.
 # This is compatible with the hand task-space control.
 # Default value is true.
 # Field default value True
 bool enable_right_arm_jointspace
 
-# Whether the neck should be controller in joint-space.
+# Whether the spine should be controlled in joint-space.
+# This is useful when streaming position control directly to the robot.
+# Default value is false.
+bool enable_spine_jointspace
+
+# Whether the left leg should be controlled in joint-space.
+# This is useful when streaming position control directly to the robot.
+# Default value is false.
+bool enable_left_leg_jointspace
+
+# Whether the right leg should be controlled in joint-space.
+# This is useful when streaming position control directly to the robot.
+# Default value is false.
+bool enable_right_leg_jointspace
+
+# Whether the neck should be controlled in joint-space.
 # Default value is true.
-# Whether the neck should be controller in joint-space.
+# Whether the neck should be controlled in joint-space.
 # Field default value True
 bool enable_neck_jointspace
 

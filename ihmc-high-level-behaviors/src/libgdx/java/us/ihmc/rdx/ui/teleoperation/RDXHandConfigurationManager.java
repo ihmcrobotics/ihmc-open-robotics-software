@@ -73,30 +73,37 @@ public class RDXHandConfigurationManager
 
    public void publishHandCommand(RobotSide side, @Nullable SakeHandPreset handPreset, boolean calibrate, boolean reset)
    {
-      SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
-      sakeHandDesiredCommandMessage.setRobotSide(side.toByte());
-      SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
-
-      if (calibrate)
+      if (sakeHandStatus.size() == 2)
       {
-         sakeHandDesiredCommandMessage.setRequestCalibration(true);
-      }
-      else if (reset)
-      {
-         sakeHandDesiredCommandMessage.setRequestResetErrors(true);
-      }
-      else if (handPreset != null)
-      {
-         double handPositionLowerLimit = sakeHandStatus.get(side).getPositionLowerLimit();
-         double handPositionUpperLimit = sakeHandStatus.get(side).getPositionUpperLimit();
+         SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
+         sakeHandDesiredCommandMessage.setRobotSide(side.toByte());
+         SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
 
-         sakeHandDesiredCommandMessage.setGripperDesiredPosition(SakeHandParameters.handOpenAngleToPosition(handPreset.getHandOpenAngle(),
-                                                                                                            handPositionLowerLimit,
-                                                                                                            handPositionUpperLimit));
-         sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(handPreset.getFingertipGripForceLimit()));
-      }
+         if (calibrate)
+         {
+            sakeHandDesiredCommandMessage.setRequestCalibration(true);
+         }
+         else if (reset)
+         {
+            sakeHandDesiredCommandMessage.setRequestResetErrors(true);
+         }
+         else if (handPreset != null)
+         {
+            double handPositionLowerLimit = sakeHandStatus.get(side).getPositionLowerLimit();
+            double handPositionUpperLimit = sakeHandStatus.get(side).getPositionUpperLimit();
 
-      RDXBaseUI.pushNotification("Commanding hand configuration...");
-      communicationHelper.publish(SakeHandAPI.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
+            sakeHandDesiredCommandMessage.setGripperDesiredPosition(SakeHandParameters.handOpenAngleToPosition(handPreset.getHandOpenAngle(),
+                                                                                                               handPositionLowerLimit,
+                                                                                                               handPositionUpperLimit));
+            sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(handPreset.getFingertipGripForceLimit()));
+         }
+
+         RDXBaseUI.pushNotification("Commanding hand configuration...");
+         communicationHelper.publish(SakeHandAPI.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
+      }
+      else
+      {
+         RDXBaseUI.pushNotification("No hands on this robot.");
+      }
    }
 }

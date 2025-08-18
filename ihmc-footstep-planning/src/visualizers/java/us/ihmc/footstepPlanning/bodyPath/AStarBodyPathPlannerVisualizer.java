@@ -85,7 +85,7 @@ public class AStarBodyPathPlannerVisualizer
          return;
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);
@@ -148,12 +148,12 @@ public class AStarBodyPathPlannerVisualizer
 
          graphics3DObject.identity();
          graphics3DObject.translate(cellPosition.getX(), cellPosition.getY(), groundHeight + 0.5 * renderedHeight);
-         graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, cellColor);
+         graphics3DObject.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), renderedHeight, true, cellColor);
       }
 
       graphics3DObject.identity();
       graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
-      graphics3DObject.addCube(heightMapData.getGridSizeXY(), heightMapData.getGridSizeXY(), 0.01, YoAppearance.Blue());
+      graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), 0.01, YoAppearance.Blue());
 
       return graphics3DObject;
    }

@@ -10,8 +10,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.TerrainMapTools;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -454,7 +454,7 @@ public class FootstepPlannerRequest
          bodyPathWaypoints.add(new Pose3D(requestPacket.getBodyPathWaypoints().get(i)));
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(requestPacket.getHeightMapMessage());
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(requestPacket.getHeightMapMessage());
       if (!heightMapData.isEmpty())
          setHeightMapData(heightMapData);
       else

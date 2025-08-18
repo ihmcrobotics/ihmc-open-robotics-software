@@ -37,7 +37,7 @@ extern "C"
 
 const bool DEBUG = false;
 
-__device__ int2 spherical_projection(float3 cellCenter, float *params)
+__device__ int2 spherical_projection(float3 cellCenter, const float *params)
 {
     float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
     float yawUnit = HORIZONTAL_FOV / (params[DEPTH_INPUT_WIDTH]);
@@ -60,31 +60,14 @@ __device__ int2 spherical_projection(float3 cellCenter, float *params)
     return make_int2(pitchCount, yawCount);
 }
 
-__device__ int2 perspective_projection(float3 point, float *params)
+__device__ int2 perspective_projection(float3 point, const float *params)
 {
     float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
     float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
     return make_int2(static_cast<int>(x), static_cast<int>(y));
 }
 
-__device__ float3 back_project_spherical(int yaw_index, int pitch_index, float depth, float *params)
-{
-    int yawCountsFromCenter = -yaw_index - (params[DEPTH_INPUT_WIDTH] / 2);
-    int pitchCountsFromCenter = -(pitch_index - (params[DEPTH_INPUT_HEIGHT] / 2));
-
-    float yaw = yawCountsFromCenter / (float)params[DEPTH_INPUT_WIDTH] * HORIZONTAL_FOV;
-    float pitch = pitchCountsFromCenter / (float)params[DEPTH_INPUT_HEIGHT] * VERTICAL_FOV;
-
-    float r = depth * cos(pitch);
-
-    float px = r * cos(yaw);
-    float py = r * sin(yaw);
-    float pz = depth * sin(pitch);
-
-    return make_float3(px, py, pz);
-}
-
-__device__ float3 back_project_perspective(int2 pos, float Z, float *params)
+__device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
     float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
     float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
@@ -92,38 +75,10 @@ __device__ float3 back_project_perspective(int2 pos, float Z, float *params)
     return point;
 }
 
-__device__ float get_spatial_average(int xIndex, int yIndex, unsigned short *globalHeightMap, size_t pitchGlobal, float *params)
+__device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCameraToWorldAlignedGround, const float* params)
 {
-    // perform a smoothing over neighboring cells
-    float heightSum = 0.0f;
-    int count = 0;
-    int globalCellsPerAxis = (int)params[GLOBAL_CELLS_PER_AXIS];
-    for (int i = -1; i < 2; i++)
-    {
-        for (int j = -1; j < 2; j++)
-        {
-            int nxIndex = xIndex + i;
-            int nyIndex = yIndex + j;
-
-            if (nxIndex >= 0 && nxIndex < globalCellsPerAxis && nyIndex >= 0 && nyIndex < globalCellsPerAxis)
-            {
-                unsigned short *heightValue = (unsigned short *)((char *)globalHeightMap + nxIndex * pitchGlobal) + nyIndex;
-                heightSum += *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-                count++;
-            }
-        }
-    }
-    float heightAverage = heightSum / (float)count;
-    return heightAverage;
-}
-
-__device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraToWorldAlignedGround, float* params)
-{
-    // The Z value doesn't matter since we are staying in Z-Up frames
     float3 cellCenterInZUp = make_float3(0.0f, 0.0f, 0.0f);
 
-
-    // Compute grid cell center in Z-Up frame
     float2 xyCoords = indices_to_coordinate(localIndex,
                                             make_float2(params[HALF_LOCAL_WIDTH_IN_METERS], 0.0f),
                                             params[CELL_SIZE],
@@ -132,7 +87,6 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
     cellCenterInZUp.x = xyCoords.x;
     cellCenterInZUp.y = xyCoords.y;
 
-    // Transform cell center from previous Z-up to current Z-up
     float3 cellCenterInGroundNoRotation = transformPoint3D(cellCenterInZUp, zUpCameraToWorldAlignedGround);
 
     int2 newCellIndex = coordinate_to_indices(
@@ -151,158 +105,159 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, float *zUpCameraTo
 // Back-project these points to the 3D space and transform them back to the Z-Up frame.
 // Compute the average height for points within the grid cell while filtering outliers.
 extern "C"
-__global__ void heightMapUpdateKernel(unsigned short *depthImage, size_t pitchDepth,
-                                      float *previousGlobalHeightMap, size_t pitchGlobal,
-                                      float *localMeanMap, size_t pitchLocalMean,
-                                      float *localVarianceMap, size_t pitchLocalVariance,
-                                      float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
-                                      unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
-                                      float *params, float *sensorToZUpFrameTf, float *zUpToSensorFrameTf,
-                                      float *zUpCameraToWorldAlignedGround,
-                                      float linearMotionMagnitude, float angularMotionMagnitude,
+extern "C"
+__global__ void heightMapUpdateKernel(const unsigned short *__restrict__ depthImage, size_t pitchDepth,
+                                      float *__restrict__ previousGlobalHeightMap, size_t pitchGlobal,
+                                      float *__restrict__ localMeanMap, size_t pitchLocalMean,
+                                      float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
+                                      float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                      const float *__restrict__ params,
+                                      const float *__restrict__ sensorToZUpFrameTf,
+                                      const float *__restrict__ zUpToSensorFrameTf,
+                                      const float *__restrict__ zUpCameraToWorldAlignedGround,
+                                      const float linearMotionMagnitude,
+                                      const float angularMotionMagnitude,
                                       float resetOffset)
 {
     // Thread indices
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Grid dimensions (from params)
-    int depthWidth = static_cast<int>(params[DEPTH_INPUT_WIDTH]);
-    int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
+    // Cache params into local variables to reduce repeated global memory accesses
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const int depthWidth = static_cast<int>(params[DEPTH_INPUT_WIDTH]);
+    const int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
+    const float cellSize = params[CELL_SIZE];
+    const float halfLocalWidth = params[HALF_LOCAL_WIDTH_IN_METERS];
+    const float groundHeight = params[GROUND_HEIGHT];
+    const int searchWindowWidth = static_cast<int>(params[SEARCH_WINDOW_WIDTH]);
+    const int searchWindowHeight = static_cast<int>(params[SEARCH_WINDOW_HEIGHT]);
+    const int searchSkip = static_cast<int>(params[SEARCH_SKIP_SIZE]);
+    const int mode = static_cast<int>(params[MODE]);
+    const float varPerMeter = params[VARIANCE_PER_METER];
+    const float varPerTranslationSpeed = params[VARIANCE_PER_TRANSLATION_SPEED];
+    const float varPerRotationSpeed = params[VARIANCE_PER_ROTATION_SPEED];
 
     // Bounds check
-    if (xIndex >= params[LOCAL_CELLS_PER_AXIS] || yIndex >= params[LOCAL_CELLS_PER_AXIS])
+    if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
-    float3 cellCenterInZUp = make_float3(0.0f, 0.0f, params[GROUND_HEIGHT]);
+    // Initialize cell center in Z-Up
+    float cellX = 0.0f;
+    float cellY = 0.0f;
+    float cellZ = groundHeight;
 
+    // Compute global index
     int2 globalIndex = getGlobalIndexFromLocalIndex(make_int2(xIndex, yIndex), zUpCameraToWorldAlignedGround, params);
 
-    if (globalIndex.x >= 0 && globalIndex.x < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS])
-        && globalIndex.y >= 0 && globalIndex.y < static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]))
+    if (globalIndex.x >= 0 && globalIndex.x < globalCellsPerAxis &&
+        globalIndex.y >= 0 && globalIndex.y < globalCellsPerAxis)
     {
         float *globalHeight = (float *)((char *)previousGlobalHeightMap + globalIndex.x * pitchGlobal) + globalIndex.y;
-
         if (*globalHeight != resetOffset)
         {
-             cellCenterInZUp.z = *globalHeight;
+            cellZ = *globalHeight;
         }
     }
 
-    // Compute grid cell center in Z-Up frame
+    // Compute grid cell center in local coordinates
     float2 xyCoords = indices_to_coordinate(make_int2(xIndex, yIndex),
                                             make_float2(0.0f, 0.0f),
-                                            params[CELL_SIZE],
+                                            cellSize,
                                             params[LOCAL_CENTER_INDEX]);
 
-    // Shift forward in X so that this cell appears in front of the robot, meaning it likely has depth data
-    cellCenterInZUp.x = xyCoords.x + params[HALF_LOCAL_WIDTH_IN_METERS];
-    cellCenterInZUp.y = xyCoords.y;
+    cellX = xyCoords.x + halfLocalWidth;
+    cellY = xyCoords.y;
 
-    float halfCellWidth = params[CELL_SIZE] / 2.0f;
-    float minX = cellCenterInZUp.x - halfCellWidth;
-    float maxX = cellCenterInZUp.x + halfCellWidth;
-    float minY = cellCenterInZUp.y - halfCellWidth;
-    float maxY = cellCenterInZUp.y + halfCellWidth;
+    float halfCellWidth = cellSize * 0.5f;
+    float minX = cellX - halfCellWidth;
+    float maxX = cellX + halfCellWidth;
+    float minY = cellY - halfCellWidth;
+    float maxY = cellY + halfCellWidth;
 
-    int skip = static_cast<int>(params[SEARCH_SKIP_SIZE]);
+    // Transform cell center from Z-Up to sensor frame
+    float3 cellCenterInSensor = transformPoint3D(make_float3(cellX, cellY, cellZ), zUpToSensorFrameTf);
 
-    // Transform cell center from Z-Up to Sensor frame
-    float3 cellCenterInSensor = transformPoint3D(cellCenterInZUp, zUpToSensorFrameTf);
-
-    // Perform projection (spherical or perspective)
+    // Project cell to image
     int2 projectedPoint;
-    if (params[MODE] == 0)
-    { // Spherical Projection
+    if (mode == 0)
         projectedPoint = spherical_projection(cellCenterInSensor, params);
-    }
-    else if (params[MODE] == 1)
-    { // Perspective Projection
-        float3 cellCenterInSensorZfwd = make_float3(-cellCenterInSensor.y, -cellCenterInSensor.z, cellCenterInSensor.x);
-        if (cellCenterInSensorZfwd.z < 0)
-            return;
-        projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
+    else
+    {
+        float xFwd = -cellCenterInSensor.y;
+        float yFwd = -cellCenterInSensor.z;
+        float zFwd = cellCenterInSensor.x;
+        if (zFwd < 0.0f) return;
+        projectedPoint = perspective_projection(make_float3(xFwd, yFwd, zFwd), params);
     }
 
-    // Distance from camera origin
-    float distance = length(cellCenterInSensor);
+    // Distance from camera
+    float distance = sqrtf(cellCenterInSensor.x * cellCenterInSensor.x +
+                           cellCenterInSensor.y * cellCenterInSensor.y +
+                           cellCenterInSensor.z * cellCenterInSensor.z);
 
+    // Welford accumulators
     int count = 0;
     float meanZ = 0.0f;
     float m2 = 0.0f;
-    float motionVarianceF = 0.0f;
+    float motionVarianceF = distance * varPerMeter + linearMotionMagnitude * varPerTranslationSpeed +
+                            angularMotionMagnitude * distance * varPerRotationSpeed;
 
-    // Search within the window in the depth image
-    for (int pitchOffset = -static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2);
-         pitchOffset < static_cast<int>(params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitchOffset += skip)
+    int searchWindowHeightHalf = (int)(searchWindowHeight * 0.5f);
+    int searchWindowWidthHalf = (int)(searchWindowWidth * 0.5f);
+
+    // Search depth image
+    for (int pitchOffset = -searchWindowHeightHalf; pitchOffset <= searchWindowHeightHalf; pitchOffset += searchSkip)
     {
         int pitchIdx = projectedPoint.y + pitchOffset;
 
-        for (int yawOffset = -static_cast<int>(params[SEARCH_WINDOW_WIDTH] / 2);
-             yawOffset < static_cast<int>(params[SEARCH_WINDOW_WIDTH] / 2) + 1; yawOffset += skip)
+        //  Exit the loop early if we can, optimize for performance
+        if (pitchIdx < 0 || pitchIdx >= depthHeight)
+            continue;
+
+        // This is created outside the inner loop because its cheaper to only create once per loop
+        unsigned short *rowPtr = (unsigned short *)((char *)depthImage + pitchIdx * pitchDepth);
+
+        for (int yawOffset = -searchWindowWidthHalf; yawOffset <= searchWindowWidthHalf; yawOffset += searchSkip)
         {
             int yawIdx = projectedPoint.x + yawOffset;
 
-            // Bounds check
-            if (yawIdx >= 0 && yawIdx < depthWidth && pitchIdx >= 0 && pitchIdx < depthHeight)
+            // Again, exit the loop early if we can
+            if (yawIdx < 0 || yawIdx >= depthWidth)
+                continue;
+
+            float depth = rowPtr[yawIdx] * 0.001f; // scale to meters
+            if (depth < 0.5f)
+                continue;
+
+            float3 queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
+            float3 queryPointInZUp = transformPoint3D(queryPointInSensor, sensorToZUpFrameTf);
+
+            if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX &&
+                queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
             {
-                unsigned short *inRow = (unsigned short *)((char *)depthImage + (pitchIdx * pitchDepth));
-                unsigned short depthValue = *(inRow + yawIdx);
-
-                float depth = static_cast<float>(depthValue) / 1000.0f; // Scaling depth to meters
-
-                // This is roughly the minimum depth of the realsense with a little buffer
-                // We reject this value cause it doesn't make any sense
-                if (depth < 0.5f)
-                    continue;
-
-                // Back-project depth to 3D point
-                float3 queryPointInSensor;
-                queryPointInSensor = back_project_perspective(make_int2(yawIdx, pitchIdx), depth, params);
-
-                // Transform back to Z-Up frame
-                float3 queryPointInZUp = transformPoint3D(queryPointInSensor, sensorToZUpFrameTf);
-
-                // Check if the point is within the cell
-                if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
-                {
-                    // Update mean and variance using Welford's algorithm
-                    count++;
-                    float delta = queryPointInZUp.z - meanZ;
-                    meanZ += delta / count;
-                    float delta2 = queryPointInZUp.z - meanZ;
-                    m2 += delta * delta2;
-                }
+                count++;
+                float delta = queryPointInZUp.z - meanZ;
+                meanZ += delta / count;
+                float delta2 = queryPointInZUp.z - meanZ;
+                m2 += delta * delta2;
             }
         }
     }
 
     float currentVariance = (count > 1) ? (m2 / (count - 1)) : 0.0f;
-
-    // Motion variance for distance from sensor origin, and "speed" of a cell
-    motionVarianceF += distance * params[VARIANCE_PER_METER];
-    motionVarianceF += linearMotionMagnitude * params[VARIANCE_PER_TRANSLATION_SPEED];
-    motionVarianceF += angularMotionMagnitude * distance * params[VARIANCE_PER_ROTATION_SPEED];
-
-    if (DEBUG && xIndex == 40 && yIndex == 40)
-    {
-        printf("Update Kernel -----------------------------\n");
-        printf("Mean: %f\n", meanZ);
-        printf("Variance: %f\n", currentVariance);
-        printf("Motion Variance: %f\n", motionVarianceF);
-    }
-
     if (count == 0)
-        meanZ = 0;
+        meanZ = 0.0f;
 
+    // Write results
     float *meanHeight = (float *)((char *)localMeanMap + xIndex * pitchLocalMean) + yIndex;
-    *meanHeight = meanZ;
     float *variance = (float *)((char *)localVarianceMap + xIndex * pitchLocalVariance) + yIndex;
-    *variance = currentVariance;
     float *motionVariance = (float *)((char *)localMotionVarianceMap + xIndex * pitchLocalMotionVariance) + yIndex;
+
+    *meanHeight = meanZ;
+    *variance = currentVariance;
     *motionVariance = motionVarianceF;
-    unsigned short *numberOfSamples = (unsigned short *)((char *)localSampleCountMap + xIndex * pitchLocalSampleCount) + yIndex;
-    *numberOfSamples = count;
 }
 
 extern "C"
@@ -349,25 +304,25 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
 }
 
 extern "C"
-__global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLocalMean,
-                                            float *localVarianceMap, size_t pitchLocalVariance,
-                                            float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
-                                            unsigned short *localSampleCountMap, size_t pitchLocalSampleCount,
-                                            float *globalMeanMap, size_t pitchGlobalMean,
-                                            float *globalVarianceMap, size_t pitchGlobalVariance,
-                                            float *zUpCameraToWorldAlignedGround,
-                                            float *params, float resetOffset)
+__global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanMap, size_t pitchLocalMean,
+                                            const float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
+                                            const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                            float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                            float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                            const float *__restrict__ zUpCameraToWorldAlignedGround,
+                                            const float *__restrict__ params, float resetOffset)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Compute global map size
-    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
-    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
+
+    // Compute global map size
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     int2 localIndex = make_int2(xIndex, yIndex);
 
@@ -424,15 +379,15 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
 }
 
 extern "C"
-__global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGlobalHeightMap,
-                                       unsigned short *scaledHeightMap, size_t pitchScaledHeightMap,
-                                       float *params)
+__global__ void scalingHeightMapKernel(const float *__restrict__ globalHeightMap, size_t pitchGlobalHeightMap,
+                                       unsigned short *__restrict__ scaledHeightMap, size_t pitchScaledHeightMap,
+                                       const float *__restrict__ params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     // Compute global map size
-    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
     if (xIndex >= globalCellsPerAxis || yIndex >= globalCellsPerAxis)
@@ -449,8 +404,8 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, size_t pitchGlobal,
-                                               unsigned short *terrainMap, size_t pitchTerrain,
+__global__ void terrainCroppingHeightMapKernel(const unsigned short *__restrict__ globalHeightMap, size_t pitchGlobal,
+                                               unsigned short *__restrict__ terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;

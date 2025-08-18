@@ -20,9 +20,14 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(flyingPointsFilter);
    }
 
-   default boolean getEnableVerticalFilter()
+   default boolean getEnableChunkedMap()
    {
-      return get(enableVerticalFilter);
+      return get(enableChunkedMap);
+   }
+
+   default boolean getLogHeightMap()
+   {
+      return get(logHeightMap);
    }
 
    default int getSearchWindowHeight()
@@ -100,9 +105,9 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(maxClampHeight);
    }
 
-   default double getCellSizeInMeters()
+   default double getCellSize()
    {
-      return get(cellSizeInMeters);
+      return get(cellSize);
    }
 
    default double getLocalWidthInMeters()
@@ -140,105 +145,8 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(steppingCosineThreshold);
    }
 
-   default int getFastSearchSize()
-   {
-      return get(fastSearchSize);
-   }
-
-   default int getVerticalSearchSize()
-   {
-      return get(verticalSearchSize);
-   }
-
-   default double getVerticalSearchResolution()
-   {
-      return get(verticalSearchResolution);
-   }
-
-   /**
-    * Resolution of the height map grid
-    */
-   default double getGridResolutionXY()
-   {
-      return get(gridResolutionXY);
-   }
-
-   /**
-    * Length of the side of the square height map grid
-    */
-   default double getGridSizeXY()
-   {
-      return get(gridSizeXY);
-   }
-
-   /**
-    * Max z relative to robot mid foot z. Points above this threshold are ignored.
-    */
-   default double getMaxZ()
-   {
-      return get(maxZ);
-   }
-
-   /**
-    * When calibrated on flat ground, this is the average standard deviation observed
-    * for a grid cell.
-    */
-   default double getNominalStandardDeviation()
-   {
-      return get(nominalStandardDeviation);
-   }
-
-   default int getMaxPointsPerCell()
-   {
-      return get(maxPointsPerCell);
-   }
-
-   /**
-    * If a grid cell is at height h, points below (h - s * m) are ignored, and points
-    * above (h + s * m) will cause the cell to throw out old data and reset. where s
-    * is getNominalStandardDeviation() and m is this value.
-    */
-   default double getMahalanobisScale()
-   {
-      return get(mahalanobisScale);
-   }
-
-   /**
-    * This is the variance added to all past measurements when a cell is translated
-    */
-   default double getVarianceAddedWhenTranslating()
-   {
-      return get(varianceAddedWhenTranslating);
-   }
-
-   /**
-    * This is the measurement variance when the robot is standing
-    */
-   default double getSensorVarianceWhenStanding()
-   {
-      return get(sensorVarianceWhenStanding);
-   }
-
-   /**
-    * This is the measurement variance when the robot is moving
-    */
-   default double getSensorVarianceWhenMoving()
-   {
-      return get(sensorVarianceWhenMoving);
-   }
-
    default boolean getEstimateHeightWithKalmanFilter()
    {
       return get(estimateHeightWithKalmanFilter);
-   }
-
-   default boolean getDenoiserEnabled()
-   {
-      return get(denoiserEnabled);
-   }
-
-   default boolean getStatisticsLoggingEnabled()
-   {
-      return get(statisticsLoggingEnabled);
    }
 }

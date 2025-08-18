@@ -29,6 +29,14 @@ module behavior_msgs
          */
         string action_frame;
         /**
+         * Whether the reference frame of the failed action was missing
+         */
+        boolean missing_frame;
+        /**
+         * Name of the object the action would collide with in not interrupted (marked as failed)
+         */
+        string collision_name;
+        /**
          * Position tolerance for the action [m]
          */
         double position_tolerance;

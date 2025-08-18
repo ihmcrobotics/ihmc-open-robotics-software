@@ -32,10 +32,15 @@ public class ImageMessageDecoder
    public ImageMessageDecoder()
    {
       if (CUDATools.hasCUDADevice() && CUDATools.hasNVJPEG())
-      {
          cudaJpegDecoder = new CUDAJPEGProcessor();
-         if (CUDATools.hasNVCOMP())
-            cudaCompressionTools = new CUDACompressionTools();
+
+      try
+      {
+         cudaCompressionTools = new CUDACompressionTools();
+      }
+      catch (Exception e)
+      {
+         LogTools.warn(e);
       }
    }
 
@@ -43,8 +48,6 @@ public class ImageMessageDecoder
    {
       Mat image = new Mat();
       decodeMessage(messageToDecode, image);
-
-      PixelFormat pixelFormat = PixelFormat.fromByte(messageToDecode.getPixelFormat());
 
       CameraIntrinsics intrinsics = new CameraIntrinsics();
       intrinsics.setWidth(messageToDecode.getImageWidth());
@@ -60,7 +63,7 @@ public class ImageMessageDecoder
       long sequenceNumber = messageToDecode.getSequenceNumber();
       float depthDiscretization = messageToDecode.getDepthDiscretization();
 
-      return new RawImage(image, null, pixelFormat, intrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
+      return new RawImage(image, null, getDecodedImagePixelFormat(), intrinsics, cameraModel, sensorPose, acquisitionTime, sequenceNumber, depthDiscretization);
    }
 
    /**

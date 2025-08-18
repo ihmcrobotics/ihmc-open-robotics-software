@@ -1,11 +1,25 @@
 
-# Goto action - Reference frame for the action
-string reference_frame_name
+# SPATIAL RELATION TYPE
+int8 DEFAULT=0
 
-# Goto action - The position to which the goal stance is aligned
-geometry_msgs/Point goal_stance_point
+int8 FRONT=1
 
-# Goto action - The point that the robot should be facing in the goal stance
-geometry_msgs/Point goal_focal_point
+int8 BEHIND=2
+
+int8 LEFT=3
+
+int8 RIGHT=4
+
+# The type of spatial relation with the secondary reference object as defined above
+int8 spatial_relation
+
+# Point of view object. Secondary reference frame (object) used as the point of view that defines the spatial relation with the object
+string pov_object
+
+# Target reference frame (object) to go to
+string target_object
+
+# The distance to the reference frame (located at the object's centroid)
+float64 distance_to_object
 
 

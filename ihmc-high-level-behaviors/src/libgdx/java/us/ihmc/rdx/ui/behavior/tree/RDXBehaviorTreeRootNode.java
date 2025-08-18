@@ -141,6 +141,10 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
          ImGui.endDisabled();
       }
       ImGui.endDisabled();
+      if (ImGui.button(labels.get("Reset Failures")))
+      {
+         state.setFailureResetRequested();
+      }
 
       ImGui.sameLine();
       concurrencyEnabledCheckbox.renderImGuiWidget();
