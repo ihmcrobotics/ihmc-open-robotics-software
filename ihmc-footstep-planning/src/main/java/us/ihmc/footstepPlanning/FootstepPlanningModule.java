@@ -178,14 +178,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
-      // Update planar regions
-      boolean flatGroundMode = request.getAssumeFlatGround() || !heightMapAvailable;
-
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
       output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
-      if (request.getPlanBodyPath() && !flatGroundMode)
+      if (request.getPlanBodyPath() && heightMapAvailable)
       {
          bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
@@ -246,6 +243,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
          planThenSnapPlanner.setInitialStanceFoot(initialStancePose, initialStanceSide);
          planThenSnapPlanner.setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
+         planThenSnapPlanner.setBodyPath(bodyPathPlanHolder);
 
          FootstepPlannerGoal goal = new FootstepPlannerGoal();
          goal.setGoalPoseBetweenFeet(goalMidFootPose);

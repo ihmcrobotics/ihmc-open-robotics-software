@@ -1,12 +1,14 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -16,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +87,17 @@ public class TurnWalkTurnPlanner
    }
 
    private final FootstepPlan footstepPlan = new FootstepPlan();
+   private WaypointDefinedBodyPathPlanHolder bodyPath = null;
+
+   public void setBodyPath(WaypointDefinedBodyPathPlanHolder bodyPath)
+   {
+      this.bodyPath = bodyPath;
+   }
+
+   public void clearBodyPath()
+   {
+      this.bodyPath = null;
+   }
 
    public FootstepPlan getPlan()
    {
@@ -102,18 +116,17 @@ public class TurnWalkTurnPlanner
       if (isGoalOutOfReach())
       {
          // turn
-         double headingTurnAngle = AngleTools.calculateHeading(robotStartPose, goalPoint, -robotStartPose.getYaw(), 0.0);
-         double minTurn = AngleTools.computeAngleDifferenceMinusPiToPi(initialStanceFootPose.getYaw(), goalPose.getYaw());
-         boolean walkingBackwards = Math.abs(headingTurnAngle) > Math.PI / 2.0 && Math.abs(minTurn) < Math.PI / 2.0;
-         if (walkingBackwards)
-            headingTurnAngle = headingTurnAngle > 0.0 ? headingTurnAngle - Math.PI : headingTurnAngle + Math.PI;
+         double currentRobotYaw = robotStartPose.getYaw();
+         double firstTurnDesiredYaw = getFirstTurnDesiredYaw();
+         double headingTurnAngle = EuclidCoreTools.angleDifferenceMinusPiToPi(firstTurnDesiredYaw, currentRobotYaw);
 
          addTurnInPlace(footstepList, headingTurnAngle, robotStartPose.getPosition());
 
          // walk
-         double distanceToTravel = walkingBackwards ? -robotStartPose.getPositionDistance(goalPoint) : robotStartPose.getPositionDistance(goalPoint);
-         double stepLength = walkingBackwards ? -Math.abs(parameters.getIdealBackStepLength()) : parameters.getIdealFootstepLength();
-         addStraightWalk(footstepList, robotStartPose.getPosition(), distanceToTravel, stepLength);
+         if (bodyPath == null)
+            addStraightWalk(footstepList, robotStartPose.getPosition());
+         else
+            walkAlongBodyPath(footstepList);
       }
       else
       {
@@ -141,6 +154,18 @@ public class TurnWalkTurnPlanner
       return FootstepPlanningResult.FOUND_SOLUTION;
    }
 
+   private double getFirstTurnDesiredYaw()
+   {
+      if (bodyPath == null)
+      {
+         return AngleTools.calculateHeading(robotStartPose, goalPose.getPosition(), 0.0, 0.0);
+      }
+      else
+      {
+         return bodyPath.getSegmentYaw(0);
+      }
+   }
+
    private void addSquareUp(List<FramePose2DReadOnly> footstepListToPack, FramePoint2DReadOnly robotPosition)
    {
       FramePoint2D positionInStance = new FramePoint2D(robotPosition);
@@ -163,16 +188,15 @@ public class TurnWalkTurnPlanner
       planStanceFootFrame.setPoseAndUpdate(footstepPose);
       lastStepSide = lastStepSide.getOppositeSide();
    }
-
    private void addStraightWalk(List<FramePose2DReadOnly> footstepListToPack,
-                                FramePoint2DReadOnly startingPoint,
-                                double distanceToTravel,
-                                double nominalStepLength)
+                                FramePoint2DReadOnly startingPoint)
    {
+      double distanceToTravel = robotStartPose.getPositionDistance(goalPose.getPosition());
+
       if (Math.abs(distanceToTravel) < epsilon)
          return;
 
-      double straightSteps = Math.ceil(distanceToTravel / nominalStepLength);
+      double straightSteps = Math.ceil(distanceToTravel / parameters.getIdealFootstepLength());
       double stepLength = distanceToTravel / straightSteps;
       FramePoint2D planStart = new FramePoint2D();
 
@@ -194,6 +218,39 @@ public class TurnWalkTurnPlanner
          nextFootStep.changeFrame(ReferenceFrame.getWorldFrame());
          footstepListToPack.add(nextFootStep);
          planStanceFootFrame.setPoseAndUpdate(nextFootStep);
+         lastStepSide = lastStepSide.getOppositeSide();
+      }
+   }
+
+   private void walkAlongBodyPath(List<FramePose2DReadOnly> footstepListToPack)
+   {
+      double distanceToTravel = bodyPath.computePathLength(0.0);
+      double nominalStepLength = parameters.getIdealFootstepLength();
+
+      if (Math.abs(distanceToTravel) < epsilon)
+         return;
+
+      double numberOfSteps = Math.ceil(distanceToTravel / nominalStepLength);
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         double alpha = (i + 1.0) / (numberOfSteps);
+         Pose3D poseOnBodyPath = new Pose3D();
+         bodyPath.getPointAlongPath(alpha, poseOnBodyPath);
+
+         int segmentIndex = bodyPath.getSegmentIndexFromAlpha(alpha);
+         double yaw = bodyPath.getSegmentYaw(segmentIndex);
+         poseOnBodyPath.getOrientation().setToYawOrientation(yaw);
+
+         FramePose2D footstep = new FramePose2D();
+         footstep.set(poseOnBodyPath);
+
+         // updating for final turn logic
+         planStanceFootFrame.setPoseAndUpdate(footstep);
+
+         footstep.appendTranslation(0.0, 0.5 * lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth()));
+
+         footstepListToPack.add(footstep);
          lastStepSide = lastStepSide.getOppositeSide();
       }
    }
