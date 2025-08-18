@@ -106,19 +106,18 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCa
 // Compute the average height for points within the grid cell while filtering outliers.
 extern "C"
 extern "C"
-__global__ void heightMapUpdateKernel(
-    const unsigned short *__restrict__ depthImage, size_t pitchDepth,
-    float *__restrict__ previousGlobalHeightMap, size_t pitchGlobal,
-    float *__restrict__ localMeanMap, size_t pitchLocalMean,
-    float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
-    float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
-    const float *__restrict__ params,
-    const float *__restrict__ sensorToZUpFrameTf,
-    const float *__restrict__ zUpToSensorFrameTf,
-    const float *__restrict__ zUpCameraToWorldAlignedGround,
-    const float linearMotionMagnitude,
-    const float angularMotionMagnitude,
-    float resetOffset)
+__global__ void heightMapUpdateKernel(const unsigned short *__restrict__ depthImage, size_t pitchDepth,
+                                      float *__restrict__ previousGlobalHeightMap, size_t pitchGlobal,
+                                      float *__restrict__ localMeanMap, size_t pitchLocalMean,
+                                      float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
+                                      float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                      const float *__restrict__ params,
+                                      const float *__restrict__ sensorToZUpFrameTf,
+                                      const float *__restrict__ zUpToSensorFrameTf,
+                                      const float *__restrict__ zUpCameraToWorldAlignedGround,
+                                      const float linearMotionMagnitude,
+                                      const float angularMotionMagnitude,
+                                      float resetOffset)
 {
     // Thread indices
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -305,24 +304,25 @@ __global__ void translateHeightMapKernel(float *oldHeightMapMean, size_t pitchOl
 }
 
 extern "C"
-__global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLocalMean,
-                                            float *localVarianceMap, size_t pitchLocalVariance,
-                                            float *localMotionVarianceMap, size_t pitchLocalMotionVariance,
-                                            float *globalMeanMap, size_t pitchGlobalMean,
-                                            float *globalVarianceMap, size_t pitchGlobalVariance,
-                                            float *zUpCameraToWorldAlignedGround,
-                                            float *params, float resetOffset)
+__global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanMap, size_t pitchLocalMean,
+                                            const float *__restrict__ localVarianceMap, size_t pitchLocalVariance,
+                                            const float *__restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
+                                            float *__restrict__ globalMeanMap, size_t pitchGlobalMean,
+                                            float *__restrict__ globalVarianceMap, size_t pitchGlobalVariance,
+                                            const float *__restrict__ zUpCameraToWorldAlignedGround,
+                                            const float *__restrict__ params, float resetOffset)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Compute global map size
-    int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
-    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
+
+    // Compute global map size
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     int2 localIndex = make_int2(xIndex, yIndex);
 
@@ -379,15 +379,15 @@ __global__ void heightMapRegistrationKernel(float *localMeanMap, size_t pitchLoc
 }
 
 extern "C"
-__global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGlobalHeightMap,
-                                       unsigned short *scaledHeightMap, size_t pitchScaledHeightMap,
-                                       float *params)
+__global__ void scalingHeightMapKernel(const float *__restrict__ globalHeightMap, size_t pitchGlobalHeightMap,
+                                       unsigned short *__restrict__ scaledHeightMap, size_t pitchScaledHeightMap,
+                                       const float *__restrict__ params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
     // Compute global map size
-    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
 
     // Check bounds for global indices
     if (xIndex >= globalCellsPerAxis || yIndex >= globalCellsPerAxis)
@@ -404,8 +404,8 @@ __global__ void scalingHeightMapKernel(float *globalHeightMap, size_t pitchGloba
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(unsigned short *globalHeightMap, size_t pitchGlobal,
-                                               unsigned short *terrainMap, size_t pitchTerrain,
+__global__ void terrainCroppingHeightMapKernel(const unsigned short *__restrict__ globalHeightMap, size_t pitchGlobal,
+                                               unsigned short *__restrict__ terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
