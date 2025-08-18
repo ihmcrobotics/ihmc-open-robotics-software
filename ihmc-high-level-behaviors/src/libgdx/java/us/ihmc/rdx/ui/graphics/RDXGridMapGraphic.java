@@ -83,19 +83,20 @@ public class RDXGridMapGraphic implements RenderableProvider
       executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
    }
 
+   @Deprecated
    public void generateMeshes(HeightMapMessage heightMapMessage)
    {
-      IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
-      IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
+      IntToDoubleFunction heightProvider = (d) -> 0.0;
+      IntFunction<Integer> keyProvider = (d) -> 0;
 
       generateMeshes(heightProvider,
                      keyProvider,
                      heightMapMessage.getHeights().size(),
-                     heightMapMessage.getXyResolution(),
-                     heightMapMessage.getGridSizeXy(),
+                     heightMapMessage.getCellSizeInMeters(),
+                     heightMapMessage.getWidthInMeters(),
                      heightMapMessage.getGridCenterX(),
                      heightMapMessage.getGridCenterY(),
-                     heightMapMessage.getEstimatedGroundHeight(),
+                     0.0,
                      heightMapMessage.getSequenceId());
    }
 

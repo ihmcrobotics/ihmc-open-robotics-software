@@ -95,13 +95,9 @@ public class HeightMapVisualizer extends AnimationTimer
       /* Compute mesh */
       meshBuilder.clear();
       IDLSequence.Integer heights = heightMapMessage.getHeights();
-      double gridResolutionXY = heightMapMessage.getXyResolution();
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
-
-      if (Double.isNaN(heightMapMessage.getEstimatedGroundHeight()))
-      {
-         heightMapMessage.setEstimatedGroundHeight(heights.min());
-      }
+      double gridResolutionXY = heightMapMessage.getCellSizeInMeters();
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), gridResolutionXY);
+      double groundPlaneHeight = heights.min();
 
       ConvexPolygon2D heightMapCell = new ConvexPolygon2D();
       heightMapCell.addVertex(-0.5 * gridResolutionXY, -0.5 * gridResolutionXY);
@@ -110,14 +106,14 @@ public class HeightMapVisualizer extends AnimationTimer
       heightMapCell.addVertex(0.5 * gridResolutionXY, 0.5 * gridResolutionXY);
       heightMapCell.update();
 
-      for (int i = 0; i < heights.size(); i++)
+      for (int key = 0; key < heights.size(); key++)
       {
-         int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getKeys().get(i), centerIndex);
-         int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getKeys().get(i), centerIndex);
+         int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+         int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
          double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
          double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
-         double height = heights.get(i);
-         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
+         double height = heights.get(key);
+         double renderedHeight = height - groundPlaneHeight;
          double[] redGreenBlue = HeightMapTools.getRedGreenBlue(height);
 
          if (ONLY_VISUALIZE_TOP)
@@ -131,7 +127,7 @@ public class HeightMapVisualizer extends AnimationTimer
             meshBuilder.addBox(gridResolutionXY,
                                gridResolutionXY,
                                renderedHeight,
-                               new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight),
+                               new Point3D(x, y, groundPlaneHeight + 0.5 * renderedHeight),
                                new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f));
          }
 
@@ -141,7 +137,7 @@ public class HeightMapVisualizer extends AnimationTimer
             {
                for (double dy : new double[] {-1.0, 1.0})
                {
-                  Point3D start = new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight());
+                  Point3D start = new Point3D(x, y, groundPlaneHeight);
                   Point3D end = new Point3D(x, y, height);
                   start.add(dx * 0.5 * gridResolutionXY, dy * 0.5 * gridResolutionXY, 0.0);
                   end.add(dx * 0.5 * gridResolutionXY, dy * 0.5 * gridResolutionXY, 0.0);
@@ -154,10 +150,10 @@ public class HeightMapVisualizer extends AnimationTimer
       if (SHOW_GROUND_PLANE)
       {
          double renderedGroundPlaneHeight = 0.005;
-         meshBuilder.addBox(heightMapMessage.getGridSizeXy(),
-                            heightMapMessage.getGridSizeXy(),
+         meshBuilder.addBox(heightMapMessage.getWidthInMeters(),
+                            heightMapMessage.getWidthInMeters(),
                             renderedGroundPlaneHeight,
-                            new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
+                            new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), groundPlaneHeight),
                             groundPlaneColor);
       }
 

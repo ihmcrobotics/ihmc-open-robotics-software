@@ -106,7 +106,7 @@ public class PlanarRegionToHeightMapConverterTest
          {
             double x = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
             double y = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
-            double height = heightMapData.getHeightAt(xIndex, yIndex);
+            double height = heightMapData.getHeight(xIndex, yIndex);
 
             if (Double.isFinite(height))
                pointCloud.add(new Point3D(x,  y, height));

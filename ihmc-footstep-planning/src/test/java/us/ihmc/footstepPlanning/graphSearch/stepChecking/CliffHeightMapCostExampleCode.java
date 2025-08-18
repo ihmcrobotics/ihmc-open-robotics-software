@@ -38,7 +38,7 @@ public class CliffHeightMapCostExampleCode
       {
          for (double yi = minY; yi <= maxY; yi += gridResolution)
          {
-            heightMapData.setHeightAt(xi, yi, plane.getZOnPlane(xi, yi));
+            heightMapData.setHeight(xi, yi, plane.getZOnPlane(xi, yi));
          }
       }
 

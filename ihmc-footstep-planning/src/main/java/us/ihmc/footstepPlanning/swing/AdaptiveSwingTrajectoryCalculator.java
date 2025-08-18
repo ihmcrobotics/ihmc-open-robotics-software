@@ -119,7 +119,7 @@ public class AdaptiveSwingTrajectoryCalculator
 
    public void checkForFootCollision(Pose3DReadOnly startPose, PlannedFootstep step)
    {      
-      if (heightMapData == null || heightMapData.isEmpty())
+      if (heightMapData == null)
       {
          return;
       }

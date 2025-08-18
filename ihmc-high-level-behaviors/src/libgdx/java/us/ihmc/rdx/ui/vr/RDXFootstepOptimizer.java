@@ -163,7 +163,7 @@ public class RDXFootstepOptimizer
       optimizedPose.setX(q[0]);
       optimizedPose.setY(q[1]);
       optimizedPose.getRotation().set(new YawPitchRoll(q[2], initialPose.getPitch(), initialPose.getRoll()));
-      optimizedPose.setZ(currentHeightMap.getHeightAt(q[0], q[1]));
+      optimizedPose.setZ(currentHeightMap.getHeight(q[0], q[1]));
       return optimizedPose;
    }
 
@@ -182,7 +182,7 @@ public class RDXFootstepOptimizer
       float planarityCost = PLANARITY_W * computePlanarityCost(q);
 
       // Add penalty for Z distance from initial pose
-      float z = (float) currentHeightMap.getHeightAt(q[0], q[1]); // Z of the point to be placed.
+      float z = (float) currentHeightMap.getHeight(q[0], q[1]); // Z of the point to be placed.
       float initialZ = (float) targetPose.getZ(); // Z of the initial Point
       float zDistancePenalty = HEIGHT_W * Math.abs(z - initialZ);
 
@@ -288,7 +288,7 @@ public class RDXFootstepOptimizer
       {
          float x = (float) (q[0] + corners[i][0] * Math.cos(q[2]) - corners[i][1] * Math.sin(q[2]));
          float y = (float) (q[1] + corners[i][0] * Math.sin(q[2]) + corners[i][1] * Math.cos(q[2]));
-         results.heights[i] = (float) currentHeightMap.getHeightAt(x, y);
+         results.heights[i] = (float) currentHeightMap.getHeight(x, y);
          results.cornersXY[i] = new float[] {x, y};
       }
 

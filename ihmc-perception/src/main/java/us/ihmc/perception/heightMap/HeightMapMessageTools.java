@@ -20,19 +20,17 @@ public class HeightMapMessageTools
       if (heightMapMessage == null)
          return null;
 
-      HeightMapData heightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
-                                                      heightMapMessage.getGridSizeXy(),
+      HeightMapData heightMapData = new HeightMapData(heightMapMessage.getCellSizeInMeters(),
+                                                      heightMapMessage.getWidthInMeters(),
                                                       heightMapMessage.getGridCenterX(),
                                                       heightMapMessage.getGridCenterY());
 
-      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
+      for (int key = 0; key < heightMapMessage.getHeights().size(); key++)
       {
-         double height = heightMapMessage.getHeights().get(i);
-         int key = heightMapMessage.getKeys().get(i);
-         heightMapData.setHeightAt(key, height);
+         double height = heightMapMessage.getHeights().get(key);
+         heightMapData.setHeight(key, height);
       }
 
-      heightMapData.setEstimatedGroundHeight(heightMapMessage.getEstimatedGroundHeight());
       return heightMapData;
    }
 
@@ -49,16 +47,9 @@ public class HeightMapMessageTools
       int totalCells = cellsPerAxis * cellsPerAxis;
       short[] heights = new short[totalCells];
 
-      for (int i = 0; i < chunkMessage.getHeights().size(); i++)
+      for (int key = 0; key < chunkMessage.getHeights().size(); key++)
       {
-         short height = (short) chunkMessage.getHeights().get(i);
-         int key = chunkMessage.getKeys().get(i);
-
-         int xIndex = key % cellsPerAxis;
-         int yIndex = key / cellsPerAxis;
-
-         int index = yIndex * cellsPerAxis + xIndex;
-         heights[index] = height;
+         heights[key] = (short) chunkMessage.getHeights().get(key);
       }
 
       shortBuffer.put(heights);
@@ -71,7 +62,7 @@ public class HeightMapMessageTools
       if (heightMapMessage == null)
          return null;
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), heightMapMessage.getCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
 
       Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
@@ -82,12 +73,10 @@ public class HeightMapMessageTools
 
       // Optimization of caching the arrays
       Integer heightsFromMessage = heightMapMessage.getHeights();
-      Integer keysFromMessage = heightMapMessage.getKeys();
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
-         int key = keysFromMessage.get(i);
-         heights[key] = (short) heightsFromMessage.get(i);
+         heights[i] = (short) heightsFromMessage.get(i);
       }
 
       shortBuffer.put(heights);
@@ -119,17 +108,13 @@ public class HeightMapMessageTools
    {
       clear(messageToPack);
 
-      messageToPack.setGridSizeXy(heightMapData.getMapSize());
-      messageToPack.setXyResolution(heightMapData.getCellSize());
       messageToPack.setGridCenterX(heightMapData.getGridCenter().getX());
       messageToPack.setGridCenterY(heightMapData.getGridCenter().getY());
-      messageToPack.setEstimatedGroundHeight(heightMapData.getEstimatedGroundHeight());
+      int numberOfCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells() && i < messageToPack.getKeys().capacity(); i++)
+      for (int key = 0; key < numberOfCells; key++)
       {
-         int key = heightMapData.getKey(i);
-         messageToPack.getKeys().add((key));
-         messageToPack.getHeights().add((short) heightMapData.getHeightAt(key));
+         messageToPack.getHeights().add((short) heightMapData.getHeight(key));
       }
    }
 
@@ -142,8 +127,6 @@ public class HeightMapMessageTools
                                 double heightScaleFactor,
                                 int cellsPerAxis)
    {
-      messageToPack.setGridSizeXy(widthInMeters);
-      messageToPack.setXyResolution(cellSizeInMeters);
       messageToPack.setOriginX(mapOrigin.getX());
       messageToPack.setOriginY(mapOrigin.getY());
       messageToPack.setWidthInMeters(widthInMeters);
@@ -164,17 +147,11 @@ public class HeightMapMessageTools
       // This is done for speed optimization
       short[] heightsArray = new short[totalCells];
       shortBuffer.get(heightsArray);
-      Integer keys = messageToPack.getKeys();
       Integer heights = messageToPack.getHeights();
 
       // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)
       {
-         if (i < keys.size())
-            keys.set(i, i);
-         else
-            keys.add(i);
-
          if (i < heights.size())
             heights.set(i, heightsArray[i]);
          else
@@ -184,12 +161,8 @@ public class HeightMapMessageTools
 
    public static void clear(ChunkMessage messageToClear)
    {
-      messageToClear.setGridSizeXy(-1.0);
-      messageToClear.setXyResolution(-1.0);
       messageToClear.setOriginX(-1.0);
       messageToClear.setOriginX(-1.0);
-      messageToClear.setEstimatedGroundHeight(-1.0);
-      messageToClear.getKeys().clear();
       messageToClear.getHeights().clear();
    }
 
@@ -202,8 +175,6 @@ public class HeightMapMessageTools
                                 double heightScaleFactor,
                                 int cellsPerAxis)
    {
-      messageToPack.setGridSizeXy(widthInMeters);
-      messageToPack.setXyResolution(cellSizeInMeters);
       messageToPack.setGridCenterX(heightMapCenter.getX());
       messageToPack.setGridCenterY(heightMapCenter.getY());
       messageToPack.setWidthInMeters(widthInMeters);
@@ -224,17 +195,11 @@ public class HeightMapMessageTools
       // This is done for speed optimization
       short[] heightsArray = new short[totalCells];
       shortBuffer.get(heightsArray);
-      Integer keys = messageToPack.getKeys();
       Integer heights = messageToPack.getHeights();
 
       // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)
       {
-         if (i < keys.size())
-            keys.set(i, i);
-         else
-            keys.add(i);
-
          if (i < heights.size())
             heights.set(i, heightsArray[i]);
          else
@@ -248,22 +213,15 @@ public class HeightMapMessageTools
    @Deprecated
    public static void clear(HeightMapMessage messageToClear)
    {
-      messageToClear.setGridSizeXy(-1.0);
-      messageToClear.setXyResolution(-1.0);
       messageToClear.setGridCenterX(-1.0);
       messageToClear.setGridCenterY(-1.0);
-      messageToClear.setEstimatedGroundHeight(-1.0);
 
-      messageToClear.getKeys().clear();
       messageToClear.getHeights().clear();
-      messageToClear.getNormals().clear();
-      messageToClear.getVariances().clear();
-      messageToClear.getCentroids().clear();
    }
 
    public static void setToFlatGround(HeightMapMessage message)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(message.getGridSizeXy(), message.getXyResolution());
+      int centerIndex = HeightMapTools.computeCenterIndex(message.getWidthInMeters(), message.getCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
 
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
@@ -271,7 +229,6 @@ public class HeightMapMessageTools
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            message.getKeys().add(key);
             message.getHeights().add(0);
          }
       }

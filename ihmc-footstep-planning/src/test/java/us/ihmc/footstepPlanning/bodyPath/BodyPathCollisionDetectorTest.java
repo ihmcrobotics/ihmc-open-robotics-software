@@ -24,23 +24,23 @@ public class BodyPathCollisionDetectorTest
       collisionDetector.initialize(heightMapData.getCellSize(), boxSizeX, boxSizeY);
 
       double randomHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);
-      heightMapData.setHeightAt(0.0, 0.0, randomHeight + 0.1);
+      heightMapData.setHeight(0.0, 0.0, randomHeight + 0.1);
       boolean collision = collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), 0, randomHeight, 0.2);
       Assertions.assertFalse(collision, "Body path collision detector failed");
 
       randomHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);
       heightMapData.reset();
-      heightMapData.setHeightAt(0.0, 0.0, randomHeight + 0.201);
+      heightMapData.setHeight(0.0, 0.0, randomHeight + 0.201);
       collision = collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), 0, randomHeight, 0.2);
       Assertions.assertTrue(collision, "Body path collision detector failed");
 
       randomHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);
       heightMapData.reset();
-      heightMapData.setHeightAt(0.0, 0.0, randomHeight);
-      heightMapData.setHeightAt(-0.2, 0.0, randomHeight + 0.201);
-      heightMapData.setHeightAt(0.2, 0.0, randomHeight + 0.201);
-      heightMapData.setHeightAt(0.0, -0.3, randomHeight + 0.201);
-      heightMapData.setHeightAt(0.0,0.3, randomHeight + 0.201);
+      heightMapData.setHeight(0.0, 0.0, randomHeight);
+      heightMapData.setHeight(-0.2, 0.0, randomHeight + 0.201);
+      heightMapData.setHeight(0.2, 0.0, randomHeight + 0.201);
+      heightMapData.setHeight(0.0, -0.3, randomHeight + 0.201);
+      heightMapData.setHeight(0.0, 0.3, randomHeight + 0.201);
       collision = collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), 0, randomHeight, 0.2);
       Assertions.assertFalse(collision, "Body path collision detector failed");
 
@@ -52,7 +52,7 @@ public class BodyPathCollisionDetectorTest
 
       heightMapData.reset();
       randomHeight = EuclidCoreRandomTools.nextDouble(random, 10.0);
-      heightMapData.setHeightAt(0.0, 0.0, randomHeight + 0.201);
+      heightMapData.setHeight(0.0, 0.0, randomHeight + 0.201);
       collision = collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), 1, randomHeight, 0.2);
       Assertions.assertTrue(collision, "Body path collision detector failed");
 
@@ -64,14 +64,14 @@ public class BodyPathCollisionDetectorTest
          heightMapData.reset();
          for (int i = 0; i < collidingPoints.length; i++)
          {
-            heightMapData.setHeightAt(collidingPoints[i].getX(), collidingPoints[i].getY(), randomHeight + 0.201);
+            heightMapData.setHeight(collidingPoints[i].getX(), collidingPoints[i].getY(), randomHeight + 0.201);
          }
          Assertions.assertTrue(collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), yawIndex, randomHeight, 0.2), "Body collision detector failed");
 
          heightMapData.reset();
          for (int i = 0; i < nonCollidingPoints.length; i++)
          {
-            heightMapData.setHeightAt(nonCollidingPoints[i].getX(), nonCollidingPoints[i].getY(), randomHeight + 0.201);
+            heightMapData.setHeight(nonCollidingPoints[i].getX(), nonCollidingPoints[i].getY(), randomHeight + 0.201);
          }
          Assertions.assertFalse(collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), yawIndex, randomHeight, 0.2), "Body collision detector failed");
       }
@@ -81,7 +81,7 @@ public class BodyPathCollisionDetectorTest
          heightMapData.reset();
          for (int i = 0; i < collidingPoints.length; i++)
          {
-            heightMapData.setHeightAt(collidingPoints[i].getY(), -collidingPoints[i].getX(), randomHeight + 0.201);
+            heightMapData.setHeight(collidingPoints[i].getY(), -collidingPoints[i].getX(), randomHeight + 0.201);
          }
          Assertions.assertTrue(collisionDetector.collisionDetected(heightMapData, new BodyPathLatticePoint(0.0, 0.0), yawIndex, randomHeight, 0.2), "Body collision detector failed");
       }

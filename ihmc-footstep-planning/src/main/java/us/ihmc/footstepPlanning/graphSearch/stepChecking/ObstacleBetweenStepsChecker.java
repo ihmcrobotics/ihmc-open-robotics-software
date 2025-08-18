@@ -50,7 +50,7 @@ public class ObstacleBetweenStepsChecker
 
    boolean hasHeightMapData()
    {
-      return heightMapData != null && !heightMapData.isEmpty();
+      return heightMapData != null;
    }
 
    public boolean isFootstepValid(DiscreteFootstep footstep, DiscreteFootstep previousStep)
@@ -106,7 +106,7 @@ public class ObstacleBetweenStepsChecker
          double x = InterpolationTools.linearInterpolate(stepPosition.getX(), previousStepPosition.getX(), alpha);
          double y = InterpolationTools.linearInterpolate(stepPosition.getY(), previousStepPosition.getY(), alpha);
 
-         if (heightMapData.getHeightAt(x, y) > maxZofGroundForCollision)
+         if (heightMapData.getHeight(x, y) > maxZofGroundForCollision)
             return true;
       }
 

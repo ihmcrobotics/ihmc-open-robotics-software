@@ -9,10 +9,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -80,9 +78,7 @@ public class AStarBodyPathSmootherVisualizer
       double heightMapGridCenterX = 0.0;
       double heightMapGridCenterY = 0.0;
 
-      double estimatedGroundPlane = 0.0;
       HeightMapData heightMapData = new HeightMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
-      heightMapData.setEstimatedGroundHeight(estimatedGroundPlane);
 
       double obstacleHeight = 0.5;
       double obstacleMinY = 0.25;
@@ -95,7 +91,7 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (double y = obstacleMinY; y < obstacleMinY + obstacleWidth; y += heightMapGridResolution)
          {
-            heightMapData.setHeightAt(x, y, obstacleHeight);
+            heightMapData.setHeight(x, y, obstacleHeight);
          }
       }
 
@@ -119,7 +115,6 @@ public class AStarBodyPathSmootherVisualizer
 
       double estimatedGroundPlane = 0.0;
       HeightMapData heightMapData = new HeightMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
-      heightMapData.setEstimatedGroundHeight(estimatedGroundPlane);
 
       double obstacleHeight = 0.5;
       double obstacleMinX = 0.25;
@@ -132,7 +127,7 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (double y = minY; y < minY + obstacleThickness; y += heightMapGridResolution)
          {
-            heightMapData.setHeightAt(x, y, obstacleHeight);
+            heightMapData.setHeight(x, y, obstacleHeight);
          }
       }
 
@@ -156,7 +151,6 @@ public class AStarBodyPathSmootherVisualizer
 
       double estimatedGroundPlane = 0.0;
       HeightMapData heightMapData = new HeightMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
-      heightMapData.setEstimatedGroundHeight(estimatedGroundPlane);
 
       double obstacleHeight = 0.5;
       double obstacleMinX = bodyPathLatticePoints.get(5).getX() + 0.2;
@@ -169,7 +163,7 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (double y = minY; y < minY + obstacleThickness; y += heightMapGridResolution)
          {
-            heightMapData.setHeightAt(x, y, obstacleHeight);
+            heightMapData.setHeight(x, y, obstacleHeight);
          }
       }
 
@@ -333,12 +327,12 @@ public class AStarBodyPathSmootherVisualizer
       Graphics3DObject graphics3DObject = new Graphics3DObject();
 
       double groundPlaneThickness = 0.01;
-      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
+      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getMinHeight());
       graphics3DObject.translate(0.0, 0.0, - groundPlaneThickness);
       graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), groundPlaneThickness, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
-      double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();
+      double groundPlaneHeight = heightMapData.getMinHeight();
 
       int gridWidth = 2 * heightMapData.getCenterIndex() + 1;
       for (int key = 0; key < gridWidth * gridWidth; key++)
@@ -351,7 +345,7 @@ public class AStarBodyPathSmootherVisualizer
                                                                             heightMapData.getGridCenter().getY(),
                                                                             heightMapData.getCellSize(),
                                                                             heightMapData.getCenterIndex()));
-         double height = heightMapData.getHeightAt(HeightMapTools.keyToXIndex(key, heightMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex()));
+         double height = heightMapData.getHeight(HeightMapTools.keyToXIndex(key, heightMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex()));
 
          double renderedHeight = height - groundPlaneHeight;
          graphics3DObject.identity();

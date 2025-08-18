@@ -151,7 +151,7 @@ public class AStarFootstepPlanner
       result = FootstepPlanningResult.PLANNING;
 
       // Update what we should use for planning
-      boolean hasHeightMap = request.getEnvironmentHandler().getHeightMapData() != null && !request.getEnvironmentHandler().getHeightMapData().isEmpty();
+      boolean hasHeightMap = request.getEnvironmentHandler().getHeightMapData() != null;
       boolean hasTerrainMap = request.getEnvironmentHandler().getTerrainMapData() != null;
       boolean flatGroundMode = request.getAssumeFlatGround() || (!hasHeightMap && !hasTerrainMap);
 

@@ -290,7 +290,7 @@ public class AStarBodyPathSmootherWaypoint
                continue;
             }
 
-            double height = heightMapData.getHeightAt(indexXI, indexYI);
+            double height = heightMapData.getHeight(indexXI, indexYI);
             if (height < heightThreshold)
             {
                continue;
@@ -389,7 +389,7 @@ public class AStarBodyPathSmootherWaypoint
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
 
          if (!Double.isNaN(heightQuery) && MathTools.intervalContains(heightQuery, minHeight, maxHeight))
          {
