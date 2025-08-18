@@ -117,7 +117,14 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    {
       if (buildMeshAndCreateModelInstance != null)
       {
-         buildMeshAndCreateModelInstance.run();
+         try
+         {
+            buildMeshAndCreateModelInstance.run();
+         }
+         catch (Exception e)
+         {
+            LogTools.warn(e.getMessage());
+         }
          buildMeshAndCreateModelInstance = null;
       }
    }

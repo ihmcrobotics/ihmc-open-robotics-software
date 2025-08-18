@@ -41,7 +41,7 @@ public class AlexanderFootstepDataMessageSwingTrajectoryTest extends AvatarFoots
    public DRCRobotModel getRobotModel()
    {
       RobotTarget target = RobotTarget.SCS;
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, target);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, target);
    }
 
    @Override

@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SupportStateParameters
 {
-   private static final double defaultFootLoadThreshold = 0.2;
+   private static final double defaultFootLoadThreshold = 0.0;
 
    private static final double EPSILON_POINT_ON_EDGE = 5e-3;
    private static final double EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS = 8e-3;
@@ -40,8 +40,8 @@ public class SupportStateParameters
 
       assumeCopOnEdge = new BooleanParameter(prefix + "AssumeCopOnEdge", registry, false);
       assumeFootBarelyLoaded = new BooleanParameter(prefix + "AssumeFootBarelyLoaded", registry, false);
-      neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, false);
-      neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, false);
+      neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, true);
+      neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, true);
       holdFootOrientationFlat = new BooleanParameter(prefix + "HoldFlatOrientation", registry, false);
 
       footLoadThreshold = new YoDouble(prefix + "LoadThreshold", registry);

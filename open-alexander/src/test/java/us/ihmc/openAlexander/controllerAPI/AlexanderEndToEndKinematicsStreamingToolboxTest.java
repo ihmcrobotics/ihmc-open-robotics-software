@@ -10,7 +10,7 @@ import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
 public class AlexanderEndToEndKinematicsStreamingToolboxTest extends KinematicsStreamingToolboxEndToEndTest
 {
-   private final OpenAlexanderVersion robotVersion = OpenAlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion robotVersion = OpenAlexanderVersion.V1_FULL_ROBOT;
    private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(robotVersion, RobotTarget.SCS);
 
    @Override

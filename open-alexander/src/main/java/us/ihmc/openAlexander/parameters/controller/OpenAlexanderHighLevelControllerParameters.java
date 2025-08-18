@@ -22,9 +22,9 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 
-import static us.ihmc.openAlexander.parameters.controller.HighLevelParametersTools.*;
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT;
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.POSITION;
+import static us.ihmc.wholeBodyController.parameters.HighLevelParametersTools.*;
 
 public class OpenAlexanderHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -156,11 +156,11 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 0.0, 15.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 0.0, 10.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 100.0, 6.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 0.0, 0.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 100.0, 6.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 100.0, 6.0);
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 100.0, 6.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 100.0, 6.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 100.0, 6.0);
 
          { // Cycloid upper arms
             double cycloidVelScale = 1.0;
@@ -205,11 +205,11 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 800.0, 3.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 800.0, 3.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 101.0, 0.0, maxPosError, maxVelError, velScale);
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 1000.0, 3.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 101.0, 0.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 1000.0, 3.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 1000.0, 3.0);
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 1000.0, 3.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 1000.0, 3.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 1000.0, 3.0);
 
          double maxArmPosError = 2.00;
          double maxArmVelError = 1.00;
@@ -240,11 +240,11 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, POSITION, 650.0, 2.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, POSITION, 200.0, 2.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 1500.0, 150.0);
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, POSITION, 1500.0, 150.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 1500.0, 150.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, POSITION, 1500.0, 150.0);
 
          double maxArmPosError = 2.00;
          double maxArmVelError = 1.00;
@@ -281,11 +281,11 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, EFFORT, 500.0, 2.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, EFFORT, 500.0, 2.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 100.0, 0.0, maxPosError, maxVelError, velScale);
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 500.0, 0.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 100.0, 0.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 500.0, 0.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 500.0, 0.0);
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 500.0, 0.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, EFFORT, 500.0, 0.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, EFFORT, 500.0, 0.0);
 
          double maxArmPosError = 2.00;
          double maxArmVelError = 1.00;
@@ -314,11 +314,11 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, POSITION, 40.0, 2.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, POSITION, 40.0, 2.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
-         HighLevelParametersTools.configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 1500.0, 150.0, maxPosError, maxVelError, velScale);
 
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, POSITION, 1500.0, 150.0);
-         HighLevelParametersTools.configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 1500.0, 150.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, POSITION, 1500.0, 150.0);
+         configureNeckBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 1500.0, 150.0);
 
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, EFFORT, 120.0, 12.0, maxPosError, maxVelError, velScale);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, EFFORT, 120.0, 12.0, maxPosError, maxVelError, velScale);

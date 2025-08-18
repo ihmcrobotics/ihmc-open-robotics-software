@@ -42,8 +42,6 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
@@ -333,7 +331,7 @@ public class AlexanderAllocationTest
 
    private void setup()
    {
-      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       testHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, new FlatGroundEnvironment(), simulationTestingParameters);
       testHelper.start();
       testHelper.simulateNow(0.25);

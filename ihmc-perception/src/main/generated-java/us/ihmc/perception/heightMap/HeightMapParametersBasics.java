@@ -18,9 +18,14 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.flyingPointsFilter, flyingPointsFilter);
    }
 
-   default void setEnableVerticalFilter(boolean enableVerticalFilter)
+   default void setEnableChunkedMap(boolean enableChunkedMap)
    {
-      set(HeightMapParameters.enableVerticalFilter, enableVerticalFilter);
+      set(HeightMapParameters.enableChunkedMap, enableChunkedMap);
+   }
+
+   default void setLogHeightMap(boolean logHeightMap)
+   {
+      set(HeightMapParameters.logHeightMap, logHeightMap);
    }
 
    default void setSearchWindowHeight(int searchWindowHeight)
@@ -98,9 +103,9 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.maxClampHeight, maxClampHeight);
    }
 
-   default void setCellSizeInMeters(double cellSizeInMeters)
+   default void setCellSize(double cellSize)
    {
-      set(HeightMapParameters.cellSizeInMeters, cellSizeInMeters);
+      set(HeightMapParameters.cellSize, cellSize);
    }
 
    default void setLocalWidthInMeters(double localWidthInMeters)
@@ -136,21 +141,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
-   }
-
-   default void setFastSearchSize(int fastSearchSize)
-   {
-      set(HeightMapParameters.fastSearchSize, fastSearchSize);
-   }
-
-   default void setVerticalSearchSize(int verticalSearchSize)
-   {
-      set(HeightMapParameters.verticalSearchSize, verticalSearchSize);
-   }
-
-   default void setVerticalSearchResolution(double verticalSearchResolution)
-   {
-      set(HeightMapParameters.verticalSearchResolution, verticalSearchResolution);
    }
 
    /**
@@ -228,15 +218,5 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
    {
       set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
-   }
-
-   default void setDenoiserEnabled(boolean denoiserEnabled)
-   {
-      set(HeightMapParameters.denoiserEnabled, denoiserEnabled);
-   }
-
-   default void setStatisticsLoggingEnabled(boolean statisticsLoggingEnabled)
-   {
-      set(HeightMapParameters.statisticsLoggingEnabled, statisticsLoggingEnabled);
    }
 }

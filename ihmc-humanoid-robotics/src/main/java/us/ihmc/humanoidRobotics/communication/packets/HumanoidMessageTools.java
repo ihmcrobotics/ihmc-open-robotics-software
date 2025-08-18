@@ -19,6 +19,7 @@ import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AutomaticManipulationAbortMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CenterOfMassTrajectoryMessage;
 import controller_msgs.msg.dds.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.ClearDelayQueueMessage;
@@ -142,7 +143,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorS
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
@@ -162,6 +162,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
+import us.ihmc.robotics.partNames.HandJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -2196,6 +2197,30 @@ public class HumanoidMessageTools
          message.getWayPointTimes().add(keyFrameTimes.get(i));
          message.getDesiredWayPointPositionsInWorld().add().set(keyFramePoints.get(i));
       }
+      return message;
+   }
+
+   public static CenterOfMassTrajectoryMessage createCenterOfMassTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition)
+   {
+      CenterOfMassTrajectoryMessage message = new CenterOfMassTrajectoryMessage();
+      message.getEuclideanTrajectory().set(createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, ReferenceFrame.getWorldFrame()));
+      return message;
+   }
+
+   /**
+    * Use this constructor to execute a straight line trajectory for center of mass with velocity.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    *
+    * @param trajectoryTime         how long it takes to reach the desired position.
+    * @param desiredPosition        desired center of mass position expressed in world frame.
+    * @param desiredLinearVelocity  desired linear velocity at the end of the trajectory.
+    */
+   public static CenterOfMassTrajectoryMessage createCenterOfMassTrajectoryMessage(double trajectoryTime,
+                                                                                   Point3DReadOnly desiredPosition,
+                                                                                   Vector3DReadOnly desiredLinearVelocity)
+   {
+      CenterOfMassTrajectoryMessage message = new CenterOfMassTrajectoryMessage();
+      message.getEuclideanTrajectory().set(createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, desiredLinearVelocity, ReferenceFrame.getWorldFrame()));
       return message;
    }
 

@@ -36,6 +36,11 @@ public class MutableReferenceFrame
       this(ReferenceFrameMissingTools.computeFrameName(), parentFrame);
    }
 
+   public MutableReferenceFrame(String frameName)
+   {
+      this (frameName, ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+   }
+
    public MutableReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       this (frameName, parentFrame, new RigidBodyTransform());

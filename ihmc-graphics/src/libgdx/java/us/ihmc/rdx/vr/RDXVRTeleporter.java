@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
-   private static final Vector3D CHEST_TO_VR_HOME_OFFSET = new Vector3D(0.25, 0.0, 0.45);
+   private static final Vector3D CHEST_TO_VR_HOME_OFFSET = new Vector3D(0.25, 0.0, 0.55);
    private static ReferenceFrame robotVRHomeReferenceFrame;
    private boolean preparingToTeleport = false;
    private ModelInstance ring;

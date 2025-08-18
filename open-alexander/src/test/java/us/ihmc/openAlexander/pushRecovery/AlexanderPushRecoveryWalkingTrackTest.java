@@ -71,7 +71,7 @@ public class AlexanderPushRecoveryWalkingTrackTest extends AvatarPushRecoveryWal
    @Test
    public void testFlatGroundWalking()
    {
-      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT, RobotTarget.SCS);
+      robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);
       super.testFlatGroundWalking();
    }
 }

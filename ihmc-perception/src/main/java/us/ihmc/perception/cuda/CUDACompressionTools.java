@@ -51,8 +51,11 @@ public class CUDACompressionTools
 
    private final CUDAJPEGProcessor jpegProcessor = new CUDAJPEGProcessor(40);
 
-   public CUDACompressionTools()
+   public CUDACompressionTools() throws Exception
    {
+      if (!(CUDATools.hasCUDADevice() && CUDATools.hasNVCOMP()))
+         throw new Exception("CUDACompressionTools cannot be used. CUDA device found: %b. nvCOMP found: %b.".formatted(CUDATools.hasCUDADevice(),
+                                                                                                                       CUDATools.hasNVCOMP()));
       stream = CUDAStreamManager.getStream();
 
       nvcompBatchedZstdOpts_t zstdOptions = nvcomp.nvcompBatchedZstdDefaultOpts();

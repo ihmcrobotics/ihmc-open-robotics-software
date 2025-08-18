@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.AvatarFootstepQueueingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.openAlexander.OpenAlexanderRobotModel;
-import us.ihmc.openAlexander.OpenAlexanderVersion;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-2")
 public class AlexanderFootstepQueueingTest extends AvatarFootstepQueueingTest
 {
-   private final OpenAlexanderVersion version = OpenAlexanderVersion.V0_FULL_ROBOT;
+   private final OpenAlexanderVersion version = OpenAlexanderVersion.V1_FULL_ROBOT;
    private final RobotTarget target = RobotTarget.SCS;
    private final OpenAlexanderRobotModel robotModel = new OpenAlexanderRobotModel(version, target);
 

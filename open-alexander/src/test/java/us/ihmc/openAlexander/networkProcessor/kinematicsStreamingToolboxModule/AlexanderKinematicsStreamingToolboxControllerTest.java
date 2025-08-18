@@ -11,7 +11,7 @@ public class AlexanderKinematicsStreamingToolboxControllerTest extends Kinematic
    @Override
    public DRCRobotModel newRobotModel()
    {
-      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V0_FULL_ROBOT);
+      return new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT);
    }
 
    @Override

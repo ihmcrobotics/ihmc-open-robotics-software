@@ -34,3 +34,7 @@ bool use_center_of_mass_input false
 # The (optional) input for controlling the center of mass of the robot.
 # If use_center_of_mass_input is false, this message is ignored.
 KinematicsToolboxCenterOfMassMessage center_of_mass_input
+# Used to synchronize the marking of demonstration episodes to enable automatic dataset generation
+# True when this motion is part of a demonstration episode
+# False at all other times
+bool is_demonstration_episode false

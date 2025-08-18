@@ -6,19 +6,30 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMapManager;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,10 +52,12 @@ public class RapidHeightMapManager
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
-   private final Point3D gridCellLocation = new Point3D();
+   private final Point3D heightMapCenterPoint = new Point3D();
    // This is created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage = new HeightMapMessage();
    private long sequenceId = 0;
+   private FileOutputStream heightMapOutputStream;
+   private final ChunkedMapManager chunkedMapManager;
 
    public RapidHeightMapManager(ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
@@ -56,7 +69,7 @@ public class RapidHeightMapManager
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
 
-      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSizeInMeters(),
+      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
                                                      0.0,
                                                      0.0);
@@ -65,8 +78,8 @@ public class RapidHeightMapManager
       footSoleFrames.add(rightFootSoleFrame);
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
+      chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
@@ -74,7 +87,7 @@ public class RapidHeightMapManager
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
    }
 
-   public void updateAndPublishHeightMap(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       // Update the sensor origin here with the latest reference frame
       RigidBodyTransform heightMapFrameToWorldFrame = heightMapCenter.getTransformToWorldFrame();
@@ -89,29 +102,117 @@ public class RapidHeightMapManager
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      publishHeightMap(hostGlobalHeightMap, heightMapCenterOrigin);
+      // The center of this map should be centered in the world grid
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
+      double currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+
+      publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint, rapidHeightMapExtractor.getCellsPerAxis());
+
+      if (heightMapParameters.getEnableChunkedMap())
+      {
+         chunkedMapManager.updateAndPublish(hostGlobalHeightMap, heightMapCenterPoint);
+      }
 
       hostGlobalHeightMap.close();
    }
 
-   private void publishHeightMap(Mat hostGlobalHeightMap, Point3D heightMapCenterOrigin)
+   private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter, int cellsPerAxis)
    {
-      // The center of this map should be centered in the world grid
-      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
-      int currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSizeInMeters());
-      int currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSizeInMeters());
-      gridCellLocation.set(currentCellX * 0.02, currentCellY * 0.02, 0.0);
-      FramePose3D cameraPose = new FramePose3D();
-      cameraPose.getTranslation().set(gridCellLocation);
-
-      HeightMapMessageTools.toMessage(hostGlobalHeightMap,
+      HeightMapMessageTools.toMessage(globalHeightMap,
                                       heightMapMessage,
-                                      gridCellLocation,
+                                      heightMapCenter,
                                       heightMapParameters.getGlobalWidthInMeters(),
-                                      heightMapParameters.getCellSizeInMeters());
+                                      heightMapParameters.getCellSize(),
+                                      heightMapParameters.getHeightOffset(),
+                                      heightMapParameters.getHeightScaleFactor(),
+                                      cellsPerAxis);
+
+      if (heightMapParameters.getLogHeightMap())
+      {
+         float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
+                                                               heightMapCenterPoint,
+                                                               (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                               (float) heightMapParameters.getCellSize(),
+                                                               heightMapParameters);
+         try
+         {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
+
+            Path heightMapDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
+
+            Path binaryLogPath = heightMapDirectory.resolve(timestamp + "_HeightMapLog.bin");
+            if (heightMapOutputStream == null)
+            {
+               heightMapOutputStream = new FileOutputStream(binaryLogPath.toFile(), true);
+               LogTools.info("Writing height map log to " + binaryLogPath);
+            }
+            if (!Files.exists(heightMapDirectory))
+            {
+               Files.createDirectory(heightMapDirectory);
+            }
+         }
+         catch (FileNotFoundException e)
+         {
+            throw new RuntimeException(e);
+         }
+         catch (IOException ignored)
+         {
+         }
+
+         try
+         {
+            logHeightMapToFile(heightMapOutputStream, floatsToLog, System.currentTimeMillis());
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+
+      if (!heightMapParameters.getLogHeightMap())
+      {
+         if (heightMapOutputStream != null)
+         {
+            try
+            {
+               heightMapOutputStream.close();
+               heightMapOutputStream = null;
+            }
+            catch (IOException e)
+            {
+               throw new RuntimeException(e);
+            }
+         }
+      }
+
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
+   }
+
+   public static void logHeightMapToFile(FileOutputStream fos, float[] packedArray, double timestamp) throws IOException
+   {
+      int frameSize = 8 + packedArray.length * Float.BYTES;
+
+      ByteBuffer buffer = ByteBuffer.allocate(4 + frameSize);
+      buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+      // Write frame size (int)
+      buffer.putInt(frameSize);
+
+      // Write timestamp (double)
+      buffer.putDouble(timestamp);
+
+      // Write packed float data
+      for (float f : packedArray)
+      {
+         buffer.putFloat(f);
+      }
+
+      // Write to file
+      fos.write(buffer.array());
    }
 
    /**
@@ -184,10 +285,11 @@ public class RapidHeightMapManager
 
       HeightMapTools.convertToHeightMapData(terrainHeightMap,
                                             latestTerrainHeightMapData,
-                                            gridCellLocation,
+                                            heightMapCenterPoint,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSizeInMeters(),
-                                            heightMapParameters);
+                                            (float) heightMapParameters.getCellSize(),
+                                            (float) heightMapParameters.getHeightScaleFactor(),
+                                            (float) heightMapParameters.getHeightOffset());
       return latestTerrainHeightMapData;
    }
 
@@ -213,5 +315,6 @@ public class RapidHeightMapManager
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
+      chunkedMapManager.destroy();
    }
 }

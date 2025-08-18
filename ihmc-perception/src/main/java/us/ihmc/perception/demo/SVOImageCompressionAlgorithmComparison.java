@@ -55,7 +55,7 @@ public class SVOImageCompressionAlgorithmComparison
    private FFmpegVideoEncoder colorEncoder;
    private FFmpegVideoEncoder depthEncoder;
 
-   private SVOImageCompressionAlgorithmComparison()
+   private SVOImageCompressionAlgorithmComparison() throws Exception
    {
       algorithmComparison.addColorCompressionAlgorithm("NVJPEG", this::nvjpegColorCompression);
       algorithmComparison.addColorCompressionAlgorithm("NVCOMP", this::nvcompColorCompression);
@@ -219,7 +219,7 @@ public class SVOImageCompressionAlgorithmComparison
       }
    }
 
-   public static void main(String[] args) throws IOException
+   public static void main(String[] args) throws Exception
    {
       SVOImageCompressionAlgorithmComparison comparison = new SVOImageCompressionAlgorithmComparison();
       comparison.run();

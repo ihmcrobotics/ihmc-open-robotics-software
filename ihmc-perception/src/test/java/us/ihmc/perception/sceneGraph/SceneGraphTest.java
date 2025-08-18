@@ -28,7 +28,7 @@ public class SceneGraphTest
 
       sceneGraph.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0", crdtInfo), sceneGraph.getRootNode()));
+         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0", crdtInfo), sceneGraph.getRootNode(), sceneGraph));
       });
 
       Assertions.assertEquals(1, sceneGraph.getRootNode().getChildren().size());
@@ -43,8 +43,8 @@ public class SceneGraphTest
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1", crdtInfo);
       sceneGraph.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));
-         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo), child1));
+         modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode(), sceneGraph));
+         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo), child1, sceneGraph));
       });
 
       Assertions.assertEquals(2, sceneGraph.getRootNode().getChildren().size());
@@ -68,9 +68,9 @@ public class SceneGraphTest
       SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo);
       sceneGraph.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new SceneGraphNodeAddition(child0, sceneGraph.getRootNode()));
-         modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));
-         modificationQueue.accept(new SceneGraphNodeAddition(child1child0, child1));
+         modificationQueue.accept(new SceneGraphNodeAddition(child0, sceneGraph.getRootNode(), sceneGraph));
+         modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode(), sceneGraph));
+         modificationQueue.accept(new SceneGraphNodeAddition(child1child0, child1, sceneGraph));
       });
 
       child1child0.getModifiableNodeFrame().update(transformToParent -> transformToParent.getTranslation().set(5.0, 2.0, 1.0));
