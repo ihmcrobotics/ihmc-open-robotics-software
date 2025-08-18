@@ -642,7 +642,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    {
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
 
-      packet.setUseGpu(getUseGPU());
       packet.setAStarHeuristicsWeight(getAStarHeuristicsWeight());
       packet.setMaxBranchFactor(getMaxBranchFactor());
       packet.setEnableExpansionMask(getEnableExpansionMask());
