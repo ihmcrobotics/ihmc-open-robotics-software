@@ -28,7 +28,11 @@ import static org.bytedeco.cuda.global.cudart.*;
 public class RapidHeightMapExtractor
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
-   private static final int BLOCK_SIZE_XY = 32;
+   /**
+    * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
+    * This was chosen based on GPU profiling and significantly effects performance.
+    */
+   private static final int BLOCK_SIZE_XY = 16;
    private static final int MODE = 1; // 0 -> Ouster, 1 -> Realsense
 
    private final HeightMapParameters heightMapParameters;
@@ -40,7 +44,6 @@ public class RapidHeightMapExtractor
    private final GpuMat localMeanMap;
    private final GpuMat localVarianceMap;
    private final GpuMat localMotionVarianceMap;
-   private final GpuMat localSampleCountMap;
 
    // These are the mats required to keep a global map
    private final GpuMat globalMeanMap;
@@ -122,7 +125,6 @@ public class RapidHeightMapExtractor
          localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         localSampleCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_16UC1);
 
          globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
@@ -219,13 +221,12 @@ public class RapidHeightMapExtractor
          previousToCurrentSensorOrigin.multiply(sensorToWorldTransform);
 
          Vector3DBasics translation = previousToCurrentSensorOrigin.getTranslation();
-         double linearMotionMagnitude = translation.norm();
+         float linearMotionMagnitude = (float) translation.norm();
 
          RotationMatrixBasics rotation = previousToCurrentSensorOrigin.getRotation();
          AxisAngle axisAngle = new AxisAngle(rotation);
-         double angularMotionMagnitude = Math.abs(axisAngle.getAngle());
+         float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         // Compute the inverse transforms for later use
          RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
          groundToSensorTransform.invert();
 
@@ -247,12 +248,12 @@ public class RapidHeightMapExtractor
          updateKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          updateKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          updateKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
-         updateKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          updateKernel.withPointer(parametersDevicePointer);
          updateKernel.withPointer(sensorToGroundTransformDevicePointer);
          updateKernel.withPointer(groundToSensorTransformDevicePointer);
          updateKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
-         updateKernel.withFloat((float) linearMotionMagnitude).withFloat((float) angularMotionMagnitude);
+         updateKernel.withFloat(linearMotionMagnitude);
+         updateKernel.withFloat(angularMotionMagnitude);
          updateKernel.withFloat(resetOffset);
 
          updateKernel.run(stream, updateKernelGridDim, blockSize, 0);
@@ -307,7 +308,6 @@ public class RapidHeightMapExtractor
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
          registerKernel.withPointer(localVarianceMap.data()).withLong(localVarianceMap.step());
          registerKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
-         registerKernel.withPointer(localSampleCountMap.data()).withLong(localSampleCountMap.step());
          registerKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          registerKernel.withPointer(globalVarianceMap.data()).withLong(globalVarianceMap.step());
          registerKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
@@ -492,7 +492,6 @@ public class RapidHeightMapExtractor
       localMeanMap.close();
       localVarianceMap.close();
       localMotionVarianceMap.close();
-      localSampleCountMap.close();
 
       globalMeanMap.close();
       globalVarianceMap.close();
