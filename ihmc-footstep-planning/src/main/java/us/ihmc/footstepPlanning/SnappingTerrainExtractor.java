@@ -12,9 +12,8 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
@@ -26,8 +25,12 @@ import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class SnappingTerrainExtractor
 {
-   private static final int BLOCK_SIZE_XY = 32;
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   /**
+    * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
+    * This was chosen based on GPU profiling and significantly effects performance.
+    */
+   private static final int BLOCK_SIZE_XY = 16;
 
    private final TerrainMapData terrainMapData;
    private final HeightMapParameters heightMapParameters;
@@ -112,7 +115,9 @@ public class SnappingTerrainExtractor
       terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
                                           cellsPerAxisTerrain,
                                           heightMapParameters.getHeightScaleFactor(),
-                                          heightMapParameters.getHeightOffset());
+                                          heightMapParameters.getHeightOffset(),
+                                          heightMapParameters.getCellSize(),
+                                          heightMapParameters.getTerrainWidthInMeters());
 
       // Initialize matrices and images
       terrainCostMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);

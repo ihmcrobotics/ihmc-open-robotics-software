@@ -17,7 +17,7 @@ public class RDXInteractableZEDMini extends RDXInteractableSensor
 
    public RDXInteractableZEDMini(RDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
-      super(panel3D, referenceFrameToRepresent, transformToParentToModify, "environmentObjects/ZEDMini/ZEDMini.g3dj");
+      super(panel3D, referenceFrameToRepresent, transformToParentToModify, "environmentObjects/ZEDMini/ZEDMini.glb");
    }
 
    @Override

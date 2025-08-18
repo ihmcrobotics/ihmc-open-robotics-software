@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StepConstraintCalculator
 {
-   private final SteppableRegionsCalculator steppableRegionsCalculator;
+   private final StepAdjustmentCalculator stepAdjustmentCalculator;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -89,7 +89,7 @@ public class StepConstraintCalculator
    {
       this.timeProvider = timeProvider;
       this.soleZUpFrames = soleZUpFrames;
-      this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
+      this.stepAdjustmentCalculator = new StepAdjustmentCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, graphicsListRegistry);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(registry, graphicsListRegistry);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
@@ -187,14 +187,14 @@ public class StepConstraintCalculator
       {
          updateCaptureRegion(currentStep);
 
-         steppableRegionsCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
+         stepAdjustmentCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
          FramePoint3D supportFoot = new FramePoint3D(soleZUpFrames.get(currentStep.getSwingSide().getOppositeSide()));
          supportFoot.changeFrame(worldFrame);
          supportPose.setToZero();
          supportPose.getPosition().set(supportFoot);
-         steppableRegionsCalculator.setStanceFootPosition(supportFoot);
+         stepAdjustmentCalculator.setStanceFootPosition(supportFoot);
 
-         List<StepConstraintRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
+         List<StepConstraintRegion> steppableRegions = stepAdjustmentCalculator.computeSteppableRegions();
 
          updateReachabilityRegion(currentStep.getSwingSide().getOppositeSide());
 

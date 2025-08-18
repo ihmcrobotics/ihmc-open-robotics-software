@@ -14,6 +14,8 @@ public class RDX3DOverlayPanel
    private final Runnable imGuiRender;
    private float windowActiveLerp;
    private final RDX3DPanel parent;
+   private float lastPanelWidth = -1, lastPanelHeight = -1, lastStartX = -1, lastStartY = -1;
+   private float lastBgAlpha = -1;
 
    public RDX3DOverlayPanel(String panelName, Runnable imGuiRender, RDX3DPanel parent)
    {
@@ -27,11 +29,23 @@ public class RDX3DOverlayPanel
       float panelWidth = 400;
       float panelHeight = 300 * windowActiveLerp;
 
-      ImGui.setNextWindowSize(panelWidth, panelHeight);
       float startX = parent.getWindowPositionX() + (parent.getWindowSizeX() - panelWidth - 5);
       float startY = previousActiveWindowY + 10;
-      ImGui.setNextWindowPos(startX, startY);
-      ImGui.setNextWindowBgAlpha(windowActiveLerp);
+      float bgAlpha = windowActiveLerp;
+
+      if (panelWidth != lastPanelWidth || panelHeight != lastPanelHeight)
+         ImGui.setNextWindowSize(panelWidth, panelHeight);
+      if (startX != lastStartX || startY != lastStartY)
+         ImGui.setNextWindowPos(startX, startY);
+      if (bgAlpha != lastBgAlpha)
+         ImGui.setNextWindowBgAlpha(bgAlpha);
+
+      lastPanelWidth = panelWidth;
+      lastPanelHeight = panelHeight;
+      lastStartX = startX;
+      lastStartY = startY;
+      lastBgAlpha = bgAlpha;
+
       int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove;
       ImGui.begin(labels.get(panelName), windowFlags);
 

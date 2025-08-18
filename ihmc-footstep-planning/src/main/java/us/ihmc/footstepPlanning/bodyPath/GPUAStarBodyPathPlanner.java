@@ -350,7 +350,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       if (cellsPerSide != heightMapData.getCellsPerAxis())
       {
          this.cellsPerSide = heightMapData.getCellsPerAxis();
-         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getGridSizeXY(), BodyPathLatticePoint.gridSizeXY);
+         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), BodyPathLatticePoint.gridSizeXY);
          this.nodesPerSide = 2 * nodeCenterIndex + 1;
          resizeOpenCLObjects();
          smoother.resizeOpenCLObjects(cellsPerSide);
@@ -393,7 +393,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       // populate the offset vertices for computing the traversibility into a GPU buffer
       populateTraversibilityOffsetsBuffer();
       // populate the offset vertices for checking for collisions into a GPU buffer
-      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
+      populateCollisionsOffsetsBuffer(heightMapData.getCellSize(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
       // populate the offset vertices for computing the children node into the GPU buffer
       populateNeighborOffsetsBuffer();
       // populate the parameters that define the height map extrinsics
@@ -627,19 +627,19 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       TIntArrayList twentyTwoCollisionOffsetsY = new TIntArrayList();
 
       double width = plannerParameters.getTraversibilitySearchWidth() / 2.0;
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
+      BodyPathCollisionDetector.packOffsets(heightMapData.getCellSize(),
                                             zeroDegCollisionOffsetsX,
                                             zeroDegCollisionOffsetsY,
                                             width,
                                             width,
                                             0.0);
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
+      BodyPathCollisionDetector.packOffsets(heightMapData.getCellSize(),
                                             fourtyFiveDegCollisionOffsetsX,
                                             fourtyFiveDegCollisionOffsetsY,
                                             width,
                                             width,
                                             Math.toRadians(45.0));
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
+      BodyPathCollisionDetector.packOffsets(heightMapData.getCellSize(),
                                             twentyTwoCollisionOffsetsX,
                                             twentyTwoCollisionOffsetsY,
                                             width,
@@ -811,7 +811,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       float snapHeightThreshold = (float) (patchWidth * Math.sin(maxIncline));
 
       FloatPointer floatPointer = heightMapParametersBuffer.getBytedecoFloatBufferPointer();
-      floatPointer.put(0, (float) heightMapData.getGridResolutionXY());
+      floatPointer.put(0, (float) heightMapData.getCellSize());
       floatPointer.put(1, (float) heightMapData.getCenterIndex());
       floatPointer.put(2, (float) heightMapData.getGridCenter().getX());
       floatPointer.put(3, (float) heightMapData.getGridCenter().getY());
@@ -867,7 +867,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
     */
    private void populateLeastSquaresOffsetBuffer(double patchWidth)
    {
-      int patchCellHalfWidth = (int) ((patchWidth / 2.0) / heightMapData.getGridResolutionXY());
+      int patchCellHalfWidth = (int) ((patchWidth / 2.0) / heightMapData.getCellSize());
       if (patchCellHalfWidth % 2 == 0)
          patchCellHalfWidth++;
 
@@ -932,7 +932,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
     */
    private void populateRansacOffsetBuffer()
    {
-      int maxOffset = (int) Math.round(HeightMapRANSACNormalCalculator.maxRansacRadius / heightMapData.getGridResolutionXY());
+      int maxOffset = (int) Math.round(HeightMapRANSACNormalCalculator.maxRansacRadius / heightMapData.getCellSize());
 
       TIntArrayList xRansacOffsets = new TIntArrayList();
       TIntArrayList yRansacOffsets = new TIntArrayList();
@@ -943,7 +943,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       {
          for (int yi = -maxOffset; yi <= maxOffset; yi++)
          {
-            double radius = heightMapData.getGridResolutionXY() * EuclidCoreTools.norm(xi, yi);
+            double radius = heightMapData.getCellSize() * EuclidCoreTools.norm(xi, yi);
             if (radius > HeightMapRANSACNormalCalculator.minRansacRadius && radius < HeightMapRANSACNormalCalculator.maxRansacRadius)
             {
                xRansacOffsets.add(xi);
@@ -1168,7 +1168,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
          double bodyY = 0.5 * (neighbor.getY() + node.getY());
 
          // ensure that this body position is within bounds. Sometimes rounding errors cause this to fail.
-         double halfWidth = heightMapData.getGridSizeXY() / 2.0;
+         double halfWidth = heightMapData.getMapSize() / 2.0;
          bodyX = MathTools.clamp(bodyX, heightMapData.getGridCenter().getX() - halfWidth, heightMapData.getGridCenter().getX() + halfWidth);
          bodyY = MathTools.clamp(bodyY, heightMapData.getGridCenter().getY() - halfWidth, heightMapData.getGridCenter().getY() + halfWidth);
 
@@ -1177,7 +1177,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                                                                            bodyY,
                                                                            heightMapData.getGridCenter().getX(),
                                                                            heightMapData.getGridCenter().getY(),
-                                                                           heightMapData.getGridResolutionXY(),
+                                                                           heightMapData.getCellSize(),
                                                                            heightMapData.getCenterIndex())));
       }
 

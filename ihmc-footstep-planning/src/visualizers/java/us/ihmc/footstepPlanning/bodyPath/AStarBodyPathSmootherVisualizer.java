@@ -335,7 +335,7 @@ public class AStarBodyPathSmootherVisualizer
       double groundPlaneThickness = 0.01;
       graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
       graphics3DObject.translate(0.0, 0.0, - groundPlaneThickness);
-      graphics3DObject.addCube(heightMapData.getGridSizeXY(), heightMapData.getGridSizeXY(), groundPlaneThickness, YoAppearance.Blue());
+      graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), groundPlaneThickness, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
       double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();
@@ -345,11 +345,11 @@ public class AStarBodyPathSmootherVisualizer
       {
          Point2D cellPosition = new Point2D(HeightMapTools.keyToXCoordinate(key,
                                                                             heightMapData.getGridCenter().getX(),
-                                                                            heightMapData.getGridResolutionXY(),
+                                                                            heightMapData.getCellSize(),
                                                                             heightMapData.getCenterIndex()),
                                             HeightMapTools.keyToYCoordinate(key,
                                                                             heightMapData.getGridCenter().getY(),
-                                                                            heightMapData.getGridResolutionXY(),
+                                                                            heightMapData.getCellSize(),
                                                                             heightMapData.getCenterIndex()));
          double height = heightMapData.getHeightAt(HeightMapTools.keyToXIndex(key, heightMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex()));
 
@@ -360,7 +360,7 @@ public class AStarBodyPathSmootherVisualizer
          if (height > groundPlaneHeight + 1e-5)
          {
             AppearanceDefinition color = YoAppearance.Olive();
-            graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, color);
+            graphics3DObject.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), renderedHeight, true, color);
          }
       }
 

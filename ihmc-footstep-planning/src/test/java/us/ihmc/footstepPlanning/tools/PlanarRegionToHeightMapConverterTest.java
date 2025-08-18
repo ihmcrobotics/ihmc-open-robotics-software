@@ -104,8 +104,8 @@ public class PlanarRegionToHeightMapConverterTest
       {
          for (int yIndex = 0; yIndex < heightMapData.getCellsPerAxis(); yIndex++)
          {
-            double x = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            double y = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+            double x = HeightMapTools.indexToCoordinate(xIndex, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
+            double y = HeightMapTools.indexToCoordinate(yIndex, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), heightMapData.getCenterIndex());
             double height = heightMapData.getHeightAt(xIndex, yIndex);
 
             if (Double.isFinite(height))
