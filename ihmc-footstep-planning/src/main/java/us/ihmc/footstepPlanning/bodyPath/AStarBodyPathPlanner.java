@@ -271,6 +271,13 @@ public class AStarBodyPathPlanner
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
+            if (deltaHeight.getValue() > 0.1)
+            {
+               rejectionReason.set(RejectionReason.TOO_STEEP);
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
+
             if (Math.abs(incline.getValue()) > Math.toRadians(plannerParameters.getMaxIncline()))
             {
                rejectionReason.set(RejectionReason.TOO_STEEP);
@@ -278,7 +285,8 @@ public class AStarBodyPathPlanner
                continue;
             }
 
-            if (plannerParameters.getCheckForCollisions())
+            double distanceFromStart = EuclidCoreTools.norm(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
+            if (plannerParameters.getCheckForCollisions() && distanceFromStart > plannerParameters.getCollisionStartTolerance())
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
                                                                               neighbor,

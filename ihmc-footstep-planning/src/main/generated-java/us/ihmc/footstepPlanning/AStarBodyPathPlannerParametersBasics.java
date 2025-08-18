@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning;
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
+import static us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters.collisionStartTolerance;
+
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
@@ -160,6 +162,14 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
       set(AStarBodyPathPlannerParameters.smootherGradientThresholdToTerminate, smootherGradientThresholdToTerminate);
    }
 
+   /**
+    * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+    */
+   default void setCollisionStartTolerance(double collisionStartTolerance)
+   {
+      set(AStarBodyPathPlannerParameters.collisionStartTolerance, collisionStartTolerance);
+   }
+
    default void set(AStarBodyPathPlannerParametersPacket packet)
    {
       double noValue = AStarBodyPathPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -199,5 +209,7 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
          setSmootherHillClimbGain(packet.getSmootherHillClimbGain());
       if (packet.getSmootherGradientThresholdToTerminate() != noValue)
          setSmootherGradientThresholdToTerminate(packet.getSmootherGradientThresholdToTerminate());
+      if (packet.getCollisionStartTolerance() != noValue)
+         setCollisionStartTolerance(packet.getCollisionStartTolerance());
    }
 }

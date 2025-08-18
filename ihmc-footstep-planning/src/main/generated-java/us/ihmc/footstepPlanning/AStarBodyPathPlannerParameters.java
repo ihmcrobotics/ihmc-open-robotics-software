@@ -97,6 +97,10 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
     * Minimum gradient vector magnitude to terminate the smoother iterations
     */
    public static final DoubleStoredPropertyKey smootherGradientThresholdToTerminate = keys.addDoubleKey("Smoother gradient threshold to terminate");
+   /**
+    * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+    */
+   public static final DoubleStoredPropertyKey collisionStartTolerance = keys.addDoubleKey("Collision start tolerance");
 
    /**
     * Loads this property set.

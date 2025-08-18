@@ -94,6 +94,10 @@ module toolbox_msgs
          * Minimum gradient vector magnitude to terminate the smoother iterations.
          */
         double smoother_gradient_threshold_to_terminate;
+        /**
+         * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+         */
+        double collision_start_tolerance;
       };
     };
   };
