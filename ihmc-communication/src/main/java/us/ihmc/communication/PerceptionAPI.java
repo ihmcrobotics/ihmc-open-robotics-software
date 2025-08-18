@@ -152,6 +152,9 @@ public final class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_image").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo").withType(ImageMessage.class).withSuffix("annotated_image");
+   public static final ROS2Topic<ImageMessage> YOLO_TRACKED_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo").withType(ImageMessage.class).withSuffix("track_annotated_image");
+   public static final ROS2Topic<Empty> REQUEST_YOLO_TRACKED_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_track_image").withType(Empty.class);
+
    public static final ROS2Topic<ImageMessage> ZED_STEREO_COLOR = IHMC_ROOT.withModule(ZED_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
    public static final SideDependentList<ROS2Topic<ImageMessage>> ZED_COLOR_IMAGES = new SideDependentList<>(BEST_EFFORT.withModule(ZED_NAME)
                                                                                                                         .withType(ImageMessage.class)
