@@ -546,12 +546,12 @@ public class FootstepPlannerRequest
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
-      if (environmentHandler.getHeightMapData() != null)
+      if (other.environmentHandler.getHeightMapData() != null)
          environmentHandler.setHeightMapData(other.getEnvironmentHandler().getHeightMapData());
       else if (other.getEnvironmentHandler().getTerrainMapData() != null)
          environmentHandler.setHeightMapData(new HeightMapData(other.getEnvironmentHandler().getHeightMapData()));
 
-      if (environmentHandler.getTerrainMapData() != null)
+      if (other.environmentHandler.getTerrainMapData() != null)
          environmentHandler.setTerrainMapData(other.getEnvironmentHandler().getTerrainMapData());
       else if (other.getEnvironmentHandler().getTerrainMapData() != null)
          environmentHandler.setTerrainMapData(new TerrainMapData(other.getEnvironmentHandler().getTerrainMapData()));
