@@ -106,7 +106,6 @@ public class FootstepPlanActionPlanningThread
       footstepPlannerRequest.setPerformAStarSearch(definition.getPlannerPerformAStarSearch().getValue());
       footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
-      footstepPlanner.enableGPUBodyPathPlanner(definition.getPlannerParametersReadOnly().getUseGPU());
       footstepPlanner.getFootstepPlannerParameters().set(definition.getPlannerParametersReadOnly());
 
       // TODO: Add body path planning options to user

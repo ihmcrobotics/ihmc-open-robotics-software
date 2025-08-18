@@ -92,10 +92,7 @@ public class AStarBodyPathPlannerVisualizer
 
       scs.addStaticLinkGraphics(heightMapGraphics(heightMapData));
 
-      SideDependentList<ConvexPolygon2D> footPolygon = PlannerTools.createDefaultFootPolygons();
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-
-      AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(parameters, new AStarBodyPathPlannerParameters(), footPolygon);
+      AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(new AStarBodyPathPlannerParameters());
       bodyPathPlanner.setHeightMapData(heightMapData);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
