@@ -45,7 +45,7 @@ public class RDXVRStereoVision
       if (enabled.get() && !dualBlackflySphericalProjection.isConnectingOrConnected())
          dualBlackflySphericalProjection.enable();
 
-      if (ImGui.checkbox(labels.get("Stereo vision enabled"), enabled))
+      if (ImGui.checkbox(labels.get("Stereo Vision Enabled"), enabled))
       {
          if (!enabled.get())
          {

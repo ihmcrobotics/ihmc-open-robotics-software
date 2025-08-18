@@ -13,22 +13,24 @@ public enum ZEDModelData
     * This has been done as sl_get_camera_model() does not differentiate between 2.2mm and 4mm lens models.
     * Assuming the use of wide angle (2.2mm) models seems safe for now (2023).
     */
-   ZED(0.06, 0.2f, 40.0f),
-   ZED_MINI(0.0315, 0.1f, 20.0f),
-   ZED_2(0.06, 0.3f, 40.0f),
-   ZED_2I(0.06, 0.2f, 40.0f),
-   ZED_X(0.06, 0.3f, 20.0f),
-   ZED_X_MINI(0.025, 0.1f, 8.0f);
+   ZED(0.06, 0.2f, 40.0f, 68.0f),
+   ZED_MINI(0.0315, 0.1f, 20.0f, 52.0f),
+   ZED_2(0.06, 0.3f, 40.0f, 68.0f),
+   ZED_2I(0.06, 0.2f, 40.0f, 68.0f),
+   ZED_X(0.06, 0.3f, 20.0f, 78.0f),
+   ZED_X_MINI(0.025, 0.1f, 8.0f, 78.0f);
 
    private final double centerToCameraDistance;
    private final float minimumDepthDistance;
    private final float maximumDepthDistance;
+   private final float verticalFOV;
 
-   ZEDModelData(double centerToCameraDistance, float minimumDepthDistance, float maximumDepthDistance)
+   ZEDModelData(double centerToCameraDistance, float minimumDepthDistance, float maximumDepthDistance, float verticalFOV)
    {
       this.centerToCameraDistance = centerToCameraDistance;
       this.minimumDepthDistance = minimumDepthDistance;
       this.maximumDepthDistance = maximumDepthDistance;
+      this.verticalFOV = verticalFOV;
    }
 
    public double getCenterToCameraDistance()
@@ -46,13 +48,8 @@ public enum ZEDModelData
       return maximumDepthDistance;
    }
 
-   public static ReferenceFrame createCameraReferenceFrame(RobotSide cameraSide, ReferenceFrame zed2CenterFrame)
+   public float getVerticalFOV()
    {
-      RigidBodyTransform zed2LeftCameraToCenterTransform = new RigidBodyTransform();
-      zed2LeftCameraToCenterTransform.getTranslation().set(0.0, cameraSide.negateIfRightSide(0.06), 0.0);
-
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("ZED2%sCameraFrame".formatted(cameraSide.getPascalCaseName()),
-                                                                               zed2CenterFrame,
-                                                                               zed2LeftCameraToCenterTransform);
+      return verticalFOV; // We use HD720 by default and SVGA for the X models
    }
 }
