@@ -27,7 +27,7 @@ import static org.bytedeco.cuda.global.cudart.*;
 
 public class RapidHeightMapExtractor
 {
-   private static final boolean PRINT_TIMING_FOR_KERNELS = true;
+   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    /**
     * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
