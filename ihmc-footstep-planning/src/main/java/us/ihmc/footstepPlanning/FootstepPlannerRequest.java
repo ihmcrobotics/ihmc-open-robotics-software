@@ -455,10 +455,7 @@ public class FootstepPlannerRequest
       }
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(requestPacket.getHeightMapMessage());
-      if (!heightMapData.isEmpty())
-         setHeightMapData(heightMapData);
-      else
-         setHeightMapData(null);
+      setHeightMapData(heightMapData);
 
       if (!TerrainMapTools.isEmpty(requestPacket.getTerrainMapMessage()))
          setTerrainMapData(new TerrainMapData(requestPacket.getTerrainMapMessage()));

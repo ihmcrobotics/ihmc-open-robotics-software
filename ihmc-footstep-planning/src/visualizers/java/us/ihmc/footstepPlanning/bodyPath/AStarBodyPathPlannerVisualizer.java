@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -14,15 +13,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
@@ -134,13 +130,14 @@ public class AStarBodyPathPlannerVisualizer
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.1);
 
-      double groundHeight = heightMapData.getEstimatedGroundHeight();
+      double groundHeight = heightMapData.getMinHeight();
       AppearanceDefinition cellColor = YoAppearance.Olive();
+      int numberOfCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells(); i++)
+      for (int key = 0; key < numberOfCells; key++)
       {
-         Point2D cellPosition = heightMapData.getCellPosition(i);
-         double height = heightMapData.getHeight(i);
+         Point2D cellPosition = heightMapData.getCellPosition(key);
+         double height = heightMapData.getHeight(key);
          double renderedHeight = (height - groundHeight);
 
          graphics3DObject.identity();
@@ -149,7 +146,7 @@ public class AStarBodyPathPlannerVisualizer
       }
 
       graphics3DObject.identity();
-      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
+      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getMinHeight());
       graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), 0.01, YoAppearance.Blue());
 
       return graphics3DObject;

@@ -173,7 +173,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      boolean heightMapAvailable = request.getEnvironmentHandler().getHeightMapData() != null && !request.getEnvironmentHandler().getHeightMapData().isEmpty();
+      boolean heightMapAvailable = request.getEnvironmentHandler().getHeightMapData() != null;
 
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);

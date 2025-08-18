@@ -4,9 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,7 +13,6 @@ import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
 import us.ihmc.log.LogTools;
@@ -26,8 +23,6 @@ import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -502,7 +497,7 @@ public class AStarBodyPathPlanner
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery))
          {
             heights.add(heightQuery);
@@ -525,7 +520,7 @@ public class AStarBodyPathPlanner
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery) && heightQuery > minHeight)
          {
             runningSum += heightQuery;

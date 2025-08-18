@@ -15,7 +15,7 @@ public class SteppableRegionsListMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "431c682c8db2e5f5953b4af92a9e7efc44e5a43b65de5cc8c2c1b768093ffd00";
+   		return "1ceb0f05229bd7871fcb5c21742f8f15c512494676c08ac7ae7e7a077eebac86";
    }
    
    @Override
