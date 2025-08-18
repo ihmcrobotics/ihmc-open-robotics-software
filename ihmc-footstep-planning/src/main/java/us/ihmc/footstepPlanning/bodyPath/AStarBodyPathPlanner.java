@@ -37,7 +37,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
+public class AStarBodyPathPlanner
 {
    private static final boolean debug = false;
    private static final boolean useRANSACTraversibility = true;
@@ -229,7 +229,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       NON_TRAVERSIBLE
    }
 
-   @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       haltRequested.set(false);
@@ -549,7 +548,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
-   @Override
    public void clearLoggedData()
    {
       edgeDataMap.clear();
@@ -577,7 +575,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       }
    }
 
-   @Override
    public BodyPathLatticePoint getNextNode()
    {
       while (!stack.isEmpty())
@@ -682,25 +679,21 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       return xyDistance(node, goalNode);
    }
 
-   @Override
    public void halt()
    {
       haltRequested.set(true);
    }
 
-   @Override
    public List<AStarBodyPathIterationData> getIterationData()
    {
       return iterationData;
    }
 
-   @Override
    public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }
 
-   @Override
    public YoRegistry getRegistry()
    {
       return registry;
