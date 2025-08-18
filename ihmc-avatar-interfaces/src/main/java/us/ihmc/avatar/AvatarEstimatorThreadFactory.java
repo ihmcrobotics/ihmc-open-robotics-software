@@ -63,7 +63,6 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -84,8 +83,7 @@ public class AvatarEstimatorThreadFactory
    private final RequiredFactoryField<SensorReaderFactory> sensorReaderFactoryField = new RequiredFactoryField<>("sensorReaderFactory");
    private final RequiredFactoryField<RobotContactPointParameters<RobotSide>> contactPointParametersField = new RequiredFactoryField<>("contactPointParameters");
    private final RequiredFactoryField<HumanoidRobotSensorInformation> sensorInformationField = new RequiredFactoryField<>("sensorInformation");
-   private final RequiredFactoryField<WholeBodyControllerParameters<RobotSide>> controllerParametersField = new RequiredFactoryField<>("controllerParameters");
-   private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("controllerRegistry");
+   private final RequiredFactoryField<YoRegistry> controllerParametersRegistry = new RequiredFactoryField<>("controllerParametersRegistry");
 
    // Optional fields -----------------------------------------------
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
@@ -288,7 +286,7 @@ public class AvatarEstimatorThreadFactory
     */
    public void setConrollerParameters(YoRegistry controllerParametersRegistry)
    {
-      registryField.set(controllerParametersRegistry);
+      this.controllerParametersRegistry.set(controllerParametersRegistry);
 //      controllerParametersField.set(controllerParameters);
    }
 
@@ -747,7 +745,7 @@ public class AvatarEstimatorThreadFactory
 
    public YoRegistry getControllerParameters()
    {
-      return registryField.get();
+      return controllerParametersRegistry.get();
    }
 
    public HumanoidRobotSensorInformation getSensorInformation()

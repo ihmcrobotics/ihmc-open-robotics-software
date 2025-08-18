@@ -38,19 +38,7 @@ public class ParameterLoaderHelper
       InputStream overwriteFile = controllerParameters.getParameterOverwrites();
       try
       {
-         if (parameterFile != null)
-         {
-            // Load the parameters from the XML file
-            loadParameters(caller, parameterFile, overwriteFile, registry, true);
-         }
-         else 
-         {
-            controllerParameters.initializeYoParameters(registry);
-//            if (overwriteFile != null)
-//            {
-//               loadParameters(caller, overwriteFile, registry, true);
-//            }
-         }
+         loadParameters(caller, parameterFile, overwriteFile, registry, true);
       }
       catch (RuntimeException exception)
       {
