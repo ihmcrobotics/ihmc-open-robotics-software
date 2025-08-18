@@ -3,10 +3,8 @@ package us.ihmc.openAlexander;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import us.ihmc.alexander.parameters.RealRobotParameters;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderControllerParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControllerParameters;
 import us.ihmc.openAlexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStateEstimatorParameters;
@@ -348,18 +346,18 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-//      return getClass().getResourceAsStream(getParameterResourceName());
-      return null; // Inactivate loading XML file
+      return null;
    }
+
    @Override
-   public void initializeYoParameters(YoRegistry registry)
+   public YoRegistry getParameterRegistry()
    {
-      new RealRobotParameters(registry);  // No parameters to initialize
+      return OpenAlexanderControllerParameters.build();
    }
 
    public String getParameterResourceName()
    {
-      return "/us/ihmc/openAlexander/parameters/controller.xml";
+      return null;
    }
 
    @Override

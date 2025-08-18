@@ -191,7 +191,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThread);
+      ParameterLoaderHelper.loadParameters(robotModel.getParameterRegistry(), drcControllerThread);
 
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
                                                        PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");

@@ -18,6 +18,20 @@ public class ParameterLoaderHelper
 {
    private static final boolean debugLoading = false;
 
+   public static void loadParameters(YoRegistry sourceRegistry, YoRegistry targetRegistry)
+   {
+      // Create a reader
+      DefaultParameterReader reader = new DefaultParameterReader();
+
+      // Step 1: Populate the reader from your source registry
+      reader.readParametersInRegistry(sourceRegistry);
+
+      // Step 2: Apply those values to the target registry
+      HashSet<String> defaultParameters = new HashSet<>();
+      HashSet<String> unmatchedParameters = new HashSet<>();
+      reader.readParametersInRegistry(targetRegistry, defaultParameters, unmatchedParameters);
+   }
+
    public static void loadParameters(Object caller, WholeBodyControllerParameters<?> controllerParameters, YoRegistry registry)
    {
       InputStream parameterFile = controllerParameters.getWholeBodyControllerParametersFile();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import EDU.oswego.cs.dl.util.concurrent.FJTask.Par;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -120,7 +121,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          csgGraphics.registerArtifactLists(artifactLists);
       }
 
-      ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
+      ParameterLoaderHelper.loadParameters(drcRobotModel.getParameterRegistry(), csgRegistry);
    }
 
    public void initialize()

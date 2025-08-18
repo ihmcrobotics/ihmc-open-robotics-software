@@ -63,6 +63,7 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ public class AvatarEstimatorThreadFactory
    private final RequiredFactoryField<RobotContactPointParameters<RobotSide>> contactPointParametersField = new RequiredFactoryField<>("contactPointParameters");
    private final RequiredFactoryField<HumanoidRobotSensorInformation> sensorInformationField = new RequiredFactoryField<>("sensorInformation");
    private final RequiredFactoryField<WholeBodyControllerParameters<RobotSide>> controllerParametersField = new RequiredFactoryField<>("controllerParameters");
+   private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("controllerRegistry");
 
    // Optional fields -----------------------------------------------
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
@@ -199,14 +201,14 @@ public class AvatarEstimatorThreadFactory
     * {@link WholeBodyControllerParameters#getContactPointParameters()}.
     * </ul>
     *
-    * @param wholeBodyControllerParameters the parameters used to configure this factory.
+    * @param robotModel the parameters used to configure this factory.
     */
-   public void configureWithWholeBodyControllerParameters(WholeBodyControllerParameters<RobotSide> wholeBodyControllerParameters)
+   public void configureWithWholeBodyControllerParameters(DRCRobotModel robotModel)
    {
-      setConrollerParameters(wholeBodyControllerParameters);
-      setStateEstimatorParamters(wholeBodyControllerParameters.getStateEstimatorParameters());
-      setSensorInformation(wholeBodyControllerParameters.getSensorInformation());
-      setContactPointParameters(wholeBodyControllerParameters.getContactPointParameters());
+      setConrollerParameters(robotModel.getParameterRegistry());
+      setStateEstimatorParamters(robotModel.getStateEstimatorParameters());
+      setSensorInformation(robotModel.getSensorInformation());
+      setContactPointParameters(((WholeBodyControllerParameters) robotModel).getContactPointParameters());
    }
 
    /**
@@ -280,13 +282,14 @@ public class AvatarEstimatorThreadFactory
 
    /**
     * Sets the parameters required to load Yo parameters, see
-    * {@link ParameterLoaderHelper#loadParameters(Object, WholeBodyControllerParameters, YoRegistry)}.
+    * {@link ParameterLoaderHelper#loadParameters(YoRegistry, YoRegistry)}.
     *
-    * @param controllerParameters the controller parameters.
+    * @param controllerParametersRegistry the controller parameters.
     */
-   public void setConrollerParameters(WholeBodyControllerParameters<RobotSide> controllerParameters)
+   public void setConrollerParameters(YoRegistry controllerParametersRegistry)
    {
-      controllerParametersField.set(controllerParameters);
+      registryField.set(controllerParametersRegistry);
+//      controllerParametersField.set(controllerParameters);
    }
 
    /**
@@ -455,7 +458,7 @@ public class AvatarEstimatorThreadFactory
       {
          avatarEstimatorThread.setRawOutputWriter(robotConfigurationDataPublisher);
       }
-      ParameterLoaderHelper.loadParameters(this, getControllerParameters(), getEstimatorRegistry());
+      ParameterLoaderHelper.loadParameters(getControllerParameters(), getEstimatorRegistry());
 
       FactoryTools.disposeFactory(this);
       return avatarEstimatorThread;
@@ -742,9 +745,9 @@ public class AvatarEstimatorThreadFactory
       return stateEstimatorParametersField.get();
    }
 
-   public WholeBodyControllerParameters<RobotSide> getControllerParameters()
+   public YoRegistry getControllerParameters()
    {
-      return controllerParametersField.get();
+      return registryField.get();
    }
 
    public HumanoidRobotSensorInformation getSensorInformation()

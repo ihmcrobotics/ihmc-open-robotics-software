@@ -51,6 +51,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -270,6 +271,8 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
+
+   YoRegistry getParameterRegistry();
 
    /**
     * Gets the collision model for this robot to use with {@link us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine}.

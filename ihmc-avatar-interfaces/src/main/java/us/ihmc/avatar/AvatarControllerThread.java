@@ -1,5 +1,6 @@
 package us.ihmc.avatar;
 
+import com.fasterxml.jackson.databind.deser.impl.CreatorCandidate.Param;
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -168,7 +169,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
 
-      ParameterLoaderHelper.loadParameters(this, robotModel, registry);
+      ParameterLoaderHelper.loadParameters(robotModel.getParameterRegistry(), registry);
+//      ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,

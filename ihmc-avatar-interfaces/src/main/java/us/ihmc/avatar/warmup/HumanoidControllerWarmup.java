@@ -355,7 +355,10 @@ public abstract class HumanoidControllerWarmup
          footStates.put(robotSide, footState);
       }
 
-      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread);
+      ParameterLoaderHelper.loadParameters(robotModel.getParameterRegistry(), drcControllerThread);
+
+
+//      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread);
 
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
                                                        PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");

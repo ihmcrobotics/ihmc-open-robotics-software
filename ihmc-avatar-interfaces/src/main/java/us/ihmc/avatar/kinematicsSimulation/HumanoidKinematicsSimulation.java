@@ -326,7 +326,7 @@ public class HumanoidKinematicsSimulation
                                                                             walkingParentRegistry,
                                                                             yoGraphicsListRegistry);
 
-      ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
+      ParameterLoaderHelper.loadParameters(robotModel.getParameterRegistry(), drcControllerThreadRegistry);
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
                                                        PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
       if (Double.isNaN(defaultHeight.getValueAsDouble()))
