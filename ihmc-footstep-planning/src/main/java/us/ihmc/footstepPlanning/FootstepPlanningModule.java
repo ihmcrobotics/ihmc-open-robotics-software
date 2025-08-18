@@ -10,9 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
-import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlannerInterface;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
-import us.ihmc.footstepPlanning.bodyPath.GPUAStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
@@ -60,7 +58,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
-   private AStarBodyPathPlannerInterface bodyPathPlannerInterface;
+   private final AStarBodyPathPlanner bodyPathPlanner;
 
    // TODO plan then snap planner needs to work for height maps.
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -82,8 +80,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final List<Consumer<SwingPlannerType>> swingReplanRequestCallbacks = new ArrayList<>();
    private final List<Consumer<FootstepPlan>> swingReplanStatusCallbacks = new ArrayList<>();
 
-   private boolean useGPU;
-
    public FootstepPlanningModule()
    {
       this(FootstepPlanningModule.class.getSimpleName());
@@ -100,23 +96,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            null);
    }
 
-   public FootstepPlanningModule(boolean useGPU)
-   {
-      this(FootstepPlanningModule.class.getSimpleName(), useGPU);
-   }
-
-   public FootstepPlanningModule(String name, boolean useGPU)
-   {
-      this(name,
-           new AStarBodyPathPlannerParameters(),
-           new DefaultFootstepPlannerParameters(),
-           new DefaultSwingPlannerParameters(),
-           null,
-           PlannerTools.createDefaultFootPolygons(),
-           null,
-           useGPU);
-   }
-
    public FootstepPlanningModule(String name,
                                  AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
                                  DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
@@ -125,40 +104,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  SideDependentList<ConvexPolygon2D> footPolygons,
                                  StepReachabilityData stepReachabilityData)
    {
-      this(name,
-           aStarBodyPathPlannerParameters,
-           footstepPlannerParameters,
-           swingPlannerParameters,
-           walkingControllerParameters,
-           footPolygons,
-           stepReachabilityData,
-           true);
-   }
-
-   public FootstepPlanningModule(String name,
-                                 AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
-                                 DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
-                                 SwingPlannerParametersBasics swingPlannerParameters,
-                                 WalkingControllerParameters walkingControllerParameters,
-                                 SideDependentList<ConvexPolygon2D> footPolygons,
-                                 StepReachabilityData stepReachabilityData,
-                                 boolean useGPU)
-   {
       this.name = name;
       this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.footPolygons = footPolygons;
-
-      this.useGPU = useGPU;
-
-      if (useGPU)
-      {
-         this.bodyPathPlannerInterface = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
-      }
-      else
-      {
-         this.bodyPathPlannerInterface = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
-      }
+      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -212,26 +162,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return output;
    }
 
-   public void destroy()
-   {
-      if (useGPU)
-         ((GPUAStarBodyPathPlanner) bodyPathPlannerInterface).destroyOpenCLStuff();
-   }
-
-   public void enableGPUBodyPathPlanner(boolean useGPU)
-   {
-      if (this.useGPU && !useGPU)
-      {
-         destroy();
-         bodyPathPlannerInterface = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
-      }
-      else if (!this.useGPU && useGPU)
-      {
-         bodyPathPlannerInterface = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
-      }
-      this.useGPU = useGPU;
-   }
-
    private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
    {
       this.request.set(request);
@@ -241,7 +171,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       bodyPathPlanHolder.getPlan().clear();
 
       aStarFootstepPlanner.clearLoggedData();
-      bodyPathPlannerInterface.clearLoggedData();
+      bodyPathPlanner.clearLoggedData();
 
       boolean heightMapAvailable = request.getEnvironmentHandler().getHeightMapData() != null && !request.getEnvironmentHandler().getHeightMapData().isEmpty();
 
@@ -257,7 +187,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPlanBodyPath() && !flatGroundMode)
       {
-         bodyPathPlannerInterface.handleRequest(request, output);
+         bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
 
          if (bodyPathWaypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
@@ -446,7 +376,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public void halt()
    {
-      bodyPathPlannerInterface.halt();
+      bodyPathPlanner.halt();
       aStarFootstepPlanner.halt();
    }
 
@@ -527,7 +457,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getBodyPathEdgeDataMap()
    {
-      return bodyPathPlannerInterface.getEdgeDataMap();
+      return bodyPathPlanner.getEdgeDataMap();
    }
 
    public List<FootstepPlannerIterationData> getIterationData()
@@ -537,12 +467,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public List<AStarBodyPathIterationData> getBodyPathIterationData()
    {
-      return bodyPathPlannerInterface.getIterationData();
+      return bodyPathPlanner.getIterationData();
    }
 
    public YoRegistry getBodyPathPlannerRegistry()
    {
-      return bodyPathPlannerInterface.getRegistry();
+      return bodyPathPlanner.getRegistry();
    }
 
    public YoRegistry getAStarPlannerRegistry()
