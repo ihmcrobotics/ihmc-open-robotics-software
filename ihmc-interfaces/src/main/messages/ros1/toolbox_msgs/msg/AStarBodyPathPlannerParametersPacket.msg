@@ -60,4 +60,7 @@ float64 smoother_hill_climb_gain
 # Minimum gradient vector magnitude to terminate the smoother iterations.
 float64 smoother_gradient_threshold_to_terminate
 
+# Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+float64 collision_start_tolerance
+
 

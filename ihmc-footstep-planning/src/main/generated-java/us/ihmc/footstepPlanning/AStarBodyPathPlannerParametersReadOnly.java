@@ -162,6 +162,14 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
       return get(smootherGradientThresholdToTerminate);
    }
 
+   /**
+    * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+    */
+   default double getCollisionStartTolerance()
+   {
+      return get(collisionStartTolerance);
+   }
+
    default AStarBodyPathPlannerParametersPacket getAsPacket()
    {
       AStarBodyPathPlannerParametersPacket packet = new AStarBodyPathPlannerParametersPacket();
@@ -181,10 +189,11 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
       packet.setInclineCostDeadband(getInclineCostDeadband());
       packet.setMaxIncline(getMaxIncline());
 
-      // Collision box dimensions
+      // Collision
       packet.setCollisionBoxSizeY(getCollisionBoxSizeY());
       packet.setCollisionBoxSizeX(getCollisionBoxSizeX());
       packet.setCollisionBoxGroundClearance(getCollisionBoxGroundClearance());
+      packet.setCollisionStartTolerance(getCollisionStartTolerance());
 
       // Smoother parameters
       packet.setSmootherCollisionWeight(getSmootherCollisionWeight());
