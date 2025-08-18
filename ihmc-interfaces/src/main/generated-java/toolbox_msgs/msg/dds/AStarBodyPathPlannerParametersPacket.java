@@ -89,6 +89,10 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
             * Minimum gradient vector magnitude to terminate the smoother iterations.
             */
    public double smoother_gradient_threshold_to_terminate_;
+   /**
+            * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+            */
+   public double collision_start_tolerance_;
 
    public AStarBodyPathPlannerParametersPacket()
    {
@@ -139,6 +143,8 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
       smoother_hill_climb_gain_ = other.smoother_hill_climb_gain_;
 
       smoother_gradient_threshold_to_terminate_ = other.smoother_gradient_threshold_to_terminate_;
+
+      collision_start_tolerance_ = other.collision_start_tolerance_;
 
    }
 
@@ -427,6 +433,21 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
       return smoother_gradient_threshold_to_terminate_;
    }
 
+   /**
+            * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+            */
+   public void setCollisionStartTolerance(double collision_start_tolerance)
+   {
+      collision_start_tolerance_ = collision_start_tolerance;
+   }
+   /**
+            * Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example.
+            */
+   public double getCollisionStartTolerance()
+   {
+      return collision_start_tolerance_;
+   }
+
 
    public static Supplier<AStarBodyPathPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -483,6 +504,8 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.smoother_gradient_threshold_to_terminate_, other.smoother_gradient_threshold_to_terminate_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.collision_start_tolerance_, other.collision_start_tolerance_, epsilon)) return false;
+
 
       return true;
    }
@@ -534,6 +557,8 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
 
       if(this.smoother_gradient_threshold_to_terminate_ != otherMyClass.smoother_gradient_threshold_to_terminate_) return false;
 
+      if(this.collision_start_tolerance_ != otherMyClass.collision_start_tolerance_) return false;
+
 
       return true;
    }
@@ -581,7 +606,9 @@ public class AStarBodyPathPlannerParametersPacket extends Packet<AStarBodyPathPl
       builder.append("smoother_hill_climb_gain=");
       builder.append(this.smoother_hill_climb_gain_);      builder.append(", ");
       builder.append("smoother_gradient_threshold_to_terminate=");
-      builder.append(this.smoother_gradient_threshold_to_terminate_);
+      builder.append(this.smoother_gradient_threshold_to_terminate_);      builder.append(", ");
+      builder.append("collision_start_tolerance=");
+      builder.append(this.collision_start_tolerance_);
       builder.append("}");
       return builder.toString();
    }

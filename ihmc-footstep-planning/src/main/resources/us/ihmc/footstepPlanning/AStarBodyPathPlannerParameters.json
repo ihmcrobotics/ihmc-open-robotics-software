@@ -71,5 +71,9 @@
   "Smoother gradient threshold to terminate": [
     0.9,
     "Minimum gradient vector magnitude to terminate the smoother iterations"
+  ],
+  "Collision start tolerance": [
+    0.5,
+    "Distance from the start to perform collision checking. Avoids false-positive collisions of the robot or gantry, for example."
   ]
 }
