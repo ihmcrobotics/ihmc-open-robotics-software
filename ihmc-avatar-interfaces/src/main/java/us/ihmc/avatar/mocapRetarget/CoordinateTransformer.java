@@ -10,31 +10,23 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import java.util.*;
 
 /**
- * Builds per-frame GLOBAL transforms for all joints using Convention A:
- *   local(j) = R(channels in listed order)  [root also has T(rootPosition)]
+ * TODO: Fix current bug in CoordinateTransformer; all transforms being completed correctly but only one transform being published to KST
+ * Builds per-frame GLOBAL transforms for all joints :
+ * *   local(j) = R(channels in listed order)  [root also has T(rootPosition)]
  *   global(root) = local(root)
  *   global(child) = global(parent) * T(OFFSET_child) * local(child)
  */
 public class CoordinateTransformer
 {
-   /** Static skeleton info. */
    private final SkeletonHierarchy skeleton;
 
    /** Stable joint index order (preorder) for FK; index 0 is root. */
    private final List<JointInfo> jointsPreorder;
-   /** Name -> index into preorder lists. */
    private final Map<String, Integer> nameToIndex;
-
-   /** Children adjacency, by joint name. */
    private final Map<String, List<JointInfo>> childrenByName;
-
-   /** Precomputed T(OFFSET) per joint index. */
    private final RigidBodyTransform[] offsetTransforms;
-
-   /** Reusable output buffer per frame (globals). */
    private final RigidBodyTransform[] globalsBuffer;
 
-   /** Reusable scratch (avoid allocations in inner loop). */
    private final RotationMatrix scratchRot = new RotationMatrix();
    private final RigidBodyTransform scratchStep = new RigidBodyTransform();
 
@@ -42,20 +34,16 @@ public class CoordinateTransformer
    {
       this.skeleton = skeleton;
 
-      // --- Build children lists & find root(s)
       this.childrenByName = buildChildrenAdjacency(skeleton);
       JointInfo root = findRoot(skeleton);
 
-      // --- Build a deterministic preorder traversal starting at root
       this.jointsPreorder = new ArrayList<>();
       preorderCollect(root, jointsPreorder, childrenByName);
 
-      // --- Build name->index map for quick lookup
       this.nameToIndex = new HashMap<>();
       for (int i = 0; i < jointsPreorder.size(); i++)
          nameToIndex.put(jointsPreorder.get(i).name(), i);
 
-      // --- Precompute T(OFFSET) per joint index (Convention A)
       this.offsetTransforms = new RigidBodyTransform[jointsPreorder.size()];
       for (int i = 0; i < jointsPreorder.size(); i++)
       {
@@ -67,7 +55,6 @@ public class CoordinateTransformer
             offsetTransforms[i].getTranslation().set(off);
       }
 
-      // --- Allocate a reusable globals buffer (one per joint)
       this.globalsBuffer = new RigidBodyTransform[jointsPreorder.size()];
       for (int i = 0; i < globalsBuffer.length; i++)
          globalsBuffer[i] = new RigidBodyTransform();
@@ -76,7 +63,6 @@ public class CoordinateTransformer
    /**
     * Compute GLOBAL transforms for all joints for a single frame.
     * Returns a Map view (name->RigidBodyTransform). The transforms are reused each call;
-    * copy them if you need to keep them.
     */
    public Map<String, RigidBodyTransform> buildGlobalTransforms(MotionFrame frame)
    {
@@ -91,7 +77,6 @@ public class CoordinateTransformer
 
          if (isRoot)
          {
-            // global(root) = local(root)
             globalsBuffer[idx].set(local);
          }
          else
@@ -102,7 +87,7 @@ public class CoordinateTransformer
 
             // scratchStep = T(OFFSET_child) * local(child)
             scratchStep.set(offsetTransforms[idx]);
-            // append local rotation (and translation if any, though non-root should have none)
+            // append local rotation
             scratchStep.getRotation().multiply(local.getRotation());
             scratchStep.getTranslation().add(local.getTranslation()); // typically zero for non-root
 
@@ -111,9 +96,6 @@ public class CoordinateTransformer
             globalsBuffer[idx].multiply(scratchStep);
          }
       }
-
-      // 2) Expose a Map<String, RigidBodyTransform> view over globalsBuffer.
-      //    (No copies; if you want copies, materialize them here.)
       Map<String, RigidBodyTransform> out = new LinkedHashMap<>();
       for (int i = 0; i < jointsPreorder.size(); i++)
          out.put(jointsPreorder.get(i).name(), globalsBuffer[i]);
@@ -122,10 +104,10 @@ public class CoordinateTransformer
    }
 
    /**
-    * Builds a LOCAL transform for a single joint for the given frame:
+    * LOCAL transform for a single joint for the given frame:
     *   - rotation composed in the BVH per-joint CHANNELS order (degrees→radians).
-    *   - translation set ONLY for the root from X/Y/Zposition (Convention A).
-    *   - DOES NOT include the static OFFSET (that is applied in FK).
+    *   - translation set ONLY for the root from X/Y/Zposition
+    *   - DOES NOT include the static OFFSET
     */
    public RigidBodyTransform buildLocalTransform(MotionFrame frame, JointInfo joint)
    {
@@ -176,19 +158,14 @@ public class CoordinateTransformer
       return local;
    }
 
-   // ===========================
-   // ----- helper methods ------
-   // ===========================
 
    private static boolean isRoot(JointInfo j)
    {
-      // Adjust if your JointInfo exposes a different root marker
       return j.parentName() == null || j.parentName().isEmpty();
    }
 
    private static JointInfo findRoot(SkeletonHierarchy skeleton)
    {
-      // If your SkeletonHierarchy exposes getRoot(), use that instead.
       for (JointInfo j : skeleton.joints.values()) // relies on your map of joints
       {
          if (j.parentName() == null || j.parentName().isEmpty())
@@ -200,7 +177,7 @@ public class CoordinateTransformer
    private static Map<String, List<JointInfo>> buildChildrenAdjacency(SkeletonHierarchy skeleton)
    {
       Map<String, List<JointInfo>> children = new HashMap<>();
-      // ensure each joint key exists
+
       for (JointInfo j : skeleton.joints.values())
          children.computeIfAbsent(j.name(), k -> new ArrayList<>());
 
@@ -236,21 +213,7 @@ public class CoordinateTransformer
 
 
 
-//package us.ihmc.avatar.mocapRetarget;
-//
-//import us.ihmc.avatar.mocapRetarget.bvh.MotionFrame;
-//import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.JointInfo;
-//import us.ihmc.avatar.mocapRetarget.bvh.SkeletonHierarchy.SkeletonHierarchy;
-//import us.ihmc.euclid.transform.RigidBodyTransform;
-//import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseKinematicsSolver;
-//import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-//
-//import java.rmi.server.Skeleton;
-//import java.util.LinkedHashMap;
-//import java.util.Map;
-//
-//public class CoordinateTransformer
-//{
+// Secondary Version CoordinateTransformer (go back to this to fix bug potentially)
 //   private SkeletonHierarchy skeleton;
 //   private Map<String, RigidBodyTransform> frameTransforms = new LinkedHashMap<>();
 //

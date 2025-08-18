@@ -19,8 +19,12 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** Current testing harness to figure out why robot won't move in sim...
+ * currently tracked down to bug in CoordinateTransformer
+ */
 public class BVHStreamingRunnerTest
 {
+   // Change to local test file
    static final String BVH_PATH = "/home/gwalrath/Downloads/walk_100.bvh";
 
    @Test

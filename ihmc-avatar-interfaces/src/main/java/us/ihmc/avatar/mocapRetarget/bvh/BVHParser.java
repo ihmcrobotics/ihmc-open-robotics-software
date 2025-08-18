@@ -140,6 +140,7 @@ public class BVHParser
       return frameTimeSeconds;
    }
 
+   //test harness
    public static void main(String[] args)
    {
       try
@@ -159,8 +160,9 @@ public class BVHParser
          }
          System.out.println(hierarchy.getTotalChannels());
          System.out.println("\nMOTION:\n");
-         System.out.println(frames.get(43241));
-         System.out.println(frames.get(43241).channelData()[0]);
+         // change to any frame
+         System.out.println(frames.get(1));
+         System.out.println(frames.get(1).channelData()[0]);
       }
       catch (IOException e)
       {

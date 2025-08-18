@@ -12,17 +12,13 @@ import java.util.List;
 import java.util.Map;
 
    /**
-    * Minimal integration test for CoordinateTransformer.
+    * CoordinateTransformer Testing Harness
     * Writes a tiny BVH to a temp file, parses it, and prints global transforms for frame 0.
     */
    public class CoordinateTransformerHarness
    {
       public static void main(String[] args) throws Exception
       {
-         // 1) Create a tiny BVH with:
-         //    ROOT Hips: 6 channels (XYZ pos + ZXY rot)
-         //    JOINT Knee: 3 channels (ZXY rot), simple OFFSET
-         //    3 frames of trivial motion (frame 0 is identity-ish)
          File tempBVH = writeMiniBVH();
 
          // 2) Parse hierarchy + motion
@@ -45,7 +41,6 @@ import java.util.Map;
             printTransform(T);
          });
 
-         // Optional: also check frame 1 to see motion change
          if (frames.size() > 1)
          {
             Map<String, RigidBodyTransform> globals1 = transformer.buildGlobalTransforms(frames.get(1));
@@ -103,13 +98,7 @@ import java.util.Map;
          double y = T.getTranslation().getY();
          double z = T.getTranslation().getZ();
 
-         // Print rotation as yaw-pitch-roll (radians) for readability
-//         double[] ypr = new double[3];
-//         T.getRotation().getYawPitchRoll(ypr); // [yaw, pitch, roll]
-//
-//         System.out.printf("  pos: (%.6f, %.6f, %.6f)%n", x, y, z);
-//         System.out.printf("  ypr(rad): (%.6f, %.6f, %.6f)%n", ypr[0], ypr[1], ypr[2]);
-         // You can also dump the matrix if you prefer:
+
          System.out.println("  R:\n" + T.getRotation());
       }
    }

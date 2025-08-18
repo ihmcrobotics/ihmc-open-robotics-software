@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Bridges BVH outputs to the robot control stack.
+ * BVH Outputs to robot control stack
  *
  * Supports:
  *  A) BVH joint → robot OneDoF joint angle extraction (returns Map<OneDoFJointBasics, Double>).
@@ -30,7 +30,6 @@ import java.util.Map;
  * Assumptions:
  *  - CoordinateTransformer outputs GLOBAL BVH transforms per joint.
  *  - Angles are radians.
- *  - If needed, a BVH-to-world alignment can be provided (default = identity).
  */
 public class JointMap
 {
@@ -84,10 +83,7 @@ public class JointMap
 
    /**
     * Extract desired joint angles (radians) for mapped OneDoF joints, using BVH parent→child relative rotation.
-    * Returns a sparse map for the joints you mapped.
-    *
-    * Note: this simple projection uses the rotation-vector dot the joint axis in the parent frame.
-    * Depending on your robot’s joint axis definition, you may need to express the axis in the same frame as 'relative'.
+    * Returns a sparse map for the joints mapped.
     */
    public Map<OneDoFJointBasics, Double> mapFrameToJointAngles(Map<String, RigidBodyTransform> bvhGlobals)
    {
@@ -157,26 +153,21 @@ public class JointMap
          return;
       }
 
-      // Create temp object to store results
       YawPitchRoll ypr = new YawPitchRoll();
 
-      // BVH pelvis yaw/pitch/roll
       YawPitchRollConversion.convertMatrixToYawPitchRoll(bvhPelvis.getRotation(), ypr);
       double bvhYaw = ypr.getYaw();
 
-      // Desired pelvis yaw/pitch/roll
       YawPitchRollConversion.convertMatrixToYawPitchRoll(desiredPelvisWorld.getRotation(), ypr);
       double desYaw = ypr.getYaw();
 
 
-      // 2) Build yaw-only rotations
       us.ihmc.euclid.matrix.RotationMatrix R_bvhYaw = new us.ihmc.euclid.matrix.RotationMatrix();
       R_bvhYaw.setToYawOrientation(bvhYaw);
 
       us.ihmc.euclid.matrix.RotationMatrix R_desYaw = new us.ihmc.euclid.matrix.RotationMatrix();
       R_desYaw.setToYawOrientation(desYaw);
 
-      // 3) Build yaw-only pelvis transforms (keep original positions)
       RigidBodyTransform T_bvhYaw = new RigidBodyTransform();
       T_bvhYaw.getRotation().set(R_bvhYaw);
       T_bvhYaw.getTranslation().set(bvhPelvis.getTranslation());
@@ -185,7 +176,6 @@ public class JointMap
       T_desYaw.getRotation().set(R_desYaw);
       T_desYaw.getTranslation().set(desiredPelvisWorld.getTranslation());
 
-      // 4) bvhToWorld = T_desYaw * inv(T_bvhYaw)
       RigidBodyTransform invYaw = new RigidBodyTransform(T_bvhYaw);
       invYaw.invert();
       bvhToWorld.set(T_desYaw);
@@ -195,7 +185,7 @@ public class JointMap
 
    /**
     * Build a KinematicsStreamingToolboxInputMessage by creating a RigidBody message
-    * for each mapped end-effector. Desired poses are taken from BVH globals and expressed in WORLD frame as required by the toolbox.
+    * for each mapped end-effector.
     */
    public KinematicsStreamingToolboxInputMessage toStreamingMessage(Map<String, RigidBodyTransform> bvhGlobals,
                                                                     long sequenceId,
@@ -232,7 +222,6 @@ public class JointMap
          scratchQuat.set(scratchWorldPose.getRotation());
          input.getDesiredOrientationInWorld().set(scratchQuat);
 
-         // Optional: selection matrices/rate limits can be set here
       }
 
       return msg;

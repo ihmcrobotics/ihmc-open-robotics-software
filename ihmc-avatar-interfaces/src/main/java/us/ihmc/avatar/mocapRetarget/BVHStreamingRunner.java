@@ -40,7 +40,8 @@ import us.ihmc.unitree.robotModel.H1Version;
 
 
 
-/**
+/** TODO: Fix bug not sending more than one transform to KST; remove dependencies on Unitree repo or move to Unitree repo
+ * Run on top of H1SessionVisualizer, H1KinematicSimulation
  * End-to-end runner:
  *  - Parses a BVH file
  *  - Builds per-frame BVH globals
@@ -184,7 +185,7 @@ public class BVHStreamingRunner
       DRCRobotModel h1 = new H1RobotModel(H1Version.HANDLESS, RobotTarget.SCS);
       FullHumanoidRobotModel fullModel = h1.createFullRobotModel();
 
-
+      // CHANGE to local file
       File bvhFile = new File("/home/gwalrath/Downloads/walk_100.bvh");
       BVHStreamingRunner runner = BVHStreamingRunner.create(fullModel, bvhFile);
 
