@@ -68,7 +68,7 @@ public class HeightMapToolsTest
       {
          for (int j = 0; j < cellsPerAxis; j++)
          {
-            heightMapData.setHeightAt(i, 1.0f);
+            heightMapData.setHeight(i, 1.0f);
          }
       }
 

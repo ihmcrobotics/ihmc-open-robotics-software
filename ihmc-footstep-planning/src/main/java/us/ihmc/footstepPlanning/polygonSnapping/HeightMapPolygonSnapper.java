@@ -259,7 +259,7 @@ public class HeightMapPolygonSnapper
             if (terrainMapData != null)
                height = terrainMapData.getHeightInWorld(footPointToSnap.getX(), footPointToSnap.getY());
             else
-               height = heightMapData.getHeightAt(footPointToSnap.getX(), footPointToSnap.getY());
+               height = heightMapData.getHeight(footPointToSnap.getX(), footPointToSnap.getY());
 
             if (Double.isNaN(height) || height < minimumHeightToConsider)
             {

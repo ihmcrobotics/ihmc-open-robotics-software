@@ -203,7 +203,7 @@ public class RDXVRFootstepPlacement
       {
          if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
-            double height = latestHeightMapData.getHeightAt(pose.getTranslationX(), pose.getTranslationY());
+            double height = latestHeightMapData.getHeight(pose.getTranslationX(), pose.getTranslationY());
             if (!Double.isNaN(height))
             {
                FramePose3D adaptedPose = new FramePose3D(pose);

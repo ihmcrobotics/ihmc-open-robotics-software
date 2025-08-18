@@ -510,7 +510,7 @@ public class SteppableRegionsCalculatorTools
       for (SteppableCell cell : regionDataHolder.getCells())
       {
          int key = HeightMapTools.indicesToKey(cell.getXIndex(), cell.getYIndex(), centerIndex);
-         regionHeightMap.setHeightAt(key, cell.getZ(), cell.getNormal());
+         regionHeightMap.setHeight(key, cell.getZ());
       }
 
       return regionHeightMap;

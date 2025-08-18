@@ -43,7 +43,7 @@ public class HeightMapCollisionDetector
       {
          for (int yIndex = minYIndex; yIndex <= maxYIndex; yIndex++)
          {
-            double groundHeight = heightMap.getHeightAt(xIndex, yIndex);
+            double groundHeight = heightMap.getHeight(xIndex, yIndex);
             double xQuery = HeightMapTools.indexToCoordinate(xIndex, centerX, resolution, centerIndex);
             double yQuery = HeightMapTools.indexToCoordinate(yIndex, centerY, resolution, centerIndex);
 
@@ -138,7 +138,7 @@ public class HeightMapCollisionDetector
       {
          for (int yIndex = minYIndex; yIndex <= maxYIndex; yIndex++)
          {
-            double groundHeight = heightMap.getHeightAt(xIndex, yIndex);
+            double groundHeight = heightMap.getHeight(xIndex, yIndex);
             double xQuery = HeightMapTools.indexToCoordinate(xIndex, centerX, resolution, centerIndex);
             double yQuery = HeightMapTools.indexToCoordinate(yIndex, centerY, resolution, centerIndex);
 
@@ -490,7 +490,7 @@ public class HeightMapCollisionDetector
       }
 
       int centerIndex = heightMapData.getCenterIndex();
-      double groundHeight = heightMapData.getHeightAt(closestX, closestY);
+      double groundHeight = heightMapData.getHeight(closestX, closestY);
       double x = HeightMapTools.indexToCoordinate(closestX, heightMapData.getGridCenter().getX(), xyResolution, centerIndex);
       double y = HeightMapTools.indexToCoordinate(closestY, heightMapData.getGridCenter().getY(), xyResolution, centerIndex);
       return new Point3D(x, y, groundHeight);
@@ -559,7 +559,7 @@ public class HeightMapCollisionDetector
                                                                 heightMap.getGridCenter().getY(),
                                                                 heightMap.getCellSize(),
                                                                 heightMap.getCenterIndex());
-            double neighborZ = heightMap.getHeightAt(neighborXIndex, neighborYIndex);
+            double neighborZ = heightMap.getHeight(neighborXIndex, neighborYIndex);
 
             Point3D neighbor = new Point3D(neighborx, neighbory, neighborZ);
             if (!firstNeighborSet)

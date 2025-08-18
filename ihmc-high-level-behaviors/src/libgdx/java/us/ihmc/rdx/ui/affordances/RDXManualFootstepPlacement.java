@@ -222,7 +222,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // Snap footstep to height map
          if (USE_HEIGHTMAP && latestHeightMapData != null)
          {
-            double height = latestHeightMapData.getHeightAt(footstepBeingPlaced.getFootPose().getX(), footstepBeingPlaced.getFootPose().getY());
+            double height = latestHeightMapData.getHeight(footstepBeingPlaced.getFootPose().getX(), footstepBeingPlaced.getFootPose().getY());
 
             if (!Double.isNaN(height))
                footstepBeingPlaced.getFootPose().setZ(height);
