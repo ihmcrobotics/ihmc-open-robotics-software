@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.io.InputStream;
 
@@ -64,6 +65,11 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    default String getParameterFileName()
    {
       return "not implemented";
+   }
+   
+   // Set the YoVariables without using the xml file.
+   default void initializeYoParameters(YoRegistry registry)
+   {      
    }
 }
 

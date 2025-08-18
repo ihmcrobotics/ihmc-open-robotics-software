@@ -21,6 +21,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -41,7 +42,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoFrameVector3D yoRootJointAngularVelocity;
    private final YoFrameVector3D yoRootJointAngularVelocityInWorld;
 
-   private final BooleanParameter zeroYawAtInitialization = new BooleanParameter("zeroEstimatedRootYawAtInitialization", registry, false);
+   private final YoBoolean zeroYawAtInitialization = new YoBoolean("zeroEstimatedRootYawAtInitialization", registry);
    private final YoDouble initialYaw = new YoDouble("initialEstimatedRootYaw", registry);
 
    private final FiniteDifferenceAngularVelocityYoFrameVector3D yoRootJointAngularVelocityFromFD;

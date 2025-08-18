@@ -1,364 +1,281 @@
 package us.ihmc.alexander.parameters;
 
-import us.ihmc.scs2.sessionVisualizer.jfx.yoRobot.YoRobotFX;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * Parameters initializer generated from the provided XML structure.
- * - Uses alias helpers to tolerate XML vs YoVariable naming differences (case/prefix).
- * - Groups initialization by registry path for readability.
- * - Relies on AbstractRobotParameters for registry/variable helper methods.
+ * Initializes YoVariables by BUILDING missing registries/variables and
+ * REUSING existing ones when present (no duplicate parameters).
  */
 public class RealRobotParameters extends AbstractRobotParameters
 {
-   // ---------- Transitions ----------
-   private YoBoolean toWalkingEnableTimeBasedTransition;
-   private YoBoolean exitWalkingEnableTimeBasedTransition;
-
-   // ---------- JointspaceGains ----------
-   private YoDouble zetaSpineJoints;
-   private YoDouble maximumFeedbackSpineJoints;
-   private YoDouble maximumFeedbackRateSpineJoints;
-   private YoDouble zetaNeckJoints;
-   private YoDouble maximumFeedbackNeckJoints;
-   private YoDouble maximumFeedbackRateNeckJoints;
-   private YoDouble kpArmJoints;
-   private YoDouble zetaArmJoints;
-   private YoDouble maximumFeedbackArmJoints;
-   private YoDouble maximumFeedbackRateArmJoints;
-
-   // ---------- RigidBodyGains ----------
-   private YoDouble zetaXYChestOrientation;
-   private YoDouble zetaZChestOrientation;
-   private YoDouble maximumFeedbackChestOrientation;
-   private YoDouble maximumFeedbackRateChestOrientation;
-   private YoDouble zetaXYZHeadOrientation;
-   private YoDouble maximumFeedbackHeadOrientation;
-   private YoDouble maximumFeedbackRateHeadOrientation;
-   private YoDouble kpXYZHandOrientation;
-   private YoDouble zetaXYZHandOrientation;
-   private YoDouble maximumFeedbackHandOrientation;
-   private YoDouble maximumFeedbackRateHandOrientation;
-   private YoDouble zetaXYPelvisOrientation;
-   private YoDouble zetaZPelvisOrientation;
-   private YoDouble maximumFeedbackPelvisOrientation;
-   private YoDouble maximumFeedbackRatePelvisOrientation;
-   private YoDouble kpXYZHandPosition;
-   private YoDouble zetaXYZHandPosition;
-   private YoDouble maximumFeedbackHandPosition;
-   private YoDouble maximumFeedbackRateHandPosition;
-
-   // ---------- FootGains ----------
-   private YoDouble maximumFeedbackSwingFootPosition;
-   private YoDouble maximumFeedbackRateSwingFootPosition;
-   private YoDouble maximumFeedbackSwingFootOrientation;
-   private YoDouble maximumFeedbackRateSwingFootOrientation;
-   private YoDouble zetaXYHoldFootPosition;
-   private YoDouble maximumFeedbackHoldFootPosition;
-   private YoDouble maximumFeedbackRateHoldFootPosition;
-   private YoDouble kpXYHoldFootOrientation;
-   private YoDouble kpZHoldFootOrientation;
-   private YoDouble zetaXYHoldFootOrientation;
-   private YoDouble zetaZHoldFootOrientation;
-   private YoDouble maximumFeedbackHoldFootOrientation;
-   private YoDouble maximumFeedbackRateHoldFootOrientation;
-   private YoDouble maximumFeedbackToeOffFootPosition;
-   private YoDouble maximumFeedbackRateToeOffFootPosition;
-   private YoDouble maximumFeedbackToeOffFootOrientation;
-   private YoDouble maximumFeedbackRateToeOffFootOrientation;
-
-   // ---------- Pelvis / CoM height ----------
-   private YoDouble pelvisHeightDefaultHeight;
-   private YoDouble pelvisHeightOffsetTrajectoryTime;
-   private YoDouble pelvisHeightMaxDistanceAnklePelvis;
-   private YoBoolean processGoHome_LookAhead;
-   private YoBoolean processGoHome_BetterLookAhead;
-
-   // ---------- FeetManager ----------
-   private YoDouble ankleLowerLimitToTriggerToeOff;
-   private YoDouble omegaThresholdForEstimation;
-   private YoDouble rotationThreshold;
-   private YoBoolean dampFootRotations;
-   private YoDouble footDamping;
-   private YoDouble footSwingTouchdownVelocityZ;
-   private YoDouble footSwingTouchdownAccelerationZ;
-   private YoDouble verificationPerpendicularCoPErrorThreshold;
-   private YoDouble verificationDistanceFromLineToComputeDesiredCoPOccupancy;
-   private YoDouble velocityOmegaMagnitudeThreshold;
-   private YoDouble velocityRotationAngleDecayBreakFrequency;
-   private YoDouble velocityRotationAngleThreshold;
-   private YoInteger croppingThresholdForCoPRegionOccupancy;
-   private YoDouble croppingDistanceFromLineOfRotationToComputeCoPOccupancy;
-   private YoDouble verificationInlineCoPHistoryStdDev;
-   private YoDouble verificationTransverseCoPHistoryStdDev;
-   private YoDouble croppingFootDropThresholdForCrop;
-
-   // ---------- Balance / CoP ----------
-   private YoBoolean computeSplitFractionsFromPositions;
-   private YoDouble ellipticICPErrorForMomentumRecovery;
-
-   // ---------- WalkingController / ICP ----------
-   private YoDouble controllerThresholdForStuck_ICPOpt;
-   private YoDouble captureKi;
-   private YoDouble captureIntegralLeakRatio;
-   private YoDouble controllerThresholdForStuck_ICP;
-
-   // ---------- Linear Momentum Weights ----------
-   private YoDouble linearMomentumRateWeightX;
-   private YoDouble linearMomentumRateWeightY;
-   private YoDouble recoveryLinearMomentumRateWeightX;
-   private YoDouble recoveryLinearMomentumRateWeightY;
-
-   // ---------- MomentumOptimizationSettings ----------
-   private YoDouble chestAngularWeightX;
-   private YoDouble chestAngularWeightY;
-
-   // ---------- Estimator (AtlasHeadPoseEstimator) ----------
-   private DoubleParameter angularVelocityVariance;
-   private DoubleParameter linearAccelerationVariance;
-   private DoubleParameter magneticFieldVariance;
-   private DoubleParameter positionVariance;
-   private DoubleParameter headAngularAccelerationVariance;
-   private DoubleParameter headLinearAccelerationVariance;
-   private DoubleParameter linearAccelerationBiasVariance;
-//   private BooleanParameter zeroEstimatedRootYawAtInitialization;
-
+   // (필요하면 필드 보관; 여기서는 set만 해도 동작)
    public RealRobotParameters(YoRegistry registry)
    {
       super(registry);
 
-      // Top path in XML:
-      // DRCControllerThread -> DRCMomentumBasedController -> HumanoidHighLevelControllerManager
-      
-//      YoRegistry DRCControllerThreadRoot = findReg(root, "DRCControllerThread");
-      if (root.getName() == "DRCControllerThread")
+      // 컨트롤러 쪽 초기화 (DRCControllerThread 루트를 받았을 때)
+      if ("DRCControllerThread".equals(root.getName()))
       {
-         YoRegistry DRCMomentumBasedControllerRegistry = findReg(root, "DRCMomentumBasedController");
-         YoRegistry HumanoidHighLevelControllerManagerRegistry = findReg(DRCMomentumBasedControllerRegistry, "HumanoidHighLevelControllerManager");
+         YoRegistry drcMomentum = ensureRegistry(root, "DRCMomentumBasedController");
+         YoRegistry hhcm = ensureRegistry(drcMomentum, "HumanoidHighLevelControllerManager");
 
-         initTransitions(HumanoidHighLevelControllerManagerRegistry);
-         initHighLevelHumanoidControllerFactory(HumanoidHighLevelControllerManagerRegistry);
-         initHighLevelControlManagerFactory(HumanoidHighLevelControllerManagerRegistry);
-         initWalkingController(HumanoidHighLevelControllerManagerRegistry);
+         initTransitions(hhcm);
+         initHighLevelHumanoidControllerFactory(hhcm);
+         initHighLevelControlManagerFactory(hhcm);
+         initWalkingController(hhcm);
       }
-//      YoRegistry DRCEstimatorThreadRoot = findReg(root, "DRCEstimatorThread");
-      if (root.getName() == "DRCEstimatorThread")
+
+      // 에스티메이터 쪽 초기화 (DRCEstimatorThread 루트를 받았을 때)
+      if ("DRCEstimatorThread".equals(root.getName()))
       {
          initEstimatorThread(root);
-                  
       }
-      
-
-    
    }
 
-   // ---------------- init sections ----------------
+   // ---------------- Controller sections ----------------
 
    private void initTransitions(YoRegistry hhcm)
    {
-      YoRegistry toWalking = findReg(hhcm, "toWalkingSmoothTransitionControllerState");
-      toWalkingEnableTimeBasedTransition =
-            setAnyBoolean(toWalking, new String[]{"toWalkingEnableTimeBasedTransition"}, false);
+      YoRegistry toWalking = ensureRegistry(hhcm, "toWalkingSmoothTransitionControllerState");
+      putBoolean(toWalking, "toWalkingEnableTimeBasedTransition", false);
 
-      YoRegistry exitWalking = findReg(hhcm, "exitWalkingSmoothTransitionControllerState");
-      exitWalkingEnableTimeBasedTransition =
-            setAnyBoolean(exitWalking, new String[]{"exitWalkingEnableTimeBasedTransition"}, true);
+      YoRegistry exitWalking = ensureRegistry(hhcm, "exitWalkingSmoothTransitionControllerState");
+      putBoolean(exitWalking, "exitWalkingEnableTimeBasedTransition", true);
    }
 
    private void initHighLevelHumanoidControllerFactory(YoRegistry hhcm)
    {
-      YoRegistry factory = findReg(hhcm, "HighLevelHumanoidControllerFactory");
+      YoRegistry factory = ensureRegistry(hhcm, "HighLevelHumanoidControllerFactory");
 
       // JointspaceGains
-      YoRegistry jointspace = findReg(factory, "JointspaceGains");
-      zetaSpineJoints = setAnyDouble(jointspace, new String[]{"zetaSpineJoints"}, 0.3);
-      maximumFeedbackSpineJoints = setAnyDouble(jointspace, new String[]{"maximumFeedbackSpineJoints"}, 10.0);
-      maximumFeedbackRateSpineJoints = setAnyDouble(jointspace, new String[]{"maximumFeedbackRateSpineJoints"}, 100.0);
-      zetaNeckJoints = setAnyDouble(jointspace, new String[]{"zetaNeckJoints"}, 0.4);
-      maximumFeedbackNeckJoints = setAnyDouble(jointspace, new String[]{"maximumFeedbackNeckJoints"}, 6.0);
-      maximumFeedbackRateNeckJoints = setAnyDouble(jointspace, new String[]{"maximumFeedbackRateNeckJoints"}, 60.0);
-      kpArmJoints = setAnyDouble(jointspace, new String[]{"kpArmJoints"}, 100.0);
-      zetaArmJoints = setAnyDouble(jointspace, new String[]{"zetaArmJoints"}, 0.1);
-      maximumFeedbackArmJoints = setAnyDouble(jointspace, new String[]{"maximumFeedbackArmJoints"}, 20.0);
-      maximumFeedbackRateArmJoints = setAnyDouble(jointspace, new String[]{"maximumFeedbackRateArmJoints"}, 700.0);
+      YoRegistry jointspace = ensureRegistry(factory, "JointspaceGains");
+      putDouble(jointspace, "zetaSpineJoints", 0.3);
+      putDouble(jointspace, "maximumFeedbackSpineJoints", 10.0);
+      putDouble(jointspace, "maximumFeedbackRateSpineJoints", 100.0);
+      putDouble(jointspace, "zetaNeckJoints", 0.4);
+      putDouble(jointspace, "maximumFeedbackNeckJoints", 6.0);
+      putDouble(jointspace, "maximumFeedbackRateNeckJoints", 60.0);
+      putDouble(jointspace, "kpArmJoints", 100.0);
+      putDouble(jointspace, "zetaArmJoints", 0.1);
+      putDouble(jointspace, "maximumFeedbackArmJoints", 20.0);
+      putDouble(jointspace, "maximumFeedbackRateArmJoints", 700.0);
 
       // RigidBodyGains
-      YoRegistry rigid = findReg(factory, "RigidBodyGains");
-      zetaXYChestOrientation = setAnyDouble(rigid, new String[]{"zetaXYChestOrientation"}, 0.5);
-      zetaZChestOrientation = setAnyDouble(rigid, new String[]{"zetaZChestOrientation"}, 0.22);
-      maximumFeedbackChestOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackChestOrientation"}, 6.0);
-      maximumFeedbackRateChestOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackRateChestOrientation"}, 60.0);
-      zetaXYZHeadOrientation = setAnyDouble(rigid, new String[]{"zetaXYZHeadOrientation"}, 0.4);
-      maximumFeedbackHeadOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackHeadOrientation"}, 6.0);
-      maximumFeedbackRateHeadOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackRateHeadOrientation"}, 60.0);
-      kpXYZHandOrientation = setAnyDouble(rigid, new String[]{"kpXYZHandOrientation"}, 40.0);
-      zetaXYZHandOrientation = setAnyDouble(rigid, new String[]{"zetaXYZHandOrientation"}, 0.0);
-      maximumFeedbackHandOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackHandOrientation"}, 10.0);
-      maximumFeedbackRateHandOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackRateHandOrientation"}, 100.0);
-      zetaXYPelvisOrientation = setAnyDouble(rigid, new String[]{"zetaXYPelvisOrientation"}, 0.2);
-      zetaZPelvisOrientation = setAnyDouble(rigid, new String[]{"zetaZPelvisOrientation"}, 0.5);
-      maximumFeedbackPelvisOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackPelvisOrientation"}, 12.0);
-      maximumFeedbackRatePelvisOrientation = setAnyDouble(rigid, new String[]{"maximumFeedbackRatePelvisOrientation"}, 180.0);
-      kpXYZHandPosition = setAnyDouble(rigid, new String[]{"kpXYZHandPosition"}, 40.0);
-      zetaXYZHandPosition = setAnyDouble(rigid, new String[]{"zetaXYZHandPosition"}, 0.0);
-      maximumFeedbackHandPosition = setAnyDouble(rigid, new String[]{"maximumFeedbackHandPosition"}, 10.0);
-      maximumFeedbackRateHandPosition = setAnyDouble(rigid, new String[]{"maximumFeedbackRateHandPosition"}, 100.0);
+      YoRegistry rigid = ensureRegistry(factory, "RigidBodyGains");
+      putDouble(rigid, "zetaXYChestOrientation", 0.5);
+      putDouble(rigid, "zetaZChestOrientation", 0.22);
+      putDouble(rigid, "maximumFeedbackChestOrientation", 6.0);
+      putDouble(rigid, "maximumFeedbackRateChestOrientation", 60.0);
+      putDouble(rigid, "zetaXYZHeadOrientation", 0.4);
+      putDouble(rigid, "maximumFeedbackHeadOrientation", 6.0);
+      putDouble(rigid, "maximumFeedbackRateHeadOrientation", 60.0);
+      putDouble(rigid, "kpXYZHandOrientation", 40.0);
+      putDouble(rigid, "zetaXYZHandOrientation", 0.0);
+      putDouble(rigid, "maximumFeedbackHandOrientation", 10.0);
+      putDouble(rigid, "maximumFeedbackRateHandOrientation", 100.0);
+      putDouble(rigid, "zetaXYPelvisOrientation", 0.2);
+      putDouble(rigid, "zetaZPelvisOrientation", 0.5);
+      putDouble(rigid, "maximumFeedbackPelvisOrientation", 12.0);
+      putDouble(rigid, "maximumFeedbackRatePelvisOrientation", 180.0);
+      putDouble(rigid, "kpXYZHandPosition", 40.0);
+      putDouble(rigid, "zetaXYZHandPosition", 0.0);
+      putDouble(rigid, "maximumFeedbackHandPosition", 10.0);
+      putDouble(rigid, "maximumFeedbackRateHandPosition", 100.0);
 
       // FootGains
-      YoRegistry foot = findReg(factory, "FootGains");
-      maximumFeedbackSwingFootPosition = setAnyDouble(foot, new String[]{"maximumFeedbackSwingFootPosition"}, 20.0);
-      maximumFeedbackRateSwingFootPosition = setAnyDouble(foot, new String[]{"maximumFeedbackRateSwingFootPosition"}, 300.0);
-      maximumFeedbackSwingFootOrientation = setAnyDouble(foot, new String[]{"maximumFeedbackSwingFootOrientation"}, 100.0);
-      maximumFeedbackRateSwingFootOrientation = setAnyDouble(foot, new String[]{"maximumFeedbackRateSwingFootOrientation"}, 1500.0);
-      zetaXYHoldFootPosition = setAnyDouble(foot, new String[]{"zetaXYHoldFootPosition"}, 0.2);
-      maximumFeedbackHoldFootPosition = setAnyDouble(foot, new String[]{"maximumFeedbackHoldFootPosition"}, 6.0);
-      maximumFeedbackRateHoldFootPosition = setAnyDouble(foot, new String[]{"maximumFeedbackRateHoldFootPosition"}, 150.0);
-      kpXYHoldFootOrientation = setAnyDouble(foot, new String[]{"kpXYHoldFootOrientation"}, 100.0);
-      kpZHoldFootOrientation = setAnyDouble(foot, new String[]{"kpZHoldFootOrientation"}, 100.0);
-      zetaXYHoldFootOrientation = setAnyDouble(foot, new String[]{"zetaXYHoldFootOrientation"}, 0.2);
-      zetaZHoldFootOrientation = setAnyDouble(foot, new String[]{"zetaZHoldFootOrientation"}, 0.2);
-      maximumFeedbackHoldFootOrientation = setAnyDouble(foot, new String[]{"maximumFeedbackHoldFootOrientation"}, 100.0);
-      maximumFeedbackRateHoldFootOrientation = setAnyDouble(foot, new String[]{"maximumFeedbackRateHoldFootOrientation"}, 1500.0);
-      maximumFeedbackToeOffFootPosition = setAnyDouble(foot, new String[]{"maximumFeedbackToeOffFootPosition"}, 6.0);
-      maximumFeedbackRateToeOffFootPosition = setAnyDouble(foot, new String[]{"maximumFeedbackRateToeOffFootPosition"}, 150.0);
-      maximumFeedbackToeOffFootOrientation = setAnyDouble(foot, new String[]{"maximumFeedbackToeOffFootOrientation"}, 100.0);
-      maximumFeedbackRateToeOffFootOrientation = setAnyDouble(foot, new String[]{"maximumFeedbackRateToeOffFootOrientation"}, 1500.0);
+      YoRegistry foot = ensureRegistry(factory, "FootGains");
+      putDouble(foot, "maximumFeedbackSwingFootPosition", 20.0);
+      putDouble(foot, "maximumFeedbackRateSwingFootPosition", 300.0);
+      putDouble(foot, "maximumFeedbackSwingFootOrientation", 100.0);
+      putDouble(foot, "maximumFeedbackRateSwingFootOrientation", 1500.0);
+      putDouble(foot, "zetaXYHoldFootPosition", 0.2);
+      putDouble(foot, "maximumFeedbackHoldFootPosition", 6.0);
+      putDouble(foot, "maximumFeedbackRateHoldFootPosition", 150.0);
+      putDouble(foot, "kpXYHoldFootOrientation", 100.0);
+      putDouble(foot, "kpZHoldFootOrientation", 100.0);
+      putDouble(foot, "zetaXYHoldFootOrientation", 0.2);
+      putDouble(foot, "zetaZHoldFootOrientation", 0.2);
+      putDouble(foot, "maximumFeedbackHoldFootOrientation", 100.0);
+      putDouble(foot, "maximumFeedbackRateHoldFootOrientation", 1500.0);
+      putDouble(foot, "maximumFeedbackToeOffFootPosition", 6.0);
+      putDouble(foot, "maximumFeedbackRateToeOffFootPosition", 150.0);
+      putDouble(foot, "maximumFeedbackToeOffFootOrientation", 100.0);
+      putDouble(foot, "maximumFeedbackRateToeOffFootOrientation", 1500.0);
 
       // MomentumOptimizationSettings
-      YoRegistry momentum = findReg(factory, "MomentumOptimizationSettings");
-      chestAngularWeightX = setAnyDouble(momentum, new String[]{"ChestAngularWeightX", "chestAngularWeightX"}, 30.0);
-      chestAngularWeightY = setAnyDouble(momentum, new String[]{"ChestAngularWeightY", "chestAngularWeightY"}, 30.0);
+      YoRegistry momentum = ensureRegistry(factory, "MomentumOptimizationSettings");
+      putDouble(momentum, "ChestAngularWeightX", 30.0);
+      putDouble(momentum, "ChestAngularWeightY", 30.0);
    }
 
    private void initHighLevelControlManagerFactory(YoRegistry hhcm)
    {
-      YoRegistry hlcmf = findReg(hhcm, "HighLevelControlManagerFactory");
+      YoRegistry hlcmf = ensureRegistry(hhcm, "HighLevelControlManagerFactory");
 
       // CenterOfMassHeightManager / PelvisHeightControlState
-      YoRegistry comHeightMgr = findReg(hlcmf, "CenterOfMassHeightManager");
-      YoRegistry pelvis = findReg(comHeightMgr, "PelvisHeightControlState");
-      pelvisHeightDefaultHeight = setAnyDouble(pelvis, new String[]{"PelvisHeightControlStateDefaultHeight", "defaultHeight"}, 0.8);
-      pelvisHeightOffsetTrajectoryTime = setAnyDouble(pelvis, new String[]{"PelvisHeightControlStateOffsetTrajectoryTime", "offsetTrajectoryTime"}, 0.5);
-      pelvisHeightMaxDistanceAnklePelvis = setAnyDouble(pelvis, new String[]{"PelvisHeightControlStateMaxDistanceAnklePelvis", "maxDistanceAnklePelvis"}, 0.9);
+      YoRegistry comHeightMgr = ensureRegistry(hlcmf, "CenterOfMassHeightManager");
+      YoRegistry pelvis = ensureRegistry(comHeightMgr, "PelvisHeightControlState");
+      // XML에선 alias가 있었지만, 여기선 최종 이름으로 생성(이미 있으면 set만)
+      putDouble(pelvis, "defaultHeight", 0.8);
+      putDouble(pelvis, "offsetTrajectoryTime", 0.5);
+      putDouble(pelvis, "maxDistanceAnklePelvis", 0.9);
 
       // CenterOfMassHeightControlState -> {LookAhead, BetterLookAhead}
-      YoRegistry comState = findReg(comHeightMgr, "CenterOfMassHeightControlState");
-      YoRegistry lookAhead = findReg(comState, "LookAheadCoMHeightTrajectoryGenerator");
-      processGoHome_LookAhead = setAnyBoolean(lookAhead, new String[]{"ProcessGoHome", "processGoHome"}, true);
-      YoRegistry betterLookAhead = findReg(comState, "BetterLookAheadCoMHeightTrajectoryGenerator");
-      processGoHome_BetterLookAhead = setAnyBoolean(betterLookAhead, new String[]{"ProcessGoHome", "processGoHome"}, true);
+      YoRegistry comState = ensureRegistry(comHeightMgr, "CenterOfMassHeightControlState");
+      YoRegistry lookAhead = ensureRegistry(comState, "LookAheadCoMHeightTrajectoryGenerator");
+      putBoolean(lookAhead, "processGoHome", true);
+      YoRegistry betterLookAhead = ensureRegistry(comState, "BetterLookAheadCoMHeightTrajectoryGenerator");
+      putBoolean(betterLookAhead, "processGoHome", true);
 
       // FeetManager
-      YoRegistry feet = findReg(hlcmf, "FeetManager");
+      YoRegistry feet = ensureRegistry(hlcmf, "FeetManager");
 
       // GeometricToeOffManager / LegJointLimitsInspector
-      YoRegistry toeOff = findReg(feet, "GeometricToeOffManager", "GeometricToeOffManagerRegistry");
-      YoRegistry legLimits = findReg(toeOff, "LegJointLimitsInspector");
-      ankleLowerLimitToTriggerToeOff = setAnyDouble(legLimits, new String[]{"ankleLowerLimitToTriggerToeOff"}, -0.94);
+      YoRegistry toeOff = ensureRegistry(feet, "GeometricToeOffManager");
+      YoRegistry legLimits = ensureRegistry(toeOff, "LegJointLimitsInspector");
+      putDouble(legLimits, "ankleLowerLimitToTriggerToeOff", -0.94);
 
       // FootRotationDetectorParameters
-      YoRegistry rot = findReg(feet, "FootRotationDetectorParameters");
-      omegaThresholdForEstimation = setAnyDouble(rot, new String[]{"omegaThresholdForEstimation"}, 2.0);
-      rotationThreshold = setAnyDouble(rot, new String[]{"rotationThreshold"}, 0.05);
+      YoRegistry rot = ensureRegistry(feet, "FootRotationDetectorParameters");
+      putDouble(rot, "omegaThresholdForEstimation", 2.0);
+      putDouble(rot, "rotationThreshold", 0.05);
 
       // SupportStateParameters
-      YoRegistry support = findReg(feet, "SupportStateParameters");
-      dampFootRotations = setAnyBoolean(support, new String[]{"dampFootRotations"}, true);
-      footDamping = setAnyDouble(support, new String[]{"footDamping"}, 20.0);
+      YoRegistry support = ensureRegistry(feet, "SupportStateParameters");
+      putBoolean(support, "dampFootRotations", true);
+      putDouble(support, "footDamping", 20.0);
 
       // FeetManager (direct parameters)
-      footSwingTouchdownVelocityZ = setAnyDouble(feet, new String[]{"FootSwingTouchdownVelocityZ"}, -0.25);
-      footSwingTouchdownAccelerationZ = setAnyDouble(feet, new String[]{"FootSwingTouchdownAccelerationZ"}, -2.0);
-      verificationPerpendicularCoPErrorThreshold = setAnyDouble(feet, new String[]{"Verification_PerpendicularCoPErrorThreshold"}, 0.005);
-      verificationDistanceFromLineToComputeDesiredCoPOccupancy = setAnyDouble(feet,
-                                                                              new String[]{"Verification_DistanceFromLineToComputeDesiredCoPOccupancy"}, 0.005);
-      velocityOmegaMagnitudeThreshold = setAnyDouble(feet, new String[]{"Velocity_omegaMagnitudeThreshold"}, 0.5);
-      velocityRotationAngleDecayBreakFrequency = setAnyDouble(feet, new String[]{"Velocity_rotationAngleDecayBreakFrequency"}, 5.0);
-      velocityRotationAngleThreshold = setAnyDouble(feet, new String[]{"Velocity_rotationAngleThreshold"}, 0.15);
-      croppingThresholdForCoPRegionOccupancy = setAnyInt(feet, new String[]{"Cropping_ThresholdForCoPRegionOccupancy"}, 4);
-      croppingDistanceFromLineOfRotationToComputeCoPOccupancy = setAnyDouble(feet,
-                                                                             new String[]{"Cropping_DistanceFromLineOfRotationToComputeCoPOccupancy"}, 0.005);
-      verificationInlineCoPHistoryStdDev = setAnyDouble(feet, new String[]{"Verification_InlineCoPHistoryStdDev"}, 0.002);
-      verificationTransverseCoPHistoryStdDev = setAnyDouble(feet, new String[]{"Verification_TransverseCoPHistoryStdDev"}, 5.0E-4);
-      croppingFootDropThresholdForCrop = setAnyDouble(feet, new String[]{"Cropping_FootDropThresholdForCrop"}, 0.02);
+      putDouble(feet, "FootSwingTouchdownVelocityZ", -0.25);
+      putDouble(feet, "FootSwingTouchdownAccelerationZ", -2.0);
+      putDouble(feet, "Verification_PerpendicularCoPErrorThreshold", 0.005);
+      putDouble(feet, "Verification_DistanceFromLineToComputeDesiredCoPOccupancy", 0.005);
+      putDouble(feet, "Velocity_omegaMagnitudeThreshold", 0.5);
+      putDouble(feet, "Velocity_rotationAngleDecayBreakFrequency", 5.0);
+      putDouble(feet, "Velocity_rotationAngleThreshold", 0.15);
+      putInteger(feet, "Cropping_ThresholdForCoPRegionOccupancy", 4);
+      putDouble(feet, "Cropping_DistanceFromLineOfRotationToComputeCoPOccupancy", 0.005);
+      putDouble(feet, "Verification_InlineCoPHistoryStdDev", 0.002);
+      putDouble(feet, "Verification_TransverseCoPHistoryStdDev", 5.0E-4);
+      putDouble(feet, "Cropping_FootDropThresholdForCrop", 0.02);
 
       // BalanceManager
-      YoRegistry balance = findReg(hlcmf, "BalanceManager");
-      YoRegistry walkingCoP = findReg(balance, "WalkingCoPTrajectoryGenerator");
-      computeSplitFractionsFromPositions = setAnyBoolean(walkingCoP, new String[]{"computeSplitFractionsFromPositions"}, true);
-      ellipticICPErrorForMomentumRecovery = setAnyDouble(balance, new String[]{"ellipticICPErrorForMomentumRecovery"}, Double.POSITIVE_INFINITY);
+      YoRegistry balance = ensureRegistry(hlcmf, "BalanceManager");
+      YoRegistry walkingCoP = ensureRegistry(balance, "WalkingCoPTrajectoryGenerator");
+      putBoolean(walkingCoP, "computeSplitFractionsFromPositions", true);
+      // Infinity는 범위 의미가 없으니 그냥 값 세팅
+      putDouble(balance, "ellipticICPErrorForMomentumRecovery", Double.POSITIVE_INFINITY);
    }
 
    private void initWalkingController(YoRegistry hhcm)
    {
-      YoRegistry walking = findReg(hhcm, "WalkingControllerState");
-      YoRegistry lmrcm = findReg(walking, "LinearMomentumRateControlModule");
+      YoRegistry walking = ensureRegistry(hhcm, "WalkingControllerState");
+      YoRegistry lmrcm = ensureRegistry(walking, "LinearMomentumRateControlModule");
 
       // ICPOptimizationController
-      YoRegistry icpOpt = findReg(lmrcm, "ICPOptimizationController");
-      controllerThresholdForStuck_ICPOpt = setAnyDouble(icpOpt, new String[]{"controllerThresholdForStuck"}, 0.12);
+      YoRegistry icpOpt = ensureRegistry(lmrcm, "ICPOptimizationController");
+      putDouble(icpOpt, "controllerThresholdForStuck", 0.12);
 
       // ICPController
-      YoRegistry icp = findReg(lmrcm, "ICPController");
-      captureKi = setAnyDouble(icp, new String[]{"captureKi"}, 1.5);
-      captureIntegralLeakRatio = setAnyDouble(icp, new String[]{"captureIntegralLeakRatio"}, 0.98);
-      controllerThresholdForStuck_ICP = setAnyDouble(icp, new String[]{"controllerThresholdForStuck"}, 0.135);
+      YoRegistry icp = ensureRegistry(lmrcm, "ICPController");
+      putDouble(icp, "captureKi", 1.5);
+      putDouble(icp, "captureIntegralLeakRatio", 0.98);
+      putDouble(icp, "controllerThresholdForStuck", 0.135);
 
-      // Linear momentum weights (variables live under lmrcm)
-      linearMomentumRateWeightX = setAnyDouble(lmrcm, new String[]{"LinearMomentumRateWeightX", "linearMomentumRateWeightX"}, 0.1);
-      linearMomentumRateWeightY = setAnyDouble(lmrcm, new String[]{"LinearMomentumRateWeightY", "linearMomentumRateWeightY"}, 0.1);
-      recoveryLinearMomentumRateWeightX = setAnyDouble(lmrcm, new String[]{"RecoveryLinearMomentumRateWeightX", "recoveryLinearMomentumRateWeightX"}, 0.3);
-      recoveryLinearMomentumRateWeightY = setAnyDouble(lmrcm, new String[]{"RecoveryLinearMomentumRateWeightY", "recoveryLinearMomentumRateWeightY"}, 0.3);
+      // Linear momentum weights
+      putDouble(lmrcm, "LinearMomentumRateWeightX", 0.1);
+      putDouble(lmrcm, "LinearMomentumRateWeightY", 0.1);
+      putDouble(lmrcm, "RecoveryLinearMomentumRateWeightX", 0.3);
+      putDouble(lmrcm, "RecoveryLinearMomentumRateWeightY", 0.3);
    }
 
-   private void initEstimatorThread(YoRegistry root)
-   {
-//      YoRegistry estimator = findReg(root,"DRCEstimatorThread");
-      YoRegistry AtlasHeadPoseEstimator = new YoRegistry("AtlasHeadPoseEstimator");
-      root.addChild(AtlasHeadPoseEstimator);
-      YoRegistry estimatorControllerRegistry;
-      if (root.findRegistry("EstimatorController") != null)
-      {
-         estimatorControllerRegistry = root.findRegistry("EstimatorController");
-      }
-      else
-      {
-         estimatorControllerRegistry = new YoRegistry("EstimatorController");
-         root.addChild(estimatorControllerRegistry);
-      }
+   // ---------------- Estimator section ----------------
 
-      YoRegistry DRCKinematicsBasedStateEstimator;
-      if (estimatorControllerRegistry.findRegistry("DRCKinematicsBasedStateEstimator") != null)
-      {
-         DRCKinematicsBasedStateEstimator = estimatorControllerRegistry.findRegistry("DRCKinematicsBasedStateEstimator");
-      }
-      else
-      {
-         DRCKinematicsBasedStateEstimator = new YoRegistry("DRCKinematicsBasedStateEstimator");
-         estimatorControllerRegistry.addChild(DRCKinematicsBasedStateEstimator);
-      }
-      YoRegistry IMUBasedPelvisRotationalStateUpdater;
-      if (DRCKinematicsBasedStateEstimator.findRegistry("IMUBasedPelvisRotationalStateUpdater") != null)
-      {
-         IMUBasedPelvisRotationalStateUpdater = DRCKinematicsBasedStateEstimator.findRegistry("IMUBasedPelvisRotationalStateUpdater");
-      }
-      else
-      {
-         IMUBasedPelvisRotationalStateUpdater = new YoRegistry("IMUBasedPelvisRotationalStateUpdater");
-         DRCKinematicsBasedStateEstimator.addChild(IMUBasedPelvisRotationalStateUpdater);   
-      }          
+   private void initEstimatorThread(YoRegistry base)
+   {
+      // base == DRCEstimatorThread
+      YoRegistry atlasHeadPoseEstimator = ensureRegistry(base, "AtlasHeadPoseEstimator");
+
+      // (옵션) 레거시 경로
+      YoRegistry estimatorController = ensureRegistry(base, "EstimatorController");
+      YoRegistry drcKinematics = ensureRegistry(estimatorController, "DRCKinematicsBasedStateEstimator");
+      YoRegistry IMUBasedPelvisRotationalStateUpdater = ensureRegistry(drcKinematics, "IMUBasedPelvisRotationalStateUpdater");
+
+      // 값 세팅 (이미 동일 변수 있으면 set만)
+      putDouble(atlasHeadPoseEstimator, "AngularVelocityVariance", 3.0E-6);
+      putDouble(atlasHeadPoseEstimator, "LinearAccelerationVariance", 10.0);
+      putDouble(atlasHeadPoseEstimator, "MagneticFieldVariance", 0.001);
+      putDouble(atlasHeadPoseEstimator, "PositionVariance", 1.0E-8);
+      putDouble(atlasHeadPoseEstimator, "HeadAngularAccelerationVariance", 10.0);
+      putDouble(atlasHeadPoseEstimator, "HeadLinearAccelerationVariance", 10.0);
+      putDouble(atlasHeadPoseEstimator, "LinearAccelerationBiasVariance", 10.0);
       
-      angularVelocityVariance = new DoubleParameter("AngularVelocityVariance", AtlasHeadPoseEstimator, 3.0E-6,0.0,1.0);
-      linearAccelerationVariance = new DoubleParameter("LinearAccelerationVariance",AtlasHeadPoseEstimator, 10.0,0.0,1.0);
-      magneticFieldVariance = new DoubleParameter("MagneticFieldVariance", AtlasHeadPoseEstimator, 0.001,0.0,1.0);
-      positionVariance = new DoubleParameter("PositionVariance", AtlasHeadPoseEstimator, 1.0E-8,0.0,1.0);
-      headAngularAccelerationVariance = new DoubleParameter("HeadAngularAccelerationVariance", AtlasHeadPoseEstimator, 10.0,0.0,1.0);
-      headLinearAccelerationVariance = new DoubleParameter("HeadLinearAccelerationVariance", AtlasHeadPoseEstimator, 10.0,0.0,1.0);
-      linearAccelerationBiasVariance = new DoubleParameter("LinearAccelerationBiasVariance", AtlasHeadPoseEstimator, 10.0,0.0,1.0);      
+      putBoolean(IMUBasedPelvisRotationalStateUpdater, "useIMUBasedPelvisRotationalStateUpdater", true);
+   }
+
+   // ---------------- Helpers ----------------
+
+   /** Ensure a child registry exists; create & attach if missing. */
+   private YoRegistry ensureRegistry(YoRegistry parent, String name)
+   {
+      YoRegistry r = parent.findRegistry(name);
+      if (r == null)
+      {
+         r = new YoRegistry(name);
+         parent.addChild(r);
+      }
+      return r;
+   }
+
+   private YoDouble putDouble(YoRegistry reg, String name, double value)
+   {
+      var existing = reg.findVariable(name);
+      if (existing instanceof YoDouble d)
+      {
+         d.set(value);
+         return d;
+      }
+      // 동일 이름이 다른 타입으로 이미 있다면 충돌 → 명확히 터뜨려서 빨리 찾게
+      if (existing != null)
+         throw new IllegalStateException("Variable '" + name + "' already exists in " + reg.getName()
+                                         + " as " + existing.getClass().getSimpleName());
+      YoDouble v = new YoDouble(name, reg);
+      v.set(value);
+      return v;
+   }
+
+   private YoBoolean putBoolean(YoRegistry reg, String name, boolean value)
+   {
+      var existing = reg.findVariable(name);
+      if (existing instanceof YoBoolean b)
+      {
+         b.set(value);
+         return b;
+      }
+      if (existing != null)
+         throw new IllegalStateException("Variable '" + name + "' already exists in " + reg.getName()
+                                         + " as " + existing.getClass().getSimpleName());
+      YoBoolean v = new YoBoolean(name, reg);
+      v.set(value);
+      return v;
+   }
+
+   private YoInteger putInteger(YoRegistry reg, String name, int value)
+   {
+      var existing = reg.findVariable(name);
+      if (existing instanceof YoInteger i)
+      {
+         i.set(value);
+         return i;
+      }
+      if (existing != null)
+         throw new IllegalStateException("Variable '" + name + "' already exists in " + reg.getName()
+                                         + " as " + existing.getClass().getSimpleName());
+      YoInteger v = new YoInteger(name, reg);
+      v.set(value);
+      return v;
    }
 }
