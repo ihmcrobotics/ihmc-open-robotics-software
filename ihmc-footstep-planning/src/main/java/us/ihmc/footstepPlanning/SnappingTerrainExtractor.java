@@ -17,7 +17,6 @@ import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParame
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -26,8 +25,12 @@ import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class SnappingTerrainExtractor
 {
-   private static final int BLOCK_SIZE_XY = 32;
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   /**
+    * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
+    * This was chosen based on GPU profiling and significantly effects performance.
+    */
+   private static final int BLOCK_SIZE_XY = 16;
 
    private final TerrainMapData terrainMapData;
    private final HeightMapParameters heightMapParameters;
