@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning;
 
 import toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket;
-import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 /**
@@ -19,55 +18,11 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
    }
 
    /**
-    * Whether the planner computes surface normals. If false, traversibility and roll
-    * are also not computed
-    */
-   default void setComputeSurfaceNormalCost(boolean computeSurfaceNormalCost)
-   {
-      set(AStarBodyPathPlannerParameters.computeSurfaceNormalCost, computeSurfaceNormalCost);
-   }
-
-   /**
-    * Whether the planner computes and checks traversibility
-    */
-   default void setComputeTraversibility(boolean computeTraversibility)
-   {
-      set(AStarBodyPathPlannerParameters.computeTraversibility, computeTraversibility);
-   }
-
-   /**
     * Whether the body path plan is post-processed with the smoother.
     */
    default void setPerformSmoothing(boolean performSmoothing)
    {
       set(AStarBodyPathPlannerParameters.performSmoothing, performSmoothing);
-   }
-
-   /**
-    * This is the weight assigned to roll in the search space. Increasing this value
-    * will decrease the likelihood of the path moving sideways across slopes.
-    */
-   default void setRollCostWeight(double rollCostWeight)
-   {
-      set(AStarBodyPathPlannerParameters.rollCostWeight, rollCostWeight);
-   }
-
-   /**
-    * The angle in degrees of the deadband applied to the computed roll. Increasing
-    * this value decreases the effect small rolls have on the path.
-    */
-   default void setRollCostDeadband(double rollCostDeadband)
-   {
-      set(AStarBodyPathPlannerParameters.rollCostDeadband, rollCostDeadband);
-   }
-
-   /**
-    * When the roll is below this angle, the cost is linearly discounted to zero.
-    * Increasing this value decreases the effect roll has on the path.
-    */
-   default void setMaxPenalizedRollAngle(double maxPenalizedRollAngle)
-   {
-      set(AStarBodyPathPlannerParameters.maxPenalizedRollAngle, maxPenalizedRollAngle);
    }
 
    /**
@@ -140,131 +95,6 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
    }
 
    /**
-    * Weight placed on maximizing traversibility in the plan. Increasing this weight
-    * will tend the plan towards flat sections.
-    */
-   default void setTraversibilityWeight(double traversibilityWeight)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityWeight, traversibilityWeight);
-   }
-
-   /**
-    * weight placed on the traversibility at the start node when computing the overall
-    * traversibility score.
-    */
-   default void setTraversibilityStanceWeight(double traversibilityStanceWeight)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityStanceWeight, traversibilityStanceWeight);
-   }
-
-   /**
-    * weight placed on the traversibility at the end node when computing the overall
-    * traversibility score.
-    */
-   default void setTraversibilityStepWeight(double traversibilityStepWeight)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityStepWeight, traversibilityStepWeight);
-   }
-
-   /**
-    * Min score on the start node traversibility to say an edge is traversible.
-    */
-   default void setMinTraversibilityScore(double minTraversibilityScore)
-   {
-      set(AStarBodyPathPlannerParameters.minTraversibilityScore, minTraversibilityScore);
-   }
-
-   /**
-    * Min angle in degrees to penalize in the traversibility score.
-    */
-   default void setMinNormalAngleToPenalizeForTraversibility(double minNormalAngleToPenalizeForTraversibility)
-   {
-      set(AStarBodyPathPlannerParameters.minNormalAngleToPenalizeForTraversibility, minNormalAngleToPenalizeForTraversibility);
-   }
-
-   /**
-    * Max angle in degrees to penalize in the traversibility score.
-    */
-   default void setMaxNormalAngleToPenalizeForTraversibility(double maxNormalAngleToPenalizeForTraversibility)
-   {
-      set(AStarBodyPathPlannerParameters.maxNormalAngleToPenalizeForTraversibility, maxNormalAngleToPenalizeForTraversibility);
-   }
-
-   /**
-    * Weight to place on the surface normals when computing the traversibility score.
-    */
-   default void setTraversibilityInclineWeight(double traversibilityInclineWeight)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityInclineWeight, traversibilityInclineWeight);
-   }
-
-   /**
-    * Box width of cells to include when performing the traversibility calculation
-    */
-   default void setTraversibilitySearchWidth(double traversibilitySearchWidth)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilitySearchWidth, traversibilitySearchWidth);
-   }
-
-   /**
-    * This is the minimum number of occupied neighbor cells to say a vertex is
-    * traversibile.
-    */
-   default void setMinOccupiedNeighborsForTraversibility(int minOccupiedNeighborsForTraversibility)
-   {
-      set(AStarBodyPathPlannerParameters.minOccupiedNeighborsForTraversibility, minOccupiedNeighborsForTraversibility);
-   }
-
-   /**
-    * This is half the typical stance width of the robot, used to compute the
-    * traversibility
-    */
-   default void setHalfStanceWidth(double halfStanceWidth)
-   {
-      set(AStarBodyPathPlannerParameters.halfStanceWidth, halfStanceWidth);
-   }
-
-   /**
-    * This the width of the height window of cells to include in the traversibility
-    * calculation. The height distance must be within this value of the start and end
-    * nodes. Increasing this value will increase the number of cells included in the
-    * traversibility calculation
-    */
-   default void setTraversibilityHeightWindowWidth(double traversibilityHeightWindowWidth)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityHeightWindowWidth, traversibilityHeightWindowWidth);
-   }
-
-   /**
-    * This is the deadband applied to the height distance of cells in the
-    * traversibility calculation. Increasing this value will increase the overall
-    * traversibility scores.
-    */
-   default void setTraversibilityHeightWindowDeadband(double traversibilityHeightWindowDeadband)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityHeightWindowDeadband, traversibilityHeightWindowDeadband);
-   }
-
-   /**
-    * This is the distance to the ground plane estimate that is needed for saying the
-    * two nodes are in the ground plane.
-    */
-   default void setHeightProximityForSayingWalkingOnGround(double heightProximityForSayingWalkingOnGround)
-   {
-      set(AStarBodyPathPlannerParameters.heightProximityForSayingWalkingOnGround, heightProximityForSayingWalkingOnGround);
-   }
-
-   /**
-    * This is the minimum discount applied to non-ground cells when computing the
-    * traversibility when the edge is located in the ground plane. Increasing this
-    * value will increase the traversibility score when walking on the ground.
-    */
-   default void setTraversibilityNonGroundDiscountWhenWalkingOnGround(double traversibilityNonGroundDiscountWhenWalkingOnGround)
-   {
-      set(AStarBodyPathPlannerParameters.traversibilityNonGroundDiscountWhenWalkingOnGround, traversibilityNonGroundDiscountWhenWalkingOnGround);
-   }
-
-   /**
     * Weight placed on the gradient for avoiding collisions
     */
    default void setSmootherCollisionWeight(double smootherCollisionWeight)
@@ -307,54 +137,11 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
    }
 
    /**
-    * Weight placed on the gradient for minimizing the roll cost of the body path plan
-    */
-   default void setSmootherRollWeight(double smootherRollWeight)
-   {
-      set(AStarBodyPathPlannerParameters.smootherRollWeight, smootherRollWeight);
-   }
-
-   /**
     * Weight placed on a gradient that drives the waypoint towards the initial value
     */
    default void setSmootherDisplacementWeight(double smootherDisplacementWeight)
    {
       set(AStarBodyPathPlannerParameters.smootherDisplacementWeight, smootherDisplacementWeight);
-   }
-
-   /**
-    * Weight placed on the gradient for maximizing the traversibility of the body path
-    * plan.
-    */
-   default void setSmootherTraversibilityWeight(double smootherTraversibilityWeight)
-   {
-      set(AStarBodyPathPlannerParameters.smootherTraversibilityWeight, smootherTraversibilityWeight);
-   }
-
-   /**
-    * Weight placed on the gradient pushing the body path plan towards the most cells
-    * in the ground plane.
-    */
-   default void setSmootherGroundPlaneWeight(double smootherGroundPlaneWeight)
-   {
-      set(AStarBodyPathPlannerParameters.smootherGroundPlaneWeight, smootherGroundPlaneWeight);
-   }
-
-   /**
-    * Traversibility threshold that results in a zero gradient for traversibility
-    */
-   default void setSmootherMinimumTraversibilityToSearchFor(double smootherMinimumTraversibilityToSearchFor)
-   {
-      set(AStarBodyPathPlannerParameters.smootherMinimumTraversibilityToSearchFor, smootherMinimumTraversibilityToSearchFor);
-   }
-
-   /**
-    * Traversibility threshold above which the traversibility gradient begins to carry
-    * less weight.
-    */
-   default void setSmootherTraversibilityThresholdForNoDiscount(double smootherTraversibilityThresholdForNoDiscount)
-   {
-      set(AStarBodyPathPlannerParameters.smootherTraversibilityThresholdForNoDiscount, smootherTraversibilityThresholdForNoDiscount);
    }
 
    /**
@@ -377,17 +164,9 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
    {
       double noValue = AStarBodyPathPlannerParametersPacket.DEFAULT_NO_VALUE;
 
-         setCheckForCollisions(packet.getCheckForCollisions());
-         setComputeSurfaceNormalCost(packet.getComputeSurfaceNormalCost());
-         setComputeTraversibility(packet.getComputeTraversibility());
-         setPerformSmoothing(packet.getPerformSmoothing());
+      setCheckForCollisions(packet.getCheckForCollisions());
+      setPerformSmoothing(packet.getPerformSmoothing());
 
-      if (packet.getRollCostWeight() != noValue)
-         setRollCostWeight(packet.getRollCostWeight());
-      if (packet.getRollCostDeadband() != noValue)
-         setRollCostDeadband(packet.getRollCostDeadband());
-      if (packet.getMaxPenalizedRollAngle() != noValue)
-         setMaxPenalizedRollAngle(packet.getMaxPenalizedRollAngle());
       if (packet.getSnapRadius() != noValue)
          setSnapRadius(packet.getSnapRadius());
       if (packet.getMinSnapHeightThreshold() != noValue)
@@ -404,34 +183,6 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
          setCollisionBoxSizeX(packet.getCollisionBoxSizeX());
       if (packet.getCollisionBoxGroundClearance() != noValue)
          setCollisionBoxGroundClearance(packet.getCollisionBoxGroundClearance());
-      if (packet.getTraversibilityWeight() != noValue)
-         setTraversibilityWeight(packet.getTraversibilityWeight());
-      if (packet.getTraversibilityStanceWeight() != noValue)
-         setTraversibilityStanceWeight(packet.getTraversibilityStanceWeight());
-      if (packet.getTraversibilityStepWeight() != noValue)
-         setTraversibilityStepWeight(packet.getTraversibilityStepWeight());
-      if (packet.getMinTraversibilityScore() != noValue)
-         setMinTraversibilityScore(packet.getMinTraversibilityScore());
-      if (packet.getMinNormalAngleToPenalizeForTraversibility() != noValue)
-         setMinNormalAngleToPenalizeForTraversibility(packet.getMinNormalAngleToPenalizeForTraversibility());
-      if (packet.getMaxNormalAngleToPenalizeForTraversibility() != noValue)
-         setMaxNormalAngleToPenalizeForTraversibility(packet.getMaxNormalAngleToPenalizeForTraversibility());
-      if (packet.getTraversibilityInclineWeight() != noValue)
-         setTraversibilityInclineWeight(packet.getTraversibilityInclineWeight());
-      if (packet.getTraversibilitySearchWidth() != noValue)
-         setTraversibilitySearchWidth(packet.getTraversibilitySearchWidth());
-      if (packet.getMinOccupiedNeighborsForTraversibility() != noValue)
-         setMinOccupiedNeighborsForTraversibility(packet.getMinOccupiedNeighborsForTraversibility());
-      if (packet.getHalfStanceWidth() != noValue)
-         setHalfStanceWidth(packet.getHalfStanceWidth());
-      if (packet.getTraversibilityHeightWindowWidth() != noValue)
-         setTraversibilityHeightWindowWidth(packet.getTraversibilityHeightWindowWidth());
-      if (packet.getTraversibilityHeightWindowDeadband() != noValue)
-         setTraversibilityHeightWindowDeadband(packet.getTraversibilityHeightWindowDeadband());
-      if (packet.getHeightProximityForSayingWalkingOnGround() != noValue)
-         setHeightProximityForSayingWalkingOnGround(packet.getHeightProximityForSayingWalkingOnGround());
-      if (packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround() != noValue)
-         setTraversibilityNonGroundDiscountWhenWalkingOnGround(packet.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
       if (packet.getSmootherCollisionWeight() != noValue)
          setSmootherCollisionWeight(packet.getSmootherCollisionWeight());
       if (packet.getSmootherSmoothnessWeight() != noValue)
@@ -442,18 +193,8 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
          setSmootherMinCurvatureToPenalize(packet.getSmootherMinCurvatureToPenalize());
       if (packet.getSmootherEqualSpacingWeight() != noValue)
          setSmootherEqualSpacingWeight(packet.getSmootherEqualSpacingWeight());
-      if (packet.getSmootherRollWeight() != noValue)
-         setSmootherRollWeight(packet.getSmootherRollWeight());
       if (packet.getSmootherDisplacementWeight() != noValue)
          setSmootherDisplacementWeight(packet.getSmootherDisplacementWeight());
-      if (packet.getSmootherTraversibilityWeight() != noValue)
-         setSmootherTraversibilityWeight(packet.getSmootherTraversibilityWeight());
-      if (packet.getSmootherGroundPlaneWeight() != noValue)
-         setSmootherGroundPlaneWeight(packet.getSmootherGroundPlaneWeight());
-      if (packet.getSmootherMinimumTraversibilityToSearchFor() != noValue)
-         setSmootherMinimumTraversibilityToSearchFor(packet.getSmootherMinimumTraversibilityToSearchFor());
-      if (packet.getSmootherTraversibilityThresholdForNoDiscount() != noValue)
-         setSmootherTraversibilityThresholdForNoDiscount(packet.getSmootherTraversibilityThresholdForNoDiscount());
       if (packet.getSmootherHillClimbGain() != noValue)
          setSmootherHillClimbGain(packet.getSmootherHillClimbGain());
       if (packet.getSmootherGradientThresholdToTerminate() != noValue)
