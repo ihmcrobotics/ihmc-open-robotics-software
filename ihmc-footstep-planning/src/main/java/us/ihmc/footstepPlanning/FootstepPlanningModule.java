@@ -108,7 +108,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.footPolygons = footPolygons;
-      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
+      this.bodyPathPlanner = new AStarBodyPathPlanner(aStarBodyPathPlannerParameters, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
