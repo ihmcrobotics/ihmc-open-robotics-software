@@ -45,7 +45,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final double rhoWeight = 5e-6;
    // TODO Needs tune up.
    private final double rhoMin = 2.0;
-   private final double rhoRateDefaultWeight = 1E-7;
+   private final double rhoRateDefaultWeight = 1E-8;
    // TODO Needs tune up.
    private final double rhoRateHighWeight = 1.6E-6;
    // TODO Needs tune up.
