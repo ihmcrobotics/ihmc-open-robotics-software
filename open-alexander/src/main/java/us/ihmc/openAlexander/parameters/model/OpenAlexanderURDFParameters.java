@@ -25,14 +25,17 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
                                                                       "alexander_V1_description/meshes/"};
    private static final String[] LOGGED_RESOURCES = {"alexander_V1_description/"};
 
-   public static final String URDF_FULL_BODY = "alexander_V1_description/urdf/alexander_v1.fullBody.urdf";
    public static final String URDF_LOWER_BODY = "alexander_V1_description/urdf/alexander_v1.lowerBody.urdf";
    public static final String URDF_HEAD = "alexander_V1_description/urdf/alexander_v1.head.urdf";
 
-   public static final String URDF_LOWER_BODY_ONLY = "alexander_V1_description/urdf/alexander_v1.lowerBodyOnly.urdf";
-   
-   public static final String URDF_LEFT_ARM_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v0.leftArmFixedForearm.urdf";
-   public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v0.rightArmFixedForearm.urdf";
+   public static final String URDF_LEFT_UPPER_ARM = "alexander_V1_description/urdf/alexander_v1.leftUpperArm.urdf";
+   public static final String URDF_RIGHT_UPPER_ARM = "alexander_V1_description/urdf/alexander_v1.rightUpperArm.urdf";
+
+   public static final String URDF_LEFT_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v1.leftFixedForearm.urdf";
+   public static final String URDF_RIGHT_NUB_FOREARM = "alexander_V1_description/urdf/alexander_v1.rightFixedForearm.urdf";
+
+   public static final String URDF_LEFT_FOREARM = "alexander_V1_description/urdf/alexander_v1.leftForearm.urdf";
+   public static final String URDF_RIGHT_FOREARM = "alexander_V1_description/urdf/alexander_v1.rightForearm.urdf";
 
    // Model paths are represented as Strings because resource paths should always be separated with "/" -- this is not platform dependent
    private final Collection<String> urdfModelPath;

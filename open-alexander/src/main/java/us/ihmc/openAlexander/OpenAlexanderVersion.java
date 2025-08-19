@@ -10,15 +10,23 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public enum OpenAlexanderVersion implements AlexanderVersionInterface
 {
-   V1_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_FULL_BODY), null),
+   V1_FULL_ROBOT(List.of(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+                         OpenAlexanderURDFParameters.URDF_LEFT_UPPER_ARM,
+                         OpenAlexanderURDFParameters.URDF_LEFT_FOREARM,
+                         OpenAlexanderURDFParameters.URDF_RIGHT_UPPER_ARM,
+                         OpenAlexanderURDFParameters.URDF_RIGHT_FOREARM,
+                         OpenAlexanderURDFParameters.URDF_HEAD), null),
    V1_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
-                                 OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
-                                 OpenAlexanderURDFParameters.URDF_HEAD,
-                                 OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null),
-   V1_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
+                                 OpenAlexanderURDFParameters.URDF_LEFT_UPPER_ARM,
+                                 OpenAlexanderURDFParameters.URDF_LEFT_NUB_FOREARM,
+                                 OpenAlexanderURDFParameters.URDF_RIGHT_UPPER_ARM,
+                                 OpenAlexanderURDFParameters.URDF_RIGHT_NUB_FOREARM,
+                                 OpenAlexanderURDFParameters.URDF_HEAD), null),
+   V1_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY), null);
 
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
