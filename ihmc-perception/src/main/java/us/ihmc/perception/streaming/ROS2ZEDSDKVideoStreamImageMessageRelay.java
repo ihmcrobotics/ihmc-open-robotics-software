@@ -20,6 +20,8 @@ import us.ihmc.zed.global.zed;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * Subscribes to a ZED SDK stream and republishes the data as ROS 2 messages.
@@ -37,6 +39,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
    private ImageMessage lastDepthImageMessage;
    private ImageMessage lastLeftColorImageMessage;
    private ImageMessage lastRightColorImageMessage;
+   private ExecutorService publisherExecutor;
 
    public ROS2ZEDSDKVideoStreamImageMessageRelay(ROS2Node ros2Node, ZEDModelData zedModel, int slDepthMode)
    {
@@ -66,6 +69,8 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
                lastDepthImageMessage = new ImageMessage();
                lastLeftColorImageMessage = new ImageMessage();
                lastRightColorImageMessage = new ImageMessage();
+
+               publisherExecutor = new ScheduledThreadPoolExecutor(3 * 10);
 
                double waited = 0.0;
                double timeout = 5.0;
@@ -103,9 +108,10 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
          packImageMessage(leftColorImage, lastLeftColorImageMessage);
          packImageMessage(rightColorImage, lastRightColorImageMessage);
 
-         ros2Helper.publish(PerceptionAPI.ZED_DEPTH, lastDepthImageMessage);
-         ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), lastLeftColorImageMessage);
-         ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), lastRightColorImageMessage);
+         // Publish async to not block receiving new images
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_DEPTH, lastDepthImageMessage));
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), lastLeftColorImageMessage));
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), lastRightColorImageMessage));
 
          rightColorImage.release();
          leftColorImage.release();
