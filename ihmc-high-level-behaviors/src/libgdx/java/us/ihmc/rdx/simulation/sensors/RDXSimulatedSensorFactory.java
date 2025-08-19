@@ -257,7 +257,7 @@ public class RDXSimulatedSensorFactory
    public static RDXHighLevelDepthSensorSimulator createChestZED2ForObjectDetection(HumanoidReferenceFrames referenceFrames, LongSupplier timeSupplier)
    {
       double publishRateHz = 20.0;
-      double verticalFOV = 70.0;
+      double verticalFOV = ZEDModelData.ZED_2.getVerticalFOV();
       int imageWidth = 1280;
       int imageHeight = 720;
       double minRange = 0.2;
@@ -278,14 +278,14 @@ public class RDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
-   public static RDXSimulatedImageSensor createZED2iImageSensor()
+   public static RDXSimulatedImageSensor createZEDMiniImageSensor()
    {
-      ZEDModelData modelData = ZEDModelData.ZED_2I;
+      ZEDModelData modelData = ZEDModelData.ZED_MINI;
       RDXSimulatedImageSensor zed = new RDXSimulatedImageSensor(modelData.name(), 15.0);
       zed.addCamera("left",
                     1280,
                     720,
-                    70.0f,
+                    ZEDModelData.ZED_MINI.getVerticalFOV(),
                     modelData.getMinimumDepthDistance(),
                     modelData.getMaximumDepthDistance(),
                     true,
@@ -297,7 +297,71 @@ public class RDXSimulatedSensorFactory
       zed.addCamera("right",
                     1280,
                     720,
-                    70.0f,
+                    ZEDModelData.ZED_MINI.getVerticalFOV(),
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                    false,
+                    -1,
+                    0,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, -modelData.getCenterToCameraDistance(), 0.0)));
+
+      return zed;
+   }
+
+   public static RDXSimulatedImageSensor createZEDXMiniImageSensor()
+   {
+      ZEDModelData modelData = ZEDModelData.ZED_X_MINI;
+      RDXSimulatedImageSensor zed = new RDXSimulatedImageSensor(modelData.name(), 15.0);
+      zed.addCamera("left",
+                    960,
+                    600,
+                    ZEDModelData.ZED_X_MINI.getVerticalFOV(),
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                    true,
+                    ZEDImageSensor.DEPTH_IMAGE_KEY,
+                    15,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, modelData.getCenterToCameraDistance(), 0.0)));
+      zed.addCamera("right",
+                    960,
+                    600,
+                    ZEDModelData.ZED_X_MINI.getVerticalFOV(),
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY,
+                    false,
+                    -1,
+                    0,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, -modelData.getCenterToCameraDistance(), 0.0)));
+
+      return zed;
+   }
+
+   public static RDXSimulatedImageSensor createZED2iImageSensor()
+   {
+      ZEDModelData modelData = ZEDModelData.ZED_2I;
+      RDXSimulatedImageSensor zed = new RDXSimulatedImageSensor(modelData.name(), 15.0);
+      zed.addCamera("left",
+                    1280,
+                    720,
+                    ZEDModelData.ZED_2I.getVerticalFOV(),
+                    modelData.getMinimumDepthDistance(),
+                    modelData.getMaximumDepthDistance(),
+                    true,
+                    ZEDImageSensor.LEFT_COLOR_IMAGE_KEY,
+                    true,
+                    ZEDImageSensor.DEPTH_IMAGE_KEY,
+                    15,
+                    new RigidBodyTransform(new RotationMatrix(), new Vector3D(0.0, modelData.getCenterToCameraDistance(), 0.0)));
+      zed.addCamera("right",
+                    1280,
+                    720,
+                    ZEDModelData.ZED_2I.getVerticalFOV(),
                     modelData.getMinimumDepthDistance(),
                     modelData.getMaximumDepthDistance(),
                     true,

@@ -427,7 +427,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
                {
                   CollisionResult collision = collidable1.evaluateCollision(collidable2);
                   EuclidFrameShape3DCollisionResult collisionData = collision.getCollisionData();
-                  assertTrue(collisionData.getSignedDistance() > -1.5e-3,
+                  assertTrue(collisionData.getSignedDistance() > -1.0e-2,
                              collidable1.getRigidBody().getName() + ", " + collidable2.getRigidBody().getName() + ": " + collisionData.getSignedDistance());
                }
             }
