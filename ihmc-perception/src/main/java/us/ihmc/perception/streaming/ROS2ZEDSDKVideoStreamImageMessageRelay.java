@@ -73,7 +73,6 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
                {
                   if (waited >= timeout)
                   {
-                     System.out.println("hit the timeout");
                      remoteZEDImageSensor.close();
                      remoteZEDImageSensor = null;
                      break;
@@ -92,8 +91,6 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
    {
       if (remoteZEDImageSensor != null && remoteZEDImageSensor.isSensorRunning())
       {
-         System.out.println("connected");
-
          double timeout = 0.5;
          remoteZEDImageSensor.waitForGrab(timeout);
 
@@ -116,7 +113,6 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
       }
       else
       {
-         System.out.println("sensor not connected");
          // Sensor not connected, sleep for some time
          ThreadTools.park(0.5);
       }
