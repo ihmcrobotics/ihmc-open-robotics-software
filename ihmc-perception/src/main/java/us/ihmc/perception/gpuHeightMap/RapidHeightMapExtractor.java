@@ -32,7 +32,7 @@ public class RapidHeightMapExtractor
     * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
     */
-   private static final int BLOCK_SIZE_XY = 16;
+   private static final int BLOCK_SIZE_XY = 8;
    private static final int MODE = 1; // 0 -> Ouster, 1 -> Realsense
 
    private final HeightMapParameters heightMapParameters;
