@@ -45,8 +45,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
 
-   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(true);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
 
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
