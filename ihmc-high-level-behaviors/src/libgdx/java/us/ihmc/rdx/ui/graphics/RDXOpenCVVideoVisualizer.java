@@ -31,7 +31,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    private Texture texture;
    private final RDXImagePanel imagePanel;
    private final List<Consumer<Mat>> overlays = new ArrayList<>();
-   private final ImBoolean visualizeImagePanel = new ImBoolean();
+   private final ImBoolean visualizeImagePanel = new ImBoolean(true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public RDXOpenCVVideoVisualizer(String title, String panelName, boolean flipY)
