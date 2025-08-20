@@ -228,7 +228,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
    public void computeSwingTrajectories(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
       swingTrajectories.clear();
-      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null || heightMapData.isEmpty()))
+      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && heightMapData == null)
       {
          return;
       }

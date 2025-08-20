@@ -595,7 +595,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       {
          for (int y = 0; y < cellsPerSide; y++)
          {
-            assertEquals(dataA.getHeightAt(x, y), dataB.getHeightAt(x, y), epsilon);
+            assertEquals(dataA.getHeight(x, y), dataB.getHeight(x, y), epsilon);
          }
       }
    }

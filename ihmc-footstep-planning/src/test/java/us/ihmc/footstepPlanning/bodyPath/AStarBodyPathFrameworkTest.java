@@ -88,12 +88,6 @@ public class AStarBodyPathFrameworkTest
       GENERATE_LOG_FOR_FAILING_TESTS &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
 
-   @AfterEach
-   public void tearDown() throws Exception
-   {
-      planningModule.destroy();
-   }
-
    @Test
    public void testDatasetsWithoutOcclusion()
    {
@@ -564,7 +558,6 @@ public class AStarBodyPathFrameworkTest
       {
          test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
       }
-      test.tearDown();
 
       Predicate<DataSet> dataSetFilter = dataSet ->
       {

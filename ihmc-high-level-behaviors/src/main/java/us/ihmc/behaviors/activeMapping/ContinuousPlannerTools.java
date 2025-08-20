@@ -215,10 +215,10 @@ public class ContinuousPlannerTools
                                                                double zOffset,
                                                                double nominalStanceWidth)
    {
-      double heightAtStartPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX(),
-                                                                 sensorZUpToWorldTransform.getTranslation().getY());
-      double heightAtGoalPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX() + xDistance + xMargin / 2.0,
-                                                                sensorZUpToWorldTransform.getTranslation().getY());
+      double heightAtStartPose = latestHeightMapData.getHeight(sensorZUpToWorldTransform.getTranslation().getX(),
+                                                               sensorZUpToWorldTransform.getTranslation().getY());
+      double heightAtGoalPose = latestHeightMapData.getHeight(sensorZUpToWorldTransform.getTranslation().getX() + xDistance + xMargin / 2.0,
+                                                              sensorZUpToWorldTransform.getTranslation().getY());
 
       if (heightAtStartPose == Double.NaN || heightAtGoalPose == Double.NaN)
       {

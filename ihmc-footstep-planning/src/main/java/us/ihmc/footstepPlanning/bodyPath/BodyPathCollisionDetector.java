@@ -37,7 +37,7 @@ class BodyPathCollisionDetector
       {
          int xQuery = xIndex + computeCollisionOffsetX(yawIndex, xOffsets.get(i), yOffsets.get(i));
          int yQuery = yIndex + computeCollisionOffsetY(yawIndex, xOffsets.get(i), yOffsets.get(i));
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
          if (Double.isNaN(heightQuery))
          {
             continue;

@@ -69,7 +69,7 @@ public class SwingPlanningModule
    {
       swingTrajectories.clear();
 
-      if (heightMapData == null || heightMapData.isEmpty())
+      if (heightMapData == null)
       {
          return;
       }
