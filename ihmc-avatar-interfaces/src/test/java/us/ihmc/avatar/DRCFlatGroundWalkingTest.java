@@ -146,7 +146,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
       physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      simulationTestHelper.setKeepSCSUp(true);
+      simulationTestHelper.setKeepSCSUp(false);
 
       simulationTestHelper.start();
 
