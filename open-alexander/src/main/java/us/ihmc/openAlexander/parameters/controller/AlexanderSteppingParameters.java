@@ -34,7 +34,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepLength()
    {
-      return 0.5;
+      return 0.3;
    }
 
    @Override
@@ -46,7 +46,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepWidth()
    {
-      return 0.5;
+      return 0.2;
    }
 
    @Override

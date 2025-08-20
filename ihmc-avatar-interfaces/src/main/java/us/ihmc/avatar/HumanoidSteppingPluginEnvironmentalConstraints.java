@@ -17,6 +17,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
@@ -187,7 +188,8 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       if (!checkStepLengthIsStupid.getValue())
          return true;
 
-      return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < 1.2 * steppingParameters.getMaxStepLength();
+      // The 10% here is a "fudge factor". This is meant to reject steps that are wildly wrong.
+      return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < 1.1 * EuclidCoreTools.norm(steppingParameters.getMaxStepLength(), steppingParameters.getMaxStepWidth());
    }
 
    private final FramePoint3D pointInRegion = new FramePoint3D();
