@@ -105,8 +105,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
 
-      ImGui.text("Footstep Planning:");
-      ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || (panel3DIsHovered && ImGui.isKeyPressed('R')))
       {
          createNewFootstep(RobotSide.LEFT);
@@ -135,10 +133,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepPlan.removeLastStep();
       }
       ImGuiTools.previousWidgetTooltip("Delete");
-      if (ImGui.checkbox("Active Footstep Adjustment", activeAdjustmentEnabled))
-      {
-         footstepPlan.setActiveAdjustment(activeAdjustmentEnabled.get());
-      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
