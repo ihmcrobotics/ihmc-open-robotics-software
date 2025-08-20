@@ -58,6 +58,8 @@ public class ContinuousPlanningStateMachine
 
       AtomicReference<ContinuousHikingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousHikingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND, commandMessage::set);
+      ContinuousHikingWebSocketServer webSocketServer = new ContinuousHikingWebSocketServer(8765, commandMessage);
+      webSocketServer.start();
 
       ContinuousHikingLogger continuousHikingLogger = new ContinuousHikingLogger();
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, activeMappingParameterObject.getMonteCarloPlannerParameters());

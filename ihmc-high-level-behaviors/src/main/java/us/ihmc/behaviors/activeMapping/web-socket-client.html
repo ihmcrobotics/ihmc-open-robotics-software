@@ -1,54 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Robot WebSocket Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .field { margin: 8px 0; }
+        label { margin-left: 6px; }
+        input[type="number"] { width: 80px; }
+        textarea { width: 100%; height: 120px; margin-top: 12px; }
+    </style>
 </head>
 <body>
-    <h1>Robot WebSocket Client</h1>
+<h2>Continuous Hiking Command</h2>
+<div id="controls">
+    <div class="field"><input type="checkbox" id="enable_continuous_hiking"><label for="enable_continuous_hiking">Enable Continuous Hiking</label></div>
+    <div class="field">Steps Before Safety Stop: <input type="number" id="steps_before_safety_stop" value="0"></div>
+    <div class="field"><input type="checkbox" id="walk_forwards"><label for="walk_forwards">Walk Forwards</label></div>
+    <div class="field"><input type="checkbox" id="side_step"><label for="side_step">Side Step</label></div>
+    <div class="field"><input type="checkbox" id="left_direction"><label for="left_direction">Left Direction</label></div>
+    <div class="field"><input type="checkbox" id="square_up_to_goal"><label for="square_up_to_goal">Square Up To Goal</label></div>
+    <div class="field"><input type="checkbox" id="use_astar_footstep_planner"><label for="use_astar_footstep_planner">Use A* Planner</label></div>
+    <div class="field"><input type="checkbox" id="use_monte_carlo_footstep_planner"><label for="use_monte_carlo_footstep_planner">Use Monte Carlo Planner</label></div>
+    <div class="field"><input type="checkbox" id="use_previous_plan_as_reference"><label for="use_previous_plan_as_reference">Use Previous Plan as Reference</label></div>
+    <div class="field"><input type="checkbox" id="use_monte_carlo_plan_as_reference"><label for="use_monte_carlo_plan_as_reference">Use Monte Carlo Plan as Reference</label></div>
+    <div class="field"><input type="checkbox" id="use_joystick_controller"><label for="use_joystick_controller">Use Joystick Controller</label></div>
+    <div class="field">Forward Value: <input type="number" step="0.1" id="forward_value" value="0.0"></div>
+    <div class="field"><input type="checkbox" id="walk_backwards"><label for="walk_backwards">Walk Backwards</label></div>
+    <div class="field">Lateral Value: <input type="number" step="0.1" id="lateral_value" value="0.0"></div>
+    <div class="field">Turning Value: <input type="number" step="0.1" id="turning_value" value="0.0"></div>
+</div>
 
-    <!-- Command buttons -->
-    <button onclick="sendCommand('STOP')">STOP</button>
-    <button onclick="sendCommand('MOVE_FORWARD')">MOVE_FORWARD</button>
+<button id="sendBtn">Send Command</button>
 
-    <p id="status">Not connected</p>
-    <p id="serverResponse"></p>
+<button onclick="stopServer()">Stop Server</button>
 
-    <script>
-        const statusDiv = document.getElementById("status");
-        const serverResponseDiv = document.getElementById("serverResponse");
-
-        // Connect to the Java WebSocket server
-        const ws = new WebSocket("ws://localhost:8765");
-
-        ws.onopen = () => {
-            console.log("Connected to server");
-            statusDiv.innerText = "Connected!";
-        };
-
-        ws.onmessage = (event) => {
-            console.log("Received from server:", event.data);
-            serverResponseDiv.innerText = "Server: " + event.data;
-        };
-
-        ws.onclose = () => {
-            console.log("Disconnected from server");
-            statusDiv.innerText = "Disconnected!";
-        };
-
-        ws.onerror = (err) => {
-            console.error("WebSocket error:", err);
-            statusDiv.innerText = "Error connecting!";
-        };
-
-        // Function to send a command to the server
-        function sendCommand(command) {
-            if (ws.readyState === WebSocket.OPEN) {
-                console.log("Sending:", command);
-                ws.send(command);
-            } else {
-                console.log("WebSocket not open");
-            }
+<script>
+    function stopServer() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send("STOP_SERVER");
         }
-    </script>
+    }
+</script>
+
+<h3>Log</h3>
+<textarea id="log" readonly></textarea>
+
+<script>
+    const ws = new WebSocket("ws://10.100.2.168:8765");
+
+    ws.onopen = () => log("Connected to server");
+    ws.onclose = () => log("Disconnected from server");
+    ws.onmessage = (event) => log("Received: " + event.data);
+
+    function log(message) {
+        const logArea = document.getElementById("log");
+        logArea.value += message + "\n";
+        logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    document.getElementById("sendBtn").onclick = () => {
+        const cmd = {
+            enable_continuous_hiking: document.getElementById("enable_continuous_hiking").checked,
+            steps_before_safety_stop: parseInt(document.getElementById("steps_before_safety_stop").value) || 0,
+            walk_forwards: document.getElementById("walk_forwards").checked,
+            side_step: document.getElementById("side_step").checked,
+            left_direction: document.getElementById("left_direction").checked,
+            square_up_to_goal: document.getElementById("square_up_to_goal").checked,
+            use_astar_footstep_planner: document.getElementById("use_astar_footstep_planner").checked,
+            use_monte_carlo_footstep_planner: document.getElementById("use_monte_carlo_footstep_planner").checked,
+            use_previous_plan_as_reference: document.getElementById("use_previous_plan_as_reference").checked,
+            use_monte_carlo_plan_as_reference: document.getElementById("use_monte_carlo_plan_as_reference").checked,
+            use_joystick_controller: document.getElementById("use_joystick_controller").checked,
+            forward_value: parseFloat(document.getElementById("forward_value").value) || 0.0,
+            walk_backwards: document.getElementById("walk_backwards").checked,
+            lateral_value: parseFloat(document.getElementById("lateral_value").value) || 0.0,
+            turning_value: parseFloat(document.getElementById("turning_value").value) || 0.0
+        };
+
+        const json = JSON.stringify(cmd);
+        ws.send(json);
+        log("Sent: " + json);
+    };
+</script>
 </body>
 </html>
