@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -134,5 +135,24 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
       PerceptionMessageTools.packImageMessageMetadata(imageMessage, frame);
 
       imageMessage.setCompressionType(CompressionType.UNCOMPRESSED.toByte());
+   }
+
+   public void destroy()
+   {
+      blockingKill();
+
+      try
+      {
+         join();
+      }
+      catch (InterruptedException e)
+      {
+         LogTools.error(e);
+      }
+
+      if (remoteZEDImageSensor != null)
+      {
+         remoteZEDImageSensor.close();
+      }
    }
 }
