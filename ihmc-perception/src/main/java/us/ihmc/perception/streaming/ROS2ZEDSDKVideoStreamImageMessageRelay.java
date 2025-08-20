@@ -141,15 +141,6 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
    {
       blockingKill();
 
-      try
-      {
-         join();
-      }
-      catch (InterruptedException e)
-      {
-         LogTools.error(e);
-      }
-
       if (remoteZEDImageSensor != null)
       {
          remoteZEDImageSensor.close();
