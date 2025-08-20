@@ -70,7 +70,7 @@ public class RDXHardwareControlStateManager
 
       float widgetStartX = 98.0f;
       ImGui.text("Current Controller State: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
-      ImGui.separator();
+
       ImGui.text("Request:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);
@@ -98,7 +98,7 @@ public class RDXHardwareControlStateManager
          RDXBaseUI.pushNotification("Commanding stand prep transition...");
          sendStandPrepTransitionRequest();
       }
-      ImGui.separator();
+   
       ImGui.text("Command:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);

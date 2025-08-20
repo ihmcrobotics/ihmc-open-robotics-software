@@ -11,6 +11,7 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
@@ -216,7 +217,7 @@ public class RDXArmManager
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.collapsingHeader(labels.get("Arms & Hands")))
+      if (ImGui.collapsingHeader(labels.get("Arms")))
       {
          float widgetStartX = 112.0f;
 
@@ -268,7 +269,7 @@ public class RDXArmManager
             ImGui.endDisabled();
 
          ImGui.separator();
-         if (ImGui.checkbox(labels.get("Display Hand Wrenches"), indicateWrenchOnScreen))
+         if (ImGui.checkbox(labels.get("Display EE Wrenches"), indicateWrenchOnScreen))
          {
             if (indicateWrenchOnScreen.get())
                RDXBaseUI.getInstance().getPrimary3DPanel().addOverlayPanel("Hand wrenches", () -> panelHandWrenchIndicator.renderImGuiOverlay());
@@ -277,12 +278,15 @@ public class RDXArmManager
          }
       }
 
-      handManager.renderImGuiWidgets(); // TODO FIX ME, Update based on Psyonic and Sake hands refactor
-
-      // Pop up warning if notification is set
-      if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
+      if (ImGui.collapsingHeader(labels.get("Hands"), ImGuiTreeNodeFlags.DefaultOpen))
       {
-         ImGui.openPopup(labels.get("Warning"));
+         handManager.renderImGuiWidgets(); // TODO FIX ME, Update based on Psyonic and Sake hands refactor
+
+         // Pop up warning if notification is set
+         if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
+         {
+            ImGui.openPopup(labels.get("Warning"));
+         }
       }
 
    }

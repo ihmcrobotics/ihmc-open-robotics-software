@@ -587,8 +587,8 @@ public class RDXTeleoperationManager extends RDXPanel
       hardwareControlStateManager.renderImGuiWidgets();
       trajectoryTimeSlider.renderImGuiWidget();
       renderWholeBodyWidgets();
-      armManager.renderImGuiWidgets();
       locomotionManager.renderImGuiWidgets();
+      armManager.renderImGuiWidgets();
    }
 
    private void renderWholeBodyWidgets()
