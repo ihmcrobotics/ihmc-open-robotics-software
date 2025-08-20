@@ -87,7 +87,7 @@ public class RDXHumanoidDoFsWidgets
       {
          interactableParts[interactableIndex++] = preset.name();
       }
-      interactableParts[0] = "-";
+      interactableParts[0] = "Select Body Part";
 
       SideDependentList<String[]> armJointNames = new SideDependentList<>();
       SideDependentList<double[]> armJointLowerLimits = new SideDependentList<>();
@@ -295,9 +295,8 @@ public class RDXHumanoidDoFsWidgets
 
    public void renderImGuiWidgets()
    {
-      ImGui.pushItemWidth(200.0f);
-      //      ImGui.combo(labels.get("Controllable Robot Part"), currentInteractablePart, interactableParts);
-      if (ImGui.beginCombo(labels.get("Controllable Robot Part"), interactableParts[currentInteractablePart.get()]))
+      ImGui.pushItemWidth(-1);
+      if (ImGui.beginCombo(labels.get("##comboBoxInteractableParts"), interactableParts[currentInteractablePart.get()]))
       {
          for (InteractableDoFs part : InteractableDoFs.values())
          {

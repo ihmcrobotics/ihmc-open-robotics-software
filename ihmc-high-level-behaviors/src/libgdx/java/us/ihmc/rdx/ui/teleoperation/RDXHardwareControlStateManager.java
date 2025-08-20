@@ -21,7 +21,6 @@ public class RDXHardwareControlStateManager
    private final CommunicationHelper communicationHelper;
    private final Timer hpuConnectedTimer = new Timer();
    private final Timer robotServoedConnectedTimer = new Timer();
-   private boolean hpuEnabled = false;
    private boolean isRobotServoed = false;
    private HighLevelControllerName currentHighLevelState = null;
 
@@ -29,11 +28,6 @@ public class RDXHardwareControlStateManager
    {
       this.communicationHelper = communicationHelper;
 
-      communicationHelper.subscribeToControllerViaVolatileCallback(EnableHPUStatusMessage.class, message ->
-      {
-         hpuConnectedTimer.reset();
-         hpuEnabled = message.getHpuEnabled();
-      });
       communicationHelper.subscribeToControllerViaVolatileCallback(MasterGainScaleControllerStatusMessage.class, message ->
       {
          robotServoedConnectedTimer.reset();
@@ -52,28 +46,11 @@ public class RDXHardwareControlStateManager
 
    public void renderImGuiWidgets()
    {
-      if (hpuConnectedTimer.isRunning(1.0))
-      {
-         if (hpuEnabled)
-         {
-            ImGui.text("HPU is enabled.");
-         }
-         else
-         {
-            if (ImGui.button(labels.get("Enable HPU")))
-            {
-               EnableHPUCommandMessage enableHPUCommandMessage = new EnableHPUCommandMessage();
-               enableHPUCommandMessage.setEnableHpu(true);
-               communicationHelper.publishToController(enableHPUCommandMessage);
-            }
-         }
-      }
-
       if (robotServoedConnectedTimer.isRunning(1.0))
       {
          if (isRobotServoed)
          {
-            if (ImGui.button(labels.get("Unservo slowly")))
+            if (ImGui.button(labels.get("Unservo Slowly")))
             {
                MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
                masterGainScaleControllerCommandMessage.setUnservoSlowly(true);
@@ -82,7 +59,7 @@ public class RDXHardwareControlStateManager
          }
          else
          {
-            if (ImGui.button(labels.get("Servo robot")))
+            if (ImGui.button(labels.get("Servo Robot")))
             {
                MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
                masterGainScaleControllerCommandMessage.setServoRobot(true);
@@ -91,9 +68,12 @@ public class RDXHardwareControlStateManager
          }
       }
 
-      ImGui.text("Current controller state: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
+      float widgetStartX = 98.0f;
+      ImGui.text("Current Controller State: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
+      ImGui.separator();
       ImGui.text("Request:");
       ImGui.sameLine();
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.button(labels.get("Calibration")))
       {
          HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
@@ -107,14 +87,21 @@ public class RDXHardwareControlStateManager
          sendFreezeRequest();
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Stand prep")))
+      if (ImGui.button(labels.get("Stand Prep")))
       {
          RDXBaseUI.pushNotification("Commanding stand prep...");
          sendStandPrepRequest();
       }
-
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stand Prep Transition")))
+      {
+         RDXBaseUI.pushNotification("Commanding stand prep transition...");
+         sendStandPrepTransitionRequest();
+      }
+      ImGui.separator();
       ImGui.text("Command:");
       ImGui.sameLine();
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.button(labels.get("Home Pose")))
       {
          double trajectoryTime = 3.0;
@@ -157,6 +144,13 @@ public class RDXHardwareControlStateManager
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendStandPrepTransitionRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
       communicationHelper.publishToController(highLevelStateMessage);
    }
 

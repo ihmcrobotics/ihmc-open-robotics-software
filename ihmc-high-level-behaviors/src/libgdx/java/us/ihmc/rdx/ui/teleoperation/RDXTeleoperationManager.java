@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -39,6 +40,7 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.affordances.RDXInteractableRobotLink;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
+import us.ihmc.rdx.ui.affordances.RDXPelvisControlMode;
 import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
@@ -125,7 +127,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
 
    /** For post-processing WBMPC commands */
-   private final ImBoolean CoMDirectControlEnabled = new ImBoolean(false);
+   private RDXPelvisControlMode pelvisControlMode = RDXPelvisControlMode.PELVIS;
    private final FramePoint3D tempCurrentCoMPosition = new FramePoint3D();
    private final FramePoint3D tempDesiredPelvisPosition = new FramePoint3D();
    private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
@@ -267,7 +269,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   {
                      if (!wholeBodyIKManager.getEnabled())
                      {
-                        if (CoMDirectControlEnabled.get())
+                        if (pelvisControlMode == RDXPelvisControlMode.COM)
                            processCoMDirectCommand();
                         else
                            processPelvis6DCommand();
@@ -350,7 +352,6 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
-         CoMDirectControlEnabled.set(false);
          demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
          addChild(demoPoses);
       }
@@ -419,8 +420,7 @@ public class RDXTeleoperationManager extends RDXPanel
                {
                   for (RobotSide side : interactableHands.sides())
                   {
-                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted()
-                                                && (armManager.getArmControlMode() == RDXArmControlMode.JOINTSPACE || armManager.getArmControlMode() == RDXArmControlMode.HYBRID));
+                     desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted());
                      desiredRobot.setArmColor(side, RDXIKSolverColors.getColor(armManager.getArmIKSolvers().get(side).getQuality()));
                   }
                }
@@ -584,76 +584,104 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void renderImGuiWidgets()
    {
-      ImGuiTools.separatorText("Whole Body", ImGuiTools.getMediumFont());
-
       hardwareControlStateManager.renderImGuiWidgets();
-
-      pelvisHeightSlider.renderImGuiWidgets();
-      dofsWidgets.renderImGuiWidgets();
-
       trajectoryTimeSlider.renderImGuiWidget();
+      renderWholeBodyWidgets();
+      armManager.renderImGuiWidgets();
+      locomotionManager.renderImGuiWidgets();
+   }
 
-      if (ImGui.button(labels.get("Delete all Interactables")) || ImGui.getIO().getKeyShift() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+   private void renderWholeBodyWidgets()
+   {
+      if (ImGui.collapsingHeader(labels.get("Whole-Body")))
       {
-         clearInteractablesAndLocomotionGraphics();
-      }
-      ImGuiTools.previousWidgetTooltip("Shift + Escape");
-      ImGui.sameLine();
-      if (interactablesAvailable)
-      {
-         ImGui.checkbox("Interactables Enabled", interactablesEnabled);
-      }
+         float widgetStartX = 168.0f;
+         ImGui.text("Joint Position Control:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         dofsWidgets.renderImGuiWidgets();
 
-      ImGui.checkbox("CoM Direct Commands Enabled", CoMDirectControlEnabled);
+         ImGui.separator();
+         ImGui.text("Pelvis Height:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         pelvisHeightSlider.renderImGuiWidgets();
 
-      if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
-      {
-         ImGui.indent();
+         ImGui.text("Pelvis Height Control Mode:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         if (ImGui.radioButton(labels.get("Pelvis"), pelvisControlMode == RDXPelvisControlMode.PELVIS))
+         {
+            pelvisControlMode = RDXPelvisControlMode.PELVIS;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("CoM"), pelvisControlMode == RDXPelvisControlMode.COM))
+         {
+            pelvisControlMode = RDXPelvisControlMode.COM;
+         }
+         ImGui.separator();
+         ImGui.text("3D Interactables: ");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
          if (interactablesAvailable)
          {
-            ImGui.text("Chest:");
-            ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
-            ImGui.sameLine();
-            interactableChest.renderImGuiWidgets();
-
-            ImGui.text("Pelvis:");
-            ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
-            ImGui.sameLine();
-            interactablePelvis.renderImGuiWidgets();
-
-            for (RobotSide side : interactableHands.sides())
-            {
-               ImGui.text(side.getPascalCaseName() + " Hand:");
-               ImGui.sameLine();
-               interactableHands.get(side).renderImGuiWidgets();
-            }
-
-            for (RobotSide side : interactableFeet.sides())
-            {
-               ImGui.text(side.getPascalCaseName() + " Foot:");
-               ImGui.sameLine();
-               interactableFeet.get(side).renderImGuiWidgets();
-            }
+            ImGui.checkbox("Enable", interactablesEnabled);
          }
-         ImGui.unindent();
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Delete all")) || ImGui.getIO().getKeyShift() && ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+         {
+            clearInteractablesAndLocomotionGraphics();
+         }
+         ImGuiTools.previousWidgetTooltip("Shift + Escape");
+         ImGui.setCursorPosX(widgetStartX);
+         wholeBodyIKManager.renderImGuiWidgets();
+
+         ImGui.setCursorPosX(widgetStartX);
+         if (ImGui.collapsingHeader(labels.get("Interactable Selections"), interactableSelections))
+         {
+            ImGui.indent();
+            if (interactablesAvailable)
+            {
+               float radioStartX = 100.0f;
+               ImGui.text("Chest:");
+               ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
+               ImGui.sameLine();
+               ImGui.setCursorPosX(radioStartX);
+               interactableChest.renderImGuiWidgets();
+
+               ImGui.text("Pelvis:");
+               ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
+               ImGui.sameLine();
+               ImGui.setCursorPosX(radioStartX);
+               interactablePelvis.renderImGuiWidgets();
+
+               for (RobotSide side : interactableHands.sides())
+               {
+                  ImGui.text(side.getPascalCaseName() + " Hand:");
+                  ImGui.sameLine();
+                  ImGui.setCursorPosX(radioStartX);
+                  interactableHands.get(side).renderImGuiWidgets();
+               }
+
+               for (RobotSide side : interactableFeet.sides())
+               {
+                  ImGui.text(side.getPascalCaseName() + " Foot:");
+                  ImGui.sameLine();
+                  ImGui.setCursorPosX(radioStartX);
+                  interactableFeet.get(side).renderImGuiWidgets();
+               }
+            }
+            ImGui.unindent();
+         }
+         ImGui.separator();
+         ImGui.text("Collisions: ");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.checkbox("Show contact", showContactCollisionMeshes);
+         ImGui.sameLine();
+         ImGui.checkbox("Show avoidance", showAvoidanceCollisionMeshes);
       }
-
-      wholeBodyIKManager.renderImGuiWidgets();
-
-      ImGui.text("Show collisions:");
-      ImGui.sameLine();
-      ImGui.checkbox("Contact", showContactCollisionMeshes);
-      ImGui.sameLine();
-      ImGui.checkbox("Avoidance", showAvoidanceCollisionMeshes);
-
-      // TODO: Add transparency sliders
-      // TODO: Add motion previews
-
-      ImGuiTools.separatorText("Locomotion", ImGuiTools.getMediumFont());
-      locomotionManager.renderImGuiWidgets();
-
-      ImGuiTools.separatorText("Arms & Hands", ImGuiTools.getMediumFont());
-      armManager.renderImGuiWidgets();
    }
 
    private void renderTooltipsAndContextMenus()
