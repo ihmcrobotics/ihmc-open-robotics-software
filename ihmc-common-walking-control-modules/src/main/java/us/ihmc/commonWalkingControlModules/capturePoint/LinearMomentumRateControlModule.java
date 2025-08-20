@@ -113,6 +113,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
+   private final FrameVector3D achievedAngularMomentumRate = new FrameVector3D();
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
 
    private double desiredCoMHeightAcceleration = 0.0;
@@ -322,6 +323,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    public void setInputFromControllerCore(ControllerCoreOutput controllerCoreOutput)
    {
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
+      controllerCoreOutput.getAngularMomentumRate(achievedAngularMomentumRate);
    }
 
    /**
@@ -433,6 +435,17 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       achievedCMP.add(centerOfMass2d);
 
       yoAchievedCMP.set(achievedCMP);
+
+      if (achievedAngularMomentumRate.containsNaN())
+      {
+         yoAchievedCoP.setToNaN();
+         return;
+      }
+
+      double weight = totalMassProvider.getValue() * gravityZ;
+      yoAchievedCoP.set(achievedCMP);
+      yoAchievedCoP.subX(achievedAngularMomentumRate.getY() / weight);
+      yoAchievedCoP.addY(achievedAngularMomentumRate.getX() / weight);
    }
 
    private void updatePolygons()
