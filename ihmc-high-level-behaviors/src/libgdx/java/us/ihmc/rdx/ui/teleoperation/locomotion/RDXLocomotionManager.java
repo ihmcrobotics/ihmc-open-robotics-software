@@ -155,8 +155,8 @@ public class RDXLocomotionManager
       planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planSwingTrajectories);
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.replanSwingTrajectoriesOnChange);
       planBodyPathCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planWidthBodyPath);
-      swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f");
-      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f");
+      swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f", true);
+      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f", true);
       stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
                                                                                      / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "%.2f", 0.5);
@@ -293,100 +293,131 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
-      // Used to calculate whether the Walking Options buttons are active or disabled.
-      // This ensures that when the spacebar key is pressed it executes the correct action.
-      boolean pauseAvailable = controllerStatusTracker.isWalking();
-      boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
-      boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
-
-      if (ImGui.button(labels.get("Disable Leg Mode")))
+      if(ImGui.collapsingHeader(labels.get("Locomotion")))
       {
-         legControlMode = RDXLegControlMode.DISABLED;
-      }
+         // Used to calculate whether the Walking Options buttons are active or disabled.
+         // This ensures that when the spacebar key is pressed it executes the correct action.
+         boolean pauseAvailable = controllerStatusTracker.isWalking();
+         boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
+         boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
+         float widgetStartX = 125.0f;
 
-      ImGui.sameLine();
-      ImGui.text("Leg Mode: " + legControlMode.name());
-
-      swingTimeSlider.renderImGuiWidget();
-      transferTimeSlider.renderImGuiWidget();
-      if (stepAggressivenessSlider.render(0.0, 1.5))
-         stepAggressivenessChanged.set();
-      if (turnAggressivenessSlider.render(0.0, 2.0))
-         turnAggressivenessChanged.set();
-
-      ImGui.separator();
-      ImGui.text("Walking Options:");
-      ImGui.sameLine();
-
-      if (ImGui.button(labels.get("Abort")))
-      {
-         sendAbortWalkingMessage();
-      }
-      ImGui.sameLine();
-
-      ImGui.beginDisabled(!walkAvailable);
-      if (ImGui.button(labels.get("Walk")))
-      { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
-         interactableFootstepPlan.walkFromSteps();
-      }
-      ImGuiTools.previousWidgetTooltip("Space");
-      ImGui.sameLine();
-      ImGui.endDisabled();
-
-      ImGui.beginDisabled(!pauseAvailable);
-      if (ImGui.button(labels.get("Pause")))
-      {
-         setPauseWalkingAndPublish(true);
-      }
-      ImGuiTools.previousWidgetTooltip("Space");
-      ImGui.sameLine();
-      ImGui.endDisabled();
-
-      ImGui.beginDisabled(!continueAvailable);
-      if (ImGui.button(labels.get("Continue")))
-      {
-         setPauseWalkingAndPublish(false);
-      }
-      ImGuiTools.previousWidgetTooltip("Space");
-      ImGui.endDisabled();
-
-      manualFootstepPlacement.renderImGuiWidgets();
-
-      ImGui.text("Goal Planning");
-      ImGui.sameLine();
-      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
-         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-
-      ImGui.separator();
-      walkPathControlRing.renderImGuiWidgets();
-
-      initialStanceSideRadioButtons.renderImGuiWidget();
-      if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
-      {
-         ImGui.indent();
-         assumeFlatGroundCheckbox.renderImGuiWidget();
-         performAStarSearchCheckbox.renderImGuiWidget();
-         areFootstepsAdjustableCheckbox.renderImGuiWidget();
-         planSwingTrajectoriesCheckbox.renderImGuiWidget();
-         replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
-         planBodyPathCheckbox.renderImGuiWidget();
-         ImGui.unindent();
-      }
-
-      // Handles all shortcuts for when the spacebar key is pressed
-      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
-      {
-         if (walkAvailable)
+         ImGui.text("Walking Command:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         if (ImGui.button(labels.get("Abort")))
          {
+            sendAbortWalkingMessage();
+         }
+         ImGui.sameLine();
+
+         ImGui.beginDisabled(!walkAvailable);
+         if (ImGui.button(labels.get("Walk")))
+         { // TODO: Add checker here. Make it harder to walk or give warning if the checker is failing
             interactableFootstepPlan.walkFromSteps();
          }
-         else if (pauseAvailable)
+         ImGuiTools.previousWidgetTooltip("Space");
+         ImGui.sameLine();
+         ImGui.endDisabled();
+
+         ImGui.beginDisabled(!pauseAvailable);
+         if (ImGui.button(labels.get("Pause")))
          {
             setPauseWalkingAndPublish(true);
          }
-         else if (continueAvailable)
+         ImGuiTools.previousWidgetTooltip("Space");
+         ImGui.sameLine();
+         ImGui.endDisabled();
+
+         ImGui.beginDisabled(!continueAvailable);
+         if (ImGui.button(labels.get("Continue")))
          {
             setPauseWalkingAndPublish(false);
+         }
+         ImGuiTools.previousWidgetTooltip("Space");
+         ImGui.endDisabled();
+         ImGui.separator();
+
+         ImGui.text("Footstep Placement:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         manualFootstepPlacement.renderImGuiWidgets();
+         ImGui.separator();
+
+         ImGui.text("Footstep Planning:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+            legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+
+         ImGui.setCursorPosX(widgetStartX);
+         if (ImGui.collapsingHeader(labels.get("Footstep Planning Options"), collapsedHeader))
+         {
+            ImGui.indent();
+            assumeFlatGroundCheckbox.renderImGuiWidget();
+            performAStarSearchCheckbox.renderImGuiWidget();
+            areFootstepsAdjustableCheckbox.renderImGuiWidget();
+            planSwingTrajectoriesCheckbox.renderImGuiWidget();
+            replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
+            planBodyPathCheckbox.renderImGuiWidget();
+            ImGui.unindent();
+         }
+
+         ImGui.setCursorPosX(widgetStartX);
+         initialStanceSideRadioButtons.renderImGuiWidget();
+         ImGui.separator();
+
+         ImGui.text("Swing Time:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         swingTimeSlider.renderImGuiWidget();
+         ImGui.text("Transfer Time:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         transferTimeSlider.renderImGuiWidget();
+         ImGui.text("Step Aggressiveness:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         if (stepAggressivenessSlider.render(0.0, 1.5, true))
+            stepAggressivenessChanged.set();
+         ImGui.text("Turn Aggressiveness:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.setNextItemWidth(-1);
+         if (turnAggressivenessSlider.render(0.0, 2.0, true))
+            turnAggressivenessChanged.set();
+         ImGui.separator();
+
+         ImGui.text("Leg Control Mode:");
+         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
+         ImGui.text(legControlMode.name());
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Disable")))
+         {
+            legControlMode = RDXLegControlMode.DISABLED;
+         }
+         walkPathControlRing.renderImGuiWidgets(widgetStartX);
+
+
+         // Handles all shortcuts for when the spacebar key is pressed
+         if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
+         {
+            if (walkAvailable)
+            {
+               interactableFootstepPlan.walkFromSteps();
+            }
+            else if (pauseAvailable)
+            {
+               setPauseWalkingAndPublish(true);
+            }
+            else if (continueAvailable)
+            {
+               setPauseWalkingAndPublish(false);
+            }
          }
       }
    }
