@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -63,17 +64,12 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
-   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
-   {
-   }
-
-   @Override
    public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
    }
 
    @Override
-   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
    }
 

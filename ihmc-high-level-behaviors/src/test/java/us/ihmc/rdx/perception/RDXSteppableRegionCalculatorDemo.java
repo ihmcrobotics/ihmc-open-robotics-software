@@ -105,7 +105,8 @@ public class RDXSteppableRegionCalculatorDemo
 
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, "what");
-      rapidHeightMapManager = new RapidHeightMapManager(ros2Node,
+      rapidHeightMapManager = new RapidHeightMapManager("Alexander",
+                                                        ros2Node,
                                                         leftFootFrame,
                                                         rightFootFrame,
                                                         heightMapCenter,

@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;

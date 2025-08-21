@@ -6,12 +6,11 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,16 +27,12 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    private final VelocityBasedSteppingPluginFactory velocityPluginFactory;
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
    private final List<Updatable> updatables = new ArrayList<>();
-   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
-
+   private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
 
    public JoystickBasedSteppingPluginFactory()
    {
       this.csgPluginFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
       this.velocityPluginFactory = new VelocityBasedSteppingPluginFactory();
-
-      //      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
-//      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
    }
 
    public void setVelocitySteppingInputParameters(VelocityBasedSteppingParameters parameters)
@@ -53,13 +48,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
-   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
-   {
-      csgPluginFactory.setFootStepPlanAdjustment(footStepAdjustment);
-      velocityPluginFactory.setFootStepPlanAdjustment(footStepAdjustment);
-   }
-
-   @Override
    public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
       csgPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
@@ -67,9 +55,9 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
-   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
-      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
+      heightMapCommandConsumers.add(heightMapCommandConsumer);
    }
 
    @Override
@@ -118,8 +106,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       csgFootstepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
-//      csgFootstepGenerator.setSwingHeightInputProvider(commandInputManager.createSwingHeightProvider());
-
 
       fastWalkingPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       fastWalkingPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
@@ -137,8 +123,8 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       //this is probably not the way the class was intended to be modified.
       commandInputManager.setCSG(csgFootstepGenerator.getContinuousStepGenerator());
 
-      for (Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer : planarRegionsListCommandConsumers)
-         commandInputManager.addPlanarRegionsListCommandConsumer(planarRegionsListCommandConsumer);
+      for (Consumer<HeightMapCommand> heightMapCommandConsumer : heightMapCommandConsumers)
+         commandInputManager.addHeightMapCommandConsumer(heightMapCommandConsumer);
 
       JoystickBasedSteppingPlugin joystickBasedSteppingPlugin = new JoystickBasedSteppingPlugin(csgFootstepGenerator, fastWalkingPlugin, updatables);
       joystickBasedSteppingPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);

@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;

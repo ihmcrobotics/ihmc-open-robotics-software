@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Conti
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -27,7 +27,7 @@ public class StepGeneratorAPIDefinition
 
       commands.add(ContinuousStepGeneratorParametersCommand.class);
       commands.add(ContinuousStepGeneratorInputCommand.class);
-      commands.add(PlanarRegionsListCommand.class);
+      commands.add(HeightMapCommand.class);
 
       stepGeneratorSupportedCommands = Collections.unmodifiableList(commands);
       stepGeneratorSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
