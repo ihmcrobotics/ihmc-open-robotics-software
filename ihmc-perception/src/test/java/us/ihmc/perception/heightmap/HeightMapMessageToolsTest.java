@@ -62,7 +62,7 @@ public class HeightMapMessageToolsTest
 
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       for (int i = 0; i < cellsPerAxis; i++)
       {
          for (int j = 0; j < cellsPerAxis; j++)
@@ -109,7 +109,7 @@ public class HeightMapMessageToolsTest
 
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       for (int i = 0; i < cellsPerAxis; i++)
       {
          for (int j = 0; j < cellsPerAxis; j++)

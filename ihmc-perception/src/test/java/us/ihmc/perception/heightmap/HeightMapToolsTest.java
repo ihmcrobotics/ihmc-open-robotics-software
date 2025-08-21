@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HeightMapToolsTest
 {
    private final int iterations = 1000;
+   private final static float MILLISECOND_TOLERANCE = 1.0f;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    @Test
@@ -76,7 +77,12 @@ public class HeightMapToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack [ HeightMapData -> Mat ]: %.3f ms%n", averageTimePerIteration);
+
+      // This will be machine-dependent, the benchmark for this value came from the cpu on the CI machine.
+      float expectedTimeTakenToPackHeightMapMessageFromAMatInMillis = MILLISECOND_TOLERANCE;
+      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMatInMillis,
+                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMatInMillis);
    }
 
    @Test
@@ -109,7 +115,12 @@ public class HeightMapToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack [ Mat -> HeightMapData ]: %.3f ms%n", averageTimePerIteration);
+
+      // This will be machine-dependent, the benchmark for this value came from the cpu on the CI machine.
+      float expectedTimeTakenToPackHeightMapMessageFromAMatInMillis = MILLISECOND_TOLERANCE;
+      Assertions.assertTrue(averageTimePerIteration < expectedTimeTakenToPackHeightMapMessageFromAMatInMillis,
+                            "Actual was : " + averageTimePerIteration + ", but the Expected was: " + expectedTimeTakenToPackHeightMapMessageFromAMatInMillis);
    }
 
    @Test
