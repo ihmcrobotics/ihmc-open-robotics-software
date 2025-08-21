@@ -56,8 +56,6 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
       {
          // Calculate cell height
          float cellHeight = message.getHeights().get(i);
-//         int height = message.getHeights().get(i) & 0xFFFF;
-//         float cellHeight = (float) (((float) height / message.getHeightScaleFactor()) - message.getHeightOffset());
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
          heights.set(key, cellHeight);
       }
