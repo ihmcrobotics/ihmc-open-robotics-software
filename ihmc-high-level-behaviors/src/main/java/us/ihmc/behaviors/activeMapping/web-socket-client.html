@@ -4,46 +4,219 @@
     <meta charset="UTF-8">
     <title>Robot WebSocket Client</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .field { margin: 8px 0; }
-        label { margin-left: 6px; }
-        input[type="number"] { width: 80px; }
-        textarea { width: 100%; height: 120px; margin-top: 12px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f7f9fc;
+            color: #333;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        #controls {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+        }
+
+        .field {
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        label {
+            margin-left: 6px;
+        }
+
+        input[type="number"] {
+            width: 100px;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        button#stopBtn {
+            background: #e74c3c;
+        }
+
+        button#stopBtn:hover {
+            background: #c0392b;
+        }
+
+        button#startBtn {
+            background: #2ecc71;
+        }
+
+        button#startBtn:hover {
+            background: #27ae60;
+        }
+
+        textarea {
+            width: 100%;
+            height: 140px;
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            resize: none;
+            font-family: monospace;
+            background: #fafafa;
+        }
+
+        details {
+            margin-top: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fdfdfd;
+            padding: 8px 12px;
+        }
+
+        details summary {
+            font-weight: bold;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details[open] {
+            background: #f0f8ff;
+            border-color: #3498db;
+        }
+
+        details div {
+            margin-top: 10px;
+        }
+
+        /* Stop server button at bottom */
+        #stopServerBtn {
+            display: block;
+            margin: 20px auto;
+            background: #f39c12;
+        }
+
+        #stopServerBtn:hover {
+            background: #d68910;
+        }
+
+        /* World container for 3D */
+        #world {
+            width: 100%;
+            height: 400px;
+            background: #eaeaea;
+            border-radius: 12px;
+            margin: 20px auto;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 </head>
+
 <body>
-<h2>Continuous Hiking Command</h2>
+<h2>🚶 Continuous Hiking Command</h2>
 <div id="controls">
-    <div class="field"><input type="checkbox" id="enable_continuous_hiking"><label for="enable_continuous_hiking">Enable Continuous Hiking</label></div>
-    <div class="field">Steps Before Safety Stop: <input type="number" id="steps_before_safety_stop" value="0"></div>
-    <div class="field"><input type="checkbox" id="walk_forwards"><label for="walk_forwards">Walk Forwards</label></div>
-    <div class="field"><input type="checkbox" id="side_step"><label for="side_step">Side Step</label></div>
-    <div class="field"><input type="checkbox" id="left_direction"><label for="left_direction">Left Direction</label></div>
-    <div class="field"><input type="checkbox" id="square_up_to_goal"><label for="square_up_to_goal">Square Up To Goal</label></div>
-    <div class="field"><input type="checkbox" id="use_astar_footstep_planner"><label for="use_astar_footstep_planner">Use A* Planner</label></div>
-    <div class="field"><input type="checkbox" id="use_monte_carlo_footstep_planner"><label for="use_monte_carlo_footstep_planner">Use Monte Carlo Planner</label></div>
-    <div class="field"><input type="checkbox" id="use_previous_plan_as_reference"><label for="use_previous_plan_as_reference">Use Previous Plan as Reference</label></div>
-    <div class="field"><input type="checkbox" id="use_monte_carlo_plan_as_reference"><label for="use_monte_carlo_plan_as_reference">Use Monte Carlo Plan as Reference</label></div>
-    <div class="field"><input type="checkbox" id="use_joystick_controller"><label for="use_joystick_controller">Use Joystick Controller</label></div>
-    <div class="field">Forward Value: <input type="number" step="0.1" id="forward_value" value="0.0"></div>
-    <div class="field"><input type="checkbox" id="walk_backwards"><label for="walk_backwards">Walk Backwards</label></div>
-    <div class="field">Lateral Value: <input type="number" step="0.1" id="lateral_value" value="0.0"></div>
-    <div class="field">Turning Value: <input type="number" step="0.1" id="turning_value" value="0.0"></div>
+    <div class="field">
+        Steps Before Safety Stop: <input type="number" id="steps_before_safety_stop" value="0">
+    </div>
+
+    <!-- Radio buttons for forward/backward -->
+    <div class="field">
+        <label><input type="radio" name="direction" value="forward" checked> Walk Forwards</label>
+        <label><input type="radio" name="direction" value="backward"> Walk Backwards</label>
+    </div>
+
+    <!-- Start/Stop Buttons -->
+    <div class="field">
+        <button id="startBtn">Start Walking</button>
+        <button id="stopBtn">Stop Walking</button>
+    </div>
+
+    <!-- Collapsible extra options -->
+    <details>
+        <summary>⚙️ More Options</summary>
+        <div>
+
+            <!-- Checkboxes -->
+            <div class="field">
+                <input type="checkbox" id="side_step">
+                <label for="side_step">Side Step</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="left_direction">
+                <label for="left_direction">Left Direction</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="square_up_to_goal" checked>
+                <label for="square_up_to_goal">Square Up To Goal</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_astar_footstep_planner" checked>
+                <label for="use_astar_footstep_planner">Use A* Planner</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_monte_carlo_footstep_planner">
+                <label for="use_monte_carlo_footstep_planner">Use Monte Carlo Planner</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_previous_plan_as_reference" checked>
+                <label for="use_previous_plan_as_reference">Use Previous Plan as Reference</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_monte_carlo_plan_as_reference">
+                <label for="use_monte_carlo_plan_as_reference">Use Monte Carlo Plan as Reference</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_joystick_controller">
+                <label for="use_joystick_controller">Use Joystick Controller</label>
+            </div>
+
+
+            <!-- Numeric values -->
+            <div class="field">Forward Value: <input type="number" step="0.1" id="forward_value" value="0.0"></div>
+            <div class="field">Lateral Value: <input type="number" step="0.1" id="lateral_value" value="0.0"></div>
+            <div class="field">Turning Value: <input type="number" step="0.1" id="turning_value" value="0.0"></div>
+        </div>
+    </details>
 </div>
 
-<button id="sendBtn">Send Command</button>
+<button id="stopServerBtn" onclick="stopServer()">Stop Server</button>
 
-<button onclick="stopServer()">Stop Server</button>
-
-<script>
-    function stopServer() {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send("STOP_SERVER");
-        }
-    }
-</script>
-
-<h3>Log</h3>
+<h3>📜 Log</h3>
 <textarea id="log" readonly></textarea>
 
 <script>
@@ -51,7 +224,23 @@
 
     ws.onopen = () => log("Connected to server");
     ws.onclose = () => log("Disconnected from server");
-    ws.onmessage = (event) => log("Received: " + event.data);
+    ws.onmessage = (event) => {
+        log("Received: " + event.data);
+
+        try {
+            const data = JSON.parse(event.data);
+
+            // Update robot position if message contains it
+            if (data.x !== undefined && data.y !== undefined) {
+                robot.position.set(data.x, 0.5, data.y);
+            }
+            if (data.theta !== undefined) {
+                robot.rotation.y = data.theta;
+            }
+        } catch (e) {
+            // Non-JSON, ignore
+        }
+    };
 
     function log(message) {
         const logArea = document.getElementById("log");
@@ -59,11 +248,16 @@
         logArea.scrollTop = logArea.scrollHeight;
     }
 
-    document.getElementById("sendBtn").onclick = () => {
-        const cmd = {
-            enable_continuous_hiking: document.getElementById("enable_continuous_hiking").checked,
+    function getDirection() {
+        return document.querySelector('input[name="direction"]:checked').value;
+    }
+
+    function buildCommand(enable) {
+        return {
+            enable_continuous_hiking: enable,
             steps_before_safety_stop: parseInt(document.getElementById("steps_before_safety_stop").value) || 0,
-            walk_forwards: document.getElementById("walk_forwards").checked,
+            walk_forwards: getDirection() === "forward",
+            walk_backwards: getDirection() === "backward",
             side_step: document.getElementById("side_step").checked,
             left_direction: document.getElementById("left_direction").checked,
             square_up_to_goal: document.getElementById("square_up_to_goal").checked,
@@ -73,15 +267,82 @@
             use_monte_carlo_plan_as_reference: document.getElementById("use_monte_carlo_plan_as_reference").checked,
             use_joystick_controller: document.getElementById("use_joystick_controller").checked,
             forward_value: parseFloat(document.getElementById("forward_value").value) || 0.0,
-            walk_backwards: document.getElementById("walk_backwards").checked,
             lateral_value: parseFloat(document.getElementById("lateral_value").value) || 0.0,
             turning_value: parseFloat(document.getElementById("turning_value").value) || 0.0
         };
+    }
 
+    // Hook up Start/Stop buttons
+    document.getElementById("startBtn").onclick = () => {
+        const cmd = buildCommand(true);
         const json = JSON.stringify(cmd);
         ws.send(json);
         log("Sent: " + json);
     };
+
+    document.getElementById("stopBtn").onclick = () => {
+        const cmd = buildCommand(false);
+        const json = JSON.stringify(cmd);
+        ws.send(json);
+        log("Sent: " + json);
+    };
+
+    function stopServer() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send("STOP_SERVER");
+            log("Sent: STOP_SERVER");
+        }
+    }
+
+    // === 3D Scene Setup ===
+    let scene, camera, renderer, robot, controls;
+
+    function init3D() {
+        const container = document.getElementById("world");
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xeeeeee);
+
+        camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(3, 3, 5);
+
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        container.appendChild(renderer.domElement);
+
+        // Lights
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 10, 7).normalize();
+        scene.add(light);
+
+        // Ground plane
+        const planeGeometry = new THREE.PlaneGeometry(20, 20);
+        const planeMaterial = new THREE.MeshPhongMaterial({color: 0x999999, depthWrite: true});
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI / 2;
+        scene.add(plane);
+
+        // Simple "robot" box
+        const robotGeometry = new THREE.BoxGeometry(0.5, 1.0, 0.5);
+        const robotMaterial = new THREE.MeshPhongMaterial({color: 0x0077ff});
+        robot = new THREE.Mesh(robotGeometry, robotMaterial);
+        robot.position.set(0, 0.5, 0);
+        scene.add(robot);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    init3D();
 </script>
+
+
 </body>
 </html>
