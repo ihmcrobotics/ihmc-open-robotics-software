@@ -153,6 +153,11 @@ public class RDXSimpleObject
       }
    }
 
+   public Shape3DBasics getCollisionGeometryObject()
+   {
+      return collisionGeometryObject;
+   }
+
    public void setPointIsInsideAlgorithm(Function<Point3DReadOnly, Boolean> isPointInside)
    {
       this.isPointInside = isPointInside;
