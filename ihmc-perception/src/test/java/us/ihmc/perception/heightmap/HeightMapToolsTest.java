@@ -17,14 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapToolsTest
 {
-   private final int iterations = 1000;
+   private final int iterations = 10000;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    @Test
    public void testRoundTripConvertMatToHeightMapDataAndBack()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-
 
       double cellSize = heightMapParameters.getCellSize();
       double terrainWidth = heightMapParameters.getTerrainWidthInMeters();
@@ -37,24 +36,18 @@ public class HeightMapToolsTest
       int cellsPerAxis = 2 * centerIndex + 1;
       Point3D centerLocation = new Point3D(centerX, centerY, 0.0);
 
-      Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
+      Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(1000));
       HeightMapData heightMapData = new HeightMapData(cellSize, terrainWidth, centerX, centerY);
-      HeightMapTools.convertToHeightMapData(originalMat,
-                                            heightMapData,
-                                            centerLocation,
-                                            (float) terrainWidth,
-                                            (float) cellSize,
-                                            (float) heightScaleFactor,
-                                            (float) heightOffset);
+      HeightMapTools.convertToHeightMapData(originalMat, heightMapData, centerLocation, (float) terrainWidth, (float) cellSize);
 
-      Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
-      HeightMapTools.convertHeightMapDataToMat(newData,  heightMapData, heightMapParameters);
+      Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      HeightMapTools.convertHeightMapDataToMat(newData, heightMapData, heightMapParameters);
 
       for (int x = 0; x < cellsPerAxis; x++)
       {
          for (int y = 0; y < cellsPerAxis; y++)
          {
-            assertEquals(originalMat.ptr(x, y).getShort(), newData.ptr(x, y).getShort());
+            assertEquals(originalMat.ptr(x, y).getFloat(), newData.ptr(x, y).getFloat());
          }
       }
    }
@@ -72,7 +65,7 @@ public class HeightMapToolsTest
          }
       }
 
-      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_16UC1);
+      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
 
       long startTime = System.nanoTime();
 
@@ -111,9 +104,7 @@ public class HeightMapToolsTest
                                                heightMapData,
                                                new Point3D(0.0, 0.0, 0.0),
                                                (float) heightMapParameters.getTerrainWidthInMeters(),
-                                               (float) heightMapParameters.getCellSize(),
-                                               (float) heightMapParameters.getHeightScaleFactor(),
-                                               (float) heightMapParameters.getHeightOffset());
+                                               (float) heightMapParameters.getCellSize());
       }
 
       long endTime = System.nanoTime();

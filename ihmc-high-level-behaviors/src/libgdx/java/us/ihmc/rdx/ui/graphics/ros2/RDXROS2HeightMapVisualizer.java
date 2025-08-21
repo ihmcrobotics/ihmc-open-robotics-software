@@ -132,9 +132,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                                                                     latestHeightMapData,
                                                                                     heightMapCenter,
                                                                                     (float) heightMapMessage.getWidthInMeters(),
-                                                                                    (float) heightMapMessage.getCellSizeInMeters(),
-                                                                                    (float) heightMapMessage.getHeightScaleFactor(),
-                                                                                    (float) heightMapMessage.getHeightOffset());
+                                                                                    (float) heightMapMessage.getCellSizeInMeters());
 
                                               // This prevents the rendering from happening too early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)

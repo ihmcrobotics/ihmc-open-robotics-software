@@ -342,7 +342,7 @@ public class RapidHeightMapExtractor
          int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
 
-         terrainCroppingKernel.withPointer(globalMeanMap.data()).withLong(scaledHeightMap.step());
+         terrainCroppingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          terrainCroppingKernel.withPointer(terrainCroppedHeightMap.data()).withLong(terrainCroppedHeightMap.step());
          terrainCroppingKernel.withInt(centerIndexTerrain);
          terrainCroppingKernel.withPointer(parametersDevicePointer);
@@ -536,7 +536,7 @@ public class RapidHeightMapExtractor
 
    public GpuMat getTerrainCroppedHeightMap()
    {
-      return terrainCroppedHeightMap.clone();
+      return terrainCroppedHeightMap;
    }
 
    public int getCellsPerAxis()

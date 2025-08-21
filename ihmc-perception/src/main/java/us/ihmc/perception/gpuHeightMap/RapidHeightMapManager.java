@@ -295,9 +295,7 @@ public class RapidHeightMapManager
                                             latestTerrainHeightMapData,
                                             heightMapCenterPoint,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize(),
-                                            (float) heightMapParameters.getHeightScaleFactor(),
-                                            (float) heightMapParameters.getHeightOffset());
+                                            (float) heightMapParameters.getCellSize());
       return latestTerrainHeightMapData;
    }
 
