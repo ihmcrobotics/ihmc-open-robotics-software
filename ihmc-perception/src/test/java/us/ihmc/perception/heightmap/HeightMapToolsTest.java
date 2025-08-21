@@ -27,8 +27,6 @@ public class HeightMapToolsTest
 
       double cellSize = heightMapParameters.getCellSize();
       double terrainWidth = heightMapParameters.getTerrainWidthInMeters();
-      double heightScaleFactor = heightMapParameters.getHeightScaleFactor();
-      double heightOffset = heightMapParameters.getHeightOffset();
       double centerX = 0.0;
       double centerY = 0.0;
 
