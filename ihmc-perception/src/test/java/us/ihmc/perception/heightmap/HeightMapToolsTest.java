@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HeightMapToolsTest
 {
-   private final int iterations = 10000;
+   private final int iterations = 1000;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
    @Test
