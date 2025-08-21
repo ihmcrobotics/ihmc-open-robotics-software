@@ -1,5 +1,6 @@
 package us.ihmc.openAlexander;
 
+import us.ihmc.handsros2.HandType;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalPropertiesV0;
 import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
@@ -118,6 +119,21 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
          case V1_NUB_FOREARMS -> true;
          default -> false;
       };
+   }
+
+   @Override
+   public boolean hasHandWithFingers(RobotSide side)
+   {
+      return this == V1_FULL_ROBOT;
+   }
+
+   @Override
+   public HandType getHandType(RobotSide side)
+   {
+      if (this == V1_FULL_ROBOT)
+         return HandType.EZ_GRIPPER;
+
+      return null;
    }
 
    @Override
