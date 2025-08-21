@@ -30,7 +30,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
    // TODO The z-component is really low, need to double-check that it is not causing problems.
-   private final Vector3D pelvisAngularWeight = new Vector3D(25.0, 25.0, 1.0);
+   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 1.0);
    // TODO Needs tune up.
    private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
@@ -56,7 +56,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final Vector2D copRateHighWeight = new Vector2D(0.00008, 0.00032);
 
    // TODO Needs tune up.
-   private final double neckJointspaceWeight = 5.0;
+   private final double neckJointspaceWeight = 0.0;
    // TODO Needs tune up.
    private final double spineJointspaceWeight = 10.0;
    // TODO Needs tune up.
