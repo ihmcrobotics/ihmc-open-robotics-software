@@ -220,7 +220,11 @@
 <textarea id="log" readonly></textarea>
 
 <script>
-    const ws = new WebSocket("ws://10.100.2.168:8765");
+    // Use the same host as the page, but fixed port 8111
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsHost = location.hostname; // only the hostname, not port
+    const wsPort = 8765;
+    const ws = new WebSocket(`${wsProtocol}//${wsHost}:${wsPort}`);
 
     ws.onopen = () => log("Connected to server");
     ws.onclose = () => log("Disconnected from server");
