@@ -184,6 +184,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                                             elevator,
                                                                             walkingControllerParameters,
                                                                             controllerToolbox.getTotalMassProvider(),
+                                                                            controllerToolbox.getWholeBodyAngularVelocityCalculator(),
                                                                             gravityZ,
                                                                             controlDT,
                                                                             walkingParentRegistry,

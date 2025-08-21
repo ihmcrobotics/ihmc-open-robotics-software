@@ -71,7 +71,7 @@ public class AlexanderSwingTrajectoryParameters extends SwingTrajectoryParameter
    public double getDesiredTouchdownVelocity()
    {
       // TODO Needs tune up
-      return -0.05;
+      return -0.1;
    }
 
    @Override

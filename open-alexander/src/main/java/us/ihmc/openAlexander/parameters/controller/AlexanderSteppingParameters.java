@@ -46,7 +46,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepWidth()
    {
-      return 0.2;
+      return 0.3;
    }
 
    @Override
@@ -73,7 +73,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI / 6.0;
+      return 0.65;
    }
 
    @Override

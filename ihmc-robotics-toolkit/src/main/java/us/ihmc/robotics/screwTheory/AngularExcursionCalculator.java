@@ -55,6 +55,11 @@ public class AngularExcursionCalculator
       }
    }
 
+   public WholeBodyAngularVelocityCalculator getWholeBodyAngularVelocityCalculator()
+   {
+      return angularVelocityCalculator;
+   }
+
    public void setToZero()
    {
       angularExcursion.setToZero();

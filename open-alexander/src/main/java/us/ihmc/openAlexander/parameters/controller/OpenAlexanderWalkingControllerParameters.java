@@ -417,7 +417,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       return taskspaceAngularGains;
    }
 
-   private PID3DGains createPelvisOrientationControlGains()
+   protected PID3DGains createPelvisOrientationControlGains()
    {
       // TODO Needs tune up
       double kpXY = 80.0;
