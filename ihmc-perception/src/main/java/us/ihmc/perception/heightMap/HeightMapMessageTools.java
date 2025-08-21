@@ -89,7 +89,7 @@ public class HeightMapMessageTools
    /**
     * This method is too slow, creating a new {@link HeightMapMessage} object is too slow when trying to
     * use this in the update loop. Especially when we start sending larger maps.
-    * Please use {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double, int)}
+    * Please use {@link #toMessage(Mat, float[], HeightMapMessage, Point3D, double, double, int)}
     * I'm going to say it one more time in case it wasn't clear the first time. THIS METHOD IS TOO SLOW, DO NOT USE!
     */
    @Deprecated
@@ -103,7 +103,7 @@ public class HeightMapMessageTools
 
    /**
     * This method is slow, it's ok to use this if necessary, but going forward we should be using the
-    * {@link HeightMapMessageTools#toMessage(Mat, HeightMapMessage, Point3D, double, double, double, double, int)} as its faster
+    * {@link #toMessage(Mat, float[], HeightMapMessage, Point3D, double, double, int)} as its faster
     */
    @Deprecated
    public static void toMessage(HeightMapData heightMapData, HeightMapMessage messageToPack)
@@ -168,21 +168,22 @@ public class HeightMapMessageTools
       messageToClear.getHeights().clear();
    }
 
+   /**
+    * This method is meant to be as fast as possible, which is why we are passing in the {@link  HeightMapMessage} and the heights array to this method.
+    * Allocating that memory in the update loop slows things down so we avoid that.
+    */
    public static void toMessage(Mat heightMapDataForMessage,
+                                float[] heightsArray,
                                 HeightMapMessage messageToPack,
                                 Point3D heightMapCenter,
                                 double widthInMeters,
                                 double cellSizeInMeters,
-                                double heightOffset,
-                                double heightScaleFactor,
                                 int cellsPerAxis)
    {
       messageToPack.setGridCenterX(heightMapCenter.getX());
       messageToPack.setGridCenterY(heightMapCenter.getY());
       messageToPack.setWidthInMeters(widthInMeters);
       messageToPack.setCellSizeInMeters(cellSizeInMeters);
-      messageToPack.setHeightOffset(heightOffset);
-      messageToPack.setHeightScaleFactor(heightScaleFactor);
       messageToPack.setCellsPerAxis(cellsPerAxis);
 
       // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
@@ -195,7 +196,6 @@ public class HeightMapMessageTools
       FloatBuffer floatBuffer = heightMapDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
 
       // This is done for speed optimization
-      float[] heightsArray = new float[totalCells];
       floatBuffer.get(heightsArray);
       Float heights = messageToPack.getHeights();
 

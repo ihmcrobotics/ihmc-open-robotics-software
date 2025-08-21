@@ -57,7 +57,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final Stopwatch stopwatch = new Stopwatch();
    private int cellsPerAxisOfHeightMap;
    private int cellsPerAxisOfChunks;
-   private float latestHeightMapOffset;
    private float latestCellSizeInMeters;
 
    public RDXROS2HeightMapVisualizer(String title)
@@ -117,7 +116,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              latestHeightMapOffset = (float) heightMapMessage.getHeightOffset();
                                               latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
                                               heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 

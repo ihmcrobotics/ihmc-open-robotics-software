@@ -208,7 +208,7 @@ public class HeightMapTools
    @Deprecated
    /**
     * We shouldn't be using this because we should be changing the snapping kernels to use floats rather than shorts
-    * This is a temporary solution that should be removed!
+    * This is a temporary solution that should be removed! (that's also why it's not tested lol)
     */ public static void convertCV32FC1ToCV16UC1(Mat floats, Mat shorts, int cellsPerAxis, HeightMapParameters heightMapParameters)
    {
       int totalCells = cellsPerAxis * cellsPerAxis;

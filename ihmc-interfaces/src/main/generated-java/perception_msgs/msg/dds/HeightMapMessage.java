@@ -24,14 +24,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             */
    public double grid_center_y_;
    /**
-            * Z height offset for converting between floats and shorts
-            */
-   public double height_offset_;
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public double height_scale_factor_;
-   /**
             * Width of the height map in meters
             */
    public double width_in_meters_;
@@ -67,10 +59,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       grid_center_x_ = other.grid_center_x_;
 
       grid_center_y_ = other.grid_center_y_;
-
-      height_offset_ = other.height_offset_;
-
-      height_scale_factor_ = other.height_scale_factor_;
 
       width_in_meters_ = other.width_in_meters_;
 
@@ -124,36 +112,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    public double getGridCenterY()
    {
       return grid_center_y_;
-   }
-
-   /**
-            * Z height offset for converting between floats and shorts
-            */
-   public void setHeightOffset(double height_offset)
-   {
-      height_offset_ = height_offset;
-   }
-   /**
-            * Z height offset for converting between floats and shorts
-            */
-   public double getHeightOffset()
-   {
-      return height_offset_;
-   }
-
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public void setHeightScaleFactor(double height_scale_factor)
-   {
-      height_scale_factor_ = height_scale_factor;
-   }
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public double getHeightScaleFactor()
-   {
-      return height_scale_factor_;
    }
 
    /**
@@ -234,10 +192,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_y_, other.grid_center_y_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_offset_, other.height_offset_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_scale_factor_, other.height_scale_factor_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
@@ -265,10 +219,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.grid_center_y_ != otherMyClass.grid_center_y_) return false;
 
-      if(this.height_offset_ != otherMyClass.height_offset_) return false;
-
-      if(this.height_scale_factor_ != otherMyClass.height_scale_factor_) return false;
-
       if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
 
       if(this.cell_size_in_meters_ != otherMyClass.cell_size_in_meters_) return false;
@@ -292,10 +242,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append(this.grid_center_x_);      builder.append(", ");
       builder.append("grid_center_y=");
       builder.append(this.grid_center_y_);      builder.append(", ");
-      builder.append("height_offset=");
-      builder.append(this.height_offset_);      builder.append(", ");
-      builder.append("height_scale_factor=");
-      builder.append(this.height_scale_factor_);      builder.append(", ");
       builder.append("width_in_meters=");
       builder.append(this.width_in_meters_);      builder.append(", ");
       builder.append("cell_size_in_meters=");
