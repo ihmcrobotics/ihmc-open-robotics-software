@@ -137,7 +137,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
                                                                                          referenceFrames,
                                                                                          updateDT,
                                                                                          registryField.get(),
-                                                                                         yoGraphicsListRegistry,
+                                                                                         null,
                                                                                          timeProvider));
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
