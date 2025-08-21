@@ -16,6 +16,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMapManager;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;

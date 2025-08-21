@@ -110,7 +110,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), heightMapMessage.getCellSizeInMeters());
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(),
+                                                                                                     heightMapMessage.getCellSizeInMeters());
                                                  cellsPerAxisOfHeightMap = 2 * centerIndex + 1;
                                               }
 
@@ -232,14 +233,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          // An additional check here to make sure that we have data in the image
          if (heightMap != null && heightMap.ptr(0) != null)
          {
-            float pixelScalingFactor = 10000.0f;
-            heightMapRenderer.update(heightMap,
-                                     latestHeightMapOffset,
-                                     heightMapCenter.getX32(),
-                                     heightMapCenter.getY32(),
-                                     cellsPerAxisOfHeightMap / 2,
-                                     latestCellSizeInMeters,
-                                     pixelScalingFactor);
+            heightMapRenderer.update(heightMap, heightMapCenter.getX32(), heightMapCenter.getY32(), cellsPerAxisOfHeightMap / 2, latestCellSizeInMeters);
          }
       }
 

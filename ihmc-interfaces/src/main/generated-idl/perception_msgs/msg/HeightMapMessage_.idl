@@ -49,7 +49,7 @@ module perception_msgs
         /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<long, 255000> heights;
+        sequence<float, 255000> heights;
       };
     };
   };

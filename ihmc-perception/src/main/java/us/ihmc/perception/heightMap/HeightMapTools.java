@@ -6,6 +6,9 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -192,22 +195,16 @@ public class HeightMapTools
       heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
       // Read data into byte[]
-      byte[] data = new byte[Short.BYTES * totalCells];
+      byte[] data = new byte[Float.BYTES * totalCells];
       heightMapPointer.data().get(data);
+
+      // Wrap as float buffer
+      FloatBuffer floatBuffer = ByteBuffer.wrap(data).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
       // Put height values into HeightMapData object
       for (int i = 0; i < totalCells; ++i)
       {
-         // Get the start index of the bytes for a short
-         int dataIndex = Short.BYTES * i;
-
-         // Get the most and least significant bits, combine into integer
-         int major = (data[dataIndex + 1] << 8) & 0xFF00;
-         int minor = data[dataIndex] & 0x00FF;
-         int height = major | minor;
-
-         // Calculate cell height
-         float cellHeight = (((float) height / heightScaleFactor) - heightOffset);
+         float cellHeight = floatBuffer.get(i);
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);

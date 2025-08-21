@@ -403,8 +403,8 @@ __global__ void scalingHeightMapKernel(const float *__restrict__ globalHeightMap
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(const unsigned short *__restrict__ globalHeightMap, size_t pitchGlobal,
-                                               unsigned short *__restrict__ terrainMap, size_t pitchTerrain,
+__global__ void terrainCroppingHeightMapKernel(const float *__restrict__ globalHeightMap, size_t pitchGlobal,
+                                               float *__restrict__ terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -419,8 +419,8 @@ __global__ void terrainCroppingHeightMapKernel(const unsigned short *__restrict_
     int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
 
     // Set the terrain map index to the equivalent index in the global map
-    unsigned short *globalRow = (unsigned short *)((char *)globalHeightMap + globalX * pitchGlobal);
-    unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
+    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
+    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
 
     terrainRow[yIndex] = globalRow[globalY];
 }

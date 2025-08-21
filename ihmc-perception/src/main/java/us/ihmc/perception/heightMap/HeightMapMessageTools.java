@@ -5,8 +5,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.idl.IDLSequence.Integer;
 
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 public class HeightMapMessageTools
@@ -65,21 +67,21 @@ public class HeightMapMessageTools
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), heightMapMessage.getCellSizeInMeters());
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
-      ShortBuffer shortBuffer = heightMap.createBuffer();
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      FloatBuffer floatBuffer = heightMap.createBuffer();
 
       int totalCells = cellsPerAxis * cellsPerAxis;
-      short[] heights = new short[totalCells];
+      float[] heights = new float[totalCells];
 
       // Optimization of caching the arrays
-      Integer heightsFromMessage = heightMapMessage.getHeights();
+      Float heightsFromMessage = heightMapMessage.getHeights();
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
-         heights[i] = (short) heightsFromMessage.get(i);
+         heights[i] = heightsFromMessage.get(i);
       }
 
-      shortBuffer.put(heights);
+      floatBuffer.put(heights);
 
       return heightMap;
    }
@@ -187,15 +189,15 @@ public class HeightMapMessageTools
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       // Make sure Mat type is correct
-      if (heightMapDataForMessage.type() != opencv_core.CV_16UC1)
-         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+      if (heightMapDataForMessage.type() != opencv_core.CV_32FC1)
+         throw new IllegalArgumentException("Expected CV_32FC1 Mat");
 
-      ShortBuffer shortBuffer = heightMapDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
+      FloatBuffer floatBuffer = heightMapDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
 
       // This is done for speed optimization
-      short[] heightsArray = new short[totalCells];
-      shortBuffer.get(heightsArray);
-      Integer heights = messageToPack.getHeights();
+      float[] heightsArray = new float[totalCells];
+      floatBuffer.get(heightsArray);
+      Float heights = messageToPack.getHeights();
 
       // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)
