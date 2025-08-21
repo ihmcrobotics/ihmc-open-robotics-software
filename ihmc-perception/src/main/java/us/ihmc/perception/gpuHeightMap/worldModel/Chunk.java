@@ -29,8 +29,6 @@ public class Chunk
 
    private double originX;
    private double originY;
-   private double heightMapOffset;
-   private double scalingFactor;
    private double cellSize;
 
    private int cellsPerAxis;
@@ -44,8 +42,6 @@ public class Chunk
       this.originY = originY;
       this.cellSize = cellSize;
       this.cellsPerAxis = cellsPerAxis;
-      this.heightMapOffset = heightMapOffset;
-      this.scalingFactor = scalingFactor;
 
       int totalCells = this.cellsPerAxis * this.cellsPerAxis;
       chunk = new Mat(this.cellsPerAxis, this.cellsPerAxis, opencv_core.CV_16UC1);
@@ -63,8 +59,6 @@ public class Chunk
       this.originY = chunkMessage.getOriginY();
       this.cellSize = chunkMessage.getCellSizeInMeters();
       this.cellsPerAxis = chunkMessage.getCellsPerAxis();
-      this.heightMapOffset = (float) chunkMessage.getHeightOffset();
-      this.scalingFactor = chunkMessage.getHeightScaleFactor();
 
       this.chunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);
 
@@ -100,19 +94,9 @@ public class Chunk
       return originY;
    }
 
-   public double getHeightMapOffset()
-   {
-      return heightMapOffset;
-   }
-
    public double getCellSize()
    {
       return cellSize;
-   }
-
-   public double getScalingFactor()
-   {
-      return scalingFactor;
    }
 
    public int getCellsPerAxis()
@@ -130,19 +114,9 @@ public class Chunk
       this.originY = originY;
    }
 
-   public void setHeightMapOffset(float heightMapOffset)
-   {
-      this.heightMapOffset = heightMapOffset;
-   }
-
    public void setCellSize(double cellSize)
    {
       this.cellSize = cellSize;
-   }
-
-   public void setScalingFactor(double scalingFactor)
-   {
-      this.scalingFactor = scalingFactor;
    }
 
    public void setChunk(Mat chunk)

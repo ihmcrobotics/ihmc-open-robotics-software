@@ -125,16 +125,12 @@ public class HeightMapMessageTools
                                 Point3D mapOrigin,
                                 double widthInMeters,
                                 double cellSizeInMeters,
-                                double heightOffset,
-                                double heightScaleFactor,
                                 int cellsPerAxis)
    {
       messageToPack.setOriginX(mapOrigin.getX());
       messageToPack.setOriginY(mapOrigin.getY());
       messageToPack.setWidthInMeters(widthInMeters);
       messageToPack.setCellSizeInMeters(cellSizeInMeters);
-      messageToPack.setHeightOffset(heightOffset);
-      messageToPack.setHeightScaleFactor(heightScaleFactor);
       messageToPack.setCellsPerAxis(cellsPerAxis);
 
       // Guarantee the width is at meter increments. So we can't have 4.02, that becomes 4.0
@@ -144,12 +140,12 @@ public class HeightMapMessageTools
       if (chunkDataForMessage.type() != opencv_core.CV_16UC1)
          throw new IllegalArgumentException("Expected CV_16UC1 Mat");
 
-      ShortBuffer shortBuffer = chunkDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
+      FloatBuffer floatBuffer = chunkDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
 
       // This is done for speed optimization
-      short[] heightsArray = new short[totalCells];
-      shortBuffer.get(heightsArray);
-      Integer heights = messageToPack.getHeights();
+      float[] heightsArray = new float[totalCells];
+      floatBuffer.get(heightsArray);
+      Float heights = messageToPack.getHeights();
 
       // No overhead for this loop, it's as fast as possible (according to AI) with the current message
       for (int i = 0; i < totalCells; ++i)

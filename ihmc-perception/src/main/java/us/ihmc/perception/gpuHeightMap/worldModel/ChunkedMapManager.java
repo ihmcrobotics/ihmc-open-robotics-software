@@ -162,8 +162,6 @@ public class ChunkedMapManager
                                          new Point3D(chunk.getOriginX(), chunk.getOriginY(), 0),
                                          Chunk.CHUNK_WIDTH,
                                          chunk.getCellSize(),
-                                         chunk.getHeightMapOffset(),
-                                         chunk.getScalingFactor(),
                                          chunk.getCellsPerAxis());
          publisher.publish(chunkMessage);
       }
