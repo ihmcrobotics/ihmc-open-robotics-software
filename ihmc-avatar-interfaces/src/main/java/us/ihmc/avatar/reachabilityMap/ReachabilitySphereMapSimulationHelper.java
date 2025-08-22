@@ -15,6 +15,7 @@ import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
+import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -47,7 +48,7 @@ public class ReachabilitySphereMapSimulationHelper
       RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
 
-      session = new SimulationSession("Reachability Analysis - " + robotDefinition.getName());
+      session = new SimulationSession("Reachability Analysis - " + robotDefinition.getName(), DoNothingPhysicsEngine::new);
       session.initializeBufferSize(16000);
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
@@ -58,6 +59,11 @@ public class ReachabilitySphereMapSimulationHelper
 
       previousVisualizationType.set(VisualizationType.RayReach);
       currentVisualizationType.set(VisualizationType.RayReach);
+   }
+
+   public SimulationSession getSession()
+   {
+      return session;
    }
 
    /**

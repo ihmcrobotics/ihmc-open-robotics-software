@@ -32,6 +32,7 @@ import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.DoubleStringConverter;
+import org.fest.util.Arrays;
 import us.ihmc.avatar.reachabilityMap.ReachabilitySphereMapSimulationHelper.VisualizationType;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.Voxel3DData;
 import us.ihmc.avatar.reachabilityMap.Voxel3DGrid.VoxelExtraData;
@@ -124,6 +125,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class ReachabilityMapVisualizer
 {
+   private SimulationSession simSession;
    private static final double bufferGrowthFactor = 1.1;
 
    private final ReachabilityMapRobotInformation robotInformation;
@@ -222,14 +224,15 @@ public class ReachabilityMapVisualizer
    public boolean loadReachabilityMapFromFile(ReachabilityMapFileReader importer, File file)
    {
       long startTime = System.nanoTime();
-      System.out.println("Loading reachability map");
+      LogTools.info("Loading reachability map");
 
       reachabilityMap = importer.read(file, robotInformation);
 
       if (reachabilityMap == null)
          return false;
 
-      System.out.println("Done loading reachability map. Took: " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " seconds.");
+      LogTools.info("Done loading reachability map. Took: " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + " seconds.");
+      LogTools.info("Reachability map contains " + Arrays.nonNullElements(reachabilityMap.getVoxels()).length + " valid voxels.");
       return true;
    }
 
@@ -238,12 +241,74 @@ public class ReachabilityMapVisualizer
       this.reachabilityMap = reachabilityMap;
    }
 
-   public void visualize()
+   public SimulationSession getSession()
+   {
+      return simSession;
+   }
+
+      public void visualize()
+      {
+         RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
+         robotDefinition.ignoreAllJoints();
+
+         SimulationSession session = new SimulationSession(robotDefinition.getName() + " Reachability Map Visualizer");
+         simSession = session;
+         SimulationSessionControls sessionControls = session.getSimulationSessionControls();
+         session.getRootRegistry().addChild(registry);
+         Robot robot = session.addRobot(robotDefinition);
+         robotBase = robot.getRigidBody(robotInformation.getBaseName());
+         robotEndEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
+         robotArmJoints = MultiBodySystemTools.createOneDoFJointPath(robotBase, robotEndEffector);
+         RigidBodyBasics endEffector = robot.getRigidBody(robotInformation.getEndEffectorName());
+         Pose3DReadOnly controlFramePose = robotInformation.getControlFramePoseInParentJoint();
+         RigidBodyTransform frameTransform = new RigidBodyTransform(controlFramePose.getOrientation(), controlFramePose.getPosition());
+         MovingReferenceFrame parentFrame = endEffector.getParentJoint().getFrameAfterJoint();
+         ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame", parentFrame, frameTransform);
+
+         guiControls = SessionVisualizer.startSessionVisualizer(session);
+         guiControls.waitUntilVisualizerFullyUp();
+         session.stopSessionThread();
+
+         guiControls.addStaticVisuals(ReachabilityMapTools.createReachibilityColorScaleVisuals());
+         guiControls.addYoGraphic(newYoGraphicCoordinateSystem3D("currentEvaluationPose", currentEvaluationPose, 0.15, ColorDefinitions.HotPink()));
+         guiControls.addYoGraphic(newYoGraphicCoordinateSystem3D("controlFrame", new FramePose3D(controlFrame), 0.05, ColorDefinitions.parse("#A1887F")));
+
+         createVisualizationControls();
+
+         LogTools.info("Done generating visuals");
+
+         if (visualizePositionReach)
+         {
+            LogTools.info("Start exploring position reach");
+            visualizePositionReach(session, controlFrame);
+            LogTools.info("Done exploring position reach");
+         }
+         if (visualizeRayReach)
+         {
+            LogTools.info("Start exploring ray reach");
+            visualizeRayReach(session);
+            LogTools.info("Done exploring ray reach");
+         }
+         if (visualizePoseReach)
+         {
+            LogTools.info("Start exploring ray reach");
+            visualizePoseReach(session);
+            LogTools.info("Done exploring ray reach");
+         }
+
+         LogTools.info("Cropping buffer");
+         sessionControls.cropBuffer();
+         LogTools.info("Restarting session's thread");
+         session.startSessionThread();
+         LogTools.info("Done");
+      }
+
+   public void visualize_Alexander(SimulationSession session)
    {
       RobotDefinition robotDefinition = robotInformation.getRobotDefinition();
       robotDefinition.ignoreAllJoints();
 
-      SimulationSession session = new SimulationSession(robotDefinition.getName() + " Reachability Map Visualizer");
+      simSession = session;
       SimulationSessionControls sessionControls = session.getSimulationSessionControls();
       session.getRootRegistry().addChild(registry);
       Robot robot = session.addRobot(robotDefinition);
