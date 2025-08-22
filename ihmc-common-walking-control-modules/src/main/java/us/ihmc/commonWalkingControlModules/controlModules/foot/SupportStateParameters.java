@@ -12,8 +12,8 @@ public class SupportStateParameters
 {
    private static final double defaultFootLoadThreshold = 0.0;
 
-   private static final double EPSILON_POINT_ON_EDGE = 5e-3;
-   private static final double EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS = 8e-3;
+   private static final double EPSILON_POINT_ON_EDGE = 8e-3;
+   private static final double EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS = 1e-2;
 
    // For testing:
    private final BooleanProvider assumeCopOnEdge;

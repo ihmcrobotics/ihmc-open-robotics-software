@@ -35,7 +35,7 @@ public class ContactStateManager
 
    private final BooleanParameter speedUpTransferDynamicsFromError = new BooleanParameter("speedUpTransferDynamicsFromError", registry, true);
    private final BooleanParameter slowDownTransferDynamicsFromError = new BooleanParameter("slowDownTransferDynamicsFromError", registry, false);
-   private final BooleanParameter speedUpSwingDynamicsFromError = new BooleanParameter("speedUpSwingDynamicsFromError", registry, true);
+   private final BooleanParameter speedUpSwingDynamicsFromError = new BooleanParameter("speedUpSwingDynamicsFromError", registry, false);
    private final BooleanParameter slowDownSwingDynamicsFromError = new BooleanParameter("slowDownSwingDynamicsFromError", registry, false);
 
    private final DoubleProvider timeAdjustmentDiscountGain = new DoubleParameter("timeAdjustmentDiscountGain", registry, 0.8);

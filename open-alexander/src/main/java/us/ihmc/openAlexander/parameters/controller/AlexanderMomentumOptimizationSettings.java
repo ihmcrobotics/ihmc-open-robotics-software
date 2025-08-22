@@ -18,7 +18,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    // TODO Needs tune up.
    private final Vector3D linearMomentumWeight = new Vector3D(0.5, 0.5, 0.02);
    // TODO The z-component is super high, probably causing tracking issues in swing
-   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 1.0);
+   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
 
    // TODO Needs tune up.
    private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
@@ -29,8 +29,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    // TODO Needs tune up.
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
-   // TODO The z-component is really low, need to double-check that it is not causing problems.
-   private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 1.0);
+   private final Vector3D pelvisAngularWeight = new Vector3D(10.0, 10.0, 3.0);
    // TODO Needs tune up.
    private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
