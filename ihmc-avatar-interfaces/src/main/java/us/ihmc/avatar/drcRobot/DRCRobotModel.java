@@ -19,7 +19,6 @@ import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -232,11 +231,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    default AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
    {
       return null;
-   }
-
-   default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
-   {
-      return new SteppingEnvironmentalConstraintParameters();
    }
 
    default String getStepReachabilityResourceName()
