@@ -204,7 +204,6 @@ public class AvatarEstimatorThreadManager
 
          // Write desired commands to robot
          hardwareCommunicationInterface.write(estimatorThread.getHumanoidRobotContextData().getProcessedJointData());
-         // TODO this is where we need to publish the current state.
       }
 
       // Update YoVariable server
