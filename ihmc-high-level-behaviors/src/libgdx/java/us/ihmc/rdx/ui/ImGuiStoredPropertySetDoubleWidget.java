@@ -5,6 +5,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImDouble;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -47,6 +48,21 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
       label = labels.get(key.getTitleCasedName());
       imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, this::renderSliderWithMinMax);
+   }
+
+   public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
+                                             DoubleStoredPropertyKey key,
+                                             String format,
+                                             double min,
+                                             double max,
+                                             Runnable onParametersUpdatedCallback)
+   {
+      this.min = min;
+      this.max = max;
+      this.onParametersUpdatedCallback = onParametersUpdatedCallback;
+      this.format = format;
+      label = labels.get(key.getTitleCasedName());
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, this::renderSliderWithMinMaxAndFormat);
    }
 
 

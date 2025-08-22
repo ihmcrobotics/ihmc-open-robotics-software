@@ -285,7 +285,7 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
             }
          }
       }
-      if (heightMapData != null && !heightMapData.isEmpty())
+      if (heightMapData != null)
       {
          EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
 

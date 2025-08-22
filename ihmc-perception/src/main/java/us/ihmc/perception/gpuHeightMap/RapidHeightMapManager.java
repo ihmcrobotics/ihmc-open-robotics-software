@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,6 +20,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.FileNotFoundException;
@@ -50,6 +52,7 @@ public class RapidHeightMapManager
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
+   private final ROS2Publisher<HeightMapMessage> controllerHeightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
@@ -59,7 +62,8 @@ public class RapidHeightMapManager
    private FileOutputStream heightMapOutputStream;
    private final ChunkedMapManager chunkedMapManager;
 
-   public RapidHeightMapManager(ROS2Node ros2Node,
+   public RapidHeightMapManager(String robotName,
+                                ROS2Node ros2Node,
                                 ReferenceFrame leftFootSoleFrame,
                                 ReferenceFrame rightFootSoleFrame,
                                 ReferenceFrame heightMapCenter,
@@ -85,6 +89,8 @@ public class RapidHeightMapManager
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
+      
+      controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessage.class, robotName));
    }
 
    public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
@@ -190,6 +196,7 @@ public class RapidHeightMapManager
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
+      controllerHeightMapMessagePublisher.publish(heightMapMessage);
    }
 
    public static void logHeightMapToFile(FileOutputStream fos, float[] packedArray, double timestamp) throws IOException

@@ -12,7 +12,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.simulationConstructionSetTools.tools.CITools;
 import us.ihmc.simulationConstructionSetTools.tools.CITools.SimpleRobotNameKeys;
 
-public class AlexanderEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajectoryMessageTest
+public class OpenAlexanderEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajectoryMessageTest
 {
 
    private final DRCRobotModel robotModel = new OpenAlexanderRobotModel(OpenAlexanderVersion.V1_FULL_ROBOT, RobotTarget.SCS);

@@ -58,11 +58,10 @@ public class PlanarRegionToHeightMapConverter
       double sideLength = Math.max(width, height);
 
       HeightMapMessage message = new HeightMapMessage();
-      message.setGridSizeXy(sideLength);
-      message.setXyResolution(resolutionXY);
+      message.setWidthInMeters(sideLength);
       message.setGridCenterX(gridCenterX);
       message.setGridCenterY(gridCenterY);
-      message.setEstimatedGroundHeight(estimatedGroundHeight);
+      message.setCellSizeInMeters(resolutionXY);
 
       int centerIndex = HeightMapTools.computeCenterIndex(sideLength, resolutionXY);
       int cellsPerAxis = 2 * centerIndex + 1;
@@ -80,7 +79,6 @@ public class PlanarRegionToHeightMapConverter
 
             if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()) && !MathTools.epsilonEquals(projectedPoint.getZ(), estimatedGroundHeight, 1e-2))
             {
-               message.getKeys().add(key);
                message.getHeights().add((int) projectedPoint.getZ());
             }
          }
