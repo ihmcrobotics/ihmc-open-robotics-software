@@ -33,6 +33,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.filters.RateLimitedYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -47,6 +48,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ICPController implements ICPControllerInterface
 {
    private static final boolean VISUALIZE = true;
+   private static final double MAX_FEEDBACK_ALPHA_RATE = 5.0;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -80,6 +82,8 @@ public class ICPController implements ICPControllerInterface
 
    private final YoDouble feedbackAlpha = new YoDouble(yoNamePrefix + "FeedbackAlpha", registry);
    private final YoDouble feedForwardAlpha = new YoDouble(yoNamePrefix + "FeedForwardAlpha", registry);
+   private final RateLimitedYoVariable feedbackAlphaLimited;
+   private final RateLimitedYoVariable feedForwardAlphaLimited;
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
 
@@ -178,6 +182,11 @@ public class ICPController implements ICPControllerInterface
                                                      registry,
                                                      icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
       feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
+
+      YoDouble maxAlphaRate = new YoDouble(yoNamePrefix + "MaxAlphaRate", registry);
+      maxAlphaRate.set(icpOptimizationParameters.getMaxAlphaRate());
+      feedbackAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedbackAlphaLimited", registry, maxAlphaRate, feedbackAlpha, controlDT);
+      feedForwardAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedForwardAlphaLimited", registry, maxAlphaRate, feedForwardAlpha, controlDT);
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
 
@@ -374,8 +383,8 @@ public class ICPController implements ICPControllerInterface
       computeUnconstrainedFeedbackCMP(perfectCoP, perfectCMPOffset, unconstrainedFeedbackNoScaling, unconstrainedFeedbackCMPNoScaling);
       computeFeedForwardAndFeedBackAlphas();
 
-      referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
-      referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
+      referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlphaLimited.getDoubleValue(), perfectCMPOffset);
+      referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlphaLimited.getDoubleValue());
 
       computeUnconstrainedFeedbackCMP(referenceFeedForwardCoP, referenceFeedForwardCMPOffset, unconstrainedFeedback, unconstrainedFeedbackCMP);
 
@@ -475,14 +484,17 @@ public class ICPController implements ICPControllerInterface
       // catches a few bugs
       if (feedForwardAlpha.isNaN())
          feedForwardAlpha.set(0.0);
+
+      feedbackAlphaLimited.update();
+      feedForwardAlphaLimited.update();
    }
 
    private void computeCMPPositions()
    {
       feedbackCoP.set(referenceFeedForwardCoP);
-      feedbackCoP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCoPDelta, feedbackCoP);
+      feedbackCoP.scaleAdd(1.0 - feedbackAlphaLimited.getValue(), feedbackCoPDelta, feedbackCoP);
       feedbackCMP.add(referenceFeedForwardCMPOffset, feedbackCoP);
-      feedbackCMP.scaleAdd(1.0 - feedbackAlpha.getValue(), feedbackCMPDelta, feedbackCMP);
+      feedbackCMP.scaleAdd(1.0 - feedbackAlphaLimited.getValue(), feedbackCMPDelta, feedbackCMP);
 
       if (parameters.getFeedbackProjectionOperator() != null)
       {
