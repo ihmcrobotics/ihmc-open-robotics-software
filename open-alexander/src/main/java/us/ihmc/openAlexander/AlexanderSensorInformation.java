@@ -21,21 +21,21 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
    protected final SideDependentList<String> feetForceSensorParentJointNames = new SideDependentList<String>();
 
-   private final String leftShoulderIMUSensor = "left_shoulder_pitch_imu";
-   private final String leftBicepIMUSensor = "left_shoulder_yaw_imu";
-   private final String leftForearmIMUSensor = "left_wrist_yaw_imu";
-   private final String leftHandIMUSensor = null; // "left_gripper_yaw_imu";
+   private final String leftShoulderIMUSensor = "left_shoulder_y_imu";
+   private final String leftBicepIMUSensor = "left_shoulder_z_imu";
+   private final String leftForearmIMUSensor = "left_wrist_z_imu";
+   private final String leftHandIMUSensor = null; // "left_gripper_z_imu";
 
-   private final String rightShoulderIMUSensor = "right_shoulder_pitch_imu";
-   private final String rightBicepIMUSensor = "right_shoulder_yaw_imu";
-   private final String rightForearmIMUSensor = "right_wrist_yaw_imu";
-   private final String rightHandIMUSensor = null; // "right_gripper_yaw_imu";
+   private final String rightShoulderIMUSensor = "right_shoulder_y_imu";
+   private final String rightBicepIMUSensor = "right_shoulder_z_imu";
+   private final String rightForearmIMUSensor = "right_wrist_z_imu";
+   private final String rightHandIMUSensor = null; // "right_gripper_z_imu";
 
    // Torso IMUs
    private final String torsoIMU = "torso_imu";
 
    // Pelvis IMUs
-   private final String pelvisIMU = "pelvis_stim_imu";
+   private final String pelvisIMU = "pelvis_imu";
 
    // Left leg IMUs
    private final String leftHipXIMU = "left_hip_x_imu";
