@@ -64,7 +64,6 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYo
 
 public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 {
-   private static final boolean USE_ANGULAR_CAPTURE_POINT = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -194,7 +193,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       this.gravityZ = gravityZ;
       this.angularVelocityCalculator = wholeBodyAngularVelocityCalculator;
 
-      useAngularCapturePoint.set(USE_ANGULAR_CAPTURE_POINT);
+      useAngularCapturePoint.set(walkingControllerParameters.useAngularCapturePointForFeedback());
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
