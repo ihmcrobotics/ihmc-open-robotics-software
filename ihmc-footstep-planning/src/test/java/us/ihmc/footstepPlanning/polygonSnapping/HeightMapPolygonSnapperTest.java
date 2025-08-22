@@ -58,7 +58,7 @@ public class HeightMapPolygonSnapperTest
             double x = HeightMapTools.keyToXCoordinate(key, gridCenterXY, gridResolution, centerIndex);
             double y = HeightMapTools.keyToYCoordinate(key, gridCenterXY, gridResolution, centerIndex);
             double z = plane.getZOnPlane(x, y);
-            heightMapData.setHeightAt(x, y, z);
+            heightMapData.setHeight(x, y, z);
          }
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
@@ -129,10 +129,10 @@ public class HeightMapPolygonSnapperTest
          double offsetZ2 = nominalZ2 + offsetZ;
          double offsetZ3 = nominalZ3 - offsetZ;
 
-         heightMapData.setHeightAt(polygonToSnap.getVertex(0).getX(), polygonToSnap.getVertex(0).getY(), offsetZ0);
-         heightMapData.setHeightAt(polygonToSnap.getVertex(1).getX(), polygonToSnap.getVertex(1).getY(), offsetZ1);
-         heightMapData.setHeightAt(polygonToSnap.getVertex(2).getX(), polygonToSnap.getVertex(2).getY(), offsetZ2);
-         heightMapData.setHeightAt(polygonToSnap.getVertex(3).getX(), polygonToSnap.getVertex(3).getY(), offsetZ3);
+         heightMapData.setHeight(polygonToSnap.getVertex(0).getX(), polygonToSnap.getVertex(0).getY(), offsetZ0);
+         heightMapData.setHeight(polygonToSnap.getVertex(1).getX(), polygonToSnap.getVertex(1).getY(), offsetZ1);
+         heightMapData.setHeight(polygonToSnap.getVertex(2).getX(), polygonToSnap.getVertex(2).getY(), offsetZ2);
+         heightMapData.setHeight(polygonToSnap.getVertex(3).getX(), polygonToSnap.getVertex(3).getY(), offsetZ3);
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
          EnvironmentHandler environmentHandler = new EnvironmentHandler();
@@ -156,7 +156,7 @@ public class HeightMapPolygonSnapperTest
       {
          for (double y = -0.10; y <= 0.1; y += gridResolution)
          {
-            heightMapData.setHeightAt(x, y, 0.2);
+            heightMapData.setHeight(x, y, 0.2);
          }
       }
 

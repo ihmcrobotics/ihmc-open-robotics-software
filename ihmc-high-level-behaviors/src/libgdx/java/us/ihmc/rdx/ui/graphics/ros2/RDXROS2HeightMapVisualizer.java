@@ -45,8 +45,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
 
-   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(true);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
 
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
@@ -110,7 +110,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), heightMapMessage.getCellSizeInMeters());
                                                  cellsPerAxisOfHeightMap = 2 * centerIndex + 1;
                                               }
 
@@ -122,8 +122,8 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
                                               if (latestHeightMapData == null)
                                               {
-                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
-                                                                                         heightMapMessage.getGridSizeXy(),
+                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getCellSizeInMeters(),
+                                                                                         heightMapMessage.getWidthInMeters(),
                                                                                          heightMapMessage.getGridCenterX(),
                                                                                          heightMapMessage.getGridCenterY());
                                               }

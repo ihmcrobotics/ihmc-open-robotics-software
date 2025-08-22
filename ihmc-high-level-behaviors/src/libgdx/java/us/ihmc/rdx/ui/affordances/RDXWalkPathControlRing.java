@@ -172,10 +172,11 @@ public class RDXWalkPathControlRing
       rightGoalFootstepGraphic.setPose(rightGoalFootPose);
    }
 
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(float startCursorPosX)
    {
-      ImGui.text("Control ring:");
+      ImGui.text("Control Ring:");
       ImGui.sameLine();
+      ImGui.setCursorPosX(startCursorPosX);
       if (ImGui.radioButton(labels.get("Deleted"), !footstepPlannerGoalGizmo.getSelected() && !footstepPlannerGoalGizmo.getModified()))
       {
          delete();

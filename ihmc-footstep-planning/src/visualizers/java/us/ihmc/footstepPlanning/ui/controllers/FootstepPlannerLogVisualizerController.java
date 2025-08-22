@@ -352,12 +352,8 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
 
-      if (!heightMapData.isEmpty())
-      {
-         messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
-      }
       if (!TerrainMapTools.isEmpty(footstepPlannerLog.getRequestPacket().getTerrainMapMessage()))
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.TerrainMapData, footstepPlannerLog.getRequestPacket().getTerrainMapMessage());
@@ -390,7 +386,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowBodyPathLogGraphics, true);
 
       // set footstep graph data
-      updateGraphData(heightMapData,
+      updateGraphData(HeightMapMessageTools.unpackMessageToHeightMapData(footstepPlannerLog.getRequestPacket().getHeightMapMessage()),
                       convertToTerrainMapData(footstepPlannerLog.getRequestPacket().getTerrainMapMessage()),
                       footstepPlannerLog.getEdgeDataMap(),
                       footstepPlannerLog.getIterationData(),

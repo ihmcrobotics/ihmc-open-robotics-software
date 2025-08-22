@@ -200,7 +200,7 @@ public class CUDAFootstepOptimizer implements AutoCloseable
          optimalFootstepPose.setX(bestSolution[0]);
          optimalFootstepPose.setY(bestSolution[1]);
          optimalFootstepPose.getRotation().set(new YawPitchRoll(bestSolution[2], initialPose.getPitch(), initialPose.getRoll()));
-         optimalFootstepPose.setZ(currentHeightMapData.getHeightAt(bestSolution[0], bestSolution[1]));
+         optimalFootstepPose.setZ(currentHeightMapData.getHeight(bestSolution[0], bestSolution[1]));
 
          // Release stuff
          cudaFreeAsync(gpuInitialPose, cudaStream);

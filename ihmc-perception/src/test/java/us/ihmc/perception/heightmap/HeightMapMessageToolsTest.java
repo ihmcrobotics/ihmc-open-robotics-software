@@ -157,7 +157,7 @@ public class HeightMapMessageToolsTest
 
       for (int i = 0; i < totalCells; i++)
       {
-         heightMapData.setHeightAt(i, 1.0f);
+         heightMapData.setHeight(i, 1.0f);
       }
 
       long startTime = System.nanoTime();

@@ -4,47 +4,44 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
+public class AStarBodyPathPlanner
 {
    private static final boolean debug = false;
-   private static final boolean useRANSACTraversibility = true;
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private final AStarBodyPathEdgeData edgeData;
    private HeightMapData heightMapData;
@@ -58,15 +55,10 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private final YoDouble snapHeight = new YoDouble("snapHeight", registry);
    private final YoDouble incline = new YoDouble("incline", registry);
    private final YoDouble inclineCost = new YoDouble("inclineCost", registry);
-   private final YoDouble traversibilityCost = new YoDouble("traversibilityCost", registry);
    private final YoDouble roll = new YoDouble("roll", registry);
-   private final YoDouble rollCost = new YoDouble("rollCost", registry);
    private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
-   private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
-
-   private final HashMap<BodyPathLatticePoint, Double> rollMap = new HashMap<>();
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
@@ -75,16 +67,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
    private double leastCost = Double.POSITIVE_INFINITY;
    private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
 
-   /* Indicator of how flat and planar and available footholds are, using least squares */
-   private final BodyPathLSTraversibilityCalculator leastSqTraversibilityCalculator;
-   /* Indicator of how flat and planar and available footholds are */
-   private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
    /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
-   /* Computes surface normals with least-squares and penalizing roll when changing elevation */
-   private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
-   /* Computes surface normals with RANSAC, used for traversibility */
-   private final HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
@@ -103,46 +87,25 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
    private final AStarBodyPathSmoother smoother;
 
-   public AStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
-                               AStarBodyPathPlannerParametersReadOnly plannerParameters,
-                               SideDependentList<ConvexPolygon2D> footPolygons)
+   public AStarBodyPathPlanner(AStarBodyPathPlannerParametersReadOnly plannerParameters)
    {
-      this(parameters, plannerParameters, footPolygons, new Stopwatch());
+      this(plannerParameters, new Stopwatch());
    }
 
-   public AStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
-                               AStarBodyPathPlannerParametersReadOnly plannerParameters,
-                               SideDependentList<ConvexPolygon2D> footPolygons,
+   public AStarBodyPathPlanner(AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                Stopwatch stopwatch)
    {
-      this(parameters, plannerParameters, footPolygons, new ArrayList<>(), stopwatch);
+      this(plannerParameters, new ArrayList<>(), stopwatch);
    }
 
-   public AStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
-                               AStarBodyPathPlannerParametersReadOnly plannerParameters,
-                               SideDependentList<ConvexPolygon2D> footPolygons,
+   public AStarBodyPathPlanner(AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                List<Consumer<FootstepPlannerOutput>> statusCallbacks,
                                Stopwatch stopwatch)
    {
-      this.parameters = parameters;
       this.plannerParameters = plannerParameters;
       this.statusCallbacks = statusCallbacks;
       this.stopwatch = stopwatch;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
-
-      if (useRANSACTraversibility)
-      {
-         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(plannerParameters,
-                                                                                     gridHeightMap::get,
-                                                                                     ransacNormalCalculator,
-                                                                                     registry);
-         leastSqTraversibilityCalculator = null;
-      }
-      else
-      {
-         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygons, gridHeightMap, registry);
-         ransacTraversibilityCalculator = null;
-      }
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
@@ -164,17 +127,13 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                                          edgeCost.set(Double.NaN);
                                          deltaHeight.set(Double.NaN);
                                          rejectionReason.set(null);
-                                         leastSqNormal.setToZero();
                                          roll.set(0.0);
                                          incline.set(0.0);
                                          heuristicCost.setToNaN();
                                          totalCost.setToNaN();
-                                         ransacTraversibilityCalculator.clearVariables();
                                       });
 
       smoother = new AStarBodyPathSmoother(plannerParameters);
-      smoother.setRansacNormalCalculator(ransacNormalCalculator);
-      smoother.setLeastSquaresNormalCalculator(surfaceNormalCalculator);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -185,17 +144,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       }
 
       this.heightMapData = heightMapData;
-      ransacNormalCalculator.initialize(heightMapData);
-      rollMap.clear();
-
-      if (useRANSACTraversibility)
-      {
-         ransacTraversibilityCalculator.setHeightMap(heightMapData);
-      }
-      else
-      {
-         leastSqTraversibilityCalculator.setHeightMap(heightMapData);
-      }
    }
 
    static void packRadialOffsets(HeightMapData heightMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
@@ -225,11 +173,9 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       INVALID_SNAP,
       TOO_STEEP,
       STEP_TOO_HIGH,
-      COLLISION,
-      NON_TRAVERSIBLE
+      COLLISION
    }
 
-   @Override
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       haltRequested.set(false);
@@ -263,22 +209,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       leastCostNode = startNode;
       leastCost = heuristics(leastCostNode);
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
-
-      if (plannerParameters.getComputeSurfaceNormalCost())
-      {
-         double patchWidth = 0.3;
-         surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
-      }
-
-      if (useRANSACTraversibility)
-      {
-         ransacNormalCalculator.initialize(heightMapData);
-         ransacTraversibilityCalculator.initialize(startNode);
-      }
-      else
-      {
-         leastSqTraversibilityCalculator.initialize(startNode);
-      }
 
       planningLoop:
       while (true)
@@ -336,6 +266,13 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
+            if (deltaHeight.getValue() > 0.1)
+            {
+               rejectionReason.set(RejectionReason.TOO_STEEP);
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
+
             if (Math.abs(incline.getValue()) > Math.toRadians(plannerParameters.getMaxIncline()))
             {
                rejectionReason.set(RejectionReason.TOO_STEEP);
@@ -343,7 +280,8 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
                continue;
             }
 
-            if (plannerParameters.getCheckForCollisions())
+            double distanceFromStart = EuclidCoreTools.norm(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
+            if (plannerParameters.getCheckForCollisions() && distanceFromStart > plannerParameters.getCollisionStartTolerance())
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
                                                                               neighbor,
@@ -359,48 +297,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
             }
 
             edgeCost.set(xyDistance);
-
-            if (plannerParameters.getComputeSurfaceNormalCost() && plannerParameters.getComputeTraversibility())
-            {
-               if (useRANSACTraversibility)
-               {
-                  traversibilityCost.set(ransacTraversibilityCalculator.computeTraversibility(neighbor, node, neighborIndex));
-                  if (ransacTraversibilityCalculator.isTraversible())
-                  {
-                     edgeCost.add(traversibilityCost);
-                  }
-                  else
-                  {
-                     rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-                     graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-                     continue;
-                  }
-               }
-               else
-               {
-                  double traversibilityIndicator = leastSqTraversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
-                  if (leastSqTraversibilityCalculator.isTraversible())
-                  {
-                     edgeCost.add(traversibilityIndicator);
-                  }
-                  else
-                  {
-                     rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-                     graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-                     continue;
-                  }
-               }
-            }
-
-            if (plannerParameters.getComputeSurfaceNormalCost())
-            {
-               double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
-               Pose2D bodyPose = new Pose2D();
-
-               bodyPose.set(neighbor.getX(), neighbor.getY(), yaw);
-               bodyPose.interpolate(new Pose2D(node.getX(), node.getY(), yaw), 0.5);
-               computeRollCost(node, neighbor, bodyPose);
-            }
 
             if (incline.getValue() < nominalIncline.getValue())
             {
@@ -451,39 +347,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       }
 
       reportStatus(request, outputToPack);
-   }
-
-   private void computeRollCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, Pose2D bodyPose)
-   {
-      UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
-                                                                                                                 bodyPose.getY(),
-                                                                                                                 heightMapData.getGridCenter().getX(),
-                                                                                                                 heightMapData.getGridCenter().getY(),
-                                                                                                                 heightMapData.getCellSize(),
-                                                                                                                 heightMapData.getCenterIndex()));
-
-      if (surfaceNormal != null)
-      {
-         Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
-         edge.normalize();
-
-         /* Roll is the amount of incline orthogonal to the direction of motion */
-         leastSqNormal.set(surfaceNormal);
-         roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
-         double effectiveRoll = roll.getDoubleValue();
-
-         if (rollMap.containsKey(node))
-         {
-            effectiveRoll += rollMap.get(node);
-         }
-
-         rollMap.put(neighbor, roll.getValue());
-         double maxAngle = Math.toRadians(plannerParameters.getMaxPenalizedRollAngle() - plannerParameters.getRollCostDeadband());
-         double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / maxAngle, 0.0, 1.0);
-         double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - Math.toRadians(plannerParameters.getRollCostDeadband()));
-         rollCost.set(plannerParameters.getRollCostWeight() * inclineScale * rollAngleDeadbanded);
-         edgeCost.add(rollCost);
-      }
    }
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
@@ -549,7 +412,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
-   @Override
    public void clearLoggedData()
    {
       edgeDataMap.clear();
@@ -577,7 +439,6 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       }
    }
 
-   @Override
    public BodyPathLatticePoint getNextNode()
    {
       while (!stack.isEmpty())
@@ -636,7 +497,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery))
          {
             heights.add(heightQuery);
@@ -659,7 +520,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery) && heightQuery > minHeight)
          {
             runningSum += heightQuery;
@@ -682,25 +543,21 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       return xyDistance(node, goalNode);
    }
 
-   @Override
    public void halt()
    {
       haltRequested.set(true);
    }
 
-   @Override
    public List<AStarBodyPathIterationData> getIterationData()
    {
       return iterationData;
    }
 
-   @Override
    public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
    }
 
-   @Override
    public YoRegistry getRegistry()
    {
       return registry;

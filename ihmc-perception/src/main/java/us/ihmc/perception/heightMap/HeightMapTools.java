@@ -210,7 +210,7 @@ public class HeightMapTools
 
          // Put it into the HeightMapData object
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
-         heightMapDataToPack.setHeightAt(key, cellHeight);
+         heightMapDataToPack.setHeight(key, cellHeight);
       }
    }
 

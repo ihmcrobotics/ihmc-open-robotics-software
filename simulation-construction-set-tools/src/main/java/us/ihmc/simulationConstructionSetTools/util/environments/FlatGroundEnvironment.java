@@ -18,7 +18,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 
    public FlatGroundEnvironment()
    {
-      this(10, 10);
+      this(9, 9);
    }
 
    public FlatGroundEnvironment(int numberX, int numberY)
@@ -28,7 +28,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 
    public FlatGroundEnvironment(double heightOffset)
    {
-      this(10, 10, heightOffset);
+      this(9, 9, heightOffset);
    }
 
 
@@ -37,13 +37,13 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
       double sizeXY = 50.0;
 
-      for (int i = -numberX / 2; i < numberX / 2; i++)
+      for (int i = 0; i < numberX; i++)
       {
-         for (int j = -numberY / 2; j < numberY / 2; j++)
+         for (int j = 0; j < numberY; j++)
          {
             Box3D box = new Box3D(sizeXY, sizeXY, 1.0);
-            box.getPosition().setX(i * sizeXY);
-            box.getPosition().setY(j * sizeXY);
+            box.getPosition().setX(i * sizeXY - 0.5 * sizeXY * (numberX - 1));
+            box.getPosition().setY(j * sizeXY - 0.5 * sizeXY * (numberY - 1));
             box.getPosition().setZ(-0.5 + heightOffset);
             flatGround.addTerrainObject(new RotatableBoxTerrainObject(box, texture));
          }

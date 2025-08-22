@@ -25,14 +25,7 @@ public class AStarBodyPathSmoother
 {
    static final int maxPoints = 80;
    static final double gradientEpsilon = 1e-6;
-
    static final int minIterations = 20;
-
-   static final double yOffsetTraversibilityNominalWindow = 0.27;
-   static final double yOffsetTraversibilityGradientWindow = 0.12;
-   static final double traversibilitySampleWindowX = 0.2;
-   static final double traversibilitySampleWindowY = 0.14;
-
    static final int iterations = 180;
 
    static final int turnPointIteration = 12;
@@ -49,8 +42,6 @@ public class AStarBodyPathSmoother
 
    private int pathSize;
    private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
-   private HeightMapLeastSquaresNormalCalculator leastSquaresNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
-   private HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
    private final AStarBodyPathSmootherWaypoint[] waypoints = new AStarBodyPathSmootherWaypoint[maxPoints];
 
@@ -118,16 +109,9 @@ public class AStarBodyPathSmoother
          waypoints[i].setNeighbors(waypoints);
       }
 
-      if (heightMapData != null)
-      {
-         double patchWidth = 0.7;
-         leastSquaresNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
-         ransacNormalCalculator.initialize(heightMapData);
-      }
-
       for (int i = 0; i < maxPoints; i++)
       {
-         waypoints[i].initialize(bodyPath, heightMapData, ransacNormalCalculator, leastSquaresNormalCalculator);
+         waypoints[i].initialize(bodyPath, heightMapData);
       }
 
       for (int i = 1; i < bodyPath.size() - 1; i++)
@@ -155,43 +139,11 @@ public class AStarBodyPathSmoother
 
          if (heightMapData != null)
          {
-            for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
-            {
-               waypoints[waypointIndex].computeCurrentTraversibility();
-            }
-
             for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
             {
                /* Collision gradient */
                gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradient());
                maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
-
-               /* Traversibility gradient */
-               Tuple3DReadOnly traversibilityGradient = waypoints[waypointIndex].computeTraversibilityGradient();
-               gradients[waypointIndex].sub(traversibilityGradient.getX(), traversibilityGradient.getY());
-
-               if (waypoints[waypointIndex].isTurnPoint())
-               {
-                  continue;
-               }
-
-               /* Ground plane gradient */
-               Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradient();
-               gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
-
-               /* Roll-z gradient */
-               Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(heightMapData);
-               gradients[waypointIndex - 1].sub(rollGradient);
-               gradients[waypointIndex + 1].add(rollGradient);
-
-               if (visualize)
-               {
-                  waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
-                  if (waypointIndex + 1 != pathSize - 1)
-                  {
-                     waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
-                  }
-               }
             }
 
             double gradientMagnitudeSq = 0.0;
@@ -332,15 +284,5 @@ public class AStarBodyPathSmoother
             }
          }
       }
-   }
-
-   public void setLeastSquaresNormalCalculator(HeightMapLeastSquaresNormalCalculator leastSquaresNormalCalculator)
-   {
-      this.leastSquaresNormalCalculator = leastSquaresNormalCalculator;
-   }
-
-   public void setRansacNormalCalculator(HeightMapRANSACNormalCalculator ransacNormalCalculator)
-   {
-      this.ransacNormalCalculator = ransacNormalCalculator;
    }
 }

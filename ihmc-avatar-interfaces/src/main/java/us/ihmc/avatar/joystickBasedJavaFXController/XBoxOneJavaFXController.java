@@ -1,11 +1,14 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import net.java.games.input.Event;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.*;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
@@ -288,5 +291,30 @@ public class XBoxOneJavaFXController
       if (reconnectThread != null)
          reconnectThread.interrupt();
       reconnectThread = null;
+   }
+
+   public static Runnable setupJoystickListener(StepGeneratorCommandInputManager csgCommandInputManager) throws JoystickNotFoundException
+   {
+      SharedMemoryMessager messager = new SharedMemoryMessager(XBoxOneJavaFXController.XBoxOneControllerAPI);
+      XBoxOneJavaFXController joystickInput = new XBoxOneJavaFXController(messager);
+
+      ContinuousStepGeneratorInputCommand inputCommand = new ContinuousStepGeneratorInputCommand();
+      inputCommand.setUnitVelocities(true);
+      messager.addTopicListener(ButtonRightBumperState, state ->
+      {
+         if (state == ButtonState.PRESSED)
+            LogTools.info("Walk.");
+         inputCommand.setWalk(state == ButtonState.PRESSED);
+      });
+      messager.addTopicListener(LeftStickYAxis, inputCommand::setForwardVelocity);
+      messager.addTopicListener(LeftStickXAxis, inputCommand::setLateralVelocity);
+      messager.addTopicListener(RightStickXAxis, inputCommand::setTurnVelocity);
+      messager.startMessager();
+
+      return () ->
+      {
+         if (csgCommandInputManager.isOpen())
+            csgCommandInputManager.getCommandInputManager().submitCommand(inputCommand);
+      };
    }
 }

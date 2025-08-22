@@ -15,7 +15,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b547aa3ae2f57b6b83f2938feb08895a508c8bef91aab5af4210b999f7aee3e0";
+   		return "bf7f3b36bcdf911d22a945a2c9341d3aa6d651c868e084c7a153ce033dd01def";
    }
    
    @Override
@@ -57,52 +57,6 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -158,75 +112,6 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -290,17 +175,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
       cdr.write_type_7(data.getCheckForCollisions());
 
-      cdr.write_type_7(data.getComputeSurfaceNormalCost());
-
-      cdr.write_type_7(data.getComputeTraversibility());
-
       cdr.write_type_7(data.getPerformSmoothing());
-
-      cdr.write_type_6(data.getRollCostWeight());
-
-      cdr.write_type_6(data.getRollCostDeadband());
-
-      cdr.write_type_6(data.getMaxPenalizedRollAngle());
 
       cdr.write_type_6(data.getSnapRadius());
 
@@ -318,34 +193,6 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
       cdr.write_type_6(data.getCollisionBoxGroundClearance());
 
-      cdr.write_type_6(data.getTraversibilityWeight());
-
-      cdr.write_type_6(data.getTraversibilityStanceWeight());
-
-      cdr.write_type_6(data.getTraversibilityStepWeight());
-
-      cdr.write_type_6(data.getMinTraversibilityScore());
-
-      cdr.write_type_6(data.getMinNormalAngleToPenalizeForTraversibility());
-
-      cdr.write_type_6(data.getMaxNormalAngleToPenalizeForTraversibility());
-
-      cdr.write_type_6(data.getTraversibilityInclineWeight());
-
-      cdr.write_type_6(data.getTraversibilitySearchWidth());
-
-      cdr.write_type_2(data.getMinOccupiedNeighborsForTraversibility());
-
-      cdr.write_type_6(data.getHalfStanceWidth());
-
-      cdr.write_type_6(data.getTraversibilityHeightWindowWidth());
-
-      cdr.write_type_6(data.getTraversibilityHeightWindowDeadband());
-
-      cdr.write_type_6(data.getHeightProximityForSayingWalkingOnGround());
-
-      cdr.write_type_6(data.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
-
       cdr.write_type_6(data.getSmootherCollisionWeight());
 
       cdr.write_type_6(data.getSmootherSmoothnessWeight());
@@ -356,21 +203,13 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
 
       cdr.write_type_6(data.getSmootherEqualSpacingWeight());
 
-      cdr.write_type_6(data.getSmootherRollWeight());
-
       cdr.write_type_6(data.getSmootherDisplacementWeight());
-
-      cdr.write_type_6(data.getSmootherTraversibilityWeight());
-
-      cdr.write_type_6(data.getSmootherGroundPlaneWeight());
-
-      cdr.write_type_6(data.getSmootherMinimumTraversibilityToSearchFor());
-
-      cdr.write_type_6(data.getSmootherTraversibilityThresholdForNoDiscount());
 
       cdr.write_type_6(data.getSmootherHillClimbGain());
 
       cdr.write_type_6(data.getSmootherGradientThresholdToTerminate());
+
+      cdr.write_type_6(data.getCollisionStartTolerance());
 
    }
 
@@ -380,17 +219,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       	
       data.setCheckForCollisions(cdr.read_type_7());
       	
-      data.setComputeSurfaceNormalCost(cdr.read_type_7());
-      	
-      data.setComputeTraversibility(cdr.read_type_7());
-      	
       data.setPerformSmoothing(cdr.read_type_7());
-      	
-      data.setRollCostWeight(cdr.read_type_6());
-      	
-      data.setRollCostDeadband(cdr.read_type_6());
-      	
-      data.setMaxPenalizedRollAngle(cdr.read_type_6());
       	
       data.setSnapRadius(cdr.read_type_6());
       	
@@ -408,34 +237,6 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       	
       data.setCollisionBoxGroundClearance(cdr.read_type_6());
       	
-      data.setTraversibilityWeight(cdr.read_type_6());
-      	
-      data.setTraversibilityStanceWeight(cdr.read_type_6());
-      	
-      data.setTraversibilityStepWeight(cdr.read_type_6());
-      	
-      data.setMinTraversibilityScore(cdr.read_type_6());
-      	
-      data.setMinNormalAngleToPenalizeForTraversibility(cdr.read_type_6());
-      	
-      data.setMaxNormalAngleToPenalizeForTraversibility(cdr.read_type_6());
-      	
-      data.setTraversibilityInclineWeight(cdr.read_type_6());
-      	
-      data.setTraversibilitySearchWidth(cdr.read_type_6());
-      	
-      data.setMinOccupiedNeighborsForTraversibility(cdr.read_type_2());
-      	
-      data.setHalfStanceWidth(cdr.read_type_6());
-      	
-      data.setTraversibilityHeightWindowWidth(cdr.read_type_6());
-      	
-      data.setTraversibilityHeightWindowDeadband(cdr.read_type_6());
-      	
-      data.setHeightProximityForSayingWalkingOnGround(cdr.read_type_6());
-      	
-      data.setTraversibilityNonGroundDiscountWhenWalkingOnGround(cdr.read_type_6());
-      	
       data.setSmootherCollisionWeight(cdr.read_type_6());
       	
       data.setSmootherSmoothnessWeight(cdr.read_type_6());
@@ -446,21 +247,13 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       	
       data.setSmootherEqualSpacingWeight(cdr.read_type_6());
       	
-      data.setSmootherRollWeight(cdr.read_type_6());
-      	
       data.setSmootherDisplacementWeight(cdr.read_type_6());
-      	
-      data.setSmootherTraversibilityWeight(cdr.read_type_6());
-      	
-      data.setSmootherGroundPlaneWeight(cdr.read_type_6());
-      	
-      data.setSmootherMinimumTraversibilityToSearchFor(cdr.read_type_6());
-      	
-      data.setSmootherTraversibilityThresholdForNoDiscount(cdr.read_type_6());
       	
       data.setSmootherHillClimbGain(cdr.read_type_6());
       	
       data.setSmootherGradientThresholdToTerminate(cdr.read_type_6());
+      	
+      data.setCollisionStartTolerance(cdr.read_type_6());
       	
 
    }
@@ -470,12 +263,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_7("check_for_collisions", data.getCheckForCollisions());
-      ser.write_type_7("compute_surface_normal_cost", data.getComputeSurfaceNormalCost());
-      ser.write_type_7("compute_traversibility", data.getComputeTraversibility());
       ser.write_type_7("perform_smoothing", data.getPerformSmoothing());
-      ser.write_type_6("roll_cost_weight", data.getRollCostWeight());
-      ser.write_type_6("roll_cost_deadband", data.getRollCostDeadband());
-      ser.write_type_6("max_penalized_roll_angle", data.getMaxPenalizedRollAngle());
       ser.write_type_6("snap_radius", data.getSnapRadius());
       ser.write_type_6("min_snap_height_threshold", data.getMinSnapHeightThreshold());
       ser.write_type_6("incline_cost_weight", data.getInclineCostWeight());
@@ -484,33 +272,15 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       ser.write_type_6("collision_box_size_y", data.getCollisionBoxSizeY());
       ser.write_type_6("collision_box_size_x", data.getCollisionBoxSizeX());
       ser.write_type_6("collision_box_ground_clearance", data.getCollisionBoxGroundClearance());
-      ser.write_type_6("traversibility_weight", data.getTraversibilityWeight());
-      ser.write_type_6("traversibility_stance_weight", data.getTraversibilityStanceWeight());
-      ser.write_type_6("traversibility_step_weight", data.getTraversibilityStepWeight());
-      ser.write_type_6("min_traversibility_score", data.getMinTraversibilityScore());
-      ser.write_type_6("min_normal_angle_to_penalize_for_traversibility", data.getMinNormalAngleToPenalizeForTraversibility());
-      ser.write_type_6("max_normal_angle_to_penalize_for_traversibility", data.getMaxNormalAngleToPenalizeForTraversibility());
-      ser.write_type_6("traversibility_incline_weight", data.getTraversibilityInclineWeight());
-      ser.write_type_6("traversibility_search_width", data.getTraversibilitySearchWidth());
-      ser.write_type_2("min_occupied_neighbors_for_traversibility", data.getMinOccupiedNeighborsForTraversibility());
-      ser.write_type_6("half_stance_width", data.getHalfStanceWidth());
-      ser.write_type_6("traversibility_height_window_width", data.getTraversibilityHeightWindowWidth());
-      ser.write_type_6("traversibility_height_window_deadband", data.getTraversibilityHeightWindowDeadband());
-      ser.write_type_6("height_proximity_for_saying_walking_on_ground", data.getHeightProximityForSayingWalkingOnGround());
-      ser.write_type_6("traversibility_non_ground_discount_when_walking_on_ground", data.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
       ser.write_type_6("smoother_collision_weight", data.getSmootherCollisionWeight());
       ser.write_type_6("smoother_smoothness_weight", data.getSmootherSmoothnessWeight());
       ser.write_type_6("smoother_turn_point_smoothness_discount", data.getSmootherTurnPointSmoothnessDiscount());
       ser.write_type_6("smoother_min_curvature_to_penalize", data.getSmootherMinCurvatureToPenalize());
       ser.write_type_6("smoother_equal_spacing_weight", data.getSmootherEqualSpacingWeight());
-      ser.write_type_6("smoother_roll_weight", data.getSmootherRollWeight());
       ser.write_type_6("smoother_displacement_weight", data.getSmootherDisplacementWeight());
-      ser.write_type_6("smoother_traversibility_weight", data.getSmootherTraversibilityWeight());
-      ser.write_type_6("smoother_ground_plane_weight", data.getSmootherGroundPlaneWeight());
-      ser.write_type_6("smoother_minimum_traversibility_to_search_for", data.getSmootherMinimumTraversibilityToSearchFor());
-      ser.write_type_6("smoother_traversibility_threshold_for_no_discount", data.getSmootherTraversibilityThresholdForNoDiscount());
       ser.write_type_6("smoother_hill_climb_gain", data.getSmootherHillClimbGain());
       ser.write_type_6("smoother_gradient_threshold_to_terminate", data.getSmootherGradientThresholdToTerminate());
+      ser.write_type_6("collision_start_tolerance", data.getCollisionStartTolerance());
    }
 
    @Override
@@ -518,12 +288,7 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setCheckForCollisions(ser.read_type_7("check_for_collisions"));
-      data.setComputeSurfaceNormalCost(ser.read_type_7("compute_surface_normal_cost"));
-      data.setComputeTraversibility(ser.read_type_7("compute_traversibility"));
       data.setPerformSmoothing(ser.read_type_7("perform_smoothing"));
-      data.setRollCostWeight(ser.read_type_6("roll_cost_weight"));
-      data.setRollCostDeadband(ser.read_type_6("roll_cost_deadband"));
-      data.setMaxPenalizedRollAngle(ser.read_type_6("max_penalized_roll_angle"));
       data.setSnapRadius(ser.read_type_6("snap_radius"));
       data.setMinSnapHeightThreshold(ser.read_type_6("min_snap_height_threshold"));
       data.setInclineCostWeight(ser.read_type_6("incline_cost_weight"));
@@ -532,33 +297,15 @@ public class AStarBodyPathPlannerParametersPacketPubSubType implements us.ihmc.p
       data.setCollisionBoxSizeY(ser.read_type_6("collision_box_size_y"));
       data.setCollisionBoxSizeX(ser.read_type_6("collision_box_size_x"));
       data.setCollisionBoxGroundClearance(ser.read_type_6("collision_box_ground_clearance"));
-      data.setTraversibilityWeight(ser.read_type_6("traversibility_weight"));
-      data.setTraversibilityStanceWeight(ser.read_type_6("traversibility_stance_weight"));
-      data.setTraversibilityStepWeight(ser.read_type_6("traversibility_step_weight"));
-      data.setMinTraversibilityScore(ser.read_type_6("min_traversibility_score"));
-      data.setMinNormalAngleToPenalizeForTraversibility(ser.read_type_6("min_normal_angle_to_penalize_for_traversibility"));
-      data.setMaxNormalAngleToPenalizeForTraversibility(ser.read_type_6("max_normal_angle_to_penalize_for_traversibility"));
-      data.setTraversibilityInclineWeight(ser.read_type_6("traversibility_incline_weight"));
-      data.setTraversibilitySearchWidth(ser.read_type_6("traversibility_search_width"));
-      data.setMinOccupiedNeighborsForTraversibility(ser.read_type_2("min_occupied_neighbors_for_traversibility"));
-      data.setHalfStanceWidth(ser.read_type_6("half_stance_width"));
-      data.setTraversibilityHeightWindowWidth(ser.read_type_6("traversibility_height_window_width"));
-      data.setTraversibilityHeightWindowDeadband(ser.read_type_6("traversibility_height_window_deadband"));
-      data.setHeightProximityForSayingWalkingOnGround(ser.read_type_6("height_proximity_for_saying_walking_on_ground"));
-      data.setTraversibilityNonGroundDiscountWhenWalkingOnGround(ser.read_type_6("traversibility_non_ground_discount_when_walking_on_ground"));
       data.setSmootherCollisionWeight(ser.read_type_6("smoother_collision_weight"));
       data.setSmootherSmoothnessWeight(ser.read_type_6("smoother_smoothness_weight"));
       data.setSmootherTurnPointSmoothnessDiscount(ser.read_type_6("smoother_turn_point_smoothness_discount"));
       data.setSmootherMinCurvatureToPenalize(ser.read_type_6("smoother_min_curvature_to_penalize"));
       data.setSmootherEqualSpacingWeight(ser.read_type_6("smoother_equal_spacing_weight"));
-      data.setSmootherRollWeight(ser.read_type_6("smoother_roll_weight"));
       data.setSmootherDisplacementWeight(ser.read_type_6("smoother_displacement_weight"));
-      data.setSmootherTraversibilityWeight(ser.read_type_6("smoother_traversibility_weight"));
-      data.setSmootherGroundPlaneWeight(ser.read_type_6("smoother_ground_plane_weight"));
-      data.setSmootherMinimumTraversibilityToSearchFor(ser.read_type_6("smoother_minimum_traversibility_to_search_for"));
-      data.setSmootherTraversibilityThresholdForNoDiscount(ser.read_type_6("smoother_traversibility_threshold_for_no_discount"));
       data.setSmootherHillClimbGain(ser.read_type_6("smoother_hill_climb_gain"));
       data.setSmootherGradientThresholdToTerminate(ser.read_type_6("smoother_gradient_threshold_to_terminate"));
+      data.setCollisionStartTolerance(ser.read_type_6("collision_start_tolerance"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket src, toolbox_msgs.msg.dds.AStarBodyPathPlannerParametersPacket dest)

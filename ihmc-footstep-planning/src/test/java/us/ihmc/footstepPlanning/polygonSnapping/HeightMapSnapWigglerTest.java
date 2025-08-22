@@ -24,7 +24,7 @@ public class HeightMapSnapWigglerTest
       {
          for (double y = -0.20; y <= 0.2; y += gridResolution)
          {
-            heightMapData.setHeightAt(x, y, 0.2);
+            heightMapData.setHeight(x, y, 0.2);
          }
       }
 

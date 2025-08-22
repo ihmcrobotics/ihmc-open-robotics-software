@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
+import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -49,6 +50,16 @@ public class PlanThenSnapPlanner
    {
       internalEnvironmentHandler.setHeightMapData(heightMapData);
       this.heightMapData = heightMapData;
+   }
+
+   public void setBodyPath(WaypointDefinedBodyPathPlanHolder bodyPath)
+   {
+      turnWalkTurnPlanner.setBodyPath(bodyPath);
+   }
+
+   public void clearBodyPath()
+   {
+      turnWalkTurnPlanner.clearBodyPath();
    }
 
    private FootstepPlan footstepPlan = new FootstepPlan();

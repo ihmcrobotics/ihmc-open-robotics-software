@@ -54,7 +54,7 @@ public class PlanarityChecker
       {
          double x = q[0] + corners[i][0] * Math.cos(q[2]) - corners[i][1] * Math.sin(q[2]);
          double y = q[1] + corners[i][0] * Math.sin(q[2]) + corners[i][1] * Math.cos(q[2]);
-         results.heights[i] = currentHeightMap.getHeightAt(x, y);
+         results.heights[i] = currentHeightMap.getHeight(x, y);
          results.cornersXY[i] = new double[] {x, y};
       }
 

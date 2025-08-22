@@ -183,6 +183,14 @@ public class RDXStoredPropertySetTuner extends RDXPanel
       return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, format, unitString, min, max, onParametersUpdatedCallback);
    }
 
+   public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey key, String unitString, double min, double max, String format,  boolean hideLabel)
+   {
+      if (hideLabel)
+         return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, format, min, max, onParametersUpdatedCallback);
+      else
+         return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, format, unitString, min, max, onParametersUpdatedCallback);
+   }
+
    public ImGuiStoredPropertySetBooleanWidget createBooleanCheckbox(BooleanStoredPropertyKey key)
    {
       return new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, key, onParametersUpdatedCallback);
