@@ -426,6 +426,19 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          previousFootstepPose.getOrientation().set(footstep.getOrientation());
       }
 
+      if (startingIndexToAdjust == 0)
+      {
+         previousFootstepPose.set(currentSupportFootPose);
+         footstepPose2D.set(currentSupportFootPose);
+      }
+      else
+      {
+         FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(startingIndexToAdjust - 1);
+         previousFootstepPose.getPosition().set(footstepData.getLocation());
+         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+         footstepPose2D.set(previousFootstepPose);
+      }
+
       // run through and make sure these adjusted steps are valid.
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
       {

@@ -141,7 +141,6 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>("createIKStreamingRealTimeController", false);
    private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters = new OptionalFactoryField<>("ikStreamingParameters",
                                                                                                                                KinematicsStreamingToolboxParameters.defaultParameters());
-   private final OptionalFactoryField<Boolean> broadcastHeightMap = new OptionalFactoryField<>("broadcastHeightMap", false);
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
@@ -453,19 +452,19 @@ public class SCS2AvatarSimulationFactory
          componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
          if (parameters != null)
             componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
-//         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
-//            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
+            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
 
          steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
       }
       else
       {
          JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
-//         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
-//         {
-//            joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
-//         }
-//         else
+         if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
+         {
+            joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+         }
+         else
          {
             stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
                                                                                       robotModel.get().getWalkingControllerParameters().getSteppingParameters());
@@ -1087,11 +1086,6 @@ public class SCS2AvatarSimulationFactory
    public void setIKStreamingParameters(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
       this.ikStreamingParameters.set(ikStreamingParameters);
-   }
-
-   public void setBroadcastHeightMap(boolean broadcastHeightMap)
-   {
-      this.broadcastHeightMap.set(broadcastHeightMap);
    }
 
    public void setInitialState(HighLevelControllerName initialState)

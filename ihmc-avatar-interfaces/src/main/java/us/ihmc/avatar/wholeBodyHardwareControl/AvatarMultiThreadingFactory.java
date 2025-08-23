@@ -429,7 +429,7 @@ public class AvatarMultiThreadingFactory
       }
       else
       {
-         // sets up the environmental constraint manager as a planar region consumer in the input manager
+         // sets up the environmental constraint manager as a height map consumer in the input manager
          pluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
          // Adds functions that adjust the footholds based on the environment.
          pluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
