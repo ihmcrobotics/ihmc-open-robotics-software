@@ -15,7 +15,7 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "89b832e2ae1e64b116b99c2a0442884afcb9ba1da4f6c1cc9e884aab61c5435a";
+   		return "ad1791a3de096993eca9091827c02abeacd438e54350fc0cc476ec73695816ec";
    }
    
    @Override
@@ -64,10 +64,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -86,12 +82,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -130,10 +120,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       cdr.write_type_6(data.getOriginY());
 
-      cdr.write_type_6(data.getHeightOffset());
-
-      cdr.write_type_6(data.getHeightScaleFactor());
-
       cdr.write_type_6(data.getWidthInMeters());
 
       cdr.write_type_6(data.getCellSizeInMeters());
@@ -156,10 +142,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       data.setOriginY(cdr.read_type_6());
       	
-      data.setHeightOffset(cdr.read_type_6());
-      	
-      data.setHeightScaleFactor(cdr.read_type_6());
-      	
       data.setWidthInMeters(cdr.read_type_6());
       	
       data.setCellSizeInMeters(cdr.read_type_6());
@@ -177,8 +159,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("origin_x", data.getOriginX());
       ser.write_type_6("origin_y", data.getOriginY());
-      ser.write_type_6("height_offset", data.getHeightOffset());
-      ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
       ser.write_type_6("width_in_meters", data.getWidthInMeters());
       ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
@@ -192,8 +172,6 @@ public class ChunkMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setOriginX(ser.read_type_6("origin_x"));
       data.setOriginY(ser.read_type_6("origin_y"));
-      data.setHeightOffset(ser.read_type_6("height_offset"));
-      data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
       data.setWidthInMeters(ser.read_type_6("width_in_meters"));
       data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));

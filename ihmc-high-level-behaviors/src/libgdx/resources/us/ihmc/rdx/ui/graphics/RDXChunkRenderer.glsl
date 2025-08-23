@@ -12,8 +12,6 @@ uniform float u_screenWidth;
 uniform int u_cellsPerAxis;
 uniform vec2 u_chunkOrigin;
 uniform float u_cellSize;
-uniform float u_heightScalingFactor;
-uniform float u_heightOffset;
 
 float linearInterpolate(float a, float b, float alpha)
 {
@@ -77,7 +75,7 @@ void main()
 
     float xPosition = u_chunkOrigin.x + float(xIndex) * u_cellSize;
     float yPosition = u_chunkOrigin.y + float(yIndex) * u_cellSize;
-    float zPosition = (a_height / u_heightScalingFactor) - u_heightOffset;
+    float zPosition = a_height;
 
     vec4 pointInCameraFrame = u_viewTrans * vec4(xPosition, yPosition, zPosition, 1);
     vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);

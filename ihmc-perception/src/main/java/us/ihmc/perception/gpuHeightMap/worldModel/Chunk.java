@@ -6,7 +6,7 @@ import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
-import java.nio.ShortBuffer;
+import java.nio.FloatBuffer;
 
 /**
  * This class represents a spot in the world that we are modeling.
@@ -29,27 +29,23 @@ public class Chunk
 
    private double originX;
    private double originY;
-   private double heightMapOffset;
-   private double scalingFactor;
    private double cellSize;
 
    private int cellsPerAxis;
 
    private Mat chunk;
-   private short[] chunkHeights;
+   private float[] chunkHeights;
 
-   public Chunk(double originX, double originY, double cellSize, int cellsPerAxis, double heightMapOffset, double scalingFactor)
+   public Chunk(double originX, double originY, double cellSize, int cellsPerAxis)
    {
       this.originX = originX;
       this.originY = originY;
       this.cellSize = cellSize;
       this.cellsPerAxis = cellsPerAxis;
-      this.heightMapOffset = heightMapOffset;
-      this.scalingFactor = scalingFactor;
 
       int totalCells = this.cellsPerAxis * this.cellsPerAxis;
-      chunk = new Mat(this.cellsPerAxis, this.cellsPerAxis, opencv_core.CV_16UC1);
-      chunkHeights = new short[totalCells];
+      chunk = new Mat(this.cellsPerAxis, this.cellsPerAxis, opencv_core.CV_32FC1);
+      chunkHeights = new float[totalCells];
 
       setDefaultHeight(this.cellsPerAxis);
    }
@@ -63,8 +59,6 @@ public class Chunk
       this.originY = chunkMessage.getOriginY();
       this.cellSize = chunkMessage.getCellSizeInMeters();
       this.cellsPerAxis = chunkMessage.getCellsPerAxis();
-      this.heightMapOffset = (float) chunkMessage.getHeightOffset();
-      this.scalingFactor = chunkMessage.getHeightScaleFactor();
 
       this.chunk = HeightMapMessageTools.unpackMessageToMat(chunkMessage);
 
@@ -80,8 +74,8 @@ public class Chunk
    {
       // Set default height of the Mat
       int totalCells = cellsPerAxis * cellsPerAxis;
-      short[] heights = new short[totalCells];
-      ShortBuffer buffer = chunk.createBuffer();
+      float[] heights = new float[totalCells];
+      FloatBuffer buffer = chunk.createBuffer();
       buffer.put(heights);
    }
 
@@ -100,19 +94,9 @@ public class Chunk
       return originY;
    }
 
-   public double getHeightMapOffset()
-   {
-      return heightMapOffset;
-   }
-
    public double getCellSize()
    {
       return cellSize;
-   }
-
-   public double getScalingFactor()
-   {
-      return scalingFactor;
    }
 
    public int getCellsPerAxis()
@@ -130,19 +114,9 @@ public class Chunk
       this.originY = originY;
    }
 
-   public void setHeightMapOffset(float heightMapOffset)
-   {
-      this.heightMapOffset = heightMapOffset;
-   }
-
    public void setCellSize(double cellSize)
    {
       this.cellSize = cellSize;
-   }
-
-   public void setScalingFactor(double scalingFactor)
-   {
-      this.scalingFactor = scalingFactor;
    }
 
    public void setChunk(Mat chunk)
@@ -156,7 +130,7 @@ public class Chunk
       this.cellsPerAxis = cellsPerAxis;
    }
 
-   public void setHeightAt(double xCord, double yCord, short height, double resolution)
+   public void setHeightAt(double xCord, double yCord, float height, double resolution)
    {
       int i = HeightMapTools.coordinateToIndex(xCord, this.originX, resolution);
       int j = HeightMapTools.coordinateToIndex(yCord, this.originY, resolution);
@@ -169,7 +143,7 @@ public class Chunk
 
    public void commitHeightsToMat()
    {
-      ShortBuffer buffer = chunk.createBuffer();
+      FloatBuffer buffer = chunk.createBuffer();
       buffer.put(chunkHeights);
    }
 

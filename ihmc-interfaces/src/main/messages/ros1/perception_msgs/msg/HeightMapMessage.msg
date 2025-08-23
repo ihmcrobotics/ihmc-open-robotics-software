@@ -9,12 +9,6 @@ float64 grid_center_x
 # Y coordinate of the center of the height map
 float64 grid_center_y
 
-# Z height offset for converting between floats and shorts
-float64 height_offset
-
-# Z height scale factor for converting between floats and shorts
-float64 height_scale_factor
-
 # Width of the height map in meters
 float64 width_in_meters
 
@@ -25,6 +19,6 @@ float64 cell_size_in_meters
 int32 cells_per_axis
 
 # List of heights, which correspond to the list of keys
-int32[] heights
+float32[] heights
 
 

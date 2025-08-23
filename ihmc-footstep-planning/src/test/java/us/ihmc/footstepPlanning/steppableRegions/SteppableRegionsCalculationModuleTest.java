@@ -31,13 +31,7 @@ public class SteppableRegionsCalculationModuleTest
       int cellsPerAxis = 2 * centerIndex + 1;
       Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
       HeightMapData heightMapData = new HeightMapData(gridResolution, terrainWidth, gridCenter.getX(), gridCenter.getY());
-      HeightMapTools.convertToHeightMapData(heightMapMat,
-                                            heightMapData,
-                                            gridCenter,
-                                            (float) terrainWidth,
-                                            (float) gridResolution,
-                                            (float) heightMapParameters.getHeightScaleFactor(),
-                                            (float) heightMapParameters.getHeightOffset());
+      HeightMapTools.convertToHeightMapData(heightMapMat, heightMapData, gridCenter, (float) terrainWidth, (float) gridResolution);
 
       double extremumValue = terrainWidth / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
 

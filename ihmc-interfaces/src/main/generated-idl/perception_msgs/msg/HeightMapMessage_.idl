@@ -27,14 +27,6 @@ module perception_msgs
          */
         double grid_center_y;
         /**
-         * Z height offset for converting between floats and shorts
-         */
-        double height_offset;
-        /**
-         * Z height scale factor for converting between floats and shorts
-         */
-        double height_scale_factor;
-        /**
          * Width of the height map in meters
          */
         double width_in_meters;
@@ -49,7 +41,7 @@ module perception_msgs
         /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<long, 255000> heights;
+        sequence<float, 255000> heights;
       };
     };
   };

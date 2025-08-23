@@ -56,8 +56,11 @@ public class RapidHeightMapManager
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
-   // This is created globally cause it takes compute time to create it in the update loop
-   private final HeightMapMessage heightMapMessage = new HeightMapMessage();
+
+   // These fields are created globally cause it takes compute time to create it in the update loop
+   private final HeightMapMessage heightMapMessage;
+   private final float[] heightsArray;
+
    private long sequenceId = 0;
    private FileOutputStream heightMapOutputStream;
    private final ChunkedMapManager chunkedMapManager;
@@ -84,6 +87,13 @@ public class RapidHeightMapManager
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
+
+      // Again we do this to optimize the speed of the rapid height map
+      heightMapMessage = new HeightMapMessage();
+      int centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+      int cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
+      int totalCells = cellsPerAxisGlobal * cellsPerAxisGlobal;
+      heightsArray = new float[totalCells];
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
@@ -127,12 +137,11 @@ public class RapidHeightMapManager
    private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter, int cellsPerAxis)
    {
       HeightMapMessageTools.toMessage(globalHeightMap,
+                                      heightsArray,
                                       heightMapMessage,
                                       heightMapCenter,
                                       heightMapParameters.getGlobalWidthInMeters(),
                                       heightMapParameters.getCellSize(),
-                                      heightMapParameters.getHeightOffset(),
-                                      heightMapParameters.getHeightScaleFactor(),
                                       cellsPerAxis);
 
       if (heightMapParameters.getLogHeightMap())
@@ -294,9 +303,7 @@ public class RapidHeightMapManager
                                             latestTerrainHeightMapData,
                                             heightMapCenterPoint,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize(),
-                                            (float) heightMapParameters.getHeightScaleFactor(),
-                                            (float) heightMapParameters.getHeightOffset());
+                                            (float) heightMapParameters.getCellSize());
       return latestTerrainHeightMapData;
    }
 

@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "52629aa86ee3ba7bc47df46633ba778928967c3c8d7ade89637f64667e538ba1";
+   		return "fb1283f0de076f172fe57235cee0b7af36ce73781c1fbef51a6f5d7ae6333444";
    }
    
    @Override
@@ -62,10 +62,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -82,12 +78,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    public final static int getCdrSerializedSize(perception_msgs.msg.dds.HeightMapMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -123,10 +113,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getGridCenterY());
 
-      cdr.write_type_6(data.getHeightOffset());
-
-      cdr.write_type_6(data.getHeightScaleFactor());
-
       cdr.write_type_6(data.getWidthInMeters());
 
       cdr.write_type_6(data.getCellSizeInMeters());
@@ -147,10 +133,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setGridCenterY(cdr.read_type_6());
       	
-      data.setHeightOffset(cdr.read_type_6());
-      	
-      data.setHeightScaleFactor(cdr.read_type_6());
-      	
       data.setWidthInMeters(cdr.read_type_6());
       	
       data.setCellSizeInMeters(cdr.read_type_6());
@@ -167,8 +149,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("grid_center_x", data.getGridCenterX());
       ser.write_type_6("grid_center_y", data.getGridCenterY());
-      ser.write_type_6("height_offset", data.getHeightOffset());
-      ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
       ser.write_type_6("width_in_meters", data.getWidthInMeters());
       ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_2("cells_per_axis", data.getCellsPerAxis());
@@ -181,8 +161,6 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setGridCenterX(ser.read_type_6("grid_center_x"));
       data.setGridCenterY(ser.read_type_6("grid_center_y"));
-      data.setHeightOffset(ser.read_type_6("height_offset"));
-      data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
       data.setWidthInMeters(ser.read_type_6("width_in_meters"));
       data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       data.setCellsPerAxis(ser.read_type_2("cells_per_axis"));
