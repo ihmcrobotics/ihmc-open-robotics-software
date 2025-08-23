@@ -43,18 +43,18 @@ public class HeightMapMessageTools
 
       int cellsPerAxis = chunkMessage.getCellsPerAxis();
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
-      ShortBuffer shortBuffer = heightMap.createBuffer();
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      FloatBuffer floatBuffer = heightMap.createBuffer();
 
       int totalCells = cellsPerAxis * cellsPerAxis;
-      short[] heights = new short[totalCells];
+      float[] heights = new float[totalCells];
 
       for (int key = 0; key < chunkMessage.getHeights().size(); key++)
       {
-         heights[key] = (short) chunkMessage.getHeights().get(key);
+         heights[key] = chunkMessage.getHeights().get(key);
       }
 
-      shortBuffer.put(heights);
+      floatBuffer.put(heights);
 
       return heightMap;
    }
@@ -137,10 +137,10 @@ public class HeightMapMessageTools
       int totalCells = cellsPerAxis * cellsPerAxis;
 
       // Make sure Mat type is correct
-      if (chunkDataForMessage.type() != opencv_core.CV_16UC1)
-         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
+      if (chunkDataForMessage.type() != opencv_core.CV_32FC1)
+         throw new IllegalArgumentException("Expected CV_32FC1 Mat");
 
-      FloatBuffer floatBuffer = chunkDataForMessage.createBuffer(); // or ByteBuffer -> ShortBuffer
+      FloatBuffer floatBuffer = chunkDataForMessage.createBuffer();
 
       // This is done for speed optimization
       float[] heightsArray = new float[totalCells];

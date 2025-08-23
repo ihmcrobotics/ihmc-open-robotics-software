@@ -22,14 +22,9 @@ import us.ihmc.rdx.shader.RDXUniform;
 import java.nio.FloatBuffer;
 
 /**
- * Renders a height map as a point cloud. The height map is stored as a 16-bit grayscale image.
- * height for each cell is represented in that buffer as value between 0 and 65536,
- * where the midway point 32,768 is the metric 0.0f height,
- * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
- * The height is scaled up by 10,000 for storage as 16-bit value (short)
  * <p>
  * To learn about OpenGL and figure out what this code is doing,
- * Tomasz recommends <a href="https://learnopengl.com/">LearnOpenGL.com</a>
+ * We recommend reading <a href="https://learnopengl.com/">LearnOpenGL.com</a>
  */
 public class RDXChunkRenderer implements RenderableProvider
 {
@@ -121,9 +116,8 @@ public class RDXChunkRenderer implements RenderableProvider
       }
 
       /* NOTE:
-       * We need to copy the short values from the height map image (Mat) to the vertices buffer (FloatBuffer) as floats.
-       * In both objects, the data is in native memory. Copying native -> java -> native is slow,
-       * so we use the Mat#convertTo() method which performs the short to float conversion and memory copy natively.
+       * We need to copy the float values from the height map image (Mat) to the vertices buffer (FloatBuffer) as floats.
+       * In both objects, the data is in native memory. Copying native -> java -> native is slow.
        */
 
       // Wrap the vertices buffer into a pointer, then into a Mat

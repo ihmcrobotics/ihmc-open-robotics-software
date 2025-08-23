@@ -12,7 +12,7 @@ import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
-import java.nio.ShortBuffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
@@ -48,18 +48,12 @@ public class ChunkedMapManager
    {
       if (heightMapParameters.getEnableChunkedMap())
       {
-         addHeightMap(latestHeightMap,
-                      heightMapCenterPoint,
-                      heightMapParameters.getGlobalWidthInMeters(),
-                      heightMapParameters.getCellSize(),
-                      heightMapParameters.getHeightOffset(),
-                      heightMapParameters.getHeightScaleFactor());
-
+         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
          publishChunkedMap(chunkMessagePublisher);
       }
    }
 
-   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution, double heightOffset, double scalingFactor)
+   public void addHeightMap(Mat heightMap, Point3DReadOnly heightMapCenter, double gridSize, double resolution)
    {
       chunks.clear();
 
@@ -69,10 +63,10 @@ public class ChunkedMapManager
       int cellsPerAxisOfIncomingHeightMap = 2 * centerIndexOfIncomingHeightMap + 1;
       int totalCellsOfIncomingHeightMap = cellsPerAxisOfIncomingHeightMap * cellsPerAxisOfIncomingHeightMap;
       // This is done for speed optimization
-      short[] heightsArray = new short[totalCellsOfIncomingHeightMap];
+      float[] heightsArray = new float[totalCellsOfIncomingHeightMap];
 
-      ShortBuffer shortBuffer = heightMap.createBuffer();
-      shortBuffer.get(heightsArray);
+      FloatBuffer floatBuffer = heightMap.createBuffer();
+      floatBuffer.get(heightsArray);
 
       for (int i = 0; i < heightMap.rows(); i++)
       {
@@ -81,10 +75,10 @@ public class ChunkedMapManager
             double XCord = HeightMapTools.indexToCoordinate(i, heightMapCenter.getX(), resolution, centerIndex);
             double YCord = HeightMapTools.indexToCoordinate(j, heightMapCenter.getY(), resolution, centerIndex);
 
-            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.CHUNK_WIDTH, resolution, heightOffset, scalingFactor);
+            Chunk chunk = getOrCreateChunk(XCord, YCord, Chunk.CHUNK_WIDTH, resolution);
 
             int index = i * cellsPerAxisOfIncomingHeightMap + j;
-            short height = heightsArray[index];
+            float height = heightsArray[index];
 
             chunk.setHeightAt(XCord, YCord, height, resolution);
 
@@ -103,12 +97,7 @@ public class ChunkedMapManager
     * So we pull from our map of {@link Chunk}'s to check, if we don't have one, we create a new one.
     * Which is why we need to pass in so many parameters.
     */
-   private Chunk getOrCreateChunk(double xCoordinate,
-                                  double yCoordinate,
-                                  double chunkSizeInMeters,
-                                  double chunkResolution,
-                                  double heightOffset,
-                                  double scalingFactor)
+   private Chunk getOrCreateChunk(double xCoordinate, double yCoordinate, double chunkSizeInMeters, double chunkResolution)
    {
       int cellsPerAxis = (int) Math.round(chunkSizeInMeters / chunkResolution);
 
@@ -132,7 +121,7 @@ public class ChunkedMapManager
       Chunk chunk = chunksHashMap.get(hash);
       if (chunk == null)
       {
-         chunk = new Chunk(chunkOriginX, chunkOriginY, chunkResolution, cellsPerAxis, heightOffset, scalingFactor);
+         chunk = new Chunk(chunkOriginX, chunkOriginY, chunkResolution, cellsPerAxis);
          chunksHashMap.put(hash, chunk);
          queueOfChunks.addLast(hash);
 
