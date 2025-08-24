@@ -17,6 +17,7 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -139,22 +140,19 @@ public class RDXTeleoperationManager extends RDXPanel
    private final FramePoint3D tempCurrentPelvisPosition = new FramePoint3D();
    private static final double HEIGHT_TOLERANCE = 0.01;
 
-   /**
-    * For use without interactables available. May crash if a YoVariableClient is needed.
-    */
-   public RDXTeleoperationManager(CommunicationHelper communicationHelper)
-   {
-      this(communicationHelper, null, null, null);
-   }
-
-   /**
-    * Enable interactables and use a YoVariable client to show wrist force arrows on
-    * some robots.
-    */
    public RDXTeleoperationManager(CommunicationHelper communicationHelper,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotSelectionCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
+   {
+      this(communicationHelper, robotSelfCollisionModel, robotSelectionCollisionModel, yoVariableClientHelper, null);
+   }
+
+   public RDXTeleoperationManager(CommunicationHelper communicationHelper,
+                                  RobotCollisionModel robotSelfCollisionModel,
+                                  RobotCollisionModel robotSelectionCollisionModel,
+                                  YoVariableClientHelper yoVariableClientHelper,
+                                  ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
       super("Teleoperation");
 
@@ -196,12 +194,14 @@ public class RDXTeleoperationManager extends RDXPanel
 
       // create the manager for the desired arm setpoints
       armManager = new RDXArmManager(communicationHelper,
+                                     peerClockEstimator,
                                      robotModel,
                                      syncedRobot,
                                      desiredRobot,
                                      teleoperationParameters,
                                      interactableHands,
-                                     wholeBodyIKManager::getEnabled);
+                                     wholeBodyIKManager::getEnabled,
+                                     ros2Helper);
 
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, ros2Helper, teleoperationParameters);
       dofsWidgets = new RDXHumanoidDoFsWidgets(syncedRobot, ros2Helper, teleoperationParameters);
