@@ -149,7 +149,7 @@ public class HeightMapTools
       return new double[] {r, g, b};
    }
 
-   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData)
    {
       int cellsPerAxis = heightMapData.getCellsPerAxis();
       int totalCells = cellsPerAxis * cellsPerAxis;
@@ -203,32 +203,6 @@ public class HeightMapTools
          int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
          heightMapDataToPack.setHeight(key, cellHeight);
       }
-   }
-
-   @Deprecated
-   /**
-    * We shouldn't be using this because we should be changing the snapping kernels to use floats rather than shorts
-    * This is a temporary solution that should be removed! (that's also why it's not tested lol)
-    */ public static void convertCV32FC1ToCV16UC1(Mat floats, Mat shorts, int cellsPerAxis, HeightMapParameters heightMapParameters)
-   {
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
-      // This is done for speed optimization
-      float[] heightsAsFloats = new float[totalCells];
-      FloatBuffer floatBuffer = floats.createBuffer();
-      floatBuffer.get(heightsAsFloats);
-
-      short[] heightsAsShorts = new short[totalCells];
-
-      for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
-      {
-         // Get the height as for row major, and save it as column major
-         short height = (short) ((heightsAsFloats[i] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-         heightsAsShorts[i] = height;
-      }
-
-      ShortBuffer buffer = shorts.createBuffer();
-      buffer.put(heightsAsShorts);
    }
 
    public static float[] packArrayForFile(Mat heightMap,

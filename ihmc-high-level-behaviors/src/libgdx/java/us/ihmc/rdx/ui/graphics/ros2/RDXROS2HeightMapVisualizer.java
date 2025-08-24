@@ -37,24 +37,18 @@ import java.util.Set;
 public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-
-   private ROS2PublishSubscribeAPI ros2;
    private final ResettableExceptionHandlingExecutorService executorService;
-
    private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
-
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
-
+   private final Point3D heightMapCenter = new Point3D();
+   private final Stopwatch stopwatch = new Stopwatch();
+   private ROS2PublishSubscribeAPI ros2;
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
    private TerrainMapData latestTerrainMapData;
-
-   private final Point3D heightMapCenter = new Point3D();
-
-   private final Stopwatch stopwatch = new Stopwatch();
    private int cellsPerAxisOfHeightMap;
    private int cellsPerAxisOfChunks;
    private float latestCellSizeInMeters;
@@ -117,20 +111,14 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
                                               latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 
-                                              if (latestHeightMapData == null)
+                                              if (heightMap == null)
                                               {
-                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getCellSizeInMeters(),
-                                                                                         heightMapMessage.getWidthInMeters(),
-                                                                                         heightMapMessage.getGridCenterX(),
-                                                                                         heightMapMessage.getGridCenterY());
+                                                 heightMap = new Mat(heightMapMessage.getCellsPerAxis(), heightMapMessage.getCellsPerAxis(), opencv_core.CV_32FC1);
                                               }
-                                              HeightMapTools.convertToHeightMapData(heightMap,
-                                                                                    latestHeightMapData,
-                                                                                    heightMapCenter,
-                                                                                    (float) heightMapMessage.getWidthInMeters(),
-                                                                                    (float) heightMapMessage.getCellSizeInMeters());
+
+                                              latestHeightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+                                              HeightMapTools.convertHeightMapDataToMat(heightMap, latestHeightMapData);
 
                                               // This prevents the rendering from happening too early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)

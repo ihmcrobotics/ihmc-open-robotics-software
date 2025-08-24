@@ -40,7 +40,7 @@ public class HeightMapToolsTest
       HeightMapTools.convertToHeightMapData(originalMat, heightMapData, centerLocation, (float) terrainWidth, (float) cellSize);
 
       Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
-      HeightMapTools.convertHeightMapDataToMat(newData, heightMapData, heightMapParameters);
+      HeightMapTools.convertHeightMapDataToMat(newData, heightMapData);
 
       for (int x = 0; x < cellsPerAxis; x++)
       {
@@ -70,7 +70,7 @@ public class HeightMapToolsTest
 
       for (int i = 0; i < iterations; i++)
       {
-         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
+         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
       }
 
       long endTime = System.nanoTime();

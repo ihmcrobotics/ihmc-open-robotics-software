@@ -116,11 +116,6 @@ public class TerrainMapTools
          message.setHasHeightMapData(true);
          PerceptionMessageTools.packShortDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
       }
-      if (terrainMapData.hasSnapHeight())
-      {
-         message.setHasSnappedHeightData(true);
-         PerceptionMessageTools.packShortDataArray(message.getSnappedHeightData(), terrainMapData.getSnapHeightMat());
-      }
       if (terrainMapData.hasSnapNormal())
       {
          message.setHasSnappedNormalData(true);

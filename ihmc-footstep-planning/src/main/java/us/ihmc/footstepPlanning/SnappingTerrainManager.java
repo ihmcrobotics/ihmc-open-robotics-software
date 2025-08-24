@@ -26,7 +26,7 @@ public class SnappingTerrainManager
    {
       snappingTerrainExtractor.update(heightMapData);
 
-      publishTerrainMapData(snappingTerrainExtractor.getTerrainMapData());
+//      publishTerrainMapData(snappingTerrainExtractor.getTerrainMapData());
    }
 
    private void publishTerrainMapData(TerrainMapData terrainMapData)
