@@ -65,17 +65,17 @@ public class HeightMapTools
 
    public static int keyToXIndex(int key, int centerIndex)
    {
-      return key % (2 * centerIndex + 1);
+      return key / (2 * centerIndex + 1);
    }
 
    public static int keyToYIndex(int key, int centerIndex)
    {
-      return key / (2 * centerIndex + 1);
+      return key % (2 * centerIndex + 1);
    }
 
    public static int indicesToKey(int xIndex, int yIndex, int centerIndex)
    {
-      return xIndex + yIndex * (2 * centerIndex + 1);
+      return yIndex + xIndex * (2 * centerIndex + 1);
    }
 
    public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)
@@ -151,26 +151,14 @@ public class HeightMapTools
 
    public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData)
    {
-      int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int totalCells = cellsPerAxis * cellsPerAxis;
+      int totalCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      // This is done for speed optimization
       double[] heightsAsDoubles = heightMapData.getHeights();
       float[] heightsAsFloats = new float[totalCells];
 
-      for (int col = 0; col < cellsPerAxis; col++)
+      for (int i = 0; i < totalCells; i++)
       {
-         for (int row = 0; row < cellsPerAxis; row++)
-         {
-            // This is happening for a reason, the current implementation expects column major for the Mat objects, and the HeightMapData object is column major
-            int rowMajorIndex = row * cellsPerAxis + col;
-            int colMajorIndex = col * cellsPerAxis + row;
-
-            // Get the height as for row major, and save it as column major
-            float height = (float) heightsAsDoubles[rowMajorIndex];
-
-            heightsAsFloats[colMajorIndex] = height;
-         }
+         heightsAsFloats[i] = (float) heightsAsDoubles[i];
       }
 
       FloatBuffer buffer = heightMapToPack.createBuffer();
@@ -194,14 +182,9 @@ public class HeightMapTools
       float[] values = new float[totalCells];
       floatPointer.get(values);
 
-      // Put height values into HeightMapData object
       for (int i = 0; i < totalCells; ++i)
       {
-         float cellHeight = values[i];
-
-         // Put it into the HeightMapData object
-         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
-         heightMapDataToPack.setHeight(key, cellHeight);
+         heightMapDataToPack.setHeight(i, values[i]);
       }
    }
 

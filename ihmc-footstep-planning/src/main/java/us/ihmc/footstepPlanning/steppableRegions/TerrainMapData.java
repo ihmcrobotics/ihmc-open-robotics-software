@@ -242,9 +242,7 @@ public class TerrainMapData
 
    public void setHeightLocal(float height, int rIndex, int cIndex)
    {
-      float offsetHeight = height + (float) heightScaleOffset;
-      int finalHeight = (int) (offsetHeight * heightScaleFactor);
-      heightMap.ptr(rIndex, cIndex).putShort((short) finalHeight);
+      heightMap.ptr(rIndex, cIndex).putFloat(height);
    }
 
    public void setSensorOrigin(Tuple3DReadOnly origin)

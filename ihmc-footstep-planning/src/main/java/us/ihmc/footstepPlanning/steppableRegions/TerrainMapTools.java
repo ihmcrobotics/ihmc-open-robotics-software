@@ -32,11 +32,6 @@ public class TerrainMapTools
       return rIndex < 0 || rIndex >= cellsPerSide || cIndex < 0 || cIndex >= cellsPerSide;
    }
 
-   public static float convertScaledAndOffsetValue(float scaleFactor, float offset, float value)
-   {
-      return (value / scaleFactor) - offset;
-   }
-
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
    {
       int cellsPerMeter = terrainMapData.getCenterIndex();
