@@ -108,8 +108,10 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       float preHeaderCursorY = ImGui.getCursorPosY();
       if (ImGui.collapsingHeader(labels.get(title)))
       {
+         ImGui.indent();
          renderImGuiWidgets();
          renderImGuiWidgetsPost();
+         ImGui.unindent();
       }
       float postHeaderCursorY = ImGui.getCursorPosY();
       if (renderRightContext)
