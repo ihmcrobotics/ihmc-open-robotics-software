@@ -188,11 +188,7 @@ public class HeightMapTools
       }
    }
 
-   public static float[] packArrayForFile(Mat heightMap,
-                                          Point3D gridCenter,
-                                          float widthInMeters,
-                                          float cellSizeInMeters,
-                                          HeightMapParameters heightMapParameters)
+   public static float[] packArrayForFile(Mat heightMap, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       // Snap to cell resolution
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
@@ -209,12 +205,8 @@ public class HeightMapTools
       short[] shortHeights = new short[totalCells];
       shortBuffer.get(shortHeights);
 
-      // Retrieve scale/offset to convert shorts → floats (real heights)
-      float heightOffset = (float) heightMapParameters.getHeightOffset();
-      float scaleFactor = (float) heightMapParameters.getHeightScaleFactor();
-
       // Prepare an output array with a header
-      final int headerFloats = 6;
+      final int headerFloats = 4;
       float[] packedArray = new float[headerFloats + totalCells];
 
       // Write header
@@ -222,8 +214,6 @@ public class HeightMapTools
       packedArray[1] = cellSizeInMeters;
       packedArray[2] = (float) gridCenter.getX();
       packedArray[3] = (float) gridCenter.getY();
-      packedArray[4] = heightOffset;
-      packedArray[5] = scaleFactor;
 
       // Convert shorts to floats and copy into a packed array
       for (int i = 0; i < totalCells; ++i)

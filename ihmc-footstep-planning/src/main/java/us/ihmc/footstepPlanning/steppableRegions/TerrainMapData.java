@@ -24,10 +24,8 @@ public class TerrainMapData
    private int localGridSize;
    private int cellsPerMeter = 50;
 
-   private double heightScaleFactor;
    private double gridResolutionXY;
    private double gridSizeXY;
-   private double heightScaleOffset;
 
    private Mat heightMap;
    private Mat terrainCostMap;
@@ -41,10 +39,8 @@ public class TerrainMapData
    private Mat snappedAreaFractionImage;
    private int centerIndex;
 
-   public TerrainMapData(int height, int width, double heightScaleFactor, double heightScaleOffset, double gridResolutionXY, double gridSizeXY)
+   public TerrainMapData(int height, int width, double gridResolutionXY, double gridSizeXY)
    {
-      this.heightScaleOffset = heightScaleOffset;
-      this.heightScaleFactor = heightScaleFactor;
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
 
@@ -58,8 +54,6 @@ public class TerrainMapData
    {
       this.localGridSize = other.localGridSize;
       this.cellsPerMeter = other.cellsPerMeter;
-      this.heightScaleFactor = other.heightScaleFactor;
-      this.heightScaleOffset = other.heightScaleOffset;
       this.gridResolutionXY = other.gridResolutionXY;
       this.centerIndex = other.centerIndex;
 
@@ -300,16 +294,6 @@ public class TerrainMapData
       return localGridSize;
    }
 
-   public double getHeightScaleOffset()
-   {
-      return heightScaleOffset;
-   }
-
-   public double getHeightScaleFactor()
-   {
-      return heightScaleFactor;
-   }
-
    public void setTerrainCostMap(Mat terrainCostMap)
    {
       this.terrainCostMap = terrainCostMap == null ? null : terrainCostMap.clone();
@@ -392,9 +376,6 @@ public class TerrainMapData
       cellsPerMeter = message.getCellsPerMeter();
 
       terrainMapCenter.set(message.getMapCenterX(), message.getMapCenterY());
-
-      heightScaleOffset = message.getHeightScaleOffset();
-      heightScaleFactor = message.getHeightScaleFactor();
 
       if (message.getHasTerrainCostData())
       {

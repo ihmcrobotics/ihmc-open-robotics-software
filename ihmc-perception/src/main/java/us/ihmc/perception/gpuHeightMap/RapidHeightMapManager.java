@@ -173,8 +173,7 @@ public class RapidHeightMapManager
          float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
                                                                heightMapCenterPoint,
                                                                (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                               (float) heightMapParameters.getCellSize(),
-                                                               heightMapParameters);
+                                                               (float) heightMapParameters.getCellSize());
          try
          {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));

@@ -92,9 +92,6 @@ public class TerrainMapTools
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
 
-      message.setHeightScaleFactor(terrainMapData.getHeightScaleFactor());
-      message.setHeightScaleOffset(terrainMapData.getHeightScaleOffset());
-
       if (terrainMapData.hasTerrainCost())
       {
          message.setHasTerrainCostData(true);
@@ -109,7 +106,7 @@ public class TerrainMapTools
       if (terrainMapData.hasHeightMap())
       {
          message.setHasHeightMapData(true);
-         PerceptionMessageTools.packShortDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
+         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
       }
       if (terrainMapData.hasSnapNormal())
       {
@@ -140,8 +137,6 @@ public class TerrainMapTools
    public static boolean isEmpty(TerrainMapMessage message)
    {
       if (message.getHasHeightMapData())
-         return false;
-      if (message.getHasSnappedHeightData())
          return false;
       return !message.getHasSteppabilityData();
    }

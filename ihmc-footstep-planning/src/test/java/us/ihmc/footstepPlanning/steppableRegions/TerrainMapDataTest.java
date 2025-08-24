@@ -10,8 +10,6 @@ public class TerrainMapDataTest
    private final HeightMapParameters parameters = new HeightMapParameters();
    private final TerrainMapData terrainMapData = new TerrainMapData(size,
                                                                     size,
-                                                                    parameters.getHeightScaleFactor(),
-                                                                    parameters.getHeightOffset(),
                                                                     parameters.getCellSize(),
                                                                     parameters.getTerrainWidthInMeters());
 

@@ -107,15 +107,13 @@ public class SnappingTerrainExtractor
       }
 
       // 16 is the number of parameters being passed in as floats
-      snappingParametersHostPointer = new FloatPointer(19);
+      snappingParametersHostPointer = new FloatPointer(17);
       snappingParametersDevicePointer = new FloatPointer();
 
       computeDerivedParameters();
 
       terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
                                           cellsPerAxisTerrain,
-                                          heightMapParameters.getHeightScaleFactor(),
-                                          heightMapParameters.getHeightOffset(),
                                           heightMapParameters.getCellSize(),
                                           heightMapParameters.getTerrainWidthInMeters());
 
@@ -301,8 +299,6 @@ public class SnappingTerrainExtractor
                           (float) gridCenter.getY(),
                           (float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
-                          (float) heightMapParameters.getHeightScaleFactor(),
-                          (float) heightMapParameters.getHeightOffset(),
                           (float) steppableRegionParameters.getFootLength(),
                           (float) steppableRegionParameters.getFootWidth(),
                           (float) steppableRegionParameters.getDistanceFromCliffTops(),

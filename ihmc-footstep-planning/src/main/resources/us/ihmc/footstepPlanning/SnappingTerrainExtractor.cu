@@ -7,21 +7,19 @@ extern "C"
 #define HEIGHT_MAP_CENTER_Y 1
 #define CELL_SIZE_IN_CENTIMETERS 2
 #define HEIGHT_MAP_WIDTH_IM_METERS 3
-#define HEIGHT_SCALING_FACTOR 4
-#define HEIGHT_OFFSET 5
-#define FOOT_LENGTH 6
-#define FOOT_WIDTH 7
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 8
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 9
-#define CLIFF_START_HEIGHT_TO_AVOID 10
-#define CLIFF_END_HEIGHT_TO_AVOID 11
-#define MIN_SUPPORT_AREA_FRACTION 12
-#define MIN_SNAP_HEIGHT_THRESHOLD 13
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
-#define INEQUALITY_ACTIVATION_SLOPE 15
-#define STEPPING_COSINE_THRESHOLD 16
-#define STEPPING_CONTACT_THRESHOLD 17
-#define CONTACT_WINDOW_SIZE 18
+#define FOOT_LENGTH 4
+#define FOOT_WIDTH 5
+#define MIN_DISTANCE_FROM_CLIFF_TOPS 6
+#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 7
+#define CLIFF_START_HEIGHT_TO_AVOID 8
+#define CLIFF_END_HEIGHT_TO_AVOID 9
+#define MIN_SUPPORT_AREA_FRACTION 10
+#define MIN_SNAP_HEIGHT_THRESHOLD 11
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 12
+#define INEQUALITY_ACTIVATION_SLOPE 13
+#define STEPPING_COSINE_THRESHOLD 14
+#define STEPPING_CONTACT_THRESHOLD 15
+#define CONTACT_WINDOW_SIZE 16
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -204,9 +202,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
         normal.z = -normal.z;
     }
 
-    // TODO include this?
-    // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
-    int snap_height_int = (snap_height + params[HEIGHT_OFFSET]) * params[HEIGHT_SCALING_FACTOR];
+    float snap_height_int = snap_height;
 
     /////////////// Make sure there's enough step area.
 
@@ -220,8 +216,8 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     //////////// Check to make sure we're not stepping too near a cliff base or top
     if (!failed)
     {
-        int cliff_start_height_to_avoid_int = (params[CLIFF_START_HEIGHT_TO_AVOID]) * params[HEIGHT_SCALING_FACTOR];
-        int cliff_end_height_to_avoid_int = (params[CLIFF_END_HEIGHT_TO_AVOID]) * params[HEIGHT_SCALING_FACTOR];
+        float cliff_start_height_to_avoid_int = params[CLIFF_START_HEIGHT_TO_AVOID];
+        float cliff_end_height_to_avoid_int = params[CLIFF_END_HEIGHT_TO_AVOID];
 
         float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
         float cliff_search_offset_squared = cliff_search_offset * cliff_search_offset;
@@ -248,10 +244,10 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                 int2 query_key = make_int2(x_query, y_query);
 
                 float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-                int query_height_int = (int) ((*heightValue + params[HEIGHT_OFFSET]) * params[HEIGHT_SCALING_FACTOR]);
+                float query_height_float = *heightValue;
 
                 // compute the relative height at this point, compared to the height contained in the current cell.
-                int relative_height_of_query_int = query_height_int - snap_height_int;
+                float relative_height_of_query_int = query_height_float - snap_height_int;
 
                 if (relative_height_of_query_int > cliff_start_height_to_avoid_int)
                 {
@@ -371,7 +367,7 @@ __global__ void computeSteppabilityConnections(unsigned short *steppableMap, siz
 }
 
 extern "C"
-__global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeightMap,
+__global__ void computeTerrainCost(float *heightMap, size_t pitchHeightMap,
                                    unsigned char *costMap, size_t pitchCostMap,
                                    float *params)
 {
@@ -383,7 +379,6 @@ __global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeight
     if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
         return;
 
-    float heightScalingFactor = params[HEIGHT_SCALING_FACTOR];
     float steppingCosineThreshold = params[STEPPING_COSINE_THRESHOLD];
 
     // Sobel operators
@@ -405,8 +400,8 @@ __global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeight
             if (xi < 0 || xi >= cells_per_axis || yj < 0 || yj >= cells_per_axis)
                 continue;
 
-            unsigned short *heightPtr = (unsigned short *)((char *)heightMap + yj * pitchHeightMap) + xi;
-            float heightValue = (*heightPtr) / heightScalingFactor;
+            float *heightPtr = (float *)((char *)heightMap + yj * pitchHeightMap) + xi;
+            float heightValue = *heightPtr;
 
             int index = (i + 1) * 3 + (j + 1);
             Kx += heightValue * KxSobel[index];
