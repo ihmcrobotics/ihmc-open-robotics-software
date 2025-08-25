@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Robot WebSocket Client</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+<h2>🚶 Continuous Hiking Command</h2>
+<div id="controls">
+    <div class="field">
+        Steps Before Safety Stop: <input type="number" id="steps_before_safety_stop" value="0">
+    </div>
+
+    <!-- Radio buttons for forward/backward -->
+    <div class="field">
+        <label><input type="radio" name="direction" value="forward" checked> Walk Forwards</label>
+        <label><input type="radio" name="direction" value="backward"> Walk Backwards</label>
+    </div>
+
+    <!-- Start/Stop Buttons -->
+    <div class="field">
+        <button id="startBtn">Start Walking</button>
+        <button id="stopBtn">Stop Walking</button>
+    </div>
+
+    <!-- Collapsible extra options -->
+    <details>
+        <summary>⚙️ More Options</summary>
+        <div>
+
+            <!-- Checkboxes -->
+            <div class="field">
+                <input type="checkbox" id="side_step">
+                <label for="side_step">Side Step</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="left_direction">
+                <label for="left_direction">Left Direction</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="square_up_to_goal" checked>
+                <label for="square_up_to_goal">Square Up To Goal</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_astar_footstep_planner" checked>
+                <label for="use_astar_footstep_planner">Use A* Planner</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_monte_carlo_footstep_planner">
+                <label for="use_monte_carlo_footstep_planner">Use Monte Carlo Planner</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_previous_plan_as_reference" checked>
+                <label for="use_previous_plan_as_reference">Use Previous Plan as Reference</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_monte_carlo_plan_as_reference">
+                <label for="use_monte_carlo_plan_as_reference">Use Monte Carlo Plan as Reference</label>
+            </div>
+
+            <div class="field">
+                <input type="checkbox" id="use_joystick_controller">
+                <label for="use_joystick_controller">Use Joystick Controller</label>
+            </div>
+
+
+            <!-- Numeric values -->
+            <div class="field">Forward Value: <input type="number" step="0.1" id="forward_value" value="0.0"></div>
+            <div class="field">Lateral Value: <input type="number" step="0.1" id="lateral_value" value="0.0"></div>
+            <div class="field">Turning Value: <input type="number" step="0.1" id="turning_value" value="0.0"></div>
+        </div>
+    </details>
+</div>
+
+<button id="stopServerBtn" onclick="stopServer()">Stop Server</button>
+
+<h3>📜 Log</h3>
+<textarea id="log" readonly></textarea>
+
+<!-- App logic -->
+<script src="main.js"></script>
+
+</body>
+</html>
