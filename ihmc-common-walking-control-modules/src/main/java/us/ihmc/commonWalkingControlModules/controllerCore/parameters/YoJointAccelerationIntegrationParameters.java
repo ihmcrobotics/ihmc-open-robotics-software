@@ -11,7 +11,7 @@ public class YoJointAccelerationIntegrationParameters
    private final YoDouble maxPositionError;
    private final YoDouble masVelocityError;
    private final YoDouble velocityReferenceAlpha;
-   
+
    private final YoDouble velocityReference;
    private final YoDouble positionReference;
    private final YoBoolean resetIntegrators;
@@ -22,8 +22,7 @@ public class YoJointAccelerationIntegrationParameters
    private final YoDouble desiredVelocity;
    private final YoDouble desiredVelocityNotClamped;
    private final YoDouble desiredVelocityClamped;
-   
-   
+
    public YoJointAccelerationIntegrationParameters(String jointName, YoRegistry registry)
    {
       String prefix = "JointAccelerationIntegrationParameters_";
@@ -41,13 +40,19 @@ public class YoJointAccelerationIntegrationParameters
       desiredPositionNotClamped = new YoDouble(prefix + jointName + "_DesiredPositionNotClamped", registry);
       desiredPositionClamped = new YoDouble(prefix + jointName + "_DesiredPositionClamped", registry);
       desriedPositionClampedJointLimits = new YoDouble(prefix + jointName + "_DesiredPositionClampedJointLimits", registry);
-      desiredVelocity = new YoDouble(prefix + jointName +"_DesiredVelocity", registry);
+      desiredVelocity = new YoDouble(prefix + jointName + "_DesiredVelocity", registry);
       desiredVelocityNotClamped = new YoDouble(prefix + jointName + "_DesiredVelocityNotClamped", registry);
       desiredVelocityClamped = new YoDouble(prefix + jointName + "_DesiredVelocityClamped", registry);
    }
-   
-   public void setParameters(double alphaPosition, double alphaVelocity, double maxPositionError, double maxVelocityError,
-                             double velocityReferenceAlpha, double velocityReference, double positionReference, boolean resetIntegrators)
+
+   public void setParameters(double alphaPosition,
+                             double alphaVelocity,
+                             double maxPositionError,
+                             double maxVelocityError,
+                             double velocityReferenceAlpha,
+                             double velocityReference,
+                             double positionReference,
+                             boolean resetIntegrators)
    {
       this.alphaPosition.set(alphaPosition);
       this.alphaVelocity.set(alphaVelocity);
@@ -58,117 +63,143 @@ public class YoJointAccelerationIntegrationParameters
       this.positionReference.set(positionReference);
       this.resetIntegrators.set(resetIntegrators);
    }
-   public void setMaxPositionError(double maxPositionError)
-   {
-      this.maxPositionError.set(maxPositionError);
-   }
-   public void setMaxVelocityError(double maxVelocityError)
-   {
-      this.masVelocityError.set(maxVelocityError);
-   }  
-   public void setAlphaPosition(double alphaPosition)
-   {
-      this.alphaPosition.set(alphaPosition);
-   }
-   public void setAlphaVelocity(double alphaVelocity)
-   {
-      this.alphaVelocity.set(alphaVelocity);
-   }
-   public void setVelocityReferenceAlpha(double velocityReferenceAlpha)
-   {
-      this.velocityReferenceAlpha.set(velocityReferenceAlpha);
-   }
-   public void setVelocityReference(double velocityReference)
-   {
-      this.velocityReference.set(velocityReference);
-   }
-   public void setPositionReference(double positionReference)
-   {
-      this.positionReference.set(positionReference);
-   }
-   public void setResetIntegrators(boolean resetIntegrators)
-   {
-      this.resetIntegrators.set(resetIntegrators);
-   }
+
    public void setDesiredPosition(double desiredPosition)
-{
-   this.desiredPosition.set(desiredPosition);
-}
-   public void setDesiredPositionNotClamped(double desiredPositionNotClamped)
    {
-      this.desiredPositionNotClamped.set(desiredPositionNotClamped);
+      this.desiredPosition.set(desiredPosition);
    }
-   public void setDesiredPositionClamped(double desiredPositionClamped)
-   {
-      this.desiredPositionClamped.set(desiredPositionClamped);
-   }
+
    public void setDesiredPositionClampedJointLimits(double desiredPositionClampedJointLimits)
    {
       this.desriedPositionClampedJointLimits.set(desiredPositionClampedJointLimits);
    }
-   public void setDesiredVelocity (double desiredVelocity)
+
+   public void setDesiredVelocity(double desiredVelocity)
    {
       this.desiredVelocity.set(desiredVelocity);
    }
-   public void setDesiredVelocityNotClamped(double desiredVelocityNotClamped)
-   {
-      this.desiredVelocityNotClamped.set(desiredVelocityNotClamped);
-   }
-   public void setDesiredVelocityClamped(double desiredVelocityClamped)
-   {
-      this.desiredVelocityClamped.set(desiredVelocityClamped);
-   }
+
    /**
     * Getters for the parameters.
     */
-      
+
    public YoDouble getAlphaPosition()
    {
       return alphaPosition;
    }
+
+   public void setAlphaPosition(double alphaPosition)
+   {
+      this.alphaPosition.set(alphaPosition);
+   }
+
    public YoDouble getAlphaVelocity()
    {
       return alphaVelocity;
    }
+
+   public void setAlphaVelocity(double alphaVelocity)
+   {
+      this.alphaVelocity.set(alphaVelocity);
+   }
+
    public YoDouble getMaxPositionError()
    {
       return maxPositionError;
    }
+
+   public void setMaxPositionError(double maxPositionError)
+   {
+      this.maxPositionError.set(maxPositionError);
+   }
+
    public YoDouble getMaxVelocityError()
    {
       return masVelocityError;
    }
+
+   public void setMaxVelocityError(double maxVelocityError)
+   {
+      this.masVelocityError.set(maxVelocityError);
+   }
+
    public YoDouble getVelocityReferenceAlpha()
    {
       return velocityReferenceAlpha;
    }
+
+   public void setVelocityReferenceAlpha(double velocityReferenceAlpha)
+   {
+      this.velocityReferenceAlpha.set(velocityReferenceAlpha);
+   }
+
    public YoDouble getVelocityReference()
    {
       return velocityReference;
    }
+
+   public void setVelocityReference(double velocityReference)
+   {
+      this.velocityReference.set(velocityReference);
+   }
+
    public YoDouble getPositionReference()
    {
       return positionReference;
    }
+
+   public void setPositionReference(double positionReference)
+   {
+      this.positionReference.set(positionReference);
+   }
+
    public YoBoolean getResetIntegrators()
    {
       return resetIntegrators;
    }
+
+   public void setResetIntegrators(boolean resetIntegrators)
+   {
+      this.resetIntegrators.set(resetIntegrators);
+   }
+
    public YoDouble getDesiredPositionNotClamped()
    {
       return desiredPositionNotClamped;
    }
+
+   public void setDesiredPositionNotClamped(double desiredPositionNotClamped)
+   {
+      this.desiredPositionNotClamped.set(desiredPositionNotClamped);
+   }
+
    public YoDouble getDesiredPositionClamped()
    {
       return desiredPositionClamped;
    }
+
+   public void setDesiredPositionClamped(double desiredPositionClamped)
+   {
+      this.desiredPositionClamped.set(desiredPositionClamped);
+   }
+
    public YoDouble getDesiredVelocityNotClamped()
    {
       return desiredVelocityNotClamped;
    }
+
+   public void setDesiredVelocityNotClamped(double desiredVelocityNotClamped)
+   {
+      this.desiredVelocityNotClamped.set(desiredVelocityNotClamped);
+   }
+
    public YoDouble getDesiredVelocityClamped()
    {
       return desiredVelocityClamped;
-   }  
-   
+   }
+
+   public void setDesiredVelocityClamped(double desiredVelocityClamped)
+   {
+      this.desiredVelocityClamped.set(desiredVelocityClamped);
+   }
 }
