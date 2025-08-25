@@ -143,12 +143,17 @@ public class HeightMapToolsTest
          double xCoordinate = gridCenterX + EuclidCoreRandomTools.nextDouble(random, 0.5 * gridSizeXY);
          double yCoordinate = gridCenterY + EuclidCoreRandomTools.nextDouble(random, 0.5 * gridSizeXY);
 
-         int key = HeightMapTools.coordinateToKey(xCoordinate, yCoordinate, gridCenterX, gridCenterY, resolution, centerIndex);
-         double xCoordinateOnGrid = HeightMapTools.keyToXCoordinate(key, gridCenterX, resolution, centerIndex);
-         double yCoordinateOnGrid = HeightMapTools.keyToYCoordinate(key, gridCenterY, resolution, centerIndex);
+         int keyFromCoordinates = HeightMapTools.coordinateToKey(xCoordinate, yCoordinate, gridCenterX, gridCenterY, resolution, centerIndex);
+         double xCoordinateOnGrid = HeightMapTools.keyToXCoordinate(keyFromCoordinates, gridCenterX, resolution, centerIndex);
+         double yCoordinateOnGrid = HeightMapTools.keyToYCoordinate(keyFromCoordinates, gridCenterY, resolution, centerIndex);
 
          Assertions.assertTrue(Math.abs(xCoordinate - xCoordinateOnGrid) < 0.5 * resolution + 1e-10, "Invalid key-coordinate conversion");
          Assertions.assertTrue(Math.abs(yCoordinate - yCoordinateOnGrid) < 0.5 * resolution + 1e-10, "Invalid key-coordinate conversion");
+
+         int xIndex = HeightMapTools.coordinateToIndex(xCoordinateOnGrid, gridCenterX, resolution, centerIndex);
+         int yIndex = HeightMapTools.coordinateToIndex(yCoordinateOnGrid, gridCenterY, resolution, centerIndex);
+         int keyFromIndices = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+         Assertions.assertEquals(keyFromCoordinates, keyFromIndices);
       }
    }
 }
