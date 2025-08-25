@@ -203,7 +203,6 @@ public class AvatarEstimatorThreadManager
             postEstimatorThreadRunnables.get(i).run();
 
          // Write desired commands to robot
-         estimatorThread.getHumanoidRobotContextData().getForceSensorDataHolder().getData()
          hardwareCommunicationInterface.write(estimatorThread.getHumanoidRobotContextData(), estimatorThread.getFullRobotModel());
       }
 
