@@ -1,7 +1,6 @@
 package us.ihmc.avatar.initialSetup;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;

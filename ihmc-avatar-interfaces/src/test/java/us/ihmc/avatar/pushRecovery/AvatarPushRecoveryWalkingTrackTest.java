@@ -10,7 +10,6 @@ import org.junit.jupiter.api.*;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -72,12 +71,6 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       footstepsCompletedPerSide = null;
       swingStartConditions = null;
       swingFinishConditions = null;
-
-      if (avatarSimulation != null)
-      {
-         avatarSimulation.dispose();
-         avatarSimulation = null;
-      }
 
       if (robotVisualizer != null)
       {
@@ -304,7 +297,6 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       return magnitudeScaler * magnitudeAlongEllipse;
    }
 
-   private AvatarSimulation avatarSimulation;
    private RobotVisualizer robotVisualizer;
 
    private void setupCameraForUnitTest()
