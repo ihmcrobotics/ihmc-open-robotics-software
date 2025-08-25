@@ -61,7 +61,6 @@ public class AvatarMultiThreadingFactory
 {
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
-   public static final boolean CREATE_FAST_WALKING_CONTROLLER = false;
    private static final int ROS2_PRIORITY = 25;
 
    private final YoRegistry rootRegistry;
@@ -347,12 +346,6 @@ public class AvatarMultiThreadingFactory
          controllerFactory.useDefaultWalkingControlState();
          controllerFactory.useDefaultDoNothingControlState();
          controllerFactory.useDefaultExitWalkingTransitionControlState(STAND_PREP_STATE);
-         
-         // setup QUICKSTER
-         if (CREATE_FAST_WALKING_CONTROLLER)
-         {
-            
-         }
 
          // setup transitions
          HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
