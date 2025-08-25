@@ -132,8 +132,9 @@ public class Chunk
 
    public void setHeightAt(double xCord, double yCord, float height, double resolution)
    {
-      int i = HeightMapTools.coordinateToIndex(xCord, this.originX, resolution);
-      int j = HeightMapTools.coordinateToIndex(yCord, this.originY, resolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(CHUNK_WIDTH, cellSize);
+      int i = HeightMapTools.coordinateToIndex(xCord, this.originX, resolution, centerIndex);
+      int j = HeightMapTools.coordinateToIndex(yCord, this.originY, resolution, centerIndex);
 
       if (i >= 0 && i < cellsPerAxis && j >= 0 && j < cellsPerAxis)
       {
