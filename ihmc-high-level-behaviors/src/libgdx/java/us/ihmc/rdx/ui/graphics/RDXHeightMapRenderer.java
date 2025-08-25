@@ -43,8 +43,6 @@ public class RDXHeightMapRenderer implements RenderableProvider
    private int centerIndex;
    private final Vector2 gridCenter = new Vector2();
    private float cellSize;
-   private float heightScalingFactor;
-   private float heightOffset;
    private boolean hasBeenCreated;
 
    public void create(int maxCells)
@@ -103,34 +101,14 @@ public class RDXHeightMapRenderer implements RenderableProvider
          shader.set(inputID, cellSize);
       });
       rdxShader.registerUniform(cellSizeUniform);
-
-      RDXUniform heightScalingFactorUniform = RDXUniform.createGlobalUniform("u_heightScalingFactor", (shader, inputID, renderable, combinedAttributes) ->
-      {
-         shader.set(inputID, heightScalingFactor);
-      });
-      rdxShader.registerUniform(heightScalingFactorUniform);
-
-      RDXUniform heightOffsetUniform = RDXUniform.createGlobalUniform("u_heightOffset", (shader, inputID, renderable, combinedAttributes) ->
-      {
-         shader.set(inputID, heightOffset);
-      });
-      rdxShader.registerUniform(heightOffsetUniform);
    }
 
-   public void update(Mat heightMapImage,
-                      float heightOffset,
-                      float gridCenterX,
-                      float gridCenterY,
-                      int centerIndex,
-                      float cellSizeXYInMeters,
-                      float heightScalingFactor)
+   public void update(Mat heightMapImage, float gridCenterX, float gridCenterY, int centerIndex, float cellSizeXYInMeters)
    {
       // Update uniforms
-      this.heightOffset = heightOffset;
       this.gridCenter.set(gridCenterX, gridCenterY);
       this.centerIndex = centerIndex;
       this.cellSize = cellSizeXYInMeters;
-      this.heightScalingFactor = heightScalingFactor;
 
       // Get the vertices buffer (contains the data sent to GPU for the vertex attribute)
       FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
@@ -154,8 +132,8 @@ public class RDXHeightMapRenderer implements RenderableProvider
       FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
       Mat verticesMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, verticesPointer);
 
-      // Convert the height map data to float, and put it into the vertex buffer
-      heightMapImage.convertTo(verticesMat, opencv_core.CV_32FC1);
+      // Direct copy (no type conversion)
+      heightMapImage.copyTo(verticesMat);
 
       verticesMat.close();
       verticesPointer.close();

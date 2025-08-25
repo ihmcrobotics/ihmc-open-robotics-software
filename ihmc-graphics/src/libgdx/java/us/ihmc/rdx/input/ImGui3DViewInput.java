@@ -131,7 +131,8 @@ public class ImGui3DViewInput
             int columnAdjustment = aliasedMouseX * Float.BYTES;
             float normalizedDeviceCoordinateZ = 2.0f * depthBuffer.getFloat(rowAdjustment + columnAdjustment) - 1.0f;
 
-            if (normalizedDeviceCoordinateZ < 1.0f) // 1.0 corresponds to no collision
+            // out of bounds == no collision
+            if (normalizedDeviceCoordinateZ >= 0.0f && normalizedDeviceCoordinateZ < 1.0f)
             {
                fallbackToXYPlaneIntersection = false;
 
@@ -242,5 +243,10 @@ public class ImGui3DViewInput
    public ImGui3DViewPickResult getClosestPick()
    {
       return closestPick;
+   }
+
+   public void setLastZCollision(double lastZCollision)
+   {
+      this.lastZCollision = lastZCollision;
    }
 }

@@ -495,7 +495,8 @@ public class FootstepPlannerRequest
 
       if (getEnvironmentHandler().getHeightMapData() != null)
       {
-         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getEnvironmentHandler().getHeightMapData());
+         HeightMapMessage heightMapMessage = new HeightMapMessage();
+         HeightMapMessageTools.toMessage(getEnvironmentHandler().getHeightMapData(), heightMapMessage);
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
 

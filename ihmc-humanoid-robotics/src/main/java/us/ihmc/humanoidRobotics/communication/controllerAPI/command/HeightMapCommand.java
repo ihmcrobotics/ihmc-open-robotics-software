@@ -5,7 +5,6 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.log.LogTools;
 
 public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMessage>
 {
@@ -55,10 +54,8 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
       for (int i = 0; i < message.getHeights().size(); i++)
       {
          // Calculate cell height
-         int height = message.getHeights().get(i) & 0xFFFF;
-         float cellHeight = (float) (((float) height / message.getHeightScaleFactor()) - message.getHeightOffset());
-         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
-         heights.set(key, cellHeight);
+         float cellHeight = message.getHeights().get(i);
+         heights.set(i, cellHeight);
       }
 
       updateGridDimensions();
@@ -154,6 +151,6 @@ public class HeightMapCommand implements Command<HeightMapCommand, HeightMapMess
 
    public static int indicesToKey(int xIndex, int yIndex, int centerIndex)
    {
-      return xIndex + yIndex * (2 * centerIndex + 1);
+      return yIndex + xIndex * (2 * centerIndex + 1);
    }
 }
