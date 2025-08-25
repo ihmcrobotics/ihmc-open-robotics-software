@@ -106,7 +106,7 @@ public class SnappingTerrainExtractor
          throw new RuntimeException(e);
       }
 
-      // 16 is the number of parameters being passed in as floats
+      // This is the number of parameters being passed in as floats to the kernel
       snappingParametersHostPointer = new FloatPointer(17);
       snappingParametersDevicePointer = new FloatPointer();
 
