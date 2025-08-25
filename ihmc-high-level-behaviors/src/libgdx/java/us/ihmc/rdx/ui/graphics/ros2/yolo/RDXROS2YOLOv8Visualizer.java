@@ -58,8 +58,6 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
    public void renderImGuiWidgets()
    {
       ImGuiStyle style = new ImGuiStyle();
-      float indent = ImGui.getFrameHeight() + style.getItemInnerSpacingX() + 1.0f;
-      ImGui.indent(indent);
 
       ImGui.combo(labels.get("Sensor Selection"), selectedSensor, AVAILABLE_SENSORS);
 
@@ -71,8 +69,6 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
          getPanel().getIsShowing().set(shouldBeActive);
 
       super.renderImGuiWidgets();
-
-      ImGui.unindent(indent);
    }
 
    @Override

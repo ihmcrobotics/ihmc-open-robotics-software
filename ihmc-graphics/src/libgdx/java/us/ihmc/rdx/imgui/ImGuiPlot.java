@@ -1,6 +1,6 @@
 package us.ihmc.rdx.imgui;
 
-import imgui.internal.ImGui;
+import imgui.ImGui;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,7 +9,7 @@ public class ImGuiPlot
 {
    private static final AtomicInteger ID = new AtomicInteger();
 
-   private final String name;
+   private String name;
    private final int bufferSize;
    private final float[] values;
    private int width;
@@ -69,6 +69,11 @@ public class ImGuiPlot
          index = 0;
       }
       values[index] = Float.NaN;
+   }
+
+   public void hideLabel()
+   {
+      name = "###" + name;
    }
 
    public void setWidth(int width)
