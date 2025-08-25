@@ -65,17 +65,17 @@ public class HeightMapTools
 
    public static int keyToXIndex(int key, int centerIndex)
    {
-      return key % (2 * centerIndex + 1);
+      return key / (2 * centerIndex + 1);
    }
 
    public static int keyToYIndex(int key, int centerIndex)
    {
-      return key / (2 * centerIndex + 1);
+      return key % (2 * centerIndex + 1);
    }
 
    public static int indicesToKey(int xIndex, int yIndex, int centerIndex)
    {
-      return xIndex + yIndex * (2 * centerIndex + 1);
+      return yIndex + xIndex * (2 * centerIndex + 1);
    }
 
    public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)
@@ -149,28 +149,16 @@ public class HeightMapTools
       return new double[] {r, g, b};
    }
 
-   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData)
    {
-      int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int totalCells = cellsPerAxis * cellsPerAxis;
+      int totalCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      // This is done for speed optimization
       double[] heightsAsDoubles = heightMapData.getHeights();
       float[] heightsAsFloats = new float[totalCells];
 
-      for (int col = 0; col < cellsPerAxis; col++)
+      for (int i = 0; i < totalCells; i++)
       {
-         for (int row = 0; row < cellsPerAxis; row++)
-         {
-            // This is happening for a reason, the current implementation expects column major for the Mat objects, and the HeightMapData object is column major
-            int rowMajorIndex = row * cellsPerAxis + col;
-            int colMajorIndex = col * cellsPerAxis + row;
-
-            // Get the height as for row major, and save it as column major
-            float height = (float) heightsAsDoubles[rowMajorIndex];
-
-            heightsAsFloats[colMajorIndex] = height;
-         }
+         heightsAsFloats[i] = (float) heightsAsDoubles[i];
       }
 
       FloatBuffer buffer = heightMapToPack.createBuffer();
@@ -194,48 +182,13 @@ public class HeightMapTools
       float[] values = new float[totalCells];
       floatPointer.get(values);
 
-      // Put height values into HeightMapData object
       for (int i = 0; i < totalCells; ++i)
       {
-         float cellHeight = values[i];
-
-         // Put it into the HeightMapData object
-         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
-         heightMapDataToPack.setHeight(key, cellHeight);
+         heightMapDataToPack.setHeight(i, values[i]);
       }
    }
 
-   @Deprecated
-   /**
-    * We shouldn't be using this because we should be changing the snapping kernels to use floats rather than shorts
-    * This is a temporary solution that should be removed! (that's also why it's not tested lol)
-    */ public static void convertCV32FC1ToCV16UC1(Mat floats, Mat shorts, int cellsPerAxis, HeightMapParameters heightMapParameters)
-   {
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
-      // This is done for speed optimization
-      float[] heightsAsFloats = new float[totalCells];
-      FloatBuffer floatBuffer = floats.createBuffer();
-      floatBuffer.get(heightsAsFloats);
-
-      short[] heightsAsShorts = new short[totalCells];
-
-      for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
-      {
-         // Get the height as for row major, and save it as column major
-         short height = (short) ((heightsAsFloats[i] + (float) heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
-         heightsAsShorts[i] = height;
-      }
-
-      ShortBuffer buffer = shorts.createBuffer();
-      buffer.put(heightsAsShorts);
-   }
-
-   public static float[] packArrayForFile(Mat heightMap,
-                                          Point3D gridCenter,
-                                          float widthInMeters,
-                                          float cellSizeInMeters,
-                                          HeightMapParameters heightMapParameters)
+   public static float[] packArrayForFile(Mat heightMap, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       // Snap to cell resolution
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
@@ -252,12 +205,8 @@ public class HeightMapTools
       short[] shortHeights = new short[totalCells];
       shortBuffer.get(shortHeights);
 
-      // Retrieve scale/offset to convert shorts → floats (real heights)
-      float heightOffset = (float) heightMapParameters.getHeightOffset();
-      float scaleFactor = (float) heightMapParameters.getHeightScaleFactor();
-
       // Prepare an output array with a header
-      final int headerFloats = 6;
+      final int headerFloats = 4;
       float[] packedArray = new float[headerFloats + totalCells];
 
       // Write header
@@ -265,8 +214,6 @@ public class HeightMapTools
       packedArray[1] = cellSizeInMeters;
       packedArray[2] = (float) gridCenter.getX();
       packedArray[3] = (float) gridCenter.getY();
-      packedArray[4] = heightOffset;
-      packedArray[5] = scaleFactor;
 
       // Convert shorts to floats and copy into a packed array
       for (int i = 0; i < totalCells; ++i)

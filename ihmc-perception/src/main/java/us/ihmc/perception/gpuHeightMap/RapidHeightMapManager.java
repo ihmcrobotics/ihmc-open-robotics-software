@@ -54,16 +54,16 @@ public class RapidHeightMapManager
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final ROS2Publisher<HeightMapMessage> controllerHeightMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
+   private final HeightMapData lastestGlobalHeightMapData;
    private final HeightMapData latestTerrainHeightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
 
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
    private final float[] heightsArray;
-
+   private final ChunkedMapManager chunkedMapManager;
    private long sequenceId = 0;
    private FileOutputStream heightMapOutputStream;
-   private final ChunkedMapManager chunkedMapManager;
 
    public RapidHeightMapManager(String robotName,
                                 ROS2Node ros2Node,
@@ -76,6 +76,7 @@ public class RapidHeightMapManager
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
 
+      lastestGlobalHeightMapData = new HeightMapData((float) heightMapParameters.getCellSize(), (float) heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
       latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
                                                      0.0,
@@ -99,8 +100,31 @@ public class RapidHeightMapManager
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
-      
+
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessage.class, robotName));
+   }
+
+   public static void logHeightMapToFile(FileOutputStream fos, float[] packedArray, double timestamp) throws IOException
+   {
+      int frameSize = 8 + packedArray.length * Float.BYTES;
+
+      ByteBuffer buffer = ByteBuffer.allocate(4 + frameSize);
+      buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+      // Write frame size (int)
+      buffer.putInt(frameSize);
+
+      // Write timestamp (double)
+      buffer.putDouble(timestamp);
+
+      // Write packed float data
+      for (float f : packedArray)
+      {
+         buffer.putFloat(f);
+      }
+
+      // Write to file
+      fos.write(buffer.array());
    }
 
    public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
@@ -124,7 +148,7 @@ public class RapidHeightMapManager
       double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
 
-      publishHeightMap(hostGlobalHeightMap, heightMapCenterPoint, rapidHeightMapExtractor.getCellsPerAxis());
+      publishHeightMap(hostGlobalHeightMap);
 
       if (heightMapParameters.getEnableChunkedMap())
       {
@@ -134,23 +158,22 @@ public class RapidHeightMapManager
       hostGlobalHeightMap.close();
    }
 
-   private void publishHeightMap(Mat globalHeightMap, Point3D heightMapCenter, int cellsPerAxis)
+   private void publishHeightMap(Mat globalHeightMap)
    {
-      HeightMapMessageTools.toMessage(globalHeightMap,
-                                      heightsArray,
-                                      heightMapMessage,
-                                      heightMapCenter,
-                                      heightMapParameters.getGlobalWidthInMeters(),
-                                      heightMapParameters.getCellSize(),
-                                      cellsPerAxis);
+      HeightMapTools.convertToHeightMapData(globalHeightMap,
+                                            lastestGlobalHeightMapData,
+                                            heightMapCenterPoint,
+                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                            (float) heightMapParameters.getCellSize());
+
+      HeightMapMessageTools.toMessage(lastestGlobalHeightMapData, heightMapMessage);
 
       if (heightMapParameters.getLogHeightMap())
       {
          float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
                                                                heightMapCenterPoint,
                                                                (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                               (float) heightMapParameters.getCellSize(),
-                                                               heightMapParameters);
+                                                               (float) heightMapParameters.getCellSize());
          try
          {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
@@ -206,29 +229,6 @@ public class RapidHeightMapManager
       heightMapMessage.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
       controllerHeightMapMessagePublisher.publish(heightMapMessage);
-   }
-
-   public static void logHeightMapToFile(FileOutputStream fos, float[] packedArray, double timestamp) throws IOException
-   {
-      int frameSize = 8 + packedArray.length * Float.BYTES;
-
-      ByteBuffer buffer = ByteBuffer.allocate(4 + frameSize);
-      buffer.order(ByteOrder.LITTLE_ENDIAN);
-
-      // Write frame size (int)
-      buffer.putInt(frameSize);
-
-      // Write timestamp (double)
-      buffer.putDouble(timestamp);
-
-      // Write packed float data
-      for (float f : packedArray)
-      {
-         buffer.putFloat(f);
-      }
-
-      // Write to file
-      fos.write(buffer.array());
    }
 
    /**

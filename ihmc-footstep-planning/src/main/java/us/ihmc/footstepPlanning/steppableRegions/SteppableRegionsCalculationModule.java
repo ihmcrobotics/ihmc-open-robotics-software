@@ -89,7 +89,7 @@ public class SteppableRegionsCalculationModule
 
       SteppableRegionsEnvironmentModel environment;
       environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(terrainMapData.getSteppabilityMat(),
-                                                                                               terrainMapData.getSnapHeightMat(),
+                                                                                               terrainMapData.getHeightMap(),
                                                                                                terrainMapData.getSnapNormalXMat(),
                                                                                                terrainMapData.getSnapNormalYMat(),
                                                                                                terrainMapData.getSnapNormalZMat(),
