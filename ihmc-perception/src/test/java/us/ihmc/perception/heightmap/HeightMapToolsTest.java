@@ -21,6 +21,79 @@ public class HeightMapToolsTest
    private final static float MILLISECOND_TOLERANCE = 1.0f;
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
 
+   /**
+    * Dealing with row-major or column-major is confusing.
+    * This test doesn't really test anything, but we want to show that we can work with both row major and column major data.
+    * Because the method for converting and unconverting the height map data is the same, it doesn't matter if our input mat is row or column-major.
+    */
+   @Test
+   public void testRowMajor()
+   {
+      // Setup default values
+      double cellSize = 0.2;
+      double terrainWidth = 1.2;
+      double centerX = 0.0;
+      double centerY = 0.0;
+      int centerIndex = HeightMapTools.computeCenterIndex(terrainWidth, cellSize);
+      int cellsPerAxis = 2 * centerIndex + 1;
+      Point3D centerLocation = new Point3D(centerX, centerY, 0.0);
+
+      // ROW-MAJOR INPUT
+      {
+         Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+
+         for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
+         {
+            // Insert into array in row-major
+            int x = i % cellsPerAxis;
+            int y = i / cellsPerAxis;
+
+            originalMat.ptr(y, x).putFloat(i);
+         }
+
+         HeightMapData heightMapData = new HeightMapData(cellSize, terrainWidth, centerX, centerY);
+         HeightMapTools.convertToHeightMapData(originalMat, heightMapData, centerLocation, (float) terrainWidth, (float) cellSize);
+
+         Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         HeightMapTools.convertHeightMapDataToMat(newData, heightMapData);
+
+         for (int x = 0; x < cellsPerAxis; x++)
+         {
+            for (int y = 0; y < cellsPerAxis; y++)
+            {
+               assertEquals(originalMat.ptr(x, y).getFloat(), newData.ptr(x, y).getFloat());
+            }
+         }
+      }
+
+      // COLUMN-MAJOR INPUT
+      {
+         Mat originalMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
+         {
+            // Insert into array in column-major
+            int x = i / cellsPerAxis;
+            int y = i % cellsPerAxis;
+
+            originalMat.ptr(x, y).putFloat(i);
+         }
+
+         HeightMapData heightMapData = new HeightMapData(cellSize, terrainWidth, centerX, centerY);
+         HeightMapTools.convertToHeightMapData(originalMat, heightMapData, centerLocation, (float) terrainWidth, (float) cellSize);
+
+         Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         HeightMapTools.convertHeightMapDataToMat(newData, heightMapData);
+
+         for (int x = 0; x < cellsPerAxis; x++)
+         {
+            for (int y = 0; y < cellsPerAxis; y++)
+            {
+               assertEquals(originalMat.ptr(x, y).getFloat(), newData.ptr(x, y).getFloat());
+            }
+         }
+      }
+   }
+
    @Test
    public void testRoundTripConvertMatToHeightMapDataAndBack()
    {
@@ -40,7 +113,7 @@ public class HeightMapToolsTest
       HeightMapTools.convertToHeightMapData(originalMat, heightMapData, centerLocation, (float) terrainWidth, (float) cellSize);
 
       Mat newData = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
-      HeightMapTools.convertHeightMapDataToMat(newData, heightMapData, heightMapParameters);
+      HeightMapTools.convertHeightMapDataToMat(newData, heightMapData);
 
       for (int x = 0; x < cellsPerAxis; x++)
       {
@@ -70,7 +143,7 @@ public class HeightMapToolsTest
 
       for (int i = 0; i < iterations; i++)
       {
-         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
+         HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
       }
 
       long endTime = System.nanoTime();

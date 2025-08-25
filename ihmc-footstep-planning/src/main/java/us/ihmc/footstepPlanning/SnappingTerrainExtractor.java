@@ -106,16 +106,14 @@ public class SnappingTerrainExtractor
          throw new RuntimeException(e);
       }
 
-      // 16 is the number of parameters being passed in as floats
-      snappingParametersHostPointer = new FloatPointer(19);
+      // This is the number of parameters being passed in as floats to the kernel
+      snappingParametersHostPointer = new FloatPointer(17);
       snappingParametersDevicePointer = new FloatPointer();
 
       computeDerivedParameters();
 
       terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
                                           cellsPerAxisTerrain,
-                                          heightMapParameters.getHeightScaleFactor(),
-                                          heightMapParameters.getHeightOffset(),
                                           heightMapParameters.getCellSize(),
                                           heightMapParameters.getTerrainWidthInMeters());
 
@@ -147,14 +145,10 @@ public class SnappingTerrainExtractor
 
       Point2D gridCenter = heightMapData.getGridCenter();
 
-      // Bunch of nonsense to get the Mat into the data we expect in the terrain kernels
       Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
-      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData, heightMapParameters);
-      Mat convertedHeightMap = new Mat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
-      HeightMapTools.convertCV32FC1ToCV16UC1(heightMap, convertedHeightMap, cellsPerAxisTerrain, heightMapParameters);
-
+      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
       GpuMat gpuHeightMap = new GpuMat();
-      gpuHeightMap.upload(convertedHeightMap);
+      gpuHeightMap.upload(heightMap);
 
       // Populate parameters buffer for the snapping kernel
       float[] snappingParametersArray = populateSnappingParametersArray(gridCenter);
@@ -246,11 +240,6 @@ public class SnappingTerrainExtractor
          terrainMapData.setHeightMap(cpuHeightMap);
          cpuHeightMap.close();
 
-         Mat cpuSnapHeightMap = new Mat();
-         snapHeightMat.download(cpuSnapHeightMap);
-         terrainMapData.setSnapHeightMat(cpuSnapHeightMap);
-         cpuSnapHeightMap.close();
-
          Mat cpuSnapNormalXMap = new Mat();
          snapNormalXMat.download(cpuSnapNormalXMap);
          terrainMapData.setSnapNormalXMat(cpuSnapNormalXMap);
@@ -310,8 +299,6 @@ public class SnappingTerrainExtractor
                           (float) gridCenter.getY(),
                           (float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
-                          (float) heightMapParameters.getHeightScaleFactor(),
-                          (float) heightMapParameters.getHeightOffset(),
                           (float) steppableRegionParameters.getFootLength(),
                           (float) steppableRegionParameters.getFootWidth(),
                           (float) steppableRegionParameters.getDistanceFromCliffTops(),

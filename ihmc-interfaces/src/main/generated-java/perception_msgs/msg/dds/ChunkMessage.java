@@ -43,7 +43,7 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
    public ChunkMessage()
    {
-      heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
+      heights_ = new us.ihmc.idl.IDLSequence.Float (5000, "type_5");
 
    }
 

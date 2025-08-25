@@ -33,7 +33,6 @@ public class FootstepPlannerLogLoaderTest
       PerceptionDebugTools.printMat("ContactMap", terrainMapData.getContactMap(), 10);
 
       PerceptionDebugTools.printMat("HeightMap", terrainMapData.getHeightMap(), 10);
-      PerceptionDebugTools.printMat("SnapHeightMap", terrainMapData.getSnapHeightMat(), 10);
       PerceptionDebugTools.printMat("SnapNormalX", terrainMapData.getSnapNormalXMat(), 10);
       PerceptionDebugTools.printMat("SnapNormalY", terrainMapData.getSnapNormalYMat(), 10);
       PerceptionDebugTools.printMat("SnapNormalZ", terrainMapData.getSnapNormalZMat(), 10);
