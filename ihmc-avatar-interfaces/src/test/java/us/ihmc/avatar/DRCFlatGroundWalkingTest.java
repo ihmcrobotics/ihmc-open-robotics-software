@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.*;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.avatar.testTools.scs2.SCS2RunsSameWayTwiceVerifier;
@@ -256,13 +255,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @AfterEach
    public void destroyOtherStuff()
    {
-
-      if (avatarSimulation != null)
-      {
-         avatarSimulation.dispose();
-         avatarSimulation = null;
-      }
-
       if (robotVisualizer != null)
       {
          robotVisualizer.close();
@@ -270,7 +262,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
    }
 
-   private AvatarSimulation avatarSimulation;
    private RobotVisualizer robotVisualizer;
 
    protected void setupAndTestFlatGroundSimulationTrackTwice(DRCRobotModel robotModel)
