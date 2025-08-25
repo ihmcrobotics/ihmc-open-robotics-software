@@ -2,6 +2,7 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -17,7 +18,7 @@ public interface EstimatorCommunicationInterface
 {
    void read(SensorDataContext sensorDataContext);
 
-   void write(HumanoidRobotContextJointData sensorDataContext);
+   void write(HumanoidRobotContextData sensorData, FullHumanoidRobotModel fullRobotModel);
 
    void start();
 

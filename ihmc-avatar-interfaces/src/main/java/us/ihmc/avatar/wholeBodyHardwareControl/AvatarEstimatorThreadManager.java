@@ -203,7 +203,8 @@ public class AvatarEstimatorThreadManager
             postEstimatorThreadRunnables.get(i).run();
 
          // Write desired commands to robot
-         hardwareCommunicationInterface.write(estimatorThread.getHumanoidRobotContextData().getProcessedJointData());
+         estimatorThread.getHumanoidRobotContextData().getForceSensorDataHolder().getData()
+         hardwareCommunicationInterface.write(estimatorThread.getHumanoidRobotContextData(), estimatorThread.getFullRobotModel());
       }
 
       // Update YoVariable server
