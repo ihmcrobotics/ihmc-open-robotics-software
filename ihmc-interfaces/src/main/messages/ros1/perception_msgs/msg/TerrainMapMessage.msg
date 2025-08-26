@@ -15,22 +15,6 @@ float64 map_center_x
 # Y coordinate of the center of the terrain map
 float64 map_center_y
 
-bool has_terrain_cost_data
-
-bool has_contact_map_data
-
-bool has_height_map_float_data
-
-bool has_height_map_data
-
-bool has_snapped_normal_data
-
-bool has_snapped_area_data
-
-bool has_steppability_data
-
-bool has_steppable_connections_data
-
 # The raw data for the terrain cost value, which are stored as chars.
 int8[] terrain_cost_data
 
@@ -38,9 +22,6 @@ int8[] terrain_cost_data
 int8[] contact_map_data
 
 float32[] heights
-
-# The raw data for the raw heights, which are stored as two bytes to form one short.
-int8[] height_map_data
 
 # The raw data for the snap normal x value, which are stored as chars.
 int8[] snapped_normal_x_data

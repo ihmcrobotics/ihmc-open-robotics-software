@@ -34,14 +34,6 @@ module perception_msgs
          * Y coordinate of the center of the terrain map
          */
         double map_center_y;
-        boolean has_terrain_cost_data;
-        boolean has_contact_map_data;
-        boolean has_height_map_float_data;
-        boolean has_height_map_data;
-        boolean has_snapped_normal_data;
-        boolean has_snapped_area_data;
-        boolean has_steppability_data;
-        boolean has_steppable_connections_data;
         /**
          * The raw data for the terrain cost value, which are stored as chars.
          */
@@ -51,10 +43,6 @@ module perception_msgs
          */
         sequence<octet, 250000> contact_map_data;
         sequence<float, 255000> heights;
-        /**
-         * The raw data for the raw heights, which are stored as two bytes to form one short.
-         */
-        sequence<octet, 500000> height_map_data;
         /**
          * The raw data for the snap normal x value, which are stored as chars.
          */

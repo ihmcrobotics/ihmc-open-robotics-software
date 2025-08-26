@@ -4,13 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-
-import java.util.ArrayList;
 
 public class TerrainMapTools
 {
@@ -96,7 +90,7 @@ public class TerrainMapTools
       terrainMapData.setSteppabilityConnectionsMap(bytesForSteppabilityConnectionsMap);
    }
 
-   public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
+   public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y)
    {
       int cellsPerMeter = terrainMapData.getCenterIndex();
       int localGridSize = terrainMapData.getCellsPerAxis();
@@ -104,46 +98,8 @@ public class TerrainMapTools
       double centerY = terrainMapData.getTerrainMapCenter().getY();
       int rIndex = getLocalIndex(cellsPerMeter, localGridSize, x, centerX);
       int cIndex = getLocalIndex(cellsPerMeter, localGridSize, y, centerY);
-      int halfGridSize = localGridSize / 2;
 
-      if (terrainMapData.hasSnapNormal())
-      {
-         return terrainMapData.getNormalLocal(rIndex, cIndex);
-      }
-      else
-      {
-         Plane3D bestFitPlane = new Plane3D();
-         ArrayList<Point3D> points = new ArrayList<>();
-
-         //LogTools.info("rIndex: {}, cIndex: {}, origin: {}", rIndex, cIndex, sensorOrigin);
-
-         for (int i = -patchSize; i <= patchSize; i++)
-         {
-            for (int j = -patchSize; j <= patchSize; j++)
-            {
-               int r = rIndex + i;
-               int c = cIndex + j;
-               if (isOutOfBounds(localGridSize, r, c))
-                  continue;
-
-               float height = terrainMapData.getHeightFloatLocal(r, c);
-
-               // compute full 3d point
-               Point3D point = new Point3D();
-               point.setX(centerX + (double) (r - halfGridSize) / cellsPerMeter);
-               point.setY(centerY + (double) (c - halfGridSize) / cellsPerMeter);
-               point.setZ(height);
-
-               //LogTools.info("Point: {}", point);
-
-               points.add(point);
-            }
-         }
-
-         LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
-         planeFitter.fitPlaneToPoints(points, bestFitPlane);
-         return bestFitPlane.getNormal();
-      }
+      return terrainMapData.getNormalLocal(rIndex, cIndex);
    }
 
    public static TerrainMapMessage toMessage(TerrainMapData terrainMapData)
@@ -156,52 +112,17 @@ public class TerrainMapTools
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
 
-      if (terrainMapData.hasTerrainCostArray())
-      {
-         message.setHasTerrainCostData(true);
-         message.getTerrainCostData().add(terrainMapData.getTerrainCostMap());
-      }
-      if (terrainMapData.hasCostArray())
-      {
-         message.setHasContactMapData(true);
-         message.getContactMapData().add(terrainMapData.getContactMap());
-      }
+      message.getTerrainCostData().add(terrainMapData.getTerrainCostMap());
+      message.getContactMapData().add(terrainMapData.getContactMap());
 
-      if (terrainMapData.hasHeightMapFloats())
-      {
-         message.setHasHeightMapFloatData(true);
-         message.getHeights().add(terrainMapData.getHeightMap());
-      }
-      if (terrainMapData.hasSnapNormal())
-      {
-         message.setHasSnappedNormalData(true);
-         message.getSnappedNormalXData().add(terrainMapData.getSnapNormalXMap());
-         message.getSnappedNormalYData().add(terrainMapData.getSnapNormalYMap());
-         message.getSnappedNormalZData().add(terrainMapData.getSnapNormalZMap());
-      }
-      if (terrainMapData.hasSnappedArea())
-      {
-         message.setHasSnappedAreaData(true);
-         message.getSnappedAreaData().add(terrainMapData.getSnappedAreaFractionMap());
-      }
-      if (terrainMapData.hasSteppability())
-      {
-         message.setHasSteppabilityData(true);
-         message.getSteppabilityData().add(terrainMapData.getSteppabilityMap());
-      }
-      if (terrainMapData.hasSteppableConnections())
-      {
-         message.setHasSteppableConnectionsData(true);
-         message.getSteppableConnectionsData().add(terrainMapData.getSteppabilityConnectionsMap());
-      }
+      message.getHeights().add(terrainMapData.getHeightMap());
+      message.getSnappedNormalXData().add(terrainMapData.getSnapNormalXMap());
+      message.getSnappedNormalYData().add(terrainMapData.getSnapNormalYMap());
+      message.getSnappedNormalZData().add(terrainMapData.getSnapNormalZMap());
+      message.getSnappedAreaData().add(terrainMapData.getSnappedAreaFractionMap());
+      message.getSteppabilityData().add(terrainMapData.getSteppabilityMap());
+      message.getSteppableConnectionsData().add(terrainMapData.getSteppabilityConnectionsMap());
 
       return message;
-   }
-
-   public static boolean isEmpty(TerrainMapMessage message)
-   {
-      if (message.getHasHeightMapData())
-         return false;
-      return !message.getHasSteppabilityData();
    }
 }

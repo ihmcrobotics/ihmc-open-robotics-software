@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -9,9 +8,6 @@ import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.opencv.OpenCVTools;
-
-import java.nio.ByteBuffer;
 
 public class TerrainMapData
 {
@@ -54,6 +50,10 @@ public class TerrainMapData
       snapNormalXMap = new byte[cellsPerAxis * cellsPerAxis];
       snapNormalYMap = new byte[cellsPerAxis * cellsPerAxis];
       snapNormalZMap = new byte[cellsPerAxis * cellsPerAxis];
+
+      snappedAreaFractionMap = new byte[cellsPerAxis * cellsPerAxis];
+      steppabilityMap = new byte[cellsPerAxis * cellsPerAxis];
+      steppabilityConnectionsMap = new byte[cellsPerAxis * cellsPerAxis];
    }
 
    public TerrainMapData(TerrainMapData other)
@@ -81,48 +81,6 @@ public class TerrainMapData
    public TerrainMapData(TerrainMapMessage other)
    {
       setFromPacket(other);
-   }
-
-   public boolean isEmpty()
-   {
-      if (hasHeightMapFloats())
-         return false;
-      return !hasSteppability();
-   }
-
-   public boolean hasTerrainCostArray()
-   {
-      return terrainCostMap != null;
-   }
-
-   public boolean hasCostArray()
-   {
-      return contactMap != null;
-   }
-
-   public boolean hasHeightMapFloats()
-   {
-      return heightMap != null;
-   }
-
-   public boolean hasSnapNormal()
-   {
-      return snapNormalXMap != null && snapNormalYMap != null && snapNormalZMap != null;
-   }
-
-   public boolean hasSteppability()
-   {
-      return steppabilityMap != null;
-   }
-
-   public boolean hasSteppableConnections()
-   {
-      return steppabilityConnectionsMap != null;
-   }
-
-   public boolean hasSnappedArea()
-   {
-      return snappedAreaFractionMap != null;
    }
 
    public int getLocalXIndex(double coordinate)
@@ -342,7 +300,7 @@ public class TerrainMapData
       this.steppabilityMap = steppabilityMap;
    }
 
-   public void setSteppabilityConnectionsMap(byte[]  steppabilityConnectionsMap)
+   public void setSteppabilityConnectionsMap(byte[] steppabilityConnectionsMap)
    {
       this.steppabilityConnectionsMap = steppabilityConnectionsMap;
    }
@@ -383,91 +341,14 @@ public class TerrainMapData
 
       terrainMapCenter.set(message.getMapCenterX(), message.getMapCenterY());
 
-      if (message.getHasTerrainCostData())
-      {
-         if (terrainCostMap == null)
-            terrainCostMap = new byte[cellsPerAxis * cellsPerAxis];
-
-         message.getTerrainCostData().add(terrainCostMap);
-      }
-      else
-      {
-         terrainCostMap = null;
-      }
-      if (message.getHasContactMapData())
-      {
-         if (contactMap == null)
-            contactMap = new byte[cellsPerAxis * cellsPerAxis];
-
-         message.getContactMapData().add(contactMap);
-      }
-      else
-      {
-         contactMap = null;
-      }
-      if (message.getHasHeightMapFloatData())
-      {
-         if (heightMap == null)
-            heightMap = new float[cellsPerAxis * cellsPerAxis];
-
-         message.getHeights().add(heightMap);
-      }
-      else
-      {
-         heightMap = null;
-      }
-      if (message.getHasSnappedNormalData())
-      {
-         if (snapNormalXMap == null)
-            snapNormalXMap = new byte[cellsPerAxis * cellsPerAxis];
-         message.getSnappedNormalXData().add(snapNormalXMap);
-         if (snapNormalYMap == null)
-            snapNormalYMap = new byte[cellsPerAxis * cellsPerAxis];
-         message.getSnappedNormalYData().add(snapNormalYMap);
-         if (snapNormalZMap == null)
-            snapNormalZMap = new byte[cellsPerAxis * cellsPerAxis];
-         message.getSnappedNormalZData().add(snapNormalZMap);
-      }
-      else
-      {
-         snapNormalXMap = null;
-         snapNormalYMap = null;
-         snapNormalZMap = null;
-      }
-      if (message.getHasSteppabilityData())
-      {
-         if (steppabilityMap == null)
-            steppabilityMap = new byte[cellsPerAxis * cellsPerAxis];
-         message.getSteppabilityData().add(steppabilityMap);
-      }
-      else
-      {
-         steppabilityMap = null;
-      }
-      if (message.getHasSteppableConnectionsData())
-      {
-         if (steppabilityConnectionsMap == null)
-            steppabilityConnectionsMap = new byte[cellsPerAxis * cellsPerAxis];
-         message.getSteppableConnectionsData().add(steppabilityConnectionsMap);
-      }
-      else
-      {
-         steppabilityConnectionsMap = null;
-      }
-      if (message.getHasSnappedAreaData())
-      {
-         if (snappedAreaFractionMap == null)
-            snappedAreaFractionMap = new byte[cellsPerAxis * cellsPerAxis];
-         message.getSnappedAreaData().add(snappedAreaFractionMap);
-      }
-      else
-      {
-         snappedAreaFractionMap = null;
-      }
-   }
-
-   private void packDataIntoMatFromByteBuffer(ByteBuffer buffer, Mat dataToPack)
-   {
-      dataToPack.data().put(buffer.array(), 0, (int) OpenCVTools.dataSize(dataToPack));
+      message.getTerrainCostData().add(terrainCostMap);
+      message.getContactMapData().add(contactMap);
+      message.getHeights().add(heightMap);
+      message.getSnappedNormalXData().add(snapNormalXMap);
+      message.getSnappedNormalYData().add(snapNormalYMap);
+      message.getSnappedNormalZData().add(snapNormalZMap);
+      message.getSteppabilityData().add(steppabilityMap);
+      message.getSteppableConnectionsData().add(steppabilityConnectionsMap);
+      message.getSnappedAreaData().add(snappedAreaFractionMap);
    }
 }

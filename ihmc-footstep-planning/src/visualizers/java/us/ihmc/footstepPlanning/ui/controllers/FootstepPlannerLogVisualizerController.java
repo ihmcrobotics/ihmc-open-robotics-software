@@ -354,7 +354,7 @@ public class FootstepPlannerLogVisualizerController
 
       messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
 
-      if (!TerrainMapTools.isEmpty(footstepPlannerLog.getRequestPacket().getTerrainMapMessage()))
+      if (footstepPlannerLog.getRequestPacket().getTerrainMapMessage() != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.TerrainMapData, footstepPlannerLog.getRequestPacket().getTerrainMapMessage());
       }

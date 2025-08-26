@@ -303,7 +303,7 @@ public class HeightMapPolygonSnapper
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       HeightMapData heightMapData = environmentHandler.getHeightMapData();
 
-      if (environmentHandler.hasTerrainMapData() && terrainMapData.hasHeightMapFloats() && terrainMapData.hasSnapNormal())
+      if (environmentHandler.hasTerrainMapData())
       {
          transformToReturn = computeSnapFromTerrainMap(polygonToSnap, terrainMapData);
       }
