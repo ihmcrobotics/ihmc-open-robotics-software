@@ -259,6 +259,9 @@ public class AvatarMultiThreadingFactory
       if (createStepGeneratorThread)
          yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
 
+      if (ikStreamingThread.hasValue())
+         yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
+
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
@@ -269,7 +272,7 @@ public class AvatarMultiThreadingFactory
                                                            estimatorThread.get(),
                                                            controllerThread.get(),
                                                            stepGeneratorThread.get(),
-                                                           ikStreamingThread.get(),
+                                                           ikStreamingThread.hasValue() ? ikStreamingThread.get() : null,
                                                            affinity,
                                                            masterThreadDt,
                                                            period,
@@ -486,8 +489,6 @@ public class AvatarMultiThreadingFactory
                                                                             controllerContextFactory,
                                                                             robotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters));
-
-      yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
    }
 
    /**
