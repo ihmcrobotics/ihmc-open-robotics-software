@@ -7,6 +7,7 @@ import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -63,6 +64,9 @@ public class AvatarMultiThreadingManager
    private final YoDouble stepGeneratorThreadUpdateRate = new YoDouble("stepGeneratorThreadUpdateRate", registry);
    private final FrequencyCalculator stepGeneratorThreadFrequencyCalculator = new FrequencyCalculator(false);
 
+   private final YoDouble ikStreamingThreadUpdateRate = new YoDouble("ikStreamingThreadUpdateRate", registry);
+   private final FrequencyCalculator ikStreamingThreadFrequencyCalculator = new FrequencyCalculator(false);
+
    private final DisposableRobotController threadScheduler;
 
    private final PeriodicParameters periodicParameters;
@@ -100,6 +104,7 @@ public class AvatarMultiThreadingManager
                                       AvatarEstimatorThread estimatorThread,
                                       AvatarControllerThread controllerThread,
                                       AvatarStepGeneratorThread stepGeneratorThread,
+                                      IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
                                       AvatarAffinityInterface affinity,
                                       double masterThreadDt,
                                       MonotonicTime period,
@@ -129,6 +134,9 @@ public class AvatarMultiThreadingManager
 
       if (stepGeneratorThread != null)
          tasks.add(setupStepGeneratorTaskAndThread(robotModel, stepGeneratorThread, masterFullRobotModel, yoVariableServer));
+
+      if (ikStreamingThread != null)
+         tasks.add(setupIKStreamingTaskAndThread(ikStreamingThread, yoVariableServer));
 
       // Set up the thread manager
       if (useMultiThreading)
@@ -254,6 +262,44 @@ public class AvatarMultiThreadingManager
       }
 
       return stepGeneratorTask;
+   }
+
+   private HumanoidRobotControlTask setupIKStreamingTaskAndThread(IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
+                                                                  YoVariableServer yoVariableServer)
+   {
+      // Set up Step Generator Task
+      IKStreamingRTPluginFactory.IKStreamingRTTask ikStreamingTask = IKStreamingRTPluginFactory.createIKStreamingRTTask(ikStreamingThread, masterThreadDt);
+
+      if (yoVariableServer != null)
+         ikStreamingTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                           ikStreamingThread.getYoVariableRegistry()));
+
+      ikStreamingTask.addCallbackPostTask(() ->
+                                          {
+                                             ikStreamingThreadFrequencyCalculator.ping();
+                                             ikStreamingThreadUpdateRate.set(ikStreamingThreadFrequencyCalculator.getFrequency());
+                                          });
+
+      // Set up Step Generator Thread
+      if (useRealtimeThreads && useMultiThreading)
+      {
+         RealtimeThread ikStreamingRealtimeThread = new RealtimeThread(affinity.getIKStreamingThreadPriority(),
+                                                                       ikStreamingTask,
+                                                                       ikStreamingTask.getClass().getSimpleName() + "Thread");
+         ikStreamingRealtimeThread.setAffinity(affinity.getIKStreamingThreadProcessor());
+         ikStreamingRealtimeThread.start();
+
+         childThreads.add(ikStreamingRealtimeThread);
+      }
+      else if (!useRealtimeThreads && useMultiThreading)
+      {
+         Thread ikStreamingNonRealtimeThread = new Thread(ikStreamingTask, ikStreamingTask.getClass().getSimpleName() + "Thread");
+         ikStreamingNonRealtimeThread.start();
+
+         childThreads.add(ikStreamingNonRealtimeThread);
+      }
+
+      return ikStreamingTask;
    }
 
    public void start()
