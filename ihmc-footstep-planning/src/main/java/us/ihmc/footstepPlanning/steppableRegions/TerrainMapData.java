@@ -21,7 +21,7 @@ public class TerrainMapData
     */
    private final Point2D terrainMapCenter = new Point2D();
 
-   private int localGridSize;
+   private int cellsPerAxis;
    private int cellsPerMeter = 50;
 
    private double gridResolutionXY;
@@ -39,20 +39,20 @@ public class TerrainMapData
    private Mat snappedAreaFractionImage;
    private int centerIndex;
 
-   public TerrainMapData(int height, int width, double gridResolutionXY, double gridSizeXY)
+   public TerrainMapData(int cellsPerAxis, double gridResolutionXY, double gridSizeXY)
    {
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
 
       centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
 
-      heightMap = new Mat(height, width, opencv_core.CV_32FC1);
-      localGridSize = height;
+      heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      this.cellsPerAxis = cellsPerAxis;
    }
 
    public TerrainMapData(TerrainMapData other)
    {
-      this.localGridSize = other.localGridSize;
+      this.cellsPerAxis = other.cellsPerAxis;
       this.cellsPerMeter = other.cellsPerMeter;
       this.gridResolutionXY = other.gridResolutionXY;
       this.centerIndex = other.centerIndex;
@@ -129,7 +129,7 @@ public class TerrainMapData
 
    private int getLocalIndex(double coordinate, double center)
    {
-      return TerrainMapTools.getLocalIndex(cellsPerMeter, localGridSize, coordinate, center);
+      return TerrainMapTools.getLocalIndex(cellsPerMeter, cellsPerAxis, coordinate, center);
    }
 
    public float getSnappedAreaFractionInWorld(double x, double y)
@@ -176,7 +176,7 @@ public class TerrainMapData
 
    public float getHeightLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, rIndex, cIndex))
          return 0.0f;
 
       // This mask is necessary because the height is stored as a short, and it discards all the additional information past those two bytes.
@@ -185,7 +185,7 @@ public class TerrainMapData
 
    public float getSnappedAreaLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, rIndex, cIndex))
          return 0.0f;
 
       // This mask is necessary because the area is stored as an unsigned char, and it discards all the additional information past that one byte. We then scale
@@ -195,7 +195,7 @@ public class TerrainMapData
 
    public UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, rIndex, cIndex))
       {
          return new UnitVector3D(0.0, 0.0, 1.0);
       }
@@ -214,7 +214,7 @@ public class TerrainMapData
 
    private float getContactScoreLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, rIndex, cIndex))
          return 0.0f;
 
       return (float) ((contactMap.ptr(rIndex, cIndex).get() & 0xFF));
@@ -227,7 +227,7 @@ public class TerrainMapData
 
    private int getSteppabilityLocal(int rIndex, int cIndex)
    {
-      if (TerrainMapTools.isOutOfBounds(localGridSize, rIndex, cIndex))
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, rIndex, cIndex))
          return SnapResult.SNAP_FAILED.ordinal();
 
       // This mask is necessary because the area is stored as an unsigned char, and it discards all the additional information past that one byte.
@@ -289,9 +289,9 @@ public class TerrainMapData
       return gridSizeXY;
    }
 
-   public int getLocalGridSize()
+   public int getCellsPerAxis()
    {
-      return localGridSize;
+      return cellsPerAxis;
    }
 
    public void setTerrainCostMap(Mat terrainCostMap)
@@ -372,7 +372,7 @@ public class TerrainMapData
 
    public void setFromPacket(TerrainMapMessage message)
    {
-      localGridSize = message.getLocalGridSize();
+      cellsPerAxis = message.getLocalGridSize();
       cellsPerMeter = message.getCellsPerMeter();
 
       terrainMapCenter.set(message.getMapCenterX(), message.getMapCenterY());
@@ -380,7 +380,7 @@ public class TerrainMapData
       if (message.getHasTerrainCostData())
       {
          if (terrainCostMap == null)
-            terrainCostMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            terrainCostMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getTerrainCostData().getBuffer(), terrainCostMap);
       }
       else
@@ -390,7 +390,7 @@ public class TerrainMapData
       if (message.getHasContactMapData())
       {
          if (contactMap == null)
-            contactMap = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            contactMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getContactMapData().getBuffer(), contactMap);
       }
       else
@@ -400,7 +400,7 @@ public class TerrainMapData
       if (message.getHasHeightMapData())
       {
          if (heightMap == null)
-            heightMap = new Mat(localGridSize, localGridSize, opencv_core.CV_32FC1);
+            heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
 
          ByteBuffer buffer = message.getHeightMapData().getBuffer();
          packDataIntoMatFromByteBuffer(buffer, heightMap);
@@ -412,13 +412,13 @@ public class TerrainMapData
       if (message.getHasSnappedNormalData())
       {
          if (snapNormalXImage == null)
-            snapNormalXImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            snapNormalXImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getSnappedNormalXData().getBuffer(), snapNormalXImage);
          if (snapNormalYImage == null)
-            snapNormalYImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            snapNormalYImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getSnappedNormalYData().getBuffer(), snapNormalYImage);
          if (snapNormalZImage == null)
-            snapNormalZImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            snapNormalZImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getSnappedNormalZData().getBuffer(), snapNormalZImage);
       }
       else
@@ -430,7 +430,7 @@ public class TerrainMapData
       if (message.getHasSteppabilityData())
       {
          if (steppabilityImage == null)
-            steppabilityImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            steppabilityImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getSteppabilityData().getBuffer(), steppabilityImage);
       }
       else
@@ -440,7 +440,7 @@ public class TerrainMapData
       if (message.getHasSteppableConnectionsData())
       {
          if (steppabilityConnectionsMat == null)
-            steppabilityConnectionsMat = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            steppabilityConnectionsMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getSteppableConnectionsData().getBuffer(), steppabilityConnectionsMat);
       }
       else
@@ -450,7 +450,7 @@ public class TerrainMapData
       if (message.getHasSnappedAreaData())
       {
          if (snappedAreaFractionImage == null)
-            snappedAreaFractionImage = new Mat(localGridSize, localGridSize, opencv_core.CV_8UC1);
+            snappedAreaFractionImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
          packDataIntoMatFromByteBuffer(message.getSnappedAreaData().getBuffer(), snappedAreaFractionImage);
       }
       else

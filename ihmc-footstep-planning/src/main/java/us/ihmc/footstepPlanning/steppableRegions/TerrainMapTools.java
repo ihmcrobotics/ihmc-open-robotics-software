@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,10 +33,32 @@ public class TerrainMapTools
       return rIndex < 0 || rIndex >= cellsPerSide || cIndex < 0 || cIndex >= cellsPerSide;
    }
 
+   public static void convertToTerrainMapData(Mat heightMap,
+                                              Mat terrainCostMap,
+                                              Mat contactMap,
+                                              Mat snapNormalXMap,
+                                              Mat snapNormalYMap,
+                                              Mat snapNormalZMap,
+                                              Mat steppabilityMap,
+                                              Mat steppabilityConnectionsMap,
+                                              Mat snappedAreaFractionMap,
+                                              TerrainMapData terrainMapData)
+   {
+      terrainMapData.setHeightMap(heightMap);
+      terrainMapData.setTerrainCostMap(terrainCostMap);
+      terrainMapData.setContactMap(contactMap);
+      terrainMapData.setSnapNormalXMat(snapNormalXMap);
+      terrainMapData.setSnapNormalYMat(snapNormalYMap);
+      terrainMapData.setSnapNormalZMat(snapNormalZMap);
+      terrainMapData.setSteppabilityMat(steppabilityMap);
+      terrainMapData.setSteppabilityConnectionsMat(steppabilityConnectionsMap);
+      terrainMapData.setSnappedAreaFractionMat(snappedAreaFractionMap);
+   }
+
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
    {
       int cellsPerMeter = terrainMapData.getCenterIndex();
-      int localGridSize = terrainMapData.getLocalGridSize();
+      int localGridSize = terrainMapData.getCellsPerAxis();
       double centerX = terrainMapData.getTerrainMapCenter().getX();
       double centerY = terrainMapData.getTerrainMapCenter().getY();
       int rIndex = getLocalIndex(cellsPerMeter, localGridSize, x, centerX);
@@ -86,7 +109,7 @@ public class TerrainMapTools
    {
       TerrainMapMessage message = new TerrainMapMessage();
 
-      message.setLocalGridSize(terrainMapData.getLocalGridSize());
+      message.setLocalGridSize(terrainMapData.getCellsPerAxis());
       message.setCellsPerMeter((byte) terrainMapData.getCenterIndex());
 
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
