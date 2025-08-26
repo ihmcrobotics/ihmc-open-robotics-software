@@ -18,7 +18,7 @@ public class TerrainMapDataTest
       {
          for (int j = cellsPerAxis / 2 - 10; j < cellsPerAxis / 2 + 10; j++)
          {
-            terrainMapData.setHeightLocal(i * (1 / 50.0f), i, j);
+            terrainMapData.setHeightFloatLocal(i * (1 / 50.0f), i, j);
          }
       }
 

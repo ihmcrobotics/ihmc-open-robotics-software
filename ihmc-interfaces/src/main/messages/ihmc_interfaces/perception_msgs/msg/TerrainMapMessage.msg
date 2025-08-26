@@ -17,6 +17,7 @@ float64 map_center_y
 
 bool has_terrain_cost_data false
 bool has_contact_map_data false
+bool has_height_map_float_data false
 bool has_height_map_data false
 bool has_snapped_normal_data false
 bool has_snapped_area_data false
@@ -27,6 +28,7 @@ bool has_steppable_connections_data false
 byte[<=250000] terrain_cost_data
 # The raw data for the contact map value, which are stored as chars.
 byte[<=250000] contact_map_data
+float32[<=255000] heights
 # The raw data for the raw heights, which are stored as two bytes to form one short.
 byte[<=500000] height_map_data
 # The raw data for the snap normal x value, which are stored as chars.

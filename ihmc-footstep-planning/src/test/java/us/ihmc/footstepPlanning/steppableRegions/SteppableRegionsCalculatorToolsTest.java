@@ -63,8 +63,8 @@ public class SteppableRegionsCalculatorToolsTest
       }
 
       SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
-      SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(steppability,
-                                                                                                                                snappedHeight,
+      SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(new TerrainMapData(50, 0.02, 1.0),
+                                                                                                                                steppability,
                                                                                                                                 snappedNormalX,
                                                                                                                                 snappedNormalY,
                                                                                                                                 snappedNormalZ,
@@ -200,8 +200,8 @@ public class SteppableRegionsCalculatorToolsTest
 
       SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
       parameters.setMaxInteriorPointsToInclude(cellsPerAxis * cellsPerAxis);
-      SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(steppability,
-                                                                                                                                snappedHeight,
+      SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(new TerrainMapData(100, 0.02, 2.0),
+                                                                                                                                steppability,
                                                                                                                                 snappedNormalX,
                                                                                                                                 snappedNormalY,
                                                                                                                                 snappedNormalZ,

@@ -98,7 +98,9 @@ public class TerrainPlanningDebugger
       this.offsetX = (int) (terrainMapData.getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
       this.offsetY = (int) (terrainMapData.getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
 
-      PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
+
+      //TODO this is hella broken
+//      PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
 
       if (terrainMapData.getContactMap() != null)
@@ -307,32 +309,6 @@ public class TerrainPlanningDebugger
    public void publishPlannedFootsteps(FootstepDataListMessage plannedFootstepsMessage)
    {
       plannedFootstesPublisherForUI.publish(plannedFootstepsMessage);
-   }
-
-   public void printContactMap()
-   {
-      if (!enabled)
-         return;
-
-      PerceptionDebugTools.printMat("Contact Map", request.getEnvironmentHandler().getTerrainMapData().getContactMap(), 4);
-   }
-
-   public void printHeightMap()
-   {
-      if (!enabled)
-         return;
-
-      PerceptionDebugTools.printMat("Height Map", request.getEnvironmentHandler().getTerrainMapData().getHeightMap(), 4);
-   }
-
-   public void publishContinuousWalkingStatusMessage()
-   {
-
-   }
-
-   public Mat getDisplayImage()
-   {
-      return stacked;
    }
 
    public void setEnabled(boolean enabled)

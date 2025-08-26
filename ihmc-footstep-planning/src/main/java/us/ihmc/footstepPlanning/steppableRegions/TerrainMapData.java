@@ -27,7 +27,7 @@ public class TerrainMapData
    private double gridResolutionXY;
    private double gridSizeXY;
 
-   private Mat heightMap;
+   private float[] heightMapFloats;
    private Mat terrainCostMap;
    private Mat contactMap;
 
@@ -46,7 +46,7 @@ public class TerrainMapData
 
       centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
 
-      heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      heightMapFloats = new float[cellsPerAxis * cellsPerAxis];
       this.cellsPerAxis = cellsPerAxis;
    }
 
@@ -59,7 +59,7 @@ public class TerrainMapData
 
       terrainMapCenter.set(other.terrainMapCenter);
 
-      setHeightMap(other.heightMap);
+      heightMapFloats  = other.heightMapFloats;
       setTerrainCostMap(other.terrainCostMap);
       setContactMap(other.contactMap);
       setSnapNormalXMat(other.snapNormalXImage);
@@ -77,7 +77,7 @@ public class TerrainMapData
 
    public boolean isEmpty()
    {
-      if (hasHeightMap())
+      if (hasHeightMapFloats())
          return false;
       return !hasSteppability();
    }
@@ -92,9 +92,9 @@ public class TerrainMapData
       return contactMap != null;
    }
 
-   public boolean hasHeightMap()
+   public boolean hasHeightMapFloats()
    {
-      return heightMap != null;
+      return heightMapFloats != null;
    }
 
    public boolean hasSnapNormal()
@@ -143,7 +143,7 @@ public class TerrainMapData
    {
       int rIndex = getLocalXIndex(x);
       int cIndex = getLocalYIndex(y);
-      return getHeightLocal(rIndex, cIndex);
+      return getHeightFloatLocal(rIndex, cIndex);
    }
 
    public float getContactScoreInWorld(double x, double y)
@@ -174,13 +174,12 @@ public class TerrainMapData
       return getSnapResultLocal(rIndex, cIndex);
    }
 
-   public float getHeightLocal(int rIndex, int cIndex)
+   public float getHeightFloatLocal(int rIndex, int cIndex)
    {
       if (TerrainMapTools.isOutOfBounds(cellsPerAxis, rIndex, cIndex))
          return 0.0f;
 
-      // This mask is necessary because the height is stored as a short, and it discards all the additional information past those two bytes.
-      return heightMap.ptr(rIndex, cIndex).getFloat();
+      return heightMapFloats[rIndex * cellsPerAxis + cIndex];
    }
 
    public float getSnappedAreaLocal(int rIndex, int cIndex)
@@ -234,9 +233,9 @@ public class TerrainMapData
       return steppabilityImage.ptr(rIndex, cIndex).get() & 0xFF;
    }
 
-   public void setHeightLocal(float height, int rIndex, int cIndex)
+   public void setHeightFloatLocal(float height, int rIndex, int cIndex)
    {
-      heightMap.ptr(rIndex, cIndex).putFloat(height);
+      heightMapFloats[rIndex * cellsPerAxis + cIndex] = height;
    }
 
    public void setSensorOrigin(Tuple3DReadOnly origin)
@@ -259,9 +258,9 @@ public class TerrainMapData
       return terrainMapCenter;
    }
 
-   public Mat getHeightMap()
+   public float[] getHeightMapFloats()
    {
-      return heightMap;
+      return heightMapFloats;
    }
 
    public Mat getTerrainCostMap()
@@ -299,9 +298,9 @@ public class TerrainMapData
       this.terrainCostMap = terrainCostMap == null ? null : terrainCostMap.clone();
    }
 
-   public void setHeightMap(Mat heightMap)
+   public void setHeightMapFloats(float[] heightMapFloats)
    {
-      this.heightMap = heightMap == null ? null : heightMap.clone();
+      this.heightMapFloats = heightMapFloats;
    }
 
    public void setContactMap(Mat contactMap)
@@ -397,17 +396,16 @@ public class TerrainMapData
       {
          contactMap = null;
       }
-      if (message.getHasHeightMapData())
+      if (message.getHasHeightMapFloatData())
       {
-         if (heightMap == null)
-            heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         if (heightMapFloats == null)
+            heightMapFloats = new float[cellsPerAxis * cellsPerAxis];
 
-         ByteBuffer buffer = message.getHeightMapData().getBuffer();
-         packDataIntoMatFromByteBuffer(buffer, heightMap);
+         message.getHeights().add(heightMapFloats);
       }
       else
       {
-         heightMap = null;
+         heightMapFloats = null;
       }
       if (message.getHasSnappedNormalData())
       {

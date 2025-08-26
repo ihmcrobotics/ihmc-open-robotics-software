@@ -88,8 +88,8 @@ public class SteppableRegionsCalculationModule
       regionCollection.resizeCollection(parameters.getYawDiscretizations());
 
       SteppableRegionsEnvironmentModel environment;
-      environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(terrainMapData.getSteppabilityMat(),
-                                                                                               terrainMapData.getHeightMap(),
+      environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(terrainMapData,
+                                                                                               terrainMapData.getSteppabilityMat(),
                                                                                                terrainMapData.getSnapNormalXMat(),
                                                                                                terrainMapData.getSnapNormalYMat(),
                                                                                                terrainMapData.getSnapNormalZMat(),

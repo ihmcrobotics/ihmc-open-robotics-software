@@ -29,8 +29,8 @@ public class SteppableRegionsCalculatorTools
 {
    private static final int maxRecursionDepth = 500;
 
-   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(Mat steppability,
-                                                                                             Mat snappedHeight,
+   public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(TerrainMapData terrainMapData,
+                                                                                             Mat steppability,
                                                                                              Mat snappedNormalX,
                                                                                              Mat snappedNormalY,
                                                                                              Mat snappedNormalZ,
@@ -41,8 +41,8 @@ public class SteppableRegionsCalculatorTools
                                                                                              double gridResolutionXY,
                                                                                              int centerIndex)
    {
-      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(steppability,
-                                                                                                   snappedHeight,
+      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(terrainMapData,
+                                                                                                   steppability,
                                                                                                    snappedNormalX,
                                                                                                    snappedNormalY,
                                                                                                    snappedNormalZ,
@@ -89,8 +89,8 @@ public class SteppableRegionsCalculatorTools
       return environmentModel;
    }
 
-   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(Mat steppability,
-                                                                                            Mat snappedHeight,
+   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(TerrainMapData terrainMapData,
+                                                                                            Mat steppability,
                                                                                             Mat snappedNormalX,
                                                                                             Mat snappedNormalY,
                                                                                             Mat snappedNormalZ,
@@ -113,7 +113,7 @@ public class SteppableRegionsCalculatorTools
                // 8 bits is fully connected
                isBorderCell = Integer.bitCount(connection) != 8;
 
-               double z = snappedHeight.ptr(x, y).getShort();
+               double z = terrainMapData.getHeightInWorld(x, y);
                Vector3D normal = new Vector3D(normalValueAsFloat(snappedNormalX, x, y),
                                               normalValueAsFloat(snappedNormalY, x, y),
                                               normalValueAsFloat(snappedNormalZ, x, y));
@@ -377,7 +377,10 @@ public class SteppableRegionsCalculatorTools
                                                    steppableRegionCalculatorParameters.getFractionOfCellToExpandSmallRegions());
       pointsInWorld.addAll(outerRing);
 
-      List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder, outerRing, steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(), new Random());
+      List<Point2D> interiorPoints = getInteriorPoints(regionDataHolder,
+                                                       outerRing,
+                                                       steppableRegionCalculatorParameters.getMaxInteriorPointsToInclude(),
+                                                       new Random());
       pointsInWorld.addAll(interiorPoints);
 
       Point2DReadOnly centroid = regionDataHolder.getCentroidInWorld();
@@ -393,8 +396,8 @@ public class SteppableRegionsCalculatorTools
       double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
       //TODO this needs some love, if you un-comment the filters, the system crash's, not sure what that's about, ripppppppppp so far
-//      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-//      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+      //      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+      //      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
       //      if (polygonizerParameters.getCutNarrowPassage())
       //         concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
@@ -441,10 +444,7 @@ public class SteppableRegionsCalculatorTools
       return points;
    }
 
-   public static List<Point2D> getInteriorPoints(SteppableRegionDataHolder regionDataHolder,
-                                                 List<Point2D> outerRingPoints,
-                                                 int cellsToSample,
-                                                 Random random)
+   public static List<Point2D> getInteriorPoints(SteppableRegionDataHolder regionDataHolder, List<Point2D> outerRingPoints, int cellsToSample, Random random)
    {
       if (regionDataHolder.getMemberCells().isEmpty())
          return Collections.emptyList();

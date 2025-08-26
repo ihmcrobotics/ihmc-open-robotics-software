@@ -1,10 +1,12 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
@@ -44,7 +46,15 @@ public class TerrainMapTools
                                               Mat snappedAreaFractionMap,
                                               TerrainMapData terrainMapData)
    {
-      terrainMapData.setHeightMap(heightMap);
+      int centerIndex = terrainMapData.getCenterIndex();
+      int cellsPerAxis = 2 * centerIndex + 1;
+      int totalCells = cellsPerAxis * cellsPerAxis;
+
+      FloatPointer floatPointer = new FloatPointer(heightMap.data());
+      float[] values = new float[totalCells];
+      floatPointer.get(values);
+      terrainMapData.setHeightMapFloats(values);
+
       terrainMapData.setTerrainCostMap(terrainCostMap);
       terrainMapData.setContactMap(contactMap);
       terrainMapData.setSnapNormalXMat(snapNormalXMap);
@@ -85,7 +95,7 @@ public class TerrainMapTools
                if (isOutOfBounds(localGridSize, r, c))
                   continue;
 
-               float height = terrainMapData.getHeightLocal(r, c);
+               float height = terrainMapData.getHeightFloatLocal(r, c);
 
                // compute full 3d point
                Point3D point = new Point3D();
@@ -126,10 +136,10 @@ public class TerrainMapTools
          PerceptionMessageTools.packDataArray(message.getContactMapData(), terrainMapData.getContactMap());
       }
 
-      if (terrainMapData.hasHeightMap())
+      if (terrainMapData.hasHeightMapFloats())
       {
-         message.setHasHeightMapData(true);
-         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
+         message.setHasHeightMapFloatData(true);
+         message.getHeights().add(terrainMapData.getHeightMapFloats());
       }
       if (terrainMapData.hasSnapNormal())
       {
