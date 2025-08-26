@@ -32,7 +32,7 @@ public class RapidHeightMapExtractor
     * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
     */
-   private static final int BLOCK_SIZE_XY = 16;
+   private static final int BLOCK_SIZE_XY = 8;
    private static final int MODE = 1; // 0 -> Ouster, 1 -> Realsense
 
    private final HeightMapParameters heightMapParameters;
@@ -51,14 +51,12 @@ public class RapidHeightMapExtractor
    private final GpuMat previousGlobalMeanMap;
    private final GpuMat previousGlobalVarianceMap;
    private final GpuMat terrainCroppedHeightMap;
-   private final GpuMat scaledHeightMap;
    private final GpuMat emptyGlobalHeightMap;
 
    private final CUDAKernel updateKernel;
    private final CUDAKernel translateKernel;
    private final CUDAKernel registerKernel;
    private final CUDAKernel terrainCroppingKernel;
-   private final CUDAKernel scalingKernel;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
@@ -109,7 +107,6 @@ public class RapidHeightMapExtractor
          translateKernel = heightMapProgram.loadKernel("translateHeightMapKernel");
          registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
          terrainCroppingKernel = heightMapProgram.loadKernel("terrainCroppingHeightMapKernel");
-         scalingKernel = heightMapProgram.loadKernel("scalingHeightMapKernel");
          planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapProgram.loadKernel("heightMapEmptyRegistrationKernel");
 
@@ -117,7 +114,6 @@ public class RapidHeightMapExtractor
          translateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          terrainCroppingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
-         scalingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
@@ -130,8 +126,7 @@ public class RapidHeightMapExtractor
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
-         scaledHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
          emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
          // Initialize transformation pointers
@@ -144,7 +139,7 @@ public class RapidHeightMapExtractor
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(27);
+         parametersHostPointer = new FloatPointer(28);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -320,27 +315,12 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      // ---------- Run the Scaling kernel ----------
-      {
-         int scalingKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 scalingKernelGridDim = new dim3(scalingKernelGridSizeXY, scalingKernelGridSizeXY, 1);
-
-         scalingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         scalingKernel.withPointer(scaledHeightMap.data()).withLong(scaledHeightMap.step());
-         scalingKernel.withPointer(parametersDevicePointer);
-
-         scalingKernel.run(stream, scalingKernelGridDim, blockSize, 0);
-
-         scalingKernelGridDim.close();
-         checkCUDAError();
-      }
-
       // ---------- Run the Terrain cropping kernel ----------
       {
          int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
 
-         terrainCroppingKernel.withPointer(scaledHeightMap.data()).withLong(scaledHeightMap.step());
+         terrainCroppingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
          terrainCroppingKernel.withPointer(terrainCroppedHeightMap.data()).withLong(terrainCroppedHeightMap.step());
          terrainCroppingKernel.withInt(centerIndexTerrain);
          terrainCroppingKernel.withPointer(parametersDevicePointer);
@@ -451,7 +431,6 @@ public class RapidHeightMapExtractor
                           (float) heightMapParameters.getLocalWidthInMeters() / 2,
                           (float) cellsPerAxisLocal,
                           (float) cellsPerAxisGlobal,
-                          (float) parameters.getHeightScaleFactor(),
                           (float) parameters.getMinHeightRegistration(),
                           (float) parameters.getMaxHeightRegistration(),
                           (float) parameters.getMinHeightDifference(),
@@ -460,7 +439,6 @@ public class RapidHeightMapExtractor
                           (float) parameters.getSearchWindowWidth(),
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
-                          (float) parameters.getHeightOffset(),
                           (float) parameters.getKalmanFilterPredictionNoise(),
                           (float) parameters.getAdditionalTranslationalVarianceAdded(),
                           (float) parameters.getVariancePerMeter(),
@@ -479,7 +457,6 @@ public class RapidHeightMapExtractor
       translateKernel.close();
       registerKernel.close();
       terrainCroppingKernel.close();
-      scalingKernel.close();
       planOffsetKernel.close();
       emptyRegisterKernel.close();
 
@@ -498,7 +475,6 @@ public class RapidHeightMapExtractor
       previousGlobalMeanMap.close();
       previousGlobalVarianceMap.close();
       terrainCroppedHeightMap.close();
-      scaledHeightMap.close();
       emptyGlobalHeightMap.close();
 
       // At the end we have to destroy the stream to release the memory
@@ -529,12 +505,12 @@ public class RapidHeightMapExtractor
 
    public GpuMat getHeightMap()
    {
-      return scaledHeightMap;
+      return globalMeanMap;
    }
 
    public GpuMat getTerrainCroppedHeightMap()
    {
-      return terrainCroppedHeightMap.clone();
+      return terrainCroppedHeightMap;
    }
 
    public int getCellsPerAxis()

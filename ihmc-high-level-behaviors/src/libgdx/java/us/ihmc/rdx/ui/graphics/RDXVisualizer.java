@@ -15,6 +15,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2OpenCVVideoVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -28,7 +29,7 @@ import java.util.function.Consumer;
 public abstract class RDXVisualizer implements RDXRenderableProvider
 {
    private final ImBoolean active = new ImBoolean(false);
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String title;
    private boolean createdYet = false;
    private Set<RDXSceneLevel> sceneLevels = Set.of(RDXSceneLevel.MODEL);
@@ -107,7 +108,10 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       float preHeaderCursorY = ImGui.getCursorPosY();
       if (ImGui.collapsingHeader(labels.get(title)))
       {
+         ImGui.indent();
          renderImGuiWidgets();
+         renderImGuiWidgetsPost();
+         ImGui.unindent();
       }
       float postHeaderCursorY = ImGui.getCursorPosY();
       if (renderRightContext)
@@ -120,7 +124,12 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
 
       if (getPanel() != null)
       {
-         if (!getPanel().getIsShowing().get())
+         boolean deactivate = !getPanel().getIsShowing().get();
+
+         if (this instanceof RDXROS2OpenCVVideoVisualizer<?> openCVVideoVisualizer)
+            deactivate &= !openCVVideoVisualizer.getSubscriptionOnly().get();
+
+         if (deactivate)
             setActive(false);
       }
 
@@ -138,6 +147,11 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    }
 
    public abstract void renderImGuiWidgets();
+
+   public void renderImGuiWidgetsPost()
+   {
+
+   }
 
    /**
     * Only called when active.

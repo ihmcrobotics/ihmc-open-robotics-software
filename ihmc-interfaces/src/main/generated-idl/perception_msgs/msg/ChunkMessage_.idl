@@ -20,16 +20,6 @@ module perception_msgs
          */
         unsigned long long sequence_id;
         /**
-         * Discretization of the height map grid
-         */
-        @defaultValue(value=-1.0)
-        double xy_resolution;
-        /**
-         * The height map covers a square of this width
-         */
-        @defaultValue(value=-1.0)
-        double grid_size_xy;
-        /**
          * X coordinate of the center of the height map
          */
         double origin_x;
@@ -37,18 +27,6 @@ module perception_msgs
          * Y coordinate of the center of the height map
          */
         double origin_y;
-        /**
-         * Z height offset for converting between floats and shorts
-         */
-        double height_offset;
-        /**
-         * Z height scale factor for converting between floats and shorts
-         */
-        double height_scale_factor;
-        /**
-         * Height of the ground plane, which is assumed to be flat
-         */
-        double estimated_ground_height;
         /**
          * Width of the height map in meters
          */
@@ -62,13 +40,9 @@ module perception_msgs
          */
         long cells_per_axis;
         /**
-         * List of height map keys. See HeightMapTools for converting keys to coordinates
-         */
-        sequence<long, 255000> keys;
-        /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<long, 255000> heights;
+        sequence<float, 5000> heights;
       };
     };
   };

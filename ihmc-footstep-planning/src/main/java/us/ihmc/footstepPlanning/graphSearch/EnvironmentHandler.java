@@ -31,7 +31,7 @@ public class EnvironmentHandler
 
    public boolean hasHeightMap()
    {
-      return heightMap != null && !heightMap.isEmpty();
+      return heightMap != null;
    }
 
    public boolean hasTerrainMapData()

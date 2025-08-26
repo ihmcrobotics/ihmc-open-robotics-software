@@ -15,23 +15,22 @@ extern "C"
 #define HALF_LOCAL_WIDTH_IN_METERS 10
 #define LOCAL_CELLS_PER_AXIS 11
 #define GLOBAL_CELLS_PER_AXIS 12
-#define HEIGHT_SCALING_FACTOR 13
-#define MIN_HEIGHT_REGISTRATION 14
-#define MAX_HEIGHT_REGISTRATION 15
-#define MIN_HEIGHT_DIFFERENCE 16
-#define MAX_HEIGHT_DIFFERENCE 17
-#define SEARCH_WINDOW_HEIGHT 18
-#define SEARCH_WINDOW_WIDTH 19
-#define MIN_CLAMP_HEIGHT 20
-#define MAX_CLAMP_HEIGHT 21
-#define HEIGHT_OFFSET 22
-#define KALMAN_FILTER_PREDICTION_NOISE 23
-#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 24
-#define VARIANCE_PER_METER 25
-#define VARIANCE_PER_TRANSLATION_SPEED 26
-#define VARIANCE_PER_ROTATION_SPEED 27
-#define SEARCH_SKIP_SIZE 28
-#define GROUND_HEIGHT 29
+#define MIN_HEIGHT_REGISTRATION 13
+#define MAX_HEIGHT_REGISTRATION 14
+#define MIN_HEIGHT_DIFFERENCE 15
+#define MAX_HEIGHT_DIFFERENCE 16
+#define SEARCH_WINDOW_HEIGHT 17
+#define SEARCH_WINDOW_WIDTH 18
+#define MIN_CLAMP_HEIGHT 19
+#define MAX_CLAMP_HEIGHT 20
+#define KALMAN_FILTER_PREDICTION_NOISE 21
+#define ADDITIONAL_TRANSLATIONAL_VARIANCE_ADDED 22
+#define VARIANCE_PER_METER 23
+#define VARIANCE_PER_TRANSLATION_SPEED 24
+#define VARIANCE_PER_ROTATION_SPEED 25
+#define SEARCH_SKIP_SIZE 26
+#define GROUND_HEIGHT 27
+
 #define VERTICAL_FOV 1.5707963267948966f
 #define HORIZONTAL_FOV 6.2831853f
 
@@ -104,7 +103,6 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCa
 // Iterate over a search window in the depth image to find points within the cell.
 // Back-project these points to the 3D space and transform them back to the Z-Up frame.
 // Compute the average height for points within the grid cell while filtering outliers.
-extern "C"
 extern "C"
 __global__ void heightMapUpdateKernel(const unsigned short *__restrict__ depthImage, size_t pitchDepth,
                                       float *__restrict__ previousGlobalHeightMap, size_t pitchGlobal,
@@ -379,33 +377,8 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 }
 
 extern "C"
-__global__ void scalingHeightMapKernel(const float *__restrict__ globalHeightMap, size_t pitchGlobalHeightMap,
-                                       unsigned short *__restrict__ scaledHeightMap, size_t pitchScaledHeightMap,
-                                       const float *__restrict__ params)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-
-    // Compute global map size
-    const int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
-
-    // Check bounds for global indices
-    if (xIndex >= globalCellsPerAxis || yIndex >= globalCellsPerAxis)
-        return;
-
-    float *globalHeight = (float *)((char *)globalHeightMap + xIndex * pitchGlobalHeightMap) + yIndex;
-    // Scale the value to be visualized an an unsigned short
-    float heightClamped = fminf(fmaxf(*globalHeight, params[MIN_CLAMP_HEIGHT]), params[MAX_CLAMP_HEIGHT]);
-    heightClamped += params[HEIGHT_OFFSET];
-    heightClamped *= params[HEIGHT_SCALING_FACTOR];
-
-    unsigned short *heightValue = (unsigned short *)((char *)scaledHeightMap + xIndex * pitchScaledHeightMap) + yIndex;
-    *heightValue = static_cast<unsigned short>(heightClamped);
-}
-
-extern "C"
-__global__ void terrainCroppingHeightMapKernel(const unsigned short *__restrict__ globalHeightMap, size_t pitchGlobal,
-                                               unsigned short *__restrict__ terrainMap, size_t pitchTerrain,
+__global__ void terrainCroppingHeightMapKernel(const float *__restrict__ globalHeightMap, size_t pitchGlobal,
+                                               float *__restrict__ terrainMap, size_t pitchTerrain,
                                                int centerIndexTerrain, float *params)
 {
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -420,8 +393,8 @@ __global__ void terrainCroppingHeightMapKernel(const unsigned short *__restrict_
     int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
 
     // Set the terrain map index to the equivalent index in the global map
-    unsigned short *globalRow = (unsigned short *)((char *)globalHeightMap + globalX * pitchGlobal);
-    unsigned short *terrainRow = (unsigned short *)((char *)terrainMap + xIndex * pitchTerrain);
+    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
+    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
 
     terrainRow[yIndex] = globalRow[globalY];
 }

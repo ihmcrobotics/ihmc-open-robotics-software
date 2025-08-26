@@ -1,8 +1,6 @@
 #ifndef __perception_msgs__msg__HeightMapMessage__idl__
 #define __perception_msgs__msg__HeightMapMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
-#include "geometry_msgs/msg/./Vector3_.idl"
 module perception_msgs
 {
   module msg
@@ -21,16 +19,6 @@ module perception_msgs
          */
         unsigned long long sequence_id;
         /**
-         * Discretization of the height map grid
-         */
-        @defaultValue(value=-1.0)
-        double xy_resolution;
-        /**
-         * The height map covers a square of this width
-         */
-        @defaultValue(value=-1.0)
-        double grid_size_xy;
-        /**
          * X coordinate of the center of the height map
          */
         double grid_center_x;
@@ -38,18 +26,6 @@ module perception_msgs
          * Y coordinate of the center of the height map
          */
         double grid_center_y;
-        /**
-         * Z height offset for converting between floats and shorts
-         */
-        double height_offset;
-        /**
-         * Z height scale factor for converting between floats and shorts
-         */
-        double height_scale_factor;
-        /**
-         * Height of the ground plane, which is assumed to be flat
-         */
-        double estimated_ground_height;
         /**
          * Width of the height map in meters
          */
@@ -63,26 +39,9 @@ module perception_msgs
          */
         long cells_per_axis;
         /**
-         * List of height map keys. See HeightMapTools for converting keys to coordinates
-         */
-        sequence<long, 255000> keys;
-        /**
          * List of heights, which correspond to the list of keys
          */
-        sequence<long, 255000> heights;
-        /**
-         * List of variances, which correspond to the list of keys. May be empty.
-         */
-        sequence<float, 255000> variances;
-        /**
-         * List of centroids for each cell, which correspond to the list of keys. May be empty
-         * Note: The z coordinate of each point is ignored, but should correspond to the height.
-         */
-        sequence<geometry_msgs::msg::dds::Point, 255000> centroids;
-        /**
-         * List of normals for each cell, which correspond to the list of keys. May be empty.
-         */
-        sequence<geometry_msgs::msg::dds::Vector3, 255000> normals;
+        sequence<float, 255000> heights;
       };
     };
   };

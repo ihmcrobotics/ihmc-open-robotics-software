@@ -147,7 +147,7 @@ public class HeightMapPolygonSnapper
       int rIndex = terrainMapData.getLocalXIndex(centroid.getX());
       int cIndex = terrainMapData.getLocalYIndex(centroid.getY());
 
-      double height = terrainMapData.getSnappedHeightLocal(rIndex, cIndex);
+      double height = terrainMapData.getHeightLocal(rIndex, cIndex);
       UnitVector3DReadOnly normal = terrainMapData.getNormalLocal(rIndex, cIndex);
 
       // The surface normal must point up. If it does not, recreate it so that it does.
@@ -259,7 +259,7 @@ public class HeightMapPolygonSnapper
             if (terrainMapData != null)
                height = terrainMapData.getHeightInWorld(footPointToSnap.getX(), footPointToSnap.getY());
             else
-               height = heightMapData.getHeightAt(footPointToSnap.getX(), footPointToSnap.getY());
+               height = heightMapData.getHeight(footPointToSnap.getX(), footPointToSnap.getY());
 
             if (Double.isNaN(height) || height < minimumHeightToConsider)
             {
@@ -303,7 +303,7 @@ public class HeightMapPolygonSnapper
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       HeightMapData heightMapData = environmentHandler.getHeightMapData();
 
-      if (environmentHandler.hasTerrainMapData() && terrainMapData.hasSnapHeight() && terrainMapData.hasSnapNormal())
+      if (environmentHandler.hasTerrainMapData() && terrainMapData.hasHeightMap() && terrainMapData.hasSnapNormal())
       {
          transformToReturn = computeSnapFromTerrainMap(polygonToSnap, terrainMapData);
       }

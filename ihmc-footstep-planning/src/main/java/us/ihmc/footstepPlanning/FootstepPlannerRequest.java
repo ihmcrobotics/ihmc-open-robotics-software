@@ -455,10 +455,7 @@ public class FootstepPlannerRequest
       }
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(requestPacket.getHeightMapMessage());
-      if (!heightMapData.isEmpty())
-         setHeightMapData(heightMapData);
-      else
-         setHeightMapData(null);
+      setHeightMapData(heightMapData);
 
       if (!TerrainMapTools.isEmpty(requestPacket.getTerrainMapMessage()))
          setTerrainMapData(new TerrainMapData(requestPacket.getTerrainMapMessage()));
@@ -498,7 +495,8 @@ public class FootstepPlannerRequest
 
       if (getEnvironmentHandler().getHeightMapData() != null)
       {
-         HeightMapMessage heightMapMessage = HeightMapMessageTools.toMessage(getEnvironmentHandler().getHeightMapData());
+         HeightMapMessage heightMapMessage = new HeightMapMessage();
+         HeightMapMessageTools.toMessage(getEnvironmentHandler().getHeightMapData(), heightMapMessage);
          requestPacket.getHeightMapMessage().set(heightMapMessage);
       }
 
@@ -546,12 +544,12 @@ public class FootstepPlannerRequest
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
 
-      if (environmentHandler.getHeightMapData() != null)
+      if (other.environmentHandler.getHeightMapData() != null)
          environmentHandler.setHeightMapData(other.getEnvironmentHandler().getHeightMapData());
       else if (other.getEnvironmentHandler().getTerrainMapData() != null)
          environmentHandler.setHeightMapData(new HeightMapData(other.getEnvironmentHandler().getHeightMapData()));
 
-      if (environmentHandler.getTerrainMapData() != null)
+      if (other.environmentHandler.getTerrainMapData() != null)
          environmentHandler.setTerrainMapData(other.getEnvironmentHandler().getTerrainMapData());
       else if (other.getEnvironmentHandler().getTerrainMapData() != null)
          environmentHandler.setTerrainMapData(new TerrainMapData(other.getEnvironmentHandler().getTerrainMapData()));

@@ -17,14 +17,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
             */
    public long sequence_id_;
    /**
-            * Discretization of the height map grid
-            */
-   public double xy_resolution_ = -1.0;
-   /**
-            * The height map covers a square of this width
-            */
-   public double grid_size_xy_ = -1.0;
-   /**
             * X coordinate of the center of the height map
             */
    public double origin_x_;
@@ -32,18 +24,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
             * Y coordinate of the center of the height map
             */
    public double origin_y_;
-   /**
-            * Z height offset for converting between floats and shorts
-            */
-   public double height_offset_;
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public double height_scale_factor_;
-   /**
-            * Height of the ground plane, which is assumed to be flat
-            */
-   public double estimated_ground_height_;
    /**
             * Width of the height map in meters
             */
@@ -57,19 +37,13 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
             */
    public int cells_per_axis_;
    /**
-            * List of height map keys. See HeightMapTools for converting keys to coordinates
-            */
-   public us.ihmc.idl.IDLSequence.Integer  keys_;
-   /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Integer  heights_;
+   public us.ihmc.idl.IDLSequence.Float  heights_;
 
    public ChunkMessage()
    {
-      keys_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
-
-      heights_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
+      heights_ = new us.ihmc.idl.IDLSequence.Float (5000, "type_5");
 
    }
 
@@ -85,19 +59,9 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       sequence_id_ = other.sequence_id_;
 
-      xy_resolution_ = other.xy_resolution_;
-
-      grid_size_xy_ = other.grid_size_xy_;
-
       origin_x_ = other.origin_x_;
 
       origin_y_ = other.origin_y_;
-
-      height_offset_ = other.height_offset_;
-
-      height_scale_factor_ = other.height_scale_factor_;
-
-      estimated_ground_height_ = other.estimated_ground_height_;
 
       width_in_meters_ = other.width_in_meters_;
 
@@ -105,7 +69,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       cells_per_axis_ = other.cells_per_axis_;
 
-      keys_.set(other.keys_);
       heights_.set(other.heights_);
    }
 
@@ -140,36 +103,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    }
 
    /**
-            * Discretization of the height map grid
-            */
-   public void setXyResolution(double xy_resolution)
-   {
-      xy_resolution_ = xy_resolution;
-   }
-   /**
-            * Discretization of the height map grid
-            */
-   public double getXyResolution()
-   {
-      return xy_resolution_;
-   }
-
-   /**
-            * The height map covers a square of this width
-            */
-   public void setGridSizeXy(double grid_size_xy)
-   {
-      grid_size_xy_ = grid_size_xy;
-   }
-   /**
-            * The height map covers a square of this width
-            */
-   public double getGridSizeXy()
-   {
-      return grid_size_xy_;
-   }
-
-   /**
             * X coordinate of the center of the height map
             */
    public void setOriginX(double origin_x)
@@ -197,51 +130,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    public double getOriginY()
    {
       return origin_y_;
-   }
-
-   /**
-            * Z height offset for converting between floats and shorts
-            */
-   public void setHeightOffset(double height_offset)
-   {
-      height_offset_ = height_offset;
-   }
-   /**
-            * Z height offset for converting between floats and shorts
-            */
-   public double getHeightOffset()
-   {
-      return height_offset_;
-   }
-
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public void setHeightScaleFactor(double height_scale_factor)
-   {
-      height_scale_factor_ = height_scale_factor;
-   }
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public double getHeightScaleFactor()
-   {
-      return height_scale_factor_;
-   }
-
-   /**
-            * Height of the ground plane, which is assumed to be flat
-            */
-   public void setEstimatedGroundHeight(double estimated_ground_height)
-   {
-      estimated_ground_height_ = estimated_ground_height;
-   }
-   /**
-            * Height of the ground plane, which is assumed to be flat
-            */
-   public double getEstimatedGroundHeight()
-   {
-      return estimated_ground_height_;
    }
 
    /**
@@ -291,18 +179,9 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
 
    /**
-            * List of height map keys. See HeightMapTools for converting keys to coordinates
-            */
-   public us.ihmc.idl.IDLSequence.Integer  getKeys()
-   {
-      return keys_;
-   }
-
-
-   /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Integer  getHeights()
+   public us.ihmc.idl.IDLSequence.Float  getHeights()
    {
       return heights_;
    }
@@ -329,19 +208,9 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.xy_resolution_, other.xy_resolution_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_size_xy_, other.grid_size_xy_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.origin_x_, other.origin_x_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.origin_y_, other.origin_y_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_offset_, other.height_offset_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_scale_factor_, other.height_scale_factor_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.estimated_ground_height_, other.estimated_ground_height_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
 
@@ -349,9 +218,7 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.keys_, other.keys_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
 
 
       return true;
@@ -370,19 +237,9 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.xy_resolution_ != otherMyClass.xy_resolution_) return false;
-
-      if(this.grid_size_xy_ != otherMyClass.grid_size_xy_) return false;
-
       if(this.origin_x_ != otherMyClass.origin_x_) return false;
 
       if(this.origin_y_ != otherMyClass.origin_y_) return false;
-
-      if(this.height_offset_ != otherMyClass.height_offset_) return false;
-
-      if(this.height_scale_factor_ != otherMyClass.height_scale_factor_) return false;
-
-      if(this.estimated_ground_height_ != otherMyClass.estimated_ground_height_) return false;
 
       if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
 
@@ -390,7 +247,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       if(this.cells_per_axis_ != otherMyClass.cells_per_axis_) return false;
 
-      if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
 
       return true;
@@ -406,28 +262,16 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
       builder.append(this.hash_code_of_chunk_);      builder.append(", ");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("xy_resolution=");
-      builder.append(this.xy_resolution_);      builder.append(", ");
-      builder.append("grid_size_xy=");
-      builder.append(this.grid_size_xy_);      builder.append(", ");
       builder.append("origin_x=");
       builder.append(this.origin_x_);      builder.append(", ");
       builder.append("origin_y=");
       builder.append(this.origin_y_);      builder.append(", ");
-      builder.append("height_offset=");
-      builder.append(this.height_offset_);      builder.append(", ");
-      builder.append("height_scale_factor=");
-      builder.append(this.height_scale_factor_);      builder.append(", ");
-      builder.append("estimated_ground_height=");
-      builder.append(this.estimated_ground_height_);      builder.append(", ");
       builder.append("width_in_meters=");
       builder.append(this.width_in_meters_);      builder.append(", ");
       builder.append("cell_size_in_meters=");
       builder.append(this.cell_size_in_meters_);      builder.append(", ");
       builder.append("cells_per_axis=");
       builder.append(this.cells_per_axis_);      builder.append(", ");
-      builder.append("keys=");
-      builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");
       builder.append(this.heights_);
       builder.append("}");

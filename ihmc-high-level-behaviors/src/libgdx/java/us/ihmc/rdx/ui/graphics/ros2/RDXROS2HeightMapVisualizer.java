@@ -37,27 +37,20 @@ import java.util.Set;
 public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-
-   private ROS2PublishSubscribeAPI ros2;
    private final ResettableExceptionHandlingExecutorService executorService;
-
    private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
-
-   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(true);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
-
+   private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
+   private final Point3D heightMapCenter = new Point3D();
+   private final Stopwatch stopwatch = new Stopwatch();
+   private ROS2PublishSubscribeAPI ros2;
    private Mat heightMap;
    private HeightMapData latestHeightMapData;
    private TerrainMapData latestTerrainMapData;
-
-   private final Point3D heightMapCenter = new Point3D();
-
-   private final Stopwatch stopwatch = new Stopwatch();
    private int cellsPerAxisOfHeightMap;
    private int cellsPerAxisOfChunks;
-   private float latestHeightMapOffset;
    private float latestCellSizeInMeters;
 
    public RDXROS2HeightMapVisualizer(String title)
@@ -110,30 +103,22 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
                                               if (sequenceId > 1)
                                               {
                                                  // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(),
+                                                                                                     heightMapMessage.getCellSizeInMeters());
                                                  cellsPerAxisOfHeightMap = 2 * centerIndex + 1;
                                               }
 
                                               heightMapCenter.setX(heightMapMessage.getGridCenterX());
                                               heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              latestHeightMapOffset = (float) heightMapMessage.getHeightOffset();
                                               latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
-                                              heightMap = HeightMapMessageTools.unpackMessageToMat(heightMapMessage);
 
-                                              if (latestHeightMapData == null)
+                                              if (heightMap == null)
                                               {
-                                                 latestHeightMapData = new HeightMapData(heightMapMessage.getXyResolution(),
-                                                                                         heightMapMessage.getGridSizeXy(),
-                                                                                         heightMapMessage.getGridCenterX(),
-                                                                                         heightMapMessage.getGridCenterY());
+                                                 heightMap = new Mat(heightMapMessage.getCellsPerAxis(), heightMapMessage.getCellsPerAxis(), opencv_core.CV_32FC1);
                                               }
-                                              HeightMapTools.convertToHeightMapData(heightMap,
-                                                                                    latestHeightMapData,
-                                                                                    heightMapCenter,
-                                                                                    (float) heightMapMessage.getWidthInMeters(),
-                                                                                    (float) heightMapMessage.getCellSizeInMeters(),
-                                                                                    (float) heightMapMessage.getHeightScaleFactor(),
-                                                                                    (float) heightMapMessage.getHeightOffset());
+
+                                              latestHeightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+                                              HeightMapTools.convertHeightMapDataToMat(heightMap, latestHeightMapData);
 
                                               // This prevents the rendering from happening too early, it was throwing exceptions
                                               if (stopwatch.lapElapsed() > 3)
@@ -232,14 +217,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          // An additional check here to make sure that we have data in the image
          if (heightMap != null && heightMap.ptr(0) != null)
          {
-            float pixelScalingFactor = 10000.0f;
-            heightMapRenderer.update(heightMap,
-                                     latestHeightMapOffset,
-                                     heightMapCenter.getX32(),
-                                     heightMapCenter.getY32(),
-                                     cellsPerAxisOfHeightMap / 2,
-                                     latestCellSizeInMeters,
-                                     pixelScalingFactor);
+            heightMapRenderer.update(heightMap, heightMapCenter.getX32(), heightMapCenter.getY32(), cellsPerAxisOfHeightMap / 2, latestCellSizeInMeters);
          }
       }
 

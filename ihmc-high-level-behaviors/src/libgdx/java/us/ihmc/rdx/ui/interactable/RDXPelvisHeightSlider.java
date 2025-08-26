@@ -42,7 +42,7 @@ public class RDXPelvisHeightSlider
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.teleoperationParameters = teleoperationParameters;
-      sliderName = "Pelvis height";
+      sliderName = "##Pelvis height";
 
       syncedRobot.addRobotConfigurationDataReceivedCallback(this::receiveRobotConfigurationData);
    }

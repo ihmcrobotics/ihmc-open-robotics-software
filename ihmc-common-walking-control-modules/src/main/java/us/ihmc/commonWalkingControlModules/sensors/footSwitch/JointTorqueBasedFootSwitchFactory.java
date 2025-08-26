@@ -21,7 +21,7 @@ public class JointTorqueBasedFootSwitchFactory implements FootSwitchFactory
    private double defaultContactThresholdTorque = 50.0;
    private double defaultHigherContactThresholdTorque = 100.0;
    private double defaultContactThresholdForce = 50.0;
-   private int defaultContactWindowSize = 5;
+   private int defaultContactWindowSize = 10;
    private boolean defaultUseJacobianTranspose = false;
    private double defaultHorizontalVelocityThreshold = 0.25;
    private double defaultVerticalVelocityThreshold = 0.1;

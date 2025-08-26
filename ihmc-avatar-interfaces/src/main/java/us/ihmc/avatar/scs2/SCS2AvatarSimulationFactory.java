@@ -461,13 +461,14 @@ public class SCS2AvatarSimulationFactory
       {
          JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
          if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
+         {
             joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+         }
          else
          {
             stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
-                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
-                                                                                      robotModel.get().getSteppingEnvironmentalConstraintParameters());
-            stepSnapperUpdatable.setShouldSnapToRegions(true);
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters());
+            stepSnapperUpdatable.setSnapToHeightMap(true);
          }
 
          steppingFactory = joystickPluginFactory;
@@ -886,6 +887,7 @@ public class SCS2AvatarSimulationFactory
                                                                                         collidableHelper,
                                                                                         terrainCollisionName,
                                                                                         robotCollisionName));
+      heightMapForFootstepZ.set(environment.getTerrainObject3D().getHeightMapIfAvailable());
    }
 
    public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)

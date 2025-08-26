@@ -106,7 +106,7 @@ public class HeightMapCliffAvoider
 
    public boolean isStepValid(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
    {
-      if (heightMapData == null || heightMapData.isEmpty())
+      if (heightMapData == null)
          return true;
 
       updateScaledFootPolygons(previousScaledFootPolygon);
@@ -129,7 +129,7 @@ public class HeightMapCliffAvoider
       {
          Point2DReadOnly polygonVertex = scaledFootPolygon.getVertex(pointIdx);
          double zBestFitPlane = bestFitPlane.getZOnPlane(polygonVertex.getX(), polygonVertex.getY());
-         double zHeightMap = heightMapData.getHeightAt(polygonVertex.getX(), polygonVertex.getY());
+         double zHeightMap = heightMapData.getHeight(polygonVertex.getX(), polygonVertex.getY());
          double distanceFromBestFitPlane = Math.abs(zHeightMap - zBestFitPlane);
          highestCliffHeight.set(Math.max(distanceFromBestFitPlane, highestCliffHeight.getValue()));
 

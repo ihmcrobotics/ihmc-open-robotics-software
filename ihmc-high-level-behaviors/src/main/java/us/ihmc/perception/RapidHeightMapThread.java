@@ -75,7 +75,8 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
       flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
-      heightMapManager = new RapidHeightMapManager(ros2Node,
+      heightMapManager = new RapidHeightMapManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
+                                                   ros2Node,
                                                    leftFootFrame,
                                                    rightFootFrame,
                                                    heightMapCenterFrame,

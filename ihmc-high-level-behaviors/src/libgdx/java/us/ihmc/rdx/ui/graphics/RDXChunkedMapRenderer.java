@@ -72,12 +72,10 @@ public class RDXChunkedMapRenderer implements RenderableProvider
                if (chunk.getChunk() != null && chunk.getChunk().ptr(0) != null)
                {
                   heightMapRenderer.update(chunk.getChunk(),
-                                           (float) chunk.getHeightMapOffset(),
                                            (float) chunk.getOriginX(),
                                            (float) chunk.getOriginY(),
                                            chunk.getCellsPerAxis(),
-                                           (float) chunk.getCellSize(),
-                                           (float) chunk.getScalingFactor());
+                                           (float) chunk.getCellSize());
                }
             }
          }
@@ -109,8 +107,6 @@ public class RDXChunkedMapRenderer implements RenderableProvider
       chunk.setOriginY(chunkMessage.getOriginY());
       chunk.setCellSize(chunkMessage.getCellSizeInMeters());
       chunk.setCellsPerAxis(chunkMessage.getCellsPerAxis());
-      chunk.setHeightMapOffset((float) chunkMessage.getHeightOffset());
-      chunk.setScalingFactor(chunkMessage.getHeightScaleFactor());
 
       latestChunk.close();
    }

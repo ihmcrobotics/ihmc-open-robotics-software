@@ -34,17 +34,9 @@ module perception_msgs
          * Y coordinate of the center of the terrain map
          */
         double map_center_y;
-        /**
-         * These are the scale factors that are used to convert from the short values to the actual heights.
-         * First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-         * height = short & 0xFFFF / height_scale_factor - height_scale_offset
-         */
-        double height_scale_factor;
-        double height_scale_offset;
         boolean has_terrain_cost_data;
         boolean has_contact_map_data;
         boolean has_height_map_data;
-        boolean has_snapped_height_data;
         boolean has_snapped_normal_data;
         boolean has_snapped_area_data;
         boolean has_steppability_data;
@@ -61,10 +53,6 @@ module perception_msgs
          * The raw data for the raw heights, which are stored as two bytes to form one short.
          */
         sequence<octet, 500000> height_map_data;
-        /**
-         * The raw data for the snapped heights, which are stored as two bytes to form one short.
-         */
-        sequence<octet, 500000> snapped_height_data;
         /**
          * The raw data for the snap normal x value, which are stored as chars.
          */

@@ -104,15 +104,17 @@ public class HeightMapLogReader implements Closeable
          shortHeights[i] = (short) packedArray[headerFloats + i];
       }
 
-      // Store into OpenCV Mat (CV_16UC1)
+      HeightMapData heightMapData = new HeightMapData(cellSizeInMeters, widthInMeters, centerX, centerY);
+
       Mat mat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
       ShortBuffer matBuffer = mat.createBuffer();
       matBuffer.put(shortHeights);
       matBuffer.rewind();
 
       Point3D center = new Point3D(centerX, centerY, 0.0);
+      HeightMapTools.convertToHeightMapData(mat, heightMapData, center, widthInMeters, cellSizeInMeters);
       HeightMapMessage msg = new HeightMapMessage();
-      HeightMapMessageTools.toMessage(mat, msg, center, widthInMeters, cellSizeInMeters, heightOffset, heightScaleFactor, cellsPerAxis);
+      HeightMapMessageTools.toMessage(heightMapData, msg);
       msg.setSequenceId(index + 2);
       return msg;
    }

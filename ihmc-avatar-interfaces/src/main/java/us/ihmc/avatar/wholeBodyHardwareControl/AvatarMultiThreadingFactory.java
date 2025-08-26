@@ -291,6 +291,7 @@ public class AvatarMultiThreadingFactory
    /**
     * Create High Level Controller Factory
     */
+   // Adding quicksterWalking parameters
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(DRCRobotModel robotModel,
                                                                                RealtimeROS2Node ros2Node,
                                                                                AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
@@ -409,9 +410,7 @@ public class AvatarMultiThreadingFactory
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
       HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
-                                                                                                                                   robotModel.getWalkingControllerParameters()
-                                                                                                                                             .getSteppingParameters(),
-                                                                                                                                   robotModel.getSteppingEnvironmentalConstraintParameters());
+                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
 
       controllerFactory.setListenToHighLevelStatePackets(true);
 
@@ -431,10 +430,10 @@ public class AvatarMultiThreadingFactory
       }
       else
       {
-         // sets up the environmental constraint manager as a planar region consumer in the input manager
-         pluginFactory.addPlanarRegionsListCommandConsumer(environmentalConstraints);
+         // sets up the environmental constraint manager as a height map consumer in the input manager
+         pluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
          // Adds functions that adjust the footholds based on the environment.
-         pluginFactory.setFootStepPlanAdjustment(environmentalConstraints.getFootstepPlanAdjustment());
+         pluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
          // Adds checkers for footholds based on the environment
          for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);

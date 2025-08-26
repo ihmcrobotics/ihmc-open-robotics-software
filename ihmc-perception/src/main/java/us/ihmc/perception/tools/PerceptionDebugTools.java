@@ -248,7 +248,7 @@ public class PerceptionDebugTools
       {
          for (int j = 0; j < heightMapData.getCellsPerAxis(); j += skip)
          {
-            double height = heightMapData.getHeightAt(i, j);
+            double height = heightMapData.getHeight(i, j);
             //if (height > 0.0001)
             matString.append(String.format("%.1f", height)).append(" ");
             //else

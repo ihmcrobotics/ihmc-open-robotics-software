@@ -50,17 +50,17 @@ public class CollisionFreeSwingCalculatorLogViewer
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 
-      IDLSequence.Integer heights = heightMapMessage.getHeights();
-      double gridResolutionXY = heightMapMessage.getXyResolution();
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
+      IDLSequence.Float heights = heightMapMessage.getHeights();
+      double gridResolutionXY = heightMapMessage.getCellSizeInMeters();
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), gridResolutionXY);
 
-      for (int i = 0; i < heights.size(); i++)
+      for (int key = 0; key < heights.size(); key++)
       {
-         int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getKeys().get(i), centerIndex);
-         int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getKeys().get(i), centerIndex);
+         int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+         int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
          double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
          double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
-         double height = heights.get(i);
+         double height = heights.get(key);
 
          terrainGraphics.translate(x, y, 0.5 * height);
          terrainGraphics.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), height, true, computeColorFromHeight(height));
