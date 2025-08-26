@@ -30,20 +30,13 @@ public class SteppableRegionsCalculatorTools
    private static final int maxRecursionDepth = 500;
 
    public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(TerrainMapData terrainMapData,
-                                                                                             Mat steppability,
-                                                                                             Mat connections,
                                                                                              SteppableRegionCalculatorParametersReadOnly parameters,
                                                                                              double gridCenterX,
                                                                                              double gridCenterY,
                                                                                              double gridResolutionXY,
                                                                                              int centerIndex)
    {
-      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(terrainMapData,
-                                                                                                   steppability,
-                                                                                                   connections);
-
-      if (steppability.rows() != steppability.cols())
-         throw new RuntimeException("The input steppability should be square");
+      SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(terrainMapData);
 
       while (environmentModel.hasUnexpandedBorderCells())
       {
@@ -83,23 +76,21 @@ public class SteppableRegionsCalculatorTools
       return environmentModel;
    }
 
-   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(TerrainMapData terrainMapData,
-                                                                                            Mat steppability,
-                                                                                            Mat connections)
+   private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(TerrainMapData terrainMapData)
    {
 
-      int cellsPerSide = steppability.rows();
-      SteppableRegionsEnvironmentModel steppableRegionsEnvironmentModel = new SteppableRegionsEnvironmentModel(cellsPerSide);
+      int cellsPerAxis = terrainMapData.getCellsPerAxis();
+      SteppableRegionsEnvironmentModel steppableRegionsEnvironmentModel = new SteppableRegionsEnvironmentModel(cellsPerAxis);
 
-      for (int x = 0; x < cellsPerSide; x++)
+      for (int x = 0; x < cellsPerAxis; x++)
       {
-         for (int y = 0; y < cellsPerSide; y++)
+         for (int y = 0; y < cellsPerAxis; y++)
          {
             // this cell is steppable. Also remember the image x-y is switched
-            if (steppability.ptr(x, y).get() == SnapResult.VALID.ordinal())
+            if (terrainMapData.getSteppabilityMap()[x * cellsPerAxis + y] == SnapResult.VALID.ordinal())
             {
                boolean isBorderCell;
-               int connection = connections.ptr(x, y).get() & 0xFF;
+               int connection = terrainMapData.getSteppabilityConnectionsMap()[x * terrainMapData.getCellsPerAxis() + y] & 0xFF;
 
                // 8 bits is fully connected
                isBorderCell = Integer.bitCount(connection) != 8;
@@ -108,19 +99,19 @@ public class SteppableRegionsCalculatorTools
                Vector3D normal = new Vector3D(normalValueAsFloat(terrainMapData.getSnapNormalXMap(), terrainMapData.getCellsPerAxis(), x, y),
                                               normalValueAsFloat(terrainMapData.getSnapNormalYMap(), terrainMapData.getCellsPerAxis(), x, y),
                                               normalValueAsFloat(terrainMapData.getSnapNormalZMap(), terrainMapData.getCellsPerAxis(), x, y));
-               SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
+               SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerAxis, isBorderCell);
                steppableRegionsEnvironmentModel.addUnexpandedSteppableCell(cell);
             }
          }
       }
 
-      for (int x = 0; x < cellsPerSide; x++)
+      for (int x = 0; x < cellsPerAxis; x++)
       {
-         for (int y = 0; y < cellsPerSide; y++)
+         for (int y = 0; y < cellsPerAxis; y++)
          {
             SteppableCell cell = steppableRegionsEnvironmentModel.getCellAt(x, y);
             if (cell != null)
-               collectCellNeighborsInEnvironment(cell, steppableRegionsEnvironmentModel, connections);
+               collectCellNeighborsInEnvironment(cell, steppableRegionsEnvironmentModel, terrainMapData.getSteppabilityConnectionsMap());
          }
       }
 
@@ -147,13 +138,13 @@ public class SteppableRegionsCalculatorTools
     * </pre>
     * Where {@code C} is the current cell.
     */
-   public static void collectCellNeighborsInEnvironment(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, Mat connections)
+   public static void collectCellNeighborsInEnvironment(SteppableCell cell, SteppableRegionsEnvironmentModel environmentModel, byte[] connectionsMap)
    {
       List<SteppableCell> cellNeighborsToPack = cell.getValidNeighbors();
-      int cellsPerSide = environmentModel.getCellsPerSide();
+      int cellsPerAxis = environmentModel.getCellsPerSide();
 
       // Need to convert the byte to an int, that is what (0xFF) does
-      int boundaryConnectionsEncodedAsOnes = (connections.ptr(cell.getXIndex(), cell.getYIndex()).get() & 0xFF);
+      int boundaryConnectionsEncodedAsOnes = connectionsMap[cell.getXIndex() * cellsPerAxis + cell.getYIndex()] & 0xFF;
 
       int neighborId = 0;
       for (int x_offset = -1; x_offset <= 1; x_offset++)
@@ -167,7 +158,7 @@ public class SteppableRegionsCalculatorTools
             int neighborX = cell.getXIndex() + x_offset;
             int neighborY = cell.getYIndex() + y_offset;
 
-            if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerSide || neighborY >= cellsPerSide)
+            if (neighborX < 0 || neighborY < 0 || neighborX >= cellsPerAxis || neighborY >= cellsPerAxis)
             {
                // increment the neighbor id for the next time through.
                neighborId++;

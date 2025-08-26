@@ -41,7 +41,6 @@ public class SteppableRegionsCalculationModule
 
    private final List<Consumer<SteppableRegionsListCollectionMessage>> steppableRegionListOutputConsumers = new ArrayList<>();
    private final List<Consumer<SteppableRegionDebugImagesMessage>> steppableRegionDebugConsumers = new ArrayList<>();
-   private Mat steppabilityMat;
 
    public SteppableRegionsCalculationModule()
    {
@@ -75,7 +74,6 @@ public class SteppableRegionsCalculationModule
 
    public void compute(TerrainMapData terrainMapData)
    {
-      steppabilityMat = terrainMapData.getSteppabilityMat();
       Stopwatch timer = new Stopwatch();
       timer.start();
 
@@ -89,8 +87,6 @@ public class SteppableRegionsCalculationModule
 
       SteppableRegionsEnvironmentModel environment;
       environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(terrainMapData,
-                                                                                               terrainMapData.getSteppabilityMat(),
-                                                                                               terrainMapData.getSteppabilityConnectionsMat(),
                                                                                                parameters,
                                                                                                terrainMapData.getTerrainMapCenter().getX(),
                                                                                                terrainMapData.getTerrainMapCenter().getY(),
@@ -149,7 +145,7 @@ public class SteppableRegionsCalculationModule
       return rotatedFootVector.getY() * 2.0;
    }
 
-   private void generateSteppabilityDebugImage(SteppableRegionDebugImageMessage messageToPack)
+   private void generateSteppabilityDebugImage(SteppableRegionDebugImageMessage messageToPack, TerrainMapData terrainMapData)
    {
       int totalSize = 3 * cellsPerSide * cellsPerSide;
       ByteBuffer uncompressedByteBuffer = NativeMemoryTools.allocate(totalSize);
@@ -160,7 +156,7 @@ public class SteppableRegionsCalculationModule
          for (int col = 0; col < cellsPerSide; col++)
          {
             Color color;
-            int status = steppabilityMat.ptr(row, col).get();
+            int status = terrainMapData.getSteppabilityMap()[row * terrainMapData.getCenterIndex() + col];
             if (status == 0)
                color = Color.WHITE; // valid
             else if (status == 1)

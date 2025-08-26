@@ -80,9 +80,20 @@ public class TerrainMapTools
       bytePointerForSnapNormalZMap.get(bytesForSnapNormalZ);
       terrainMapData.setSnapNormalZMap(bytesForSnapNormalZ);
 
-      terrainMapData.setSteppabilityMat(steppabilityMap);
-      terrainMapData.setSteppabilityConnectionsMat(steppabilityConnectionsMap);
-      terrainMapData.setSnappedAreaFractionMat(snappedAreaFractionMap);
+      BytePointer bytePointerForSnappedAreaFractionMap = new BytePointer(snappedAreaFractionMap.data());
+      byte[] bytesForSnappedAreaFractionMap = new byte[totalCells];
+      bytePointerForSnappedAreaFractionMap.get(bytesForSnappedAreaFractionMap);
+      terrainMapData.setSnappedAreaFractionMap(bytesForSnappedAreaFractionMap);
+
+      BytePointer bytePointerForSteppabilityMap = new BytePointer(steppabilityMap.data());
+      byte[] bytesForSteppabilityMap = new byte[totalCells];
+      bytePointerForSteppabilityMap.get(bytesForSteppabilityMap);
+      terrainMapData.setSteppabilityMap(bytesForSteppabilityMap);
+
+      BytePointer bytePointerForSteppabilityConnectionsMap = new BytePointer(steppabilityConnectionsMap.data());
+      byte[] bytesForSteppabilityConnectionsMap = new byte[totalCells];
+      bytePointerForSteppabilityConnectionsMap.get(bytesForSteppabilityConnectionsMap);
+      terrainMapData.setSteppabilityConnectionsMap(bytesForSteppabilityConnectionsMap);
    }
 
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
@@ -171,17 +182,17 @@ public class TerrainMapTools
       if (terrainMapData.hasSnappedArea())
       {
          message.setHasSnappedAreaData(true);
-         PerceptionMessageTools.packDataArray(message.getSnappedAreaData(), terrainMapData.getSnappedAreaFractionMat());
+         message.getSnappedAreaData().add(terrainMapData.getSnappedAreaFractionMap());
       }
       if (terrainMapData.hasSteppability())
       {
          message.setHasSteppabilityData(true);
-         PerceptionMessageTools.packDataArray(message.getSteppabilityData(), terrainMapData.getSteppabilityMat());
+         message.getSteppabilityData().add(terrainMapData.getSteppabilityMap());
       }
       if (terrainMapData.hasSteppableConnections())
       {
          message.setHasSteppableConnectionsData(true);
-         PerceptionMessageTools.packDataArray(message.getSteppableConnectionsData(), terrainMapData.getSteppabilityConnectionsMat());
+         message.getSteppableConnectionsData().add(terrainMapData.getSteppabilityConnectionsMap());
       }
 
       return message;

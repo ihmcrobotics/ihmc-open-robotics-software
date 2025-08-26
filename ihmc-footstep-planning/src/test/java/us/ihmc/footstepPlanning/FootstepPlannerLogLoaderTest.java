@@ -28,9 +28,5 @@ public class FootstepPlannerLogLoaderTest
       request.setFromPacket(log.getRequestPacket());
 
       TerrainMapData terrainMapData = request.getEnvironmentHandler().getTerrainMapData();
-
-      PerceptionDebugTools.printMat("SnappedAreaFraction", terrainMapData.getSnappedAreaFractionMat(), 10);
-      PerceptionDebugTools.printMat("Steppability", terrainMapData.getSteppabilityMat(), 10);
-      PerceptionDebugTools.printMat("SteppableConnections", terrainMapData.getSteppabilityConnectionsMat(), 10);
    }
 }

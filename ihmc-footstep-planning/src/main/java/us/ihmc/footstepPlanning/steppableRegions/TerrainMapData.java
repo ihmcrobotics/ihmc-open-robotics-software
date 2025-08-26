@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -35,9 +34,10 @@ public class TerrainMapData
    private byte[] snapNormalYMap;
    private byte[] snapNormalZMap;
 
-   private Mat steppabilityImage;
-   private Mat steppabilityConnectionsMat;
-   private Mat snappedAreaFractionImage;
+   private byte[] snappedAreaFractionMap;
+   private byte[] steppabilityMap;
+   private byte[] steppabilityConnectionsMap;
+
    private int centerIndex;
 
    public TerrainMapData(int cellsPerAxis, double gridResolutionXY, double gridSizeXY)
@@ -60,6 +60,7 @@ public class TerrainMapData
    {
       this.cellsPerAxis = other.cellsPerAxis;
       this.gridResolutionXY = other.gridResolutionXY;
+      this.gridSizeXY = other.gridSizeXY;
       this.centerIndex = other.centerIndex;
 
       terrainMapCenter.set(other.terrainMapCenter);
@@ -72,9 +73,9 @@ public class TerrainMapData
       snapNormalYMap = other.snapNormalYMap;
       snapNormalZMap = other.snapNormalZMap;
 
-      setSteppabilityMat(other.steppabilityImage);
-      setSteppabilityConnectionsMat(other.steppabilityConnectionsMat);
-      setSnappedAreaFractionMat(other.snappedAreaFractionImage);
+      snappedAreaFractionMap = other.snappedAreaFractionMap;
+      steppabilityMap = other.steppabilityMap;
+      steppabilityConnectionsMap = other.steppabilityConnectionsMap;
    }
 
    public TerrainMapData(TerrainMapMessage other)
@@ -111,17 +112,17 @@ public class TerrainMapData
 
    public boolean hasSteppability()
    {
-      return steppabilityImage != null;
+      return steppabilityMap != null;
    }
 
    public boolean hasSteppableConnections()
    {
-      return steppabilityConnectionsMat != null;
+      return steppabilityConnectionsMap != null;
    }
 
    public boolean hasSnappedArea()
    {
-      return snappedAreaFractionImage != null;
+      return snappedAreaFractionMap != null;
    }
 
    public int getLocalXIndex(double coordinate)
@@ -197,7 +198,7 @@ public class TerrainMapData
 
       // This mask is necessary because the area is stored as an unsigned char, and it discards all the additional information past that one byte. We then scale
       // by 255, which is the maximum value that the char can contain, to convert the output to be between 0 and 1.
-      return ((float) ((snappedAreaFractionImage.ptr(rIndex, cIndex).get() & 0xFF))) / 255;
+      return ((float) ((snappedAreaFractionMap[rIndex * cellsPerAxis + cIndex] & 0xFF))) / 255;
    }
 
    public UnitVector3DReadOnly getNormalLocal(int rIndex, int cIndex)
@@ -238,7 +239,7 @@ public class TerrainMapData
          return SnapResult.SNAP_FAILED.ordinal();
 
       // This mask is necessary because the area is stored as an unsigned char, and it discards all the additional information past that one byte.
-      return steppabilityImage.ptr(rIndex, cIndex).get() & 0xFF;
+      return steppabilityMap[rIndex * cellsPerAxis + cIndex] & 0xFF;
    }
 
    public void setHeightFloatLocal(float height, int rIndex, int cIndex)
@@ -331,19 +332,19 @@ public class TerrainMapData
       this.snapNormalZMap = snapNormalZMap;
    }
 
-   public void setSteppabilityMat(Mat steppabilityImage)
+   public void setSnappedAreaFractionMap(byte[] snappedAreaFractionMap)
    {
-      this.steppabilityImage = steppabilityImage == null ? null : steppabilityImage.clone();
+      this.snappedAreaFractionMap = snappedAreaFractionMap;
    }
 
-   public void setSteppabilityConnectionsMat(Mat steppabilityConnectionsImage)
+   public void setSteppabilityMap(byte[] steppabilityMap)
    {
-      this.steppabilityConnectionsMat = steppabilityConnectionsImage == null ? null : steppabilityConnectionsImage.clone();
+      this.steppabilityMap = steppabilityMap;
    }
 
-   public void setSnappedAreaFractionMat(Mat snappedAreaFractionImage)
+   public void setSteppabilityConnectionsMap(byte[]  steppabilityConnectionsMap)
    {
-      this.snappedAreaFractionImage = snappedAreaFractionImage == null ? null : snappedAreaFractionImage.clone();
+      this.steppabilityConnectionsMap = steppabilityConnectionsMap;
    }
 
    public byte[] getSnapNormalXMap()
@@ -361,19 +362,19 @@ public class TerrainMapData
       return snapNormalZMap;
    }
 
-   public Mat getSteppabilityMat()
+   public byte[] getSnappedAreaFractionMap()
    {
-      return steppabilityImage;
+      return snappedAreaFractionMap;
    }
 
-   public Mat getSteppabilityConnectionsMat()
+   public byte[] getSteppabilityMap()
    {
-      return steppabilityConnectionsMat;
+      return steppabilityMap;
    }
 
-   public Mat getSnappedAreaFractionMat()
+   public byte[] getSteppabilityConnectionsMap()
    {
-      return snappedAreaFractionImage;
+      return steppabilityConnectionsMap;
    }
 
    public void setFromPacket(TerrainMapMessage message)
@@ -435,33 +436,33 @@ public class TerrainMapData
       }
       if (message.getHasSteppabilityData())
       {
-         if (steppabilityImage == null)
-            steppabilityImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSteppabilityData().getBuffer(), steppabilityImage);
+         if (steppabilityMap == null)
+            steppabilityMap = new byte[cellsPerAxis * cellsPerAxis];
+         message.getSteppabilityData().add(steppabilityMap);
       }
       else
       {
-         steppabilityImage = null;
+         steppabilityMap = null;
       }
       if (message.getHasSteppableConnectionsData())
       {
-         if (steppabilityConnectionsMat == null)
-            steppabilityConnectionsMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSteppableConnectionsData().getBuffer(), steppabilityConnectionsMat);
+         if (steppabilityConnectionsMap == null)
+            steppabilityConnectionsMap = new byte[cellsPerAxis * cellsPerAxis];
+         message.getSteppableConnectionsData().add(steppabilityConnectionsMap);
       }
       else
       {
-         steppabilityConnectionsMat = null;
+         steppabilityConnectionsMap = null;
       }
       if (message.getHasSnappedAreaData())
       {
-         if (snappedAreaFractionImage == null)
-            snappedAreaFractionImage = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
-         packDataIntoMatFromByteBuffer(message.getSnappedAreaData().getBuffer(), snappedAreaFractionImage);
+         if (snappedAreaFractionMap == null)
+            snappedAreaFractionMap = new byte[cellsPerAxis * cellsPerAxis];
+         message.getSnappedAreaData().add(snappedAreaFractionMap);
       }
       else
       {
-         snappedAreaFractionImage = null;
+         snappedAreaFractionMap = null;
       }
    }
 
