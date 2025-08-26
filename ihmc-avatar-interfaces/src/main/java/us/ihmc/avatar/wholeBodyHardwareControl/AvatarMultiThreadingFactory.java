@@ -98,7 +98,6 @@ public class AvatarMultiThreadingFactory
    private final TimestampProvider monotonicTimeProvider;
    private final AvatarAffinityInterface affinity;
    private final boolean createStepGeneratorThread;
-   private final boolean createIKStreamingThread;
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
@@ -111,7 +110,6 @@ public class AvatarMultiThreadingFactory
                                       HighLevelControllerStateFactory freezeStateFactory,
                                       AvatarAffinityInterface affinity,
                                       boolean createStepGeneratorThread,
-                                      boolean createIKStreamingThread,
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       MonotonicTime period,
@@ -127,7 +125,6 @@ public class AvatarMultiThreadingFactory
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.affinity = affinity;
       this.createStepGeneratorThread = createStepGeneratorThread;
-      this.createIKStreamingThread = createIKStreamingThread;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
       this.rootRegistry = registry;
