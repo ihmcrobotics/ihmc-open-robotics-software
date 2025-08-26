@@ -55,6 +55,8 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicReference<WalkingStatus> previousWalkingStatus = new AtomicReference<>(null);
    private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
    private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
+   private final YoBoolean turnOnQFP = new YoBoolean("turnOnQFP", registry);
+
 
    public StepGeneratorCommandInputManager()
    {
@@ -133,7 +135,14 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void update(double time)
    {
       isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
-
+      
+      if (turnOnQFP.getBooleanValue())
+      {
+         ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
+         turnOnQFP.addListener(change -> command.setWalk(turnOnQFP.getBooleanValue()));
+         walk.set(turnOnQFP.getBooleanValue());
+      }
+      
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
