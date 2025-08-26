@@ -65,9 +65,6 @@ public class SteppableRegionsCalculatorToolsTest
       SteppableRegionCalculatorParameters parameters = new SteppableRegionCalculatorParameters();
       SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(new TerrainMapData(50, 0.02, 1.0),
                                                                                                                                 steppability,
-                                                                                                                                snappedNormalX,
-                                                                                                                                snappedNormalY,
-                                                                                                                                snappedNormalZ,
                                                                                                                                 connections,
                                                                                                                                 parameters,
                                                                                                                                 gridCenter.getX(),
@@ -91,7 +88,7 @@ public class SteppableRegionsCalculatorToolsTest
    }
 
    /**
-    * Basic test to make sure the {@link SteppableRegionsCalculatorTools#normalValueAsFloat(Mat, int, int)} returns the expected value.
+    * Basic test to make sure the {@link SteppableRegionsCalculatorTools#normalValueAsFloat(byte[], int, int, int)} returns the expected value.
     */
    @Test
    public void testGetNormalValueAsFloat()
@@ -99,10 +96,16 @@ public class SteppableRegionsCalculatorToolsTest
       int cellsPerAxis = 10;
 
       // We fill with zeros
-      Mat dataMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
+
+      byte[] dataArray = new byte[cellsPerAxis * cellsPerAxis];
+
+      for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
+      {
+         dataArray[i] = (byte) 0;
+      }
 
       // We are scaling the normal between [-1.0, 1.0], so from [0 - 255] we expect a result of -1.0
-      float valueAsFloat = SteppableRegionsCalculatorTools.normalValueAsFloat(dataMat, 0, 0);
+      float valueAsFloat = SteppableRegionsCalculatorTools.normalValueAsFloat(dataArray, cellsPerAxis, 0, 0);
       float expectedValue = -1.0f;
       assertEquals(expectedValue, valueAsFloat);
    }
@@ -202,9 +205,6 @@ public class SteppableRegionsCalculatorToolsTest
       parameters.setMaxInteriorPointsToInclude(cellsPerAxis * cellsPerAxis);
       SteppableRegionsEnvironmentModel environment = SteppableRegionsCalculatorTools.createEnvironmentByMergingCellsIntoRegions(new TerrainMapData(100, 0.02, 2.0),
                                                                                                                                 steppability,
-                                                                                                                                snappedNormalX,
-                                                                                                                                snappedNormalY,
-                                                                                                                                snappedNormalZ,
                                                                                                                                 connections,
                                                                                                                                 parameters,
                                                                                                                                 gridCenter.getX(),

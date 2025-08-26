@@ -31,9 +31,6 @@ public class SteppableRegionsCalculatorTools
 
    public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(TerrainMapData terrainMapData,
                                                                                              Mat steppability,
-                                                                                             Mat snappedNormalX,
-                                                                                             Mat snappedNormalY,
-                                                                                             Mat snappedNormalZ,
                                                                                              Mat connections,
                                                                                              SteppableRegionCalculatorParametersReadOnly parameters,
                                                                                              double gridCenterX,
@@ -43,9 +40,6 @@ public class SteppableRegionsCalculatorTools
    {
       SteppableRegionsEnvironmentModel environmentModel = createUnsortedSteppableRegionEnvironment(terrainMapData,
                                                                                                    steppability,
-                                                                                                   snappedNormalX,
-                                                                                                   snappedNormalY,
-                                                                                                   snappedNormalZ,
                                                                                                    connections);
 
       if (steppability.rows() != steppability.cols())
@@ -91,9 +85,6 @@ public class SteppableRegionsCalculatorTools
 
    private static SteppableRegionsEnvironmentModel createUnsortedSteppableRegionEnvironment(TerrainMapData terrainMapData,
                                                                                             Mat steppability,
-                                                                                            Mat snappedNormalX,
-                                                                                            Mat snappedNormalY,
-                                                                                            Mat snappedNormalZ,
                                                                                             Mat connections)
    {
 
@@ -114,9 +105,9 @@ public class SteppableRegionsCalculatorTools
                isBorderCell = Integer.bitCount(connection) != 8;
 
                double z = terrainMapData.getHeightInWorld(x, y);
-               Vector3D normal = new Vector3D(normalValueAsFloat(snappedNormalX, x, y),
-                                              normalValueAsFloat(snappedNormalY, x, y),
-                                              normalValueAsFloat(snappedNormalZ, x, y));
+               Vector3D normal = new Vector3D(normalValueAsFloat(terrainMapData.getSnapNormalXMap(), terrainMapData.getCellsPerAxis(), x, y),
+                                              normalValueAsFloat(terrainMapData.getSnapNormalYMap(), terrainMapData.getCellsPerAxis(), x, y),
+                                              normalValueAsFloat(terrainMapData.getSnapNormalZMap(), terrainMapData.getCellsPerAxis(), x, y));
                SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
                steppableRegionsEnvironmentModel.addUnexpandedSteppableCell(cell);
             }
@@ -203,9 +194,9 @@ public class SteppableRegionsCalculatorTools
       return maskedValue > 0;
    }
 
-   public static float normalValueAsFloat(Mat image, int x, int y)
+   public static float normalValueAsFloat(byte[] normalArray, int cellsPerAxis, int x, int y)
    {
-      return ((float) ((image.ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
+      return (float) ((normalArray[x * cellsPerAxis + y] & 0xFF)) * 2 / 255 - 1.0f;
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,

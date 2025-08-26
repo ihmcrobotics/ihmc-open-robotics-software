@@ -29,12 +29,6 @@ public class FootstepPlannerLogLoaderTest
 
       TerrainMapData terrainMapData = request.getEnvironmentHandler().getTerrainMapData();
 
-      PerceptionDebugTools.printMat("TerrainCost", terrainMapData.getTerrainCostMap(), 10);
-      PerceptionDebugTools.printMat("ContactMap", terrainMapData.getContactMap(), 10);
-
-      PerceptionDebugTools.printMat("SnapNormalX", terrainMapData.getSnapNormalXMat(), 10);
-      PerceptionDebugTools.printMat("SnapNormalY", terrainMapData.getSnapNormalYMat(), 10);
-      PerceptionDebugTools.printMat("SnapNormalZ", terrainMapData.getSnapNormalZMat(), 10);
       PerceptionDebugTools.printMat("SnappedAreaFraction", terrainMapData.getSnappedAreaFractionMat(), 10);
       PerceptionDebugTools.printMat("Steppability", terrainMapData.getSteppabilityMat(), 10);
       PerceptionDebugTools.printMat("SteppableConnections", terrainMapData.getSteppabilityConnectionsMat(), 10);

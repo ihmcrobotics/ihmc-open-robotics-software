@@ -1,12 +1,12 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
@@ -53,13 +53,33 @@ public class TerrainMapTools
       FloatPointer floatPointer = new FloatPointer(heightMap.data());
       float[] values = new float[totalCells];
       floatPointer.get(values);
-      terrainMapData.setHeightMapFloats(values);
+      terrainMapData.setHeightMap(values);
 
-      terrainMapData.setTerrainCostMap(terrainCostMap);
-      terrainMapData.setContactMap(contactMap);
-      terrainMapData.setSnapNormalXMat(snapNormalXMap);
-      terrainMapData.setSnapNormalYMat(snapNormalYMap);
-      terrainMapData.setSnapNormalZMat(snapNormalZMap);
+      BytePointer bytePointerTerrainMap = new BytePointer(terrainCostMap.data());
+      byte[] bytesForTerrainCost = new byte[totalCells];
+      bytePointerTerrainMap.get(bytesForTerrainCost);
+      terrainMapData.setTerrainCostMap(bytesForTerrainCost);
+
+      BytePointer bytePointerContactMap = new BytePointer(contactMap.data());
+      byte[] bytesForContactMap = new byte[totalCells];
+      bytePointerContactMap.get(bytesForContactMap);
+      terrainMapData.setContactMap(bytesForContactMap);
+
+      BytePointer bytePointerForSnapNormalXMap = new BytePointer(snapNormalXMap.data());
+      byte[] bytesForSnapNormalX = new byte[totalCells];
+      bytePointerForSnapNormalXMap.get(bytesForSnapNormalX);
+      terrainMapData.setSnapNormalXMap(bytesForSnapNormalX);
+
+      BytePointer bytePointerForSnapNormalYMap = new BytePointer(snapNormalYMap.data());
+      byte[] bytesForSnapNormalY = new byte[totalCells];
+      bytePointerForSnapNormalYMap.get(bytesForSnapNormalY);
+      terrainMapData.setSnapNormalYMap(bytesForSnapNormalY);
+
+      BytePointer bytePointerForSnapNormalZMap = new BytePointer(snapNormalZMap.data());
+      byte[] bytesForSnapNormalZ = new byte[totalCells];
+      bytePointerForSnapNormalZMap.get(bytesForSnapNormalZ);
+      terrainMapData.setSnapNormalZMap(bytesForSnapNormalZ);
+
       terrainMapData.setSteppabilityMat(steppabilityMap);
       terrainMapData.setSteppabilityConnectionsMat(steppabilityConnectionsMap);
       terrainMapData.setSnappedAreaFractionMat(snappedAreaFractionMap);
@@ -125,28 +145,28 @@ public class TerrainMapTools
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
 
-      if (terrainMapData.hasTerrainCost())
+      if (terrainMapData.hasTerrainCostArray())
       {
          message.setHasTerrainCostData(true);
-         PerceptionMessageTools.packDataArray(message.getTerrainCostData(), terrainMapData.getTerrainCostMap());
+         message.getTerrainCostData().add(terrainMapData.getTerrainCostMap());
       }
-      if (terrainMapData.hasContactMap())
+      if (terrainMapData.hasCostArray())
       {
          message.setHasContactMapData(true);
-         PerceptionMessageTools.packDataArray(message.getContactMapData(), terrainMapData.getContactMap());
+         message.getContactMapData().add(terrainMapData.getContactMap());
       }
 
       if (terrainMapData.hasHeightMapFloats())
       {
          message.setHasHeightMapFloatData(true);
-         message.getHeights().add(terrainMapData.getHeightMapFloats());
+         message.getHeights().add(terrainMapData.getHeightMap());
       }
       if (terrainMapData.hasSnapNormal())
       {
          message.setHasSnappedNormalData(true);
-         PerceptionMessageTools.packDataArray(message.getSnappedNormalXData(), terrainMapData.getSnapNormalXMat());
-         PerceptionMessageTools.packDataArray(message.getSnappedNormalYData(), terrainMapData.getSnapNormalYMat());
-         PerceptionMessageTools.packDataArray(message.getSnappedNormalZData(), terrainMapData.getSnapNormalZMat());
+         message.getSnappedNormalXData().add(terrainMapData.getSnapNormalXMap());
+         message.getSnappedNormalYData().add(terrainMapData.getSnapNormalYMap());
+         message.getSnappedNormalZData().add(terrainMapData.getSnapNormalZMap());
       }
       if (terrainMapData.hasSnappedArea())
       {
