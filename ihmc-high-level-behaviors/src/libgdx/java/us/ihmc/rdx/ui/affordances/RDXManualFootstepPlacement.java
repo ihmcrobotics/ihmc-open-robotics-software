@@ -396,6 +396,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(tempFramePose);
+      currentFootStepSide = footstepBeingPlaced.getFootstepSide();
       placeFootstep();
       exitPlacement();
    }
