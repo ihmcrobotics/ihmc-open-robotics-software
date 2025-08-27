@@ -13,6 +13,22 @@ import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
  * <p>
  * This implementation is for state-only systems, no input -- or if you prefer: x_dot = f(x), not x_dot = f(x, u).
  * </p>
+ * <p>
+ * To utilize this filter, the user must extend this class and provide implementations of the process and measurement models by overriding the abstract methods:
+ * <ul>
+ *    <li> {@link #processModel(DMatrixRMaj)} </li>
+ *    <li> {@link #measurementModel(DMatrixRMaj)} </li>
+ * </ul>
+ * Then, to get updates, the user calls {@link #calculateEstimate(DMatrix)} with the observation at the current time step. This will return the estimated
+ * state based on the observations.
+ * </p>
+ * <p>
+ * For example implementations, see:
+ * <ul>
+ *    <li> {@link us.ihmc.parameterEstimation.examples.ExamplePendulumExtendedKalmanFilter}</li>
+ *    <li> {@link us.ihmc.parameterEstimation.examples.ExamplePendulumExtendedKalmanFilter}</li>
+ * </ul>
+ * </p>
  *
  * @author James Foster
  */

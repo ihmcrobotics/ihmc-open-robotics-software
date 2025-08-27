@@ -5,7 +5,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
-import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilterTestTools.LinearSystem;
 
 import javax.swing.*;
@@ -22,77 +21,6 @@ import java.util.Random;
  */
 public class ConstantVelocity2DExtendedKalmanFilterDemo
 {
-   public static class ConstantVelocity2DKalmanFilter extends ExtendedKalmanFilter
-   {
-      private static final int stateSize = 4;
-      private static final int measurementSize = 2;
-
-      // Start at (x,y) = (0,0) with no velocity
-      private static final DMatrixRMaj x0 = new DMatrixRMaj(new double[] {0.0, 0.0, 0.0, 0.0});
-
-      // Position is barely affected by noise, velocity is affected by noise
-      private static final DMatrixRMaj Q = new DMatrixRMaj(new double[][] {{1e-6, 0.0, 0.0, 0.0},
-                                                                           {0.0, 1e-6, 0.0, 0.0},
-                                                                           {0.0, 0.0, 1e-6, 0.0},
-                                                                           {0.0, 0.0, 0.0, 1e-6}});
-
-      // Both x and y position measurements are corrupted by noise
-      private static final DMatrixRMaj R = new DMatrixRMaj(new double[][] {{1, 0.0}, {0.0, 1}});
-
-      // Ignorant initial guess on P0, we assume we're more certain about positions than velocities
-      private static final DMatrixRMaj P0 = new DMatrixRMaj(new double[][] {{0.1, 0.0, 0.0, 0.0},
-                                                                            {0.0, 1.0, 0.0, 0.0},
-                                                                            {0.0, 0.0, 0.1, 0.0},
-                                                                            {0.0, 0.0, 0.0, 1.0}});
-
-      private static final double dt = 0.01;
-
-      // Constant velocity model of a 2D planar system
-      private static final DMatrixRMaj A = new DMatrixRMaj(new double[][] {{1.0, dt, 0.0, 0.0},
-                                                                           {0.0, 1.0, 0.0, 0.0},
-                                                                           {0.0, 0.0, 1.0, dt},
-                                                                           {0.0, 0.0, 0.0, 1.0}});
-
-      // We only measure positions, not velocities
-      private static final DMatrixRMaj C = new DMatrixRMaj(new double[][] {{1.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 1.0, 0.0}});
-
-      public ConstantVelocity2DKalmanFilter()
-      {
-         super(x0, P0, Q, R);
-      }
-
-      // In the case of a linear process model, the linearization is just the A matrix of the process model
-      @Override
-      public DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousState)
-      {
-         return A;
-      }
-
-      // In the case of a linear measurement model, the linearization is just the C matrix of the measurement model
-      @Override
-      public DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedState)
-      {
-         return C;
-      }
-
-      // y = Ax
-      @Override
-      public DMatrixRMaj processModel(DMatrixRMaj state)
-      {
-         DMatrixRMaj nextState = new DMatrixRMaj(stateSize, 1);
-         CommonOps_DDRM.mult(A, state, nextState);
-         return nextState;
-      }
-
-      // y = Cx
-      @Override
-      public DMatrixRMaj measurementModel(DMatrixRMaj state)
-      {
-         DMatrixRMaj measurement = new DMatrixRMaj(measurementSize, 1);
-         CommonOps_DDRM.mult(C, state, measurement);
-         return measurement;
-      }
-   }
 
    private static final int ITERATIONS = 1000;
 
@@ -102,11 +30,11 @@ public class ConstantVelocity2DExtendedKalmanFilterDemo
 
       // We'll set things up such that the real system is always less noisy than the filter. Said the other way, our filter design
       // will assume that the system is more noisy than it actually is -- a good thing.
-      DMatrixRMaj Q = new DMatrixRMaj(ConstantVelocity2DKalmanFilter.Q);
+      DMatrixRMaj Q = new DMatrixRMaj(ExampleConstantVelocity2DKalmanFilter.Q);
       CommonOps_DDRM.scale(0.1, Q);
       // We'll set things up such that the real system is always less noisy than the filter. Said the other way, our filter design
       // will assume that the system is more noisy than it actually is -- a good thing.
-      DMatrixRMaj R = new DMatrixRMaj(ConstantVelocity2DKalmanFilter.R);
+      DMatrixRMaj R = new DMatrixRMaj(ExampleConstantVelocity2DKalmanFilter.R);
       CommonOps_DDRM.scale(0.01, R);
 
       // In general, initial state of system is different from that of filter.
@@ -116,14 +44,14 @@ public class ConstantVelocity2DExtendedKalmanFilterDemo
       //      LinearSystem system = new LinearSystem(initialSystemState,
       //                                             ConstantVelocity2DKalmanFilter.A,
       //                                             ConstantVelocity2DKalmanFilter.C);
-      LinearSystem system = new LinearSystem(initialSystemState, ConstantVelocity2DKalmanFilter.A, Q, ConstantVelocity2DKalmanFilter.C, R, random);
+      LinearSystem system = new LinearSystem(initialSystemState, ExampleConstantVelocity2DKalmanFilter.A, Q, ExampleConstantVelocity2DKalmanFilter.C, R, random);
 
-      DMatrixRMaj state = new DMatrixRMaj(ConstantVelocity2DKalmanFilter.stateSize, 1);
-      DMatrixRMaj measurement = new DMatrixRMaj(ConstantVelocity2DKalmanFilter.measurementSize, 1);
+      DMatrixRMaj state = new DMatrixRMaj(ExampleConstantVelocity2DKalmanFilter.stateSize, 1);
+      DMatrixRMaj measurement = new DMatrixRMaj(ExampleConstantVelocity2DKalmanFilter.measurementSize, 1);
 
       // Filter
-      ConstantVelocity2DKalmanFilter kalmanFilter = new ConstantVelocity2DKalmanFilter();
-      DMatrixRMaj estimatedState = new DMatrixRMaj(ConstantVelocity2DKalmanFilter.stateSize, 1);
+      ExampleConstantVelocity2DKalmanFilter kalmanFilter = new ExampleConstantVelocity2DKalmanFilter();
+      DMatrixRMaj estimatedState = new DMatrixRMaj(ExampleConstantVelocity2DKalmanFilter.stateSize, 1);
 
       // Arrays for recording data that we'll plot
       double[] timestamps = new double[ITERATIONS];
@@ -139,7 +67,7 @@ public class ConstantVelocity2DExtendedKalmanFilterDemo
 
          estimatedState.set(kalmanFilter.calculateEstimate(measurement));
 
-         timestamps[i] = i * ConstantVelocity2DKalmanFilter.dt;
+         timestamps[i] = i * ExampleConstantVelocity2DKalmanFilter.dt;
          trueStates.add(new DMatrixRMaj(state));
          measurements.add(new DMatrixRMaj(measurement));
          estimatedStates.add(new DMatrixRMaj(estimatedState));
