@@ -16,14 +16,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             */
    public long sequence_id_;
    /**
-            * The number of cells per side of the terrain map grid
-            */
-   public int local_grid_size_;
-   /**
-            * The number of cells contained per meter. This defines the resolution of the grid.
-            */
-   public byte cells_per_meter_;
-   /**
             * X coordinate of the center of the terrain map
             */
    public double map_center_x_;
@@ -31,6 +23,18 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             * Y coordinate of the center of the terrain map
             */
    public double map_center_y_;
+   /**
+            * The number of cells per side of the terrain map grid
+            */
+   public int width_in_meters_;
+   /**
+            * The number of cells contained per meter. This defines the resolution of the grid.
+            */
+   public byte cells_per_meter_;
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double cell_size_in_meters_;
    /**
             * The raw data for the terrain cost value, which are stored as chars.
             */
@@ -97,13 +101,15 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    {
       sequence_id_ = other.sequence_id_;
 
-      local_grid_size_ = other.local_grid_size_;
-
-      cells_per_meter_ = other.cells_per_meter_;
-
       map_center_x_ = other.map_center_x_;
 
       map_center_y_ = other.map_center_y_;
+
+      width_in_meters_ = other.width_in_meters_;
+
+      cells_per_meter_ = other.cells_per_meter_;
+
+      cell_size_in_meters_ = other.cell_size_in_meters_;
 
       terrain_cost_data_.set(other.terrain_cost_data_);
       contact_map_data_.set(other.contact_map_data_);
@@ -129,36 +135,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public long getSequenceId()
    {
       return sequence_id_;
-   }
-
-   /**
-            * The number of cells per side of the terrain map grid
-            */
-   public void setLocalGridSize(int local_grid_size)
-   {
-      local_grid_size_ = local_grid_size;
-   }
-   /**
-            * The number of cells per side of the terrain map grid
-            */
-   public int getLocalGridSize()
-   {
-      return local_grid_size_;
-   }
-
-   /**
-            * The number of cells contained per meter. This defines the resolution of the grid.
-            */
-   public void setCellsPerMeter(byte cells_per_meter)
-   {
-      cells_per_meter_ = cells_per_meter;
-   }
-   /**
-            * The number of cells contained per meter. This defines the resolution of the grid.
-            */
-   public byte getCellsPerMeter()
-   {
-      return cells_per_meter_;
    }
 
    /**
@@ -189,6 +165,51 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public double getMapCenterY()
    {
       return map_center_y_;
+   }
+
+   /**
+            * The number of cells per side of the terrain map grid
+            */
+   public void setWidthInMeters(int width_in_meters)
+   {
+      width_in_meters_ = width_in_meters;
+   }
+   /**
+            * The number of cells per side of the terrain map grid
+            */
+   public int getWidthInMeters()
+   {
+      return width_in_meters_;
+   }
+
+   /**
+            * The number of cells contained per meter. This defines the resolution of the grid.
+            */
+   public void setCellsPerMeter(byte cells_per_meter)
+   {
+      cells_per_meter_ = cells_per_meter;
+   }
+   /**
+            * The number of cells contained per meter. This defines the resolution of the grid.
+            */
+   public byte getCellsPerMeter()
+   {
+      return cells_per_meter_;
+   }
+
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public void setCellSizeInMeters(double cell_size_in_meters)
+   {
+      cell_size_in_meters_ = cell_size_in_meters;
+   }
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double getCellSizeInMeters()
+   {
+      return cell_size_in_meters_;
    }
 
 
@@ -289,13 +310,15 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.local_grid_size_, other.local_grid_size_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_meter_, other.cells_per_meter_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.map_center_x_, other.map_center_x_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.map_center_y_, other.map_center_y_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_meter_, other.cells_per_meter_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.terrain_cost_data_, other.terrain_cost_data_, epsilon)) return false;
 
@@ -330,13 +353,15 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.local_grid_size_ != otherMyClass.local_grid_size_) return false;
-
-      if(this.cells_per_meter_ != otherMyClass.cells_per_meter_) return false;
-
       if(this.map_center_x_ != otherMyClass.map_center_x_) return false;
 
       if(this.map_center_y_ != otherMyClass.map_center_y_) return false;
+
+      if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
+
+      if(this.cells_per_meter_ != otherMyClass.cells_per_meter_) return false;
+
+      if(this.cell_size_in_meters_ != otherMyClass.cell_size_in_meters_) return false;
 
       if (!this.terrain_cost_data_.equals(otherMyClass.terrain_cost_data_)) return false;
       if (!this.contact_map_data_.equals(otherMyClass.contact_map_data_)) return false;
@@ -359,14 +384,16 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append("TerrainMapMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("local_grid_size=");
-      builder.append(this.local_grid_size_);      builder.append(", ");
-      builder.append("cells_per_meter=");
-      builder.append(this.cells_per_meter_);      builder.append(", ");
       builder.append("map_center_x=");
       builder.append(this.map_center_x_);      builder.append(", ");
       builder.append("map_center_y=");
       builder.append(this.map_center_y_);      builder.append(", ");
+      builder.append("width_in_meters=");
+      builder.append(this.width_in_meters_);      builder.append(", ");
+      builder.append("cells_per_meter=");
+      builder.append(this.cells_per_meter_);      builder.append(", ");
+      builder.append("cell_size_in_meters=");
+      builder.append(this.cell_size_in_meters_);      builder.append(", ");
       builder.append("terrain_cost_data=");
       builder.append(this.terrain_cost_data_);      builder.append(", ");
       builder.append("contact_map_data=");

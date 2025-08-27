@@ -18,6 +18,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
@@ -72,7 +73,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptHeightMapMessage);
-//      ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
+      ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
    }
 
    public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)
@@ -160,7 +161,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      latestTerrainMapData = new TerrainMapData(terrainMapMessage);
+      latestTerrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
    }
 
    @Override

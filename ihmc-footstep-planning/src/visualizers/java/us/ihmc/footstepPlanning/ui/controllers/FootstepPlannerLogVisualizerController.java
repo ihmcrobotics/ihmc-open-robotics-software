@@ -63,6 +63,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -189,7 +190,7 @@ public class FootstepPlannerLogVisualizerController
    {
       if (terrainMapMessage == null)
          return null;
-      return new TerrainMapData(terrainMapMessage);
+      return TerrainMapMessageTools.unpackMessage(terrainMapMessage);
    }
 
 

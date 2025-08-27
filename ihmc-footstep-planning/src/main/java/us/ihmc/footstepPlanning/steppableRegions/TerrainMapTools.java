@@ -101,28 +101,4 @@ public class TerrainMapTools
 
       return terrainMapData.getNormalLocal(rIndex, cIndex);
    }
-
-   public static TerrainMapMessage toMessage(TerrainMapData terrainMapData)
-   {
-      TerrainMapMessage message = new TerrainMapMessage();
-
-      message.setLocalGridSize(terrainMapData.getCellsPerAxis());
-      message.setCellsPerMeter((byte) terrainMapData.getCenterIndex());
-
-      message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
-      message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
-
-      message.getTerrainCostData().add(terrainMapData.getTerrainCostMap());
-      message.getContactMapData().add(terrainMapData.getContactMap());
-
-      message.getHeights().add(terrainMapData.getHeightMap());
-      message.getSnappedNormalXData().add(terrainMapData.getSnapNormalXMap());
-      message.getSnappedNormalYData().add(terrainMapData.getSnapNormalYMap());
-      message.getSnappedNormalZData().add(terrainMapData.getSnapNormalZMap());
-      message.getSnappedAreaData().add(terrainMapData.getSnappedAreaFractionMap());
-      message.getSteppabilityData().add(terrainMapData.getSteppabilityMap());
-      message.getSteppableConnectionsData().add(terrainMapData.getSteppabilityConnectionsMap());
-
-      return message;
-   }
 }

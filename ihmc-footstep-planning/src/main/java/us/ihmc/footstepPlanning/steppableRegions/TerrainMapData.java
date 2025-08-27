@@ -78,11 +78,6 @@ public class TerrainMapData
       steppabilityConnectionsMap = other.steppabilityConnectionsMap;
    }
 
-   public TerrainMapData(TerrainMapMessage other)
-   {
-      setFromPacket(other);
-   }
-
    public int getLocalXIndex(double coordinate)
    {
       return getLocalIndex(coordinate, terrainMapCenter.getX());
@@ -260,6 +255,11 @@ public class TerrainMapData
       return cellsPerAxis;
    }
 
+   public void setTerrainMapCenter(Point2DReadOnly terrainMapCenter)
+   {
+      this.terrainMapCenter.set(terrainMapCenter);
+   }
+
    public void setHeightMap(float[] heightMap)
    {
       this.heightMap = heightMap;
@@ -333,22 +333,5 @@ public class TerrainMapData
    public byte[] getSteppabilityConnectionsMap()
    {
       return steppabilityConnectionsMap;
-   }
-
-   public void setFromPacket(TerrainMapMessage message)
-   {
-      cellsPerAxis = message.getLocalGridSize();
-
-      terrainMapCenter.set(message.getMapCenterX(), message.getMapCenterY());
-
-      message.getTerrainCostData().add(terrainCostMap);
-      message.getContactMapData().add(contactMap);
-      message.getHeights().add(heightMap);
-      message.getSnappedNormalXData().add(snapNormalXMap);
-      message.getSnappedNormalYData().add(snapNormalYMap);
-      message.getSnappedNormalZData().add(snapNormalZMap);
-      message.getSteppabilityData().add(steppabilityMap);
-      message.getSteppableConnectionsData().add(steppabilityConnectionsMap);
-      message.getSnappedAreaData().add(snappedAreaFractionMap);
    }
 }

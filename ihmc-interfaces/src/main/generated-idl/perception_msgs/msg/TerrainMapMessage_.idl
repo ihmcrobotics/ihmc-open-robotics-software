@@ -19,14 +19,6 @@ module perception_msgs
          */
         unsigned long long sequence_id;
         /**
-         * The number of cells per side of the terrain map grid
-         */
-        unsigned short local_grid_size;
-        /**
-         * The number of cells contained per meter. This defines the resolution of the grid.
-         */
-        octet cells_per_meter;
-        /**
          * X coordinate of the center of the terrain map
          */
         double map_center_x;
@@ -34,6 +26,18 @@ module perception_msgs
          * Y coordinate of the center of the terrain map
          */
         double map_center_y;
+        /**
+         * The number of cells per side of the terrain map grid
+         */
+        unsigned short width_in_meters;
+        /**
+         * The number of cells contained per meter. This defines the resolution of the grid.
+         */
+        octet cells_per_meter;
+        /**
+         * Cell size in meters of an individual cell
+         */
+        double cell_size_in_meters;
         /**
          * The raw data for the terrain cost value, which are stored as chars.
          */

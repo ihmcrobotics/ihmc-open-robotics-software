@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -30,7 +30,7 @@ public class SnappingTerrainManager
 
    private void publishTerrainMapData(TerrainMapData terrainMapData)
    {
-      TerrainMapMessage message = TerrainMapTools.toMessage(terrainMapData);
+      TerrainMapMessage message = TerrainMapMessageTools.toMessage(terrainMapData);
       if (snappingTerrainPublisher != null)
          snappingTerrainPublisher.publish(message);
    }

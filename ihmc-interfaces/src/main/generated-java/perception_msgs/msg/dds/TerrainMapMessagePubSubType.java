@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f27584c23e05e0703297a9241e23ec4635dd83cfbb6a9437910916b032d39e3d";
+   		return "d72199dfc9aacf5e0a6dce95e581b4a98798f95ba6815d209de5a32b7cfe497e";
    }
    
    @Override
@@ -54,11 +54,13 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -96,13 +98,16 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -152,13 +157,15 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       cdr.write_type_12(data.getSequenceId());
 
-      cdr.write_type_3(data.getLocalGridSize());
-
-      cdr.write_type_9(data.getCellsPerMeter());
-
       cdr.write_type_6(data.getMapCenterX());
 
       cdr.write_type_6(data.getMapCenterY());
+
+      cdr.write_type_3(data.getWidthInMeters());
+
+      cdr.write_type_9(data.getCellsPerMeter());
+
+      cdr.write_type_6(data.getCellSizeInMeters());
 
       if(data.getTerrainCostData().size() <= 250000)
       cdr.write_type_e(data.getTerrainCostData());else
@@ -202,13 +209,15 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       data.setSequenceId(cdr.read_type_12());
       	
-      data.setLocalGridSize(cdr.read_type_3());
-      	
-      data.setCellsPerMeter(cdr.read_type_9());
-      	
       data.setMapCenterX(cdr.read_type_6());
       	
       data.setMapCenterY(cdr.read_type_6());
+      	
+      data.setWidthInMeters(cdr.read_type_3());
+      	
+      data.setCellsPerMeter(cdr.read_type_9());
+      	
+      data.setCellSizeInMeters(cdr.read_type_6());
       	
       cdr.read_type_e(data.getTerrainCostData());	
       cdr.read_type_e(data.getContactMapData());	
@@ -226,10 +235,11 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final void serialize(perception_msgs.msg.dds.TerrainMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_12("sequence_id", data.getSequenceId());
-      ser.write_type_3("local_grid_size", data.getLocalGridSize());
-      ser.write_type_9("cells_per_meter", data.getCellsPerMeter());
       ser.write_type_6("map_center_x", data.getMapCenterX());
       ser.write_type_6("map_center_y", data.getMapCenterY());
+      ser.write_type_3("width_in_meters", data.getWidthInMeters());
+      ser.write_type_9("cells_per_meter", data.getCellsPerMeter());
+      ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_e("terrain_cost_data", data.getTerrainCostData());
       ser.write_type_e("contact_map_data", data.getContactMapData());
       ser.write_type_e("heights", data.getHeights());
@@ -245,10 +255,11 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.TerrainMapMessage data)
    {
       data.setSequenceId(ser.read_type_12("sequence_id"));
-      data.setLocalGridSize(ser.read_type_3("local_grid_size"));
-      data.setCellsPerMeter(ser.read_type_9("cells_per_meter"));
       data.setMapCenterX(ser.read_type_6("map_center_x"));
       data.setMapCenterY(ser.read_type_6("map_center_y"));
+      data.setWidthInMeters(ser.read_type_3("width_in_meters"));
+      data.setCellsPerMeter(ser.read_type_9("cells_per_meter"));
+      data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       ser.read_type_e("terrain_cost_data", data.getTerrainCostData());
       ser.read_type_e("contact_map_data", data.getContactMapData());
       ser.read_type_e("heights", data.getHeights());

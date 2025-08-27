@@ -3,16 +3,20 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
-# The number of cells per side of the terrain map grid
-uint16 local_grid_size
-# The number of cells contained per meter. This defines the resolution of the grid.
-uint8 cells_per_meter
-
 # X coordinate of the center of the terrain map
 float64 map_center_x
 
 # Y coordinate of the center of the terrain map
 float64 map_center_y
+
+# The number of cells per side of the terrain map grid
+uint16 width_in_meters
+
+# The number of cells contained per meter. This defines the resolution of the grid.
+uint8 cells_per_meter
+
+# Cell size in meters of an individual cell
+float64 cell_size_in_meters
 
 # The raw data for the terrain cost value, which are stored as chars.
 byte[<=250000] terrain_cost_data
