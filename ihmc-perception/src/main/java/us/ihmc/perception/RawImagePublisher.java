@@ -21,8 +21,8 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-import static us.ihmc.perception.imageMessage.CompressionType.PNG;
 import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
+import static us.ihmc.perception.imageMessage.CompressionType.PNG;
 
 public class RawImagePublisher implements AutoCloseable
 {
@@ -80,8 +80,8 @@ public class RawImagePublisher implements AutoCloseable
    private void publishAsImageMessage(ROS2Topic<ImageMessage> imageTopic, RawImage imageToPublish)
    {
       RawImage imageToCompress = imageToPublish;
-      BytePointer compressedImage = null;
-      CompressionType compressionType = null;
+      BytePointer compressedImage;
+      CompressionType compressionType;
 
       switch (imageToPublish.getPixelFormat())
       {
@@ -90,6 +90,7 @@ public class RawImagePublisher implements AutoCloseable
             OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
             compressionType = PNG;
             break;
+
          case BGRA8: // BGRA image -> convert to BGR, then compress using nvJPEG
             GpuMat bgr8Image = new GpuMat();
             opencv_cudaimgproc.cvtColor(imageToCompress.getGpuImageMat(), bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
@@ -99,6 +100,7 @@ public class RawImagePublisher implements AutoCloseable
             jpegProcessor.encodeBGR(imageToCompress.getGpuImageMat(), compressedImage);
             compressionType = NVJPEG;
             break;
+
          case RGBA8: // RGBA image -> convert to RGB, then compress using nvJPEG
             GpuMat rgb8Image = new GpuMat();
             opencv_cudaimgproc.cvtColor(imageToCompress.getGpuImageMat(), rgb8Image, opencv_imgproc.COLOR_RGBA2RGB);
@@ -108,6 +110,7 @@ public class RawImagePublisher implements AutoCloseable
             jpegProcessor.encodeRGB(imageToCompress.getGpuImageMat(), compressedImage);
             compressionType = NVJPEG;
             break;
+
          case GRAY8: // Black and white image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeGray(imageToCompress.getGpuImageMat(), compressedImage);
