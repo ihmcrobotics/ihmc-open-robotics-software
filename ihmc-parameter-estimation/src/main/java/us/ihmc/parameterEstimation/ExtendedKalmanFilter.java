@@ -26,7 +26,7 @@ import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
  * For example implementations, see:
  * <ul>
  *    <li> {@link us.ihmc.parameterEstimation.examples.ExamplePendulumExtendedKalmanFilter}</li>
- *    <li> {@link us.ihmc.parameterEstimation.examples.ExamplePendulumExtendedKalmanFilter}</li>
+ *    <li> {@link us.ihmc.parameterEstimation.examples.ExampleConstantVelocity2DKalmanFilter}</li>
  * </ul>
  * </p>
  *
@@ -144,8 +144,14 @@ public abstract class ExtendedKalmanFilter
    private final DMatrixRMaj josephGainTerm;
    private final DMatrixRMaj josephGainTermContainer;
 
+   private final int stateSize;
+   private final int measurementSize;
+
    public ExtendedKalmanFilter(int stateSize, int measurementSize)
    {
+      this.stateSize = stateSize;
+      this.measurementSize = measurementSize;
+
       processCovariance = new DMatrixRMaj(stateSize, stateSize);
       measurementCovariance = new DMatrixRMaj(measurementSize, measurementSize);
 
@@ -202,6 +208,16 @@ public abstract class ExtendedKalmanFilter
 
       state.set(initialState);
       covariance.set(initialCovariance);
+   }
+
+   public int getStateSize()
+   {
+      return stateSize;
+   }
+
+   public int getMeasurementSize()
+   {
+      return measurementSize;
    }
 
    /**
@@ -438,6 +454,11 @@ public abstract class ExtendedKalmanFilter
    public double getNormalizedInnovation()
    {
       return normalizedInnovation.getData()[0];
+   }
+
+   public DMatrixRMaj getCovariance()
+   {
+      return covariance;
    }
 
    public void setNormalizedInnovationThreshold(double normalizedInnovationThreshold)

@@ -39,6 +39,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfM
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.MomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryKalmanFilter;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -65,6 +66,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final MomentumStateUpdater momentumStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
+   private final OdometryKalmanFilter odometry;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -107,6 +109,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       rootJoint = inverseDynamicsStructure.getRootJoint();
 
+
       usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
 
@@ -144,6 +147,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>(imuProcessedOutputs);
 
+
       BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement",
                                                                                       registry,
                                                                                       stateEstimatorParameters.cancelGravityFromAccelerationMeasurement());
@@ -161,6 +165,10 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                       robotMotionStatusFromController,
                                                       stateEstimatorParameters,
                                                       registry);
+
+
+      List<IMUSensorReadOnly> feetIMUs = imusToUse.stream().filter(sensor -> feet.containsKey(sensor.getMeasurementLink())).toList();
+      odometry = new OdometryKalmanFilter(imusToUse.get(0), feetIMUs, imuBiasStateEstimator, cancelGravityFromAccelerationMeasurement, estimatorDT, gravitationalAcceleration, registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMap, stateEstimatorParameters, registry);
 
@@ -335,6 +343,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       for (int i = 0; i < footSwitchList.size(); i++)
          footSwitchList.get(i).update();
+
+      // TODO should this also consume some of the foot switch data?
+      odometry.compute();
 
       switch (operatingMode.getEnumValue())
       {
