@@ -101,7 +101,7 @@ public class JustWaitState implements State
 
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
 
-      controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, "Nadia");
+      controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       ros2Helper.createPublisher(controllerFootstepDataTopic);
 
       ros2Helper.subscribeViaCallback(ContinuousHikingAPI.ROTATE_90_DEGREES, this::rotate90Degrees);
