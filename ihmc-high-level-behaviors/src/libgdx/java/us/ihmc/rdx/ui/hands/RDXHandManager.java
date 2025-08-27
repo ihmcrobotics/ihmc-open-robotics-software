@@ -22,9 +22,9 @@ import java.util.Map;
 public class RDXHandManager
 {
    private final SideDependentList<RDXHandInterface> rdxHands = new SideDependentList<>();
-   private final Map<HandType, HandROS2HardwareCommunication<?, ?>> handCommunications = new HashMap<>();
+   private final SideDependentList<RDXHandQuickAccessButtons> quickAccessButtons = new SideDependentList<>();
 
-   private final Map<String, RDXHandQuickAccessButtons> quickAccessButtons = new HashMap<>();
+   private final Map<HandType, HandROS2HardwareCommunication<?, ?>> handCommunications = new HashMap<>();
 
    public RDXHandManager(DRCRobotModel robotModel)
    {
@@ -64,14 +64,17 @@ public class RDXHandManager
          handCommunication.start();
 
       for (RobotSide side : rdxHands.sides())
-         quickAccessButtons.put(rdxHands.get(side).getIdentifier(), new RDXHandQuickAccessButtons(baseUI, rdxHands.get(side)));
+         quickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, rdxHands.get(side)));
    }
 
    public void update()
    {
       // Update the hands
-      rdxHands.values().forEach(RDXHandInterface::update);
-      quickAccessButtons.values().forEach(RDXHandQuickAccessButtons::update);
+      for (RobotSide side : rdxHands.sides())
+      {
+         rdxHands.get(side).update();
+         quickAccessButtons.get(side).update();
+      }
    }
 
    public void renderImGuiWidgets()

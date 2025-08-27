@@ -17,7 +17,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
