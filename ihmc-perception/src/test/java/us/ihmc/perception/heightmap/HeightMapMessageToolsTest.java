@@ -18,17 +18,17 @@ public class HeightMapMessageToolsTest
     * These values are set to reflect the size of the {@link HeightMapMessage#heights_}.
     * We only allocate so much data in the message so we don't want to store more than that in the {@link HeightMapData#getHeights()}.
     */
-   private final float widthInMeters = 10.0f;
-   private final float cellResolution = 0.2f;
+   private static final float WIDTH_IN_METERS = 10.0f;
+   private static final float CELL_RESOLUTION = 0.2f;
 
    @Test
    public void testHeightMapMessaging()
    {
       HeightMapMessage heightMapMessage = new HeightMapMessage();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
       int cellsPerAxis = 2 * centerIndex + 1;
-      HeightMapData heightMapData = new HeightMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
          heightMapData.setHeight(i, 10);
@@ -49,9 +49,9 @@ public class HeightMapMessageToolsTest
    {
       HeightMapMessage heightMapMessage = new HeightMapMessage();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
       int cellsPerAxis = 2 * centerIndex + 1;
-      HeightMapData heightMapData = new HeightMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
          heightMapData.setHeight(i, 100);
@@ -85,10 +85,10 @@ public class HeightMapMessageToolsTest
    @Test
    public void testSpeedOfPackingHeightMapMessage()
    {
-      HeightMapData heightMapData = new HeightMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
       HeightMapMessage heightMapMessage = new HeightMapMessage();
 
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(WIDTH_IN_METERS, CELL_RESOLUTION);
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
 
