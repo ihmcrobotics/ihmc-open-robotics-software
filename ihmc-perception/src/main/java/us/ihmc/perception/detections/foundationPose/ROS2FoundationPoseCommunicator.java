@@ -8,7 +8,6 @@ import perception_msgs.msg.dds.FoundationPoseResult;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -18,7 +17,6 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.ImageSensor;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -117,9 +115,9 @@ public class ROS2FoundationPoseCommunicator
       // Pack and publish request
       requestMessage.setObjectId(objectId);
       requestMessage.setMeshFile(meshFileName);
-      PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, requestMessage.getColor());
-      PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, requestMessage.getDepth());
-      PerceptionMessageTools.packImageMessage(objectMask, encodedMask, CompressionType.PNG, requestMessage.getObjectMask());
+      PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.CPU_JPEG, requestMessage.getColor());
+      PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.CPU_PNG, requestMessage.getDepth());
+      PerceptionMessageTools.packImageMessage(objectMask, encodedMask, CompressionType.CPU_PNG, requestMessage.getObjectMask());
       requestPublisher.publish(requestMessage);
 
       // Release pointers
@@ -173,8 +171,8 @@ public class ROS2FoundationPoseCommunicator
          opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
 
          // Publish compressed images
-         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, colorMessage);
-         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, depthMessage);
+         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.CPU_JPEG, colorMessage);
+         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.CPU_PNG, depthMessage);
 
          colorPublisher.publish(colorMessage);
          depthPublisher.publish(depthMessage);

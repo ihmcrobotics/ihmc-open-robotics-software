@@ -3,7 +3,6 @@ package us.ihmc.perception.cuda;
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.cudaDeviceProp;
 import org.bytedeco.cuda.global.cudart;
-import org.bytedeco.cuda.global.nvcomp;
 import org.bytedeco.cuda.global.nvjpeg;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -25,11 +24,6 @@ public class CUDATools
    public static boolean hasCUDA()
    {
       return hasLibrary(cudart.class);
-   }
-
-   public static boolean hasNVCOMP()
-   {
-      return hasLibrary(nvcomp.class);
    }
 
    public static boolean hasNVJPEG()

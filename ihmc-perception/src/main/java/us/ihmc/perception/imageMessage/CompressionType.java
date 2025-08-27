@@ -4,11 +4,9 @@ import perception_msgs.msg.dds.ImageMessage;
 
 public enum CompressionType
 {
-   JPEG,
-   NVJPEG, // NVJPEG compression and OpenCV JPEG compression are not compatible. WHY NVIDIA, WHY?????
-   PNG,
-   NVCOMP,
-   ZSTD_NVJPEG_HYBRID,
+   CPU_JPEG,
+   CPU_PNG,
+   GPU_NVJPEG, // NVJPEG compression and OpenCV JPEG compression are not compatible. WHY NVIDIA, WHY?????
    UNCOMPRESSED;
 
    public byte toByte()

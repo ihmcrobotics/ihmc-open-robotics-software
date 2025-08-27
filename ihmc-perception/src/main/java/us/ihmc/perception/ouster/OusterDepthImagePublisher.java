@@ -78,7 +78,7 @@ public class OusterDepthImagePublisher
          ImageMessage depthImageMessage = new ImageMessage();
          PerceptionMessageTools.packImageMessage(depthImageToPublish,
                                                  depthPNGPointer,
-                                                 CompressionType.PNG,
+                                                 CompressionType.CPU_PNG,
                                                  ouster.getBeamAltitudeAnglesBuffer(),
                                                  ouster.getBeamAzimuthAnglesBuffer(),
                                                  depthImageMessage);

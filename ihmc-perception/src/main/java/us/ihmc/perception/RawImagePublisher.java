@@ -12,7 +12,6 @@ import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -22,11 +21,11 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-import static us.ihmc.perception.imageMessage.CompressionType.*;
+import static us.ihmc.perception.imageMessage.CompressionType.CPU_PNG;
+import static us.ihmc.perception.imageMessage.CompressionType.GPU_NVJPEG;
 
 public class RawImagePublisher implements AutoCloseable
 {
-   private CUDACompressionTools compressionTools;
    private final CUDAJPEGProcessor jpegProcessor;
    private final ROS2SRTSensorStreamer sensorStreamer;
 
@@ -38,15 +37,6 @@ public class RawImagePublisher implements AutoCloseable
 
    public RawImagePublisher(ROS2Node ros2Node)
    {
-      try
-      {
-         compressionTools = new CUDACompressionTools();
-      }
-      catch (Exception e)
-      {
-         compressionTools = null;
-      }
-
       jpegProcessor = new CUDAJPEGProcessor();
       sensorStreamer = new ROS2SRTSensorStreamer(ros2Node);
 
@@ -90,32 +80,25 @@ public class RawImagePublisher implements AutoCloseable
    private void publishAsImageMessage(ROS2Topic<ImageMessage> imageTopic, RawImage imageToPublish)
    {
       RawImage imageToCompress = imageToPublish;
-      BytePointer compressedImage;
-      CompressionType compressionType;
+      BytePointer compressedImage = null;
+      CompressionType compressionType = null;
 
       switch (imageToPublish.getPixelFormat())
       {
-         case GRAY16: // Depth image -> compress using ZSTD nvJPEG hybrid compression (or default to PNG if nvCOMP isn't available)
-            if (compressionTools != null)
-            {
-               compressedImage = compressionTools.compressDepth(imageToCompress.getGpuImageMat());
-               compressionType = ZSTD_NVJPEG_HYBRID;
-            }
-            else
-            {
-               compressedImage = new BytePointer();
-               OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
-               compressionType = PNG;
-            }
+         case GRAY16:
+            compressedImage = new BytePointer();
+            OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
+            compressionType = CPU_PNG;
             break;
          case BGRA8: // BGRA image -> convert to BGR, then compress using nvJPEG
             GpuMat bgr8Image = new GpuMat();
             opencv_cudaimgproc.cvtColor(imageToCompress.getGpuImageMat(), bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
             imageToCompress = imageToPublish.replaceImage(bgr8Image, PixelFormat.BGR8);
+            break;
          case BGR8: // BGR image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeBGR(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = NVJPEG;
+            compressionType = GPU_NVJPEG;
             break;
          case RGBA8: // RGBA image -> convert to RGB, then compress using nvJPEG
             GpuMat rgb8Image = new GpuMat();
@@ -124,12 +107,12 @@ public class RawImagePublisher implements AutoCloseable
          case RGB8: // RGB image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeRGB(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = NVJPEG;
+            compressionType = GPU_NVJPEG;
             break;
          case GRAY8: // Black and white image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeGray(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = NVJPEG;
+            compressionType = GPU_NVJPEG;
             break;
          default:
             throw new NotImplementedException("Tomasz has not implemented the compression method for this pixel format yet.");
@@ -174,8 +157,6 @@ public class RawImagePublisher implements AutoCloseable
    public synchronized void close()
    {
       System.out.println("Closing " + getClass().getSimpleName());
-      if (compressionTools != null)
-         compressionTools.destroy();
       jpegProcessor.destroy();
       sensorStreamer.destroy();
       destroyed = true;

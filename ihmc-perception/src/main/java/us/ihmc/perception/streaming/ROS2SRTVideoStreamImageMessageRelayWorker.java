@@ -64,9 +64,9 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
 
       switch (compressionType)
       {
-         case UNCOMPRESSED, JPEG, PNG:
+         case UNCOMPRESSED, CPU_JPEG, CPU_PNG:
             break;
-         case NVJPEG:
+         case GPU_NVJPEG:
             cudajpegProcessor = new CUDAJPEGProcessor(90);
             break;
          default:
@@ -95,14 +95,14 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
       switch (compressionType)
       {
          case UNCOMPRESSED -> PerceptionMessageTools.packImageMessageData(imageMessage, frameMat.data().limit(OpenCVTools.dataSize(frameMat)));
-         case JPEG ->
+         case CPU_JPEG ->
          {
             BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
             opencv_imgcodecs.imencode(".jpg", frameMat, encodedData);
             PerceptionMessageTools.packImageMessageData(imageMessage, encodedData);
             encodedData.close();
          }
-         case NVJPEG ->
+         case GPU_NVJPEG ->
          {
             BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
             if (cudajpegProcessor != null)
@@ -110,7 +110,7 @@ public class ROS2SRTVideoStreamImageMessageRelayWorker
             PerceptionMessageTools.packImageMessageData(imageMessage, encodedData);
             encodedData.close();
          }
-         case PNG ->
+         case CPU_PNG ->
          {
             BytePointer encodedData = new BytePointer(OpenCVTools.dataSize(frameMat));
             opencv_imgcodecs.imencode(".png", frameMat, encodedData);

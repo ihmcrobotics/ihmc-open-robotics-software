@@ -244,8 +244,8 @@ public class RDXFoundationPoseDemo
          opencv_imgcodecs.imencode(PNG, depth.getCpuImageMat(), encodedDepth);
 
          // Publish compressed images
-         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, colorMessage);
-         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, depthMessage);
+         PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.CPU_JPEG, colorMessage);
+         PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.CPU_PNG, depthMessage);
 
          colorPublisher.publish(colorMessage);
          depthPublisher.publish(depthMessage);
@@ -297,9 +297,9 @@ public class RDXFoundationPoseDemo
             // Pack and publish request
             requestMessage.setObjectId(OBJECT_ID);
             requestMessage.setMeshFile("mustard0.obj");
-            PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.JPEG, requestMessage.getColor());
-            PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.PNG, requestMessage.getDepth());
-            PerceptionMessageTools.packImageMessage(mask, encodedMask, CompressionType.PNG, requestMessage.getObjectMask());
+            PerceptionMessageTools.packImageMessage(color, encodedColor, CompressionType.CPU_JPEG, requestMessage.getColor());
+            PerceptionMessageTools.packImageMessage(depth, encodedDepth, CompressionType.CPU_PNG, requestMessage.getDepth());
+            PerceptionMessageTools.packImageMessage(mask, encodedMask, CompressionType.CPU_PNG, requestMessage.getObjectMask());
             requestPublisher.publish(requestMessage);
 
             // Release pointers

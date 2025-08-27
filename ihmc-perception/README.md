@@ -29,18 +29,6 @@ For older NVIDIA graphics cards:
 sudo apt-get install -y cuda-drivers
 ```
 
-
-### nvCOMP
-
-```shell
-cd ~/Downloads
-wget https://developer.download.nvidia.com/compute/nvcomp/redist/nvcomp/linux-x86_64/nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz
-tar -xvf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive.tar.xz
-sudo rsync -av nvcomp-linux-x86_64-4.1.0.6_cuda12-archive/lib/* /usr/local/cuda/lib64
-sudo rsync -av nvcomp-linux-x86_64-4.1.0.6_cuda12-archive/include/* /usr/local/cuda/include
-rm -rf nvcomp-linux-x86_64-4.1.0.6_cuda12-archive*
-```
-
 ### ZED SDK
 
 ```shell
@@ -67,26 +55,6 @@ cuda_12.6.0_windows_network.exe -s
 :: When asked whether to run express or custom installation, you may select express. 
 
 del cuda_12.6.0_windows_network.exe
-```
-
-### nvCOMP
-
-Some of the following commands must be ran as an administrator. To open a Command Prompt as administrator, search CMD in the windows search menu, right click on Command Prompt, and select "Run as administrator."
-
-```shell
-mkdir nvcomp
-cd nvcomp
-curl -o nvcomp.zip -L https://developer.download.nvidia.com/compute/nvcomp/redist/nvcomp/windows-x86_64/nvcomp-windows-x86_64-4.1.0.6_cuda12-archive.zip
-tar -xvf nvcomp-windows-x86_64-4.1.0.6_cuda12-archive.zip
-
-:: The following move commands must be ran as administrator
-move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\include\* "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
-move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\include\nvcomp "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\include"
-move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\bin\nvcomp*.dll "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\bin"
-move nvcomp-windows-x86_64-4.1.0.6_cuda12-archive\lib\nvcomp*.lib "%ProgramFiles%\NVIDIA GPU Computing Toolkit\CUDA\v12.6\lib\x64"
-
-cd ..
-rmdir /s /q nvcomp
 ```
 
 ### ZED SDK
