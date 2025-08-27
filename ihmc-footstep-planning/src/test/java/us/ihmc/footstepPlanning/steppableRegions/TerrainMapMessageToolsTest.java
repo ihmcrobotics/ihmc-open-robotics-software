@@ -42,7 +42,6 @@ public class TerrainMapMessageToolsTest
 
       TerrainMapMessage message = TerrainMapMessageTools.toMessage(terrainMapData);
 
-
       TerrainMapData resultingData = TerrainMapMessageTools.unpackMessage(message);
 
       // Check results match the input
