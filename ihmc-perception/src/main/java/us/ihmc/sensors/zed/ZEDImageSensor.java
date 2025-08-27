@@ -117,7 +117,7 @@ public class ZEDImageSensor extends ImageSensor
 
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
-      zedRuntimeParameters.enable_depth(true);
+      zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
       zedRuntimeParameters.confidence_threshold(70);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
@@ -219,13 +219,6 @@ public class ZEDImageSensor extends ImageSensor
       catch (ZEDException exception)
       {
          LogTools.error(exception);
-
-         if (slInputType == SL_INPUT_TYPE_STREAM)
-         {
-            // Do not retry if stream, it can cause a native crash. TODO: Look into this
-            LogTools.info("Connection to remote ZED SDK failed, not retrying.");
-            close();
-         }
 
          return false;
       }

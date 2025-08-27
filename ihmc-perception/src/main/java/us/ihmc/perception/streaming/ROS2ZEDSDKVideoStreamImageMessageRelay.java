@@ -7,18 +7,14 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotDataLogger.logger.ZEDSVOLoggerManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.zed.global.zed;
-import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
@@ -27,82 +23,47 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 /**
  * Subscribes to a ZED SDK stream and republishes the data as ROS 2 messages.
  */
-public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
+public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
 {
-   private static final boolean ZED_SDK_LOADED = ZEDJavaAPINativeLibrary.load();
+   private static int lastCameraId = 0;
 
    private final ROS2Helper ros2Helper;
+   private final RepeatingTaskThread publishThread;
+   private final ExecutorService publisherExecutor;
 
-   /*
-    * These fields are null until a remote connection has been established
-    */
-   private ZEDImageSensor remoteZEDImageSensor;
-   private ImageMessage lastDepthImageMessage;
-   private ImageMessage lastLeftColorImageMessage;
-   private ImageMessage lastRightColorImageMessage;
-   private ExecutorService publisherExecutor;
+   private final ImageMessage lastDepthImageMessage;
+   private final ImageMessage lastLeftColorImageMessage;
+   private final ImageMessage lastRightColorImageMessage;
 
-   public ROS2ZEDSDKVideoStreamImageMessageRelay(ROS2Node ros2Node, ZEDModelData zedModel, int slDepthMode)
+   public ROS2ZEDSDKVideoStreamImageMessageRelay(ROS2Node ros2Node,
+                                                 ZEDModelData zedModel,
+                                                 int slDepthMode,
+                                                 String remoteStreamingAddress,
+                                                 int remoteStreamingPort)
    {
-      super("ROS2ZEDSDKVideoStreamImageMessageRelay");
+      super(lastCameraId++, zedModel, slDepthMode, remoteStreamingAddress, remoteStreamingPort);
 
       ros2Helper = new ROS2Helper(ros2Node);
+      publishThread = new RepeatingTaskThread(getClass().getSimpleName() + "-PublishThread", this::publish);
+      publisherExecutor = new ScheduledThreadPoolExecutor(3 * 10);
 
-      // #runTask will repeat indefinitely and wait for each new frame from the ZED, if connected.
-      startRepeating();
+      lastDepthImageMessage = new ImageMessage();
+      lastLeftColorImageMessage = new ImageMessage();
+      lastRightColorImageMessage = new ImageMessage();
 
-      // Listen for the robot broadcasting that it's available to stream from
-      ros2Node.createSubscription2(ZEDSVOLoggerManager.ZED_SDK_ANNOUNCE_TOPIC, msg ->
-      {
-         if (remoteZEDImageSensor == null && ZED_SDK_LOADED)
-         {
-            synchronized (ROS2ZEDSDKVideoStreamImageMessageRelay.this)
-            {
-               /*
-                * Create the image sensor
-                */
-               int cameraID = 10;
-               String remoteStreamingAddress = msg.getAddressAsString();
-               int remoteStreamingPort = msg.getPort();
-               remoteZEDImageSensor = new ZEDImageSensor(cameraID, zedModel, slDepthMode, remoteStreamingAddress, remoteStreamingPort);
-               remoteZEDImageSensor.run(true);
-
-               lastDepthImageMessage = new ImageMessage();
-               lastLeftColorImageMessage = new ImageMessage();
-               lastRightColorImageMessage = new ImageMessage();
-
-               publisherExecutor = new ScheduledThreadPoolExecutor(3 * 10);
-
-               double waited = 0.0;
-               double timeout = 5.0;
-               while (!zed.sl_is_opened(remoteZEDImageSensor.getCameraID()))
-               {
-                  if (waited >= timeout)
-                  {
-                     remoteZEDImageSensor.close();
-                     remoteZEDImageSensor = null;
-                     break;
-                  }
-
-                  ThreadTools.park(1.0);
-                  waited += 1.0;
-               }
-            }
-         }
-      });
+      publishThread.startRepeating();
    }
 
-   @Override
-   protected synchronized void runTask() throws Throwable
+   public void publish() throws InterruptedException
    {
-      if (remoteZEDImageSensor != null && remoteZEDImageSensor.isSensorRunning())
+      if (isSensorRunning())
       {
          double timeout = 0.5;
-         remoteZEDImageSensor.waitForGrab(timeout);
+         waitForGrab(timeout);
 
-         RawImage depthImage = remoteZEDImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
-         RawImage leftColorImage = remoteZEDImageSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-         RawImage rightColorImage = remoteZEDImageSensor.getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
+         RawImage depthImage = getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
+         RawImage leftColorImage = getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+         RawImage rightColorImage = getImage(ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
 
          // Pack all RawImages into ImageMessages
          packImageMessage(depthImage, lastDepthImageMessage);
@@ -120,7 +81,6 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
       }
       else
       {
-         // Sensor not connected, sleep for some time
          ThreadTools.park(0.5);
       }
    }
@@ -137,13 +97,12 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends RepeatingTaskThread
       imageMessage.setCompressionType(CompressionType.UNCOMPRESSED.toByte());
    }
 
-   public void destroy()
+   @Override
+   public void close()
    {
-      blockingKill();
+      publisherExecutor.shutdownNow();
+      publishThread.blockingKill();
 
-      if (remoteZEDImageSensor != null)
-      {
-         remoteZEDImageSensor.close();
-      }
+      super.close();
    }
 }
