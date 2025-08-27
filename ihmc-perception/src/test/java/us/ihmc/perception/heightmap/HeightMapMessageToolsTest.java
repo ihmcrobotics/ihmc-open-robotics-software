@@ -31,7 +31,7 @@ public class HeightMapMessageToolsTest
       HeightMapData heightMapData = new HeightMapData(CELL_RESOLUTION, WIDTH_IN_METERS, 0.0, 0.0);
       for (int i = 0; i < cellsPerAxis * cellsPerAxis; i++)
       {
-         heightMapData.setHeight(i, 10);
+         heightMapData.setHeight(i, 100);
       }
 
       HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
