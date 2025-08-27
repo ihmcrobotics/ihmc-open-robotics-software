@@ -168,10 +168,7 @@ public class HeightMapTools
       float[] values = new float[totalCells];
       floatPointer.get(values);
 
-      for (int i = 0; i < totalCells; ++i)
-      {
-         heightMapDataToPack.setHeight(i, values[i]);
-      }
+      heightMapDataToPack.setHeights(values);
    }
 
    public static float[] packArrayForFile(Mat heightMap, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
