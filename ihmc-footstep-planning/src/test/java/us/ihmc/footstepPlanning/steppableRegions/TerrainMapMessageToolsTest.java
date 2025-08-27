@@ -46,15 +46,15 @@ public class TerrainMapMessageToolsTest
       TerrainMapData resultingData = TerrainMapMessageTools.unpackMessage(message);
 
       // Check results match the input
-      float[] heightMapResult = terrainMapData.getHeightMap();
-      byte[] terrainCostMapResult = terrainMapData.getTerrainCostMap();
-      byte[] contactMapResult = terrainMapData.getContactMap();
-      byte[] snapNormalXMapResult = terrainMapData.getSnapNormalXMap();
-      byte[] snapNormalYMapResult = terrainMapData.getSnapNormalYMap();
-      byte[] snapNormalZMapResult = terrainMapData.getSnapNormalZMap();
-      byte[] steppabilityMapResult = terrainMapData.getSteppabilityMap();
-      byte[] steppabilityConnectionsMapResult = terrainMapData.getSteppabilityConnectionsMap();
-      byte[] snappedAreaFractionMapResult = terrainMapData.getSnappedAreaFractionMap();
+      float[] heightMapResult = resultingData.getHeightMap();
+      byte[] terrainCostMapResult = resultingData.getTerrainCostMap();
+      byte[] contactMapResult = resultingData.getContactMap();
+      byte[] snapNormalXMapResult = resultingData.getSnapNormalXMap();
+      byte[] snapNormalYMapResult = resultingData.getSnapNormalYMap();
+      byte[] snapNormalZMapResult = resultingData.getSnapNormalZMap();
+      byte[] steppabilityMapResult = resultingData.getSteppabilityMap();
+      byte[] steppabilityConnectionsMapResult = resultingData.getSteppabilityConnectionsMap();
+      byte[] snappedAreaFractionMapResult = resultingData.getSnappedAreaFractionMap();
 
       int totalCells = cellsPerAxis * cellsPerAxis;
 
