@@ -94,7 +94,6 @@ public class RawImagePublisher implements AutoCloseable
             GpuMat bgr8Image = new GpuMat();
             opencv_cudaimgproc.cvtColor(imageToCompress.getGpuImageMat(), bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
             imageToCompress = imageToPublish.replaceImage(bgr8Image, PixelFormat.BGR8);
-            break;
          case BGR8: // BGR image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeBGR(imageToCompress.getGpuImageMat(), compressedImage);
