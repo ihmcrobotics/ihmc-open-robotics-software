@@ -108,7 +108,7 @@ public class OusterDepthPublisher
          outputImageMessage.getData().add(pngImageBytePointer.get(i));
       }
       outputImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
-      outputImageMessage.setCompressionType(CompressionType.CPU_PNG.toByte());
+      outputImageMessage.setCompressionType(CompressionType.PNG.toByte());
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);

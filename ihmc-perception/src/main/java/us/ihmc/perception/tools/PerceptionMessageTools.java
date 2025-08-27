@@ -169,7 +169,7 @@ public class PerceptionMessageTools
    {
       packImageMessage(depthImageMessage, compressedDepthPointer, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       depthImageMessage.setPixelFormat(PixelFormat.GRAY16.toByte());
-      depthImageMessage.setCompressionType(CompressionType.CPU_PNG.toByte());
+      depthImageMessage.setCompressionType(CompressionType.PNG.toByte());
    }
 
    public static void packJPGCompressedColorImage(BytePointer compressedColorPointer,
@@ -183,7 +183,7 @@ public class PerceptionMessageTools
    {
       packImageMessage(colorImageMessage, compressedColorPointer, cameraPose, acquisitionTime, sequenceNumber, height, width, depthToMetersRatio);
       colorImageMessage.setPixelFormat(PixelFormat.YUV_I420.toByte());
-      colorImageMessage.setCompressionType(CompressionType.CPU_JPEG.toByte());
+      colorImageMessage.setCompressionType(CompressionType.JPEG.toByte());
    }
 
    public static void packImageMessage(ImageMessage imageMessage,

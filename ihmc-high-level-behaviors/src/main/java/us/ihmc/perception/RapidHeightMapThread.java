@@ -104,7 +104,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
             CompressionType compressionType;
             BytePointer bytePointer;
 
-            compressionType = CompressionType.CPU_PNG;
+            compressionType = CompressionType.PNG;
             Mat cpuDepthImage = new Mat();
             bytePointer = new BytePointer();
             depthImageNoFlyingPoints.download(cpuDepthImage);

@@ -21,8 +21,8 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-import static us.ihmc.perception.imageMessage.CompressionType.CPU_PNG;
-import static us.ihmc.perception.imageMessage.CompressionType.GPU_NVJPEG;
+import static us.ihmc.perception.imageMessage.CompressionType.PNG;
+import static us.ihmc.perception.imageMessage.CompressionType.NVJPEG;
 
 public class RawImagePublisher implements AutoCloseable
 {
@@ -88,7 +88,7 @@ public class RawImagePublisher implements AutoCloseable
          case GRAY16:
             compressedImage = new BytePointer();
             OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
-            compressionType = CPU_PNG;
+            compressionType = PNG;
             break;
          case BGRA8: // BGRA image -> convert to BGR, then compress using nvJPEG
             GpuMat bgr8Image = new GpuMat();
@@ -98,7 +98,7 @@ public class RawImagePublisher implements AutoCloseable
          case BGR8: // BGR image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeBGR(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = GPU_NVJPEG;
+            compressionType = NVJPEG;
             break;
          case RGBA8: // RGBA image -> convert to RGB, then compress using nvJPEG
             GpuMat rgb8Image = new GpuMat();
@@ -107,12 +107,12 @@ public class RawImagePublisher implements AutoCloseable
          case RGB8: // RGB image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeRGB(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = GPU_NVJPEG;
+            compressionType = NVJPEG;
             break;
          case GRAY8: // Black and white image -> compress using nvJPEG
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             jpegProcessor.encodeGray(imageToCompress.getGpuImageMat(), compressedImage);
-            compressionType = GPU_NVJPEG;
+            compressionType = NVJPEG;
             break;
          default:
             throw new NotImplementedException("Tomasz has not implemented the compression method for this pixel format yet.");

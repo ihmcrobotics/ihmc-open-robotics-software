@@ -239,7 +239,7 @@ public class ImageMessageDecoderTest
       opencv_imgcodecs.imencode(".png", image, pngData);
 
       PerceptionMessageTools.packImageMessageData(message, pngData);
-      message.setCompressionType(CompressionType.CPU_PNG.toByte());
+      message.setCompressionType(CompressionType.PNG.toByte());
 
       pngData.close();
    }
@@ -250,7 +250,7 @@ public class ImageMessageDecoderTest
       opencv_imgcodecs.imencode(".jpg", image, jpegData);
 
       PerceptionMessageTools.packImageMessageData(message, jpegData);
-      message.setCompressionType(CompressionType.CPU_JPEG.toByte());
+      message.setCompressionType(CompressionType.JPEG.toByte());
 
       jpegData.close();
    }
@@ -271,7 +271,7 @@ public class ImageMessageDecoderTest
          }
 
          PerceptionMessageTools.packImageMessageData(message, encodedData);
-         message.setCompressionType(CompressionType.GPU_NVJPEG.toByte());
+         message.setCompressionType(CompressionType.NVJPEG.toByte());
 
          encodedData.close();
          jpegProcessor.destroy();

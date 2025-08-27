@@ -70,14 +70,14 @@ public class ImageMessageDecoder
 
       switch (CompressionType.fromImageMessage(messageToDecode))
       {
-         case CPU_JPEG, CPU_PNG ->
+         case JPEG, PNG ->
          {
             opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, imageToPack);
             // RGBA or BGRA will lose the alpha channel in jpeg encoding, so we give it back
             if (lastImagePixelFormat.elementsPerPixel == 4 && imageToPack.channels() == 3)
                opencv_imgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGR2BGRA);
          }
-         case GPU_NVJPEG ->
+         case NVJPEG ->
          {
             if (cudaJpegDecoder != null)
             {  // Use CUDA acceleration if available
@@ -118,7 +118,7 @@ public class ImageMessageDecoder
 
       switch (CompressionType.fromImageMessage(messageToDecode))
       {
-         case CPU_JPEG ->
+         case JPEG ->
          {
             // NVJPEG and JPEG and not compatible, but with some hacks we can get them to work
             if (lastImagePixelFormat.elementsPerPixel == 1)
@@ -132,14 +132,14 @@ public class ImageMessageDecoder
                   opencv_cudaimgproc.cvtColor(imageToPack, imageToPack, opencv_imgproc.COLOR_BGR2BGRA);
             }
          }
-         case CPU_PNG ->
+         case PNG ->
          {
             Mat decompressedImage = new Mat();
             opencv_imgcodecs.imdecode(messageDataExtractor.getInputMat(), opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
             imageToPack.upload(decompressedImage);
             decompressedImage.close();
          }
-         case GPU_NVJPEG ->
+         case NVJPEG ->
          {
             BytePointer encodedData = messageDataExtractor.getInputPointer();
             cudaJpegDecoder.decodeToBGR(encodedData, encodedData.limit(), imageToPack);
