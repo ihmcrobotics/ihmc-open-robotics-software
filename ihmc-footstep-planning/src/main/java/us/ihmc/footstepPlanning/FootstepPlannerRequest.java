@@ -503,7 +503,8 @@ public class FootstepPlannerRequest
 
       if (getEnvironmentHandler().getTerrainMapData() != null)
       {
-         TerrainMapMessage terrainMapMessage = TerrainMapMessageTools.toMessage(getEnvironmentHandler().getTerrainMapData());
+         TerrainMapMessage terrainMapMessage = new TerrainMapMessage();
+         TerrainMapMessageTools.toMessage(getEnvironmentHandler().getTerrainMapData(), terrainMapMessage);
          requestPacket.getTerrainMapMessage().set(terrainMapMessage);
       }
 

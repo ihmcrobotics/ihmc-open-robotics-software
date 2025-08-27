@@ -10,7 +10,7 @@ float64 map_center_x
 float64 map_center_y
 
 # The number of cells per side of the terrain map grid
-uint16 width_in_meters
+float64 width_in_meters
 
 # The number of cells contained per meter. This defines the resolution of the grid.
 uint8 cells_per_meter

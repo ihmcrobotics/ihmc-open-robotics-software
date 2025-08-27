@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class HeightMapData
 {
    /* List of heights indexed by key. See HeightMapTools for definition of key */
-   private double[] heights;
+   private float[] heights;
    /* Zero-indexed key corresponding to the center of the height map */
    private int centerIndex;
    /* Number of cells along each axis of the height map */
@@ -28,7 +28,7 @@ public class HeightMapData
       this.mapSize = mapSize;
       this.centerIndex = HeightMapTools.computeCenterIndex(mapSize, cellSize);
       this.cellsPerAxis = 2 * centerIndex + 1;
-      this.heights = new double[cellsPerAxis * cellsPerAxis];
+      this.heights = new float[cellsPerAxis * cellsPerAxis];
       this.gridCenter.set(gridCenterX, gridCenterY);
       updateGridDimensions();
       reset();
@@ -45,7 +45,7 @@ public class HeightMapData
       this.mapSize = latestHeightMapData.getMapSize();
       this.centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapSize(), latestHeightMapData.getCellSize());
       this.cellsPerAxis = 2 * latestHeightMapData.getCenterIndex() + 1;
-      this.heights = new double[latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis()];
+      this.heights = new float[latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis()];
 
       for (int i = 0; i < latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis(); i++)
       {
@@ -69,7 +69,7 @@ public class HeightMapData
 
    public void reset()
    {
-      Arrays.fill(heights, Double.NaN);
+      Arrays.fill(heights, Float.NaN);
    }
 
    public double getCellSize()
@@ -107,8 +107,13 @@ public class HeightMapData
    {
       if (key >= 0 && key < heights.length)
       {
-         heights[key] = height;
+         heights[key] = (float) height;
       }
+   }
+
+   public void setHeights(float[] heights)
+   {
+      this.heights = heights;
    }
 
    public void setHeight(double x, double y, double z)
@@ -119,7 +124,7 @@ public class HeightMapData
       }
 
       int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), cellSize, centerIndex);
-      heights[key] = z;
+      heights[key] = (float) z;
    }
 
    public double getHeight(int key)
@@ -170,7 +175,7 @@ public class HeightMapData
       updateGridDimensions();
    }
 
-   public double[] getHeights()
+   public float[] getHeights()
    {
       return heights;
    }

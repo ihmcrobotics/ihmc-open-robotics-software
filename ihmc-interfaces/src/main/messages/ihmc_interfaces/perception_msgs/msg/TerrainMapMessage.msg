@@ -10,7 +10,7 @@ float64 map_center_x
 float64 map_center_y
 
 # The number of cells per side of the terrain map grid
-uint16 width_in_meters
+float64 width_in_meters
 
 # The number of cells contained per meter. This defines the resolution of the grid.
 uint8 cells_per_meter
@@ -19,19 +19,19 @@ uint8 cells_per_meter
 float64 cell_size_in_meters
 
 # The raw data for the terrain cost value, which are stored as chars.
-byte[<=250000] terrain_cost_data
+byte[<=255000] terrain_cost_data
 # The raw data for the contact map value, which are stored as chars.
-byte[<=250000] contact_map_data
+byte[<=255000] contact_map_data
 float32[<=255000] heights
 # The raw data for the snap normal x value, which are stored as chars.
-byte[<=250000] snapped_normal_x_data
+byte[<=255000] snapped_normal_x_data
 # The raw data for the snap normal y value, which are stored as chars.
-byte[<=250000] snapped_normal_y_data
+byte[<=255000] snapped_normal_y_data
 # The raw data for the snap normal z value, which are stored as chars.
-byte[<=250000] snapped_normal_z_data
+byte[<=255000] snapped_normal_z_data
 # The raw data for the snapped support area, which are stored as chars.
-byte[<=250000] snapped_area_data
+byte[<=255000] snapped_area_data
 # The raw data for the steppability area, which are stored as chars.
-byte[<=250000] steppability_data
+byte[<=255000] steppability_data
 # The raw data for the steppable connections value, which are stored as chars.
-byte[<=250000] steppable_connections_data
+byte[<=255000] steppable_connections_data

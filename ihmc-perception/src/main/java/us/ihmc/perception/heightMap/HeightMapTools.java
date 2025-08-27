@@ -146,16 +146,7 @@ public class HeightMapTools
 
    public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData)
    {
-      int totalCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
-
-      double[] heightsAsDoubles = heightMapData.getHeights();
-      float[] heightsAsFloats = new float[totalCells];
-
-      for (int i = 0; i < totalCells; i++)
-      {
-         heightsAsFloats[i] = (float) heightsAsDoubles[i];
-      }
-
+      float[] heightsAsFloats = heightMapData.getHeights();
       FloatBuffer buffer = heightMapToPack.createBuffer();
       buffer.put(heightsAsFloats);
    }

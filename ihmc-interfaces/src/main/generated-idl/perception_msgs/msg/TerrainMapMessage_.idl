@@ -29,7 +29,7 @@ module perception_msgs
         /**
          * The number of cells per side of the terrain map grid
          */
-        unsigned short width_in_meters;
+        double width_in_meters;
         /**
          * The number of cells contained per meter. This defines the resolution of the grid.
          */
@@ -41,36 +41,36 @@ module perception_msgs
         /**
          * The raw data for the terrain cost value, which are stored as chars.
          */
-        sequence<octet, 250000> terrain_cost_data;
+        sequence<octet, 255000> terrain_cost_data;
         /**
          * The raw data for the contact map value, which are stored as chars.
          */
-        sequence<octet, 250000> contact_map_data;
+        sequence<octet, 255000> contact_map_data;
         sequence<float, 255000> heights;
         /**
          * The raw data for the snap normal x value, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_normal_x_data;
+        sequence<octet, 255000> snapped_normal_x_data;
         /**
          * The raw data for the snap normal y value, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_normal_y_data;
+        sequence<octet, 255000> snapped_normal_y_data;
         /**
          * The raw data for the snap normal z value, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_normal_z_data;
+        sequence<octet, 255000> snapped_normal_z_data;
         /**
          * The raw data for the snapped support area, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_area_data;
+        sequence<octet, 255000> snapped_area_data;
         /**
          * The raw data for the steppability area, which are stored as chars.
          */
-        sequence<octet, 250000> steppability_data;
+        sequence<octet, 255000> steppability_data;
         /**
          * The raw data for the steppable connections value, which are stored as chars.
          */
-        sequence<octet, 250000> steppable_connections_data;
+        sequence<octet, 255000> steppable_connections_data;
       };
     };
   };

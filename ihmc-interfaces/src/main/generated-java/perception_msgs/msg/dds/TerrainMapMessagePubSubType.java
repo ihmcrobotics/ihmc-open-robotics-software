@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d72199dfc9aacf5e0a6dce95e581b4a98798f95ba6815d209de5a32b7cfe497e";
+   		return "327b65bea1c0f0a7c333e50adb8d619cfb8ce3887478b19ea8b8c86cef54f49e";
    }
    
    @Override
@@ -58,29 +58,29 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -104,7 +104,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -161,47 +161,47 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       cdr.write_type_6(data.getMapCenterY());
 
-      cdr.write_type_3(data.getWidthInMeters());
+      cdr.write_type_6(data.getWidthInMeters());
 
       cdr.write_type_9(data.getCellsPerMeter());
 
       cdr.write_type_6(data.getCellSizeInMeters());
 
-      if(data.getTerrainCostData().size() <= 250000)
+      if(data.getTerrainCostData().size() <= 255000)
       cdr.write_type_e(data.getTerrainCostData());else
-          throw new RuntimeException("terrain_cost_data field exceeds the maximum length: %d > %d".formatted(data.getTerrainCostData().size(), 250000));
+          throw new RuntimeException("terrain_cost_data field exceeds the maximum length: %d > %d".formatted(data.getTerrainCostData().size(), 255000));
 
-      if(data.getContactMapData().size() <= 250000)
+      if(data.getContactMapData().size() <= 255000)
       cdr.write_type_e(data.getContactMapData());else
-          throw new RuntimeException("contact_map_data field exceeds the maximum length: %d > %d".formatted(data.getContactMapData().size(), 250000));
+          throw new RuntimeException("contact_map_data field exceeds the maximum length: %d > %d".formatted(data.getContactMapData().size(), 255000));
 
       if(data.getHeights().size() <= 255000)
       cdr.write_type_e(data.getHeights());else
           throw new RuntimeException("heights field exceeds the maximum length: %d > %d".formatted(data.getHeights().size(), 255000));
 
-      if(data.getSnappedNormalXData().size() <= 250000)
+      if(data.getSnappedNormalXData().size() <= 255000)
       cdr.write_type_e(data.getSnappedNormalXData());else
-          throw new RuntimeException("snapped_normal_x_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedNormalXData().size(), 250000));
+          throw new RuntimeException("snapped_normal_x_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedNormalXData().size(), 255000));
 
-      if(data.getSnappedNormalYData().size() <= 250000)
+      if(data.getSnappedNormalYData().size() <= 255000)
       cdr.write_type_e(data.getSnappedNormalYData());else
-          throw new RuntimeException("snapped_normal_y_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedNormalYData().size(), 250000));
+          throw new RuntimeException("snapped_normal_y_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedNormalYData().size(), 255000));
 
-      if(data.getSnappedNormalZData().size() <= 250000)
+      if(data.getSnappedNormalZData().size() <= 255000)
       cdr.write_type_e(data.getSnappedNormalZData());else
-          throw new RuntimeException("snapped_normal_z_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedNormalZData().size(), 250000));
+          throw new RuntimeException("snapped_normal_z_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedNormalZData().size(), 255000));
 
-      if(data.getSnappedAreaData().size() <= 250000)
+      if(data.getSnappedAreaData().size() <= 255000)
       cdr.write_type_e(data.getSnappedAreaData());else
-          throw new RuntimeException("snapped_area_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedAreaData().size(), 250000));
+          throw new RuntimeException("snapped_area_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedAreaData().size(), 255000));
 
-      if(data.getSteppabilityData().size() <= 250000)
+      if(data.getSteppabilityData().size() <= 255000)
       cdr.write_type_e(data.getSteppabilityData());else
-          throw new RuntimeException("steppability_data field exceeds the maximum length: %d > %d".formatted(data.getSteppabilityData().size(), 250000));
+          throw new RuntimeException("steppability_data field exceeds the maximum length: %d > %d".formatted(data.getSteppabilityData().size(), 255000));
 
-      if(data.getSteppableConnectionsData().size() <= 250000)
+      if(data.getSteppableConnectionsData().size() <= 255000)
       cdr.write_type_e(data.getSteppableConnectionsData());else
-          throw new RuntimeException("steppable_connections_data field exceeds the maximum length: %d > %d".formatted(data.getSteppableConnectionsData().size(), 250000));
+          throw new RuntimeException("steppable_connections_data field exceeds the maximum length: %d > %d".formatted(data.getSteppableConnectionsData().size(), 255000));
 
    }
 
@@ -213,7 +213,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       	
       data.setMapCenterY(cdr.read_type_6());
       	
-      data.setWidthInMeters(cdr.read_type_3());
+      data.setWidthInMeters(cdr.read_type_6());
       	
       data.setCellsPerMeter(cdr.read_type_9());
       	
@@ -237,7 +237,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_12("sequence_id", data.getSequenceId());
       ser.write_type_6("map_center_x", data.getMapCenterX());
       ser.write_type_6("map_center_y", data.getMapCenterY());
-      ser.write_type_3("width_in_meters", data.getWidthInMeters());
+      ser.write_type_6("width_in_meters", data.getWidthInMeters());
       ser.write_type_9("cells_per_meter", data.getCellsPerMeter());
       ser.write_type_6("cell_size_in_meters", data.getCellSizeInMeters());
       ser.write_type_e("terrain_cost_data", data.getTerrainCostData());
@@ -257,7 +257,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setSequenceId(ser.read_type_12("sequence_id"));
       data.setMapCenterX(ser.read_type_6("map_center_x"));
       data.setMapCenterY(ser.read_type_6("map_center_y"));
-      data.setWidthInMeters(ser.read_type_3("width_in_meters"));
+      data.setWidthInMeters(ser.read_type_6("width_in_meters"));
       data.setCellsPerMeter(ser.read_type_9("cells_per_meter"));
       data.setCellSizeInMeters(ser.read_type_6("cell_size_in_meters"));
       ser.read_type_e("terrain_cost_data", data.getTerrainCostData());

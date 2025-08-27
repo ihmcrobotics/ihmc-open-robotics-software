@@ -13,12 +13,14 @@ public class SnappingTerrainManager
 {
    private final SnappingTerrainExtractor snappingTerrainExtractor;
    private ROS2Publisher<TerrainMapMessage> snappingTerrainPublisher;
+   private final TerrainMapMessage terrainMapMessage;
 
    public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
    {
       if (ros2Node != null)
          snappingTerrainPublisher = ros2Node.createPublisher(ContinuousHikingAPI.TERRAIN_MAP);
 
+      terrainMapMessage = new TerrainMapMessage();
       snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
    }
 
@@ -30,9 +32,9 @@ public class SnappingTerrainManager
 
    private void publishTerrainMapData(TerrainMapData terrainMapData)
    {
-      TerrainMapMessage message = TerrainMapMessageTools.toMessage(terrainMapData);
+      TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
       if (snappingTerrainPublisher != null)
-         snappingTerrainPublisher.publish(message);
+         snappingTerrainPublisher.publish(terrainMapMessage);
    }
 
    public TerrainMapData getTerrainMapData()

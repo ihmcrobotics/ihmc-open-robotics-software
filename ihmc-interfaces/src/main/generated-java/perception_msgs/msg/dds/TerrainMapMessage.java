@@ -26,7 +26,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    /**
             * The number of cells per side of the terrain map grid
             */
-   public int width_in_meters_;
+   public double width_in_meters_;
    /**
             * The number of cells contained per meter. This defines the resolution of the grid.
             */
@@ -71,23 +71,23 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
    public TerrainMapMessage()
    {
-      terrain_cost_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      terrain_cost_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      contact_map_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      contact_map_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
       heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
-      snapped_normal_x_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_normal_x_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      snapped_normal_y_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_normal_y_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      snapped_normal_z_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_normal_z_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      snapped_area_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_area_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      steppability_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      steppability_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      steppable_connections_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      steppable_connections_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
    }
 
@@ -170,14 +170,14 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    /**
             * The number of cells per side of the terrain map grid
             */
-   public void setWidthInMeters(int width_in_meters)
+   public void setWidthInMeters(double width_in_meters)
    {
       width_in_meters_ = width_in_meters;
    }
    /**
             * The number of cells per side of the terrain map grid
             */
-   public int getWidthInMeters()
+   public double getWidthInMeters()
    {
       return width_in_meters_;
    }
