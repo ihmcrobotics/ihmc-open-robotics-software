@@ -67,7 +67,7 @@ public class TerrainMapMessageTools
 
       Byte steppabilityMap = message.getSteppabilityData();
       byte[] steppabilityMapArray = steppabilityMap.copyArray();
-      terrainMapData.setSnappedAreaFractionMap(steppabilityMapArray);
+      terrainMapData.setSteppabilityMap(steppabilityMapArray);
 
       Byte steppabilityConnectionsMap = message.getSteppableConnectionsData();
       byte[] steppabilityConnectionsMapArray = steppabilityConnectionsMap.copyArray();
