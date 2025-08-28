@@ -5,19 +5,20 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.commons.thread.RepeatingTaskThread;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
+import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -26,8 +27,6 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapParameters;
 
 import java.util.concurrent.BlockingQueue;
 
@@ -39,7 +38,6 @@ public class RapidHeightMapThread extends RepeatingTaskThread
    private final Object heightMapLock = new Object();
 
    private final HeightMapParameters heightMapParameters;
-   private CUDACompressionTools cudaCompressionTools;
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
 
@@ -54,15 +52,6 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       super(RapidHeightMapThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
-
-      try
-      {
-         cudaCompressionTools = new CUDACompressionTools();
-      }
-      catch (Exception e)
-      {
-         cudaCompressionTools = null;
-      }
 
       // At the highest level pass in the reference frames for the specific robot
       ReferenceFrame leftFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
@@ -115,20 +104,12 @@ public class RapidHeightMapThread extends RepeatingTaskThread
             CompressionType compressionType;
             BytePointer bytePointer;
 
-            if (cudaCompressionTools != null)
-            {
-               compressionType = CompressionType.ZSTD_NVJPEG_HYBRID;
-               bytePointer = cudaCompressionTools.compressDepth(depthImageNoFlyingPoints);
-            }
-            else
-            {
-               compressionType = CompressionType.PNG;
-               Mat cpuDepthImage = new Mat();
-               bytePointer = new BytePointer();
-               depthImageNoFlyingPoints.download(cpuDepthImage);
-               OpenCVTools.compressImagePNG(cpuDepthImage, bytePointer);
-               cpuDepthImage.close();
-            }
+            compressionType = CompressionType.PNG;
+            Mat cpuDepthImage = new Mat();
+            bytePointer = new BytePointer();
+            depthImageNoFlyingPoints.download(cpuDepthImage);
+            OpenCVTools.compressImagePNG(cpuDepthImage, bytePointer);
+            cpuDepthImage.close();
 
             ImageMessage imageMessage = new ImageMessage();
             PerceptionMessageTools.packImageMessage(depthImage, bytePointer, compressionType, imageMessage);
@@ -171,8 +152,6 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       super.kill();
       interrupt();
 
-      if (cudaCompressionTools != null)
-         cudaCompressionTools.destroy();
       bodyCollisionFilter.close();
       flyingPointsFilter.destroy();
       heightMapManager.destroy();

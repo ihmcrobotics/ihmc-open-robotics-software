@@ -88,11 +88,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.variancePerRotationSpeed, variancePerRotationSpeed);
    }
 
-   default void setHeightOffset(double heightOffset)
-   {
-      set(HeightMapParameters.heightOffset, heightOffset);
-   }
-
    default void setMinClampHeight(double minClampHeight)
    {
       set(HeightMapParameters.minClampHeight, minClampHeight);
@@ -123,11 +118,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
 
-   default void setHeightScaleFactor(double heightScaleFactor)
-   {
-      set(HeightMapParameters.heightScaleFactor, heightScaleFactor);
-   }
-
    default void setSteppingContactThreshold(int steppingContactThreshold)
    {
       set(HeightMapParameters.steppingContactThreshold, steppingContactThreshold);
@@ -141,10 +131,5 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
       set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
-   }
-
-   default void setEstimateHeightWithKalmanFilter(boolean estimateHeightWithKalmanFilter)
-   {
-      set(HeightMapParameters.estimateHeightWithKalmanFilter, estimateHeightWithKalmanFilter);
    }
 }

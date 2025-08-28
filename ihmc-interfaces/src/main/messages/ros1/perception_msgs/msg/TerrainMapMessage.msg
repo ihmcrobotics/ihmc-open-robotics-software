@@ -15,20 +15,11 @@ float64 map_center_x
 # Y coordinate of the center of the terrain map
 float64 map_center_y
 
-# These are the scale factors that are used to convert from the short values to the actual heights.
-# First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-# height = short & 0xFFFF / height_scale_factor - height_scale_offset
-float64 height_scale_factor
-
-float64 height_scale_offset
-
 bool has_terrain_cost_data
 
 bool has_contact_map_data
 
 bool has_height_map_data
-
-bool has_snapped_height_data
 
 bool has_snapped_normal_data
 
@@ -46,9 +37,6 @@ int8[] contact_map_data
 
 # The raw data for the raw heights, which are stored as two bytes to form one short.
 int8[] height_map_data
-
-# The raw data for the snapped heights, which are stored as two bytes to form one short.
-int8[] snapped_height_data
 
 # The raw data for the snap normal x value, which are stored as chars.
 int8[] snapped_normal_x_data

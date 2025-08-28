@@ -31,17 +31,9 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             * Y coordinate of the center of the terrain map
             */
    public double map_center_y_;
-   /**
-            * These are the scale factors that are used to convert from the short values to the actual heights.
-            * First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-            * height = short & 0xFFFF / height_scale_factor - height_scale_offset
-            */
-   public double height_scale_factor_;
-   public double height_scale_offset_;
    public boolean has_terrain_cost_data_;
    public boolean has_contact_map_data_;
    public boolean has_height_map_data_;
-   public boolean has_snapped_height_data_;
    public boolean has_snapped_normal_data_;
    public boolean has_snapped_area_data_;
    public boolean has_steppability_data_;
@@ -58,10 +50,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             * The raw data for the raw heights, which are stored as two bytes to form one short.
             */
    public us.ihmc.idl.IDLSequence.Byte  height_map_data_;
-   /**
-            * The raw data for the snapped heights, which are stored as two bytes to form one short.
-            */
-   public us.ihmc.idl.IDLSequence.Byte  snapped_height_data_;
    /**
             * The raw data for the snap normal x value, which are stored as chars.
             */
@@ -95,8 +83,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       height_map_data_ = new us.ihmc.idl.IDLSequence.Byte (500000, "type_9");
 
-      snapped_height_data_ = new us.ihmc.idl.IDLSequence.Byte (500000, "type_9");
-
       snapped_normal_x_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
 
       snapped_normal_y_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
@@ -129,17 +115,11 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       map_center_y_ = other.map_center_y_;
 
-      height_scale_factor_ = other.height_scale_factor_;
-
-      height_scale_offset_ = other.height_scale_offset_;
-
       has_terrain_cost_data_ = other.has_terrain_cost_data_;
 
       has_contact_map_data_ = other.has_contact_map_data_;
 
       has_height_map_data_ = other.has_height_map_data_;
-
-      has_snapped_height_data_ = other.has_snapped_height_data_;
 
       has_snapped_normal_data_ = other.has_snapped_normal_data_;
 
@@ -152,7 +132,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       terrain_cost_data_.set(other.terrain_cost_data_);
       contact_map_data_.set(other.contact_map_data_);
       height_map_data_.set(other.height_map_data_);
-      snapped_height_data_.set(other.snapped_height_data_);
       snapped_normal_x_data_.set(other.snapped_normal_x_data_);
       snapped_normal_y_data_.set(other.snapped_normal_y_data_);
       snapped_normal_z_data_.set(other.snapped_normal_z_data_);
@@ -236,34 +215,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       return map_center_y_;
    }
 
-   /**
-            * These are the scale factors that are used to convert from the short values to the actual heights.
-            * First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-            * height = short & 0xFFFF / height_scale_factor - height_scale_offset
-            */
-   public void setHeightScaleFactor(double height_scale_factor)
-   {
-      height_scale_factor_ = height_scale_factor;
-   }
-   /**
-            * These are the scale factors that are used to convert from the short values to the actual heights.
-            * First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-            * height = short & 0xFFFF / height_scale_factor - height_scale_offset
-            */
-   public double getHeightScaleFactor()
-   {
-      return height_scale_factor_;
-   }
-
-   public void setHeightScaleOffset(double height_scale_offset)
-   {
-      height_scale_offset_ = height_scale_offset;
-   }
-   public double getHeightScaleOffset()
-   {
-      return height_scale_offset_;
-   }
-
    public void setHasTerrainCostData(boolean has_terrain_cost_data)
    {
       has_terrain_cost_data_ = has_terrain_cost_data;
@@ -289,15 +240,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public boolean getHasHeightMapData()
    {
       return has_height_map_data_;
-   }
-
-   public void setHasSnappedHeightData(boolean has_snapped_height_data)
-   {
-      has_snapped_height_data_ = has_snapped_height_data;
-   }
-   public boolean getHasSnappedHeightData()
-   {
-      return has_snapped_height_data_;
    }
 
    public void setHasSnappedNormalData(boolean has_snapped_normal_data)
@@ -361,15 +303,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public us.ihmc.idl.IDLSequence.Byte  getHeightMapData()
    {
       return height_map_data_;
-   }
-
-
-   /**
-            * The raw data for the snapped heights, which are stored as two bytes to form one short.
-            */
-   public us.ihmc.idl.IDLSequence.Byte  getSnappedHeightData()
-   {
-      return snapped_height_data_;
    }
 
 
@@ -454,17 +387,11 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.map_center_y_, other.map_center_y_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_scale_factor_, other.height_scale_factor_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_scale_offset_, other.height_scale_offset_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_terrain_cost_data_, other.has_terrain_cost_data_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_contact_map_data_, other.has_contact_map_data_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_height_map_data_, other.has_height_map_data_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_snapped_height_data_, other.has_snapped_height_data_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_snapped_normal_data_, other.has_snapped_normal_data_, epsilon)) return false;
 
@@ -479,8 +406,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.contact_map_data_, other.contact_map_data_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.height_map_data_, other.height_map_data_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.snapped_height_data_, other.snapped_height_data_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.snapped_normal_x_data_, other.snapped_normal_x_data_, epsilon)) return false;
 
@@ -517,17 +442,11 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if(this.map_center_y_ != otherMyClass.map_center_y_) return false;
 
-      if(this.height_scale_factor_ != otherMyClass.height_scale_factor_) return false;
-
-      if(this.height_scale_offset_ != otherMyClass.height_scale_offset_) return false;
-
       if(this.has_terrain_cost_data_ != otherMyClass.has_terrain_cost_data_) return false;
 
       if(this.has_contact_map_data_ != otherMyClass.has_contact_map_data_) return false;
 
       if(this.has_height_map_data_ != otherMyClass.has_height_map_data_) return false;
-
-      if(this.has_snapped_height_data_ != otherMyClass.has_snapped_height_data_) return false;
 
       if(this.has_snapped_normal_data_ != otherMyClass.has_snapped_normal_data_) return false;
 
@@ -540,7 +459,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       if (!this.terrain_cost_data_.equals(otherMyClass.terrain_cost_data_)) return false;
       if (!this.contact_map_data_.equals(otherMyClass.contact_map_data_)) return false;
       if (!this.height_map_data_.equals(otherMyClass.height_map_data_)) return false;
-      if (!this.snapped_height_data_.equals(otherMyClass.snapped_height_data_)) return false;
       if (!this.snapped_normal_x_data_.equals(otherMyClass.snapped_normal_x_data_)) return false;
       if (!this.snapped_normal_y_data_.equals(otherMyClass.snapped_normal_y_data_)) return false;
       if (!this.snapped_normal_z_data_.equals(otherMyClass.snapped_normal_z_data_)) return false;
@@ -567,18 +485,12 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append(this.map_center_x_);      builder.append(", ");
       builder.append("map_center_y=");
       builder.append(this.map_center_y_);      builder.append(", ");
-      builder.append("height_scale_factor=");
-      builder.append(this.height_scale_factor_);      builder.append(", ");
-      builder.append("height_scale_offset=");
-      builder.append(this.height_scale_offset_);      builder.append(", ");
       builder.append("has_terrain_cost_data=");
       builder.append(this.has_terrain_cost_data_);      builder.append(", ");
       builder.append("has_contact_map_data=");
       builder.append(this.has_contact_map_data_);      builder.append(", ");
       builder.append("has_height_map_data=");
       builder.append(this.has_height_map_data_);      builder.append(", ");
-      builder.append("has_snapped_height_data=");
-      builder.append(this.has_snapped_height_data_);      builder.append(", ");
       builder.append("has_snapped_normal_data=");
       builder.append(this.has_snapped_normal_data_);      builder.append(", ");
       builder.append("has_snapped_area_data=");
@@ -593,8 +505,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append(this.contact_map_data_);      builder.append(", ");
       builder.append("height_map_data=");
       builder.append(this.height_map_data_);      builder.append(", ");
-      builder.append("snapped_height_data=");
-      builder.append(this.snapped_height_data_);      builder.append(", ");
       builder.append("snapped_normal_x_data=");
       builder.append(this.snapped_normal_x_data_);      builder.append(", ");
       builder.append("snapped_normal_y_data=");

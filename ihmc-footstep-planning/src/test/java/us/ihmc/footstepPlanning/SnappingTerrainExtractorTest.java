@@ -40,7 +40,7 @@ public class SnappingTerrainExtractorTest
 
       HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(), (float) heightMapParameters.getTerrainWidthInMeters(), 0, 0);
 
-      HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F, 10000, 3.2768f);
+      HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F);
 
       snappingTerrainExtractor.update(heightMapData);
       snappingTerrainExtractor.close();
@@ -63,23 +63,21 @@ public class SnappingTerrainExtractorTest
 
       SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
 
-      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       fakeHeightMap.setTo(new Scalar(32767));
-      Mat inputDataShorts = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
-      fakeHeightMap.download(inputDataShorts);
+      Mat inputDataFloats = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      fakeHeightMap.download(inputDataFloats);
 
       HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                       (float) heightMapParameters.getTerrainWidthInMeters(),
                                                       gridCenter.getX(),
                                                       gridCenter.getY());
 
-      HeightMapTools.convertToHeightMapData(inputDataShorts,
+      HeightMapTools.convertToHeightMapData(inputDataFloats,
                                             heightMapData,
                                             gridCenter,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize(),
-                                            (float) heightMapParameters.getHeightScaleFactor(),
-                                            (float) heightMapParameters.getHeightOffset());
+                                            (float) heightMapParameters.getCellSize());
 
       snappingTerrainExtractor.update(heightMapData);
 
@@ -118,9 +116,9 @@ public class SnappingTerrainExtractorTest
 
       SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
 
-      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       fakeHeightMap.setTo(new Scalar(32767));
-      Mat inputDataShorts = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1);
+      Mat inputDataShorts = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       fakeHeightMap.download(inputDataShorts);
 
       HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
@@ -132,9 +130,7 @@ public class SnappingTerrainExtractorTest
                                             heightMapData,
                                             gridCenter,
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize(),
-                                            (float) heightMapParameters.getHeightScaleFactor(),
-                                            (float) heightMapParameters.getHeightOffset());
+                                            (float) heightMapParameters.getCellSize());
 
       snappingTerrainExtractor.update(heightMapData);
 

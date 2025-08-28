@@ -1,10 +1,12 @@
 package us.ihmc.perception.heightMap;
 
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -46,11 +48,6 @@ public class HeightMapTools
       return indexToCoordinate(yIndex, yCenter, resolution, centerIndex);
    }
 
-   public static int coordinateToIndex(double coordinate, double origin, double resolution)
-   {
-      return (int) Math.floor((coordinate - origin) / resolution);
-   }
-
    public static int coordinateToIndex(double coordinate, double gridCenter, double resolution, int centerIndex)
    {
       return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;
@@ -63,17 +60,17 @@ public class HeightMapTools
 
    public static int keyToXIndex(int key, int centerIndex)
    {
-      return key % (2 * centerIndex + 1);
+      return key / (2 * centerIndex + 1);
    }
 
    public static int keyToYIndex(int key, int centerIndex)
    {
-      return key / (2 * centerIndex + 1);
+      return key % (2 * centerIndex + 1);
    }
 
    public static int indicesToKey(int xIndex, int yIndex, int centerIndex)
    {
-      return xIndex + yIndex * (2 * centerIndex + 1);
+      return yIndex + xIndex * (2 * centerIndex + 1);
    }
 
    public static int getIndexFromCoordinates(double coordinate, float resolution, int offset)
@@ -147,31 +144,19 @@ public class HeightMapTools
       return new double[] {r, g, b};
    }
 
-   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData, HeightMapParameters heightMapParameters)
+   public static void convertHeightMapDataToMat(Mat heightMapToPack, HeightMapData heightMapData)
    {
-      int cellsPerAxis = heightMapData.getCellsPerAxis();
-      int totalCells = cellsPerAxis * cellsPerAxis;
+      int totalCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      // This is done for speed optimization
       double[] heightsAsDoubles = heightMapData.getHeights();
-      short[] heightsAsFloats = new short[totalCells];
+      float[] heightsAsFloats = new float[totalCells];
 
-      for (int col = 0; col < cellsPerAxis; col++)
+      for (int i = 0; i < totalCells; i++)
       {
-         for (int row = 0; row < cellsPerAxis; row++)
-         {
-            // This is happening for a reason, the current implementation expects column major for the Mat objects, but the HeightMapData object is row major
-            int rowMajorIndex = row * cellsPerAxis + col;
-            int colMajorIndex = col * cellsPerAxis + row;
-
-            // Get the height as for row major, and save it as column major
-            short height = (short) (((float) heightsAsDoubles[rowMajorIndex] + (float) heightMapParameters.getHeightOffset())
-                                    * heightMapParameters.getHeightScaleFactor());
-            heightsAsFloats[colMajorIndex] = height;
-         }
+         heightsAsFloats[i] = (float) heightsAsDoubles[i];
       }
 
-      ShortBuffer buffer = heightMapToPack.createBuffer();
+      FloatBuffer buffer = heightMapToPack.createBuffer();
       buffer.put(heightsAsFloats);
    }
 
@@ -179,9 +164,7 @@ public class HeightMapTools
                                              HeightMapData heightMapDataToPack,
                                              Point3D gridCenter,
                                              float widthInMeters,
-                                             float cellSizeInMeters,
-                                             float heightScaleFactor,
-                                             float heightOffset)
+                                             float cellSizeInMeters)
    {
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
       int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
@@ -190,35 +173,17 @@ public class HeightMapTools
 
       heightMapDataToPack.setGridCenter(gridCenter.getX(), gridCenter.getY());
 
-      // Read data into byte[]
-      byte[] data = new byte[Short.BYTES * totalCells];
-      heightMapPointer.data().get(data);
+      FloatPointer floatPointer = new FloatPointer(heightMapPointer.data());
+      float[] values = new float[totalCells];
+      floatPointer.get(values);
 
-      // Put height values into HeightMapData object
       for (int i = 0; i < totalCells; ++i)
       {
-         // Get the start index of the bytes for a short
-         int dataIndex = Short.BYTES * i;
-
-         // Get the most and least significant bits, combine into integer
-         int major = (data[dataIndex + 1] << 8) & 0xFF00;
-         int minor = data[dataIndex] & 0x00FF;
-         int height = major | minor;
-
-         // Calculate cell height
-         float cellHeight = (((float) height / heightScaleFactor) - heightOffset);
-
-         // Put it into the HeightMapData object
-         int key = cellsPerAxis * (i % cellsPerAxis) + (i / cellsPerAxis);
-         heightMapDataToPack.setHeight(key, cellHeight);
+         heightMapDataToPack.setHeight(i, values[i]);
       }
    }
 
-   public static float[] packArrayForFile(Mat heightMap,
-                                          Point3D gridCenter,
-                                          float widthInMeters,
-                                          float cellSizeInMeters,
-                                          HeightMapParameters heightMapParameters)
+   public static float[] packArrayForFile(Mat heightMap, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
    {
       // Snap to cell resolution
       widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
@@ -235,12 +200,8 @@ public class HeightMapTools
       short[] shortHeights = new short[totalCells];
       shortBuffer.get(shortHeights);
 
-      // Retrieve scale/offset to convert shorts → floats (real heights)
-      float heightOffset = (float) heightMapParameters.getHeightOffset();
-      float scaleFactor = (float) heightMapParameters.getHeightScaleFactor();
-
       // Prepare an output array with a header
-      final int headerFloats = 6;
+      final int headerFloats = 4;
       float[] packedArray = new float[headerFloats + totalCells];
 
       // Write header
@@ -248,8 +209,6 @@ public class HeightMapTools
       packedArray[1] = cellSizeInMeters;
       packedArray[2] = (float) gridCenter.getX();
       packedArray[3] = (float) gridCenter.getY();
-      packedArray[4] = heightOffset;
-      packedArray[5] = scaleFactor;
 
       // Convert shorts to floats and copy into a packed array
       for (int i = 0; i < totalCells; ++i)

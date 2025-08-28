@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.modules;
 
 import com.google.common.base.CaseFormat;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
@@ -17,6 +16,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -193,7 +195,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
                LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
                yoVariableServer.setMainRegistry(registry,
-                                                AvatarSimulationFactory.createYoVariableServerJointList(fullRobotModel.getElevator()),
+                                                createYoVariableServerJointList(fullRobotModel.getElevator()),
                                                 yoGraphicsListRegistry);
                yoVariableServer.start();
                break;
@@ -548,5 +550,24 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    public long getServerTime()
    {
       return serverTime;
+   }
+
+   public static List<JointBasics> createYoVariableServerJointList(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof CrossFourBarJoint)
+         {
+            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 }

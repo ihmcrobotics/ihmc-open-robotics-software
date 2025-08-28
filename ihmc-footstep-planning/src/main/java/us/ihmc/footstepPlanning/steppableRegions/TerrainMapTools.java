@@ -32,11 +32,6 @@ public class TerrainMapTools
       return rIndex < 0 || rIndex >= cellsPerSide || cIndex < 0 || cIndex >= cellsPerSide;
    }
 
-   public static float convertScaledAndOffsetValue(float scaleFactor, float offset, float value)
-   {
-      return (value / scaleFactor) - offset;
-   }
-
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
    {
       int cellsPerMeter = terrainMapData.getCenterIndex();
@@ -97,9 +92,6 @@ public class TerrainMapTools
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
 
-      message.setHeightScaleFactor(terrainMapData.getHeightScaleFactor());
-      message.setHeightScaleOffset(terrainMapData.getHeightScaleOffset());
-
       if (terrainMapData.hasTerrainCost())
       {
          message.setHasTerrainCostData(true);
@@ -114,12 +106,7 @@ public class TerrainMapTools
       if (terrainMapData.hasHeightMap())
       {
          message.setHasHeightMapData(true);
-         PerceptionMessageTools.packShortDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
-      }
-      if (terrainMapData.hasSnapHeight())
-      {
-         message.setHasSnappedHeightData(true);
-         PerceptionMessageTools.packShortDataArray(message.getSnappedHeightData(), terrainMapData.getSnapHeightMat());
+         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
       }
       if (terrainMapData.hasSnapNormal())
       {
@@ -150,8 +137,6 @@ public class TerrainMapTools
    public static boolean isEmpty(TerrainMapMessage message)
    {
       if (message.getHasHeightMapData())
-         return false;
-      if (message.getHasSnappedHeightData())
          return false;
       return !message.getHasSteppabilityData();
    }

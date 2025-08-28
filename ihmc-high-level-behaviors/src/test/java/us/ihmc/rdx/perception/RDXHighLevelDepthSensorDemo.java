@@ -128,7 +128,6 @@ public class RDXHighLevelDepthSensorDemo
             heightMapMessage.setWidthInMeters(2.0);
             heightMapMessage.setGridCenterX(1.0);
             heightMapMessage.setGridCenterY(1.0);
-            HeightMapMessageTools.setToFlatGround(heightMapMessage);
             heightMap.generateMeshesAsync(heightMapMessage);
             baseUI.getPrimaryScene().addRenderableProvider(heightMap, RDXSceneLevel.MODEL);
          }

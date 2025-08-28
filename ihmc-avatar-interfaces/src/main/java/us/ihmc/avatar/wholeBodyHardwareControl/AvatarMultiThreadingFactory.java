@@ -291,6 +291,7 @@ public class AvatarMultiThreadingFactory
    /**
     * Create High Level Controller Factory
     */
+   // Adding quicksterWalking parameters
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(DRCRobotModel robotModel,
                                                                                RealtimeROS2Node ros2Node,
                                                                                AvatarLowLevelOutputProcessor lowLevelOutputProcessor,

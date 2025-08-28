@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "293e3bd5cfa8d56b6a83108b982f21492242117955c59d848d183e296da3dba4";
+   		return "8f173a4cdea1b4d561ed68655eb8ca283f5c50de8315def2397a0d208fa8fe77";
    }
    
    @Override
@@ -62,12 +62,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -85,8 +79,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (250000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (500000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (500000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -130,15 +122,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -170,10 +153,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getHeightMapData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getSnappedHeightData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -216,17 +195,11 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       cdr.write_type_6(data.getMapCenterY());
 
-      cdr.write_type_6(data.getHeightScaleFactor());
-
-      cdr.write_type_6(data.getHeightScaleOffset());
-
       cdr.write_type_7(data.getHasTerrainCostData());
 
       cdr.write_type_7(data.getHasContactMapData());
 
       cdr.write_type_7(data.getHasHeightMapData());
-
-      cdr.write_type_7(data.getHasSnappedHeightData());
 
       cdr.write_type_7(data.getHasSnappedNormalData());
 
@@ -247,10 +220,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       if(data.getHeightMapData().size() <= 500000)
       cdr.write_type_e(data.getHeightMapData());else
           throw new RuntimeException("height_map_data field exceeds the maximum length: %d > %d".formatted(data.getHeightMapData().size(), 500000));
-
-      if(data.getSnappedHeightData().size() <= 500000)
-      cdr.write_type_e(data.getSnappedHeightData());else
-          throw new RuntimeException("snapped_height_data field exceeds the maximum length: %d > %d".formatted(data.getSnappedHeightData().size(), 500000));
 
       if(data.getSnappedNormalXData().size() <= 250000)
       cdr.write_type_e(data.getSnappedNormalXData());else
@@ -290,17 +259,11 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       	
       data.setMapCenterY(cdr.read_type_6());
       	
-      data.setHeightScaleFactor(cdr.read_type_6());
-      	
-      data.setHeightScaleOffset(cdr.read_type_6());
-      	
       data.setHasTerrainCostData(cdr.read_type_7());
       	
       data.setHasContactMapData(cdr.read_type_7());
       	
       data.setHasHeightMapData(cdr.read_type_7());
-      	
-      data.setHasSnappedHeightData(cdr.read_type_7());
       	
       data.setHasSnappedNormalData(cdr.read_type_7());
       	
@@ -313,7 +276,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getTerrainCostData());	
       cdr.read_type_e(data.getContactMapData());	
       cdr.read_type_e(data.getHeightMapData());	
-      cdr.read_type_e(data.getSnappedHeightData());	
       cdr.read_type_e(data.getSnappedNormalXData());	
       cdr.read_type_e(data.getSnappedNormalYData());	
       cdr.read_type_e(data.getSnappedNormalZData());	
@@ -331,12 +293,9 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_9("cells_per_meter", data.getCellsPerMeter());
       ser.write_type_6("map_center_x", data.getMapCenterX());
       ser.write_type_6("map_center_y", data.getMapCenterY());
-      ser.write_type_6("height_scale_factor", data.getHeightScaleFactor());
-      ser.write_type_6("height_scale_offset", data.getHeightScaleOffset());
       ser.write_type_7("has_terrain_cost_data", data.getHasTerrainCostData());
       ser.write_type_7("has_contact_map_data", data.getHasContactMapData());
       ser.write_type_7("has_height_map_data", data.getHasHeightMapData());
-      ser.write_type_7("has_snapped_height_data", data.getHasSnappedHeightData());
       ser.write_type_7("has_snapped_normal_data", data.getHasSnappedNormalData());
       ser.write_type_7("has_snapped_area_data", data.getHasSnappedAreaData());
       ser.write_type_7("has_steppability_data", data.getHasSteppabilityData());
@@ -344,7 +303,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("terrain_cost_data", data.getTerrainCostData());
       ser.write_type_e("contact_map_data", data.getContactMapData());
       ser.write_type_e("height_map_data", data.getHeightMapData());
-      ser.write_type_e("snapped_height_data", data.getSnappedHeightData());
       ser.write_type_e("snapped_normal_x_data", data.getSnappedNormalXData());
       ser.write_type_e("snapped_normal_y_data", data.getSnappedNormalYData());
       ser.write_type_e("snapped_normal_z_data", data.getSnappedNormalZData());
@@ -361,12 +319,9 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       data.setCellsPerMeter(ser.read_type_9("cells_per_meter"));
       data.setMapCenterX(ser.read_type_6("map_center_x"));
       data.setMapCenterY(ser.read_type_6("map_center_y"));
-      data.setHeightScaleFactor(ser.read_type_6("height_scale_factor"));
-      data.setHeightScaleOffset(ser.read_type_6("height_scale_offset"));
       data.setHasTerrainCostData(ser.read_type_7("has_terrain_cost_data"));
       data.setHasContactMapData(ser.read_type_7("has_contact_map_data"));
       data.setHasHeightMapData(ser.read_type_7("has_height_map_data"));
-      data.setHasSnappedHeightData(ser.read_type_7("has_snapped_height_data"));
       data.setHasSnappedNormalData(ser.read_type_7("has_snapped_normal_data"));
       data.setHasSnappedAreaData(ser.read_type_7("has_snapped_area_data"));
       data.setHasSteppabilityData(ser.read_type_7("has_steppability_data"));
@@ -374,7 +329,6 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("terrain_cost_data", data.getTerrainCostData());
       ser.read_type_e("contact_map_data", data.getContactMapData());
       ser.read_type_e("height_map_data", data.getHeightMapData());
-      ser.read_type_e("snapped_height_data", data.getSnappedHeightData());
       ser.read_type_e("snapped_normal_x_data", data.getSnappedNormalXData());
       ser.read_type_e("snapped_normal_y_data", data.getSnappedNormalYData());
       ser.read_type_e("snapped_normal_z_data", data.getSnappedNormalZData());

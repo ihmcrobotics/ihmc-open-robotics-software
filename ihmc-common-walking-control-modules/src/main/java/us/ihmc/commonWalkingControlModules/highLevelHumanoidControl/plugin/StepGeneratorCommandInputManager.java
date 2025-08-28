@@ -65,6 +65,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
       isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
       isUnitVelocities.set(false);
+
+      // by default, command input manager is not enabled, set enabled only if #update is called
+      commandInputManager.setEnabled(false);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -133,6 +136,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void update(double time)
    {
       isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
+      commandInputManager.setEnabled(isOpen);
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
@@ -169,6 +173,7 @@ public class StepGeneratorCommandInputManager implements Updatable
       {
          latestHeightMap.set(commandInputManager.pollNewestCommand(HeightMapCommand.class));
       }
+      commandInputManager.clearCommands(HeightMapCommand.class);
 
       // if the robot is standing, or we just finished a step, we should submit the newest regions
       if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
@@ -202,7 +207,10 @@ public class StepGeneratorCommandInputManager implements Updatable
       previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());
 
       if (!isOpen)
+      {
          walk.set(false);
+         commandInputManager.clearAllCommands();
+      }
    }
 
    public boolean isOpen()
