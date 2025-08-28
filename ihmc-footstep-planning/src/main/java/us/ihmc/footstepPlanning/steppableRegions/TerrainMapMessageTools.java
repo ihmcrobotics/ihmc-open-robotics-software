@@ -15,39 +15,30 @@ public class TerrainMapMessageTools
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
 
-      int totalCells = terrainMapData.getCellsPerAxis() *  terrainMapData.getCellsPerAxis();
+      message.getHeights().resetQuick();
+      message.getHeights().add(terrainMapData.getHeightMap());
 
-      float[] heightsFromData = terrainMapData.getHeightMap();
-      Float heights = message.getHeights();
+      message.getTerrainCostData().resetQuick();
+      message.getTerrainCostData().add(terrainMapData.getTerrainCostMap());
 
-      for (int i = 0; i < totalCells; i++)
-      {
-         if (i < heights.size())
-            heights.set(i, heightsFromData[i]);
-         else
-            heights.add(heightsFromData[i]);
-      }
+      message.getContactMapData().resetQuick();
+      message.getContactMapData().add(terrainMapData.getContactMap());
 
-      updateByteList(message.getTerrainCostData(), terrainMapData.getTerrainCostMap());
-      updateByteList(message.getContactMapData(), terrainMapData.getContactMap());
-      updateByteList(message.getSnappedNormalXData(), terrainMapData.getSnapNormalXMap());
-      updateByteList(message.getSnappedNormalYData(), terrainMapData.getSnapNormalYMap());
-      updateByteList(message.getSnappedNormalZData(), terrainMapData.getSnapNormalZMap());
-      updateByteList(message.getSteppabilityData(),  terrainMapData.getSteppabilityMap());
-      updateByteList(message.getSteppableConnectionsData(), terrainMapData.getSteppabilityConnectionsMap());
-      updateByteList(message.getSnappedAreaData(), terrainMapData.getSnappedAreaFractionMap());
-   }
+      message.getSnappedNormalXData().resetQuick();
+      message.getSnappedNormalXData().add(terrainMapData.getSnapNormalXMap());
+      message.getSnappedNormalYData().resetQuick();
+      message.getSnappedNormalYData().add(terrainMapData.getSnapNormalYMap());
+      message.getSnappedNormalZData().resetQuick();
+      message.getSnappedNormalZData().add(terrainMapData.getSnapNormalZMap());
 
-   private static void updateByteList(Byte target, byte[] source)
-   {
-      for (int i = 0; i < source.length; i++)
-      {
-         byte value = source[i];
-         if (i < target.size())
-            target.set(i, value);
-         else
-            target.add(value);
-      }
+      message.getSteppabilityData().resetQuick();
+      message.getSteppabilityData().add(terrainMapData.getSteppabilityMap());
+
+      message.getSteppableConnectionsData().resetQuick();
+      message.getSteppableConnectionsData().add(terrainMapData.getSteppabilityConnectionsMap());
+
+      message.getSnappedAreaData().resetQuick();
+      message.getSnappedAreaData().add(terrainMapData.getSnappedAreaFractionMap());
    }
 
    public static TerrainMapData unpackMessage(TerrainMapMessage message)
