@@ -126,11 +126,9 @@ __device__ float getHeightAt(float x, float y, const float* heightMapData, float
     return (float)heightMapData[key];
 }
 
-Need to update constrctor fo ri this cuda kernel
-
 __device__ void sampleFootCorners(
     float x, float y, float yaw,
-    double* heightMapData,
+    float* heightMapData,
     float* heightMapCenter,
     int heightMapCenterIdx,
     float heightMapResolution,
