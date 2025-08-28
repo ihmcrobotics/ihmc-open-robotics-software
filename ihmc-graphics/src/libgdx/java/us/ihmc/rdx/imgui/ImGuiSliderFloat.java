@@ -29,6 +29,14 @@ public class ImGuiSliderFloat extends ImGuiFancyWidget
       return valueChanged;
    }
 
+   public boolean render(float minValue, float maxValue, boolean hideLabel)
+   {
+      beforeWidgetRender(hideLabel);
+      boolean valueChanged = ImGui.sliderFloat(label, imFloat.getData(), minValue, maxValue, format);
+      afterWidgetRender();
+      return valueChanged;
+   }
+
    public void setFloatValue(float value)
    {
       imFloat.set(value);
