@@ -96,23 +96,23 @@ public class RDXAbilityHand implements RDXHandInterface
       ImGui.text("Configurations:");
       ImGui.sameLine();
       ImGui.setCursorPosX(widgetStartX);
-      if (ImGui.button("OPEN"))
+      if (ImGui.button("Open"))
       {
          gripMode(Grip.RELAX, communication);
       }
       ImGui.sameLine();
-      if (ImGui.button("GRIP"))
+      if (ImGui.button("Grip"))
       {
          gripMode(Grip.POWER, communication);
       }
 
       ImGui.sameLine();
-      if (ImGui.button("TRIPOD CLOSED"))
+      if (ImGui.button("Tripod Closed"))
       {
          gripMode(Grip.TRIPOD_C, communication);
       }
       ImGui.sameLine();
-      if (ImGui.button("HOOK"))
+      if (ImGui.button("Hook"))
       {
          gripMode(Grip.HOOK, communication);
       }
@@ -121,27 +121,27 @@ public class RDXAbilityHand implements RDXHandInterface
       if (ImGui.collapsingHeader("Other Configurations"))
       {
          ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.button("TRIPOD OPEN"))
+         if (ImGui.button("Tripod OPEN"))
          {
             gripMode(Grip.TRIPOD_O, communication);
          }
          ImGui.sameLine();
-         if (ImGui.button("PINCH OPEN"))
+         if (ImGui.button("Pinch Open"))
          {
             gripMode(Grip.PINCH_O, communication);
          }
          ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.button("PINCH CLOSED"))
+         if (ImGui.button("Pinch Closed"))
          {
             gripMode(Grip.PINCH_C, communication);
          }
          ImGui.sameLine();
-         if (ImGui.button("KEY"))
+         if (ImGui.button("Key"))
          {
             gripMode(Grip.KEY, communication);
          }
          ImGui.sameLine();
-         if (ImGui.button("RUDE"))
+         if (ImGui.button("Rude"))
          {
             gripMode(Grip.RUDE, communication);
          }
