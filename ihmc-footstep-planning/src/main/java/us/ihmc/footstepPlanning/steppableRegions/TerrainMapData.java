@@ -9,17 +9,19 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
+import java.util.Arrays;
+
 public class TerrainMapData
 {
    /**
     * Sensor origin that defines the center of the height map
     */
-   private final Point2D terrainMapCenter = new Point2D();
+   private Point2D terrainMapCenter = new Point2D();
 
-   private int cellsPerAxis;
+   private final int cellsPerAxis;
 
-   private double gridResolutionXY;
-   private double gridSizeXY;
+   private final double gridResolutionXY;
+   private final double gridSizeXY;
 
    private float[] heightMap;
 
@@ -63,19 +65,20 @@ public class TerrainMapData
       this.gridSizeXY = other.gridSizeXY;
       this.centerIndex = other.centerIndex;
 
-      terrainMapCenter.set(other.terrainMapCenter);
+      this.terrainMapCenter = new Point2D(other.terrainMapCenter);
+      int size = cellsPerAxis * cellsPerAxis;
 
-      heightMap = other.heightMap;
-      terrainCostMap = other.terrainCostMap;
-      contactMap = other.contactMap;
+      this.heightMap = Arrays.copyOf(other.heightMap, size);
+      this.terrainCostMap = Arrays.copyOf(other.terrainCostMap, size);
+      this.contactMap = Arrays.copyOf(other.contactMap, size);
 
-      snapNormalXMap = other.snapNormalXMap;
-      snapNormalYMap = other.snapNormalYMap;
-      snapNormalZMap = other.snapNormalZMap;
+      this.snapNormalXMap = Arrays.copyOf(other.snapNormalXMap, size);
+      this.snapNormalYMap = Arrays.copyOf(other.snapNormalYMap, size);
+      this.snapNormalZMap = Arrays.copyOf(other.snapNormalZMap, size);
 
-      snappedAreaFractionMap = other.snappedAreaFractionMap;
-      steppabilityMap = other.steppabilityMap;
-      steppabilityConnectionsMap = other.steppabilityConnectionsMap;
+      this.snappedAreaFractionMap = Arrays.copyOf(other.snappedAreaFractionMap, size);
+      this.steppabilityMap = Arrays.copyOf(other.steppabilityMap, size);
+      this.steppabilityConnectionsMap = Arrays.copyOf(other.steppabilityConnectionsMap, size);
    }
 
    public int getLocalXIndex(double coordinate)
@@ -257,7 +260,7 @@ public class TerrainMapData
 
    public void setTerrainMapCenter(Point2DReadOnly terrainMapCenter)
    {
-      this.terrainMapCenter.set(terrainMapCenter);
+      this.terrainMapCenter = new Point2D(terrainMapCenter);
    }
 
    public void setHeightMap(float[] heightMap)
