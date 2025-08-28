@@ -26,7 +26,6 @@ import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 import java.time.Instant;
 

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.RawImageTest;
-import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -111,33 +110,6 @@ public class ImageMessageDecoderTest
          LogTools.info("Testing NVJPEG Compression: {}", pixelFormat);
          testDecompression(getNVJPEGCompressionFunction(pixelFormat), zedColorBGR, pixelFormat, LOSSY_COMPRESSION_EPSILON);
       }
-      System.out.println();
-   }
-
-   @Test
-   public void testNVCOMP()
-   {
-      for (PixelFormat pixelFormat : PixelFormat.values())
-      {  // Test the color formats
-         if (TESTABLE_COLOR_FORMATS.contains(pixelFormat))
-         {
-            LogTools.info("Testing Color NVCOMP Compression: {}", pixelFormat.name());
-            testDecompression(this::nvcompCompression, zedColorBGR, pixelFormat, LOSSLESS_COMPRESSION_EPSILON);
-            System.out.println();
-         }
-      }
-
-      // Test depth compression
-      LogTools.info("Testing Depth NVCOMP Compression");
-      testGeneralDecompression(this::nvcompCompression, zedDepth16U, PixelFormat.GRAY16, LOSSLESS_COMPRESSION_EPSILON);
-      System.out.println();
-   }
-
-   @Test
-   public void testHybridDepthCompression()
-   {
-      LogTools.info("Testing Hybrid Depth Compression");
-      testGeneralDecompression(this::hybridDepthCompression, zedDepth16U, PixelFormat.GRAY16, LOSSY_COMPRESSION_EPSILON);
       System.out.println();
    }
 
@@ -304,45 +276,5 @@ public class ImageMessageDecoderTest
          encodedData.close();
          jpegProcessor.destroy();
       };
-   }
-
-   private void nvcompCompression(Mat image, ImageMessage message)
-   {
-      CUDACompressionTools compressionTools;
-      try
-      {
-         compressionTools = new CUDACompressionTools();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
-
-      BytePointer compressedData = compressionTools.compress(image);
-      PerceptionMessageTools.packImageMessageData(message, compressedData);
-      message.setCompressionType(CompressionType.NVCOMP.toByte());
-
-      compressionTools.destroy();
-      compressedData.close();
-   }
-
-   private void hybridDepthCompression(Mat image, ImageMessage message)
-   {
-      CUDACompressionTools compressionTools;
-      try
-      {
-         compressionTools = new CUDACompressionTools();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException(e);
-      }
-
-      BytePointer compressedData = compressionTools.compressDepth(image);
-      PerceptionMessageTools.packImageMessageData(message, compressedData);
-      message.setCompressionType(CompressionType.ZSTD_NVJPEG_HYBRID.toByte());
-
-      compressionTools.destroy();
-      compressedData.close();
    }
 }
