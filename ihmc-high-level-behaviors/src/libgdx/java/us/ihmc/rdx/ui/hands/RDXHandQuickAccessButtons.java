@@ -1,17 +1,16 @@
-package us.ihmc.rdx.ui.teleoperation;
+package us.ihmc.rdx.ui.hands;
 
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import static us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction.*;
 
 public class RDXHandQuickAccessButtons
 {
    private final RDX3DPanelToolbarButton openHandCalibrateButton;
-   private final Runnable openHand;
-   private final Runnable closeHand;
-   private final Runnable calibrateHand;
-   private final Runnable resetHand;
    private final RDX3DPanelToolbarButton closeHandResetButton;
    private final RDXIconTexture openIcon;
    private final RDXIconTexture calibrateIcon;
@@ -22,13 +21,13 @@ public class RDXHandQuickAccessButtons
    private final String closeHandText;
    private final String resetHandText;
 
-   public RDXHandQuickAccessButtons(RDXBaseUI baseUI,
-                                    RobotSide side,
-                                    Runnable openHand,
-                                    Runnable closeHand,
-                                    Runnable calibrateHand,
-                                    Runnable resetHand)
+   private final RDXHandInterface hand;
+
+   public RDXHandQuickAccessButtons(RDXBaseUI baseUI, RDXHandInterface hand)
    {
+      this.hand = hand;
+
+      RobotSide side = hand.getSide();
       if (side == RobotSide.LEFT) // Make buttons symmetrical
       {
          closeHandResetButton = baseUI.getPrimary3DPanel().addToolbarButton();
@@ -40,33 +39,31 @@ public class RDXHandQuickAccessButtons
          closeHandResetButton = baseUI.getPrimary3DPanel().addToolbarButton();
       }
 
-      this.openHand = openHand;
-      this.closeHand = closeHand;
-      this.calibrateHand = calibrateHand;
-      this.resetHand = resetHand;
-
       calibrateIcon = openHandCalibrateButton.loadAndSetIcon("icons/calibrate.png");
       openIcon = openHandCalibrateButton.loadAndSetIcon("icons/openHand%s.png".formatted(side.getPascalCaseName()));
       openHandText = "Open %s hand".formatted(side.getLowerCaseName());
       calibrateHandText = "Calibrate %s hand".formatted(side.getLowerCaseName());
       openHandCalibrateButton.setTooltipText(openHandText);
-      openHandCalibrateButton.setOnPressed(openHand);
+      openHandCalibrateButton.setOnPressed(() -> hand.sendCommand(OPEN));
 
       resetIcon = closeHandResetButton.loadAndSetIcon("icons/resetHand.png");
       closeIcon = closeHandResetButton.loadAndSetIcon("icons/closeHand%s.png".formatted(side.getPascalCaseName()));
       closeHandText = "Close %s hand".formatted(side.getLowerCaseName());
       resetHandText = "Reset %s hand".formatted(side.getLowerCaseName());
       closeHandResetButton.setTooltipText(closeHandText);
-      closeHandResetButton.setOnPressed(closeHand);
+      closeHandResetButton.setOnPressed(() -> hand.sendCommand(CLOSE));
    }
 
-   public void update(boolean isCalibrated, boolean needsReset)
+   public void update()
    {
+      boolean isCalibrated = hand.isCalibrated();
+      boolean needsReset = hand.needsReset();
+
       openHandCalibrateButton.setIconTexture(isCalibrated ? openIcon : calibrateIcon);
-      openHandCalibrateButton.setOnPressed(needsReset ? null : isCalibrated ? openHand : calibrateHand);
+      openHandCalibrateButton.setOnPressed(needsReset ? null : () -> hand.sendCommand(isCalibrated ? OPEN : CALIBRATE));
       openHandCalibrateButton.setTooltipText(needsReset ? "Unavailable" : isCalibrated ? openHandText : calibrateHandText);
       closeHandResetButton.setIconTexture(needsReset ? resetIcon : closeIcon);
-      closeHandResetButton.setOnPressed(needsReset ? resetHand : closeHand);
+      closeHandResetButton.setOnPressed(() -> hand.sendCommand(needsReset ? RESET : CLOSE));
       closeHandResetButton.setTooltipText(needsReset ? resetHandText : closeHandText);
    }
 }

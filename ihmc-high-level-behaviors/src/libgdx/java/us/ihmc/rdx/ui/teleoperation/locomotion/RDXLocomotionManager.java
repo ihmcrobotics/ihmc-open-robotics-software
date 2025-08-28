@@ -293,13 +293,14 @@ public class RDXLocomotionManager
 
    public void renderImGuiWidgets()
    {
+      // Used to calculate whether the Walking Options buttons are active or disabled.
+      // This ensures that when the spacebar key is pressed it executes the correct action.
+      boolean pauseAvailable = controllerStatusTracker.isWalking();
+      boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
+      boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
+      
       if(ImGui.collapsingHeader(labels.get("Locomotion")))
       {
-         // Used to calculate whether the Walking Options buttons are active or disabled.
-         // This ensures that when the spacebar key is pressed it executes the correct action.
-         boolean pauseAvailable = controllerStatusTracker.isWalking();
-         boolean continueAvailable = !pauseAvailable && controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps() > 0;
-         boolean walkAvailable = !continueAvailable && interactableFootstepPlan.getNumberOfFootsteps() > 0;
          float widgetStartX = 125.0f;
 
          ImGui.text("Walking Command:");
@@ -401,23 +402,21 @@ public class RDXLocomotionManager
             legControlMode = RDXLegControlMode.DISABLED;
          }
          walkPathControlRing.renderImGuiWidgets(widgetStartX);
-
-
-         // Handles all shortcuts for when the spacebar key is pressed
-         if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
+      }
+      // Handles all shortcuts for when the spacebar key is pressed
+      if (ImGui.isKeyReleased(ImGuiTools.getSpaceKey()) && !ImGui.getIO().getWantCaptureKeyboard())
+      {
+         if (walkAvailable)
          {
-            if (walkAvailable)
-            {
-               interactableFootstepPlan.walkFromSteps();
-            }
-            else if (pauseAvailable)
-            {
-               setPauseWalkingAndPublish(true);
-            }
-            else if (continueAvailable)
-            {
-               setPauseWalkingAndPublish(false);
-            }
+            interactableFootstepPlan.walkFromSteps();
+         }
+         else if (pauseAvailable)
+         {
+            setPauseWalkingAndPublish(true);
+         }
+         else if (continueAvailable)
+         {
+            setPauseWalkingAndPublish(false);
          }
       }
    }
