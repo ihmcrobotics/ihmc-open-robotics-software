@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.hands.psyonicAbilityHand;
 
+import com.badlogic.gdx.graphics.Color;
 import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -59,7 +60,6 @@ public class RDXAbilityHand implements RDXHandInterface
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
-         fingerSliders[i].setFloatValue(START_POSITION);
       }
 
       publishThrottler.setFrequency(30.0);
@@ -82,12 +82,20 @@ public class RDXAbilityHand implements RDXHandInterface
    @Override
    public void renderImGuiWidgets()
    {
+      boolean unavailable = false;
       if (!communication.getAvailableHands().contains(identifier))
-         return;
+      {
+         ImGui.beginDisabled();
+         unavailable = true;
+      }
 
       ImGui.pushID(identifier);
-      ImGui.text(getSide().toString() + " Ability Hand");
+      ImGuiTools.separatorText(getSide().toString() + " Ability Hand", ImGuiTools.getSmallBoldFont());
 
+      float widgetStartX = 100.0f;
+      ImGui.text("Configurations:");
+      ImGui.sameLine();
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.button("OPEN"))
       {
          gripMode(Grip.RELAX, communication);
@@ -108,8 +116,11 @@ public class RDXAbilityHand implements RDXHandInterface
       {
          gripMode(Grip.HOOK, communication);
       }
-      if (ImGui.collapsingHeader("Other Grips"))
+
+      ImGui.setCursorPosX(widgetStartX);
+      if (ImGui.collapsingHeader("Other Configurations"))
       {
+         ImGui.setCursorPosX(widgetStartX);
          if (ImGui.button("TRIPOD OPEN"))
          {
             gripMode(Grip.TRIPOD_O, communication);
@@ -119,11 +130,12 @@ public class RDXAbilityHand implements RDXHandInterface
          {
             gripMode(Grip.PINCH_O, communication);
          }
-         ImGui.sameLine();
+         ImGui.setCursorPosX(widgetStartX);
          if (ImGui.button("PINCH CLOSED"))
          {
             gripMode(Grip.PINCH_C, communication);
          }
+         ImGui.sameLine();
          if (ImGui.button("KEY"))
          {
             gripMode(Grip.KEY, communication);
@@ -136,11 +148,13 @@ public class RDXAbilityHand implements RDXHandInterface
       }
 
       float currentNotch = (actuatorPositions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
-      float sliderStart = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
-      float sliderWidth = ImGui.getColumnWidth() - sliderStart;
-      ImGuiTools.renderSliderOrProgressNotch(sliderStart + currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
+      float sliderWidth = ImGui.getColumnWidth() - widgetStartX;
+      ImGuiTools.renderSliderOrProgressNotch(widgetStartX + currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
-      if (controlFingersSlider.render(SLIDER_MIN, SLIDER_MAX))
+      ImGui.text("Fingers:");
+      ImGui.sameLine();
+      ImGui.setCursorPosX(widgetStartX);
+      if (controlFingersSlider.render(SLIDER_MIN, SLIDER_MAX, true))
       {
          float newPos = controlFingersSlider.getFloatValue();
          controlMode = ControlMode.POSITION;
@@ -157,6 +171,7 @@ public class RDXAbilityHand implements RDXHandInterface
          commandNotification.set();
       }
 
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.collapsingHeader("Individual Finger Control"))
       {
          for (int i = 0; i < ACTUATOR_COUNT; i++)
@@ -183,6 +198,12 @@ public class RDXAbilityHand implements RDXHandInterface
             }
          }
       }
+      if (unavailable)
+      {
+         ImGui.endDisabled();
+         ImGuiTools.textColored(Color.RED, "Connect hand device to enable options");
+      }
+      ImGui.newLine();
 
       ImGui.popID();
    }
