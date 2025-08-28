@@ -26,7 +26,7 @@ import static us.ihmc.perception.imageMessage.CompressionType.PNG;
 
 public class RawImagePublisher implements AutoCloseable
 {
-   private final CUDAJPEGProcessor jpegProcessor;
+   private CUDAJPEGProcessor jpegProcessor;
    private final ROS2SRTSensorStreamer sensorStreamer;
 
    private final ROS2Helper ros2Helper;
@@ -37,7 +37,14 @@ public class RawImagePublisher implements AutoCloseable
 
    public RawImagePublisher(ROS2Node ros2Node)
    {
-      jpegProcessor = new CUDAJPEGProcessor();
+      try
+      {
+         jpegProcessor = new CUDAJPEGProcessor();
+      }
+      catch (UnsatisfiedLinkError ignored)
+      {
+      }
+
       sensorStreamer = new ROS2SRTSensorStreamer(ros2Node);
 
       ros2Helper = new ROS2Helper(ros2Node);
