@@ -121,7 +121,7 @@ public class RDXAbilityHand implements RDXHandInterface
       if (ImGui.collapsingHeader("Other Configurations"))
       {
          ImGui.setCursorPosX(widgetStartX);
-         if (ImGui.button("Tripod OPEN"))
+         if (ImGui.button("Tripod Open"))
          {
             gripMode(Grip.TRIPOD_O, communication);
          }
