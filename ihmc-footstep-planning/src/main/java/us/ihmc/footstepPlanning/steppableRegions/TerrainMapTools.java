@@ -1,13 +1,9 @@
 package us.ihmc.footstepPlanning.steppableRegions;
 
-import perception_msgs.msg.dds.TerrainMapMessage;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-
-import java.util.ArrayList;
 
 public class TerrainMapTools
 {
@@ -32,112 +28,60 @@ public class TerrainMapTools
       return rIndex < 0 || rIndex >= cellsPerSide || cIndex < 0 || cIndex >= cellsPerSide;
    }
 
-   public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y, int patchSize)
+   /**
+    * This method is meant to be as fast as possible, so we don't create local arrays, and we don't do any bounds checks.
+    */
+   public static void convertToTerrainMapData(Mat heightMap,
+                                              Mat terrainCostMap,
+                                              Mat contactMap,
+                                              Mat snapNormalXMap,
+                                              Mat snapNormalYMap,
+                                              Mat snapNormalZMap,
+                                              Mat steppabilityMap,
+                                              Mat steppabilityConnectionsMap,
+                                              Mat snappedAreaFractionMap,
+                                              TerrainMapData terrainMapData)
+   {
+      // How this looks like is we create a pointer for the Mat object.
+      // Doing Pointer.get() takes in a parameter that will be packed with the data that is from the pointer.
+      // So it looks like Pointer.get(dataToPack) where dataToPack = TerrainMapData.getMap()
+      FloatPointer floatPointer = new FloatPointer(heightMap.data());
+      floatPointer.get(terrainMapData.getHeightMap());
+
+      BytePointer bytePointerTerrainMap = new BytePointer(terrainCostMap.data());
+      bytePointerTerrainMap.get(terrainMapData.getTerrainCostMap());
+
+      BytePointer bytePointerContactMap = new BytePointer(contactMap.data());
+      bytePointerContactMap.get(terrainMapData.getContactMap());
+
+      BytePointer bytePointerForSnapNormalXMap = new BytePointer(snapNormalXMap.data());
+      bytePointerForSnapNormalXMap.get(terrainMapData.getSnapNormalXMap());
+
+      BytePointer bytePointerForSnapNormalYMap = new BytePointer(snapNormalYMap.data());
+      bytePointerForSnapNormalYMap.get(terrainMapData.getSnapNormalYMap());
+
+      BytePointer bytePointerForSnapNormalZMap = new BytePointer(snapNormalZMap.data());
+      bytePointerForSnapNormalZMap.get(terrainMapData.getSnapNormalZMap());
+
+      BytePointer bytePointerForSnappedAreaFractionMap = new BytePointer(snappedAreaFractionMap.data());
+      bytePointerForSnappedAreaFractionMap.get(terrainMapData.getSnappedAreaFractionMap());
+
+      BytePointer bytePointerForSteppabilityMap = new BytePointer(steppabilityMap.data());
+      bytePointerForSteppabilityMap.get(terrainMapData.getSteppabilityMap());
+
+      BytePointer bytePointerForSteppabilityConnectionsMap = new BytePointer(steppabilityConnectionsMap.data());
+      bytePointerForSteppabilityConnectionsMap.get(terrainMapData.getSteppabilityConnectionsMap());
+   }
+
+   public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y)
    {
       int cellsPerMeter = terrainMapData.getCenterIndex();
-      int localGridSize = terrainMapData.getLocalGridSize();
+      int localGridSize = terrainMapData.getCellsPerAxis();
       double centerX = terrainMapData.getTerrainMapCenter().getX();
       double centerY = terrainMapData.getTerrainMapCenter().getY();
       int rIndex = getLocalIndex(cellsPerMeter, localGridSize, x, centerX);
       int cIndex = getLocalIndex(cellsPerMeter, localGridSize, y, centerY);
-      int halfGridSize = localGridSize / 2;
 
-      if (terrainMapData.hasSnapNormal())
-      {
-         return terrainMapData.getNormalLocal(rIndex, cIndex);
-      }
-      else
-      {
-         Plane3D bestFitPlane = new Plane3D();
-         ArrayList<Point3D> points = new ArrayList<>();
-
-         //LogTools.info("rIndex: {}, cIndex: {}, origin: {}", rIndex, cIndex, sensorOrigin);
-
-         for (int i = -patchSize; i <= patchSize; i++)
-         {
-            for (int j = -patchSize; j <= patchSize; j++)
-            {
-               int r = rIndex + i;
-               int c = cIndex + j;
-               if (isOutOfBounds(localGridSize, r, c))
-                  continue;
-
-               float height = terrainMapData.getHeightLocal(r, c);
-
-               // compute full 3d point
-               Point3D point = new Point3D();
-               point.setX(centerX + (double) (r - halfGridSize) / cellsPerMeter);
-               point.setY(centerY + (double) (c - halfGridSize) / cellsPerMeter);
-               point.setZ(height);
-
-               //LogTools.info("Point: {}", point);
-
-               points.add(point);
-            }
-         }
-
-         LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
-         planeFitter.fitPlaneToPoints(points, bestFitPlane);
-         return bestFitPlane.getNormal();
-      }
-   }
-
-   public static TerrainMapMessage toMessage(TerrainMapData terrainMapData)
-   {
-      TerrainMapMessage message = new TerrainMapMessage();
-
-      message.setLocalGridSize(terrainMapData.getLocalGridSize());
-      message.setCellsPerMeter((byte) terrainMapData.getCenterIndex());
-
-      message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
-      message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());
-
-      if (terrainMapData.hasTerrainCost())
-      {
-         message.setHasTerrainCostData(true);
-         PerceptionMessageTools.packDataArray(message.getTerrainCostData(), terrainMapData.getTerrainCostMap());
-      }
-      if (terrainMapData.hasContactMap())
-      {
-         message.setHasContactMapData(true);
-         PerceptionMessageTools.packDataArray(message.getContactMapData(), terrainMapData.getContactMap());
-      }
-
-      if (terrainMapData.hasHeightMap())
-      {
-         message.setHasHeightMapData(true);
-         PerceptionMessageTools.packDataArray(message.getHeightMapData(), terrainMapData.getHeightMap());
-      }
-      if (terrainMapData.hasSnapNormal())
-      {
-         message.setHasSnappedNormalData(true);
-         PerceptionMessageTools.packDataArray(message.getSnappedNormalXData(), terrainMapData.getSnapNormalXMat());
-         PerceptionMessageTools.packDataArray(message.getSnappedNormalYData(), terrainMapData.getSnapNormalYMat());
-         PerceptionMessageTools.packDataArray(message.getSnappedNormalZData(), terrainMapData.getSnapNormalZMat());
-      }
-      if (terrainMapData.hasSnappedArea())
-      {
-         message.setHasSnappedAreaData(true);
-         PerceptionMessageTools.packDataArray(message.getSnappedAreaData(), terrainMapData.getSnappedAreaFractionMat());
-      }
-      if (terrainMapData.hasSteppability())
-      {
-         message.setHasSteppabilityData(true);
-         PerceptionMessageTools.packDataArray(message.getSteppabilityData(), terrainMapData.getSteppabilityMat());
-      }
-      if (terrainMapData.hasSteppableConnections())
-      {
-         message.setHasSteppableConnectionsData(true);
-         PerceptionMessageTools.packDataArray(message.getSteppableConnectionsData(), terrainMapData.getSteppabilityConnectionsMat());
-      }
-
-      return message;
-   }
-
-   public static boolean isEmpty(TerrainMapMessage message)
-   {
-      if (message.getHasHeightMapData())
-         return false;
-      return !message.getHasSteppabilityData();
+      return terrainMapData.getNormalLocal(rIndex, cIndex);
    }
 }

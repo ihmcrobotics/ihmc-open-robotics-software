@@ -25,7 +25,6 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -175,15 +174,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      if (ImGui.button("Print Contact Map"))
-      {
-         PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
-      }
-      ImGui.sameLine();
-      if (ImGui.button("Print Height Map"))
-      {
-         PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 4);
-      }
       ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
       if (terrainMapData != null && terrainMapData.getHeightMap() != null)
       {
