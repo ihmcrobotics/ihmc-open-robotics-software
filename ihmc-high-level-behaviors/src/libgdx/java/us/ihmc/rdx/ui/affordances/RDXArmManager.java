@@ -280,7 +280,7 @@ public class RDXArmManager
 
       if (ImGui.collapsingHeader(labels.get("Hands"), ImGuiTreeNodeFlags.DefaultOpen))
       {
-         handManager.renderImGuiWidgets(); // TODO FIX ME, Update based on Psyonic and Sake hands refactor
+         handManager.renderImGuiWidgets();
 
          // Pop up warning if notification is set
          if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
