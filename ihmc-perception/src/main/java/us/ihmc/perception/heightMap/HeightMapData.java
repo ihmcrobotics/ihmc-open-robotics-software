@@ -3,8 +3,6 @@ package us.ihmc.perception.heightMap;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 
-import java.util.Arrays;
-
 public class HeightMapData
 {
    /* List of heights indexed by key. See HeightMapTools for definition of key */
@@ -31,7 +29,6 @@ public class HeightMapData
       this.heights = new float[cellsPerAxis * cellsPerAxis];
       this.gridCenter.set(gridCenterX, gridCenterY);
       updateGridDimensions();
-      reset();
    }
 
    public HeightMapData(HeightMapData latestHeightMapData)
@@ -65,11 +62,6 @@ public class HeightMapData
       maxX = gridCenter.getX() + halfWidth;
       minY = gridCenter.getY() - halfWidth;
       maxY = gridCenter.getY() + halfWidth;
-   }
-
-   public void reset()
-   {
-      Arrays.fill(heights, Float.NaN);
    }
 
    public double getCellSize()
