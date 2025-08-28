@@ -89,7 +89,7 @@ public class HeightMapMessageTools
                                                       heightMapMessage.getGridCenterY());
 
       Float heightsFromMessage = heightMapMessage.getHeights();
-      heightMapData.setHeights(heightsFromMessage.toArray());
+      heightsFromMessage.toArray(heightMapData.getHeights());
 
       return heightMapData;
    }

@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.steppableRegions;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 
 public class TerrainMapTools
@@ -29,6 +28,9 @@ public class TerrainMapTools
       return rIndex < 0 || rIndex >= cellsPerSide || cIndex < 0 || cIndex >= cellsPerSide;
    }
 
+   /**
+    * This method is meant to be as fast as possible, so we don't create local arrays, and we don't do any bounds checks.
+    */
    public static void convertToTerrainMapData(Mat heightMap,
                                               Mat terrainCostMap,
                                               Mat contactMap,
@@ -40,54 +42,35 @@ public class TerrainMapTools
                                               Mat snappedAreaFractionMap,
                                               TerrainMapData terrainMapData)
    {
-      int centerIndex = terrainMapData.getCenterIndex();
-      int cellsPerAxis = 2 * centerIndex + 1;
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
+      // How this looks like is we create a pointer for the Mat object.
+      // Doing Pointer.get() takes in a parameter that will be packed with the data that is from the pointer.
+      // So it looks like Pointer.get(dataToPack) where dataToPack = TerrainMapData.getMap()
       FloatPointer floatPointer = new FloatPointer(heightMap.data());
-      float[] values = new float[totalCells];
-      floatPointer.get(values);
-      terrainMapData.setHeightMap(values);
+      floatPointer.get(terrainMapData.getHeightMap());
 
       BytePointer bytePointerTerrainMap = new BytePointer(terrainCostMap.data());
-      byte[] bytesForTerrainCost = new byte[totalCells];
-      bytePointerTerrainMap.get(bytesForTerrainCost);
-      terrainMapData.setTerrainCostMap(bytesForTerrainCost);
+      bytePointerTerrainMap.get(terrainMapData.getTerrainCostMap());
 
       BytePointer bytePointerContactMap = new BytePointer(contactMap.data());
-      byte[] bytesForContactMap = new byte[totalCells];
-      bytePointerContactMap.get(bytesForContactMap);
-      terrainMapData.setContactMap(bytesForContactMap);
+      bytePointerContactMap.get(terrainMapData.getContactMap());
 
       BytePointer bytePointerForSnapNormalXMap = new BytePointer(snapNormalXMap.data());
-      byte[] bytesForSnapNormalX = new byte[totalCells];
-      bytePointerForSnapNormalXMap.get(bytesForSnapNormalX);
-      terrainMapData.setSnapNormalXMap(bytesForSnapNormalX);
+      bytePointerForSnapNormalXMap.get(terrainMapData.getSnapNormalXMap());
 
       BytePointer bytePointerForSnapNormalYMap = new BytePointer(snapNormalYMap.data());
-      byte[] bytesForSnapNormalY = new byte[totalCells];
-      bytePointerForSnapNormalYMap.get(bytesForSnapNormalY);
-      terrainMapData.setSnapNormalYMap(bytesForSnapNormalY);
+      bytePointerForSnapNormalYMap.get(terrainMapData.getSnapNormalYMap());
 
       BytePointer bytePointerForSnapNormalZMap = new BytePointer(snapNormalZMap.data());
-      byte[] bytesForSnapNormalZ = new byte[totalCells];
-      bytePointerForSnapNormalZMap.get(bytesForSnapNormalZ);
-      terrainMapData.setSnapNormalZMap(bytesForSnapNormalZ);
+      bytePointerForSnapNormalZMap.get(terrainMapData.getSnapNormalZMap());
 
       BytePointer bytePointerForSnappedAreaFractionMap = new BytePointer(snappedAreaFractionMap.data());
-      byte[] bytesForSnappedAreaFractionMap = new byte[totalCells];
-      bytePointerForSnappedAreaFractionMap.get(bytesForSnappedAreaFractionMap);
-      terrainMapData.setSnappedAreaFractionMap(bytesForSnappedAreaFractionMap);
+      bytePointerForSnappedAreaFractionMap.get(terrainMapData.getSnappedAreaFractionMap());
 
       BytePointer bytePointerForSteppabilityMap = new BytePointer(steppabilityMap.data());
-      byte[] bytesForSteppabilityMap = new byte[totalCells];
-      bytePointerForSteppabilityMap.get(bytesForSteppabilityMap);
-      terrainMapData.setSteppabilityMap(bytesForSteppabilityMap);
+      bytePointerForSteppabilityMap.get(terrainMapData.getSteppabilityMap());
 
       BytePointer bytePointerForSteppabilityConnectionsMap = new BytePointer(steppabilityConnectionsMap.data());
-      byte[] bytesForSteppabilityConnectionsMap = new byte[totalCells];
-      bytePointerForSteppabilityConnectionsMap.get(bytesForSteppabilityConnectionsMap);
-      terrainMapData.setSteppabilityConnectionsMap(bytesForSteppabilityConnectionsMap);
+      bytePointerForSteppabilityConnectionsMap.get(terrainMapData.getSteppabilityConnectionsMap());
    }
 
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y)

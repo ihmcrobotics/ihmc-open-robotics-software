@@ -112,7 +112,7 @@ public class TerrainMapToolsTest
       double totalTimeMillis = (endTime - startTime) / 1_000_000.0;
       double averageTimePerIteration = totalTimeMillis / iterations;
 
-      System.out.printf("Average time per pack of Mats -> Terrain Map Data: %.3f ms%n", averageTimePerIteration);
+      System.out.printf("Average time per pack of Mats -> Terrain Map Data: %.6f ms%n", averageTimePerIteration);
 
       // This will be machine-dependent, the benchmark for this value came from a laptop with a AMD Ryzen 7 5800H cpu.
       float expectedTimeTakenToPackHeightMapMessageFromAMat = MILLISECOND_TOLERANCE * 5;
