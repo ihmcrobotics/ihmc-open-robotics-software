@@ -48,7 +48,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private final AlexanderPhysicalProperties physicalProperties;
    private final ToeOffParameters toeOffParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private AlexanderSteppingParameters steppingParameters;
+   private OpenAlexanderSteppingParameters steppingParameters;
    private final OpenAlexanderICPControllerParameters icpControllerParameters;
    private final AlexanderStepAdjustmentParameters stepAdjustmentParameters;
    private JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new AlexanderJointPrivilegedConfigurationParameters();
@@ -102,7 +102,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       toeOffParameters = new AlexanderToeOffParameters(physicalProperties);
       momentumOptimizationSettings = new AlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
       swingTrajectoryParameters = new AlexanderSwingTrajectoryParameters();
-      steppingParameters = new AlexanderSteppingParameters(physicalProperties);
+      steppingParameters = new OpenAlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();
       stepAdjustmentParameters = new AlexanderStepAdjustmentParameters();
 
@@ -870,7 +870,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       this.doPreparePelvisForLocomotion = doPreparePelvisForLocomotion;
    }
 
-   public void setSteppingParameters(AlexanderSteppingParameters steppingParameters)
+   public void setSteppingParameters(OpenAlexanderSteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
    }
