@@ -41,7 +41,6 @@ public class SteppableRegionsCalculationModuleTest
       snappingTerrainExtractor.update(heightMapData);
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
 
-      PerceptionDebugTools.printMat("ii", terrainMapData.getSteppabilityMat(), 1);
       steppableRegionsCalculationModule.compute(terrainMapData);
       SteppableRegionsListCollection regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
 

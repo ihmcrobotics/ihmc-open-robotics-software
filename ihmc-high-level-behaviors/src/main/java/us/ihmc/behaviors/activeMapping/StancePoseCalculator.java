@@ -217,7 +217,7 @@ public class StancePoseCalculator
 
    private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
    {
-      UnitVector3DReadOnly normal = TerrainMapTools.computeSurfaceNormalInWorld(terrainMapData, (float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
+      UnitVector3DReadOnly normal = TerrainMapTools.computeSurfaceNormalInWorld(terrainMapData, (float) poseToSnap.getX(), (float) poseToSnap.getY());
       RigidBodyTransform snapTransform = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
       poseToSnap.applyTransform(snapTransform);
    }

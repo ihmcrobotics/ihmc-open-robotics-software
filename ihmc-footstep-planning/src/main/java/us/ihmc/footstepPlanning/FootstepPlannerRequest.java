@@ -9,6 +9,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
@@ -457,8 +458,8 @@ public class FootstepPlannerRequest
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(requestPacket.getHeightMapMessage());
       setHeightMapData(heightMapData);
 
-      if (!TerrainMapTools.isEmpty(requestPacket.getTerrainMapMessage()))
-         setTerrainMapData(new TerrainMapData(requestPacket.getTerrainMapMessage()));
+      if (requestPacket.getTerrainMapMessage() != null)
+         setTerrainMapData(TerrainMapMessageTools.unpackMessage(requestPacket.getTerrainMapMessage()));
       else
          setTerrainMapData(null);
    }
@@ -502,7 +503,8 @@ public class FootstepPlannerRequest
 
       if (getEnvironmentHandler().getTerrainMapData() != null)
       {
-         TerrainMapMessage terrainMapMessage = TerrainMapTools.toMessage(getEnvironmentHandler().getTerrainMapData());
+         TerrainMapMessage terrainMapMessage = new TerrainMapMessage();
+         TerrainMapMessageTools.toMessage(getEnvironmentHandler().getTerrainMapData(), terrainMapMessage);
          requestPacket.getTerrainMapMessage().set(terrainMapMessage);
       }
 

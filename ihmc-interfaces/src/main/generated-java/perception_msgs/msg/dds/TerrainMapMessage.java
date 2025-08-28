@@ -16,14 +16,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             */
    public long sequence_id_;
    /**
-            * The number of cells per side of the terrain map grid
-            */
-   public int local_grid_size_;
-   /**
-            * The number of cells contained per meter. This defines the resolution of the grid.
-            */
-   public byte cells_per_meter_;
-   /**
             * X coordinate of the center of the terrain map
             */
    public double map_center_x_;
@@ -31,13 +23,18 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             * Y coordinate of the center of the terrain map
             */
    public double map_center_y_;
-   public boolean has_terrain_cost_data_;
-   public boolean has_contact_map_data_;
-   public boolean has_height_map_data_;
-   public boolean has_snapped_normal_data_;
-   public boolean has_snapped_area_data_;
-   public boolean has_steppability_data_;
-   public boolean has_steppable_connections_data_;
+   /**
+            * The number of cells per side of the terrain map grid
+            */
+   public double width_in_meters_;
+   /**
+            * The number of cells contained per meter. This defines the resolution of the grid.
+            */
+   public byte cells_per_meter_;
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double cell_size_in_meters_;
    /**
             * The raw data for the terrain cost value, which are stored as chars.
             */
@@ -46,10 +43,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             * The raw data for the contact map value, which are stored as chars.
             */
    public us.ihmc.idl.IDLSequence.Byte  contact_map_data_;
-   /**
-            * The raw data for the raw heights, which are stored as two bytes to form one short.
-            */
-   public us.ihmc.idl.IDLSequence.Byte  height_map_data_;
+   public us.ihmc.idl.IDLSequence.Float  heights_;
    /**
             * The raw data for the snap normal x value, which are stored as chars.
             */
@@ -77,23 +71,23 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
    public TerrainMapMessage()
    {
-      terrain_cost_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      terrain_cost_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      contact_map_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      contact_map_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      height_map_data_ = new us.ihmc.idl.IDLSequence.Byte (500000, "type_9");
+      heights_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
-      snapped_normal_x_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_normal_x_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      snapped_normal_y_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_normal_y_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      snapped_normal_z_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_normal_z_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      snapped_area_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      snapped_area_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      steppability_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      steppability_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
-      steppable_connections_data_ = new us.ihmc.idl.IDLSequence.Byte (250000, "type_9");
+      steppable_connections_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
    }
 
@@ -107,31 +101,19 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    {
       sequence_id_ = other.sequence_id_;
 
-      local_grid_size_ = other.local_grid_size_;
-
-      cells_per_meter_ = other.cells_per_meter_;
-
       map_center_x_ = other.map_center_x_;
 
       map_center_y_ = other.map_center_y_;
 
-      has_terrain_cost_data_ = other.has_terrain_cost_data_;
+      width_in_meters_ = other.width_in_meters_;
 
-      has_contact_map_data_ = other.has_contact_map_data_;
+      cells_per_meter_ = other.cells_per_meter_;
 
-      has_height_map_data_ = other.has_height_map_data_;
-
-      has_snapped_normal_data_ = other.has_snapped_normal_data_;
-
-      has_snapped_area_data_ = other.has_snapped_area_data_;
-
-      has_steppability_data_ = other.has_steppability_data_;
-
-      has_steppable_connections_data_ = other.has_steppable_connections_data_;
+      cell_size_in_meters_ = other.cell_size_in_meters_;
 
       terrain_cost_data_.set(other.terrain_cost_data_);
       contact_map_data_.set(other.contact_map_data_);
-      height_map_data_.set(other.height_map_data_);
+      heights_.set(other.heights_);
       snapped_normal_x_data_.set(other.snapped_normal_x_data_);
       snapped_normal_y_data_.set(other.snapped_normal_y_data_);
       snapped_normal_z_data_.set(other.snapped_normal_z_data_);
@@ -153,36 +135,6 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    public long getSequenceId()
    {
       return sequence_id_;
-   }
-
-   /**
-            * The number of cells per side of the terrain map grid
-            */
-   public void setLocalGridSize(int local_grid_size)
-   {
-      local_grid_size_ = local_grid_size;
-   }
-   /**
-            * The number of cells per side of the terrain map grid
-            */
-   public int getLocalGridSize()
-   {
-      return local_grid_size_;
-   }
-
-   /**
-            * The number of cells contained per meter. This defines the resolution of the grid.
-            */
-   public void setCellsPerMeter(byte cells_per_meter)
-   {
-      cells_per_meter_ = cells_per_meter;
-   }
-   /**
-            * The number of cells contained per meter. This defines the resolution of the grid.
-            */
-   public byte getCellsPerMeter()
-   {
-      return cells_per_meter_;
    }
 
    /**
@@ -215,67 +167,49 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       return map_center_y_;
    }
 
-   public void setHasTerrainCostData(boolean has_terrain_cost_data)
+   /**
+            * The number of cells per side of the terrain map grid
+            */
+   public void setWidthInMeters(double width_in_meters)
    {
-      has_terrain_cost_data_ = has_terrain_cost_data;
+      width_in_meters_ = width_in_meters;
    }
-   public boolean getHasTerrainCostData()
+   /**
+            * The number of cells per side of the terrain map grid
+            */
+   public double getWidthInMeters()
    {
-      return has_terrain_cost_data_;
-   }
-
-   public void setHasContactMapData(boolean has_contact_map_data)
-   {
-      has_contact_map_data_ = has_contact_map_data;
-   }
-   public boolean getHasContactMapData()
-   {
-      return has_contact_map_data_;
+      return width_in_meters_;
    }
 
-   public void setHasHeightMapData(boolean has_height_map_data)
+   /**
+            * The number of cells contained per meter. This defines the resolution of the grid.
+            */
+   public void setCellsPerMeter(byte cells_per_meter)
    {
-      has_height_map_data_ = has_height_map_data;
+      cells_per_meter_ = cells_per_meter;
    }
-   public boolean getHasHeightMapData()
+   /**
+            * The number of cells contained per meter. This defines the resolution of the grid.
+            */
+   public byte getCellsPerMeter()
    {
-      return has_height_map_data_;
-   }
-
-   public void setHasSnappedNormalData(boolean has_snapped_normal_data)
-   {
-      has_snapped_normal_data_ = has_snapped_normal_data;
-   }
-   public boolean getHasSnappedNormalData()
-   {
-      return has_snapped_normal_data_;
+      return cells_per_meter_;
    }
 
-   public void setHasSnappedAreaData(boolean has_snapped_area_data)
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public void setCellSizeInMeters(double cell_size_in_meters)
    {
-      has_snapped_area_data_ = has_snapped_area_data;
+      cell_size_in_meters_ = cell_size_in_meters;
    }
-   public boolean getHasSnappedAreaData()
+   /**
+            * Cell size in meters of an individual cell
+            */
+   public double getCellSizeInMeters()
    {
-      return has_snapped_area_data_;
-   }
-
-   public void setHasSteppabilityData(boolean has_steppability_data)
-   {
-      has_steppability_data_ = has_steppability_data;
-   }
-   public boolean getHasSteppabilityData()
-   {
-      return has_steppability_data_;
-   }
-
-   public void setHasSteppableConnectionsData(boolean has_steppable_connections_data)
-   {
-      has_steppable_connections_data_ = has_steppable_connections_data;
-   }
-   public boolean getHasSteppableConnectionsData()
-   {
-      return has_steppable_connections_data_;
+      return cell_size_in_meters_;
    }
 
 
@@ -297,12 +231,9 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    }
 
 
-   /**
-            * The raw data for the raw heights, which are stored as two bytes to form one short.
-            */
-   public us.ihmc.idl.IDLSequence.Byte  getHeightMapData()
+   public us.ihmc.idl.IDLSequence.Float  getHeights()
    {
-      return height_map_data_;
+      return heights_;
    }
 
 
@@ -379,33 +310,21 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.local_grid_size_, other.local_grid_size_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_meter_, other.cells_per_meter_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.map_center_x_, other.map_center_x_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.map_center_y_, other.map_center_y_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_terrain_cost_data_, other.has_terrain_cost_data_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_contact_map_data_, other.has_contact_map_data_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_meter_, other.cells_per_meter_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_height_map_data_, other.has_height_map_data_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_snapped_normal_data_, other.has_snapped_normal_data_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_snapped_area_data_, other.has_snapped_area_data_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_steppability_data_, other.has_steppability_data_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_steppable_connections_data_, other.has_steppable_connections_data_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.terrain_cost_data_, other.terrain_cost_data_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.contact_map_data_, other.contact_map_data_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.height_map_data_, other.height_map_data_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.snapped_normal_x_data_, other.snapped_normal_x_data_, epsilon)) return false;
 
@@ -434,31 +353,19 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.local_grid_size_ != otherMyClass.local_grid_size_) return false;
-
-      if(this.cells_per_meter_ != otherMyClass.cells_per_meter_) return false;
-
       if(this.map_center_x_ != otherMyClass.map_center_x_) return false;
 
       if(this.map_center_y_ != otherMyClass.map_center_y_) return false;
 
-      if(this.has_terrain_cost_data_ != otherMyClass.has_terrain_cost_data_) return false;
+      if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
 
-      if(this.has_contact_map_data_ != otherMyClass.has_contact_map_data_) return false;
+      if(this.cells_per_meter_ != otherMyClass.cells_per_meter_) return false;
 
-      if(this.has_height_map_data_ != otherMyClass.has_height_map_data_) return false;
-
-      if(this.has_snapped_normal_data_ != otherMyClass.has_snapped_normal_data_) return false;
-
-      if(this.has_snapped_area_data_ != otherMyClass.has_snapped_area_data_) return false;
-
-      if(this.has_steppability_data_ != otherMyClass.has_steppability_data_) return false;
-
-      if(this.has_steppable_connections_data_ != otherMyClass.has_steppable_connections_data_) return false;
+      if(this.cell_size_in_meters_ != otherMyClass.cell_size_in_meters_) return false;
 
       if (!this.terrain_cost_data_.equals(otherMyClass.terrain_cost_data_)) return false;
       if (!this.contact_map_data_.equals(otherMyClass.contact_map_data_)) return false;
-      if (!this.height_map_data_.equals(otherMyClass.height_map_data_)) return false;
+      if (!this.heights_.equals(otherMyClass.heights_)) return false;
       if (!this.snapped_normal_x_data_.equals(otherMyClass.snapped_normal_x_data_)) return false;
       if (!this.snapped_normal_y_data_.equals(otherMyClass.snapped_normal_y_data_)) return false;
       if (!this.snapped_normal_z_data_.equals(otherMyClass.snapped_normal_z_data_)) return false;
@@ -477,34 +384,22 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append("TerrainMapMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("local_grid_size=");
-      builder.append(this.local_grid_size_);      builder.append(", ");
-      builder.append("cells_per_meter=");
-      builder.append(this.cells_per_meter_);      builder.append(", ");
       builder.append("map_center_x=");
       builder.append(this.map_center_x_);      builder.append(", ");
       builder.append("map_center_y=");
       builder.append(this.map_center_y_);      builder.append(", ");
-      builder.append("has_terrain_cost_data=");
-      builder.append(this.has_terrain_cost_data_);      builder.append(", ");
-      builder.append("has_contact_map_data=");
-      builder.append(this.has_contact_map_data_);      builder.append(", ");
-      builder.append("has_height_map_data=");
-      builder.append(this.has_height_map_data_);      builder.append(", ");
-      builder.append("has_snapped_normal_data=");
-      builder.append(this.has_snapped_normal_data_);      builder.append(", ");
-      builder.append("has_snapped_area_data=");
-      builder.append(this.has_snapped_area_data_);      builder.append(", ");
-      builder.append("has_steppability_data=");
-      builder.append(this.has_steppability_data_);      builder.append(", ");
-      builder.append("has_steppable_connections_data=");
-      builder.append(this.has_steppable_connections_data_);      builder.append(", ");
+      builder.append("width_in_meters=");
+      builder.append(this.width_in_meters_);      builder.append(", ");
+      builder.append("cells_per_meter=");
+      builder.append(this.cells_per_meter_);      builder.append(", ");
+      builder.append("cell_size_in_meters=");
+      builder.append(this.cell_size_in_meters_);      builder.append(", ");
       builder.append("terrain_cost_data=");
       builder.append(this.terrain_cost_data_);      builder.append(", ");
       builder.append("contact_map_data=");
       builder.append(this.contact_map_data_);      builder.append(", ");
-      builder.append("height_map_data=");
-      builder.append(this.height_map_data_);      builder.append(", ");
+      builder.append("heights=");
+      builder.append(this.heights_);      builder.append(", ");
       builder.append("snapped_normal_x_data=");
       builder.append(this.snapped_normal_x_data_);      builder.append(", ");
       builder.append("snapped_normal_y_data=");

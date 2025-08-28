@@ -82,19 +82,14 @@ public class SnappingTerrainExtractorTest
       snappingTerrainExtractor.update(heightMapData);
 
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
-      Mat actualResult = terrainMapData.getSteppabilityMat();
+      byte[] actualResult = terrainMapData.getSteppabilityMap();
 
-      for (int i = 0; i < actualResult.rows(); i++)
+      for (int i = 0; i < terrainMapData.getCellsPerAxis(); i++)
       {
-         for (int j = 0; j < actualResult.cols(); j++)
+         for (int j = 0; j < terrainMapData.getCellsPerAxis(); j++)
          {
-            assertEquals(4, actualResult.row(i).col(j).ptr().get());
+            assertEquals(4, actualResult[i * cellsPerAxis + j]);
          }
-      }
-
-      if (DEBUG)
-      {
-         PerceptionDebugTools.printMat("result", actualResult, 1);
       }
 
       snappingTerrainExtractor.close();
@@ -135,28 +130,24 @@ public class SnappingTerrainExtractorTest
       snappingTerrainExtractor.update(heightMapData);
 
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
-      Mat actualResult = terrainMapData.getSteppabilityConnectionsMat();
+      byte[] actualResult= terrainMapData.getSteppabilityConnectionsMap();
 
       // We expect all the middle since its fully connected, to be filled with 255, all the bits are set
-      for (int i = 1; i < actualResult.rows() - 1; i++)
+      for (int i = 1; i < terrainMapData.getCellsPerAxis() - 1; i++)
       {
-         for (int j = 1; j < actualResult.cols() - 1; j++)
+         for (int j = 1; j < terrainMapData.getCellsPerAxis() - 1; j++)
          {
-            assertEquals(255, actualResult.row(i).col(j).ptr().get() & 0xFF);
+            assertEquals(255, actualResult[i * cellsPerAxis + j] & 0xFF);
          }
       }
 
       // The corners will all be different because they will have different bits set
       // These values are the expected bits to be set based on there surrounding neighbors
-      assertEquals(208, actualResult.row(0).col(0).ptr().get() & 0xFF);
-      assertEquals(11, actualResult.row(actualResult.rows() - 1).col(actualResult.cols() - 1).ptr().get() & 0xFF);
-      assertEquals(22, actualResult.row(actualResult.rows() - 1).col(0).ptr().get() & 0xFF);
-      assertEquals(104, actualResult.row(0).col(actualResult.cols() - 1).ptr().get() & 0xFF);
-
-      if (DEBUG)
-      {
-         PerceptionDebugTools.printMat("result", actualResult, 1);
-      }
+      // We keep the 0's lying around because it represents the x,y index
+      assertEquals(208, actualResult[0] & 0xFF);
+      assertEquals(11, actualResult[(cellsPerAxis * cellsPerAxis + cellsPerAxis) - 1] & 0xFF);
+      assertEquals(22, actualResult[cellsPerAxis * cellsPerAxis + 0] & 0xFF);
+      assertEquals(104, actualResult[0 + cellsPerAxis] & 0xFF);
 
       snappingTerrainExtractor.close();
    }
