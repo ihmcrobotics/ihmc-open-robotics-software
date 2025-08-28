@@ -203,7 +203,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
                                                         desiredOrientation,
                                                         pelvis.getName(),
                                                         statusMessages.remove(0),
-                                                        2.0e-4,
+                                                        EPSILON_FOR_DESIREDS,
                                                         controllerDT);
    }
 

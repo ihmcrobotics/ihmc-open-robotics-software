@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class C1ContinuousTrajectorySmoother implements FixedFramePositionTrajectoryGenerator
 {
-   private static final double DEFAULT_TRACKING_STIFFNESS = 500.0;
+   private static final double DEFAULT_TRACKING_STIFFNESS = 600.0;
    private static final double DEFAULT_TRACKING_ZETA = 0.8;
 
    private final FixedFramePositionTrajectoryGenerator trajectoryToTrack;
