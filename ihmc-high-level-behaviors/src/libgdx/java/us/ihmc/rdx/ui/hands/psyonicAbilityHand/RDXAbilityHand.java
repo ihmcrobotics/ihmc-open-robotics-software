@@ -26,6 +26,12 @@ public class RDXAbilityHand implements RDXHandInterface
    private static final float SLIDER_MIN = 0.0f;
    private static final float SLIDER_MAX = 120.0f;
    private static final float GRIP_VELOCITY = 30.0f;
+   private static final float THUMB_CURL_MAX = 70.0f;
+   private static final float THUMB_CURL_MIN = 10.0f;
+   private static final float THUMB_OPPOSITION_MAX = 100.0f;
+   private static final float THUMB_OPPOSITION_MIN = 10.0f;
+   private static final float FINGER_CURL_MAX = 80.0f;
+   private static final float FINGER_CURL_MIN = 0.0f;
    private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
 
    private final String identifier;
@@ -293,5 +299,65 @@ public class RDXAbilityHand implements RDXHandInterface
       communication.getCommand(identifier).setGrip(abilityHandGrip);
       previousControl = ControlMode.GRIP;
       publishCommand();
+   }
+
+   @Override
+   public void sendFingerPosition(int index, float value)
+   {
+      if(previousControl != ControlMode.POSITION)
+      {
+         previousControl = ControlMode.POSITION;
+      }
+
+      // 0-3 indices correspond to index-pinky finger curls, 4 is the thumb curl, 5 the thumb opposition
+      int mappedIndex = switch (index)
+      {
+         case 0 -> 4;  // thumb curl
+         case 5 -> 5;  // thumb opposition
+         default -> index - 1; // other fingers curl
+      };
+
+      float mappedValue;
+      float min = switch (mappedIndex)
+      {
+         case 0 -> THUMB_CURL_MIN;
+         case 5 -> THUMB_OPPOSITION_MIN;
+         default -> FINGER_CURL_MIN;
+      };
+      float max = switch (mappedIndex)
+      {
+         case 0 -> THUMB_CURL_MAX;
+         case 5 -> THUMB_OPPOSITION_MAX;
+         default -> FINGER_CURL_MAX;
+      };
+
+      if (value < 0.05f)
+      {
+         mappedValue = min;
+      }
+      else if (value <= 0.85f)
+      {
+         // scale linearly from MIN at 0.05 to MAX at 0.85
+         mappedValue = min + (value - 0.05f) / (0.85f - 0.05f) * (max - min);
+      }
+      else
+      {
+         mappedValue = max;
+      }
+
+      if (mappedIndex == 5) // opposition is negative
+      {
+         mappedValue = -1.0f * mappedValue;
+      }
+
+      communication.getCommand(identifier).setControlMode(controlMode.toByte());
+      communication.getCommand(identifier).getGoalPositions()[mappedIndex] = mappedValue;
+      commandNotification.set();
+   }
+
+   @Override
+   public float getFingerPosition(int index)
+   {
+      return actuatorPositions[index];
    }
 }
