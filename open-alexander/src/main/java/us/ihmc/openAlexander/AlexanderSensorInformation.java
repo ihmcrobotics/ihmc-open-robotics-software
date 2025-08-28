@@ -35,7 +35,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final String torsoIMU = "torso_imu";
 
    // Pelvis IMUs
-   private final String pelvisIMU = "pelvis_stim_imu";
+   private final String pelvisIMU = "pelvis_imu";
 
    // Left leg IMUs
    private final String leftHipXIMU = "left_hip_x_imu";
