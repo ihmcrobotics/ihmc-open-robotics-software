@@ -175,7 +175,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
-      System.out.println(latestPickPoint.getTranslation().toString("%.3f"));
       if (terrainMapData != null && terrainMapData.getHeightMap() != null)
       {
          ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
