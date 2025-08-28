@@ -11,6 +11,7 @@ public class TerrainMapMessageTools
    public static void toMessage(TerrainMapData terrainMapData, TerrainMapMessage message)
    {
       message.setWidthInMeters(terrainMapData.getGridSizeXY());
+      message.setCellSizeInMeters(terrainMapData.getGridResolutionXY());
       message.setCellsPerMeter((byte) terrainMapData.getCenterIndex());
       message.setMapCenterX(terrainMapData.getTerrainMapCenter().getX());
       message.setMapCenterY(terrainMapData.getTerrainMapCenter().getY());

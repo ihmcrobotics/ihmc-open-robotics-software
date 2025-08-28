@@ -173,14 +173,15 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          selectionActive = false;
       }
 
-//      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-//      ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
-//      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
-//      {
-//         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
-//         ImGui.text(
-//               "Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
-//      }
+      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
+      ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
+      System.out.println(latestPickPoint.getTranslation().toString("%.3f"));
+      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
+      {
+         ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+         ImGui.text(
+               "Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
+      }
 
       ImGui.checkbox(labels.get("Calculate Stance Pose"), calculateStancePose);
       if (ImGui.collapsingHeader(labels.get("Stance Pose Parameters")))
