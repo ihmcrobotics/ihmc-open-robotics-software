@@ -338,7 +338,8 @@ public abstract class ExtendedKalmanFilter
       CommonOps_DDRM.addEquals(residualCovariance, measurementCovariance);
 
       solver.setA(residualCovariance);
-      solver.invert(inverseResidualCovariance);
+      CommonOps_DDRM.invert(residualCovariance, inverseResidualCovariance);
+//      solver.invert(inverseResidualCovariance);
    }
 
    protected void calculateKalmanGain()

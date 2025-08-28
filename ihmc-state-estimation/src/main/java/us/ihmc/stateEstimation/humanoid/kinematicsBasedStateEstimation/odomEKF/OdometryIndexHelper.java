@@ -13,6 +13,11 @@ public class OdometryIndexHelper
       return 16;
    }
 
+   public static int getObservationSizePerLink()
+   {
+      return 15;
+   }
+
    public static int getStatePositionIndex()
    {
       return 0;
@@ -91,6 +96,12 @@ public class OdometryIndexHelper
    public static void toQuaternionFromRotationVector(Vector3DReadOnly rotation, QuaternionBasics quaternionToPack)
    {
       double magnitude = rotation.norm();
+      if (magnitude < 1e-7)
+      {
+         quaternionToPack.setToZero();
+         return;
+      }
+
       double s = Math.sin(magnitude * 0.5);
       double qs = Math.cos(magnitude * 0.5);
       double qx = s * rotation.getX() / magnitude;
@@ -112,6 +123,7 @@ public class OdometryIndexHelper
 
    public static void logMap(QuaternionReadOnly quaternion, Vector3DBasics rotationToPack)
    {
+      // TODO is this just a transform to the axis-angle representation?
       double norm = EuclidCoreTools.norm(quaternion.getX(), quaternion.getY(), quaternion.getZ());
       double scale = 2.0 * Math.atan2(norm, quaternion.getS()) / norm;
       rotationToPack.set(quaternion.getX(), quaternion.getY(), quaternion.getZ());
