@@ -57,7 +57,7 @@ public class AlexanderPushRecoveryOverSteppingStonesTest extends AvatarPushRecov
                @Override
                public SteppingParameters getSteppingParameters()
                {
-                  return new AlexanderSteppingParameters(getPhysicalProperties())
+                  return new OpenAlexanderSteppingParameters(getPhysicalProperties())
                   {
                      @Override
                      public double getMaxStepLength()

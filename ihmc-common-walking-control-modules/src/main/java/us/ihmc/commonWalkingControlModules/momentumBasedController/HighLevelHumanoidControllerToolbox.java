@@ -48,6 +48,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
+import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -423,6 +424,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public SideDependentList<YoPlaneContactState> getFootContactStates()
    {
       return footContactStates;
+   }
+
+   public WholeBodyAngularVelocityCalculator getWholeBodyAngularVelocityCalculator()
+   {
+      return angularExcursionCalculator.getWholeBodyAngularVelocityCalculator();
    }
 
    public void update()

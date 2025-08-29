@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepG
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
@@ -131,6 +132,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       if (!checkStepLength.getValue())
          return true;
 
-      return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < steppingParameters.getMaxStepLength();
+      // The 10% here is a "fudge factor". This is meant to reject steps that are wildly wrong.
+      return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < 1.1 * EuclidCoreTools.norm(steppingParameters.getMaxStepLength(), steppingParameters.getMaxStepWidth());
    }
 }

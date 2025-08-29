@@ -51,6 +51,15 @@ public abstract class WalkingControllerParameters
     */
    public abstract double getOmega0();
 
+   /**
+    * Specifies whether to use the angular capture point for feedback. The angular capture point is similar to the regular capture point, but incorporates
+    * the angular momentum to determine the rate portion. This allows for a better capture point estimate, and is similar to the ALIP model for walking.
+    */
+   public boolean useAngularCapturePointForFeedback()
+   {
+      return false;
+   }
+
    public enum SmoothFootUnloadMethod
    {
       HARD_CONSTRAINT, RHO_WEIGHT

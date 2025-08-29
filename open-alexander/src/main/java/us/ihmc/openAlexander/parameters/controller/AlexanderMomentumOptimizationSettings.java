@@ -16,9 +16,9 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
 {
    // TODO Parameter values copied from Valkyrie which has different weight.
    // TODO Needs tune up.
-   private final Vector3D linearMomentumWeight = new Vector3D(0.1, 0.1, 0.02);
+   private final Vector3D linearMomentumWeight = new Vector3D(0.5, 0.5, 0.02);
    // TODO The z-component is super high, probably causing tracking issues in swing
-   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 1.0);
+   private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
 
    // TODO Needs tune up.
    private final Vector3D footAngularWeight = new Vector3D(0.5, 0.5, 0.5);
@@ -29,8 +29,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    // TODO Needs tune up.
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
-   // TODO The z-component is really low, need to double-check that it is not causing problems.
-   private final Vector3D pelvisAngularWeight = new Vector3D(25.0, 25.0, 1.0);
+   private final Vector3D pelvisAngularWeight = new Vector3D(10.0, 10.0, 3.0);
    // TODO Needs tune up.
    private final Vector3D pelvisLinearWeight = new Vector3D(5.0, 5.0, 30.0);
 
@@ -42,10 +41,10 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final double jointAccelerationWeight = 0.005;
    // TODO Needs tune up.
    private final double jointJerkWeight = 1.6E-6;
-   private final double rhoWeight = 1e-5;
+   private final double rhoWeight = 5e-6;
    // TODO Needs tune up.
-   private final double rhoMin = 4.0;
-   private final double rhoRateDefaultWeight = 1E-7;
+   private final double rhoMin = 2.0;
+   private final double rhoRateDefaultWeight = 1E-8;
    // TODO Needs tune up.
    private final double rhoRateHighWeight = 1.6E-6;
    // TODO Needs tune up.
@@ -56,7 +55,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final Vector2D copRateHighWeight = new Vector2D(0.00008, 0.00032);
 
    // TODO Needs tune up.
-   private final double neckJointspaceWeight = 5.0;
+   private final double neckJointspaceWeight = 0.0;
    // TODO Needs tune up.
    private final double spineJointspaceWeight = 10.0;
    // TODO Needs tune up.
@@ -72,7 +71,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    // TODO Needs tune up.
    private final Vector3D headAngularWeight = new Vector3D(500.0, 500.0, 500.0);
    // TODO Needs tune up.
-   private final Vector3D chestAngularWeight = new Vector3D(15.0, 15.0, 5.0);
+   private final Vector3D chestAngularWeight = new Vector3D(30.0, 30.0, 5.0);
 
    private final Vector3D handAngularWeight;
 
