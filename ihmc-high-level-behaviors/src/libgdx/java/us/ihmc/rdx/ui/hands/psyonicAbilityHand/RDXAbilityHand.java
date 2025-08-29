@@ -59,6 +59,7 @@ public class RDXAbilityHand implements RDXHandInterface
 
       controlFingersSlider = new ImGuiSliderFloat("Control Fingers", "%.1f°", Float.NaN);
       controlFingersSlider.addWidgetAligner(widgetAligner);
+      controlFingersSlider.setFloatValue(30.0f);
       controlMode = ControlMode.POSITION;
 
       for (int i = 0; i < ACTUATOR_COUNT; i++)
@@ -66,6 +67,7 @@ public class RDXAbilityHand implements RDXHandInterface
          String label = FINGER_NAMES[i];
          fingerSliders[i] = new ImGuiSliderFloat(label, "%.1f°", Float.NaN);
          fingerSliders[i].addWidgetAligner(widgetAligner);
+         fingerSliders[i].setFloatValue(30.0f);
       }
 
       publishThrottler.setFrequency(30.0);
