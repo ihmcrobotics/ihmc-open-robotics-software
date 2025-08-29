@@ -132,6 +132,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       if (!checkStepLength.getValue())
          return true;
 
+      // The 10% here is a "fudge factor". This is meant to reject steps that are wildly wrong.
       return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < 1.1 * EuclidCoreTools.norm(steppingParameters.getMaxStepLength(), steppingParameters.getMaxStepWidth());
    }
 }
