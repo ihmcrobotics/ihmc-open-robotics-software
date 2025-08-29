@@ -8,6 +8,19 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class OdometryIndexHelper
 {
+   static final int stateSizePerLink = 16;
+   static final int stateTranslationIndex = 0;
+   static final int stateLinearVelocityIndex = 3;
+   static final int stateOrientationIndex = 6;
+   static final int stateAccelBiasIndex = 10;
+   static final int stateGyroBiasIndex = 13;
+
+   static final int measurementRelativeTranslationIndex = 0;
+   static final int measurementRelativeOrientationErrorIndex = 3;
+   static final int measurementRelativeVelocityIndex = 6;
+   static final int measurementContactVelocityIndex = 9;
+   static final int measurementAccelIndex = 12;
+
    public static int getStateSizePerLink()
    {
       return 16;

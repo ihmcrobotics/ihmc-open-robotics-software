@@ -15,6 +15,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryIndexHelper.*;
+
 class MeasurementModel
 {
    private static final DMatrixRMaj eye3x3 = CommonOps_DDRM.identity(3);
@@ -118,15 +120,15 @@ class MeasurementModel
 
    public void get(int start, DMatrixRMaj measurementToPack)
    {
-      footPredictedRelativePosition.get(start, measurementToPack);
-      footPredictedRelativeOrientationError.get(start + 3, measurementToPack);
-      footPredictedLinearVelocityError.get(start + 6, measurementToPack);
+      footPredictedRelativePosition.get(start + measurementRelativeTranslationIndex, measurementToPack);
+      footPredictedRelativeOrientationError.get(start + measurementRelativeOrientationErrorIndex, measurementToPack);
+      footPredictedLinearVelocityError.get(start + measurementRelativeVelocityIndex, measurementToPack);
 
       if (isInContact.getBooleanValue())
          return;
 
-      footPredictedLinearVelocity.get(start + 9, measurementToPack);
-      footPredictedGravityVector.get(start + 12, measurementToPack);
+      footPredictedLinearVelocity.get(start + measurementContactVelocityIndex, measurementToPack);
+      footPredictedGravityVector.get(start + measurementAccelIndex, measurementToPack);
    }
 
    /**
@@ -155,30 +157,31 @@ class MeasurementModel
       OdometryTools.toSkewSymmetricMatrix(footPositionError, skewMatrix);
 
       // First row
-      MatrixTools.setMatrixBlock(jacobianToPack, rowOffset, 0, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
-      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, rowOffset, 6);
+      int row = rowOffset + measurementRelativeTranslationIndex;
+      MatrixTools.setMatrixBlock(jacobianToPack, row, stateTranslationIndex, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
+      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, stateOrientationIndex);
 
       // Second row
-      rowOffset += 3;
+      row = rowOffset + measurementRelativeOrientationErrorIndex;
       DMatrixRMaj left = new DMatrixRMaj(3, 3);
       DMatrixRMaj right = new DMatrixRMaj(3, 3);
       Quaternion orientation = new Quaternion(footState.orientation);
       orientation.multiplyConjugateThis(baseState.orientation);
       OdometryKalmanFilter.l3Operator(orientation, left);
       OdometryKalmanFilter.r3Operator(footMeasurements.orientationMeasurement, right);
-      MatrixTools.multAddBlock(-1.0, left, right, jacobianToPack, rowOffset, 6);
+      MatrixTools.multAddBlock(-1.0, left, right, jacobianToPack, row, stateOrientationIndex);
 
       // Third row
-      rowOffset += 3;
+      row = rowOffset + measurementRelativeVelocityIndex;
       OdometryTools.toSkewSymmetricMatrix(footVelocityError, skewMatrix);
 
-      MatrixTools.setMatrixBlock(jacobianToPack, rowOffset, 3, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
-      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, rowOffset, 6);
+      MatrixTools.setMatrixBlock(jacobianToPack, row, stateLinearVelocityIndex, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
+      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, stateOrientationIndex);
 
       if (OdometryKalmanFilter.includeBias)
       {
          OdometryTools.toSkewSymmetricMatrix(footMeasurements.positionMeasurement, skewMatrix);
-         MatrixTools.setMatrixBlock(jacobianToPack, rowOffset, 12, skewMatrix, 0, 0, 3, 3, -1.0);
+         MatrixTools.setMatrixBlock(jacobianToPack, row, stateGyroBiasIndex, skewMatrix, 0, 0, 3, 3, -1.0);
       }
    }
 

@@ -124,16 +124,27 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       MatrixTools.setDiagonal(processCovariance, 1e-2);
       MatrixTools.setDiagonal(measurementCovariance, 1e-3);
 
-      translationCovariance.set(1e-3);
-      velocityCovariance.set(1e-2);
-      orientationCovariance.set(1e-2);
-      biasCovariance.set(1e-4);
+//      translationCovariance.set(1e-3);
+//      velocityCovariance.set(1e-2);
+//      orientationCovariance.set(1e-2);
+//      biasCovariance.set(1e-4);
+//
+//      measuredTranslationCovariance.set(1e-5);
+//      measuredOrientationCovariance.set(1e-2);
+//      velocityErrorCovariance.set(1e-3);
+//      contactVelocityCovariance.set(1e-5);
+//      contactAccelerationCovariance.set(1.0);
 
-      measuredTranslationCovariance.set(1e-5);
-      measuredOrientationCovariance.set(1e-2);
-      velocityErrorCovariance.set(1e-3);
-      contactVelocityCovariance.set(1e-5);
-      contactAccelerationCovariance.set(1.0);
+            translationCovariance.set(1e-4);
+            velocityCovariance.set(1e-4);
+            orientationCovariance.set(1e-4);
+            biasCovariance.set(1e-4);
+
+            measuredTranslationCovariance.set(1e-4);
+            measuredOrientationCovariance.set(1e-4);
+            velocityErrorCovariance.set(1e-4);
+            contactVelocityCovariance.set(1e-4);
+            contactAccelerationCovariance.set(1e-4);
 
       contactThreshold.set(Double.MAX_VALUE);
 

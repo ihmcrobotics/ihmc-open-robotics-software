@@ -15,7 +15,7 @@ public class ObservationModel
 
    public void get(int startRow, DMatrixRMaj observation)
    {
-      footMeasurements.positionMeasurement.get(startRow, observation);
-      footMeasurements.accelMeasurement.get(startRow + 6, observation);
+      footMeasurements.positionMeasurement.get(startRow + OdometryIndexHelper.measurementRelativeTranslationIndex, observation);
+      footMeasurements.accelMeasurement.get(startRow + OdometryIndexHelper.measurementAccelIndex, observation);
    }
 }
