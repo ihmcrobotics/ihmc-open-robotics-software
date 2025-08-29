@@ -1,70 +1,44 @@
-# IHMC Perception Dependencies
+# IHMC Perception Dependencies / Requirements
 
 IHMC perception has some additional dependencies for using CUDA and running ZED cameras.
 Follow the below instructions to install the dependencies.
 
-## Linux (Ubuntu 22.04, x86_64)
+Hardware requirements:
+- A decent CPU
+- NVIDIA 20-series or newer GPU
 
-### CUDA Toolkit
+## Linux (Ubuntu 24.04, x86_64)
+### CUDA
+If there is any doubt, please follow the official installation instructions [here](https://developer.nvidia.com/cuda-12-9-1-download-archive?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=24.04&target_type=deb_network
+).
 
-For other linux distros or architectures, find installation instructions on the [CUDA Toolkit Download](https://developer.nvidia.com/cuda-downloads) site.
-
-```shell
+```
 cd ~/Downloads
-wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
-sudo apt-get -y install cuda-toolkit-12-6
+sudo apt-get -y install cuda-toolkit-12-9
 ```
 
-To install the NVIDIA driver for 20 series graphics cards and up:
-
-```shell
+For modern GPUs (30-series and up)
+```
 sudo apt-get install -y nvidia-open
 ```
 
-For older NVIDIA graphics cards: 
-
-```shell
+For older GPUs
+```
 sudo apt-get install -y cuda-drivers
 ```
 
 ### ZED SDK
+We currently depend on ZED SDK 5.0.x, other versions are not compatible.
 
-```shell
-cd ~/Downloads
-wget https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.2/ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
-chmod +x ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
-./ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
+Download ZED SDK for Linux [here](https://www.stereolabs.com/developers/release/5.0#82af3640d775)
 
-# Follow the ZED SDK installer prompts
 
-rm -f ZED_SDK_Ubuntu22_cuda12.1_v4.2.1.zstd.run
-```
-
-## Windows (x86_64)
-
-### CUDA Toolkit
-
-```shell
-cd %USERPROFILE%\Downloads
-curl -OL https://developer.download.nvidia.com/compute/cuda/12.6.0/network_installers/cuda_12.6.0_windows_network.exe
-cuda_12.6.0_windows_network.exe -s
-
-:: Follow the NVIDIA Installer prompts. 
-:: When asked whether to run express or custom installation, you may select express. 
-
-del cuda_12.6.0_windows_network.exe
-```
+## Windows (10+ x86_64)
+### CUDA
+Download CUDA for Windows [here](https://developer.nvidia.com/cuda-12-9-1-download-archive?target_os=Windows&target_arch=x86_64)
 
 ### ZED SDK
-
-```shell
-cd %USERPROFILE%\Downloads
-curl -o ZED_SDK_Installer.exe -L https://stereolabs.sfo2.cdn.digitaloceanspaces.com/zedsdk/4.2/ZED_SDK_Windows_cuda12.1_v4.2.1.exe
-ZED_SDK_Installer .exe -s
-
-:: Follow the ZED SDK installer prompts
-
-del ZED_SDK_Installer.exe
-```
+Download ZED SDK for Windows [here](https://www.stereolabs.com/developers/release/5.0#82af3640d775)
