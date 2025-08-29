@@ -12,6 +12,7 @@ import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
@@ -41,8 +42,9 @@ public class RawImagePublisher implements AutoCloseable
       {
          jpegProcessor = new CUDAJPEGProcessor();
       }
-      catch (UnsatisfiedLinkError ignored)
+      catch (UnsatisfiedLinkError e)
       {
+         LogTools.error("Unable to create CUDAJPEGProcessor: " + e.getMessage());
       }
 
       sensorStreamer = new ROS2SRTSensorStreamer(ros2Node);
