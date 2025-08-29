@@ -7,8 +7,6 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
-import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
