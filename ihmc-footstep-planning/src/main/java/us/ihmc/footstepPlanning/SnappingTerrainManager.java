@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning;
 
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.ros2.ROS2Node;
@@ -15,13 +16,13 @@ public class SnappingTerrainManager
    private ROS2Publisher<TerrainMapMessage> snappingTerrainPublisher;
    private final TerrainMapMessage terrainMapMessage;
 
-   public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
+   public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters footstepPlannerParameters)
    {
       if (ros2Node != null)
          snappingTerrainPublisher = ros2Node.createPublisher(ContinuousHikingAPI.TERRAIN_MAP);
 
       terrainMapMessage = new TerrainMapMessage();
-      snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, footstepPlannerParameters);
    }
 
    public void updateAndPublish(HeightMapData heightMapData)

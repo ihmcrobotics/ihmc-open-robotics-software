@@ -58,7 +58,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
       ReferenceFrame rightFootFrame = syncedRobotModel.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
       // TODO we don't have a great way to setup the height map if we are using more then one sensor
       // This will make the height map not appear correct cause the center is wrong
-      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getExperimentalCameraFrame();
+      ReferenceFrame heightMapCenterFrame = syncedRobotModel.getReferenceFrames().getSteppingCameraFrame();
 
       filteredDepthPublisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_DEPTH_FILTERED_IMAGE);
 

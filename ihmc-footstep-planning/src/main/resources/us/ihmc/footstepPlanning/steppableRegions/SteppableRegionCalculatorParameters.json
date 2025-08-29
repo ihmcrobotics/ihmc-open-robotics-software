@@ -1,7 +1,8 @@
 {
   "title" : "SteppableRegionCalculatorParameters",
-  "Distance from cliff bottoms" : 0.13999999999999999,
-  "Distance from cliff tops" : 0.05,
+  "Distance from cliff bottoms" : 0.14,
+  "Distance from cliff tops" : 0.06,
+  "Scaled foot in meters" : 0.16,
   "Yaw discretizations" : 5,
   "Foot width" : 0.12,
   "Foot length" : 0.2,
