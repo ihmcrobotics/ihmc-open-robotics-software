@@ -210,6 +210,11 @@ public abstract class ExtendedKalmanFilter
       covariance.set(initialCovariance);
    }
 
+   public void initializeState(DMatrixRMaj state)
+   {
+      this.state.set(state);
+   }
+
    public int getStateSize()
    {
       return stateSize;

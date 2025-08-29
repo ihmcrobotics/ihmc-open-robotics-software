@@ -344,8 +344,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       for (int i = 0; i < footSwitchList.size(); i++)
          footSwitchList.get(i).update();
 
-      // TODO should this also consume some of the foot switch data?
-      odometry.compute();
+
 
       switch (operatingMode.getEnumValue())
       {
@@ -357,6 +356,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             break;
       }
+
+      // TODO should this also consume some of the foot switch data?
+      odometry.compute();
 
       if (momentumStateUpdater != null)
          momentumStateUpdater.update();

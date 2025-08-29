@@ -7,13 +7,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public interface IMUSensorReadOnly
 {
    public abstract String getSensorName();
 
-   public abstract ReferenceFrame getMeasurementFrame();
+   public abstract MovingReferenceFrame getMeasurementFrame();
 
    public abstract RigidBodyBasics getMeasurementLink();
 
