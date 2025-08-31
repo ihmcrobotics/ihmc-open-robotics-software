@@ -401,7 +401,7 @@ public class RDXSimulatedSensorFactory
                      -1,
                      true,
                      RealSenseImageSensor.DEPTH_IMAGE_KEY,
-                     10,
+                     20,
                      new RigidBodyTransform());
 
       return d455;
