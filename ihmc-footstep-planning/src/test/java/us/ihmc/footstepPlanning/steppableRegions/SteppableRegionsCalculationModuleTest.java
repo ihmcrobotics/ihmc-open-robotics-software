@@ -38,8 +38,8 @@ public class SteppableRegionsCalculationModuleTest
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
 
-      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, footstepPlannerParameters);
+      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
       snappingTerrainExtractor.update(heightMapData);
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
 
