@@ -11,10 +11,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -31,6 +30,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryIndexHelper.*;
 
 /**
  * The process model in this class is defined as
@@ -64,7 +65,6 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
 
    private final YoDouble contactThreshold = new YoDouble("contactVarianceThreshold", registry);
 
-
    // Internal variables for state holding
    private final YoFrameVector3D yoBaseAngularVelocityMeasurement;
 
@@ -79,13 +79,17 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
    private final DMatrixRMaj AMatrix;
    private final DMatrixRMaj CMatrix;
 
-   private final MeasuredVariables baseMeasurement;
-   private final List<MeasuredVariables> feetMeasurements = new ArrayList<>();
+   private final SensedVariables baseSensing;
+   private final List<SensedVariables> feetSensing = new ArrayList<>();
 
    private final StateVariables baseProcessState;
    private final StateVariables basePredictedState;
+   private final StateCorrectionVariables baseStateCorrection;
    private final List<StateVariables> feetProcessState = new ArrayList<>();
    private final List<StateVariables> feetPredictedState = new ArrayList<>();
+   private final List<StateCorrectionVariables> feetStateCorrections = new ArrayList<>();
+   private final List<MeasurementResidualVariables> feetMeasurementResiduals = new ArrayList<>();
+   private final List<MeasurementVariables> feetMeasurements = new ArrayList<>();
 
    private final List<ProcessModel> processModels = new ArrayList<>();
    private final List<MeasurementModel> measurementModels = new ArrayList<>();
@@ -116,35 +120,36 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
                                double gravitationalAcceleration,
                                YoRegistry parentRegistry)
    {
-      super(OdometryIndexHelper.getStateSizePerLink() * (1 + feetIMUs.size()), OdometryIndexHelper.getObservationSizePerLink() * feetIMUs.size());
+      super(stateSizePerLink * (1 + feetIMUs.size()), errorSizePerLink * (1 + feetIMUs.size()) , measurementSizePerLink * feetIMUs.size());
 
+      int links = 1 + feetIMUs.size();
       // Initialize covariance
-      processCovariance = new DMatrixRMaj(getStateSize(), getStateSize());
+      processCovariance = new DMatrixRMaj(getErrorSize(), getErrorSize());
       measurementCovariance = new DMatrixRMaj(getMeasurementSize(), getMeasurementSize());
       MatrixTools.setDiagonal(processCovariance, 1e-2);
       MatrixTools.setDiagonal(measurementCovariance, 1e-3);
 
-//      translationCovariance.set(1e-3);
-//      velocityCovariance.set(1e-2);
-//      orientationCovariance.set(1e-2);
-//      biasCovariance.set(1e-4);
+      translationCovariance.set(1e-3);
+      velocityCovariance.set(1e-2);
+      orientationCovariance.set(1e-2);
+      biasCovariance.set(1e-4);
+
+      measuredTranslationCovariance.set(1e-5);
+      measuredOrientationCovariance.set(1e-2);
+      velocityErrorCovariance.set(1e-3);
+      contactVelocityCovariance.set(1e-5);
+      contactAccelerationCovariance.set(1.0);
+
+//            translationCovariance.set(1e-4);
+//            velocityCovariance.set(1e-4);
+//            orientationCovariance.set(1e-4);
+//            biasCovariance.set(1e-4);
 //
-//      measuredTranslationCovariance.set(1e-5);
-//      measuredOrientationCovariance.set(1e-2);
-//      velocityErrorCovariance.set(1e-3);
-//      contactVelocityCovariance.set(1e-5);
-//      contactAccelerationCovariance.set(1.0);
-
-            translationCovariance.set(1e-4);
-            velocityCovariance.set(1e-4);
-            orientationCovariance.set(1e-4);
-            biasCovariance.set(1e-4);
-
-            measuredTranslationCovariance.set(1e-4);
-            measuredOrientationCovariance.set(1e-4);
-            velocityErrorCovariance.set(1e-4);
-            contactVelocityCovariance.set(1e-4);
-            contactAccelerationCovariance.set(1e-4);
+//            measuredTranslationCovariance.set(1e-4);
+//            measuredOrientationCovariance.set(1e-4);
+//            velocityErrorCovariance.set(1e-4);
+//            contactVelocityCovariance.set(1e-4);
+//            contactAccelerationCovariance.set(1e-4);
 
       contactThreshold.set(Double.MAX_VALUE);
 
@@ -155,15 +160,16 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
 
       predictedState = new DMatrixRMaj(getStateSize(), 1);
       predictedMeasurement = new DMatrixRMaj(getMeasurementSize(), 1);
-      AMatrix = new DMatrixRMaj(getStateSize(), getStateSize());
-      CMatrix = new DMatrixRMaj(getMeasurementSize(), getStateSize());
-      observationVector = new DMatrixRMaj(OdometryIndexHelper.getObservationSizePerLink() * feetIMUs.size(), 1);
+      AMatrix = new DMatrixRMaj(getErrorSize(), getErrorSize());
+      CMatrix = new DMatrixRMaj(getMeasurementSize(), getErrorSize());
+      observationVector = new DMatrixRMaj(getMeasurementSize(), 1);
 
       gravityVector = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(() -> worldFrame, new Vector3D(0, 0, Math.abs(gravitationalAcceleration)));
 
-      baseMeasurement = new MeasuredVariables("base", baseIMU, baseIMU, imuBiasProvider, registry);
+      baseSensing = new SensedVariables("base", baseIMU, baseIMU, imuBiasProvider, registry);
       baseProcessState = new StateVariables("baseProcessState", baseIMU.getMeasurementFrame(), registry);
       basePredictedState = new StateVariables("basePredicted",  baseIMU.getMeasurementFrame(), registry);
+      baseStateCorrection = new StateCorrectionVariables("baseStateCorrection", baseIMU.getMeasurementFrame(), registry);
       processModels.add(new ProcessModel(baseProcessState,
                                          basePredictedState,
                                          cancelGravityFromAccelerationMeasurement,
@@ -171,14 +177,20 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
                                          estimatorDT));
       for (int i = 0; i < feetIMUs.size(); i++)
       {
-         MeasuredVariables footMeasurements = new MeasuredVariables("foot" + i, baseIMU, feetIMUs.get(i), imuBiasProvider, registry);
+         SensedVariables footSensing = new SensedVariables("foot" + i, baseIMU, feetIMUs.get(i), imuBiasProvider, registry);
          StateVariables footProcessState = new StateVariables("foot" + i + "ProcessState", feetIMUs.get(i).getMeasurementFrame(), registry);
          StateVariables footPredictedState = new StateVariables("foot" + i + "PredictedState", feetIMUs.get(i).getMeasurementFrame(), registry);
-         feetMeasurements.add(footMeasurements);
+         StateCorrectionVariables footStateCorrection = new StateCorrectionVariables("foot" + i + "StateCorrection", feetIMUs.get(i).getMeasurementFrame(), registry);
+         MeasurementVariables footMeasurement = new MeasurementVariables("foot" + i + "Predicted", registry);
+         MeasurementResidualVariables footMeasurementResidual = new MeasurementResidualVariables("foot" + i + "Residual", registry);
+         feetSensing.add(footSensing);
+         feetMeasurements.add(footMeasurement);
          feetProcessState.add(footProcessState);
          feetPredictedState.add(footPredictedState);
+         feetStateCorrections.add(footStateCorrection);
+         feetMeasurementResiduals.add(footMeasurementResidual);
 
-         observationModels.add(new ObservationModel(footMeasurements));
+         observationModels.add(new ObservationModel(footSensing));
          processModels.add(new ProcessModel(footProcessState,
                                             footPredictedState,
                                             cancelGravityFromAccelerationMeasurement,
@@ -187,7 +199,8 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
          measurementModels.add(new MeasurementModel("foot" + i,
                                                     basePredictedState,
                                                     footPredictedState,
-                                                    footMeasurements,
+                                                    footSensing,
+                                                    footMeasurement,
                                                     gravityVector,
                                                     contactThreshold,
                                                     registry));
@@ -217,7 +230,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
          feetProcessState.get(i).initialize();
 
       // update the predicted state from the yo variablized state
-      baseProcessState.get(OdometryIndexHelper.getBasePositionIndex(), state);
+      baseProcessState.get(stateTranslationIndex, state);
       for (int i = 0; i < feetIMUs.size(); i++)
       {
          feetProcessState.get(i).get(OdometryIndexHelper.getFootPositionIndex(i), state);
@@ -226,154 +239,19 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       initializeState(state);
    }
 
-   static class MeasuredVariables
-   {
-      // State providers
-      private final IMUSensorReadOnly baseIMU;
-      private final IMUSensorReadOnly imu;
-      private final IMUBiasProvider imuBiasProvider;
-
-      // State recorders
-      public final YoFrameVector3D gyroMeasurementInWorld;
-      public final YoFrameVector3D gyroMeasurement;
-      public final YoFrameVector3D accelMeasurementInWorld;
-      public final YoFrameVector3D accelMeasurement;
-
-      public final YoFramePoint3D positionMeasurement;
-      public final YoFrameQuaternion orientationMeasurement;
-      public final YoFrameVector3D linearVelocity;
-
-      // Temp variables
-      private final FrameVector3D linearAcceleration = new FrameVector3D();
-      private final FrameVector3D angularVelocity = new FrameVector3D();
-      private final Twist twist = new Twist();
-
-      public MeasuredVariables(String prefix, IMUSensorReadOnly baseIMU, IMUSensorReadOnly imu, IMUBiasProvider imuBiasProvider, YoRegistry registry)
-      {
-         this.baseIMU = baseIMU;
-         this.imu = imu;
-         this.imuBiasProvider = imuBiasProvider;
-
-         gyroMeasurementInWorld = new YoFrameVector3D(prefix + "GyroMeasurementInWorld", worldFrame, registry);
-         gyroMeasurement = new YoFrameVector3D(prefix + "GyroMeasurement", imu.getMeasurementFrame(), registry);
-         accelMeasurementInWorld = new YoFrameVector3D(prefix + "AccelMeasurementInWorld", worldFrame, registry);
-         accelMeasurement = new YoFrameVector3D(prefix + "AccelMeasurement", imu.getMeasurementFrame(), registry);
-
-         positionMeasurement = new YoFramePoint3D(prefix + "PositionMeasurement", baseIMU.getMeasurementFrame(), registry);
-         orientationMeasurement = new YoFrameQuaternion(prefix + "OrientationMeasurement", baseIMU.getMeasurementFrame(), registry);
-
-         linearVelocity = new YoFrameVector3D(prefix + "LinearVelocity", worldFrame, registry);
-      }
-
-      public void update()
-      {
-         // Update gyro measure
-         FrameVector3DReadOnly gyroBiasInput = imuBiasProvider.getAngularVelocityBiasInIMUFrame(imu);
-         Vector3DReadOnly gyroRawInput = imu.getAngularVelocityMeasurement();
-
-         angularVelocity.setReferenceFrame(imu.getMeasurementFrame());
-         angularVelocity.sub(gyroRawInput, gyroBiasInput);
-
-         gyroMeasurementInWorld.setMatchingFrame(angularVelocity);
-         gyroMeasurement.setMatchingFrame(angularVelocity);
-
-         // Update the accelerometer measure
-         FrameVector3DReadOnly accelBiasInput = imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imu);
-         Vector3DReadOnly accelRawInput = imu.getLinearAccelerationMeasurement();
-
-         linearAcceleration.setReferenceFrame(imu.getMeasurementFrame());
-         linearAcceleration.sub(accelRawInput, accelBiasInput);
-
-         accelMeasurementInWorld.setMatchingFrame(linearAcceleration);
-         accelMeasurement.setMatchingFrame(linearAcceleration);
-
-         positionMeasurement.setFromReferenceFrame(imu.getMeasurementFrame());
-         orientationMeasurement.setFromReferenceFrame(imu.getMeasurementFrame());
-
-         imu.getMeasurementFrame().getTwistRelativeToOther(baseIMU.getMeasurementFrame(), twist);
-         twist.changeFrame(worldFrame);
-         linearVelocity.set(twist.getLinearPart());
-      }
-   }
-
-   static class StateVariables
-   {
-      public final YoFramePoint3D translation;
-      public final YoFrameVector3D linearVelocity;
-      public final YoFrameQuaternion orientation;
-      public final YoFrameVector3D accelBias;
-      public final YoFrameVector3D gyroBias;
-
-      public final YoFrameVector3D unbiasedAccel;
-      public final YoFrameVector3D unbiasedGyro;
-
-      private final MovingReferenceFrame sensorFrame;
-
-      public StateVariables(String prefix, MovingReferenceFrame sensorFrame, YoRegistry registry)
-      {
-         this.sensorFrame = sensorFrame;
-
-         translation = new YoFramePoint3D(prefix + "Translation", worldFrame, registry);
-         linearVelocity = new YoFrameVector3D(prefix + "LinearVelocity", worldFrame, registry);
-         orientation = new YoFrameQuaternion(prefix + "Orientation", worldFrame, registry);
-         accelBias = new YoFrameVector3D(prefix + "AccelBias", sensorFrame, registry);
-         gyroBias = new YoFrameVector3D(prefix + "GyroBias", sensorFrame, registry);
-         unbiasedAccel = new YoFrameVector3D(prefix + "UnbiasedAccel", sensorFrame, registry);
-         unbiasedGyro = new YoFrameVector3D(prefix + "UnbiasedGyro", sensorFrame, registry);
-      }
-
-      public void initialize()
-      {
-         this.translation.setFromReferenceFrame(sensorFrame);
-         this.orientation.setFromReferenceFrame(sensorFrame);
-         linearVelocity.setMatchingFrame(sensorFrame.getTwistOfFrame().getLinearPart());
-         accelBias.setToZero();
-         gyroBias.setToZero();
-      }
-
-      public void set(int start, DMatrixRMaj state, MeasuredVariables measuredVariables)
-      {
-         translation.set(start + OdometryIndexHelper.getStatePositionIndex(), state);
-         linearVelocity.set(start + OdometryIndexHelper.getStateVelocityIndex(), state);
-         orientation.set(start + OdometryIndexHelper.getStateOrientationIndex(), state);
-         accelBias.set(start + OdometryIndexHelper.getStateAccelerationBiasIndex(), state);
-         gyroBias.set(start + OdometryIndexHelper.getStateGyroBiasIndex(), state);
-
-         if (OdometryKalmanFilter.includeBias)
-         {
-            unbiasedAccel.sub(measuredVariables.accelMeasurement, accelBias);
-            unbiasedGyro.sub(measuredVariables.gyroMeasurement, gyroBias);
-         }
-         else
-         {
-            unbiasedAccel.set(measuredVariables.accelMeasurement);
-            unbiasedGyro.set(measuredVariables.gyroMeasurement);
-         }
-      }
-
-      public void get(int start, DMatrixRMaj stateToPack)
-      {
-         translation.get(start + OdometryIndexHelper.getStatePositionIndex(), stateToPack);
-         linearVelocity.get(start + OdometryIndexHelper.getStateVelocityIndex(), stateToPack);
-         orientation.get(start + OdometryIndexHelper.getStateOrientationIndex(), stateToPack);
-         accelBias.get(start + OdometryIndexHelper.getStateAccelerationBiasIndex(), stateToPack);
-         gyroBias.get(start + OdometryIndexHelper.getStateGyroBiasIndex(), stateToPack);
-      }
-   }
-
    private boolean initialized = false;
 
    public void compute()
    {
       updateCovariance();
 
-      baseMeasurement.update();
-      for (int i = 0; i < feetMeasurements.size(); i++)
-         feetMeasurements.get(i).update();
+      baseSensing.update();
+      for (int i = 0; i < feetSensing.size(); i++)
+         feetSensing.get(i).update();
 
       for (int i = 0; i < observationModels.size(); i++)
       {
-         observationModels.get(i).get(i * OdometryIndexHelper.getObservationSizePerLink(), observationVector);
+         observationModels.get(i).get(i * measurementSizePerLink, observationVector);
       }
 
       if (!initialized)
@@ -403,42 +281,22 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
    {
       for (int i = 0; i < feetIMUs.size() + 1; i++)
       {
-         int index = i * OdometryIndexHelper.getStateSizePerLink();
-         processCovariance.set(index, index++, translationCovariance.getValue());
-         processCovariance.set(index, index++, translationCovariance.getValue());
-         processCovariance.set(index, index++, translationCovariance.getValue());
-         processCovariance.set(index, index++, velocityCovariance.getValue());
-         processCovariance.set(index, index++, velocityCovariance.getValue());
-         processCovariance.set(index, index++, velocityCovariance.getValue());
-         processCovariance.set(index, index++, orientationCovariance.getValue());
-         processCovariance.set(index, index++, orientationCovariance.getValue());
-         processCovariance.set(index, index++, orientationCovariance.getValue());
-         processCovariance.set(index, index++, orientationCovariance.getValue());
-         processCovariance.set(index, index++, biasCovariance.getValue());
-         processCovariance.set(index, index++, biasCovariance.getValue());
-         processCovariance.set(index, index++, biasCovariance.getValue());
-         processCovariance.set(index, index++, biasCovariance.getValue());
-         processCovariance.set(index, index++, biasCovariance.getValue());
-         processCovariance.set(index, index, biasCovariance.getValue());
+         int index = i * errorSizePerLink;
+         OdometryTools.setDiagonals(index + errorTranslationIndex, 3, translationCovariance.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorLinearVelocityIndex, 3, velocityCovariance.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorOrientationIndex, 3, orientationCovariance.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorAccelBiasIndex, 3, biasCovariance.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorGyroBiasIndex, 3, biasCovariance.getValue(), processCovariance);
       }
 
       for (int i = 0; i < feetIMUs.size(); i++)
       {
-         int index = i * OdometryIndexHelper.getObservationSizePerLink();
-         for (int j = 0; j < 3; j++)
-            measurementCovariance.set(index + j, index + j, measuredTranslationCovariance.getValue());
-         index += 3;
-         for (int j = 0; j < 3; j++)
-            measurementCovariance.set(index + j, index + j, measuredOrientationCovariance.getValue());
-         index += 3;
-         for (int j = 0; j < 3; j++)
-            measurementCovariance.set(index + j, index + j, velocityErrorCovariance.getValue());
-         index += 3;
-         for (int j = 0; j < 3; j++)
-            measurementCovariance.set(index + j, index + j, contactVelocityCovariance.getValue());
-         index += 3;
-         for (int j = 0; j < 3; j++)
-            measurementCovariance.set(index + j, index + j, contactAccelerationCovariance.getValue());
+         int index = i * measurementSizePerLink;
+         OdometryTools.setDiagonals(index + measurementRelativeTranslationIndex, 3, measuredTranslationCovariance.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementRelativeOrientationErrorIndex, 3, measuredOrientationCovariance.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementRelativeVelocityIndex, 3, velocityErrorCovariance.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementContactVelocityIndex, 3, contactVelocityCovariance.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementAccelIndex, 3, contactAccelerationCovariance.getValue(), measurementCovariance);
       }
 
       setProcessCovariance(processCovariance);
@@ -496,9 +354,9 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
    }
 
    private final FramePoint3D imuToRoot = new FramePoint3D();
+
    private final FrameVector3D addedAngular = new FrameVector3D();
    private final FrameVector3D momentArm = new FrameVector3D();
-
    private void updateRootJointTwistLinearPart(FrameVector3DReadOnly imuLinearVelocity,
                                                FrameVector3DReadOnly imuAngularVelocity,
                                                FixedFrameVector3DBasics rootLinearVelocityToPack)
@@ -519,15 +377,55 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
    }
 
    @Override
+   protected void postSolveHook()
+   {
+      // Update some yo variables
+      baseStateCorrection.set(0, stateCorrection);
+      for (int i = 0; i < feetIMUs.size(); i++)
+      {
+         feetStateCorrections.get(i).set((i + 1) * errorSizePerLink, stateCorrection);
+         feetMeasurementResiduals.get(i).set(i * measurementSizePerLink, measurementResidual);
+      }
+   }
+
+   @Override
+   protected void applyStateCorrection(DMatrixRMaj state, DMatrixRMaj correction, DMatrixRMaj correctedState)
+   {
+      correctedState.set(state);
+      for (int i = 0; i < feetIMUs.size() + 1; i++)
+      {
+         int destStart = stateSizePerLink * i;
+         int sourceStart = errorSizePerLink * i;
+         // Update the translation
+         MatrixTools.addMatrixBlock(correctedState, destStart + stateTranslationIndex, 0, correction, sourceStart + errorTranslationIndex, 0, 3, 1, 1.0);
+         // Update the linear velocity
+         MatrixTools.addMatrixBlock(correctedState, destStart + stateLinearVelocityIndex, 0, correction, sourceStart + errorLinearVelocityIndex, 0, 3, 1, 1.0);
+         // Update the orientation
+         // FIXME garbage
+         Vector3D rotationVector = new Vector3D();
+         rotationVector.set(sourceStart + errorOrientationIndex, correction);
+         Quaternion correctionRotation = new Quaternion(rotationVector);
+         Quaternion rotation = new Quaternion();
+         rotation.set(destStart + stateOrientationIndex, state);
+         rotation.multiply(correctionRotation);
+         rotation.get(destStart + stateOrientationIndex, correctedState);
+         // Update the accel bias
+         MatrixTools.addMatrixBlock(correctedState, destStart + stateAccelBiasIndex, 0, correction, sourceStart + errorAccelBiasIndex, 0, 3, 1, 1.0);
+         // Update the gyro bias
+         MatrixTools.addMatrixBlock(correctedState, destStart + stateGyroBiasIndex, 0, correction, sourceStart + errorGyroBiasIndex, 0, 3, 1, 1.0);
+      }
+   }
+
+   @Override
    public DMatrixRMaj processModel(DMatrixRMaj state)
    {
       predictedState.zero();
 
       // update the yo variables representing the state
-      baseProcessState.set(OdometryIndexHelper.getBasePositionIndex(), state, baseMeasurement);
+      baseProcessState.set(stateTranslationIndex, state, baseSensing);
       for (int i = 0; i < feetIMUs.size(); i++)
       {
-         feetProcessState.get(i).set(OdometryIndexHelper.getFootPositionIndex(i), state, feetMeasurements.get(i));
+         feetProcessState.get(i).set(OdometryIndexHelper.getFootPositionIndex(i), state, feetSensing.get(i));
       }
 
       // do the prediction
@@ -535,7 +433,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
          processModels.get(i).update();
 
       // update the predicted state from the yo variablized state
-      basePredictedState.get(OdometryIndexHelper.getBasePositionIndex(), predictedState);
+      basePredictedState.get(stateTranslationIndex, predictedState);
       for (int i = 0; i < feetIMUs.size(); i++)
       {
          feetPredictedState.get(i).get(OdometryIndexHelper.getFootPositionIndex(i), predictedState);
@@ -553,11 +451,11 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       // Note that this bypasses the use of predicted state vector, as the predicted state variables are computed in the {@link #processModel(DMatrixRMaj)} call
       for (int i = 0; i < feetIMUs.size(); i++)
       {
-         int row = OdometryIndexHelper.getFootVelocityIndex(i);
+         int row = errorSizePerLink * (i + 1) + errorLinearVelocityIndex;
          MatrixTools.setMatrixBlock(footCovariance, 0, 0, getCovariance(), row, row, 3, 3, 1.0);
 
          measurementModels.get(i).update(footCovariance);
-         measurementModels.get(i).get(i * OdometryIndexHelper.getObservationSizePerLink(), predictedMeasurement);
+         feetMeasurements.get(i).get(measurementModels.get(i).getIsFootInContact(), i * measurementSizePerLink, predictedMeasurement);
       }
 
       // return the predicted measurement
@@ -570,12 +468,11 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       // make sure to call zero, as the compute process model stuff has a bunch of add operators.
       AMatrix.zero();
       int offset = 0;
-      ProcessModel.computeProcessJacobian(baseProcessState, estimatorDT, offset, AMatrix);
 
-      for (int i = 0; i < feetIMUs.size(); i++)
+      for (int i = 0; i < feetIMUs.size() + 1; i++)
       {
-         offset += OdometryIndexHelper.getStateSizePerLink();
-         ProcessModel.computeProcessJacobian(feetProcessState.get(i), estimatorDT, offset, AMatrix);
+         processModels.get(i).computeProcessJacobian(baseProcessState, estimatorDT, offset, AMatrix);
+         offset += errorSizePerLink;
       }
 
       return AMatrix;
@@ -587,14 +484,14 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       // make sure to call zero, as the compute process model stuff has a bunch of add operators.
       CMatrix.zero();
       int rowOffset = 0;
-      int colOffset = OdometryIndexHelper.getStateSizePerLink();
+      int colOffset = errorSizePerLink;
       for (int i = 0; i < feetIMUs.size(); i++)
       {
          MeasurementModel measurementModel = measurementModels.get(i);
-         measurementModel.computeBaseMeasurementJacobian(basePredictedState, feetPredictedState.get(i), feetMeasurements.get(i), rowOffset, CMatrix);
-         measurementModel.computeFootMeasurementJacobian(basePredictedState, feetPredictedState.get(i), feetMeasurements.get(i), gravityVector, rowOffset, colOffset, CMatrix);
-         rowOffset += OdometryIndexHelper.getObservationSizePerLink();
-         colOffset += OdometryIndexHelper.getStateSizePerLink();
+         measurementModel.computeBaseMeasurementJacobian(basePredictedState, feetPredictedState.get(i), feetSensing.get(i), rowOffset, CMatrix);
+         measurementModel.computeFootMeasurementJacobian(basePredictedState, feetPredictedState.get(i), feetSensing.get(i), gravityVector, rowOffset, colOffset, CMatrix);
+         rowOffset += measurementSizePerLink;
+         colOffset += errorSizePerLink;
       }
 
       return CMatrix;

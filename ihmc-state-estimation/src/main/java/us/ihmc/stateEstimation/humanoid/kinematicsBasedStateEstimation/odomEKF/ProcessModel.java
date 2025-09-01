@@ -7,12 +7,14 @@ import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryKalmanFilter.StateVariables;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+
+import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryIndexHelper.*;
 
 class ProcessModel
 {
    private static final DMatrixRMaj eye3x3 = CommonOps_DDRM.identity(3);
+   private final DMatrixRMaj deltaT;
 
    // State providers
    private final StateVariables currentState;
@@ -25,6 +27,9 @@ class ProcessModel
    private final Vector3D integratedVelocity = new Vector3D();
    private final Vector3D unbiasedAcceleration = new Vector3D();
    private final Quaternion integratedRotation = new Quaternion();
+   private final DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj skewMatrix = new DMatrixRMaj(3, 3);
+
 
    public ProcessModel(StateVariables processState,
                        StateVariables predictedState,
@@ -37,6 +42,9 @@ class ProcessModel
       this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
       this.gravityVector = gravityVector;
       this.estimatorDt = estimatorDt;
+
+      deltaT = new DMatrixRMaj(eye3x3);
+      CommonOps_DDRM.scale(estimatorDt, deltaT);
    }
 
    public void update()
@@ -69,55 +77,39 @@ class ProcessModel
    /**
     * This is equation 39
     */
-   public static void computeProcessJacobian(StateVariables stateVariables, double estimateDT, int offset, DMatrixRMaj jacobianToPack)
+   public void computeProcessJacobian(StateVariables stateVariables, double estimateDT, int offset, DMatrixRMaj jacobianToPack)
    {
-      // Do the partial derivative with respect to the base position state
-      int rowStart = offset + OdometryIndexHelper.getStatePositionIndex();
-      CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + OdometryIndexHelper.getStatePositionIndex());
-      MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateVelocityIndex(), eye3x3, 0, 0, 3, 3, estimateDT);
+      // First row. Partial derivative with respect to the base position state
+      // p_k+1 = p_k + v_k deltaT
+      int rowStart = offset + errorTranslationIndex;
+      CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + errorTranslationIndex);
+      CommonOps_DDRM.insert(deltaT, jacobianToPack, rowStart, offset + errorLinearVelocityIndex);
 
-      // Do the partial derivative with respect to the base velocity state FIXME lots of garbage
-      rowStart = offset + OdometryIndexHelper.getStateVelocityIndex();
-      CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateVelocityIndex());
+      // Second row. Partial derivative with respect to the base velocity state
+      // v_k+1 = v_k + deltaT * (R * a - g)
+      rowStart = offset + errorLinearVelocityIndex;
+      CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + errorLinearVelocityIndex);
 
-      DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
-      DMatrixRMaj skewMatrix = new DMatrixRMaj(3, 3);
       OdometryTools.toRotationMatrix(stateVariables.orientation, rotationMatrix);
       OdometryTools.toSkewSymmetricMatrix(stateVariables.unbiasedAccel, skewMatrix);
-      MatrixTools.multAddBlock(-estimateDT, rotationMatrix, skewMatrix, jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateOrientationIndex());
+      MatrixTools.multAddBlock(-estimateDT, rotationMatrix, skewMatrix, jacobianToPack, rowStart, offset + errorOrientationIndex);
 
       if (OdometryKalmanFilter.includeBias)
-         MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateGyroBiasIndex(), rotationMatrix, 0, 0, 3, 3, -estimateDT);
+         MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + errorAccelBiasIndex, rotationMatrix, 0, 0, 3, 3, -estimateDT);
 
-      // Do the partial derivative with respect to the orientation state
-      rowStart = offset + OdometryIndexHelper.getStateOrientationIndex();
+      // Third row. Partial derivative with respect to the orientation state
+      rowStart = offset + errorOrientationIndex;
       OdometryTools.toSkewSymmetricMatrix(stateVariables.unbiasedGyro, skewMatrix);
-      MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateOrientationIndex(), rotationMatrix, 0, 0, 3, 3, -estimateDT);
+      CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + errorOrientationIndex);
+      MatrixTools.addMatrixBlock(jacobianToPack, rowStart, offset + errorOrientationIndex, skewMatrix, 0, 0, 3, 3, -estimateDT);
       if (OdometryKalmanFilter.includeBias)
       {
-         MatrixTools.addMatrixBlock(jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateOrientationIndex(), eye3x3, 0, 0, 3, 3, 1.0);
-         MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + OdometryIndexHelper.getStateAccelerationBiasIndex(), eye3x3, 0, 0, 3, 3, -estimateDT);
+         MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + errorGyroBiasIndex, deltaT, 0, 0, 3, 3, -1.0);
       }
 
-      // Do the partial derivative with respect to the acceleration bias state
-      MatrixTools.setMatrixBlock(jacobianToPack,
-                                 offset + OdometryIndexHelper.getStateAccelerationBiasIndex(),
-                                 offset + OdometryIndexHelper.getStateAccelerationBiasIndex(),
-                                 eye3x3,
-                                 0,
-                                 0,
-                                 3,
-                                 3,
-                                 1.0);
-      // Do the partial derivative with respect to the gyro bias state
-      MatrixTools.setMatrixBlock(jacobianToPack,
-                                 offset + OdometryIndexHelper.getStateGyroBiasIndex(),
-                                 offset + OdometryIndexHelper.getStateGyroBiasIndex(),
-                                 eye3x3,
-                                 0,
-                                 0,
-                                 3,
-                                 3,
-                                 1.0);
+      // Fourth row. Partial derivative with respect to the acceleration bias state
+      CommonOps_DDRM.insert(eye3x3, jacobianToPack, offset + errorAccelBiasIndex, offset + errorAccelBiasIndex);
+      // Fifth row. Partial derivative with respect to the gyro bias state
+      CommonOps_DDRM.insert(eye3x3, jacobianToPack, offset + errorGyroBiasIndex, offset + errorGyroBiasIndex);
    }
 }

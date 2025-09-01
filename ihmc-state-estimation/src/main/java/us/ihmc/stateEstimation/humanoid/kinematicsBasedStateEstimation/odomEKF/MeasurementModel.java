@@ -7,10 +7,7 @@ import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryKalmanFilter.MeasuredVariables;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryKalmanFilter.StateVariables;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
-import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -23,15 +20,11 @@ class MeasurementModel
 
    private final StateVariables baseState;
    private final StateVariables footState;
-   private final MeasuredVariables footMeasurements;
+   private final SensedVariables footSensing;
+   private final MeasurementVariables predictedMeasurements;
    private final FrameVector3DReadOnly gravityVector;
 
    // State variables
-   public final YoVector3D footPredictedRelativePosition;
-   public final YoVector3D footPredictedRelativeOrientationError;
-   public final YoVector3D footPredictedLinearVelocityError;
-   public final YoVector3D footPredictedLinearVelocity;
-   public final YoVector3D footPredictedGravityVector;
    public final YoQuaternion footOrientationInBaseFrame;
 
    public final YoBoolean isInContact;
@@ -39,27 +32,31 @@ class MeasurementModel
 
    // Temp variables
    private final Quaternion footOrientationError = new Quaternion();
+   private final Vector3D positionError = new Vector3D();
    private final Vector3D velocityError = new Vector3D();
+   private final Vector3D tempVector = new Vector3D();
+   private final DMatrixRMaj rotationMatrixTranspose = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj skewMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj left = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj right = new DMatrixRMaj(3, 3);
+   private final Quaternion tempRotation = new Quaternion();
 
    public MeasurementModel(String prefix,
                            StateVariables baseState,
                            StateVariables footState,
-                           MeasuredVariables footMeasurements,
+                           SensedVariables footSensing,
+                           MeasurementVariables predictedMeasurement,
                            FrameVector3DReadOnly gravityVector,
                            DoubleProvider contactThreshold,
                            YoRegistry registry)
    {
       this.baseState = baseState;
       this.footState = footState;
-      this.footMeasurements = footMeasurements;
+      this.footSensing = footSensing;
+      this.predictedMeasurements = predictedMeasurement;
       this.gravityVector = gravityVector;
       this.contactThreshold = contactThreshold;
 
-      footPredictedRelativePosition = new YoVector3D(prefix + "PredictedRelativePosition", registry);
-      footPredictedRelativeOrientationError = new YoVector3D(prefix + "PredictedRelativeOrientationError", registry);
-      footPredictedLinearVelocityError = new YoVector3D(prefix + "PredictedLinearVelocityError", registry);
-      footPredictedLinearVelocity = new YoVector3D(prefix + "PredictedLinearVelocity", registry);
-      footPredictedGravityVector = new YoVector3D(prefix + "PredictedAccelMeasure", registry);
       footOrientationInBaseFrame = new YoQuaternion(prefix + "OrientationInBaseFrame", registry);
       isInContact = new YoBoolean(prefix + "IsInContact", registry);
    }
@@ -69,66 +66,58 @@ class MeasurementModel
     */
    public void update(DMatrixRMaj footCovariance)
    {
-      isInContact.set(isFootInContact(footCovariance));
+      isInContact.set(computeIsFootInContact(footCovariance));
 
       // First row. Update the predicted foot position of the foot relative to the base in the base frame
-      footPredictedRelativePosition.sub(footState.translation, baseState.translation);
-      baseState.orientation.transform(footPredictedRelativePosition); // FIXME is this right? transforms do more operations than I think is expected
+      predictedMeasurements.relativePosition.sub(footState.translation, baseState.translation);
+      baseState.orientation.transform(predictedMeasurements.relativePosition); // FIXME is this right? transforms do more operations than I think is expected
 
       // Update the predicted foot orientation of the foot relative to the base in the base frame
       QuaternionTools.multiplyConjugateLeft(baseState.orientation, footState.orientation, footOrientationInBaseFrame);
 
       // Compute the error between the predicted and measured foot orientation
-      QuaternionTools.multiplyConjugateLeft(footMeasurements.orientationMeasurement, footOrientationInBaseFrame, footOrientationError);
-      footOrientationError.getRotationVector(footPredictedRelativeOrientationError);
+      QuaternionTools.multiplyConjugateLeft(footSensing.orientationMeasurement, footOrientationInBaseFrame, footOrientationError);
+      footOrientationError.getRotationVector(predictedMeasurements.relativeOrientationError);
 
       // Third row. Compute the linear velocity error in the base frame
       velocityError.sub(baseState.linearVelocity, footState.linearVelocity);
       baseState.orientation.inverseTransform(velocityError);
 
-      footPredictedLinearVelocityError.cross(baseState.unbiasedGyro, footMeasurements.positionMeasurement);
-      footPredictedLinearVelocityError.scale(-1.0);
-      footPredictedLinearVelocityError.sub(velocityError);
-      footPredictedLinearVelocityError.add(footMeasurements.linearVelocity);
+      predictedMeasurements.relativeLinearVelocityError.cross(baseState.unbiasedGyro, footSensing.positionMeasurement);
+      predictedMeasurements.relativeLinearVelocityError.scale(-1.0);
+      predictedMeasurements.relativeLinearVelocityError.sub(velocityError);
+      predictedMeasurements.relativeLinearVelocityError.add(footSensing.linearVelocity);
 
       if (!isInContact.getBooleanValue())
          return;
 
       // Fourth row. Set the predicted linear velocity
-      footPredictedLinearVelocity.set(footState.linearVelocity);
+      predictedMeasurements.contactVelocity.set(footState.linearVelocity);
 
       // Fifth row. Set the predicted gravity vector
-      footState.orientation.transform(gravityVector, footPredictedGravityVector);
+      footState.orientation.transform(gravityVector, predictedMeasurements.accelMeasure);
       if (OdometryKalmanFilter.includeBias)
-         footPredictedGravityVector.add(footState.accelBias);
+         predictedMeasurements.accelMeasure.add(footState.accelBias);
    }
 
    private final DMatrixRMaj vector = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj tempVector = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj tempDVector = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj tempScalar = new DMatrixRMaj(3, 1);
 
-   private boolean isFootInContact(DMatrixRMaj footCovariance)
+   private boolean computeIsFootInContact(DMatrixRMaj footCovariance)
    {
       footState.translation.get(vector);
 
-      CommonOps_DDRM.mult(footCovariance, vector, tempVector);
-      CommonOps_DDRM.multTransA(vector, tempVector, tempScalar);
+      CommonOps_DDRM.mult(footCovariance, vector, tempDVector);
+      CommonOps_DDRM.multTransA(vector, tempDVector, tempScalar);
 
       // tests the mahalonobis distance of the foot velocity being below a certain threshold.
       return tempScalar.get(0, 0) < contactThreshold.getValue();
    }
 
-   public void get(int start, DMatrixRMaj measurementToPack)
+   public boolean getIsFootInContact()
    {
-      footPredictedRelativePosition.get(start + measurementRelativeTranslationIndex, measurementToPack);
-      footPredictedRelativeOrientationError.get(start + measurementRelativeOrientationErrorIndex, measurementToPack);
-      footPredictedLinearVelocityError.get(start + measurementRelativeVelocityIndex, measurementToPack);
-
-      if (isInContact.getBooleanValue())
-         return;
-
-      footPredictedLinearVelocity.get(start + measurementContactVelocityIndex, measurementToPack);
-      footPredictedGravityVector.get(start + measurementAccelIndex, measurementToPack);
+      return isInContact.getBooleanValue();
    }
 
    /**
@@ -136,52 +125,45 @@ class MeasurementModel
     */
    public void computeBaseMeasurementJacobian(StateVariables baseState,
                                                StateVariables footState,
-                                               MeasuredVariables footMeasurements,
+                                               SensedVariables footMeasurements,
                                                int rowOffset,
                                                DMatrixRMaj jacobianToPack)
    {
-      // FIXME garbage
-      DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
-      DMatrixRMaj rotationMatrixTranspose = new DMatrixRMaj(3, 3);
-      OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrix);
-      CommonOps_DDRM.transpose(rotationMatrix, rotationMatrixTranspose);
+      OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrixTranspose);
+      CommonOps_DDRM.transpose(rotationMatrixTranspose);
 
-      Vector3D footPositionError = new Vector3D();
-      Vector3D footVelocityError = new Vector3D();
-      footPositionError.sub(footState.translation, baseState.translation);
-      footVelocityError.sub(footState.linearVelocity, baseState.linearVelocity);
-      baseState.orientation.inverseTransform(footPositionError);
-      baseState.orientation.inverseTransform(footVelocityError);
 
-      DMatrixRMaj skewMatrix = new DMatrixRMaj(3, 3);
-      OdometryTools.toSkewSymmetricMatrix(footPositionError, skewMatrix);
+      positionError.sub(footState.translation, baseState.translation);
+      velocityError.sub(footState.linearVelocity, baseState.linearVelocity);
+      baseState.orientation.inverseTransform(positionError);
+      baseState.orientation.inverseTransform(velocityError);
 
-      // First row
+      OdometryTools.toSkewSymmetricMatrix(positionError, skewMatrix);
+
+      // First row. Partial of relative foot position w.r.t. the base state
       int row = rowOffset + measurementRelativeTranslationIndex;
-      MatrixTools.setMatrixBlock(jacobianToPack, row, stateTranslationIndex, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
-      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, stateOrientationIndex);
+      MatrixTools.setMatrixBlock(jacobianToPack, row, errorTranslationIndex, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
+      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, errorOrientationIndex);
 
-      // Second row
+      // Second row. Partial of relative foot orientation error w.r.t. the base state
       row = rowOffset + measurementRelativeOrientationErrorIndex;
-      DMatrixRMaj left = new DMatrixRMaj(3, 3);
-      DMatrixRMaj right = new DMatrixRMaj(3, 3);
-      Quaternion orientation = new Quaternion(footState.orientation);
-      orientation.multiplyConjugateThis(baseState.orientation);
-      OdometryKalmanFilter.l3Operator(orientation, left);
+      tempRotation.set(footState.orientation);
+      tempRotation.multiplyConjugateThis(baseState.orientation);
+      OdometryKalmanFilter.l3Operator(tempRotation, left);
       OdometryKalmanFilter.r3Operator(footMeasurements.orientationMeasurement, right);
-      MatrixTools.multAddBlock(-1.0, left, right, jacobianToPack, row, stateOrientationIndex);
+      MatrixTools.multAddBlock(-1.0, left, right, jacobianToPack, row, errorOrientationIndex);
 
-      // Third row
+      // Third row. Partial of relative foot velocity error w.r.t. the base state
       row = rowOffset + measurementRelativeVelocityIndex;
-      OdometryTools.toSkewSymmetricMatrix(footVelocityError, skewMatrix);
+      OdometryTools.toSkewSymmetricMatrix(velocityError, skewMatrix);
 
-      MatrixTools.setMatrixBlock(jacobianToPack, row, stateLinearVelocityIndex, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
-      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, stateOrientationIndex);
+      MatrixTools.setMatrixBlock(jacobianToPack, row, errorLinearVelocityIndex, rotationMatrixTranspose, 0, 0, 3, 3, -1.0);
+      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, errorOrientationIndex);
 
       if (OdometryKalmanFilter.includeBias)
       {
          OdometryTools.toSkewSymmetricMatrix(footMeasurements.positionMeasurement, skewMatrix);
-         MatrixTools.setMatrixBlock(jacobianToPack, row, stateGyroBiasIndex, skewMatrix, 0, 0, 3, 3, -1.0);
+         MatrixTools.setMatrixBlock(jacobianToPack, row, errorGyroBiasIndex, skewMatrix, 0, 0, 3, 3, -1.0);
       }
    }
 
@@ -190,58 +172,54 @@ class MeasurementModel
     */
    public void computeFootMeasurementJacobian(StateVariables baseState,
                                                StateVariables footState,
-                                               MeasuredVariables footMeasurements,
+                                               SensedVariables footMeasurements,
                                                FrameVector3DReadOnly gravityVector,
                                                int rowOffset,
                                                int colOffset,
                                                DMatrixRMaj jacobianToPack)
    {
-      // FIXME garbage
-      DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
-      OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrix);
-      CommonOps_DDRM.transpose(rotationMatrix);
+      OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrixTranspose);
+      CommonOps_DDRM.transpose(rotationMatrixTranspose);
 
-      Vector3D footPositionError = new Vector3D();
-      Vector3D footVelocityError = new Vector3D();
-      footPositionError.sub(footState.translation, baseState.translation);
-      footVelocityError.sub(footState.linearVelocity, baseState.linearVelocity);
-      baseState.orientation.inverseTransform(footPositionError);
-      baseState.orientation.inverseTransform(footVelocityError);
+      positionError.sub(footState.translation, baseState.translation);
+      velocityError.sub(footState.linearVelocity, baseState.linearVelocity);
+      baseState.orientation.inverseTransform(positionError);
+      baseState.orientation.inverseTransform(velocityError);
 
-      DMatrixRMaj skewMatrix = new DMatrixRMaj(3, 3);
-      OdometryTools.toSkewSymmetricMatrix(footPositionError, skewMatrix);
+      OdometryTools.toSkewSymmetricMatrix(positionError, skewMatrix);
 
-      // First row
-      CommonOps_DDRM.insert(rotationMatrix, jacobianToPack, rowOffset, colOffset);
+      // First row. Partial of relative contact position w.r.t. foot state
+      int row = rowOffset + measurementRelativeTranslationIndex;
+      CommonOps_DDRM.insert(rotationMatrixTranspose, jacobianToPack, row, colOffset + errorTranslationIndex);
 
-      // Second row
-      rowOffset += 3;
-      DMatrixRMaj left = new DMatrixRMaj(3, 3);
-      Quaternion orientation = new Quaternion(footMeasurements.orientationMeasurement);
-      orientation.multiplyConjugateOther(baseState.orientation);
-      orientation.multiply(footState.orientation);
-      OdometryKalmanFilter.l3Operator(orientation, left);
-      CommonOps_DDRM.insert(left, jacobianToPack, rowOffset, colOffset + 6);
+      // Second row. Partial of relative orientation error w.r.t. foot state
+      row = rowOffset + measurementRelativeOrientationErrorIndex;
+      tempRotation.set(footMeasurements.orientationMeasurement);
+      tempRotation.multiplyConjugateOther(baseState.orientation);
+      tempRotation.multiply(footState.orientation);
+      OdometryKalmanFilter.l3Operator(tempRotation, left);
+      CommonOps_DDRM.insert(left, jacobianToPack, row, colOffset + errorOrientationIndex);
 
-      // Third row
-      rowOffset += 3;
-      CommonOps_DDRM.insert(rotationMatrix, jacobianToPack, rowOffset, colOffset + 3);
+      // Third row. Partial of relative velocity error w.r.t. foot state
+      row = rowOffset + measurementRelativeVelocityIndex;
+      CommonOps_DDRM.insert(rotationMatrixTranspose, jacobianToPack, row, colOffset + errorLinearVelocityIndex);
 
-      if (isInContact.getBooleanValue())
+      if (!isInContact.getBooleanValue())
          return;
 
-      // Fourth row
-      rowOffset += 3;
-      CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowOffset, colOffset + 3);
+      // Fourth row. Partial of contact velocity w.r.t. foot state
+      // The contact velocity is directly the foot velocity when it's in contact.
+      row = rowOffset + measurementContactVelocityIndex;
+      CommonOps_DDRM.insert(eye3x3, jacobianToPack, row, colOffset + errorLinearVelocityIndex);
 
-      // Fifth row
-      rowOffset += 3;
-      Vector3D gravity = new Vector3D(gravityVector);
-      footState.orientation.inverseTransform(gravity);
-      OdometryTools.toSkewSymmetricMatrix(gravityVector, skewMatrix);
-      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, rowOffset, colOffset + 6);
+      // Fifth row. Partial of contact acceleration w.r.t. foot state
+      row = rowOffset + measurementAccelIndex;
+      tempVector.set(gravityVector);
+      footState.orientation.inverseTransform(tempVector);
+      OdometryTools.toSkewSymmetricMatrix(tempVector, skewMatrix);
+      CommonOps_DDRM.insert(skewMatrix, jacobianToPack, row, colOffset + errorOrientationIndex);
 
       if (OdometryKalmanFilter.includeBias)
-         CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowOffset, colOffset + 9);
+         CommonOps_DDRM.insert(eye3x3, jacobianToPack, row, colOffset + errorAccelBiasIndex);
    }
 }
