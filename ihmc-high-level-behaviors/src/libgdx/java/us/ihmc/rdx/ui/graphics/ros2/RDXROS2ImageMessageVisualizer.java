@@ -7,6 +7,8 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
@@ -96,12 +98,31 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
          synchronized (imageMessageSwapReference)
          {
             imageMessageB = imageMessageSwapReference.getForThreadTwo();
+            PixelFormat imagePixelFormat = PixelFormat.fromImageMessage(imageMessageB);
 
-            if (imageMessageB.getCompressionType() == CompressionType.UNCOMPRESSED.toByte())
+            /*
+             * Depth images can't be directly converted to RGBA, so we must first convert it into an 8 bit gray image by clamping the values,
+             * and then convert from gray to RGBA. This also helps "brighten" the depth image when the range of depth values is small.
+             * This is purely for visualization, and the resulting RGBA image cannot be used to measure depth.
+             */
+            if (imagePixelFormat == PixelFormat.GRAY16)
             {
-               RawImage rawImage = decoder.decodeMessageCPU(imageMessageB);
-               opencv_imgproc.cvtColor(rawImage.getCpuImageMat(), decompressedImage, opencv_imgproc.COLOR_RGB2BGRA);
-               rawImage.release();
+               decoder.decodeMessage(imageMessageB, decompressedImage);
+               OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, decompressedImage, 0.0, 255.0);
+               OpenCVTools.convertGrayToRGBA(decompressedImage, decompressedImage);
+            }
+            else
+            {
+               if (imageMessageB.getCompressionType() == CompressionType.UNCOMPRESSED.toByte())
+               {
+                  RawImage rawImage = decoder.decodeMessageCPU(imageMessageB);
+                  opencv_imgproc.cvtColor(rawImage.getCpuImageMat(), decompressedImage, opencv_imgproc.COLOR_BGR2RGBA);
+                  rawImage.release();
+               }
+               else
+               {
+                  decoder.decodeMessageToRGBA(imageMessageB, decompressedImage);
+               }
             }
          }
 
