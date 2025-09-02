@@ -116,7 +116,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
                if (imageMessageB.getCompressionType() == CompressionType.UNCOMPRESSED.toByte())
                {
                   RawImage rawImage = decoder.decodeMessageCPU(imageMessageB);
-                  opencv_imgproc.cvtColor(rawImage.getCpuImageMat(), decompressedImage, opencv_imgproc.COLOR_RGB2BGRA);
+                  opencv_imgproc.cvtColor(rawImage.getCpuImageMat(), decompressedImage, opencv_imgproc.COLOR_BGR2RGBA);
                   rawImage.release();
                }
                else
