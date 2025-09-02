@@ -14,7 +14,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final RigidBodyTransform ZED_2I_TO_CHEST_TRANSFORM = new RigidBodyTransform();
    static
    {
-      ZED_2I_TO_CHEST_TRANSFORM.getTranslation().set(0.13251,  -0.00116,  0.18667 );
+      ZED_2I_TO_CHEST_TRANSFORM.getTranslation().set(0.204,  0.0,  0.574);
       EuclidCoreMissingTools.setYawPitchRollDegrees(ZED_2I_TO_CHEST_TRANSFORM.getRotation(), 0.0, 42.76840, 0.0);
    }
 
