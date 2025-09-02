@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
@@ -15,6 +16,8 @@ class ProcessModel
 {
    private static final DMatrixRMaj eye3x3 = CommonOps_DDRM.identity(3);
    private final DMatrixRMaj deltaT;
+
+   private static final boolean usePredictedInJacobian = true;
 
    // State providers
    private final StateVariables currentState;
@@ -77,8 +80,9 @@ class ProcessModel
    /**
     * This is equation 39
     */
-   public void computeProcessJacobian(StateVariables stateVariables, double estimateDT, int offset, DMatrixRMaj jacobianToPack)
+   public void computeProcessJacobian(int offset, DMatrixRMaj jacobianToPack)
    {
+      StateVariables stateVariables = OdometryKalmanFilter.usePredictedStateInJacobian ? predictedState : currentState;
       // First row. Partial derivative with respect to the base position state
       // p_k+1 = p_k + v_k deltaT
       int rowStart = offset + errorTranslationIndex;
@@ -90,18 +94,19 @@ class ProcessModel
       rowStart = offset + errorLinearVelocityIndex;
       CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + errorLinearVelocityIndex);
 
+
       OdometryTools.toRotationMatrix(stateVariables.orientation, rotationMatrix);
       OdometryTools.toSkewSymmetricMatrix(stateVariables.unbiasedAccel, skewMatrix);
-      MatrixTools.multAddBlock(-estimateDT, rotationMatrix, skewMatrix, jacobianToPack, rowStart, offset + errorOrientationIndex);
+      MatrixTools.multAddBlock(-estimatorDt, rotationMatrix, skewMatrix, jacobianToPack, rowStart, offset + errorOrientationIndex);
 
       if (OdometryKalmanFilter.includeBias)
-         MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + errorAccelBiasIndex, rotationMatrix, 0, 0, 3, 3, -estimateDT);
+         MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + errorAccelBiasIndex, rotationMatrix, 0, 0, 3, 3, -estimatorDt);
 
       // Third row. Partial derivative with respect to the orientation state
       rowStart = offset + errorOrientationIndex;
       OdometryTools.toSkewSymmetricMatrix(stateVariables.unbiasedGyro, skewMatrix);
       CommonOps_DDRM.insert(eye3x3, jacobianToPack, rowStart, offset + errorOrientationIndex);
-      MatrixTools.addMatrixBlock(jacobianToPack, rowStart, offset + errorOrientationIndex, skewMatrix, 0, 0, 3, 3, -estimateDT);
+      MatrixTools.addMatrixBlock(jacobianToPack, rowStart, offset + errorOrientationIndex, skewMatrix, 0, 0, 3, 3, -estimatorDt);
       if (OdometryKalmanFilter.includeBias)
       {
          MatrixTools.setMatrixBlock(jacobianToPack, rowStart, offset + errorGyroBiasIndex, deltaT, 0, 0, 3, 3, -1.0);

@@ -37,8 +37,11 @@ class MeasurementModel
    private final Vector3D tempVector = new Vector3D();
    private final DMatrixRMaj rotationMatrixTranspose = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj skewMatrix = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj left = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj right = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj left3x3 = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj left = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj right = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj lr = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj lr3x3 = new DMatrixRMaj(3, 3);
    private final Quaternion tempRotation = new Quaternion();
 
    public MeasurementModel(String prefix,
@@ -123,11 +126,7 @@ class MeasurementModel
    /**
     * This is equation 41
     */
-   public void computeBaseMeasurementJacobian(StateVariables baseState,
-                                               StateVariables footState,
-                                               SensedVariables footMeasurements,
-                                               int rowOffset,
-                                               DMatrixRMaj jacobianToPack)
+   public void computeBaseMeasurementJacobian(int rowOffset, DMatrixRMaj jacobianToPack)
    {
       OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrixTranspose);
       CommonOps_DDRM.transpose(rotationMatrixTranspose);
@@ -147,11 +146,11 @@ class MeasurementModel
 
       // Second row. Partial of relative foot orientation error w.r.t. the base state
       row = rowOffset + measurementRelativeOrientationErrorIndex;
-      tempRotation.set(footState.orientation);
-      tempRotation.multiplyConjugateThis(baseState.orientation);
-      OdometryKalmanFilter.l3Operator(tempRotation, left);
-      OdometryKalmanFilter.r3Operator(footMeasurements.orientationMeasurement, right);
-      MatrixTools.multAddBlock(-1.0, left, right, jacobianToPack, row, errorOrientationIndex);
+      QuaternionTools.multiplyConjugateLeft(footState.orientation, baseState.orientation, tempRotation);
+      OdometryTools.lOperator(tempRotation, left);
+      OdometryTools.rOperator(footSensing.orientationMeasurement, right);
+      CommonOps_DDRM.mult(left, right, lr);
+      MatrixTools.setMatrixBlock(jacobianToPack, row, errorOrientationIndex, lr, 1, 1, 3, 3, -1.0);
 
       // Third row. Partial of relative foot velocity error w.r.t. the base state
       row = rowOffset + measurementRelativeVelocityIndex;
@@ -162,7 +161,7 @@ class MeasurementModel
 
       if (OdometryKalmanFilter.includeBias)
       {
-         OdometryTools.toSkewSymmetricMatrix(footMeasurements.positionMeasurement, skewMatrix);
+         OdometryTools.toSkewSymmetricMatrix(footSensing.positionMeasurement, skewMatrix);
          MatrixTools.setMatrixBlock(jacobianToPack, row, errorGyroBiasIndex, skewMatrix, 0, 0, 3, 3, -1.0);
       }
    }
@@ -170,13 +169,7 @@ class MeasurementModel
    /**
     * This is equation 42
     */
-   public void computeFootMeasurementJacobian(StateVariables baseState,
-                                               StateVariables footState,
-                                               SensedVariables footMeasurements,
-                                               FrameVector3DReadOnly gravityVector,
-                                               int rowOffset,
-                                               int colOffset,
-                                               DMatrixRMaj jacobianToPack)
+   public void computeFootMeasurementJacobian(int rowOffset, int colOffset, DMatrixRMaj jacobianToPack)
    {
       OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrixTranspose);
       CommonOps_DDRM.transpose(rotationMatrixTranspose);
@@ -194,11 +187,11 @@ class MeasurementModel
 
       // Second row. Partial of relative orientation error w.r.t. foot state
       row = rowOffset + measurementRelativeOrientationErrorIndex;
-      tempRotation.set(footMeasurements.orientationMeasurement);
+      tempRotation.set(footSensing.orientationMeasurement);
       tempRotation.multiplyConjugateOther(baseState.orientation);
       tempRotation.multiply(footState.orientation);
-      OdometryKalmanFilter.l3Operator(tempRotation, left);
-      CommonOps_DDRM.insert(left, jacobianToPack, row, colOffset + errorOrientationIndex);
+      OdometryTools.l3Operator(tempRotation, left3x3);
+      CommonOps_DDRM.insert(left3x3, jacobianToPack, row, colOffset + errorOrientationIndex);
 
       // Third row. Partial of relative velocity error w.r.t. foot state
       row = rowOffset + measurementRelativeVelocityIndex;

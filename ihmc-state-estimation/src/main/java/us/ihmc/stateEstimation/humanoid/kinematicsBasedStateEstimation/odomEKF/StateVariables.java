@@ -47,7 +47,7 @@ class StateVariables
       gyroBias.setToZero();
    }
 
-   public void set(int start, DMatrixRMaj state, SensedVariables measuredVariables)
+   public void set(int start, DMatrixRMaj state, SensedVariables sensedVariables)
    {
       translation.set(start + stateTranslationIndex, state);
       linearVelocity.set(start + stateLinearVelocityIndex, state);
@@ -57,13 +57,13 @@ class StateVariables
 
       if (OdometryKalmanFilter.includeBias)
       {
-         unbiasedAccel.sub(measuredVariables.accelMeasurement, accelBias);
-         unbiasedGyro.sub(measuredVariables.gyroMeasurement, gyroBias);
+         unbiasedAccel.sub(sensedVariables.accelMeasurement, accelBias);
+         unbiasedGyro.sub(sensedVariables.gyroMeasurement, gyroBias);
       }
       else
       {
-         unbiasedAccel.set(measuredVariables.accelMeasurement);
-         unbiasedGyro.set(measuredVariables.gyroMeasurement);
+         unbiasedAccel.set(sensedVariables.accelMeasurement);
+         unbiasedGyro.set(sensedVariables.gyroMeasurement);
       }
    }
 

@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -39,6 +38,7 @@ import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.od
 public class OdometryKalmanFilter extends ExtendedKalmanFilter
 {
    static final boolean includeBias = false;
+   static final boolean usePredictedStateInJacobian = true;
 
    // Constants and providers
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -471,7 +471,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
 
       for (int i = 0; i < feetIMUs.size() + 1; i++)
       {
-         processModels.get(i).computeProcessJacobian(baseProcessState, estimatorDT, offset, AMatrix);
+         processModels.get(i).computeProcessJacobian(offset, AMatrix);
          offset += errorSizePerLink;
       }
 
@@ -488,25 +488,12 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       for (int i = 0; i < feetIMUs.size(); i++)
       {
          MeasurementModel measurementModel = measurementModels.get(i);
-         measurementModel.computeBaseMeasurementJacobian(basePredictedState, feetPredictedState.get(i), feetSensing.get(i), rowOffset, CMatrix);
-         measurementModel.computeFootMeasurementJacobian(basePredictedState, feetPredictedState.get(i), feetSensing.get(i), gravityVector, rowOffset, colOffset, CMatrix);
+         measurementModel.computeBaseMeasurementJacobian(rowOffset, CMatrix);
+         measurementModel.computeFootMeasurementJacobian(rowOffset, colOffset, CMatrix);
          rowOffset += measurementSizePerLink;
          colOffset += errorSizePerLink;
       }
 
       return CMatrix;
-   }
-
-   static void l3Operator(QuaternionReadOnly quaternion, DMatrixRMaj matrixToPack)
-   {
-      OdometryTools.toSkewSymmetricMatrix(quaternion.getX(), quaternion.getY(), quaternion.getZ(), matrixToPack);
-      CommonOps_DDRM.addEquals(matrixToPack, quaternion.getS(), eye3x3);
-   }
-
-   static void r3Operator(QuaternionReadOnly quaternion, DMatrixRMaj matrixToPack)
-   {
-      OdometryTools.toSkewSymmetricMatrix(quaternion.getX(), quaternion.getY(), quaternion.getZ(), matrixToPack);
-      CommonOps_DDRM.scale(-1.0, matrixToPack);
-      CommonOps_DDRM.addEquals(matrixToPack, quaternion.getS(), eye3x3);
    }
 }
