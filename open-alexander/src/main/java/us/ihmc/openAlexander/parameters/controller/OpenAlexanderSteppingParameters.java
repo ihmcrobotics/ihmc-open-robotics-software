@@ -3,11 +3,11 @@ package us.ihmc.openAlexander.parameters.controller;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 
-public class AlexanderSteppingParameters implements SteppingParameters
+public class OpenAlexanderSteppingParameters implements SteppingParameters
 {
    protected final AlexanderPhysicalProperties alexanderPhysicalProperties;
 
-   public AlexanderSteppingParameters(AlexanderPhysicalProperties alexanderPhysicalProperties)
+   public OpenAlexanderSteppingParameters(AlexanderPhysicalProperties alexanderPhysicalProperties)
    {
       this.alexanderPhysicalProperties = alexanderPhysicalProperties;
    }
@@ -34,7 +34,6 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepLength()
    {
-      // TODO Needs tune up.
       return 0.7;
    }
 
@@ -47,7 +46,6 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepWidth()
    {
-      // TODO Needs tune up.
       return 0.8;
    }
 
@@ -75,8 +73,7 @@ public class AlexanderSteppingParameters implements SteppingParameters
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      // TODO Needs tune up.
-      return Math.PI / 4.0;
+      return 0.65;
    }
 
    @Override

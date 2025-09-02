@@ -13,6 +13,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -133,7 +134,7 @@ public class FootstepPathCalculatorModule
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapReference.get());
       TerrainMapData terrainMapData = null;
       if (terrainMapReference.get() != null)
-         terrainMapData = new TerrainMapData(terrainMapReference.get());
+         terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapReference.get());
 
       if (heightMapData == null && terrainMapData == null)
          return;

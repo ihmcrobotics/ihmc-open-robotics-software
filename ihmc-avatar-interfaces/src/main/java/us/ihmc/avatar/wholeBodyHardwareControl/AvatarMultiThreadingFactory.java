@@ -2,6 +2,8 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -41,6 +43,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -67,6 +70,7 @@ public class AvatarMultiThreadingFactory
 
    // Robot model
    private final DRCRobotModel robotModel;
+   private final HumanoidRobotContextDataFactory controllerContextFactory = new HumanoidRobotContextDataFactory();
 
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
@@ -74,8 +78,11 @@ public class AvatarMultiThreadingFactory
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
    public final String IHMC_ROS_CONTROLLER_NODE_NAME;
+   public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
    private final RealtimeROS2Node estimatorRealtimeROS2Node;
    private final RealtimeROS2Node controllerRealtimeROS2Node;
+   private final OptionalFactoryField<RealtimeROS2Node> ikStreamingRealtimeROS2Node = new OptionalFactoryField<>("AvatarIKStreamingROS2Node");
+   private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // The thread factories
    private final AvatarEstimatorThreadFactory estimatorThreadFactory;
@@ -84,7 +91,8 @@ public class AvatarMultiThreadingFactory
    // The threads
    private final RequiredFactoryField<AvatarEstimatorThread> estimatorThread = new RequiredFactoryField<>("AvatarEstimatorThread");
    private final RequiredFactoryField<AvatarControllerThread> controllerThread = new RequiredFactoryField<>("AvatarControllerThread");
-   private final RequiredFactoryField<AvatarStepGeneratorThread> stepGeneratorThread = new RequiredFactoryField<>("AvatarStepGeneratorThread");
+   private final OptionalFactoryField<AvatarStepGeneratorThread> stepGeneratorThread = new OptionalFactoryField<>("AvatarStepGeneratorThread");
+   private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> ikStreamingThread = new OptionalFactoryField<>("AvatarIKStreamingThread");
 
    // Multi-threading manager
    private final RequiredFactoryField<AvatarMultiThreadingManager> threadingManager = new RequiredFactoryField<>("AvatarMultiThreadingManager");
@@ -98,7 +106,6 @@ public class AvatarMultiThreadingFactory
    private final TimestampProvider monotonicTimeProvider;
    private final AvatarAffinityInterface affinity;
    private final boolean createStepGeneratorThread;
-   private final boolean createIKStreamingThread;
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
@@ -111,7 +118,6 @@ public class AvatarMultiThreadingFactory
                                       HighLevelControllerStateFactory freezeStateFactory,
                                       AvatarAffinityInterface affinity,
                                       boolean createStepGeneratorThread,
-                                      boolean createIKStreamingThread,
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       MonotonicTime period,
@@ -127,7 +133,6 @@ public class AvatarMultiThreadingFactory
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.affinity = affinity;
       this.createStepGeneratorThread = createStepGeneratorThread;
-      this.createIKStreamingThread = createIKStreamingThread;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
       this.rootRegistry = registry;
@@ -136,8 +141,7 @@ public class AvatarMultiThreadingFactory
       // Estimator and controller ROS2 nodes
       IHMC_ROS_STATE_ESTIMATOR_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_state_estimator";
       IHMC_ROS_CONTROLLER_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_" + HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME;
-
-      PeriodicThreadSchedulerFactory ros2ThreadFactory;
+      IHMC_ROS_IKSTREAMING_NODE_NAME = robotModel.getSimpleRobotName().toLowerCase() + "_ihmc_ikstreaming";
 
       if (useRealtimeThreads)
          ros2ThreadFactory = new PeriodicRealtimeThreadSchedulerFactory(new PriorityParameters(ROS2_PRIORITY));
@@ -165,6 +169,9 @@ public class AvatarMultiThreadingFactory
    {
       estimatorRealtimeROS2Node.spin();
       controllerRealtimeROS2Node.spin();
+      if (ikStreamingRealtimeROS2Node.hasValue())
+         ikStreamingRealtimeROS2Node.get().spin();
+
       hardwareCommunicationInterface.start();
       threadingManager.get().start();
    }
@@ -179,6 +186,9 @@ public class AvatarMultiThreadingFactory
       System.out.println("Calling stop in the multi-threading factory");
       estimatorRealtimeROS2Node.stopSpinning();
       controllerRealtimeROS2Node.stopSpinning();
+      if (ikStreamingRealtimeROS2Node.hasValue())
+         ikStreamingRealtimeROS2Node.get().stopSpinning();
+
       hardwareCommunicationInterface.stop();
       threadingManager.get().stop();
    }
@@ -193,6 +203,12 @@ public class AvatarMultiThreadingFactory
 
       controllerRealtimeROS2Node.destroy();
       System.out.println("Controller node has been destroyed");
+
+      if (ikStreamingRealtimeROS2Node.hasValue())
+      {
+         ikStreamingRealtimeROS2Node.get().destroy();
+         System.out.println("IK Streaming node has been destroyed");
+      }
 
       hardwareCommunicationInterface.destroy();
       System.out.println("Hardware communication node has been destroyed");
@@ -213,7 +229,6 @@ public class AvatarMultiThreadingFactory
       stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
       estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
 
-      HumanoidRobotContextDataFactory controllerContextFactory = new HumanoidRobotContextDataFactory();
       controllerThread.set(new AvatarControllerThread(robotModel.getSimpleRobotName().toLowerCase(),
                                                       robotModel,
                                                       null,
@@ -226,7 +241,8 @@ public class AvatarMultiThreadingFactory
                                                       false));
 
       // Create step generator thread
-      stepGeneratorThread.set(createStepGeneratorThread(robotModel, controllerThread.get(), controllerContextFactory, controllerFactory));
+      if (createStepGeneratorThread)
+         stepGeneratorThread.set(createStepGeneratorThread(robotModel, controllerThread.get(), controllerContextFactory, controllerFactory));
 
       // Add estimator thread registry as child to the root registry (since estimator thread is essentially our master thread)
       rootRegistry.addChild(estimatorThread.get().getYoRegistry());
@@ -243,6 +259,9 @@ public class AvatarMultiThreadingFactory
       if (createStepGeneratorThread)
          yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
 
+      if (ikStreamingThread.hasValue())
+         yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
+
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
@@ -253,7 +272,9 @@ public class AvatarMultiThreadingFactory
                                                            estimatorThread.get(),
                                                            controllerThread.get(),
                                                            stepGeneratorThread.get(),
-                                                           affinity, masterThreadDt,
+                                                           ikStreamingThread.hasValue() ? ikStreamingThread.get() : null,
+                                                           affinity,
+                                                           masterThreadDt,
                                                            period,
                                                            monotonicTimeProvider,
                                                            useRealtimeThreads,
@@ -409,9 +430,9 @@ public class AvatarMultiThreadingFactory
 
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
-      HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
-                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
-
+//      HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
+//                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
+      HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = null; //TODO fix the yawing issue with environmental constraints
       controllerFactory.setListenToHighLevelStatePackets(true);
 
       JoystickBasedSteppingPluginFactory pluginFactory = new JoystickBasedSteppingPluginFactory();
@@ -454,6 +475,20 @@ public class AvatarMultiThreadingFactory
       }
 
       return stepGeneratorThread;
+   }
+
+   public void addIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
+   {
+      ikStreamingRealtimeROS2Node.set(new ROS2NodeBuilder().buildRealtime(IHMC_ROS_IKSTREAMING_NODE_NAME, ros2ThreadFactory));
+
+      ikStreamingThread.set(new IKStreamingRTPluginFactory().createRTThread(robotModel.getSimpleRobotName(),
+                                                                            ikStreamingRealtimeROS2Node.get(),
+                                                                            controllerFactory.getCommandInputManager(),
+                                                                            controllerFactory.getStatusOutputManager(),
+                                                                            robotModel,
+                                                                            controllerContextFactory,
+                                                                            robotModel.getHumanoidRobotKinematicsCollisionModel(),
+                                                                            ikStreamingParameters));
    }
 
    /**

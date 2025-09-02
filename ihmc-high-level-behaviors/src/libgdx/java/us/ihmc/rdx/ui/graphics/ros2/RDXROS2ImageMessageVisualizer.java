@@ -1,8 +1,11 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
@@ -109,7 +112,18 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
                OpenCVTools.convertGrayToRGBA(decompressedImage, decompressedImage);
             }
             else
-               decoder.decodeMessageToRGBA(imageMessageB, decompressedImage);
+            {
+               if (imageMessageB.getCompressionType() == CompressionType.UNCOMPRESSED.toByte())
+               {
+                  RawImage rawImage = decoder.decodeMessageCPU(imageMessageB);
+                  opencv_imgproc.cvtColor(rawImage.getCpuImageMat(), decompressedImage, opencv_imgproc.COLOR_BGR2RGBA);
+                  rawImage.release();
+               }
+               else
+               {
+                  decoder.decodeMessageToRGBA(imageMessageB, decompressedImage);
+               }
+            }
          }
 
          synchronized (this) // synchronize with the update method

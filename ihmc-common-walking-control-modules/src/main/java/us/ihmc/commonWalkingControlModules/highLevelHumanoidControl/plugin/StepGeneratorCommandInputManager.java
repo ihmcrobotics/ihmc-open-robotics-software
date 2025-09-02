@@ -55,9 +55,6 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicReference<WalkingStatus> previousWalkingStatus = new AtomicReference<>(null);
    private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
    private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
-   private final YoBoolean turnCSG = new YoBoolean("turnOnCSG", registry);
-   private final YoBoolean walkCommandCSG = new YoBoolean("walkCommandCSG", registry);
-
 
    public StepGeneratorCommandInputManager()
    {
@@ -68,6 +65,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
       isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
       isUnitVelocities.set(false);
+
+      // by default, command input manager is not enabled, set enabled only if #update is called
+      commandInputManager.setEnabled(false);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -136,14 +136,8 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void update(double time)
    {
       isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
-//
-//      if (turnCSG.getBooleanValue())
-//      {
-//         ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
-//         walkCommandCSG.addListener(change -> command.setWalk(walkCommandCSG.getBooleanValue()));
-//         walk.set(walkCommandCSG.getBooleanValue());
-//      }
-//
+      commandInputManager.setEnabled(isOpen);
+
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
          ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
@@ -179,6 +173,7 @@ public class StepGeneratorCommandInputManager implements Updatable
       {
          latestHeightMap.set(commandInputManager.pollNewestCommand(HeightMapCommand.class));
       }
+      commandInputManager.clearCommands(HeightMapCommand.class);
 
       // if the robot is standing, or we just finished a step, we should submit the newest regions
       if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
@@ -212,7 +207,10 @@ public class StepGeneratorCommandInputManager implements Updatable
       previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());
 
       if (!isOpen)
+      {
          walk.set(false);
+         commandInputManager.clearAllCommands();
+      }
    }
 
    public boolean isOpen()

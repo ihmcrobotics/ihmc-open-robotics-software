@@ -5,6 +5,7 @@ import us.ihmc.openAlexander.AlexanderSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,6 +29,8 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
    private final SideDependentList<String> footForceSensorNames;
 
+   private final double neckJointPositionFrequency;
+   private final double neckJointVelocityFrequency;
    private final double spineJointPositionFrequency;
    private final double spineJointVelocityFrequency;
    private final double lowerBodyJointPositionFrequency;
@@ -52,6 +55,9 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
       spineJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
       spineJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 100.0 : Double.POSITIVE_INFINITY;
+
+      neckJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
+      neckJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 50.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 50.0 : Double.POSITIVE_INFINITY;
@@ -80,6 +86,11 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(spineJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, spineJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(spineJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, spineJoints());
 
+      DoubleProvider neckJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("neckJointPositionFrequency", spineJointPositionFrequency);
+      DoubleProvider neckJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("neckJointVelocityFrequency", spineJointVelocityFrequency);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(neckJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, neckJoints());
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(neckJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, neckJoints());
+
       // IMU
       DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationBreakFrequency", orientationFrequency);
       DoubleProvider angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityBreakFrequency", angularVelocityFrequency);
@@ -102,7 +113,12 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       return toJointNameStrings(SpineJointName.SPINE_YAW);
    }
 
-   private String[] toJointNameStrings(LegJointName... legJointNames)
+   private String[] neckJoints()
+   {
+      return toJointNameStrings(NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH);
+   }
+
+   protected String[] toJointNameStrings(LegJointName... legJointNames)
    {
       List<String> names = new ArrayList<>();
 
@@ -121,6 +137,16 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
       for (SpineJointName spineJointName : spineJointNames)
          names.add(jointMap.getSpineJointName(spineJointName));
+
+      return names.toArray(new String[0]);
+   }
+
+   private String[] toJointNameStrings(NeckJointName... neckJointNames)
+   {
+      List<String> names = new ArrayList<>();
+
+      for (NeckJointName neckJointName : neckJointNames)
+         names.add(jointMap.getNeckJointName(neckJointName));
 
       return names.toArray(new String[0]);
    }

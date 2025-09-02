@@ -10,10 +10,36 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetrieverSVO.RecordMode;
 
 public class RDXZEDSVORecorderPanel
 {
+   public enum RecordMode
+   {
+      RECORD((byte) 0), PLAYBACK((byte) 1);
+
+      private final byte byteValue;
+
+      RecordMode(byte byteValue)
+      {
+         this.byteValue = byteValue;
+      }
+
+      public byte toByte()
+      {
+         return byteValue;
+      }
+
+      public static RecordMode fromByte(byte b)
+      {
+         for (RecordMode value : values())
+         {
+            if (value.byteValue == b)
+               return value;
+         }
+         return null;
+      }
+   }
+
    private static final String PANEL_NAME = "ZED SVO Recorder";
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

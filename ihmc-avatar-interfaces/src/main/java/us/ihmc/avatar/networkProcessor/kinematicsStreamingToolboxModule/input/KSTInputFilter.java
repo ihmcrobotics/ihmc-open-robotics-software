@@ -98,7 +98,10 @@ public class KSTInputFilter
          }
          double linearVelocity = input.getDesiredVelocity().norm();
          if (linearVelocity > maxLinearVelocity.getValue())
+         {
+            LogTools.warn("CoM linear velocity exceeded the maximum allowable threshold");
             return false;
+         }
       }
 
       return true;

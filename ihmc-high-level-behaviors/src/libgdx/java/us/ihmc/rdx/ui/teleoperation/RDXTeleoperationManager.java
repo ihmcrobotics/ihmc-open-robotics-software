@@ -5,13 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -34,7 +32,6 @@ import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
-import us.ihmc.rdx.ui.affordances.RDXArmControlMode;
 import us.ihmc.rdx.ui.affordances.RDXArmManager;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFoot;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
@@ -43,6 +40,8 @@ import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.affordances.RDXPelvisControlMode;
 import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
+import us.ihmc.rdx.ui.hands.RDXHandInterface.HandAction;
+import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.interactable.RDXHumanoidDoFsWidgets;
 import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
@@ -75,7 +74,7 @@ import java.util.Set;
  * Sub managers:
  * <ul>
  * <li>{@link RDXArmManager Arm manager}</li>
- * <li>{@link RDXHandConfigurationManager Hand configuration manager} - lives inside the arm manager</li>
+ * <li>{@link RDXHandManager Hand configuration manager} - lives inside the arm manager</li>
  * <li>{@link RDXLocomotionManager Locomotion manager}</li>
  * </ul>
  *
@@ -338,8 +337,8 @@ public class RDXTeleoperationManager extends RDXPanel
                    armManager.executeDesiredArmCommand(side);
                 }
                });
-               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.OPEN, false, false));
-               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().publishHandCommand(side, SakeHandPreset.CLOSE, false, false));
+               interactableHands.get(side).setOpenHand(() -> armManager.getHandManager().getHand(side).sendCommand(HandAction.OPEN));
+               interactableHands.get(side).setCloseHand(() -> armManager.getHandManager().getHand(side).sendCommand(HandAction.CLOSE));
                interactableHands.get(side).setGotoArmHome(() -> armManager.executeArmHome(side));
             }
          }
@@ -793,6 +792,7 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       desiredRobot.destroy();
       locomotionManager.destroy();
+      armManager.destroy();
       dofsWidgets.destroy();
    }
 

@@ -28,7 +28,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXRobotPerceptionVisualizersPanel;
-import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
+import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRManager;
@@ -54,7 +54,7 @@ public class RDXVRModeManager
    private ImBoolean interactablesEnabled;
 
    private RDXVRFootstepPlacement footstepPlacer;
-   private RDXHandConfigurationManager handManager;
+   private RDXHandManager handManager;
 
    @Nullable
    private RDXVRWholeBodyKinematicStreaming kinematicsStreaming;

@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
@@ -112,10 +113,7 @@ public class SnappingTerrainExtractor
 
       computeDerivedParameters();
 
-      terrainMapData = new TerrainMapData(cellsPerAxisTerrain,
-                                          cellsPerAxisTerrain,
-                                          heightMapParameters.getCellSize(),
-                                          heightMapParameters.getTerrainWidthInMeters());
+      terrainMapData = new TerrainMapData(cellsPerAxisTerrain, heightMapParameters.getCellSize(), heightMapParameters.getTerrainWidthInMeters());
 
       // Initialize matrices and images
       terrainCostMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
@@ -227,48 +225,51 @@ public class SnappingTerrainExtractor
       {
          Mat cpuTerrainCostMap = new Mat();
          terrainCostMat.download(cpuTerrainCostMap);
-         terrainMapData.setTerrainCostMap(cpuTerrainCostMap);
-         cpuTerrainCostMap.close();
 
          Mat cpuContactMap = new Mat();
          contactMat.download(cpuContactMap);
-         terrainMapData.setContactMap(cpuContactMap);
-         cpuContactMap.close();
 
          Mat cpuHeightMap = new Mat();
          gpuHeightMap.download(cpuHeightMap);
-         terrainMapData.setHeightMap(cpuHeightMap);
-         cpuHeightMap.close();
 
          Mat cpuSnapNormalXMap = new Mat();
          snapNormalXMat.download(cpuSnapNormalXMap);
-         terrainMapData.setSnapNormalXMat(cpuSnapNormalXMap);
-         cpuSnapNormalXMap.close();
 
          Mat cpuSnapNormalYMap = new Mat();
          snapNormalYMat.download(cpuSnapNormalYMap);
-         terrainMapData.setSnapNormalYMat(cpuSnapNormalYMap);
-         cpuSnapNormalYMap.close();
 
          Mat cpuSnapNormalZMap = new Mat();
          snapNormalZMat.download(cpuSnapNormalZMap);
-         terrainMapData.setSnapNormalZMat(cpuSnapNormalZMap);
-         cpuSnapNormalZMap.close();
 
          Mat cpuSnappedAreaFractionMap = new Mat();
          snappedAreaFractionMat.download(cpuSnappedAreaFractionMap);
-         terrainMapData.setSnappedAreaFractionMat(cpuSnappedAreaFractionMap);
-         cpuSnappedAreaFractionMap.close();
 
          Mat cpuSteppabilityMap = new Mat();
          steppabilityMat.download(cpuSteppabilityMap);
-         terrainMapData.setSteppabilityMat(cpuSteppabilityMap);
-         cpuSteppabilityMap.close();
 
          Mat cpuSteppableConnections = new Mat();
          steppabilityConnectionsMat.download(cpuSteppableConnections);
-         terrainMapData.setSteppabilityConnectionsMat(cpuSteppableConnections);
+
+         TerrainMapTools.convertToTerrainMapData(cpuHeightMap,
+                                                 cpuTerrainCostMap,
+                                                 cpuContactMap,
+                                                 cpuSnapNormalXMap,
+                                                 cpuSnapNormalYMap,
+                                                 cpuSnapNormalZMap,
+                                                 cpuSteppabilityMap,
+                                                 cpuSteppableConnections,
+                                                 cpuSnappedAreaFractionMap,
+                                                 terrainMapData);
+
+         cpuHeightMap.close();
+         cpuTerrainCostMap.close();
+         cpuContactMap.close();
+         cpuSnapNormalXMap.close();
+         cpuSnapNormalYMap.close();
+         cpuSnapNormalZMap.close();
+         cpuSteppabilityMap.close();
          cpuSteppableConnections.close();
+         cpuSnappedAreaFractionMap.close();
       }
    }
 

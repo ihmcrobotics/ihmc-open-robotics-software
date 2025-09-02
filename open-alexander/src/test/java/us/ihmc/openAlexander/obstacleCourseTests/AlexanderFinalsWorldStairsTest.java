@@ -374,7 +374,7 @@ public class AlexanderFinalsWorldStairsTest
       footstepDataList.getFootstepDataList().add()
                       .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT,
                                                                           new Point3D(startingLocation.getX() + 0.15,
-                                                                                      startingLocation.getY() - 1.1,
+                                                                                      startingLocation.getY() - 1.15,
                                                                                       startingLocation.getZ() + 0.25),
                                                                           new Quaternion(orientation),
                                                                           leftFootPoint2ds));
@@ -382,7 +382,7 @@ public class AlexanderFinalsWorldStairsTest
       footstepDataList.getFootstepDataList().add()
                       .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT,
                                                                           new Point3D(startingLocation.getX() - 0.15,
-                                                                                      startingLocation.getY() - 1.4,
+                                                                                      startingLocation.getY() - 1.45,
                                                                                       startingLocation.getZ() + 0.45),
                                                                           new Quaternion(orientation),
                                                                           rightFootPoint2ds));
@@ -390,7 +390,7 @@ public class AlexanderFinalsWorldStairsTest
       footstepDataList.getFootstepDataList().add()
                       .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT,
                                                                           new Point3D(startingLocation.getX() + 0.15,
-                                                                                      startingLocation.getY() - 1.69,
+                                                                                      startingLocation.getY() - 1.74,
                                                                                       startingLocation.getZ() + 0.68),
                                                                           new Quaternion(orientation),
                                                                           leftFootPoint2ds));
@@ -398,7 +398,7 @@ public class AlexanderFinalsWorldStairsTest
       footstepDataList.getFootstepDataList().add()
                       .set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT,
                                                                           new Point3D(startingLocation.getX() - 0.15,
-                                                                                      startingLocation.getY() - 2.02,
+                                                                                      startingLocation.getY() - 2.07,
                                                                                       startingLocation.getZ() + 0.91),
                                                                           new Quaternion(orientation),
                                                                           rightFootPoint2ds));

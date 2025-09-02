@@ -18,6 +18,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.AngularExcursionCalculator;
+import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -169,6 +171,7 @@ public class WholeBodyControllerCoreFactory
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
+      WholeBodyAngularVelocityCalculator wholeBodyAngularVelocityCalculator = controllerToolbox.getWholeBodyAngularVelocityCalculator();
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox,
                                                                             referenceFrames,
@@ -176,6 +179,7 @@ public class WholeBodyControllerCoreFactory
                                                                             elevator,
                                                                             walkingControllerParameters,
                                                                             totalMassProvider,
+                                                                            wholeBodyAngularVelocityCalculator,
                                                                             gravityZ,
                                                                             controlDT,
                                                                             registry,

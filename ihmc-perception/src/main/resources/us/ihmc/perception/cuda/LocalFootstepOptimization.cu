@@ -120,7 +120,7 @@ __device__ int coordinateToKey(float x, float y, float xCenter, float yCenter,
 // -------------------------------------------------------------------------
 // Returns the height at world coordinates (x,y) given a height map that is
 // stored as a contiguous float array
-__device__ float getHeightAt(float x, float y, const double* heightMapData, float* heightMapCenter, int heightMapCenterIdx, float heightMapResolution)
+__device__ float getHeightAt(float x, float y, const float* heightMapData, float* heightMapCenter, int heightMapCenterIdx, float heightMapResolution)
 {
     int key = coordinateToKey(x, y, heightMapCenter[0], heightMapCenter[1], heightMapResolution, heightMapCenterIdx);
     return (float)heightMapData[key];
@@ -128,7 +128,7 @@ __device__ float getHeightAt(float x, float y, const double* heightMapData, floa
 
 __device__ void sampleFootCorners(
     float x, float y, float yaw,
-    double* heightMapData,
+    float* heightMapData,
     float* heightMapCenter,
     int heightMapCenterIdx,
     float heightMapResolution,
@@ -253,7 +253,7 @@ __device__ float* fitPlane(float2* points, float* heights)
 // height deviation and inclination
 __device__ float computePlanarityCost(
     float x, float y, float yaw,
-    double* heightMapData,
+    float* heightMapData,
     float* heightMapCenter,
     int heightMapCenterIdx,
     float heightMapResolution,
@@ -319,7 +319,7 @@ __device__ float computePlanarityCost(
     }
 }
 
-__device__ float computeCost(float x, float y, float yaw, float* initialPose, float footLength, float footWidth, double* heightMapData, float* heightMapCenter, int heightMapCenterIdx, float heightMapResolution)
+__device__ float computeCost(float x, float y, float yaw, float* initialPose, float footLength, float footWidth, float* heightMapData, float* heightMapCenter, int heightMapCenterIdx, float heightMapResolution)
 {
     float positionCost = POSITION_W * (fabsf(x - initialPose[0]) + fabsf(y - initialPose[1]));
     float yawCost = YAW_W * fabsf(yaw - initialPose[3]);
@@ -331,7 +331,7 @@ __device__ float computeCost(float x, float y, float yaw, float* initialPose, fl
     return positionCost + yawCost + planarityCost + zDistancePenalty;
 }
 
-extern "C" __global__ void optimizeFootstep(double* heightMapData,
+extern "C" __global__ void optimizeFootstep(float* heightMapData,
                                             float* heightMapCenter,
                                             int heightMapCenterIdx,
                                             float heightMapResolution,
