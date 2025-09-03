@@ -430,9 +430,8 @@ public class AvatarMultiThreadingFactory
 
       LogTools.info("create step generator = " + createStepGeneratorThread);
 
-//      HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
-//                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
-      HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = null; //TODO fix the yawing issue with environmental constraints
+      HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
+                                                                                                                                   robotModel.getWalkingControllerParameters().getSteppingParameters());
       controllerFactory.setListenToHighLevelStatePackets(true);
 
       JoystickBasedSteppingPluginFactory pluginFactory = new JoystickBasedSteppingPluginFactory();
