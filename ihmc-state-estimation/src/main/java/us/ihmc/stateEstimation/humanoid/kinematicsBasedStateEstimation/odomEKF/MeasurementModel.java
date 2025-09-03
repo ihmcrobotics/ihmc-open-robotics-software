@@ -11,6 +11,7 @@ import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryIndexHelper.*;
 
@@ -28,6 +29,7 @@ class MeasurementModel
    public final YoQuaternion footOrientationInBaseFrame;
 
    public final YoBoolean isInContact;
+   public final YoDouble footVariance;
    private final DoubleProvider contactThreshold;
 
    // Temp variables
@@ -61,6 +63,7 @@ class MeasurementModel
 
       footOrientationInBaseFrame = new YoQuaternion(prefix + "OrientationInBaseFrame", registry);
       isInContact = new YoBoolean(prefix + "IsInContact", registry);
+      footVariance = new YoDouble(prefix + "FootVariance", registry);
    }
 
    /**
@@ -91,7 +94,9 @@ class MeasurementModel
       predictedMeasurements.relativeLinearVelocityError.add(footSensing.linearVelocity);
 
       if (!isInContact.getBooleanValue())
+      {
          return;
+      }
 
       // Fourth row. Set the predicted linear velocity
       predictedMeasurements.contactVelocity.set(footState.linearVelocity);
@@ -108,13 +113,15 @@ class MeasurementModel
 
    private boolean computeIsFootInContact(DMatrixRMaj footCovariance)
    {
-      footState.translation.get(vector);
+      footState.linearVelocity.get(vector);
 
       CommonOps_DDRM.mult(footCovariance, vector, tempDVector);
       CommonOps_DDRM.multTransA(vector, tempDVector, tempScalar);
 
+      footVariance.set(Math.sqrt(tempScalar.get(0, 0)));
+
       // tests the mahalonobis distance of the foot velocity being below a certain threshold.
-      return tempScalar.get(0, 0) < contactThreshold.getValue();
+      return footVariance.getValue() < contactThreshold.getValue();
    }
 
    public boolean getIsFootInContact()

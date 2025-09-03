@@ -49,7 +49,6 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
    private final List<? extends IMUSensorReadOnly> feetIMUs;
    private final IMUBiasProvider imuBiasProvider;
 
-   private final double estimatorDT;
    private final FrameVector3DReadOnly gravityVector;
 
    private final YoDouble translationCovariance = new YoDouble("translationCovariance", registry);
@@ -122,41 +121,28 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
    {
       super(stateSizePerLink * (1 + feetIMUs.size()), errorSizePerLink * (1 + feetIMUs.size()) , measurementSizePerLink * feetIMUs.size());
 
-      int links = 1 + feetIMUs.size();
       // Initialize covariance
       processCovariance = new DMatrixRMaj(getErrorSize(), getErrorSize());
       measurementCovariance = new DMatrixRMaj(getMeasurementSize(), getMeasurementSize());
       MatrixTools.setDiagonal(processCovariance, 1e-2);
       MatrixTools.setDiagonal(measurementCovariance, 1e-3);
 
-      translationCovariance.set(1e-3);
+      translationCovariance.set(1e-5);
       velocityCovariance.set(1e-2);
       orientationCovariance.set(1e-2);
       biasCovariance.set(1e-4);
 
-      measuredTranslationCovariance.set(1e-8);
-      measuredOrientationCovariance.set(1e-8);
+      measuredTranslationCovariance.set(1e-6);
+      measuredOrientationCovariance.set(1e-5);
       velocityErrorCovariance.set(1e-5);
-      contactVelocityCovariance.set(1e-6);
+      contactVelocityCovariance.set(1e-10);
       contactAccelerationCovariance.set(1.0);
-
-//            translationCovariance.set(1e-4);
-//            velocityCovariance.set(1e-4);
-//            orientationCovariance.set(1e-4);
-//            biasCovariance.set(1e-4);
-//
-//            measuredTranslationCovariance.set(1e-4);
-//            measuredOrientationCovariance.set(1e-4);
-//            velocityErrorCovariance.set(1e-4);
-//            contactVelocityCovariance.set(1e-4);
-//            contactAccelerationCovariance.set(1e-4);
 
       contactThreshold.set(Double.MAX_VALUE);
 
       this.baseIMU = baseIMU;
       this.feetIMUs = feetIMUs;
       this.imuBiasProvider = baseImuBiasProvider;
-      this.estimatorDT = estimatorDT;
 
       predictedState = new DMatrixRMaj(getStateSize(), 1);
       predictedMeasurement = new DMatrixRMaj(getMeasurementSize(), 1);
@@ -451,7 +437,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       // Note that this bypasses the use of predicted state vector, as the predicted state variables are computed in the {@link #processModel(DMatrixRMaj)} call
       for (int i = 0; i < feetIMUs.size(); i++)
       {
-         int row = errorSizePerLink * (i + 1) + errorLinearVelocityIndex;
+         int row = errorSizePerLink * (i + 1) + measurementContactVelocityIndex;
          MatrixTools.setMatrixBlock(footCovariance, 0, 0, getCovariance(), row, row, 3, 3, 1.0);
 
          measurementModels.get(i).update(footCovariance);
