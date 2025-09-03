@@ -3,9 +3,16 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.type.ImBoolean;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
+import us.ihmc.rdx.ui.graphics.RDXRobotPerceptionVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
+
+import java.util.Collection;
 
 public class RDXVRModeControls
 {
@@ -14,7 +21,7 @@ public class RDXVRModeControls
    private boolean wasVRReady = false;
    private final ImBoolean renderOnLeftHand = new ImBoolean(false);
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
-   private final ImBoolean useStereoVision = new ImBoolean(false);
+   private final ImBoolean useStereoVision = new ImBoolean(true);
    private final RDXBaseUI baseUI;
 
    public RDXVRModeControls(RDXVRModeManager vrModeManager)
@@ -91,19 +98,29 @@ public class RDXVRModeControls
 
       if (ImGui.collapsingHeader("Visual Feedback"))
       {
-         ImGui.checkbox("Floating Video Panel", showFloatingVideoPanel);
-         if (showFloatingVideoPanel.get())
+         if (ImGui.checkbox("Floating Video Panel", showFloatingVideoPanel))
          {
-            // Stereo checkbox is enabled and interactive
-            ImGui.checkbox("Stereo Enabled", useStereoVision);
+            for (RDXPanel panel : RDXBaseUI.getInstance().getImGuiPanelManager().getPanels())
+            {
+               if (panel instanceof RDXRobotPerceptionVisualizersPanel perceptionVisualizersPanel)
+               {
+                  RDXROS2ImageMessageVisualizer leftColorVisualizer = perceptionVisualizersPanel.getZedLeftColorImageVisualizer();
+                  if (leftColorVisualizer != null)
+                  {
+                     activateWithSubscriptionOnly(leftColorVisualizer);
+                  }
+                  RDXROS2ImageMessageVisualizer rightColorVisualizer = perceptionVisualizersPanel.getZedRightColorImageVisualizer();
+                  if (rightColorVisualizer != null)
+                  {
+                     activateWithSubscriptionOnly(rightColorVisualizer);
+                  }
+                  break;
+               }
+            }
          }
-         else
-         {
-            // Stereo checkbox is disabled (grayed out)
-            ImGui.beginDisabled();
-            ImGui.checkbox("Stereo Enabled", useStereoVision);
-            ImGui.endDisabled();
-         }
+
+         // Stereo checkbox is enabled and interactive
+         ImGui.checkbox("Stereo Enabled", useStereoVision);
       }
 
       if (ImGui.collapsingHeader("Trackers"))
@@ -130,6 +147,12 @@ public class RDXVRModeControls
             case JOYSTICK_WALKING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXJoystickBasedStepping.class.getSimpleName());
          }
       }
+   }
+
+   private void activateWithSubscriptionOnly(RDXROS2ImageMessageVisualizer visualizer)
+   {
+      visualizer.setActive(true);
+      visualizer.getSubscriptionOnly().set(true);
    }
 
    public ImBoolean getRenderOnLeftHand()
