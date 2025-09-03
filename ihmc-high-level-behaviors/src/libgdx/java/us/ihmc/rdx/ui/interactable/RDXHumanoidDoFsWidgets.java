@@ -62,8 +62,8 @@ public class RDXHumanoidDoFsWidgets
    private final SpineJointName[] spineJointNamesArray;
 
    private final ImDoubleWrapper[] neckJointAngleWidgets = new ImDoubleWrapper[NUMBER_OF_DOFS_SPHERICAL_JOINT*2];
-   private final double[] neckJointWidgetValues = new double[NUMBER_OF_DOFS_SPHERICAL_JOINT*2];
-   private final double[] neckValuesFromRobot = new double[NUMBER_OF_DOFS_SPHERICAL_JOINT*2];
+   private double[] neckJointWidgetValues;
+   private double[] neckValuesFromRobot;
    private NeckJointName[] neckJointNamesArray;
 
    private final SideDependentList<ImDoubleWrapper[]> legJointAngleWidgets = new SideDependentList<>();
@@ -191,6 +191,8 @@ public class RDXHumanoidDoFsWidgets
             ++jointIndex;
          }
 
+         neckJointWidgetValues = new double[neckJointNamesArray.length];
+         neckValuesFromRobot = new double[neckJointNamesArray.length];
          for (int i = 0; i < neckJointAngleWidgets.length; i++)
          {
             neckJointAngleWidgets[i] = createImDoubleWrapper(i, neckJointWidgetValues, neckLowerLimits, neckUpperLimits, neckJointNames);
@@ -378,7 +380,10 @@ public class RDXHumanoidDoFsWidgets
       if (ImGui.button(labels.get("Send to Robot")))
       {
          receiveRobotConfigurationData();
-         buildAndPublishHeadTrajectoryMessage();
+         ros2ControllerHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
+                                                                                                                      neckJointNamesArray,
+                                                                                                                      neckJointWidgetValues,
+                                                                                                                      teleoperationParameters.getTrajectoryTime()));
       }
       updateDesiredRobotNeck();
    }
@@ -590,90 +595,6 @@ public class RDXHumanoidDoFsWidgets
       long frameId = MessageTools.toFrameId(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
       ros2ControllerHelper.publishToController(message);
-   }
-
-   private void buildAndPublishHeadTrajectoryMessage()
-   {
-      FrameYawPitchRoll frameHeadYawPitchRoll = new FrameYawPitchRoll();
-
-      for (int i = 0; i < neckJointNamesArray.length; i++)
-      {
-         switch (neckJointNamesArray[i])
-         {
-            case PROXIMAL_NECK_PITCH ->
-            {
-               frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setPitch(neckJointWidgetValues[i]);
-            }
-            case PROXIMAL_NECK_YAW ->
-            {
-               frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_YAW));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setYaw(neckJointWidgetValues[i]);
-            }
-            case PROXIMAL_NECK_ROLL ->
-            {
-               frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setRoll(neckJointWidgetValues[i]);
-            }
-            case DISTAL_NECK_PITCH ->
-            {
-               frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.DISTAL_NECK_PITCH));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setPitch(neckJointWidgetValues[i]);
-            }
-            case DISTAL_NECK_YAW ->
-            {
-               frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.DISTAL_NECK_YAW));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setYaw(neckJointWidgetValues[i]);
-            }
-            case DISTAL_NECK_ROLL ->
-            {
-               frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.DISTAL_NECK_ROLL));
-               frameHeadYawPitchRoll.setToZero();
-               frameHeadYawPitchRoll.setRoll(neckJointWidgetValues[i]);
-            }
-         }
-      }
-
-      frameHeadYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getChestFrame());
-      SO3TrajectoryMessage taskspaceTrajectoryMessage = HumanoidMessageTools.createSO3TrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                        frameHeadYawPitchRoll,
-                                                                                                        EuclidCoreTools.zeroVector3D,
-                                                                                                        syncedRobot.getReferenceFrames().getChestFrame());
-      taskspaceTrajectoryMessage.getWeightMatrix().setXWeight(0.01); // low weights to give more priority to the jointspace task
-      taskspaceTrajectoryMessage.getWeightMatrix().setYWeight(0.01);
-      taskspaceTrajectoryMessage.getWeightMatrix().setZWeight(0.01);
-      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildHeadJointspaceTrajectoryMessage();
-      HeadHybridJointspaceTaskspaceTrajectoryMessage hybridMessage = new HeadHybridJointspaceTaskspaceTrajectoryMessage();
-      hybridMessage.getTaskspaceTrajectoryMessage().set(taskspaceTrajectoryMessage);
-      hybridMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-      ros2ControllerHelper.publishToController(hybridMessage);
-   }
-
-   private JointspaceTrajectoryMessage buildHeadJointspaceTrajectoryMessage()
-   {
-      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
-      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-
-      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getNeckJointNamesAsStrings().size()];
-
-      for (int i = 0; i < jointAngles.length; i++)
-         jointAngles[i] = neckJointWidgetValues[i];
-
-      for (double q : jointAngles)
-      {
-         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
-         trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
-         trajectoryPoint1DMessage.setPosition(q);
-         trajectoryPoint1DMessage.setVelocity(0.0);
-      }
-
-      return jointspaceTrajectoryMessage;
    }
 
    public RDXDesiredRobot getDesiredRobot()
