@@ -51,16 +51,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
 
    private final FrameVector3DReadOnly gravityVector;
 
-   private final YoDouble translationCovariance = new YoDouble("translationCovariance", registry);
-   private final YoDouble velocityCovariance = new YoDouble("velocityCovariance", registry);
-   private final YoDouble orientationCovariance = new YoDouble("orientationCovariance", registry);
-   private final YoDouble biasCovariance = new YoDouble("biasCovariance", registry);
-
-   private final YoDouble measuredTranslationCovariance = new YoDouble("measuredTranslationCovariance", registry);
-   private final YoDouble measuredOrientationCovariance = new YoDouble("measuredOrientationCovariance", registry);
-   private final YoDouble velocityErrorCovariance = new YoDouble("velocityErrorCovariance", registry);
-   private final YoDouble contactVelocityCovariance = new YoDouble("contactVelocityCovariance", registry);
-   private final YoDouble contactAccelerationCovariance = new YoDouble("contactAccelerationMeasureCovariance", registry);
+   private final OdometryKalmanFilterParameters parameters = new OdometryKalmanFilterParameters(registry);
 
    private final YoDouble contactThreshold = new YoDouble("contactVarianceThreshold", registry);
 
@@ -127,18 +118,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       MatrixTools.setDiagonal(processCovariance, 1e-2);
       MatrixTools.setDiagonal(measurementCovariance, 1e-3);
 
-      translationCovariance.set(1e-5);
-      velocityCovariance.set(1e-2);
-      orientationCovariance.set(1e-2);
-      biasCovariance.set(1e-4);
-
-      measuredTranslationCovariance.set(1e-6);
-      measuredOrientationCovariance.set(1e-5);
-      velocityErrorCovariance.set(1e-5);
-      contactVelocityCovariance.set(1e-10);
-      contactAccelerationCovariance.set(1.0);
-
-      contactThreshold.set(Double.MAX_VALUE);
+      contactThreshold.set(0.5);
 
       this.baseIMU = baseIMU;
       this.feetIMUs = feetIMUs;
@@ -265,24 +245,31 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
 
    private void updateCovariance()
    {
-      for (int i = 0; i < feetIMUs.size() + 1; i++)
+      OdometryTools.setDiagonals(errorTranslationIndex, 3, parameters.baseProcessTranslationNoise.getValue(), processCovariance);
+      OdometryTools.setDiagonals(errorLinearVelocityIndex, 2, parameters.baseProcessVelocityXYNoise.getValue(), processCovariance);
+      OdometryTools.setDiagonals(errorLinearVelocityIndex + 2, 1, parameters.baseProcessVelocityZNoise.getValue(), processCovariance);
+      OdometryTools.setDiagonals(errorOrientationIndex, 3, parameters.baseProcessOrientationNoise.getValue(), processCovariance);
+      OdometryTools.setDiagonals(errorAccelBiasIndex, 3, parameters.baseProcessAccelBiasNoise.getValue(), processCovariance);
+      OdometryTools.setDiagonals(errorGyroBiasIndex, 3, parameters.baseProcessGyroBiasNoise.getValue(), processCovariance);
+
+      for (int i = 0; i < feetIMUs.size(); i++)
       {
-         int index = i * errorSizePerLink;
-         OdometryTools.setDiagonals(index + errorTranslationIndex, 3, translationCovariance.getValue(), processCovariance);
-         OdometryTools.setDiagonals(index + errorLinearVelocityIndex, 3, velocityCovariance.getValue(), processCovariance);
-         OdometryTools.setDiagonals(index + errorOrientationIndex, 3, orientationCovariance.getValue(), processCovariance);
-         OdometryTools.setDiagonals(index + errorAccelBiasIndex, 3, biasCovariance.getValue(), processCovariance);
-         OdometryTools.setDiagonals(index + errorGyroBiasIndex, 3, biasCovariance.getValue(), processCovariance);
+         int index = (i + 1) * errorSizePerLink;
+         OdometryTools.setDiagonals(index + errorTranslationIndex, 3, parameters.footProcessTranslationNoise.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorLinearVelocityIndex, 3, parameters.footProcessVelocityNoise.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorOrientationIndex, 3, parameters.footProcessOrientationNoise.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorAccelBiasIndex, 3, parameters.footProcessAccelBiasNoise.getValue(), processCovariance);
+         OdometryTools.setDiagonals(index + errorGyroBiasIndex, 3, parameters.footProcessGyroBiasNoise.getValue(), processCovariance);
       }
 
       for (int i = 0; i < feetIMUs.size(); i++)
       {
          int index = i * measurementSizePerLink;
-         OdometryTools.setDiagonals(index + measurementRelativeTranslationIndex, 3, measuredTranslationCovariance.getValue(), measurementCovariance);
-         OdometryTools.setDiagonals(index + measurementRelativeOrientationErrorIndex, 3, measuredOrientationCovariance.getValue(), measurementCovariance);
-         OdometryTools.setDiagonals(index + measurementRelativeVelocityIndex, 3, velocityErrorCovariance.getValue(), measurementCovariance);
-         OdometryTools.setDiagonals(index + measurementContactVelocityIndex, 3, contactVelocityCovariance.getValue(), measurementCovariance);
-         OdometryTools.setDiagonals(index + measurementAccelIndex, 3, contactAccelerationCovariance.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementRelativeTranslationIndex, 3, parameters.measurementIKPositionNoise.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementRelativeOrientationErrorIndex, 3, parameters.measurementIKOrientationNoise.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementRelativeVelocityIndex, 3, parameters.measurementIKVelocityNoise.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementContactVelocityIndex, 3, parameters.measurementContactVelocityNoise.getValue(), measurementCovariance);
+         OdometryTools.setDiagonals(index + measurementAccelIndex, 3, parameters.measurementContactAccelNoise.getValue(), measurementCovariance);
       }
 
       setProcessCovariance(processCovariance);
@@ -441,7 +428,7 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
          MatrixTools.setMatrixBlock(footCovariance, 0, 0, getCovariance(), row, row, 3, 3, 1.0);
 
          measurementModels.get(i).update(footCovariance);
-         feetMeasurements.get(i).get(measurementModels.get(i).getIsFootInContact(), i * measurementSizePerLink, predictedMeasurement);
+         feetMeasurements.get(i).get(i * measurementSizePerLink, predictedMeasurement);
       }
 
       // return the predicted measurement
@@ -481,5 +468,31 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       }
 
       return CMatrix;
+   }
+
+   @Override
+   protected void maskResidualCovarianceForOutlierRejection()
+   {
+      // FIXME garbage
+      DMatrixRMaj mask = CommonOps_DDRM.identity(getMeasurementSize(), getMeasurementSize());
+      DMatrixRMaj maskTransposeS = new DMatrixRMaj(0, 0);
+
+      for (int i = feetIMUs.size() - 1; i >= 0; i--)
+      {
+         if (!measurementModels.get(i).getIsFootInContact())
+         {
+            int index = i * measurementSizePerLink;
+            // remove the rows of the measurement accel, since it's larger
+            CommonOps_DDRM.removeColumns(mask, index + measurementAccelIndex, index + measurementAccelIndex + 2);
+            CommonOps_DDRM.removeColumns(mask, index + measurementContactVelocityIndex, index + measurementContactVelocityIndex + 2);
+         }
+      }
+
+      CommonOps_DDRM.multTransA(mask, measurementResidual, maskedMeasurementResidual);
+      CommonOps_DDRM.multTransA(mask, measurementJacobian, maskedMeasurementJacobian);
+      CommonOps_DDRM.multTransA(mask, residualCovariance, maskTransposeS);
+      CommonOps_DDRM.mult(maskTransposeS, mask, maskedResidualCovariance);
+      CommonOps_DDRM.multTransA(mask, measurementCovariance, maskTransposeS);
+      CommonOps_DDRM.mult(maskTransposeS, mask, maskedMeasurementCovariance);
    }
 }

@@ -1,6 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -12,6 +11,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 class SensedVariables
 {
@@ -31,6 +31,8 @@ class SensedVariables
    public final YoFramePoint3D positionMeasurement;
    public final YoFrameQuaternion orientationMeasurement;
    public final YoFrameVector3D linearVelocity;
+
+   public final YoBoolean isInContact;
 
    // Temp variables
    private final FrameVector3D linearAcceleration = new FrameVector3D();
@@ -52,6 +54,7 @@ class SensedVariables
       orientationMeasurement = new YoFrameQuaternion(prefix + "OrientationMeasurement", baseIMU.getMeasurementFrame(), registry);
 
       linearVelocity = new YoFrameVector3D(prefix + "LinearVelocity", worldFrame, registry);
+      isInContact = new YoBoolean(prefix + "IsInContact", registry);
    }
 
    public void update()

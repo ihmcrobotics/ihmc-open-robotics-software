@@ -28,7 +28,6 @@ class MeasurementModel
    // State variables
    public final YoQuaternion footOrientationInBaseFrame;
 
-   public final YoBoolean isInContact;
    public final YoDouble footVariance;
    private final DoubleProvider contactThreshold;
 
@@ -62,7 +61,6 @@ class MeasurementModel
       this.contactThreshold = contactThreshold;
 
       footOrientationInBaseFrame = new YoQuaternion(prefix + "OrientationInBaseFrame", registry);
-      isInContact = new YoBoolean(prefix + "IsInContact", registry);
       footVariance = new YoDouble(prefix + "FootVariance", registry);
    }
 
@@ -71,7 +69,7 @@ class MeasurementModel
     */
    public void update(DMatrixRMaj footCovariance)
    {
-      isInContact.set(computeIsFootInContact(footCovariance));
+      footSensing.isInContact.set(computeIsFootInContact(footCovariance));
 
       // First row. Update the predicted foot position of the foot relative to the base in the base frame
       predictedMeasurements.relativePosition.sub(footState.translation, baseState.translation);
@@ -92,11 +90,6 @@ class MeasurementModel
       predictedMeasurements.relativeLinearVelocityError.scale(-1.0);
       predictedMeasurements.relativeLinearVelocityError.sub(velocityError);
       predictedMeasurements.relativeLinearVelocityError.add(footSensing.linearVelocity);
-
-      if (!isInContact.getBooleanValue())
-      {
-         return;
-      }
 
       // Fourth row. Set the predicted linear velocity
       predictedMeasurements.contactVelocity.set(footState.linearVelocity);
@@ -126,7 +119,7 @@ class MeasurementModel
 
    public boolean getIsFootInContact()
    {
-      return isInContact.getBooleanValue();
+      return footSensing.isInContact.getBooleanValue();
    }
 
    /**
@@ -136,7 +129,6 @@ class MeasurementModel
    {
       OdometryTools.toRotationMatrix(baseState.orientation, rotationMatrixTranspose);
       CommonOps_DDRM.transpose(rotationMatrixTranspose);
-
 
       positionError.sub(footState.translation, baseState.translation);
       velocityError.sub(footState.linearVelocity, baseState.linearVelocity);
@@ -202,9 +194,6 @@ class MeasurementModel
       // Third row. Partial of relative velocity error w.r.t. foot state
       row = rowOffset + measurementRelativeVelocityIndex;
       CommonOps_DDRM.insert(rotationMatrixTranspose, jacobianToPack, row, colOffset + errorLinearVelocityIndex);
-
-      if (!isInContact.getBooleanValue())
-         return;
 
       // Fourth row. Partial of contact velocity w.r.t. foot state
       // The contact velocity is directly the foot velocity when it's in contact.

@@ -3,6 +3,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryIndexHelper.*;
 import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.odomEKF.OdometryIndexHelper.measurementAccelIndex;
@@ -16,6 +17,7 @@ class MeasurementVariables
    public final YoVector3D contactVelocity;
    public final YoVector3D accelMeasure;
 
+
    public MeasurementVariables(String prefix, YoRegistry registry)
    {
       relativePosition = new YoVector3D(prefix + "RelativePosition", registry);
@@ -25,15 +27,11 @@ class MeasurementVariables
       accelMeasure = new YoVector3D(prefix + "AccelMeasure", registry);
    }
 
-   public void get(boolean isInContact, int start, DMatrixRMaj measurementToPack)
+   public void get(int start, DMatrixRMaj measurementToPack)
    {
       relativePosition.get(start + measurementRelativeTranslationIndex, measurementToPack);
       relativeOrientationError.get(start + measurementRelativeOrientationErrorIndex, measurementToPack);
       relativeLinearVelocityError.get(start + measurementRelativeVelocityIndex, measurementToPack);
-
-      if (!isInContact)
-         return;
-
       contactVelocity.get(start + measurementContactVelocityIndex, measurementToPack);
       accelMeasure.get(start + measurementAccelIndex, measurementToPack);
    }
