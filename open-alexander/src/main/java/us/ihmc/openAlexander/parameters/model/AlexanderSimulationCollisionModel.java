@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DBasics;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -118,9 +119,8 @@ public class AlexanderSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
             RigidBodyBasics foot = ankleRoll.getSuccessor();
             // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-            FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.26, 0.14, 0.055);
+            FrameBox3DBasics footShape = newBoxWithSTP(ankleRollFrame, new Vector3D(0.26, 0.14, 0.055));
             footShape.getPosition().set(0.045, 0.0, -0.05);
-            footShape.setMargins(1.0e-5, 4.0e-4);
             collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
          }
       }

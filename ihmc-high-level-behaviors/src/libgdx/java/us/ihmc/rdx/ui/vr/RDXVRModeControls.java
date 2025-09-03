@@ -51,13 +51,22 @@ public class RDXVRModeControls
          vrModeManager.renderImGuiWidgets();
       }
 
+      // Render options for VR modes that have options
+      boolean optionsAvailable = false;
+      if (vrModeManager.getMode() == RDXVRMode.WHOLE_BODY_IK_STREAMING || vrModeManager.getMode() == RDXVRMode.JOYSTICK_WALKING)
+      {
+         optionsAvailable = true;
+      }
+      else
+      {
+         ImGui.beginDisabled();
+      }
       if (ImGui.collapsingHeader("VR Mode Options"))
       {
          // Render options for VR modes that have options
-         if (vrModeManager.getMode() == RDXVRMode.WHOLE_BODY_IK_STREAMING || vrModeManager.getMode() == RDXVRMode.JOYSTICK_WALKING)
+         if (optionsAvailable)
          {
-            ImGuiTools.separatorText(vrModeManager.getMode().getReadableName() + " options");
-
+            ImGuiTools.separatorText("Main Options", ImGuiTools.getSmallBoldFont());
             switch (vrModeManager.getMode())
             {
                case WHOLE_BODY_IK_STREAMING ->
@@ -74,6 +83,10 @@ public class RDXVRModeControls
                case JOYSTICK_WALKING -> vrModeManager.getJoystickBasedStepping().renderImGuiWidgets();
             }
          }
+      }
+      if (!optionsAvailable)
+      {
+         ImGui.endDisabled();
       }
 
       if (ImGui.collapsingHeader("Visual Feedback"))
