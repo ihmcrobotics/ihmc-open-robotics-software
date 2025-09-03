@@ -3,6 +3,7 @@ package us.ihmc.avatar.arm;
 public enum PresetArmConfiguration
 {
    HOME,
+   N_POSE,
    INITIAL_SETUP,
    STAND_PREP,
    WIDE_ARMS,

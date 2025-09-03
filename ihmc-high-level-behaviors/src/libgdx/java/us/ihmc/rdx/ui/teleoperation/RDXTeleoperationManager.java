@@ -656,47 +656,14 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void renderImGuiWidgets()
    {
-      hardwareControlStateManager.renderImGuiWidgets();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("N-Pose")))
-         goNPose();
+      hardwareControlStateManager.renderImGuiWidgets(syncedRobot.getRobotModel(),
+                                                     syncedRobot.getReferenceFrames(),
+                                                     armManager,
+                                                     teleoperationParameters.getPelvisMaximumHeight());
       trajectoryTimeSlider.renderImGuiWidget();
       renderWholeBodyWidgets();
       locomotionManager.renderImGuiWidgets();
       armManager.renderImGuiWidgets();
-   }
-
-   private void goNPose()
-   {
-      double trajectoryTime = 3.0;
-
-      for (RobotSide side : RobotSide.values)
-         armManager.executeArmAngles(side, PresetArmConfiguration.HOME, trajectoryTime);
-
-      if (robotModel.getRobotVersion().hasHead())
-      {
-         NeckJointName[] neckJointNamesArray = syncedRobot.getRobotModel().getJointMap().getNeckJointNames();
-         double[] desiredNeckJointValues = new double[neckJointNamesArray.length];
-         for (int i = 0; i < neckJointNamesArray.length; i++)
-         {
-            desiredNeckJointValues[i] = 0.0;
-         }
-         ros2Helper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
-                                                                                                            neckJointNamesArray,
-                                                                                                            desiredNeckJointValues,
-                                                                                                            trajectoryTime));
-      }
-
-      FramePose3D pelvisPose = new FramePose3D(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
-      pelvisPose.getTranslation().addZ(teleoperationParameters.getPelvisMaximumHeight() - 0.02);
-      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPose));
-
-      GoHomeMessage homeChest = new GoHomeMessage();
-      homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-      homeChest.setTrajectoryTime(trajectoryTime);
-      ros2Helper.publishToController(homeChest);
-      RDXBaseUI.pushNotification("Commanding N-pose...");
    }
 
    private void renderWholeBodyWidgets()

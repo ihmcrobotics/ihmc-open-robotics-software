@@ -285,16 +285,7 @@ public class RDXArmManager
       }
       if (hasHand)
       {
-         if (ImGui.collapsingHeader(labels.get("Hands"), ImGuiTreeNodeFlags.DefaultOpen))
-         {
-            handManager.renderImGuiWidgets();
-
-            // Pop up warning if notification is set
-            if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
-            {
-               ImGui.openPopup(labels.get("Warning"));
-            }
-         }
+         handManager.renderImGuiWidgets();
       }
    }
 
