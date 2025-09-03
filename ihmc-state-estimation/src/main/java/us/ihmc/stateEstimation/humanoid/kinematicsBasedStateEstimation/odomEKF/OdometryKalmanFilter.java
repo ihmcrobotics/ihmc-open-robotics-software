@@ -37,7 +37,7 @@ import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.od
  */
 public class OdometryKalmanFilter extends ExtendedKalmanFilter
 {
-   static final boolean includeBias = false;
+   static final boolean includeBias = true;
    static final boolean usePredictedStateInJacobian = true;
 
    // Constants and providers
@@ -134,10 +134,10 @@ public class OdometryKalmanFilter extends ExtendedKalmanFilter
       orientationCovariance.set(1e-2);
       biasCovariance.set(1e-4);
 
-      measuredTranslationCovariance.set(1e-5);
-      measuredOrientationCovariance.set(1e-2);
-      velocityErrorCovariance.set(1e-3);
-      contactVelocityCovariance.set(1e-5);
+      measuredTranslationCovariance.set(1e-8);
+      measuredOrientationCovariance.set(1e-8);
+      velocityErrorCovariance.set(1e-5);
+      contactVelocityCovariance.set(1e-6);
       contactAccelerationCovariance.set(1.0);
 
 //            translationCovariance.set(1e-4);

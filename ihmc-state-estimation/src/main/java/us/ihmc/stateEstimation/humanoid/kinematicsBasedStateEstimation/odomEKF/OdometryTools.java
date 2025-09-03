@@ -113,23 +113,6 @@ public class OdometryTools
          matrix.set(i, i, value);
    }
 
-   public static void toQuaternionFromRotationVector(Vector3DReadOnly rotation, QuaternionBasics quaternionToPack)
-   {
-      double magnitude = rotation.norm();
-      if (magnitude < 1e-7)
-      {
-         quaternionToPack.setToZero();
-         return;
-      }
-
-      double s = Math.sin(magnitude * 0.5);
-      double qs = Math.cos(magnitude * 0.5);
-      double qx = s * rotation.getX() / magnitude;
-      double qy = s * rotation.getY() / magnitude;
-      double qz = s * rotation.getZ() / magnitude;
-      quaternionToPack.set(qx, qy, qz, qs);
-   }
-
    public static void toQuaternionFromRotationVectorSmallAngle(Vector3DReadOnly rotation, QuaternionBasics quaternionToPack)
    {
       double magnitude = rotation.norm();

@@ -6,6 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import us.ihmc.log.LogTools;
 
 /**
  * This class provides an implementation of an Extended Kalman Filter (EKF). The EKF is a recursive filter that uses a linearization of the process and

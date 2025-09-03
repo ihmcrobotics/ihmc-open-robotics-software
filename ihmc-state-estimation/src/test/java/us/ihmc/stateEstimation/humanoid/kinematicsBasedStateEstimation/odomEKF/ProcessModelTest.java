@@ -125,7 +125,7 @@ public class ProcessModelTest
 
          predictedState.translation.get(predictedTranslation);
          predictedState.linearVelocity.get(predictedLinearVelocity);
-         predictedState.orientation.get(predictedRotation);
+         predictedRotation.set(OdomTestTools.toVector(predictedState.orientation));
          predictedState.accelBias.get(predictedAccelBias);
          predictedState.gyroBias.get(predictedGyroBias);
 
@@ -136,6 +136,7 @@ public class ProcessModelTest
          EjmlUnitTests.assertEquals(expectedPredictedGyroBias, predictedGyroBias, 1e-6);
       }
    }
+
    @Test
    public void testComputeProcessJacobian()
    {

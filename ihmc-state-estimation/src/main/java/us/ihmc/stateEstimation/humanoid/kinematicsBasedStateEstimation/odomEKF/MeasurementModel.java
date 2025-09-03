@@ -41,7 +41,6 @@ class MeasurementModel
    private final DMatrixRMaj left = new DMatrixRMaj(4, 4);
    private final DMatrixRMaj right = new DMatrixRMaj(4, 4);
    private final DMatrixRMaj lr = new DMatrixRMaj(4, 4);
-   private final DMatrixRMaj lr3x3 = new DMatrixRMaj(3, 3);
    private final Quaternion tempRotation = new Quaternion();
 
    public MeasurementModel(String prefix,
@@ -73,7 +72,7 @@ class MeasurementModel
 
       // First row. Update the predicted foot position of the foot relative to the base in the base frame
       predictedMeasurements.relativePosition.sub(footState.translation, baseState.translation);
-      baseState.orientation.transform(predictedMeasurements.relativePosition); // FIXME is this right? transforms do more operations than I think is expected
+      baseState.orientation.inverseTransform(predictedMeasurements.relativePosition);
 
       // Update the predicted foot orientation of the foot relative to the base in the base frame
       QuaternionTools.multiplyConjugateLeft(baseState.orientation, footState.orientation, footOrientationInBaseFrame);
@@ -98,7 +97,7 @@ class MeasurementModel
       predictedMeasurements.contactVelocity.set(footState.linearVelocity);
 
       // Fifth row. Set the predicted gravity vector
-      footState.orientation.transform(gravityVector, predictedMeasurements.accelMeasure);
+      footState.orientation.inverseTransform(gravityVector, predictedMeasurements.accelMeasure);
       if (OdometryKalmanFilter.includeBias)
          predictedMeasurements.accelMeasure.add(footState.accelBias);
    }

@@ -9,7 +9,9 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 import java.util.Random;
@@ -120,6 +122,30 @@ public class OdometryToolsTest
          CommonOps_DDRM.invert(rotationExpected);
 
          EjmlUnitTests.assertEquals(rotationExpected, rotationMatrixInverse, 1e-8);
+      }
+   }
+
+   @Test
+   public void testExponentialMap()
+   {
+      Random random = new Random(1738L);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         Quaternion a = EuclidCoreRandomTools.nextQuaternion(random);
+         Vector3DReadOnly rotationVector = EuclidCoreRandomTools.nextVector3D(random, 0.02);
+         DMatrixRMaj rotatedAVector = new DMatrixRMaj(4, 1);
+         DMatrixRMaj rotationQuat = OdometryTools.exponentialMap(rotationVector);
+         CommonOps_DDRM.mult(OdometryTools.lOperator(a), OdometryTools.exponentialMap(rotationVector), rotatedAVector);
+         Quaternion rotatedA =  OdomTestTools.fromVector(rotatedAVector);
+
+         Quaternion rotationQuaternion = new Quaternion(rotationVector);
+
+         EuclidCoreTestTools.assertEquals(rotationQuaternion,  OdomTestTools.fromVector(rotationQuat), 1e-5);
+         Quaternion rotatedAExpected = new Quaternion();
+         rotatedAExpected.multiply(a,rotationQuaternion);
+
+         EuclidCoreTestTools.assertEquals(rotatedAExpected, rotatedA, 1e-6);
       }
    }
 }

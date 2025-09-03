@@ -79,11 +79,6 @@ class SensedVariables
       positionMeasurement.setFromReferenceFrame(imu.getMeasurementFrame());
       orientationMeasurement.setFromReferenceFrame(imu.getMeasurementFrame());
 
-      FramePoint3D imuInWorld = new FramePoint3D(imu.getMeasurementFrame());
-      FramePoint3D baseInWorld = new FramePoint3D(baseIMU.getMeasurementFrame());
-      imuInWorld.changeFrame(worldFrame);
-      baseInWorld.changeFrame(worldFrame);
-
       imu.getMeasurementFrame().getTwistRelativeToOther(baseIMU.getMeasurementFrame(), twist);
       twist.changeFrame(worldFrame);
       linearVelocity.set(twist.getLinearPart());
