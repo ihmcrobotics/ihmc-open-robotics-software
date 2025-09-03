@@ -80,7 +80,6 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
