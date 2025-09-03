@@ -44,14 +44,14 @@ public class WorkspaceLimiterParameters
                                                                                        registry,
                                                                                        0.97);
       maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight = new DoubleParameter(namePrefix
-            + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForHeight", registry, 0.94);
+            + "MaxPercOfLegLengthForSingularityAvoidanceInSwingForHeight", registry, 0.95);
       minPercentOfLegLengthForSingularityAvoidanceInSwing = new DoubleParameter(namePrefix + "MinPercOfLegLengthForSingularityAvoidanceInSwing", registry, 0.5);
       percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForFoot",
                                                                                         registry,
                                                                                         0.05);
       percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight = new DoubleParameter(namePrefix + "PercMarginToEnableSingularityAvoidanceForHeight",
                                                                                           registry,
-                                                                                          0.1);
+                                                                                          0.05);
       percentOfLegLengthMarginToDisableSingularityAvoidance = new DoubleParameter(namePrefix + "PercMarginToDisableSingularityAvoidance", registry, 0.12);
       percentOfLegLengthMarginToAbortSingularityAvoidance = new DoubleParameter(namePrefix + "PercMarginToAbortSingularityAvoidance", registry, 0.17);
 

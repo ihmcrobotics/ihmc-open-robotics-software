@@ -784,12 +784,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       return Double.POSITIVE_INFINITY;
    }
 
-   @Override
-   public double getMaxAllowedDistanceCMPSupport()
-   {
-      // TODO Needs tune up
-      return 0.04;
-   }
 
    @Override
    public ToeOffParameters getToeOffParameters()
