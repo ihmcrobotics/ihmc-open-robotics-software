@@ -27,6 +27,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ROS2LogMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -53,6 +54,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -78,6 +80,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import javax.annotation.Nullable;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -95,6 +98,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXVRMultiContact multiContact;
    private final RDXVRHandControl handControl;
    private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.HAND_CONFIGURATION, RDXHandControlMode.HAND_CONFIGURATION);
+   private final SideDependentList<Boolean> handHasFingers = new SideDependentList<>(true, true);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RDXVRContext vrContext;
@@ -251,7 +255,16 @@ public class RDXVRWholeBodyKinematicStreaming
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
       }
 
-      handControl = new RDXVRHandControl(vrContext, handManager, streamToController, handControlModes, syncedRobot.getRobotModel().getRobotVersion());
+      RobotVersion robotVersion = syncedRobot.getRobotModel().getRobotVersion();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (!robotVersion.hasHandWithFingers(side))
+         {
+            handControlModes.put(side, RDXHandControlMode.NONE);
+            handHasFingers.put(side, false);
+         }
+      }
+      handControl = new RDXVRHandControl(vrContext, handManager, streamToController, handControlModes, robotVersion);
       multiContact = new RDXVRMultiContact(syncedRobot, ghostFullRobotModel, ros2ControllerHelper, vrContext, streamPeriod, streamToController, handControlModes);
    }
 
@@ -728,45 +741,54 @@ public class RDXVRWholeBodyKinematicStreaming
          comTracking.set(false);
       }
 
-      if (ImGui.collapsingHeader(labels.get("Hand Control Mode")))
+      ImGuiTools.separatorText("Visualization Options", ImGuiTools.getSmallBoldFont());
+      ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
+      if (miniGhost.isEnabled())
       {
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.text(side.getCamelCaseName() + " Hand:");
-            if (ImGui.radioButton(labels.get("Hand Configuration"), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
-            {
-               handControlModes.put(side, RDXHandControlMode.HAND_CONFIGURATION);
-            }
-            if (ImGui.radioButton(labels.get("Finger Streaming"), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
-            {
-               handControlModes.put(side, RDXHandControlMode.FINGER_STREAMING);
-            }
-            if (ImGui.radioButton(labels.get("Load Bearing"), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
-            {
-               handControlModes.put(side, RDXHandControlMode.LOAD_BEARING);
-            }
-            ImGui.separator();
-         }
-      }
-
-      if (ImGui.collapsingHeader(labels.get("Visualization Options")))
-      {
-         ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
          ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
-         ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
       }
+      ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
 
-      if (ImGui.collapsingHeader(labels.get("Utility Functions")))
+      ImGuiTools.separatorText("Utility Functions", ImGuiTools.getSmallBoldFont());
+      if (ImGui.button(labels.get("Wakeup Toolbox")))
       {
-         if (ImGui.button(labels.get("Wakeup Toolbox")))
+         wakeUpToolbox();
+      }
+      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
+      {
+         reinitializeToolboxRobotConfiguration();
+      }
+      ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+
+      ImGuiTools.separatorText("Hand Control Mode", ImGuiTools.getSmallBoldFont());
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.text(side.getCamelCaseName() + " Hand:");
+         if (ImGui.radioButton(labels.get("None"), handControlModes.get(side) == RDXHandControlMode.NONE))
          {
-            wakeUpToolbox();
+            handControlModes.put(side, RDXHandControlMode.NONE);
          }
-         if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
+         if (!handHasFingers.get(side))
          {
-            reinitializeToolboxRobotConfiguration();
+            ImGui.beginDisabled();
          }
-         ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+         if (ImGui.radioButton(labels.get("Hand Configuration"), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
+         {
+            handControlModes.put(side, RDXHandControlMode.HAND_CONFIGURATION);
+         }
+         if (ImGui.radioButton(labels.get("Finger Streaming"), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
+         {
+            handControlModes.put(side, RDXHandControlMode.FINGER_STREAMING);
+         }
+         if (!handHasFingers.get(side))
+         {
+            ImGui.endDisabled();
+         }
+         if (ImGui.radioButton(labels.get("Load Bearing"), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
+         {
+            handControlModes.put(side, RDXHandControlMode.LOAD_BEARING);
+         }
+         ImGui.separator();
       }
    }
 
@@ -775,7 +797,7 @@ public class RDXVRWholeBodyKinematicStreaming
       if (enabled)
       {
          initialize();
-         wakeUpToolbox();
+         reinitializeToolboxRobotConfiguration();
          ghostRobotGraphic.setActive(true);
          miniGhost.setActive(true);
       }
