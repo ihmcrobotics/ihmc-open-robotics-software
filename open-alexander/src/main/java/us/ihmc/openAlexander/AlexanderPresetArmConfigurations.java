@@ -9,6 +9,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class AlexanderPresetArmConfigurations
 {
+   //TODO Set configurations, only stand prep and n-pose are correct
    private static final SideDependentList<double[]> STAND_PREP_4DOF = new SideDependentList<>();
    private static final SideDependentList<double[]> HOME_4DOF = new SideDependentList<>();
    private static final SideDependentList<double[]> TUCKED_UP_ARMS_4DOF = new SideDependentList<>();
@@ -57,7 +58,7 @@ public class AlexanderPresetArmConfigurations
       switch (presetArmConfiguration)
       {
          case STAND_PREP -> System.arraycopy(STAND_PREP_4DOF.get(side), 0, jointAnglesToPack, 0, STAND_PREP_4DOF.get(side).length);
-         case HOME -> System.arraycopy(HOME_4DOF.get(side), 0, jointAnglesToPack, 0, HOME_4DOF.get(side).length);
+         case HOME, N_POSE -> System.arraycopy(HOME_4DOF.get(side), 0, jointAnglesToPack, 0, HOME_4DOF.get(side).length);
          case TUCKED_UP_ARMS -> System.arraycopy(TUCKED_UP_ARMS_4DOF.get(side), 0, jointAnglesToPack, 0, TUCKED_UP_ARMS_4DOF.get(side).length);
       }
    }
@@ -67,7 +68,7 @@ public class AlexanderPresetArmConfigurations
       switch (presetArmConfiguration)
       {
          case STAND_PREP -> System.arraycopy(STAND_PREP_7DOF.get(side), 0, jointAnglesToPack, 0, STAND_PREP_7DOF.get(side).length);
-         case HOME -> System.arraycopy(HOME_7DOF.get(side), 0, jointAnglesToPack, 0, HOME_7DOF.get(side).length);
+         case HOME, N_POSE -> System.arraycopy(HOME_7DOF.get(side), 0, jointAnglesToPack, 0, HOME_7DOF.get(side).length);
          case TUCKED_UP_ARMS -> System.arraycopy(TUCKED_UP_ARMS_7DOF.get(side), 0, jointAnglesToPack, 0, TUCKED_UP_ARMS_7DOF.get(side).length);
       }
    }

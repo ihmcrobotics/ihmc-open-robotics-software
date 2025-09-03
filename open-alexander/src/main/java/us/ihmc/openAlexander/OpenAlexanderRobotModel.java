@@ -486,8 +486,19 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public RigidBodyTransform getHandGraphicToHandFrameTransform(RobotSide side)
    {
       RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
-      handGraphicToHandTransform.getRotation().setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
+      if (!robotVersion.hasNubHands(side))
+         handGraphicToHandTransform.getRotation().setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
+
       return handGraphicToHandTransform;
+   }
+
+   @Override
+   public RigidBodyTransform getChestGraphicToFrameTransform()
+   {
+      RigidBodyTransform chestGraphicToFrameTransform = new RigidBodyTransform();
+      chestGraphicToFrameTransform.getTranslation().addZ(0.1);
+
+      return chestGraphicToFrameTransform;
    }
 
    public void setControllerDT(double controllerDT)

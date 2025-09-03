@@ -3,10 +3,12 @@ package us.ihmc.rdx.ui.teleoperation;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.GoHomeMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -18,6 +20,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.LocomotionParameters;
@@ -48,12 +51,14 @@ import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -93,6 +98,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final DRCRobotModel robotModel;
    private final SideDependentList<Boolean> hasArms = new SideDependentList<>();
    private boolean hasEitherArm = false;
+   private boolean hasHead = false;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
@@ -113,6 +119,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final SideDependentList<RDXInteractableHand> interactableHands = new SideDependentList<>();
    private RDXInteractableRobotLink interactableChest;
    private RDXInteractableRobotLink interactablePelvis;
+   private RDXInteractableRobotLink interactableHead;
    private final ArrayList<RDXInteractableRobotLink> allInteractableRobotLinks = new ArrayList<>();
    private final ImString tempImGuiText = new ImString(1000);
    private final ImBoolean interactableSelections = new ImBoolean(true);
@@ -154,6 +161,7 @@ public class RDXTeleoperationManager extends RDXPanel
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
       robotModel = communicationHelper.getRobotModel();
+      hasHead = robotModel.getRobotVersion().hasHead();
       for (RobotSide side : RobotSide.values)
       {
          boolean hasArm = robotModel.getRobotVersion().hasArm(side);
@@ -237,6 +245,8 @@ public class RDXTeleoperationManager extends RDXPanel
                   interactableChest = new RDXInteractableRobotLink();
                   interactableChest.create(robotCollidable,
                                            syncedRobot.getReferenceFrames().getChestFrame(),
+                                           robotModel.getChestGraphicToFrameTransform(),
+                                           new RigidBodyTransform(),
                                            modelFileName,
                                            baseUI.getPrimary3DPanel());
                   interactableChest.setActionExecutor(() ->
@@ -279,6 +289,29 @@ public class RDXTeleoperationManager extends RDXPanel
                else
                {
                   interactablePelvis.addAdditionalRobotCollidable(robotCollidable);
+               }
+            }
+            if (hasHead)
+            {
+               if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getHead().getName()))
+               {
+                  if (interactableHead == null)
+                  {
+                     interactableHead = new RDXInteractableRobotLink();
+                     interactableHead.create(robotCollidable, syncedRobot.getReferenceFrames().getHeadFrame(), modelFileName, baseUI.getPrimary3DPanel());
+                     interactableHead.setActionExecutor(() ->
+                                                        {
+                                                           if (!wholeBodyIKManager.getEnabled())
+                                                           {
+                                                              processHeadCommand();
+                                                           }
+                                                        });
+                     allInteractableRobotLinks.add(interactableHead);
+                  }
+                  else
+                  {
+                     interactableHead.addAdditionalRobotCollidable(robotCollidable);
+                  }
                }
             }
             for (RobotSide side : RobotSide.values)
@@ -445,6 +478,8 @@ public class RDXTeleoperationManager extends RDXPanel
       if (interactablesAvailable)
       {
          allAreDeleted &= interactableChest.isDeleted() && interactablePelvis.isDeleted();
+         if (hasHead)
+            allAreDeleted &= interactableHead.isDeleted();
          for (RobotSide side : interactableHands.sides())
             allAreDeleted &= interactableHands.get(side).isDeleted();
          for (RobotSide side : interactableFeet.sides())
@@ -533,6 +568,42 @@ public class RDXTeleoperationManager extends RDXPanel
             interactablePelvis.getPose()));
    }
 
+   private void processHeadCommand()
+   {
+      RDXBaseUI.pushNotification("Commanding head trajectory...");
+      NeckJointName[] neckJointNamesArray = syncedRobot.getRobotModel().getJointMap().getNeckJointNames();
+      double[] desiredNeckJointValues = new double[neckJointNamesArray.length];
+
+      FramePose3D headInChestFrame = new FramePose3D(interactableHead.getPose());
+      headInChestFrame.changeFrame(syncedRobot.getReferenceFrames().getChestFrame());
+
+      double desiredYaw = headInChestFrame.getYaw();
+      double desiredPitch = headInChestFrame.getPitch();
+      double desiredRoll = headInChestFrame.getRoll();
+
+      for (int i = 0; i < neckJointNamesArray.length; i++)
+      {
+         switch (neckJointNamesArray[i])
+         {
+            case DISTAL_NECK_YAW:
+               desiredNeckJointValues[i] = desiredYaw;
+               break;
+            case DISTAL_NECK_PITCH:
+               desiredNeckJointValues[i] = desiredPitch;
+               break;
+            case DISTAL_NECK_ROLL:
+               desiredNeckJointValues[i] = desiredRoll;
+               break;
+            default:
+               desiredNeckJointValues[i] = 0.0; // fallback
+         }
+      }
+      ros2Helper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(syncedRobot.getReferenceFrames(),
+                                                                                                         neckJointNamesArray,
+                                                                                                         desiredNeckJointValues,
+                                                                                                         teleoperationParameters.getTrajectoryTime()));
+   }
+
    private void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
@@ -564,6 +635,8 @@ public class RDXTeleoperationManager extends RDXPanel
 
             interactableChest.process3DViewInput(input);
             interactablePelvis.process3DViewInput(input);
+            if (hasHead)
+               interactableHead.process3DViewInput(input);
 
             for (RobotSide side : interactableFeet.sides())
             {
@@ -583,7 +656,10 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void renderImGuiWidgets()
    {
-      hardwareControlStateManager.renderImGuiWidgets();
+      hardwareControlStateManager.renderImGuiWidgets(syncedRobot.getRobotModel(),
+                                                     syncedRobot.getReferenceFrames(),
+                                                     armManager,
+                                                     teleoperationParameters.getPelvisMaximumHeight());
       trajectoryTimeSlider.renderImGuiWidget();
       renderWholeBodyWidgets();
       locomotionManager.renderImGuiWidgets();
@@ -643,6 +719,15 @@ public class RDXTeleoperationManager extends RDXPanel
             if (interactablesAvailable)
             {
                float radioStartX = 100.0f;
+               if (hasHead)
+               {
+                  ImGui.text("Head:");
+                  ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
+                  ImGui.sameLine();
+                  ImGui.setCursorPosX(radioStartX);
+                  interactableHead.renderImGuiWidgets();
+               }
+
                ImGui.text("Chest:");
                ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
                ImGui.sameLine();

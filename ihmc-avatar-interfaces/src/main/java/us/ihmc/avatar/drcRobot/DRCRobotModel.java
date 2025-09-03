@@ -313,6 +313,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new RigidBodyTransform();
    }
 
+   public default RigidBodyTransform getChestGraphicToFrameTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
    public abstract Transform getJmeTransformWristToHand(RobotSide side);
 
 }
