@@ -100,8 +100,7 @@ public class RDXVRModeControls
       {
          if (ImGui.checkbox("Floating Video Panel", showFloatingVideoPanel))
          {
-            Collection<RDXPanel> baseUIPanels = RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
-            for (RDXPanel panel : baseUIPanels)
+            for (RDXPanel panel : RDXBaseUI.getInstance().getImGuiPanelManager().getPanels())
             {
                if (panel instanceof RDXRobotPerceptionVisualizersPanel perceptionVisualizersPanel)
                {
