@@ -47,7 +47,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    protected final SideDependentList<String> feetForceSensorParentJointNames = new SideDependentList<String>();
 
    // Head IMU
-   private final String headIMU = "head_imu";
+   private static final String headIMU = "head_imu";
 
    // Left upper arm IMUs
    private static final String leftShoulderIMU = "left_shoulder_y_imu";
@@ -118,7 +118,6 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
 
       if (alexanderVersion.hasHead())
          imuSensorsToUse.add(headIMU);
-      else
 
       for (RobotSide robotSide : RobotSide.values)
       {
