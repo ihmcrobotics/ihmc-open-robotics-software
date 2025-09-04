@@ -117,7 +117,7 @@ public class ZEDImageSensor extends ImageSensor
 
       // Set runtime parameters to default values
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
-      zedRuntimeParameters.enable_depth(true);
+      zedRuntimeParameters.enable_depth(slDepthMode != SL_DEPTH_MODE_NONE);
       zedRuntimeParameters.confidence_threshold(70);
       zedRuntimeParameters.texture_confidence_threshold(100);
       zedRuntimeParameters.remove_saturated_areas(true);
@@ -220,13 +220,6 @@ public class ZEDImageSensor extends ImageSensor
       {
          LogTools.error(exception);
 
-         if (slInputType == SL_INPUT_TYPE_STREAM)
-         {
-            // Do not retry if stream, it can cause a native crash. TODO: Look into this
-            LogTools.info("Connection to remote ZED SDK failed, not retrying.");
-            close();
-         }
-
          return false;
       }
 
@@ -323,17 +316,17 @@ public class ZEDImageSensor extends ImageSensor
 
          // Retrieve the grabbed depth image
          Pointer depthImagePointer = slMatPointers[DEPTH_IMAGE_KEY];
-         returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight);
+         returnCode = sl_retrieve_measure(cameraID, depthImagePointer, SL_MEASURE_DEPTH_U16_MM, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
          // Retrieve the grabbed left color image
          Pointer leftColorImagePointer = slMatPointers[LEFT_COLOR_IMAGE_KEY];
-         returnCode = sl_retrieve_image(cameraID, leftColorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight);
+         returnCode = sl_retrieve_image(cameraID, leftColorImagePointer, SL_VIEW_LEFT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
          // Retrieve the grabbed right color image
          Pointer rightColorImagePointer = slMatPointers[RIGHT_COLOR_IMAGE_KEY];
-         returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight);
+         returnCode = sl_retrieve_image(cameraID, rightColorImagePointer, SL_VIEW_RIGHT, SL_MEM_GPU, imageWidth, imageHeight, null); // TODO: Pass custream
          throwOnError(returnCode);
 
          synchronized (grabbedImages)

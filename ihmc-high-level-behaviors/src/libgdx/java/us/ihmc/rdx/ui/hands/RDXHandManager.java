@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui.hands;
 
+import imgui.ImGui;
+import imgui.flag.ImGuiTreeNodeFlags;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.handsros2.HandInterface;
@@ -79,7 +81,10 @@ public class RDXHandManager
 
    public void renderImGuiWidgets()
    {
-      rdxHands.values().forEach(RDXHandInterface::renderImGuiWidgets);
+      if (ImGui.collapsingHeader("Hands", ImGuiTreeNodeFlags.DefaultOpen))
+      {
+         rdxHands.values().forEach(RDXHandInterface::renderImGuiWidgets);
+      }
    }
 
    public SideDependentList<RDXHandInterface> getHands()

@@ -23,4 +23,8 @@ public interface RDXHandInterface
    void renderImGuiWidgets();
 
    void sendCommand(HandAction action);
+
+   void sendFingerPosition(int index, float value);
+
+   float getFingerPosition(int index);
 }

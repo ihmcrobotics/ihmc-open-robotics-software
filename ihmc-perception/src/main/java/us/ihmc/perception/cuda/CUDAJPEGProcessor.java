@@ -53,7 +53,7 @@ public class CUDAJPEGProcessor
     *
     * @param quality value between 1 and 100 representing the quality of the jpeg image. 1 will result in the lowest quality, but highest compression.
     */
-   public CUDAJPEGProcessor(int quality)
+   public CUDAJPEGProcessor(int quality) throws UnsatisfiedLinkError
    {
       if (!CUDATools.hasNVJPEG())
          throw new UnsatisfiedLinkError("NVJPEG was not found. To install NVJPEG, see instructions in ihmc-perception/README.md");
