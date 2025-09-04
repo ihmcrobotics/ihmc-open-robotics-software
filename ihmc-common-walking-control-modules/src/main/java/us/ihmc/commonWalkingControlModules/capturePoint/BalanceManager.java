@@ -107,6 +107,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
 
+   private final YoBoolean useAngularCapturePoint = new YoBoolean("useAngularCapturePoint", registry);
    private final YoBoolean isUsingPrecomputedTrajectory = new YoBoolean("isUsingPrecomputedTrajectory", registry);
    private final FramePoint2D previousDesiredCapturePointPrecomputed = new FramePoint2D();
    private final FrameVector2D previousDesiredCapturePointVelocityPrecomputed = new FrameVector2D();
@@ -238,6 +239,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
+
+      useAngularCapturePoint.set(walkingControllerParameters.useAngularCapturePointForFeedback());
 
       contactStateBasedPredicate = robotSide -> controllerToolbox.getFootContactState(robotSide).inContact();
       contactStateManager = new ContactStateManager(yoTime, walkingControllerParameters, registry);
@@ -466,7 +469,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       double omega0 = controllerToolbox.getOmega0();
 
-      controllerToolbox.getCapturePoint(capturePoint2d);
+      capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
       icpControlPlane.setOmega0(omega0);
       icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
 
@@ -572,7 +575,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
       desiredCoM2d.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
 
-      capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
+      // todo is this variable used in here?
+      capturePoint2d.setIncludingFrame(controllerToolbox.getAngularCapturePoint());
       pelvisICPBasedTranslationManager.compute(supportLeg, multiContactStabilityRegion);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCoM2d, perfectCMP2d);
 
@@ -668,6 +672,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
+      linearMomentumRateControlModuleInput.setUseAngularCapturePoint(useAngularCapturePoint.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointAtEndOfState(yoFinalDesiredICP);
@@ -824,7 +829,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    private double computeTimeShiftToMinimizeTrackingError()
    {
-      controllerToolbox.getCapturePoint(capturePoint2d);
+      capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
       perfectCMP2d.set(yoPerfectCMP);
       return timeAdjustmentCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
                                                                                      perfectCMP2d,
@@ -945,7 +950,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoFinalDesiredCoM.setToNaN();
       yoFinalDesiredCoMVelocity.setToNaN();
       yoFinalDesiredCoMAcceleration.setToNaN();
-      yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
+      yoDesiredCapturePoint.set(controllerToolbox.getAngularCapturePoint());
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
       yoDesiredCoMVelocity.setToZero();
 
@@ -1101,14 +1106,14 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    public double getICPErrorMagnitude()
    {
-      return controllerToolbox.getCapturePoint().distanceXY(yoDesiredCapturePoint);
+      return controllerToolbox.getAngularCapturePoint().distanceXY(yoDesiredCapturePoint);
    }
 
-   public void getICPError(FrameVector2D icpErrorToPack)
+   public void getICPError(FrameVector2DBasics icpErrorToPack)
    {
       icpErrorToPack.setIncludingFrame(yoDesiredCapturePoint);
-      icpErrorToPack.checkReferenceFrameMatch(controllerToolbox.getCapturePoint());
-      icpErrorToPack.sub(controllerToolbox.getCapturePoint().getX(), controllerToolbox.getCapturePoint().getY());
+      icpErrorToPack.checkReferenceFrameMatch(controllerToolbox.getAngularCapturePoint());
+      icpErrorToPack.sub(controllerToolbox.getAngularCapturePoint().getX(), controllerToolbox.getAngularCapturePoint().getY());
    }
 
    public boolean isPrecomputedICPPlannerActive()
@@ -1157,7 +1162,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       centerOfMassPosition.changeFrame(worldFrame);
 
       capturabilityBasedStatus.setOmega(controllerToolbox.getOmega0());
-      capturabilityBasedStatus.getCapturePoint2d().set(controllerToolbox.getCapturePoint());
+      capturabilityBasedStatus.getCapturePoint2d().set(controllerToolbox.getAngularCapturePoint());
       capturabilityBasedStatus.getDesiredCapturePoint2d().set(yoDesiredCapturePoint);
       capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
@@ -1175,7 +1180,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    public FramePoint3DReadOnly getCapturePoint()
    {
-      return controllerToolbox.getCapturePoint();
+      return controllerToolbox.getAngularCapturePoint();
    }
 
    public void minimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)

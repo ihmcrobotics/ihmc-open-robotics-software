@@ -34,6 +34,11 @@ public class LinearMomentumRateControlModuleInput
    private boolean useMomentumRecoveryMode;
 
    /**
+    * Boolean saying whether to use the angular capture point or regular capture point
+    */
+   private boolean useAngularCapturePoint;
+
+   /**
     * The desired capture point that the ICP controller should track.
     */
    private final FramePoint2D desiredCapturePoint = new FramePoint2D();
@@ -120,6 +125,16 @@ public class LinearMomentumRateControlModuleInput
    public double getOmega0()
    {
       return omega0;
+   }
+
+   public void setUseAngularCapturePoint(boolean useAngularCapturePoint)
+   {
+      this.useAngularCapturePoint = useAngularCapturePoint;
+   }
+
+   public boolean getUseAngularCapturePoint()
+   {
+      return useAngularCapturePoint;
    }
 
    public void setUseMomentumRecoveryMode(boolean useMomentumRecoveryMode)
@@ -289,6 +304,7 @@ public class LinearMomentumRateControlModuleInput
    {
       omega0 = other.omega0;
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
+      useAngularCapturePoint = other.useAngularCapturePoint;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
       desiredCapturePointAtEndOfState.setIncludingFrame(other.desiredCapturePointAtEndOfState);
@@ -332,6 +348,8 @@ public class LinearMomentumRateControlModuleInput
          if (controlHeightWithMomentum ^ other.controlHeightWithMomentum)
             return false;
          if (useMomentumRecoveryMode ^ other.useMomentumRecoveryMode)
+            return false;
+         if (useAngularCapturePoint ^ other.useAngularCapturePoint)
             return false;
          if (initializeOnStateChange ^ other.initializeOnStateChange)
             return false;
