@@ -36,7 +36,7 @@ public class ROS2ImageSensors
       this.realsenseSensor = realsenseSensor;
       realsenseDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE);
       realsenseSensor.setSensorFrame(sensorFrame);
-      setupCallbackForDemandNode(realsenseSensor.getGrabThread(), realsenseDemandNode);
+      realsenseSensor.run(true);
 
       realsensePublishDemandNode = new ROS2DemandGraphNode(ros2Node, PerceptionAPI.REQUEST_REALSENSE_PUBLICATION);
       realsenseDemandNode.addDependents(realsensePublishDemandNode);

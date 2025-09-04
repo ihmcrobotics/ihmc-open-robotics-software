@@ -19,6 +19,7 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -153,6 +154,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
+      SteppableRegionCalculatorParameters  steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -171,6 +173,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousHikingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
+      RDXStoredPropertySetTuner steppableRegionCalculatorParametersPanel = new RDXStoredPropertySetTuner("Steppable Region Parameters (CH)");
+      createParametersPanel(steppableRegionCalculatorParameters,
+                            steppableRegionCalculatorParametersPanel,
+                            hostStoredPropertySets,
+                            ContinuousHikingAPI.STEPPABLE_REGION_CALCULATOR_PARAMETERS);
 
       RDXStoredPropertySetTuner depthImageFilteringParametersPanel = new RDXStoredPropertySetTuner("Depth Image Filtering Parameters");
       createParametersPanel(depthImageFilteringParameters,

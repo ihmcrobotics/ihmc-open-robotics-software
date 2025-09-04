@@ -35,7 +35,7 @@ public class SnappingTerrainExtractor
 
    private final TerrainMapData terrainMapData;
    private final HeightMapParameters heightMapParameters;
-   private final SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
+   private final SteppableRegionCalculatorParameters steppableRegionParameters;
 
    private final CUstream_st stream;
    private final CUDAProgram snappingTerrainProgram;
@@ -60,7 +60,6 @@ public class SnappingTerrainExtractor
     */
    private final GpuMat terrainCostMat;
    private final GpuMat contactMat;
-   private final GpuMat snapHeightMat;
    private final GpuMat snapNormalXMat;
    private final GpuMat snapNormalYMat;
    private final GpuMat snapNormalZMat;
@@ -75,9 +74,10 @@ public class SnappingTerrainExtractor
     *
     * @param heightMapParameters parameters used to compute terrain data
     */
-   public SnappingTerrainExtractor(HeightMapParameters heightMapParameters)
+   public SnappingTerrainExtractor(HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters steppableRegionCalculatorParameters)
    {
       this.heightMapParameters = heightMapParameters;
+      this.steppableRegionParameters = steppableRegionCalculatorParameters;
 
       stream = CUDAStreamManager.getStream();
 
@@ -108,7 +108,7 @@ public class SnappingTerrainExtractor
       }
 
       // This is the number of parameters being passed in as floats to the kernel
-      snappingParametersHostPointer = new FloatPointer(17);
+      snappingParametersHostPointer = new FloatPointer(18);
       snappingParametersDevicePointer = new FloatPointer();
 
       computeDerivedParameters();
@@ -118,7 +118,6 @@ public class SnappingTerrainExtractor
       // Initialize matrices and images
       terrainCostMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       contactMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
-      snapHeightMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_16UC1);
       snapNormalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
@@ -160,7 +159,6 @@ public class SnappingTerrainExtractor
       // Pass all the parameters to the kernel so that its setup to run correctly
       snappingTerrainKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
       snappingTerrainKernel.withPointer(steppabilityMat.data()).withLong(steppabilityMat.step());
-      snappingTerrainKernel.withPointer(snapHeightMat.data()).withLong(snapHeightMat.step());
       snappingTerrainKernel.withPointer(snapNormalXMat.data()).withLong(snapNormalXMat.step());
       snappingTerrainKernel.withPointer(snapNormalYMat.data()).withLong(snapNormalYMat.step());
       snappingTerrainKernel.withPointer(snapNormalZMat.data()).withLong(snapNormalZMat.step());
@@ -304,6 +302,7 @@ public class SnappingTerrainExtractor
                           (float) steppableRegionParameters.getFootWidth(),
                           (float) steppableRegionParameters.getDistanceFromCliffTops(),
                           (float) steppableRegionParameters.getDistanceFromCliffBottoms(),
+                          (float) steppableRegionParameters.getScaledFootInMeters(),
                           (float) steppableRegionParameters.getCliffStartHeightToAvoid(),
                           (float) steppableRegionParameters.getCliffEndHeightToAvoid(),
                           (float) steppableRegionParameters.getMinSupportAreaFraction(),
@@ -328,7 +327,6 @@ public class SnappingTerrainExtractor
       steppableConnectionsKernelGridDim.close();
       blockSize.close();
 
-      snapHeightMat.close();
       snapNormalXMat.close();
       snapNormalYMat.close();
       snapNormalZMat.close();

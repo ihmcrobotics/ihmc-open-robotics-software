@@ -33,6 +33,13 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
       set(RobotSide.RIGHT, rightTransform);
    }};
 
+   private static final RigidBodyTransform D457_TO_CHEST_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.092,  0.0,  0.113 );
+      EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), 0.0, 52.0, 0.0);
+   }
+
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
    protected final SideDependentList<String> feetForceSensorParentJointNames = new SideDependentList<String>();
 
@@ -223,5 +230,11 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public RigidBodyTransform getStereoCameraTransform(RobotSide side)
    {
       return ZED_X_MINI_LENSES_TO_HEAD_TRANSFORM.get(side);
+   }
+
+   @Override
+   public RigidBodyTransform getSteppingCameraTransform()
+   {
+      return D457_TO_CHEST_TRANSFORM;
    }
 }

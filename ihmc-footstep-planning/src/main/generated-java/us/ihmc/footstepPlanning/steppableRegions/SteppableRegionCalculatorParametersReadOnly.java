@@ -20,6 +20,11 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
       return get(distanceFromCliffTops);
    }
 
+   default double getScaledFootInMeters()
+   {
+      return get(scaledFootInMeters);
+   }
+
    default int getYawDiscretizations()
    {
       return get(yawDiscretizations);

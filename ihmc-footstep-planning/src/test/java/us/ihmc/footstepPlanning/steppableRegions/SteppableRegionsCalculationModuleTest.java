@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.SnappingTerrainExtractor;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
@@ -37,7 +38,8 @@ public class SteppableRegionsCalculationModuleTest
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
 
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
       snappingTerrainExtractor.update(heightMapData);
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
 

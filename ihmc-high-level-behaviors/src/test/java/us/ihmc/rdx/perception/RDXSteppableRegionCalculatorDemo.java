@@ -2,11 +2,14 @@ package us.ihmc.rdx.perception;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.lwjgl.system.Pointer.Default;
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsManager;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.ROS2ImageSensors;
@@ -113,7 +116,7 @@ public class RDXSteppableRegionCalculatorDemo
                                                         controllerFootstepQueueMonitor,
                                                         heightMapParameters);
 
-      snappingTerrainManager = new SnappingTerrainManager(ros2Node, heightMapParameters);
+      snappingTerrainManager = new SnappingTerrainManager(ros2Node, heightMapParameters, new SteppableRegionCalculatorParameters());
       steppableRegionsManager = new SteppableRegionsManager(ros2Node);
 
       ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("STEPPABLE_REGIONS_UPDATE").build();
