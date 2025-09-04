@@ -70,7 +70,7 @@ public class AlexanderModelFactory
       return new DefaultLogModelProvider<>(clazz, urdfParameters.getURDFModelName(), urdfParameters.getURDFAsInputStream(), filter, urdfParameters.getResourceDirectories());
    }
 
-   public RobotDefinition getSCS1RobotDefinition()
+   public RobotDefinition getSCS1RobotDefinition(boolean createContactPoints)
    {
       if (simulationRobotDefinition == null)
       {
@@ -81,7 +81,7 @@ public class AlexanderModelFactory
                                                                          Arrays.asList(urdfParameters.getResourceDirectories()),
                                                                          getClass().getClassLoader(),
                                                                          urdfParameters.getURDFModelName(),
-                                                                         contactPointParameters,
+                                                                         createContactPoints ? contactPointParameters : null,
                                                                          jointMap,
                                                                          true,
                                                                          parserProperties);
@@ -120,7 +120,7 @@ public class AlexanderModelFactory
    {
       if (controllerRobotDefinition == null)
       {
-         controllerRobotDefinition = getSCS1RobotDefinition();
+         controllerRobotDefinition = getSCS1RobotDefinition(true);
       }
       return controllerRobotDefinition;
    }
