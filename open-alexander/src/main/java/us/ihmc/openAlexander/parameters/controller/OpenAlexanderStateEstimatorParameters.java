@@ -36,6 +36,10 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
    private final double spineJointVelocityFrequency;
    private final double lowerBodyJointPositionFrequency;
    private final double lowerBodyJointVelocityFrequency;
+   private final double upperArmJointPositionFrequency;
+   private final double upperArmJointVelocityFrequency;
+   private final double forearmJointPositionFrequency;
+   private final double forearmJointVelocityFrequency;
 
    private final double orientationFrequency;
    private final double angularVelocityFrequency;
@@ -62,6 +66,12 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
       lowerBodyJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 50.0 : Double.POSITIVE_INFINITY;
+
+      upperArmJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 60.0 : Double.POSITIVE_INFINITY;
+      upperArmJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 15.0 : Double.POSITIVE_INFINITY;
+
+      forearmJointPositionFrequency = target == RobotTarget.REAL_ROBOT ? 60.0 : Double.POSITIVE_INFINITY;
+      forearmJointVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 9.0 : Double.POSITIVE_INFINITY;
 
       orientationFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
       angularVelocityFrequency = target == RobotTarget.REAL_ROBOT ? 25.0 : Double.POSITIVE_INFINITY;
@@ -92,13 +102,13 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(neckJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, neckJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(neckJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, neckJoints());
 
-      DoubleProvider upperArmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("upperArmJointPositionFrequency", 60.0);
-      DoubleProvider upperArmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("upperArmJointVelocityFrequency", 15.0);
+      DoubleProvider upperArmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("upperArmJointPositionFrequency", upperArmJointPositionFrequency);
+      DoubleProvider upperArmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("upperArmJointVelocityFrequency", upperArmJointVelocityFrequency);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(upperArmJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, upperArmJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(upperArmJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, upperArmJoints());
 
-      DoubleProvider forearmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointPositionFrequency", 60.0);
-      DoubleProvider forearmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointVelocityFrequency", 9.0);
+      DoubleProvider forearmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointPositionFrequency", forearmJointPositionFrequency);
+      DoubleProvider forearmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointVelocityFrequency", forearmJointVelocityFrequency);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(forearmJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, forearmJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(forearmJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, forearmJoints());
 

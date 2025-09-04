@@ -105,14 +105,16 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
                                                 rightBicepIMUSensor, rightForearmIMUSensor};
 
    // IMUs to use
-   private final List<String> imuSensorsToUse = new ArrayList<>(List.of(leftHipXIMU,
-                                                                leftThighIMU,
-                                                                leftShinIMU,
-                                                                leftFootIMU,
-                                                                rightHipXIMU,
-                                                                rightThighIMU,
-                                                                rightShinIMU,
-                                                                rightFootIMU));
+   private final List<String> imuSensorsToUse = new ArrayList<>(List.of(pelvisIMU,
+                                                                        torsoIMU,
+                                                                        leftHipXIMU,
+                                                                        leftThighIMU,
+                                                                        leftShinIMU,
+                                                                        leftFootIMU,
+                                                                        rightHipXIMU,
+                                                                        rightThighIMU,
+                                                                        rightShinIMU,
+                                                                        rightFootIMU));
 
    private AlexanderVersionInterface alexanderVersion;
 
@@ -127,7 +129,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (alexanderVersion.hasArm(RobotSide.LEFT))
+         if (alexanderVersion.hasArm(robotSide))
          {
             imuSensorsToUse.add(shoulderIMUNames.get(robotSide));
             imuSensorsToUse.add(bicepIMUNames.get(robotSide));
