@@ -74,7 +74,7 @@ public class LeRobotDatasetDataWriter
          SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
          for (RobotSide side : robotArmJointNames.sides())
          {
-            String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "KinematicsStreamingToolboxModule");
+            String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "IKStreamingRTThread");
             String kstController = kstModule + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
             String capitalizedRobotName = StringUtils.capitalize(session.getLogProperties().getModel().getNameAsString());
             String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
@@ -101,7 +101,7 @@ public class LeRobotDatasetDataWriter
 
    public YoPose3D findYoPose(String linkName, String qualifier)
    {
-      String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "KinematicsStreamingToolboxModule");
+      String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "IKStreamingRTThread");
       String kstController = kstModule + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
       String feedbackController = kstController + "WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.";
       if (rootRegistry.findVariable("%s%s%sPositionX".formatted(feedbackController, linkName, qualifier)) instanceof YoDouble xVariable

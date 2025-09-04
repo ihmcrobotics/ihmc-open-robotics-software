@@ -129,7 +129,7 @@ public class LeRobotDataset
       ensureTaskNameInJsonl(taskName);
 
       MutableBoolean stillGoing = new MutableBoolean(false);
-      String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "KinematicsStreamingToolboxModule");
+      String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "IKStreamingRTThread");
       String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
       if (session.getRootRegistry().findVariable(kstStreaming + "isDemonstrationEpisode") instanceof YoBoolean isDemonstrationEpisode)
       {
