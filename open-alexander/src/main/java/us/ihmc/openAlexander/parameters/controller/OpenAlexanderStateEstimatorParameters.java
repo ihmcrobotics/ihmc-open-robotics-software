@@ -109,6 +109,7 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
       DoubleProvider forearmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointPositionFrequency", forearmJointPositionFrequency);
       DoubleProvider forearmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointVelocityFrequency", forearmJointVelocityFrequency);
+
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(forearmJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, forearmJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(forearmJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, forearmJoints());
 
