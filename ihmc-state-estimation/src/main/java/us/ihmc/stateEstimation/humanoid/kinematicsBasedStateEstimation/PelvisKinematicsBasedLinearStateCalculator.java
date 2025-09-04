@@ -107,6 +107,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
       correctTrustedFeetPositions = new BooleanParameter("correctTrustedFeetPositions", registry, stateEstimatorParameters.correctTrustedFeetPositions());
 
+      YoBoolean useFootIMUData = new YoBoolean("useFootIMUData", registry);
       YoDouble footAlphaLeakIMUOnly = new YoDouble("footIMUOnlyAlphaLeak", registry);
       YoDouble imuAgainstKinematicsForVelocityBreakFrequency = new YoDouble("footIMUAgainstKinematicsForVelocityBreakFrequency", registry);
       YoDouble imuAgainstKinematicsForPositionBreakFrequency = new YoDouble("footIMUAgainstKinematicsForPositionBreakFrequency", registry);
@@ -133,6 +134,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
                                                      centerOfPressureDataHolderFromController,
                                                      cancelGravityFromAccelerationMeasurement,
                                                      gravityVector,
+                                                     useFootIMUData,
                                                      imuAgainstKinematicsForPositionBreakFrequency,
                                                      imuAgainstKinematicsForVelocityBreakFrequency,
                                                      footAlphaLeakIMUOnly,

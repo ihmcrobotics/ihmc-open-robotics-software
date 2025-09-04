@@ -44,14 +44,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 class SingleFootEstimator implements SCS2YoGraphicHolder
 {
-   private static boolean USE_IMU_DATA = true;
-
    private final RigidBodyBasics foot;
 
    private final ReferenceFrame rootJointFrame;
    private final ReferenceFrame soleFrame;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final BooleanProvider useIMUData;
    private final YoFrameVector3D footIKLinearVelocityInWorld;
    private final YoFrameVector3D footIKAngularVelocityInWorld;
    private final YoFrameVector3D footIMULinearVelocityInWorld;
@@ -99,6 +98,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
                               CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
                               BooleanProvider cancelGravityFromAccelerationMeasurement,
                               FrameVector3DReadOnly gravityVector,
+                              BooleanProvider useIMUData,
                               DoubleProvider imuAgainstKinematicsForPositionBreakFrequency,
                               DoubleProvider imuAgainstKinematicsForVelocityBreakFrequency,
                               DoubleProvider footAlphaLeakIMUOnly,
@@ -112,6 +112,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
       this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
       this.gravityVector = gravityVector;
+      this.useIMUData = useIMUData;
       this.imuAgainstKinematicsForPositionBreakFrequency = imuAgainstKinematicsForPositionBreakFrequency;
       this.imuAgainstKinematicsForVelocityBreakFrequency = imuAgainstKinematicsForVelocityBreakFrequency;
       this.footAlphaLeakIMUOnly = footAlphaLeakIMUOnly;
@@ -204,7 +205,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       footToRootJointPosition.update(tempFrameVector);
 
       // FIXME remove magic parameters
-      if (USE_IMU_DATA)
+      if (useIMUData.getValue() && footIMU != null)
          footIsMoving.set(getFootLinearVelocityInWorld().norm() > 0.5 || getFootAngularVelocityInWorld().norm() > 1.0);
       else
          footIsMoving.set(false);
@@ -380,7 +381,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
          copIKPositionInWorld.setFromReferenceFrame(soleFrame);
       }
 
-      if (USE_IMU_DATA)
+      if (useIMUData.getValue() && footIMU != null)
       {
          // Integrate the fused position using the velocity, which is from the kinematics and the IMU.
          computeLinearVelocityAtPointInWorld(copFusedPositionInWorld, tempFrameVector);
@@ -418,7 +419,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       footTwistInWorld.setBodyFrame(soleFrame);
       footTwistInWorld.changeFrame(worldFrame);
 
-      if (USE_IMU_DATA)
+      if (useIMUData.getValue() && footIMU != null)
       {
          // Record the kinematic data
          footIKLinearVelocityInWorld.set(footTwistInWorld.getLinearPart());
