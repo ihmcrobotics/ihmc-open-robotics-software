@@ -64,6 +64,8 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final String leftForearmIMU = "left_wrist_z_imu";
    private final String leftHandIMU = "left_gripper_z_imu";
 
+   private final String headIMU = "head_imu";
+
    // Right upper arm IMUs
    private final String rightShoulderIMU = "right_shoulder_y_imu";
    private final String rightBicepIMU = "right_shoulder_z_imu";
@@ -126,6 +128,11 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
       feetForceSensorNames.put(RobotSide.RIGHT, "RightFootFTSensor");
       feetForceSensorParentJointNames.put(RobotSide.LEFT, "LEFT_ANKLE_X");
       feetForceSensorParentJointNames.put(RobotSide.RIGHT, "RIGHT_ANKLE_X");
+
+      if (alexanderVersion.hasHead())
+         imuSensorsToUse.add(headIMU);
+      else
+
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -228,6 +235,14 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public String getTorsoIMUName()
    {
       return torsoIMU;
+   }
+
+   public String getHeadIMUName()
+   {
+      if (imuSensorsToUse.contains(headIMU))
+         return headIMU;
+      else
+         return null;
    }
 
    public String getHipIMUName(RobotSide robotSide)
