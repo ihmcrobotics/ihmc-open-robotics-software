@@ -115,15 +115,12 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     int max_points_possible_under_support = 0;
 
-    int samples = 5;
-    float resolution = foot_search_radius / samples;
-
-    for (int x_value_idx = -samples; x_value_idx <= samples; x_value_idx++)
+    for (int x_value_idx = foot_search_min_x; x_value_idx <= foot_search_max_x; x_value_idx++)
     {
-        for (int y_value_idx = -samples; y_value_idx <= samples; y_value_idx++)
+        for (int y_value_idx = foot_search_min_y; y_value_idx <= foot_search_max_y; y_value_idx++)
         {
             // Calculate offset and check distance
-            float2 offset = make_float2((float)x_value_idx * resolution, (float)y_value_idx * resolution);
+            float2 offset = make_float2((float)(x_value_idx - terrain_map_index.x) * map_resolution, (float)(y_value_idx - terrain_map_index.y) * map_resolution);
             float offset_distance_squared = dot2D(offset, offset);
 
             if (offset_distance_squared > foot_search_radius_squared)
@@ -184,8 +181,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     }
 
     // This is the actual height of the snapped foot
-    float *heightValue = (float *) ((char *)heightMap + y_index * pitchHeightMap) + x_index;
-    float snap_height = *heightValue;
+    float snap_height = z/n;
 
     float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
     float z_variance_vector[3] = {-xz, -yz, -z};
@@ -260,10 +256,10 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     // Write results back to surfaces.
     int area_fraction = static_cast<int>(255 * n / max_points_possible_under_support);
-    // note these are switched to align with world
 
     // Technically speaking, the z value of the normal doesn't need to be returned, since we know the magnitude of the vector is unitary.
     int normal_x_int = static_cast<int>(255 * (normal.y + 1.0f) / 2.0f);
+    // Note these are switched to align with world, this is correct
     int normal_y_int = static_cast<int>(255 * (normal.x + 1.0f) / 2.0f);
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = make_int2(x_index, y_index);
