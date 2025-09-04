@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
       YoDouble footAlphaLeakIMUOnly = new YoDouble("footIMUOnlyAlphaLeak", registry);
       YoDouble imuAgainstKinematicsForVelocityBreakFrequency = new YoDouble("footIMUAgainstKinematicsForVelocityBreakFrequency", registry);
       YoDouble imuAgainstKinematicsForPositionBreakFrequency = new YoDouble("footIMUAgainstKinematicsForPositionBreakFrequency", registry);
-      imuAgainstKinematicsForPositionBreakFrequency.set(200.0);
+      imuAgainstKinematicsForPositionBreakFrequency.set(0.0);
       imuAgainstKinematicsForVelocityBreakFrequency.set(2.0);
       footAlphaLeakIMUOnly.set(0.999);
 
@@ -234,14 +235,28 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          rootJointLinearVelocity.setToZero();
    }
 
-   public void estimatePelvisLinearState(List<RigidBodyBasics> trustedFeet, List<RigidBodyBasics> unTrustedFeet, FramePoint3DReadOnly pelvisPosition)
+   private final List<RigidBodyBasics> trustedFeetLocal = new ArrayList<>();
+   private final List<RigidBodyBasics> unTrustedFeetLocal = new ArrayList<>();
+
+   public void estimatePelvisLinearState(List<RigidBodyBasics> trustedFeet,
+                                         List<RigidBodyBasics> unTrustedFeet,
+                                         FramePoint3DReadOnly pelvisPosition,
+                                         FrameVector3DReadOnly pelvisLinearVelocity)
    {
       if (!kinematicsIsUpToDate.getBooleanValue())
          throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
 
+      trustedFeetLocal.clear();
+      unTrustedFeetLocal.clear();
+
       for (int i = 0; i < trustedFeet.size(); i++)
+         trustedFeetLocal.add(trustedFeet.get(i));
+      for (int i = 0; i < unTrustedFeet.size(); i++)
+         unTrustedFeetLocal.add(unTrustedFeet.get(i));
+
+      for (int i = 0; i < trustedFeetLocal.size(); i++)
       {
-         SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
+         SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeetLocal.get(i));
          if (assumeTrustedFootAtZeroHeight.getValue())
          {
             if (trustCoPAsNonSlippingContactPoint.getValue())
@@ -257,23 +272,52 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          {
             footEstimator.updateCoPAndFootPosition(trustCoPAsNonSlippingContactPoint.getValue(), useControllerDesiredCoP.getValue());
          }
-         footEstimator.correctPelvisFromKinematics(trustedFeet.size(), alphaRootJointLinearVelocity.getValue(), rootJointPosition, rootJointLinearVelocity);
+      }
+
+      int trustIdx = 0;
+      while (trustIdx < trustedFeetLocal.size())
+      {
+         if (footEstimatorMap.get(trustedFeetLocal.get(trustIdx)).isFootMoving())
+            unTrustedFeetLocal.add(trustedFeetLocal.remove(trustIdx));
+         else
+            trustIdx++;
+      }
+
+      if (trustedFeetLocal.isEmpty())
+      {
+         rootJointPosition.set(pelvisPosition);
+         if (pelvisLinearVelocity != null)
+            rootJointLinearVelocity.set(pelvisLinearVelocity);
+         else
+            rootJointLinearVelocity.setToZero();
+      }
+      else
+      {
+         for (int i = 0; i < trustedFeetLocal.size(); i++)
+         {
+            SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeetLocal.get(i));
+            footEstimator.correctPelvisFromKinematics(trustedFeetLocal.size(),
+                                                      alphaRootJointLinearVelocity.getValue(),
+                                                      rootJointPosition,
+                                                      rootJointLinearVelocity);
+         }
       }
 
       rootJointLinearVelocityFDDebug.update();
 
+      // TODO should this use the local copies?
       if (correctTrustedFeetPositions.getValue())
       {
-         for (int i = 0; i < trustedFeet.size(); i++)
+         for (int i = 0; i < trustedFeetLocal.size(); i++)
          {
-            SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
+            SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeetLocal.get(i));
             footEstimator.correctFootPositionFromRootJoint(true, trustCoPAsNonSlippingContactPoint.getValue(), rootJointPosition);
          }
       }
 
-      for (int i = 0; i < unTrustedFeet.size(); i++)
+      for (int i = 0; i < unTrustedFeetLocal.size(); i++)
       {
-         SingleFootEstimator footEstimator = footEstimatorMap.get(unTrustedFeet.get(i));
+         SingleFootEstimator footEstimator = footEstimatorMap.get(unTrustedFeetLocal.get(i));
          footEstimator.correctFootPositionFromRootJoint(false, false, pelvisPosition);
       }
 

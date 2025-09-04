@@ -364,10 +364,10 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    public void updateRootJointPositionAndLinearVelocity()
    {
+      kinematicsBasedLinearStateCalculator.updateKinematics();
+
       if (requestStopEstimationOfPelvisLinearState.getBooleanValue())
          return;
-
-      kinematicsBasedLinearStateCalculator.updateKinematics();
 
       numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
       numberOfEndEffectorsFilteredByLoad.set(0);
@@ -413,7 +413,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       else if (numberOfEndEffectorsTrusted.getIntegerValue() > 0)
       {
          updateTrustedFeetLists();
-         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition, rootJointVelocity);
 
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {

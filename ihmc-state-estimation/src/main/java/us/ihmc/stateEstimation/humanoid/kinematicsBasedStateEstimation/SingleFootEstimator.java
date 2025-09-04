@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
@@ -39,6 +40,7 @@ import us.ihmc.yoVariables.filters.AlphaFilterTools;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 class SingleFootEstimator implements SCS2YoGraphicHolder
 {
@@ -57,13 +59,17 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    private final YoFrameVector3D footFusedLinearVelocityInWorld;
    private final YoFrameVector3D footFusedAngularVelocityInWorld;
 
+   private final YoBoolean footIsMoving;
+
    private final YoFrameVector3D copVelocityInWorld;
    private final AlphaFilteredYoFrameVector3D footToRootJointPosition;
    private final YoFramePoint3D footPositionInWorld;
    /** Debug variable */
    private final YoFramePoint3D rootJointPositionPerFoot;
 
-   private final YoFramePoint3D copPositionInWorld;
+   private final YoFramePoint3D copIKPositionInWorld;
+   private final YoFramePoint3D copIMUPositionInWorld;
+   private final YoFramePoint3D copFusedPositionInWorld;
    private final YoFramePoint2D previousCoPInFootFrame;
 
    private final AlphaFilteredYoFramePoint2D copFilteredInFootFrame;
@@ -124,6 +130,8 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
       previousCoPInFootFrame = new YoFramePoint2D(namePrefix + "PreviousCoPInFootFrame", soleFrame, registry);
 
+      footIsMoving = new YoBoolean(namePrefix + "IsMoving", registry);
+
       footIKLinearVelocityInWorld = new YoFrameVector3D(namePrefix + "IKLinearVelocityInWorld", worldFrame, registry);
       footIKAngularVelocityInWorld = new YoFrameVector3D(namePrefix + "IKAngularVelocityInWorld", worldFrame, registry);
       footIMULinearVelocityInWorld = new YoFrameVector3D(namePrefix + "IMULinearVelocityInWorld", worldFrame, registry);
@@ -134,7 +142,9 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       DoubleProvider alphaCop = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copFilterBreakFrequency.getValue(), estimatorDT);
       copFilteredInFootFrame = new AlphaFilteredYoFramePoint2D(namePrefix + "CoPFilteredInFootFrame", "", registry, alphaCop, copRawInFootFrame);
       copFilteredInFootFrame.update(0.0, 0.0);
-      copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionInWorld", worldFrame, registry);
+      copIKPositionInWorld = new YoFramePoint3D(namePrefix + "CoPIKPositionInWorld", worldFrame, registry);
+      copIMUPositionInWorld = new YoFramePoint3D(namePrefix + "CoPIMUPositionInWorld", worldFrame, registry);
+      copFusedPositionInWorld = new YoFramePoint3D(namePrefix + "CoPFusedPositionInWorld", worldFrame, registry);
       copVelocityInWorld = new YoFrameVector3D(namePrefix + "CoPVelocityInWorld", worldFrame, registry);
    }
 
@@ -144,7 +154,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
          return;
 
       String sidePrefix = foot.getName();
-      YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP", copPositionInWorld, 0.005, YoAppearance.DeepPink());
+      YoGraphicPosition copInWorld = new YoGraphicPosition(sidePrefix + "StateEstimatorCoP", copFusedPositionInWorld, 0.005, YoAppearance.DeepPink());
       YoArtifactPosition artifact = copInWorld.createArtifact();
       artifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("StateEstimator", artifact);
@@ -153,7 +163,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
-      return YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName() + "StateEstimatorCoP", copPositionInWorld,
+      return YoGraphicDefinitionFactory.newYoGraphicPoint2D(foot.getName() + "StateEstimatorCoP", copFusedPositionInWorld,
                                                             0.01,
                                                             ColorDefinitions.DeepPink(),
                                                             DefaultPoint2DGraphic.CIRCLE);
@@ -192,6 +202,12 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       tempFrameVector.changeFrame(worldFrame);
 
       footToRootJointPosition.update(tempFrameVector);
+
+      // FIXME remove magic parameters
+      if (USE_IMU_DATA)
+         footIsMoving.set(getFootLinearVelocityInWorld().norm() > 0.5 || getFootAngularVelocityInWorld().norm() > 1.0);
+      else
+         footIsMoving.set(false);
    }
 
    /**
@@ -202,7 +218,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    public void updateCoPAndFootSettingZ(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP, double zPosition)
    {
       updateCoPPosition(trustCoPAsNonSlippingContactPoint, useControllerDesiredCoP);
-      copPositionInWorld.setZ(zPosition);
+      copFusedPositionInWorld.setZ(zPosition);
       correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint);
    }
 
@@ -257,14 +273,14 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
 
       if (!isTrusted)
       {
-         copPositionInWorld.set(footPositionInWorld);
+         copFusedPositionInWorld.set(footPositionInWorld);
          copRawInFootFrame.setToZero();
          copFilteredInFootFrame.setToZero();
       }
       else if (trustCoPAsNonSlippingContactPoint)
       {
          tempFrameVector.sub(footPositionInWorld, tempPoint); // Delta from previous to new foot position
-         copPositionInWorld.add(tempFrameVector); // New CoP position
+         copFusedPositionInWorld.add(tempFrameVector); // New CoP position
       }
    }
 
@@ -286,6 +302,11 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    public FrameVector3DReadOnly getFootAngularVelocityInWorld()
    {
       return footFusedAngularVelocityInWorld;
+   }
+
+   public boolean isFootMoving()
+   {
+      return footIsMoving.getBooleanValue();
    }
 
    private final FramePoint2D tempCoP2d = new FramePoint2D();
@@ -340,6 +361,9 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
          copRawInFootFrame.set(tempCoP2d);
          copFilteredInFootFrame.update();
 
+         // Update the CoP value from kinematics. This treats it as non-stationary.
+         copIKPositionInWorld.setMatchingFrame(soleFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
+
          // Update the change in the CoP from the previous tick.
          tempCoPOffset.setIncludingFrame(soleFrame,
                                          copFilteredInFootFrame.getX() - previousCoPInFootFrame.getX(),
@@ -347,16 +371,25 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
                                          0.0);
          tempCoPOffset.changeFrame(worldFrame);
          // Apply this same change to the CoP in world.
-         copPositionInWorld.add(tempCoPOffset);
+         copFusedPositionInWorld.add(tempCoPOffset);
       }
       else
       {
          tempCoP2d.setToZero(soleFrame);
-         copRawInFootFrame.setToZero();
-         copFilteredInFootFrame.setToZero();
-         copPositionInWorld.setFromReferenceFrame(soleFrame);
+         // Update the CoP value to match the center of the foot.
+         copIKPositionInWorld.setFromReferenceFrame(soleFrame);
       }
 
+      if (USE_IMU_DATA)
+      {
+         // Integrate the fused position using the velocity, which is from the kinematics and the IMU.
+         computeLinearVelocityAtPointInWorld(copFusedPositionInWorld, tempFrameVector);
+         copIMUPositionInWorld.scaleAdd(footAlphaLeakIMUOnly.getValue() * estimatorDT, tempFrameVector, copFusedPositionInWorld);
+
+         // Fuse the kinematic data with the IMU data
+         double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
+         copFusedPositionInWorld.interpolate(copIKPositionInWorld, copIMUPositionInWorld, alpha);
+      }
    }
 
    private void correctFootPositionsUsingCoP(boolean trustCoPAsNonSlippingContactPoint)
@@ -368,7 +401,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       tempCoPOffset.setIncludingFrame(copFilteredInFootFrame, 0.0);
       tempCoPOffset.changeFrame(worldFrame);
       // Update where the foot must be, according to this CoP location
-      footPositionInWorld.sub(copPositionInWorld, tempCoPOffset);
+      footPositionInWorld.sub(copFusedPositionInWorld, tempCoPOffset);
    }
 
    private final FrameVector3D linearAcceleration = new FrameVector3D();
@@ -446,9 +479,14 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
 
    private void computeCoPLinearVelocityInWorld(FixedFrameVector3DBasics footLinearVelocityToPack)
    {
+      computeLinearVelocityAtPointInWorld(copFusedPositionInWorld, footLinearVelocityToPack);
+   }
+
+   private void computeLinearVelocityAtPointInWorld(FramePoint3DReadOnly point, FixedFrameVector3DBasics footLinearVelocityToPack)
+   {
       footTwistInWorld.getLinearPart().set(footFusedLinearVelocityInWorld);
       footTwistInWorld.getAngularPart().set(footFusedAngularVelocityInWorld);
 
-      footTwistInWorld.getLinearVelocityAt(copPositionInWorld, footLinearVelocityToPack);
+      footTwistInWorld.getLinearVelocityAt(point, footLinearVelocityToPack);
    }
 }
