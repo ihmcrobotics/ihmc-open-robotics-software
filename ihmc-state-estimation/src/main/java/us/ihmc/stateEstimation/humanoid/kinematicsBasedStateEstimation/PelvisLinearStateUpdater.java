@@ -311,8 +311,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
             // By setting the root joint to be at -footZ, the foot will be at a height of zero.
             rootJointPosition.setZ(-footPositionInWorld.getZ());
-            LogTools.info(-footPositionInWorld.getZ());
-            LogTools.info(rootJointPosition.getZ());
+            LogTools.info("Robot state initialized.%n-footZ = %.4f%nrootZ = %.4f".formatted(-footPositionInWorld.getZ(), rootJointPosition.getZ()));
          }
       }
       else
