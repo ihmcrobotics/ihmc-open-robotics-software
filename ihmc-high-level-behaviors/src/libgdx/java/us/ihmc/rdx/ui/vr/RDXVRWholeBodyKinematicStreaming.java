@@ -91,7 +91,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
 public class RDXVRWholeBodyKinematicStreaming
 {
-   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
+   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = true;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
 
    private final RDXVRMultiContact multiContact;
@@ -317,6 +317,7 @@ public class RDXVRWholeBodyKinematicStreaming
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processControllers(toolboxInputMessage);
          processTrackers(toolboxInputMessage);
+         processHeadset(toolboxInputMessage);
          retargetMotion(toolboxInputMessage);
          multiContact.doCoMControl(toolboxInputMessage);
 
@@ -526,6 +527,29 @@ public class RDXVRWholeBodyKinematicStreaming
       }
    }
 
+   private void processHeadset(KinematicsStreamingToolboxInputMessage messageToPack)
+   {
+      vrContext.getHeadset().runIfConnected(headset->
+      {
+         RigidBodyBasics controlledSegment = getControlledSegment(HEAD);
+         if (controlledSegment != null)
+         {
+            FramePose3D desiredPose = new FramePose3D();
+            desiredPose.setToZero(headset.getXForwardZUpHeadsetFrame());
+            desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                               desiredPose,
+                                                                               headset.getAngularVelocity(),
+                                                                               headset.getLinearVelocity(),
+                                                                               retargetingParameters.getPositionWeight(HEAD),
+                                                                               retargetingParameters.getOrientationWeight(HEAD),
+                                                                               retargetingParameters.getLinearRateLimitation(HEAD),
+                                                                               retargetingParameters.getAngularRateLimitation(HEAD));
+            messageToPack.getInputs().add().set(message);
+         }
+      });
+   }
+
    private void retargetMotion(KinematicsStreamingToolboxInputMessage messageToPack)
    {
       if (armScaling.get())
@@ -604,6 +628,7 @@ public class RDXVRWholeBodyKinematicStreaming
          case LEFT_HAND, RIGHT_HAND -> ghostFullRobotModel.getHand(segmentType.getSegmentSide());
          case LEFT_ANKLE, RIGHT_ANKLE -> ghostFullRobotModel.getFoot(segmentType.getSegmentSide());
          case LEFT_WRIST, RIGHT_WRIST -> ghostFullRobotModel.getForearm(segmentType.getSegmentSide());
+         case HEAD -> ghostFullRobotModel.getHead();
          case CHEST -> ghostFullRobotModel.getChest();
          case WAIST -> ghostFullRobotModel.getPelvis();
       };
