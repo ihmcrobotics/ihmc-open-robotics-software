@@ -372,7 +372,7 @@ public class PartialFootholdControlModule implements SCS2YoGraphicHolder
       fullSupportAfterShrinking.changeFrameAndProjectToXYPlane(worldFrame);
       fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);
       fullSupportAfterShrinking.update();
-      controllerToolbox.getAngularCapturePoint(capturePoint);
+      controllerToolbox.getCapturePoint(capturePoint);
       yoFullSupportAfterShrinking.set(fullSupportAfterShrinking);
       //      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
       //      if (!icpInPolygon)
