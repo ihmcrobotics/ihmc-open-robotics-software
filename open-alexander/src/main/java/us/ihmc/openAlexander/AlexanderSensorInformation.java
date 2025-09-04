@@ -12,6 +12,9 @@ import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensors.zed.ZEDModelData;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AlexanderSensorInformation implements HumanoidRobotSensorInformation
 {
    // ZED X Mini
@@ -43,6 +46,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
    protected final SideDependentList<String> feetForceSensorParentJointNames = new SideDependentList<String>();
 
+<<<<<<< HEAD
    private static final String leftShoulderIMUSensor = "left_shoulder_y_imu";
    private static final String leftBicepIMUSensor = "left_shoulder_z_imu";
    private static final String leftForearmIMUSensor = "left_wrist_z_imu";
@@ -52,6 +56,21 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final String rightBicepIMUSensor = "right_shoulder_z_imu";
    private static final String rightForearmIMUSensor = "right_wrist_z_imu";
    private static final String rightHandIMUSensor = null; // "right_gripper_z_imu";
+=======
+   // Left upper arm IMUs
+   private final String leftShoulderIMU = "left_shoulder_y_imu";
+   private final String leftBicepIMU = "left_shoulder_z_imu";
+   // Left lower arm IMUs
+   private final String leftForearmIMU = "left_wrist_z_imu";
+   private final String leftHandIMU = "left_gripper_z_imu";
+
+   // Right upper arm IMUs
+   private final String rightShoulderIMU = "right_shoulder_y_imu";
+   private final String rightBicepIMU = "right_shoulder_z_imu";
+   // Right lower arm IMUs
+   private final String rightForearmIMU = "right_wrist_z_imu";
+   private final String rightHandIMU = "right_gripper_z_imu";
+>>>>>>> 3c568f379dc (added in filters for the arm joints)
 
    // Torso IMUs
    private static final String torsoIMU = "torso_imu";
@@ -71,25 +90,29 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final String rightShinIMU = "right_shin_imu";
    private static final String rightFootIMU = "right_foot_imu";
 
-   //
-   private final SideDependentList<String> hipIMUNames = new SideDependentList<>();
-   private final SideDependentList<String> thighIMUNames = new SideDependentList<>();
-   private final SideDependentList<String> shinIMUNames = new SideDependentList<>();
-   private final SideDependentList<String> footIMUNames = new SideDependentList<>();
+
+   private final SideDependentList<String> hipIMUNames = new SideDependentList<>(leftHipXIMU, rightHipXIMU);
+   private final SideDependentList<String> thighIMUNames = new SideDependentList<>(leftThighIMU, rightThighIMU);
+   private final SideDependentList<String> shinIMUNames = new SideDependentList<>(leftShinIMU, rightShinIMU);
+   private final SideDependentList<String> footIMUNames = new SideDependentList<>(leftFootIMU, rightFootIMU);
+
+   private final SideDependentList<String> shoulderIMUNames = new SideDependentList<>(leftShoulderIMU, rightShoulderIMU);
+   private final SideDependentList<String> bicepIMUNames = new SideDependentList<>(leftBicepIMU, rightBicepIMU);
+   private final SideDependentList<String> forearmIMUNames = new SideDependentList<>(leftForearmIMU, rightForearmIMU);
+   private final SideDependentList<String> handIMUNames = new SideDependentList<>(leftHandIMU, rightHandIMU);
 
    private static final String[] imuSensorsToIgnore = {leftBicepIMUSensor, leftForearmIMUSensor,
                                                 rightBicepIMUSensor, rightForearmIMUSensor};
 
    // IMUs to use
-   private static final String[] imuSensorsToUse = {pelvisIMU,
-                                             leftHipXIMU,
-                                             leftThighIMU,
-                                             leftShinIMU,
-                                             leftFootIMU,
-                                             rightHipXIMU,
-                                             rightThighIMU,
-                                             rightShinIMU,
-                                             rightFootIMU};
+   private final List<String> imuSensorsToUse = new ArrayList<>(List.of(leftHipXIMU,
+                                                                leftThighIMU,
+                                                                leftShinIMU,
+                                                                leftFootIMU,
+                                                                rightHipXIMU,
+                                                                rightThighIMU,
+                                                                rightShinIMU,
+                                                                rightFootIMU));
 
    private AlexanderVersionInterface alexanderVersion;
 
@@ -102,23 +125,37 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
       feetForceSensorParentJointNames.put(RobotSide.LEFT, "LEFT_ANKLE_X");
       feetForceSensorParentJointNames.put(RobotSide.RIGHT, "RIGHT_ANKLE_X");
 
-      hipIMUNames.put(RobotSide.LEFT, leftHipXIMU);
-      hipIMUNames.put(RobotSide.RIGHT, rightHipXIMU);
-
-      thighIMUNames.put(RobotSide.LEFT, leftThighIMU);
-      thighIMUNames.put(RobotSide.RIGHT, rightThighIMU);
-
-      shinIMUNames.put(RobotSide.LEFT, leftShinIMU);
-      shinIMUNames.put(RobotSide.RIGHT, rightShinIMU);
-
-      footIMUNames.put(RobotSide.LEFT, leftFootIMU);
-      footIMUNames.put(RobotSide.RIGHT, rightFootIMU);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (alexanderVersion.hasArm(RobotSide.LEFT))
+         {
+            imuSensorsToUse.add(shoulderIMUNames.get(robotSide));
+            imuSensorsToUse.add(bicepIMUNames.get(robotSide));
+            if (alexanderVersion.hasCycloidForearms())
+            {
+               imuSensorsToUse.add(forearmIMUNames.get(robotSide));
+               imuSensorsToUse.add(handIMUNames.get(robotSide));
+            }
+            else
+            {
+               forearmIMUNames.put(robotSide, null);
+               handIMUNames.put(robotSide, null);
+            }
+         }
+         else
+         {
+            shoulderIMUNames.put(robotSide, null);
+            bicepIMUNames.put(robotSide, null);
+            forearmIMUNames.put(robotSide, null);
+            handIMUNames.put(robotSide, null);
+         }
+      }
    }
 
    @Override
    public String[] getIMUSensorsToUseInStateEstimator()
    {
-      return imuSensorsToUse;
+      return imuSensorsToUse.toArray(new String[0]);
    }
 
    @Override
@@ -209,6 +246,26 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public String getFootIMUName(RobotSide robotSide)
    {
       return footIMUNames.get(robotSide);
+   }
+
+   public String getShoulderIMUName(RobotSide robotSide)
+   {
+      return shoulderIMUNames.get(robotSide);
+   }
+
+   public String getBicepIMUName(RobotSide robotSide)
+   {
+      return bicepIMUNames.get(robotSide);
+   }
+
+   public String getForearmIMUName(RobotSide robotSide)
+   {
+      return forearmIMUNames.get(robotSide);
+   }
+
+   public String getHandIMUName(RobotSide robotSide)
+   {
+      return handIMUNames.get(robotSide);
    }
 
    @Override

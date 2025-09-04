@@ -4,6 +4,7 @@ import us.ihmc.openAlexander.AlexanderJointMap;
 import us.ihmc.openAlexander.AlexanderSensorInformation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -86,10 +87,20 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(spineJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, spineJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(spineJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, spineJoints());
 
-      DoubleProvider neckJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("neckJointPositionFrequency", spineJointPositionFrequency);
-      DoubleProvider neckJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("neckJointVelocityFrequency", spineJointVelocityFrequency);
+      DoubleProvider neckJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("neckJointPositionFrequency", neckJointPositionFrequency);
+      DoubleProvider neckJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("neckJointVelocityFrequency", neckJointVelocityFrequency);
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(neckJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, neckJoints());
       sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(neckJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, neckJoints());
+
+      DoubleProvider upperArmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("upperArmJointPositionFrequency", 60.0);
+      DoubleProvider upperArmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("upperArmJointVelocityFrequency", 15.0);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(upperArmJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, upperArmJoints());
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(upperArmJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, upperArmJoints());
+
+      DoubleProvider forearmJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointPositionFrequency", 60.0);
+      DoubleProvider forearmJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("forearmJointVelocityFrequency", 9.0);
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(forearmJointPositionAlphaFilter, false, SensorType.JOINT_POSITION, forearmJoints());
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(forearmJointVelocityAlphaFilter, false, SensorType.JOINT_VELOCITY, forearmJoints());
 
       // IMU
       DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationBreakFrequency", orientationFrequency);
@@ -118,6 +129,16 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
       return toJointNameStrings(NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH);
    }
 
+   private String[] upperArmJoints()
+   {
+      return toJointNameStrings(ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH);
+   }
+
+   private String[] forearmJoints()
+   {
+      return toJointNameStrings(ArmJointName.ELBOW_YAW, ArmJointName.WRIST_ROLL, ArmJointName.WRIST_YAW);
+   }
+
    protected String[] toJointNameStrings(LegJointName... legJointNames)
    {
       List<String> names = new ArrayList<>();
@@ -130,6 +151,20 @@ public class OpenAlexanderStateEstimatorParameters extends StateEstimatorParamet
 
       return names.toArray(new String[0]);
    }
+
+   private String[] toJointNameStrings(ArmJointName... armJointNames)
+   {
+      List<String> names = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ArmJointName armJointName : armJointNames)
+            names.add(jointMap.getArmJointName(robotSide, armJointName));
+      }
+
+      return names.toArray(new String[0]);
+   }
+
 
    private String[] toJointNameStrings(SpineJointName... spineJointNames)
    {
