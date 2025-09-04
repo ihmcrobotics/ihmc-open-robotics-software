@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
@@ -64,6 +65,7 @@ public class SnappingTerrainExtractor
    private final GpuMat snapNormalYMat;
    private final GpuMat snapNormalZMat;
    private final GpuMat snappedAreaFractionMat;
+   private final GpuMat squaredErrorMat;
    private final GpuMat steppabilityMat;
    private final GpuMat steppabilityConnectionsMat;
 
@@ -122,6 +124,7 @@ public class SnappingTerrainExtractor
       snapNormalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snappedAreaFractionMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      squaredErrorMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       steppabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       steppabilityConnectionsMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
@@ -163,6 +166,7 @@ public class SnappingTerrainExtractor
       snappingTerrainKernel.withPointer(snapNormalYMat.data()).withLong(snapNormalYMat.step());
       snappingTerrainKernel.withPointer(snapNormalZMat.data()).withLong(snapNormalZMat.step());
       snappingTerrainKernel.withPointer(snappedAreaFractionMat.data()).withLong(snappedAreaFractionMat.step());
+      snappingTerrainKernel.withPointer(squaredErrorMat.data()).withLong(squaredErrorMat.step());
       snappingTerrainKernel.withPointer(snappingParametersDevicePointer).withInt(cellsPerAxisTerrain);
 
       // Compute the correct number of threads to run with the kernel
@@ -241,6 +245,9 @@ public class SnappingTerrainExtractor
 
          Mat cpuSnappedAreaFractionMap = new Mat();
          snappedAreaFractionMat.download(cpuSnappedAreaFractionMap);
+
+         Mat squaredErrorMap = new Mat();
+         squaredErrorMat.download(squaredErrorMap);
 
          Mat cpuSteppabilityMap = new Mat();
          steppabilityMat.download(cpuSteppabilityMap);
