@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,11 +167,22 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
       setupBunchOfVariables();
 
+      Map<RigidBodyBasics, IMUSensorReadOnly> footIMUs = new HashMap<>();
+      for (IMUSensorReadOnly imu : imuProcessedOutputs)
+      {
+         if (feetContactablePlaneBodies.containsKey(imu.getMeasurementLink()))
+            footIMUs.put(imu.getMeasurementLink(), imu);
+      }
+
       kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure,
                                                                                             feetContactablePlaneBodies,
                                                                                             footSwitches,
+                                                                                            footIMUs,
+                                                                                            imuBiasProvider,
                                                                                             centerOfPressureDataHolderFromController,
+                                                                                            cancelGravityFromAccelerationMeasurement,
                                                                                             estimatorDT,
+                                                                                            gravitationalAcceleration,
                                                                                             stateEstimatorParameters,
                                                                                             yoGraphicsListRegistry,
                                                                                             registry);
