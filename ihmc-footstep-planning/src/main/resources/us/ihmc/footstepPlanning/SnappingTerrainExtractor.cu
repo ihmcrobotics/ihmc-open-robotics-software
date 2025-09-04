@@ -44,6 +44,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                    unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
                                    unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
+                                   unsigned short *squaredErrorMap, size_t pitchSquaredError,
                                    float *params, int terrainMapXY)
 {
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -144,27 +145,25 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             if (isnan(query_height))
                 continue;
 
-            float snap_height_threshold = params[MIN_SNAP_HEIGHT_THRESHOLD] + params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE] * fminf(fmaxf(offset_distance / foot_search_radius, 0.0f), 1.0f);
+            // 0.0 in center, 1.0 at edge
+            float alpha_edge = fminf(fmaxf(offset_distance / foot_search_radius, 0.0f), 1.0f);
+
+            float snap_height_threshold = interpolate(params[MIN_SNAP_HEIGHT_THRESHOLD], params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE], alpha_edge);
             float min_height_under_foot_to_consider = max_height_under_foot - snap_height_threshold;
 
-            // This activation gain is a way of doing a soft inequality. If the query height is less than the min height, as an inequality constraint, the
-            // activation value is zero, and if it's greater, the activation is 1.0. In this formulation, we're blurring around that hard inequality. If the
-            // query height is less than the min height, the "error" is negative, so the tanh function returns -1.0f. If it's positive, tanh returns 1.0f.
-            float tanh_slope = params[INEQUALITY_ACTIVATION_SLOPE];
-            float activation = 0.5f * (1.0f + tanh(tanh_slope * (query_height - min_height_under_foot_to_consider)));
-
-            float activation2 = activation * activation;
-
-            n += activation;
-            x += activation * point_query.x;
-            y += activation * point_query.y;
-            z += activation * query_height;
-            xx += activation2 * point_query.x * point_query.x;
-            xy += activation2 * point_query.x * point_query.y;
-            xz += activation2 * point_query.x * query_height;
-            yy += activation2 * point_query.y * point_query.y;
-            yz += activation2 * point_query.y * query_height;
-            zz += activation2 * query_height * query_height;
+            if (query_height >= min_height_under_foot_to_consider)
+            {
+                n += 1;
+                x += point_query.x;
+                y += point_query.y;
+                z += query_height;
+                xx += point_query.x * point_query.x;
+                xy += point_query.x * point_query.y;
+                xz += point_query.x * query_height;
+                yy += point_query.y * point_query.y;
+                yz += point_query.y * query_height;
+                zz += query_height * query_height;
+            }
         }
     }
 
@@ -172,8 +171,8 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     bool failed = false;
     int snap_result = VALID;
 
-    // Fixme this arguably should never happen
-    if (n < 0.0001f)
+    // Fail if insufficient data is in the radius
+    if (n < 3)
     {
         snap_result = SNAP_FAILED;
         failed = true;
@@ -186,7 +185,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
     float z_variance_vector[3] = {-xz, -yz, -z};
     float coefficients[3] = {0.0f, 0.0f, 0.0f};
-    solveForPlaneCoefficients(covariance_matrix, z_variance_vector, coefficients);
+    float squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
 
     float3 normal = make_float3(coefficients[0], coefficients[1], 1.0);
     normal = normalize(normal);
@@ -264,6 +263,10 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = make_int2(x_index, y_index);
 
+    float squared_error_scale = 0.1;
+    float alpha_squared_error = fminf(fmaxf(squared_error / squared_error_scale, 0.0f), 1.0f);
+    int squared_error_int = static_cast<int>(255 * alpha_squared_error);
+
     unsigned char *steppabilityMapElement = (unsigned char *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
     *steppabilityMapElement = static_cast<unsigned char>(snap_result);
 
@@ -278,6 +281,9 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     unsigned char *areaFractionElement = (unsigned char *)((char *)snappedAreaFractionMap + storage_key.y * pitchSnappedAreaFraction) + storage_key.x;
     *areaFractionElement = static_cast<unsigned char>(area_fraction);
+
+    unsigned char *squaredErrorElement = (unsigned char *)((char *)squaredErrorMap + storage_key.y * pitchSquaredError) + storage_key.x;
+    *squaredErrorElement = static_cast<unsigned char>(squared_error_int);
 }
 
 extern "C"
