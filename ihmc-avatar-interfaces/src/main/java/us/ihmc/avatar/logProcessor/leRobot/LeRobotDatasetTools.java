@@ -54,7 +54,7 @@ public class LeRobotDatasetTools
       for (RigidBodyDefinition link : robotDefinition.getAllRigidBodies())
       {
          String linkName = link.getName().toLowerCase();
-         if (link.getChildrenJoints().size() != 1 && (linkName.contains("wrist") || linkName.contains("gripper")))
+         if (linkName.contains("wrist_yaw"))
             for (RobotSide side : RobotSide.values)
                if (linkName.contains(side.getLowerCaseName()))
                   handLinkNames.put(side, link.getName());

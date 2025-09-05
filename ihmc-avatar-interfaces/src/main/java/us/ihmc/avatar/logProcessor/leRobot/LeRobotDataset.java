@@ -140,7 +140,7 @@ public class LeRobotDataset
             int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
             while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
             {
-               // It's kinda weird to think about but current log position is actually referring to the next log index to read
+               // The current log position is actually referring to the next log index to read
                // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
                int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
                int loadedIndex = indexToLoad - 1;
@@ -148,7 +148,6 @@ public class LeRobotDataset
                if (desiredDataIsLoaded)
                {
                   if (isDemonstrationEpisode.getBooleanValue())
-//                  if ((loadedIndex > 80920 && loadedIndex < 81970) || (loadedIndex > 82220 && loadedIndex < 83220)) // TODO Remove test code
                   {
                      if (episode == null)
                      {
