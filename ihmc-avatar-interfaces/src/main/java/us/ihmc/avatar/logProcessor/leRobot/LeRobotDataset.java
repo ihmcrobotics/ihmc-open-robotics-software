@@ -174,6 +174,7 @@ public class LeRobotDataset
                {
                   break;
                }
+               ThreadTools.park(0.00001);
             }
             stillGoing.setValue(false);
          }, "ScrubToNextEpisode");
