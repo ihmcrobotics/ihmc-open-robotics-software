@@ -135,47 +135,57 @@ public class LeRobotDataset
       {
          ThreadTools.startAThread(() ->
          {
-            stillGoing.setValue(true);
-            LeRobotDatasetEpisode episode = null;
-            int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
-            while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
+            try
             {
-               // The current log position is actually referring to the next log index to read
-               // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
-               int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
-               int loadedIndex = indexToLoad - 1;
-               boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
-               if (desiredDataIsLoaded)
+               stillGoing.setValue(true);
+               LeRobotDatasetEpisode episode = null;
+               int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
+               while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
                {
-                  if (isDemonstrationEpisode.getBooleanValue())
+                  // The current log position is actually referring to the next log index to read
+                  // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
+                  int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
+                  int loadedIndex = indexToLoad - 1;
+                  boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
+                  if (desiredDataIsLoaded)
                   {
-                     if (episode == null)
+                     if (isDemonstrationEpisode.getBooleanValue())
                      {
-                        episode = createEpisode(taskName);
-                        episode.initializeEpisode(session, this::writeMetaJson, usePerfectTimestamps);
+                        if (episode == null)
+                        {
+                           episode = createEpisode(taskName);
+                           episode.initializeEpisode(session, this::writeMetaJson, usePerfectTimestamps);
+                        }
+
+                        episode.processFrame();
                      }
-
-                     episode.processFrame();
+                     else if (episode != null)
+                     {
+                        episode.finalizeEpisodeGeneration();
+                        episode = null;
+                     }
                   }
-                  else if (episode != null)
+
+                  if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
                   {
-                     episode.finalizeEpisodeGeneration();
-                     episode = null;
+                     session.submitLogPositionRequest(indexToLoad);
+                     desiredLoadedIndex = indexToLoad;
                   }
+                  else // we hit the end
+                  {
+                     break;
+                  }
+                  ThreadTools.park(0.000001);
                }
-
-               if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
-               {
-                  session.submitLogPositionRequest(indexToLoad);
-                  desiredLoadedIndex = indexToLoad;
-               }
-               else // we hit the end
-               {
-                  break;
-               }
-               ThreadTools.park(0.00001);
             }
-            stillGoing.setValue(false);
+            catch (Exception e)
+            {
+               DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+            }
+            finally
+            {
+               stillGoing.setValue(false);
+            }
          }, "ScrubToNextEpisode");
       }
       return stillGoing::booleanValue;
