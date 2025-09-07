@@ -132,54 +132,6 @@ public class RDXLeRobotDatasetCreator
             }
          }
 
-         ImGui.separator();
-         ImGui.text("Tasks:");
-         for (int i = 0; i < dataset.getTaskNames().size(); i++)
-         {
-            ImGui.text("%d. %s".formatted(i, dataset.getTaskNames().get(i)));
-         }
-
-         ImGui.separator();
-         ImGui.text("Episodes:");
-         mouseHoveringEpisode = -1;
-         for (int i = 0; i < dataset.getEpisodes().size(); i++)
-         {
-            LeRobotDatasetEpisode episode = dataset.getEpisodes().get(i);
-            String text = "%s length: %d".formatted(episode.getEpisodeName(), episode.getLength());
-
-            boolean mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getTextLineHeight());
-            if (mouseHoveringNodeLine)
-            {
-               mouseHoveringEpisode = i;
-               ImGui.textColored(ImGuiTools.GRAY, text);
-            }
-            else
-               ImGui.text(text);
-            List<LeRobotEpisodeRecord> records = episode.getRecords();
-            ImGuiTools.previousWidgetTooltip(
-               """
-               Buffer index: %d -> %d
-               Right click for options.
-               """.formatted(records.isEmpty() ? -1 : records.get(0).ihmcLogPosition(),
-                             records.isEmpty() ? -1 : records.get(records.size() - 1).ihmcLogPosition())
-            );
-
-            String popupId = "episode_context_menu_" + i;
-            if (ImGui.isItemClicked(ImGuiMouseButton.Right))
-            {
-               ImGui.openPopup(popupId);
-            }
-            if (ImGui.beginPopup(popupId))
-            {
-               if (ImGui.menuItem(labels.get("Remove %s".formatted(episode.getEpisodeName()))))
-               {
-                  dataset.removeEpisode(i);
-                  ImGui.closeCurrentPopup();
-               }
-               ImGui.endPopup();
-            }
-         }
-
          ImGuiTools.separatorText("New episode");
 
          ImGui.text("Current task name:");
@@ -220,6 +172,57 @@ public class RDXLeRobotDatasetCreator
                dataset.writeParquetData();
             }
          }
+
+         ImGuiTools.separatorText("Tasks");
+         for (int i = 0; i < dataset.getTaskNames().size(); i++)
+         {
+            ImGui.text("%d. %s".formatted(i, dataset.getTaskNames().get(i)));
+         }
+
+         ImGuiTools.separatorText("Episodes");
+         ImGui.beginChild(labels.get("Episodes Scroll Area"));
+         mouseHoveringEpisode = -1;
+         for (int i = 0; i < dataset.getEpisodes().size(); i++)
+         {
+            LeRobotDatasetEpisode episode = dataset.getEpisodes().get(i);
+            List<LeRobotEpisodeRecord> records = episode.getRecords();
+            String text = "%s length: %d".formatted(episode.getEpisodeName(), episode.getLength());
+
+            boolean mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getTextLineHeight());
+            if (mouseHoveringNodeLine)
+            {
+               mouseHoveringEpisode = i;
+               ImGui.textColored(ImGuiTools.GRAY, text);
+
+               if (!records.isEmpty() && ImGui.isMouseClicked(ImGuiMouseButton.Left))
+                  logSession.getSession().submitLogPositionRequest(records.get(0).ihmcLogPosition());
+            }
+            else
+               ImGui.text(text);
+            ImGuiTools.previousWidgetTooltip(
+               """
+               Buffer index: %d -> %d
+               Right click for options.
+               """.formatted(records.isEmpty() ? -1 : records.get(0).ihmcLogPosition(),
+                             records.isEmpty() ? -1 : records.get(records.size() - 1).ihmcLogPosition())
+            );
+
+            String popupId = "episode_context_menu_" + i;
+            if (ImGui.isItemClicked(ImGuiMouseButton.Right))
+            {
+               ImGui.openPopup(popupId);
+            }
+            if (ImGui.beginPopup(popupId))
+            {
+               if (ImGui.menuItem(labels.get("Remove %s".formatted(episode.getEpisodeName()))))
+               {
+                  dataset.removeEpisode(i);
+                  ImGui.closeCurrentPopup();
+               }
+               ImGui.endPopup();
+            }
+         }
+         ImGui.endChild();
       }
       else
       {
@@ -235,6 +238,8 @@ public class RDXLeRobotDatasetCreator
 
       if (dataset != null)
       {
+         float sliderEndOffset = ImGui.getStyle().getGrabMinSize() + 3;
+         sliderWidth -= sliderEndOffset; // Line up the notches to the left edge of the slider
          for (int i = 0; i < dataset.getEpisodes().size(); i++)
          {
             LeRobotDatasetEpisode episode = dataset.getEpisodes().get(i);
