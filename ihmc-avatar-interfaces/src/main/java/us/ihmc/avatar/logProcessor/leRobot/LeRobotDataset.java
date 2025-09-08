@@ -231,9 +231,9 @@ public class LeRobotDataset
                                                                        DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
                   node.put("episode_index", k);
                   ObjectNode episodeIndex = (ObjectNode) node.get("stats").get("episode_index");
-                  episodeIndex.put("min", k);
-                  episodeIndex.put("max", k);
-                  episodeIndex.put("mean", (double) k);
+                  episodeIndex.putArray("min").add(k);
+                  episodeIndex.putArray("max").add(k);
+                  episodeIndex.putArray("mean").add((double) k);
                   LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
                   int priorFrames = 0;
                   for (int l = 0; l < k; l++)
@@ -242,10 +242,10 @@ public class LeRobotDataset
                      indexStats.addValue(l);
                   indexStats.calculate();
                   ObjectNode index = (ObjectNode) node.get("stats").get("index");
-                  index.put("min", indexStats.getMin());
-                  index.put("max", indexStats.getMax());
-                  index.put("mean", indexStats.getMean());
-                  index.put("std", indexStats.getStddev());
+                  index.putArray("min").add(indexStats.getMin());
+                  index.putArray("max").add(indexStats.getMax());
+                  index.putArray("mean").add(indexStats.getMean());
+                  index.putArray("std").add(indexStats.getStddev());
 
                   statsLines.set(k, node.toString());
                }
