@@ -1,10 +1,7 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
-import com.jerolba.carpet.CarpetWriter;
-import com.jerolba.carpet.ColumnNamingStrategy;
 import org.apache.commons.lang.StringUtils;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -18,9 +15,6 @@ import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +25,12 @@ import java.util.List;
  * <p>
  * TODO: If using hand poses, transform them to walking frame or something
  */
-public class LeRobotDatasetDataWriter
+public class LeRobotDatasetDataVariables
 {
    public static final boolean USE_HAND_POSES = true;
 
-   private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
+   private final LeRobotDatasetEpisode episode;
+
    private final YoPose3D pelvisPoseCurrent;
    private final YoPose3D pelvisPoseDesired;
    private final SideDependentList<YoPose3D> handPosesCurrent = new SideDependentList<>();
@@ -44,14 +39,11 @@ public class LeRobotDatasetDataWriter
    private final SideDependentList<YoDouble[]> jointAnglesDesired = new SideDependentList<>();
    private final MutableReferenceFrame pelvisFrame = new MutableReferenceFrame("pelvisFrame");
    private final FramePose3D handFramePose = new FramePose3D();
-   private final long episodeIndex;
    private final YoRegistry rootRegistry;
-   private final long datasetLengthSoFar;
 
-   public LeRobotDatasetDataWriter(long episodeIndex, long datasetLengthSoFar, SCS2LogSessionWithVideo session)
+   public LeRobotDatasetDataVariables(LeRobotDatasetEpisode episode, SCS2LogSessionWithVideo session)
    {
-      this.episodeIndex = episodeIndex;
-      this.datasetLengthSoFar = datasetLengthSoFar;
+      this.episode = episode;
 
       rootRegistry = session.getRootRegistry();
 
@@ -119,7 +111,7 @@ public class LeRobotDatasetDataWriter
       }
    }
 
-   public LeRobotEpisodeRecord addFrame(long timestampMicros, long frameIndex, LeRobotDatasetEpisodeStatistics statistics, int ihmcLogPosition)
+   public void addFrame(long timestampMicros, LeRobotDatasetEpisodeStatistics statistics, int ihmcLogPosition)
    {
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
@@ -167,52 +159,14 @@ public class LeRobotDatasetDataWriter
       boolean isLastFrame = false;
       LeRobotEpisodeRecord record = new LeRobotEpisodeRecord(state,
                                                              action,
-                                                             episodeIndex,
-                                                             frameIndex,
+                                                             episode.getEpisodeIndex(),
+                                                             episode.getRecords().size(),
                                                              timestamp,
                                                              ihmcLogPosition,
                                                              isLastFrame,
-                                                             datasetLengthSoFar + frameIndex,
+                                                             episode.getDataset().getTotalEpisodeFrames() + episode.getRecords().size(),
                                                              taskIndex);
       statistics.processParquetRecord(record);
-      records.add(record);
-      return record;
-   }
-
-   public void writeFile(Path parquetPath)
-   {
-      // Mark the last frame
-      LeRobotEpisodeRecord last = records.get(records.size() - 1);
-      records.set(records.size() - 1, new LeRobotEpisodeRecord(last.state(),
-                                                               last.action(),
-                                                               last.episodeIndex(),
-                                                               last.frameIndex(),
-                                                               last.timestamp(),
-                                                               last.ihmcLogPosition(),
-                                                               true, // <-- Main thing we're doing here
-                                                               last.index(),
-                                                               last.taskIndex()));
-
-      writeParquetFile(parquetPath, records);
-   }
-
-   public static void writeParquetFile(Path parquetPath, List<LeRobotEpisodeRecord> records)
-   {
-      try
-      {
-         OutputStream outputStream = Files.newOutputStream(parquetPath);
-         CarpetWriter<LeRobotEpisodeRecord> writer = new CarpetWriter.Builder<>(outputStream, LeRobotEpisodeRecord.class)
-               .withColumnNamingStrategy(ColumnNamingStrategy.SNAKE_CASE).build();
-
-         for (LeRobotEpisodeRecord record : records)
-            writer.write(record);
-
-         writer.close();
-         outputStream.close();
-      }
-      catch (Exception e)
-      {
-         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
-      }
+      episode.getRecords().add(record);
    }
 }

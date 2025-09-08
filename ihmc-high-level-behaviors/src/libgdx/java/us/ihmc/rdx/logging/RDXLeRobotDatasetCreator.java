@@ -12,11 +12,13 @@ import us.ihmc.avatar.logProcessor.leRobot.LeRobotDatasetTools;
 import us.ihmc.avatar.logProcessor.leRobot.LeRobotEpisodeRecord;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2LogSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogDataReader;
 
 import java.awt.*;
@@ -38,6 +40,8 @@ public class RDXLeRobotDatasetCreator
    private transient final ImString datasetName = new ImString(512);
    private transient final ImString imTaskName = new ImString(512);
    private transient final ImInt logPosition = new ImInt();
+   private transient final ImBoolean removalSelectionMode = new ImBoolean();
+   private boolean[] episodesToRemove;
    private List<Path> datasets;
    private LeRobotDataset dataset;
    private BooleanSupplier generating;
@@ -131,25 +135,28 @@ public class RDXLeRobotDatasetCreator
                dataset.setUsePerfectTimestamps(!dataset.getUsePerfectTimestamps());
             }
          }
+         ImGui.sameLine();
+         ImGui.text("FPS: %.2f".formatted(dataset.getFps()));
 
          ImGuiTools.separatorText("New episode");
 
          ImGui.text("Current task name:");
          ImGuiTools.inputTextMultiline(labels.getHidden("taskName"), imTaskName);
 
-         ImGui.beginDisabled(imTaskName.get().trim().isEmpty());
-         if (ImGui.button(labels.get("Add Episode")))
+         ImGui.text("Add episode:");
+         ImGui.sameLine();
+         ImGui.beginDisabled(imTaskName.get().trim().isEmpty() || (generating != null && generating.getAsBoolean()));
+         if (ImGui.button(labels.get("From Buffer")))
          {
             dataset.addEpisode(imTaskName.get().trim(), logSession.getSession());
          }
          ImGuiTools.previousWidgetTooltip("Add an episode from the current SCS 2 in/out points.");
-         ImGui.beginDisabled(generating != null && generating.getAsBoolean());
-         if (ImGui.button(labels.get("Add Episodes Automatically")))
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Auto Scrub")))
          {
             keepGenerating.set(true);
             generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), logSession.getSession(), keepGenerating::get);
          }
-         ImGui.endDisabled();
          if (keepGenerating.get())
          {
             ImGui.sameLine();
@@ -161,16 +168,34 @@ public class RDXLeRobotDatasetCreator
          ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the isDemonstrationEpisode variable.");
          ImGui.endDisabled();
 
+         boolean noEpisodes = dataset == null || dataset.getEpisodes().isEmpty();
+         if (noEpisodes)
+            removalSelectionMode.set(false);
+         if (removalSelectionMode.get())
+         {
+            ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
+            if (ImGui.button(labels.get("Remove Selected Episodes")))
+               dataset.removeEpisodes(episodesToRemove);
+            ImGui.popStyleColor();
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Cancel")))
+               removalSelectionMode.set(false);
+         }
+         else
+         {
+            ImGui.beginDisabled(noEpisodes);
+            if (ImGui.checkbox(labels.get("Remove Episode Mode"), removalSelectionMode))
+               episodesToRemove = new boolean[dataset.getEpisodes().size()];
+            ImGui.endDisabled();
+         }
+
          if (ImGui.collapsingHeader(labels.get("Debug Operations")))
          {
             if (ImGui.button(labels.get("Regenerate Metadata")))
-            {
                dataset.regenerateAndRewriteMetadata();
-            }
+            ImGui.sameLine();
             if (ImGui.button(labels.get("Write Parquet Data")))
-            {
                dataset.writeParquetData();
-            }
          }
 
          ImGuiTools.separatorText("Tasks");
@@ -188,6 +213,16 @@ public class RDXLeRobotDatasetCreator
             List<LeRobotEpisodeRecord> records = episode.getRecords();
             String text = "%s length: %d".formatted(episode.getEpisodeName(), episode.getLength());
 
+            if (removalSelectionMode.get())
+            {
+               ImGui.pushStyleColor(ImGuiCol.CheckMark, ImGuiTools.DARK_RED);
+               if (ImGuiTools.smallCheckbox(labels.getHidden("RemoveEpisode%d".formatted(i)), episodesToRemove[i]))
+                  episodesToRemove[i] = !episodesToRemove[i];
+               ImGuiTools.previousWidgetTooltip("Remove this episode.");
+               ImGui.popStyleColor();
+               ImGui.sameLine();
+            }
+
             boolean mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getTextLineHeight());
             if (mouseHoveringNodeLine)
             {
@@ -195,7 +230,16 @@ public class RDXLeRobotDatasetCreator
                ImGui.textColored(ImGuiTools.GRAY, text);
 
                if (!records.isEmpty() && ImGui.isMouseClicked(ImGuiMouseButton.Left))
-                  logSession.getSession().submitLogPositionRequest(records.get(0).ihmcLogPosition());
+               {
+                  ThreadTools.startAsDaemon(() -> // Make it easy to see what the episodes are, just click them to play
+                  {
+                     logSession.getSession().setSessionMode(SessionMode.PAUSE);
+                     ThreadTools.park(0.01);
+                     logSession.getSession().submitLogPositionRequest(records.get(0).ihmcLogPosition());
+                     ThreadTools.park(0.01);
+                     logSession.getSession().setSessionMode(SessionMode.RUNNING);
+                  }, "PlayEpisode");
+               }
             }
             else
                ImGui.text(text);
@@ -209,16 +253,11 @@ public class RDXLeRobotDatasetCreator
 
             String popupId = "episode_context_menu_" + i;
             if (ImGui.isItemClicked(ImGuiMouseButton.Right))
-            {
                ImGui.openPopup(popupId);
-            }
             if (ImGui.beginPopup(popupId))
             {
-               if (ImGui.menuItem(labels.get("Remove %s".formatted(episode.getEpisodeName()))))
-               {
-                  dataset.removeEpisode(i);
+               if (ImGui.menuItem(labels.get("Close")))
                   ImGui.closeCurrentPopup();
-               }
                ImGui.endPopup();
             }
          }

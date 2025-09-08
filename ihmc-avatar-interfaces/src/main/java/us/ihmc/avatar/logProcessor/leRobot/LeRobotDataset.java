@@ -41,6 +41,7 @@ public class LeRobotDataset
    private final Path infoJsonPath;
    private final Path tasksJsonlPath;
 
+   private float fps;
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
    private long totalFrames = 0L;
@@ -82,6 +83,9 @@ public class LeRobotDataset
 
    public void loadData() // TODO: Load completely
    {
+      JSONFileTools.load(infoJsonPath, rootNode -> {
+         fps = rootNode.get("fps").floatValue();
+      });
       taskNames.clear();
       JSONFileTools.loadLines(tasksJsonlPath, lineRoot ->
       {
@@ -90,21 +94,10 @@ public class LeRobotDataset
       episodes.clear();
       JSONFileTools.loadLines(episodesJsonlPath, lineRoot ->
       {
-         int episodeIndex = episodes.size();
-         String taskName = lineRoot.get("tasks").get(0).textValue();
-         int length = lineRoot.get("length").intValue();
-         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                   taskName,
-                                                                   length,
-                                                                   totalFrames,
-                                                                   episodesJsonlPath,
-                                                                   episodeStatsJsonlPath,
-                                                                   dataChunk0Path,
-                                                                   zedVideoDirs);
+         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, lineRoot);
          episode.loadParquetData();
          episodes.add(episode);
-
-         totalFrames += length;
+         totalFrames += episode.getLength();
       });
    }
 
@@ -116,10 +109,7 @@ public class LeRobotDataset
    private LeRobotDatasetEpisode createEpisode(String taskName)
    {
       ensureTaskNameInJsonl(taskName);
-
-      int episodeIndex = episodes.size();
-      LeRobotDatasetEpisode episode
-            = new LeRobotDatasetEpisode(episodeIndex, taskName, 0, totalFrames, episodesJsonlPath, episodeStatsJsonlPath, dataChunk0Path, zedVideoDirs);
+      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, episodes.size(), taskName);
       episodes.add(episode);
       return episode;
    }
@@ -198,6 +188,30 @@ public class LeRobotDataset
          taskNames.add(taskName);
          writeTaskJsonlLine(taskName);
       }
+   }
+
+   public void removeEpisodes(boolean[] episodesToRemove)
+   {
+      // Remove data
+
+      for (int i = 0; i < episodesToRemove.length; i++)
+      {
+
+         LeRobotDatasetEpisode episode = episodes.get(i);
+
+         if (episodesToRemove[i])
+         {
+            episodes.remove(i);
+
+
+            removeEpisode(i);
+         }
+      }
+
+      // Reindex episodes
+
+
+      regenerateAndRewriteMetadata();
    }
 
    public void removeEpisode(int index)
@@ -380,7 +394,6 @@ public class LeRobotDataset
       JSONFileTools.save(infoJsonPath, rootNode ->
       {
          totalFrames = 0;
-         float fps = episodes.isEmpty() ? 1.0f : episodes.get(0).getFps();
          for (LeRobotDatasetEpisode episode : episodes)
          {
             totalFrames += episode.getLength();
@@ -497,9 +510,29 @@ public class LeRobotDataset
       return dataChunk0Path;
    }
 
+   public Path getEpisodesJsonlPath()
+   {
+      return episodesJsonlPath;
+   }
+
+   public Path getEpisodeStatsJsonlPath()
+   {
+      return episodeStatsJsonlPath;
+   }
+
    public SideDependentList<Path> getZedVideoDirs()
    {
       return zedVideoDirs;
+   }
+
+   public void setFps(float fps)
+   {
+      this.fps = fps;
+   }
+
+   public float getFps()
+   {
+      return fps;
    }
 
    public List<String> getTaskNames()
@@ -510,6 +543,14 @@ public class LeRobotDataset
    public List<LeRobotDatasetEpisode> getEpisodes()
    {
       return episodes;
+   }
+
+   public int getTotalEpisodeFrames()
+   {
+      int totalFrames = 0;
+      for (LeRobotDatasetEpisode episode : episodes)
+         totalFrames += episode.getLength();
+      return totalFrames;
    }
 
    public long getTotalFrames()

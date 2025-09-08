@@ -13,6 +13,7 @@ import java.util.List;
 /**
  * Calculates data statistics, which are used to normalize the machine learning data
  * before training.
+ * There is no reset function. Just create a whole new one to do it again.
  * <p>
  * Part of the {@link LeRobotDataset} generation system from IHMC logs.
  */
