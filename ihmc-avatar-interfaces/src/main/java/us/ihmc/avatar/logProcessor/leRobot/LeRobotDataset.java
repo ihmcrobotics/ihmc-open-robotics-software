@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -202,6 +203,8 @@ public class LeRobotDataset
    {
       ExceptionTools.handle(() ->
       {
+         List<String> statsLines = Files.readAllLines(episodeStatsJsonlPath);
+
          for (int i = 0, j = 0; i < episodesToRemove.length; i++, j++)
          {
             if (episodesToRemove[i])
@@ -211,6 +214,7 @@ public class LeRobotDataset
                   FileTools.deleteQuietly(zedVideoDirs.get(side).resolve("episode_%06d".formatted(j) + ".mp4"));
 
                episodes.remove(j);
+               statsLines.remove(j);
 
                for (int k = j; k < episodes.size(); k++)
                {
@@ -221,6 +225,29 @@ public class LeRobotDataset
                   for (RobotSide side : RobotSide.values)
                      Files.move(zedVideoDirs.get(side).resolve("episode_%06d".formatted(k + 1) + ".mp4"),
                                 zedVideoDirs.get(side).resolve("episode_%06d".formatted(k) + ".mp4"));
+
+                  final String statsLine = statsLines.get(k);
+                  ObjectNode node = (ObjectNode) ExceptionTools.handle(() -> new ObjectMapper(new JsonFactory()).readTree(statsLine),
+                                                                       DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+                  node.put("episode_index", k);
+                  ObjectNode episodeIndex = (ObjectNode) node.get("stats").get("episode_index");
+                  episodeIndex.put("min", k);
+                  episodeIndex.put("max", k);
+                  episodeIndex.put("mean", (double) k);
+                  LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
+                  int priorFrames = 0;
+                  for (int l = 0; l < k; l++)
+                     priorFrames += episodes.get(l).getLength();
+                  for (int l = priorFrames; l < priorFrames + episodes.get(k).getLength(); l++)
+                     indexStats.addValue(l);
+                  indexStats.calculate();
+                  ObjectNode index = (ObjectNode) node.get("stats").get("index");
+                  index.put("min", indexStats.getMin());
+                  index.put("max", indexStats.getMax());
+                  index.put("mean", indexStats.getMean());
+                  index.put("std", indexStats.getStddev());
+
+                  statsLines.set(k, node.toString());
                }
 
                --j;
@@ -234,10 +261,7 @@ public class LeRobotDataset
          for (LeRobotDatasetEpisode episode : episodes)
             episode.writeEpisodeJsonlLine();
 
-         // TODO: Try doing this more efficiently
-//         FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
-//         for (LeRobotDatasetEpisode episode : episodes)
-//            episode.readDataAndWriteStatisticsJsonlLine();
+         Files.write(episodeStatsJsonlPath, statsLines, StandardOpenOption.TRUNCATE_EXISTING);
 
          writeMetaJson();
 
