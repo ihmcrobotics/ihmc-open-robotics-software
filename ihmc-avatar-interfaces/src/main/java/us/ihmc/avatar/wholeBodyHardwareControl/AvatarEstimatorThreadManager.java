@@ -21,13 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class is responsible for converting AvatarEstimatorThread either a regular thread or realtime thread. They are
- * then organized into either a SingleThreadedRobotController (in the case of single threading), or a
- * BarrierScheduledRobotController (in the case of multi-threading). These dictate the execution
- * of each thread and our entire control process itself. Lastly, this class manages the passing of
- * measured and desired robot data to and from a hardware communication interface.
- *
- * @author Stefan Fasano
+ * This class is responsible for converting AvatarEstimatorThread either a regular thread or realtime thread. It is then organized into a
+ * SingleThreadedRobotController. This dictates the execution  of the thread and the estimator process itself. Lastly, this class manages the publishing of
+ * the estimated robot data from the read low-level measurements.
  */
 public class AvatarEstimatorThreadManager
 {
@@ -202,7 +198,7 @@ public class AvatarEstimatorThreadManager
          for (int i = 0; i < postEstimatorThreadRunnables.size(); i++)
             postEstimatorThreadRunnables.get(i).run();
 
-         // Write desired commands to robot
+         // Write estimated state to the network
          hardwareCommunicationInterface.write(estimatorThread.getHumanoidRobotContextData(), estimatorThread.getFullRobotModel());
       }
 

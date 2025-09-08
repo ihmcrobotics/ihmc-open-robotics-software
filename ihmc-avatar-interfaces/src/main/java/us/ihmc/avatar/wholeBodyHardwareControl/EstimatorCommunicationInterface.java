@@ -8,11 +8,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 
 /**
- * General interface for passing measured and desired robot data to and from
- * a physical robot, either through ROS2 or directly via low-level hardware
- * device drivers/managers.
- *
- * @author Stefan Fasano
+ * General interface for receiving the measured data and then publishing the estimated robot data from a physical robot.
  */
 public interface EstimatorCommunicationInterface
 {
