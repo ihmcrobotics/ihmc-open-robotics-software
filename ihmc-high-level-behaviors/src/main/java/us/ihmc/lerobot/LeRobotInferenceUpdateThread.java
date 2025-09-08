@@ -98,13 +98,14 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    @Override
    protected void runTask()
    {
-      boolean wasRunning = running.getValue();
-
       if (uiCommandSubscription.poll())
       {
          LerobotInferenceOperationMessage uiCommand = uiCommandSubscription.read();
          latestTimestampModifiable.fromMessage(uiCommand.getLatestTimestampModifiable());
+         boolean wasRunning = running.getValue();
          running.fromMessage(uiCommand.getRunning());
+         if (!wasRunning && running.getValue())
+            ikStreaming.wakeUp();
          controlRobot.fromMessage(uiCommand.getControlRobot());
          controlArmsOnly.fromMessage(uiCommand.getControlArmsOnly());
       }
@@ -155,9 +156,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
                actionHandPoses.get(side).set(handFramePose);
             }
          }
-
-         if (!wasRunning && running.getValue() && controlArmsOnly.getValue())
-            ikStreaming.saveInitialConfiguration();
 
          ikStreaming.update(actionTimestampNanos, actionHandPoses, controlArmsOnly.getValue());
       }

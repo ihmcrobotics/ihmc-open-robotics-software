@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -45,6 +46,13 @@ public class LeRobotIKStreaming
                                                                                                .withTypeName(ToolboxStateMessage.class));
       initialConfigurationPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput(),
                                                                                       KinematicsStreamingToolboxInitialConfigurationMessage.class));
+   }
+
+   public void wakeUp()
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
+      toolboxStatePublisher.publish(toolboxStateMessage);
    }
 
    public void saveInitialConfiguration()
