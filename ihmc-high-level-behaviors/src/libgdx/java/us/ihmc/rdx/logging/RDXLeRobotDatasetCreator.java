@@ -90,6 +90,7 @@ public class RDXLeRobotDatasetCreator
                      dataset.loadData();
                      if (!dataset.getTaskNames().isEmpty())
                         imTaskName.set(dataset.getTaskNames().get(dataset.getTaskNames().size() - 1));
+                     ImGui.closeCurrentPopup();
                   }
                }
             }
@@ -106,6 +107,7 @@ public class RDXLeRobotDatasetCreator
                dataset.writeMetaJson();
                datasetName.clear();
                refresh();
+               ImGui.closeCurrentPopup();
             }
             ImGui.endMenu();
          }
@@ -175,7 +177,10 @@ public class RDXLeRobotDatasetCreator
          {
             ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
             if (ImGui.button(labels.get("Remove Selected Episodes")))
+            {
                dataset.removeEpisodes(episodesToRemove);
+               removalSelectionMode.set(false);
+            }
             ImGui.popStyleColor();
             ImGui.sameLine();
             if (ImGui.button(labels.get("Cancel")))

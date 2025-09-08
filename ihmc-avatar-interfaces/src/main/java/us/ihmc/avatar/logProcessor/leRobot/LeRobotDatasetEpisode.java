@@ -54,6 +54,8 @@ public class LeRobotDatasetEpisode
    public LeRobotDatasetEpisode(LeRobotDataset dataset, JsonNode lineRoot)
    {
       this(dataset, lineRoot.get("episode_index").intValue(), lineRoot.get("tasks").get(0).textValue());
+
+      statistics = new LeRobotDatasetEpisodeStatistics();
    }
 
    public LeRobotDatasetEpisode(LeRobotDataset dataset, int episodeIndex, String taskName)
@@ -65,10 +67,15 @@ public class LeRobotDatasetEpisode
       episodeName = "episode_%06d".formatted(episodeIndex);
    }
 
-   public void reindex(int newIndex, long datasetLengthSoFar)
+   public void reindex(int newIndex)
    {
       episodeIndex = newIndex;
       episodeName = "episode_%06d".formatted(episodeIndex);
+
+      int framesInPreceedingEpisodes = 0;
+      for (int i = 0; i < episodeIndex; i++)
+         framesInPreceedingEpisodes += dataset.getEpisodes().get(i).getLength();
+
       List<LeRobotEpisodeRecord> previousRecords = new ArrayList<>(records);
       records.clear();
       for (LeRobotEpisodeRecord record : previousRecords)
@@ -80,7 +87,7 @@ public class LeRobotDatasetEpisode
                                               record.timestamp(),
                                               record.ihmcLogPosition(),
                                               record.nextDone(),
-                                              datasetLengthSoFar + record.frameIndex(),
+                                              framesInPreceedingEpisodes + record.frameIndex(),
                                               record.taskIndex()));
       }
    }
@@ -332,6 +339,11 @@ public class LeRobotDatasetEpisode
    public List<LeRobotEpisodeRecord> getRecords()
    {
       return records;
+   }
+
+   public LeRobotDatasetEpisodeStatistics getStatistics()
+   {
+      return statistics;
    }
 
    public int getEpisodeIndex()

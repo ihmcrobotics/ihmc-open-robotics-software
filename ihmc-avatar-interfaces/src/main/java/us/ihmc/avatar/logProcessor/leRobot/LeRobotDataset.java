@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.thread.ThreadTools;
@@ -98,6 +100,12 @@ public class LeRobotDataset
          episode.loadParquetData();
          episodes.add(episode);
          totalFrames += episode.getLength();
+      });
+      MutableInt i = new MutableInt();
+      JSONFileTools.loadLines(episodeStatsJsonlPath, lineRoot ->
+      {
+         episodes.get(i.intValue()).getStatistics().loadJSON(lineRoot);
+         i.increment();
       });
    }
 
@@ -192,116 +200,53 @@ public class LeRobotDataset
 
    public void removeEpisodes(boolean[] episodesToRemove)
    {
-      // Remove data
-
-      for (int i = 0; i < episodesToRemove.length; i++)
+      ExceptionTools.handle(() ->
       {
-
-         LeRobotDatasetEpisode episode = episodes.get(i);
-
-         if (episodesToRemove[i])
+         for (int i = 0, j = 0; i < episodesToRemove.length; i++, j++)
          {
-            episodes.remove(i);
+            if (episodesToRemove[i])
+            {
+               FileTools.deleteQuietly(dataChunk0Path.resolve("episode_%06d".formatted(j) + ".parquet"));
+               for (RobotSide side : RobotSide.values)
+                  FileTools.deleteQuietly(zedVideoDirs.get(side).resolve("episode_%06d".formatted(j) + ".mp4"));
 
+               episodes.remove(j);
 
-            removeEpisode(i);
+               for (int k = j; k < episodes.size(); k++)
+               {
+                  episodes.get(k).reindex(k);
+
+                  Files.move(dataChunk0Path.resolve("episode_%06d".formatted(k + 1) + ".parquet"),
+                             dataChunk0Path.resolve("episode_%06d".formatted(k) + ".parquet"));
+                  for (RobotSide side : RobotSide.values)
+                     Files.move(zedVideoDirs.get(side).resolve("episode_%06d".formatted(k + 1) + ".mp4"),
+                                zedVideoDirs.get(side).resolve("episode_%06d".formatted(k) + ".mp4"));
+               }
+
+               --j;
+            }
          }
-      }
 
-      // Reindex episodes
+         for (LeRobotDatasetEpisode episode : episodes)
+            episode.writeParquetData();
 
+         FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+         for (LeRobotDatasetEpisode episode : episodes)
+            episode.writeEpisodeJsonlLine();
 
-      regenerateAndRewriteMetadata();
-   }
+         // TODO: Try doing this more efficiently
+//         FileTools.write(episodeStatsJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+//         for (LeRobotDatasetEpisode episode : episodes)
+//            episode.readDataAndWriteStatisticsJsonlLine();
 
-   public void removeEpisode(int index)
-   {
-      if (episodes.isEmpty())
-      {
-         LogTools.warn("No episodes to remove.");
-         return;
-      }
+         writeMetaJson();
 
-      LeRobotDatasetEpisode lastEpisode = episodes.get(index);
-      String episodeName = lastEpisode.getEpisodeName();
-
-      Path parquetToDelete = dataChunk0Path.resolve(episodeName + ".parquet");
-      if (Files.exists(parquetToDelete))
-      {
-         FileTools.deleteQuietly(parquetToDelete);
-         changeNumbers(index, episodes.size(), dataChunk0Path, ".parquet");
-         LogTools.info("Deleted Parquet: " + parquetToDelete);
-      }
-      else
-      {
-         LogTools.warn("Parquet does not exist: " + parquetToDelete);
-         return;
-      }
-
-      for (RobotSide side : RobotSide.values)
-      {
-         Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
-         if (Files.exists(mp4Path))
-         {
-            FileTools.deleteQuietly(mp4Path);
-            changeNumbers(index, episodes.size(), zedVideoDirs.get(side), ".mp4");
-            LogTools.info("Deleted MP4: " + mp4Path);
-         }
-         else
-         {
-            LogTools.warn("MP4 does not exist: " + mp4Path);
-            return;
-         }
-      }
-
-
-      try
-      {
-         removeLineFromJsonl(episodesJsonlPath, index);
-         removeLineFromJsonl(episodeStatsJsonlPath, index);
-         shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
-         shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
-      }
-      catch (IOException e)
-      {
-         DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
-      }
-
-      episodes.remove(episodes.size() - 1);
-      LogTools.info("Removed episode: " + episodeName);
-      regenerateAndRewriteMetadata();
-   }
-
-   private void changeNumbers(int index, int finalNumber, Path fileSpot, String fileType)
-   {
-      for (int i = index + 1; i < finalNumber; i++)
-      {
-         LeRobotDatasetEpisode moveEpisode = episodes.get(i);
-         String episodeName = moveEpisode.getEpisodeName();
-         LeRobotDatasetEpisode newEpisode = episodes.get(i - 1);
-         String newEpisodeName = newEpisode.getEpisodeName();
-
-         Path parquetToMove = fileSpot.resolve(episodeName + fileType);
-         Path parquetSpot = fileSpot.resolve(newEpisodeName + fileType);
-         try
-         {
-            Files.move(parquetToMove, parquetSpot);
-         }
-         catch (IOException e)
-         {
-            LogTools.error("Failed to move parquet file: " + parquetToMove);
-         }
-      }
+      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    private void shiftEpisodeIndicesInJsonl(Path jsonlPath, int removedIndex) throws IOException
    {
       List<String> allLines = Files.readAllLines(jsonlPath);
-      if (allLines.isEmpty())
-      {
-         LogTools.warn("JSONL is empty, nothing to shift: " + jsonlPath);
-         return;
-      }
 
       ObjectMapper mapper = new ObjectMapper();
       List<String> rewritten = new ArrayList<>(allLines.size());
@@ -335,22 +280,12 @@ public class LeRobotDataset
    private void removeLineFromJsonl(Path jsonlPath, int index) throws IOException
    {
       List<String> allLines = Files.readAllLines(jsonlPath);
-
-      if (allLines.isEmpty())
-      {
-         LogTools.warn("JSONL file is empty (nothing to remove): " + jsonlPath);
-         return;
-      }
       List<String> linesToWrite = new ArrayList<>();
       List<String> secondLines = new ArrayList<>();
       if (index > 0)
-      {
          linesToWrite = allLines.subList(0, index - 1);
-      }
       if (index < allLines.size())
-      {
          secondLines = allLines.subList(index + 1, allLines.size());
-      }
       linesToWrite.addAll(secondLines);
       Files.write(jsonlPath, linesToWrite, StandardOpenOption.TRUNCATE_EXISTING);
       LogTools.info("Removed last line from " + jsonlPath + " (now has " + linesToWrite.size() + " lines).");

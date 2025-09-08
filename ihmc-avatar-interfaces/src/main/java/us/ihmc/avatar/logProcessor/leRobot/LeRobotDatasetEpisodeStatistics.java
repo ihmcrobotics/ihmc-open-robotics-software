@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -45,7 +46,6 @@ public class LeRobotDatasetEpisodeStatistics
    private final LeRobotIntegerStatisticsCalculator nextDoneStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
    private final LeRobotIntegerStatisticsCalculator taskIndexStats = new LeRobotIntegerStatisticsCalculator();
-
 
    public void submitFrame(RobotSide side, Mat bgrMat)
    {
@@ -256,5 +256,10 @@ public class LeRobotDatasetEpisodeStatistics
       fieldStats.putArray("mean").add(taskIndexStats.getMean());
       fieldStats.putArray("std").add(taskIndexStats.getStddev());
       fieldStats.putArray("count").add(length);
+   }
+
+   public void loadJSON(JsonNode lineRoot)
+   {
+      // TODO
    }
 }
