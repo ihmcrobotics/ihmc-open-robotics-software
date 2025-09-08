@@ -3,13 +3,10 @@ package us.ihmc.rdx.ui.graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
-import imgui.ImGui;
-import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -31,15 +28,13 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    private Texture texture;
    private final RDXImagePanel imagePanel;
    private final List<Consumer<Mat>> overlays = new ArrayList<>();
-   private final ImBoolean visualizeImagePanel = new ImBoolean();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public RDXOpenCVVideoVisualizer(String title, String panelName, boolean flipY)
    {
       super(title);
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-      imagePanel = new RDXImagePanel(ImGuiTools.uniqueLabel(this, panelName), flipY);
-      imagePanel.setActive(visualizeImagePanel.get());
+      imagePanel = new RDXImagePanel(labels.get(panelName), flipY);
    }
 
    public void doReceiveMessageOnThread(Runnable receiveMessageOnThread)
@@ -82,10 +77,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.get("Render image inside panel"), visualizeImagePanel))
-      {
-         imagePanel.setActive(visualizeImagePanel.get());
-      }
+
    }
 
    @Override

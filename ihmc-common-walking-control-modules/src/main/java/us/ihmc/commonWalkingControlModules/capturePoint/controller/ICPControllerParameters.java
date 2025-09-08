@@ -163,6 +163,14 @@ public abstract class ICPControllerParameters
    {
    }
 
+   /**
+    * The feedback and feedforward alphas are rate limited. This is the maximum rate they are allowed to change at.
+    **/
+   public double getMaxAlphaRate()
+   {
+      return 10.0;
+   }
+
    public FeedForwardAlphaCalculator getFeedForwardAlphaCalculator()
    {
       return null;

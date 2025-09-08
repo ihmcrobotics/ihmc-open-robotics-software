@@ -34,6 +34,14 @@ public class ImGuiSliderDouble extends ImGuiFancyWidget
       return valueChanged;
    }
 
+   public boolean render(double minValue, double maxValue, boolean hideLabel)
+   {
+      beforeWidgetRender(hideLabel);
+      boolean valueChanged = ImGuiTools.sliderDouble(label, imDouble, minValue, maxValue, format);
+      afterWidgetRender();
+      return valueChanged;
+   }
+
    public void setDoubleValue(double value)
    {
       imDouble.set(value);

@@ -7,9 +7,10 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.sensors.deprecated.ZEDColorDepthImageRetriever;
+import us.ihmc.sensors.zed.ZEDImageSensor;
+import us.ihmc.sensors.zed.ZEDModelData;
+import us.ihmc.zed.global.zed;
 
 import java.time.Instant;
 import java.util.LinkedList;
@@ -19,7 +20,7 @@ public class RDXRawImagePointCloudVisualizerDemo
 {
    private RDXRawImagePointCloudVisualizer pointCloudVisualizer;
 
-   private ZEDColorDepthImageRetriever zed;
+   private ZEDImageSensor zedImageSensor;
    private final RepeatingTaskThread zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
 
    private final Queue<RawImage> depthImageQueue = new LinkedList<>();
@@ -45,8 +46,8 @@ public class RDXRawImagePointCloudVisualizerDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
 
-            zed = new ZEDColorDepthImageRetriever(0, sensorPoseGizmo::getGizmoFrame, () -> true, () -> true);
-            zed.start();
+            zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2I, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_PERFORMANCE, zed.SL_RESOLUTION_VGA, 100);
+            zedImageSensor.run(true);
 
             pointCloudVisualizer = new RDXRawImagePointCloudVisualizer("ZED Point Cloud");
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudVisualizer);
@@ -78,7 +79,7 @@ public class RDXRawImagePointCloudVisualizerDemo
          public void dispose()
          {
             zedGrabThread.blockingKill();
-            zed.destroy();
+            zedImageSensor.close();
             pointCloudVisualizer.destroy();
             colorImageQueue.forEach(RawImage::release);
             depthImageQueue.forEach(RawImage::release);
@@ -87,10 +88,12 @@ public class RDXRawImagePointCloudVisualizerDemo
       });
    }
 
-   private void zedGrabThread()
+   private void zedGrabThread() throws InterruptedException
    {
-      RawImage colorImage = zed.getLatestRawColorImage(RobotSide.LEFT);
-      RawImage depthImage = zed.getLatestRawDepthImage();
+      zedImageSensor.waitForGrab();
+
+      RawImage colorImage = zedImageSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+      RawImage depthImage = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       colorImageQueue.add(colorImage);
       depthImageQueue.add(depthImage);

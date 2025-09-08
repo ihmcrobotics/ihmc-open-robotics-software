@@ -19,6 +19,8 @@ public interface AvatarAffinityInterface
 
    Processor getStepGeneratorThreadProcessor();
 
+   Processor getIKStreamingThreadProcessor();
+
    PriorityParameters getMasterThreadPriority();
 
    PriorityParameters getEstimatorThreadPriority();
@@ -26,4 +28,6 @@ public interface AvatarAffinityInterface
    PriorityParameters getControllerThreadPriority();
 
    PriorityParameters getStepGeneratorThreadPriority();
+
+   PriorityParameters getIKStreamingThreadPriority();
 }

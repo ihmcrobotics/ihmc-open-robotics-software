@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.SnappingTerrainExtractor;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
@@ -31,23 +32,17 @@ public class SteppableRegionsCalculationModuleTest
       int cellsPerAxis = 2 * centerIndex + 1;
       Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1, new Scalar(32767));
       HeightMapData heightMapData = new HeightMapData(gridResolution, terrainWidth, gridCenter.getX(), gridCenter.getY());
-      HeightMapTools.convertToHeightMapData(heightMapMat,
-                                            heightMapData,
-                                            gridCenter,
-                                            (float) terrainWidth,
-                                            (float) gridResolution,
-                                            (float) heightMapParameters.getHeightScaleFactor(),
-                                            (float) heightMapParameters.getHeightOffset());
+      HeightMapTools.convertToHeightMapData(heightMapMat, heightMapData, gridCenter, (float) terrainWidth, (float) gridResolution);
 
       double extremumValue = terrainWidth / 2.0 - Math.max(SteppableRegionsCalculationModule.footLength, SteppableRegionsCalculationModule.footWidth) / 2.0;
 
       SteppableRegionsCalculationModule steppableRegionsCalculationModule = new SteppableRegionsCalculationModule();
 
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
       snappingTerrainExtractor.update(heightMapData);
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
 
-      PerceptionDebugTools.printMat("ii", terrainMapData.getSteppabilityMat(), 1);
       steppableRegionsCalculationModule.compute(terrainMapData);
       SteppableRegionsListCollection regions = steppableRegionsCalculationModule.getSteppableRegionsListCollection();
 

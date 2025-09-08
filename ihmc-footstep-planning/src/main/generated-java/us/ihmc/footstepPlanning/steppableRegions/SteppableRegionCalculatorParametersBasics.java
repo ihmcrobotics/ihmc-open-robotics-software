@@ -18,6 +18,11 @@ public interface SteppableRegionCalculatorParametersBasics extends SteppableRegi
       set(SteppableRegionCalculatorParameters.distanceFromCliffTops, distanceFromCliffTops);
    }
 
+   default void setScaledFootInMeters(double scaledFootInMeters)
+   {
+      set(SteppableRegionCalculatorParameters.scaledFootInMeters, scaledFootInMeters);
+   }
+
    default void setYawDiscretizations(int yawDiscretizations)
    {
       set(SteppableRegionCalculatorParameters.yawDiscretizations, yawDiscretizations);

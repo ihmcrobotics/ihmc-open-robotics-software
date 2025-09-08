@@ -18,6 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
@@ -45,6 +46,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private RDXInteractableFootstep footstepBeingPlaced;
    private boolean footstepBeingPlacedIsReachable;
    private boolean modeNewlyActivated = false;
+   private boolean needToInitializePlacementHeight = false;
    private RDXBaseUI baseUI;
    private ROS2SyncedRobotModel syncedRobot;
    private RobotSide currentFootStepSide;
@@ -105,8 +107,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    {
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
 
-      ImGui.text("Footstep Planning:");
-      ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || (panel3DIsHovered && ImGui.isKeyPressed('R')))
       {
          createNewFootstep(RobotSide.LEFT);
@@ -135,10 +135,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          footstepPlan.removeLastStep();
       }
       ImGuiTools.previousWidgetTooltip("Delete");
-      if (ImGui.checkbox("Active Footstep Adjustment", activeAdjustmentEnabled))
-      {
-         footstepPlan.setActiveAdjustment(activeAdjustmentEnabled.get());
-      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -174,6 +170,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       if (footstepBeingPlaced != null)
       {
          footstepBeingPlaced.process3DViewInput(input, true);
+
+         if (needToInitializePlacementHeight) // Initialize placed footstep height until scene collisions take back over
+         {
+            needToInitializePlacementHeight = false;
+            input.setLastZCollision(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
+         }
 
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
          renderTooltip = true;
@@ -298,6 +300,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void createNewFootstep(RobotSide footstepSide)
    {
       modeNewlyActivated = true;
+      needToInitializePlacementHeight = true;
       RigidBodyTransformReadOnly latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
 
@@ -393,6 +396,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.getTranslation().addY(furthestForwardFootstep.negateIfLeftSide(footstepPlannerParameters.getIdealFootstepWidth()));
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       footstepBeingPlaced.updatePose(tempFramePose);
+      currentFootStepSide = footstepBeingPlaced.getFootstepSide();
       placeFootstep();
       exitPlacement();
    }

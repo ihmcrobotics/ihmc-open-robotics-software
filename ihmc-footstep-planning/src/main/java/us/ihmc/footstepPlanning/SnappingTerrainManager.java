@@ -2,8 +2,9 @@ package us.ihmc.footstepPlanning;
 
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -13,27 +14,28 @@ public class SnappingTerrainManager
 {
    private final SnappingTerrainExtractor snappingTerrainExtractor;
    private ROS2Publisher<TerrainMapMessage> snappingTerrainPublisher;
+   private final TerrainMapMessage terrainMapMessage;
 
-   public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters)
+   public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters footstepPlannerParameters)
    {
       if (ros2Node != null)
          snappingTerrainPublisher = ros2Node.createPublisher(ContinuousHikingAPI.TERRAIN_MAP);
 
-      snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      terrainMapMessage = new TerrainMapMessage();
+      snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, footstepPlannerParameters);
    }
 
    public void updateAndPublish(HeightMapData heightMapData)
    {
       snappingTerrainExtractor.update(heightMapData);
-
       publishTerrainMapData(snappingTerrainExtractor.getTerrainMapData());
    }
 
    private void publishTerrainMapData(TerrainMapData terrainMapData)
    {
-      TerrainMapMessage message = TerrainMapTools.toMessage(terrainMapData);
+      TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
       if (snappingTerrainPublisher != null)
-         snappingTerrainPublisher.publish(message);
+         snappingTerrainPublisher.publish(terrainMapMessage);
    }
 
    public TerrainMapData getTerrainMapData()

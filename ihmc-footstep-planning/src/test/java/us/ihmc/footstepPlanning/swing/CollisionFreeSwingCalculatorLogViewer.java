@@ -50,7 +50,7 @@ public class CollisionFreeSwingCalculatorLogViewer
 
       Graphics3DObject terrainGraphics = new Graphics3DObject();
 
-      IDLSequence.Integer heights = heightMapMessage.getHeights();
+      IDLSequence.Float heights = heightMapMessage.getHeights();
       double gridResolutionXY = heightMapMessage.getCellSizeInMeters();
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(), gridResolutionXY);
 

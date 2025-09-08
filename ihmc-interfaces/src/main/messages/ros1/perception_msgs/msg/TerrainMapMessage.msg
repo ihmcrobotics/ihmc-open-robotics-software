@@ -3,40 +3,20 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
-# The number of cells per side of the terrain map grid
-uint16 local_grid_size
-
-# The number of cells contained per meter. This defines the resolution of the grid.
-uint8 cells_per_meter
-
 # X coordinate of the center of the terrain map
 float64 map_center_x
 
 # Y coordinate of the center of the terrain map
 float64 map_center_y
 
-# These are the scale factors that are used to convert from the short values to the actual heights.
-# First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-# height = short & 0xFFFF / height_scale_factor - height_scale_offset
-float64 height_scale_factor
+# The number of cells per side of the terrain map grid
+float64 width_in_meters
 
-float64 height_scale_offset
+# The number of cells contained per meter. This defines the resolution of the grid.
+uint8 cells_per_meter
 
-bool has_terrain_cost_data
-
-bool has_contact_map_data
-
-bool has_height_map_data
-
-bool has_snapped_height_data
-
-bool has_snapped_normal_data
-
-bool has_snapped_area_data
-
-bool has_steppability_data
-
-bool has_steppable_connections_data
+# Cell size in meters of an individual cell
+float64 cell_size_in_meters
 
 # The raw data for the terrain cost value, which are stored as chars.
 int8[] terrain_cost_data
@@ -44,11 +24,7 @@ int8[] terrain_cost_data
 # The raw data for the contact map value, which are stored as chars.
 int8[] contact_map_data
 
-# The raw data for the raw heights, which are stored as two bytes to form one short.
-int8[] height_map_data
-
-# The raw data for the snapped heights, which are stored as two bytes to form one short.
-int8[] snapped_height_data
+float32[] heights
 
 # The raw data for the snap normal x value, which are stored as chars.
 int8[] snapped_normal_x_data

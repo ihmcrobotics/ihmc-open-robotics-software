@@ -38,7 +38,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
    private final EnvironmentHandler environmentHandler;
-   private final HeightMapCliffAvoider heightMapCliffAvoider;
    private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
    private final FootstepPlannerBodyCollisionDetector collisionDetector;
    private final FootstepPoseHeuristicChecker heuristicPoseChecker;
@@ -66,7 +65,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       this.snapper = snapper;
       this.footPolygons = footPolygons;
       this.environmentHandler = environmentHandler;
-      this.heightMapCliffAvoider = new HeightMapCliffAvoider(parameters, snapper, footPolygons, registry);
       this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
       this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
       this.heuristicPoseChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
@@ -138,14 +136,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          if (poseRejectionReason != null)
          {
             rejectionReason.set(poseRejectionReason);
-            return;
-         }
-
-         // Check height map cliff avoidance
-         heightMapCliffAvoider.setHeightMapData(environmentHandler.getHeightMapData());
-         if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
-         {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE);
             return;
          }
       }

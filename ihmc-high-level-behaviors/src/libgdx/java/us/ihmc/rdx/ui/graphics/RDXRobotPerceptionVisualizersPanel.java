@@ -9,6 +9,7 @@ import us.ihmc.perception.streaming.ROS2SRTVideoStreamImageMessageRelay;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2KSTRobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
@@ -25,6 +26,7 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
 
    // Common — always present
    protected final RDXROS2RobotVisualizer robotVisualizer;
+   protected final RDXROS2KSTRobotVisualizer kinematicsStreamingSolutionVisualizer;
    protected final ROS2SRTVideoStreamImageMessageRelay videoStreamImageMessageRelay;
 
    // Optional — may be null in some robots
@@ -51,6 +53,10 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       robotVisualizer.setPinned(true);
       robotVisualizer.setActive(true);
       addVisualizer(robotVisualizer);
+
+      // Kinematics streaming solution visualizer
+      kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Helper.getROS2Node(), syncedRobot.getRobotModel());
+      addVisualizer(kinematicsStreamingSolutionVisualizer);
 
       videoStreamImageMessageRelay = new ROS2SRTVideoStreamImageMessageRelay(PerceptionAPI.SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS,
                                                                              ros2Node,
@@ -93,6 +99,11 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public RDXROS2RobotVisualizer getRobotVisualizer()
    {
       return robotVisualizer;
+   }
+
+   public RDXROS2KSTRobotVisualizer getKinematicsStreamingSolutionVisualizer()
+   {
+      return kinematicsStreamingSolutionVisualizer;
    }
 
    public RDXROS2ColoredPointCloudVisualizer getZedColoredPointCloudVisualizer()

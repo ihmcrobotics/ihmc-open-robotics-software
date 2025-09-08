@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.qui
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -33,10 +34,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    /** This is used only when the support foot based footstep adjustment is created. */
    private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
    private final OptionalFactoryField<FootstepAdjustment> primaryFootstepAdjusterField = new OptionalFactoryField<>("csgPrimaryFootstepAdjusterField");
-   private final OptionalFactoryField<FootstepPlanAdjustment> footstepPlanAdjusterField = new OptionalFactoryField<>("csgFootstepPlanAdjusterField");
    private final List<FootstepAdjustment> secondaryFootstepAdjusters = new ArrayList<>();
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
-   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+   private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
 
    private final List<Updatable> updatables = new ArrayList<>();
 
@@ -63,21 +63,15 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    }
 
    @Override
-   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
-   {
-      footstepPlanAdjusterField.set(footStepAdjustment);
-   }
-
-   @Override
    public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
       footstepValidityIndicators.add(footstepValidityIndicator);
    }
 
    @Override
-   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
-      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
+      heightMapCommandConsumers.add(heightMapCommandConsumer);
    }
 
    @Override
@@ -143,15 +137,13 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
                                                                                          referenceFrames,
                                                                                          updateDT,
                                                                                          registryField.get(),
-                                                                                         yoGraphicsListRegistry,
+                                                                                         null,
                                                                                          timeProvider));
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
       if (primaryFootstepAdjusterField.hasValue() && primaryFootstepAdjusterField.get() != null)
          continuousStepGenerator.setFootstepAdjustment(primaryFootstepAdjusterField.get());
-      if (footstepPlanAdjusterField.hasValue() && footstepPlanAdjusterField.get() != null)
-         continuousStepGenerator.setFootstepPlanAdjustment(footstepPlanAdjusterField.get());
       for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusters)
          continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
       for (FootstepValidityIndicator footstepValidityIndicator : footstepValidityIndicators)
@@ -198,8 +190,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       else if (csgCommandInputManagerField.hasValue())
       {
          StepGeneratorCommandInputManager commandInputManager = csgCommandInputManagerField.get();
-         for (Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer : planarRegionsListCommandConsumers)
-            commandInputManager.addPlanarRegionsListCommandConsumer(planarRegionsListCommandConsumer);
+         for (Consumer<HeightMapCommand> heightMapCommandConsumer : heightMapCommandConsumers)
+            commandInputManager.addHeightMapCommandConsumer(heightMapCommandConsumer);
 
          continuousStepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
@@ -214,6 +206,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
          //this is probably not the way the class was intended to be modified.
          commandInputManager.setCSG(continuousStepGenerator);
+         continuousStepGenerator.setYoComponentProviders();
       }
       else
       {

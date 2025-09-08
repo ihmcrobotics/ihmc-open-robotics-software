@@ -90,11 +90,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(variancePerRotationSpeed);
    }
 
-   default double getHeightOffset()
-   {
-      return get(heightOffset);
-   }
-
    default double getMinClampHeight()
    {
       return get(minClampHeight);
@@ -125,11 +120,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(globalWidthInMeters);
    }
 
-   default double getHeightScaleFactor()
-   {
-      return get(heightScaleFactor);
-   }
-
    default int getSteppingContactThreshold()
    {
       return get(steppingContactThreshold);
@@ -143,10 +133,5 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getSteppingCosineThreshold()
    {
       return get(steppingCosineThreshold);
-   }
-
-   default boolean getEstimateHeightWithKalmanFilter()
-   {
-      return get(estimateHeightWithKalmanFilter);
    }
 }

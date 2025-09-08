@@ -56,12 +56,6 @@ RUN apt-get --quiet 2 --yes update \
  && mkdir -p /etc/OpenCL/vendors \
  && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 
-# Install nvCOMP
-RUN wget https://developer.download.nvidia.com/compute/nvcomp/3.0.5/local_installers/nvcomp_3.0.5_x86_64_12.x.tgz \
- && tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/lib64/ --strip-components=1 lib/ \
- && tar -xvf nvcomp_3.0.5_x86_64_12.x.tgz -C /usr/local/cuda/include/ --strip-components=1 include/ \
- && rm -f nvcomp_3.0.5_x86_64_12.x.tgz
-
 # Install ZED SDK
 RUN apt-get --quiet 2 --yes update  \
  && apt-get --quiet 2 --yes install zstd > /dev/null \

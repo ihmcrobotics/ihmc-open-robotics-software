@@ -139,7 +139,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
 
             if (armConfigurations.get(robotSide) == AlexanderArmConfiguration.NUB)
             {
-               Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_ELBOW_PITCH_LINK : Links.RIGHT_ELBOW_PITCH_LINK;
+               Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_ELBOW_Y_LINK : Links.RIGHT_ELBOW_Y_LINK;
                handNames.put(robotSide, hand.name);
 
                lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_ELBOW_Y : Joints.RIGHT_ELBOW_Y;
@@ -154,7 +154,7 @@ public class AlexanderJointMap implements HumanoidJointNameMap
                Links hand = robotSide == RobotSide.LEFT ? Links.LEFT_GRIPPER_Z_LINK : Links.RIGHT_GRIPPER_Z_LINK;
                handNames.put(robotSide, hand.name);
 
-               Links forearm = robotSide == RobotSide.LEFT ? Links.LEFT_WRIST_YAW_LINK : Links.RIGHT_WRIST_YAW_LINK;
+               Links forearm = robotSide == RobotSide.LEFT ? Links.LEFT_WRIST_Z_LINK : Links.RIGHT_WRIST_Z_LINK;
                forearmNames.put(robotSide, forearm.name);
 
                lastSimulatedJoint = robotSide == RobotSide.LEFT ? Joints.LEFT_GRIPPER_Z : Joints.RIGHT_GRIPPER_Z;
@@ -624,25 +624,25 @@ public class AlexanderJointMap implements HumanoidJointNameMap
       HEAD_LINK,
 
       /* Left leg links */
-      LEFT_HIP_YAW_LINK, LEFT_HIP_ROLL_LINK, LEFT_THIGH, LEFT_SHIN, LEFT_ANKLE_LINK, LEFT_FOOT,
+      LEFT_HIP_Z_LINK, LEFT_HIP_X_LINK, LEFT_THIGH, LEFT_SHIN, LEFT_ANKLE_Y_LINK, LEFT_FOOT,
 
       /* Right leg links */
-      RIGHT_HIP_YAW_LINK, RIGHT_HIP_ROLL_LINK, RIGHT_THIGH, RIGHT_SHIN, RIGHT_ANKLE_LINK, RIGHT_FOOT,
+      RIGHT_HIP_Z_LINK, RIGHT_HIP_X_LINK, RIGHT_THIGH, RIGHT_SHIN, RIGHT_ANKLE_Y_LINK, RIGHT_FOOT,
 
       /* Spine links */
-      PELVIS_LINK, SPINE_YAW_LINK, TORSO_LINK,
+      PELVIS_LINK, SPINE_Z_LINK, TORSO_LINK,
 
       /* Left shoulder links */
-      LEFT_SHOULDER_PITCH_LINK, LEFT_SHOULDER_ROLL_LINK, LEFT_SHOULDER_YAW_LINK, LEFT_ELBOW_PITCH_LINK,
+      LEFT_SHOULDER_Y_LINK, LEFT_SHOULDER_X_LINK, LEFT_SHOULDER_Z_LINK, LEFT_ELBOW_Y_LINK,
 
       /* Left forearm links */
-      LEFT_WRIST_YAW_LINK, LEFT_WRIST_ROLL_LINK, LEFT_GRIPPER_Z_LINK, LEFT_GRIPPER_ROLL1_LINK, LEFT_GRIPPER_ROLL2_LINK,
+      LEFT_WRIST_Z_LINK, LEFT_WRIST_X_LINK, LEFT_GRIPPER_Z_LINK, LEFT_GRIPPER_X1_LINK, LEFT_GRIPPER_X2_LINK,
 
       /* Right shoulder links */
-      RIGHT_SHOULDER_PITCH_LINK, RIGHT_SHOULDER_ROLL_LINK, RIGHT_SHOULDER_YAW_LINK, RIGHT_ELBOW_PITCH_LINK,
+      RIGHT_SHOULDER_Y_LINK, RIGHT_SHOULDER_X_LINK, RIGHT_SHOULDER_Z_LINK, RIGHT_ELBOW_Y_LINK,
 
       /* Right forearm links */
-      RIGHT_WRIST_YAW_LINK, RIGHT_WRIST_ROLL_LINK, RIGHT_GRIPPER_Z_LINK, RIGHT_GRIPPER_ROLL1_LINK, RIGHT_GRIPPER_ROLL2_LINK,
+      RIGHT_WRIST_Z_LINK, RIGHT_WRIST_X_LINK, RIGHT_GRIPPER_Z_LINK, RIGHT_GRIPPER_X1_LINK, RIGHT_GRIPPER_X2_LINK,
       ;
 
       private final String name = toString();

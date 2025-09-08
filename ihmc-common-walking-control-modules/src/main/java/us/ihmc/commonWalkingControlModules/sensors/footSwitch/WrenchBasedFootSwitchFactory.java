@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
 {
    private double defaultContactThresholdForce = Double.NaN;
-   private double defaultCoPThresholdFraction = Double.NaN;
+   private double defaultCoPThresholdDistance = Double.NaN;
    private double defaultSecondContactThresholdForceIgnoringCoP = Double.NaN;
 
    private DoubleProvider contactThresholdForceParameter;
@@ -29,7 +29,7 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
    /**
     * When determining that a foot has hit the floor after a step the z-force on the foot needs to be
     * past the threshold defined by this method. In addition the center of pressure needs to be inside
-    * certain bounds of the foot (see {@link #setDefaultCoPThresholdFraction(double)}).
+    * certain bounds of the foot (see {@link #setDefaultCoPThresholdDistance(double)}).
     * </p>
     * See also {@link #setDefaultSecondContactThresholdForceIgnoringCoP(double)} for another threshold
     * on the contact force that does not require the CoP to be within bounds.
@@ -42,13 +42,13 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
 
    /**
     * When determining whether a foot has touched down after a step the controller will make sure that
-    * the CoP of the foot is within bounds before the touchdown is triggered. This fraction of the foot
-    * length is used to move these bounds in. In addition the ground reaction force needs to be above
+    * the CoP of the foot is within bounds before the touchdown is triggered. This is the distance threshold
+    * inside the foot for the CoP to trigger touchdown. In addition the ground reaction force needs to be above
     * the threshold defined in {@link #setDefaultContactThresholdForce(double)}
     */
-   public void setDefaultCoPThresholdFraction(double defaultCoPThresholdFraction)
+   public void setDefaultCoPThresholdDistance(double defaultCoPThresholdDistance)
    {
-      this.defaultCoPThresholdFraction = defaultCoPThresholdFraction;
+      this.defaultCoPThresholdDistance = defaultCoPThresholdDistance;
    }
 
    /**
@@ -75,7 +75,7 @@ public class WrenchBasedFootSwitchFactory implements FootSwitchFactory
       if (contactThresholdForceParameter == null)
       {
          contactThresholdForceParameter = new DoubleParameter("ContactThresholdForce", registry, defaultContactThresholdForce);
-         copThresholdFractionParameter = new DoubleParameter("CoPThresholdFraction", registry, defaultCoPThresholdFraction);
+         copThresholdFractionParameter = new DoubleParameter("CoPThresholdFraction", registry, defaultCoPThresholdDistance);
          secondContactThresholdForceParameter = new DoubleParameter("SecondContactThresholdForce", registry, defaultSecondContactThresholdForceIgnoringCoP);
       }
 

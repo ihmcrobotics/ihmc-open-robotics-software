@@ -36,9 +36,9 @@ import java.util.function.Consumer;
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private String startPlacementButtonText = "Place pose";
-   private String startPlacementButtonDisabledText = "Placing";
-   private String stopPlacementButtonText = "Clear";
+   private String startPlacementButtonText = "Place Goal";
+   private String startPlacementButtonDisabledText = "Placing Goal";
+   private String stopPlacementButtonText = "Clear Goal";
    private ModelInstance sphere;
    private ModelInstance arrow;
    private RDXUIActionMap placeGoalActionMap;

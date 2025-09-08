@@ -19,14 +19,6 @@ module perception_msgs
          */
         unsigned long long sequence_id;
         /**
-         * The number of cells per side of the terrain map grid
-         */
-        unsigned short local_grid_size;
-        /**
-         * The number of cells contained per meter. This defines the resolution of the grid.
-         */
-        octet cells_per_meter;
-        /**
          * X coordinate of the center of the terrain map
          */
         double map_center_x;
@@ -35,60 +27,50 @@ module perception_msgs
          */
         double map_center_y;
         /**
-         * These are the scale factors that are used to convert from the short values to the actual heights.
-         * First the shorts are masked with 0xFFFF. Then they are scaled down by the scale factor and offset by the offset.
-         * height = short & 0xFFFF / height_scale_factor - height_scale_offset
+         * The number of cells per side of the terrain map grid
          */
-        double height_scale_factor;
-        double height_scale_offset;
-        boolean has_terrain_cost_data;
-        boolean has_contact_map_data;
-        boolean has_height_map_data;
-        boolean has_snapped_height_data;
-        boolean has_snapped_normal_data;
-        boolean has_snapped_area_data;
-        boolean has_steppability_data;
-        boolean has_steppable_connections_data;
+        double width_in_meters;
+        /**
+         * The number of cells contained per meter. This defines the resolution of the grid.
+         */
+        octet cells_per_meter;
+        /**
+         * Cell size in meters of an individual cell
+         */
+        double cell_size_in_meters;
         /**
          * The raw data for the terrain cost value, which are stored as chars.
          */
-        sequence<octet, 250000> terrain_cost_data;
+        sequence<octet, 255000> terrain_cost_data;
         /**
          * The raw data for the contact map value, which are stored as chars.
          */
-        sequence<octet, 250000> contact_map_data;
-        /**
-         * The raw data for the raw heights, which are stored as two bytes to form one short.
-         */
-        sequence<octet, 500000> height_map_data;
-        /**
-         * The raw data for the snapped heights, which are stored as two bytes to form one short.
-         */
-        sequence<octet, 500000> snapped_height_data;
+        sequence<octet, 255000> contact_map_data;
+        sequence<float, 255000> heights;
         /**
          * The raw data for the snap normal x value, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_normal_x_data;
+        sequence<octet, 255000> snapped_normal_x_data;
         /**
          * The raw data for the snap normal y value, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_normal_y_data;
+        sequence<octet, 255000> snapped_normal_y_data;
         /**
          * The raw data for the snap normal z value, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_normal_z_data;
+        sequence<octet, 255000> snapped_normal_z_data;
         /**
          * The raw data for the snapped support area, which are stored as chars.
          */
-        sequence<octet, 250000> snapped_area_data;
+        sequence<octet, 255000> snapped_area_data;
         /**
          * The raw data for the steppability area, which are stored as chars.
          */
-        sequence<octet, 250000> steppability_data;
+        sequence<octet, 255000> steppability_data;
         /**
          * The raw data for the steppable connections value, which are stored as chars.
          */
-        sequence<octet, 250000> steppable_connections_data;
+        sequence<octet, 255000> steppable_connections_data;
       };
     };
   };

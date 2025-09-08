@@ -116,8 +116,8 @@ public class CUDAFootstepOptimizer implements AutoCloseable
          FloatPointer gpuInitialPose = new FloatPointer();
          CUDATools.mallocAsync(gpuInitialPose, 4, cudaStream);
 
-         DoublePointer cpuHeights = new DoublePointer(currentHeightMapData.getHeights());
-         DoublePointer gpuHeights = new DoublePointer();
+         FloatPointer cpuHeights = new FloatPointer(currentHeightMapData.getHeights());
+         FloatPointer gpuHeights = new FloatPointer();
          CUDATools.mallocAsync(gpuHeights, currentHeightMapData.getHeights().length, cudaStream);
 
          FloatPointer cpuGridCenter = new FloatPointer((float) currentHeightMapData.getGridCenter().getX(),

@@ -4,14 +4,16 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeightMapCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -45,10 +47,10 @@ public class StepGeneratorCommandInputManager implements Updatable
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
-   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+   private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
    private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
    private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
-   private final AtomicReference<PlanarRegionsListCommand> latestPlanarRegions = new AtomicReference<>(null);
+   private final AtomicReference<HeightMapCommand> latestHeightMap = new AtomicReference<>(null);
    private final AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>(null);
    private final AtomicReference<WalkingStatus> previousWalkingStatus = new AtomicReference<>(null);
    private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
@@ -63,6 +65,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       swingHeight = new YoDouble("desiredSwingHeight_" + suffix, registry);
       isUnitVelocities = new YoBoolean("isUnitVelocities_" + suffix, registry);
       isUnitVelocities.set(false);
+
+      // by default, command input manager is not enabled, set enabled only if #update is called
+      commandInputManager.setEnabled(false);
    }
 
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
@@ -70,9 +75,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       this.continuousStepGenerator = continuousStepGenerator;
    }
 
-   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   public void addHeightMapCommandConsumer(Consumer<HeightMapCommand> heightMapCommandConsumer)
    {
-      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
+      heightMapCommandConsumers.add(heightMapCommandConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -131,6 +136,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void update(double time)
    {
       isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.QUICKSTER;
+      commandInputManager.setEnabled(isOpen);
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
       {
@@ -163,11 +169,11 @@ public class StepGeneratorCommandInputManager implements Updatable
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
 
       // update the local planar regions
-      if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+      if (commandInputManager.isNewCommandAvailable(HeightMapCommand.class))
       {
-         latestPlanarRegions.set(commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class));
+         latestHeightMap.set(commandInputManager.pollNewestCommand(HeightMapCommand.class));
       }
-      commandInputManager.clearCommands(PlanarRegionsListCommand.class);
+      commandInputManager.clearCommands(HeightMapCommand.class);
 
       // if the robot is standing, or we just finished a step, we should submit the newest regions
       if (latestWalkingStatus.get() == WalkingStatus.COMPLETED || latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
@@ -182,14 +188,14 @@ public class StepGeneratorCommandInputManager implements Updatable
          shouldSubmitNewRegions.set(true);
 
       // submit the new planar regions
-      if (isOpen && shouldSubmitNewRegions.getAndSet(false) && latestPlanarRegions.get() != null)
+      if (isOpen && shouldSubmitNewRegions.getAndSet(false) && latestHeightMap.get() != null)
       {
-         PlanarRegionsListCommand command = latestPlanarRegions.getAndSet(null);
+         HeightMapCommand command = latestHeightMap.getAndSet(null);
 
          if (command != null)
          {
-            for (int i = 0; i < planarRegionsListCommandConsumers.size(); i++)
-               planarRegionsListCommandConsumers.get(i).accept(command);
+            for (int i = 0; i < heightMapCommandConsumers.size(); i++)
+               heightMapCommandConsumers.get(i).accept(command);
 
             ticksSinceUpdatingTheEnvironment.set(0);
          }
@@ -201,7 +207,10 @@ public class StepGeneratorCommandInputManager implements Updatable
       previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());
 
       if (!isOpen)
+      {
          walk.set(false);
+         commandInputManager.clearAllCommands();
+      }
    }
 
    public boolean isOpen()

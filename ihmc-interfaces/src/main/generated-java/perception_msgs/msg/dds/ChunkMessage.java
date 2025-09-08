@@ -25,14 +25,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
             */
    public double origin_y_;
    /**
-            * Z height offset for converting between floats and shorts
-            */
-   public double height_offset_;
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public double height_scale_factor_;
-   /**
             * Width of the height map in meters
             */
    public double width_in_meters_;
@@ -47,11 +39,11 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Integer  heights_;
+   public us.ihmc.idl.IDLSequence.Float  heights_;
 
    public ChunkMessage()
    {
-      heights_ = new us.ihmc.idl.IDLSequence.Integer (255000, "type_2");
+      heights_ = new us.ihmc.idl.IDLSequence.Float (5000, "type_5");
 
    }
 
@@ -70,10 +62,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
       origin_x_ = other.origin_x_;
 
       origin_y_ = other.origin_y_;
-
-      height_offset_ = other.height_offset_;
-
-      height_scale_factor_ = other.height_scale_factor_;
 
       width_in_meters_ = other.width_in_meters_;
 
@@ -145,36 +133,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    }
 
    /**
-            * Z height offset for converting between floats and shorts
-            */
-   public void setHeightOffset(double height_offset)
-   {
-      height_offset_ = height_offset;
-   }
-   /**
-            * Z height offset for converting between floats and shorts
-            */
-   public double getHeightOffset()
-   {
-      return height_offset_;
-   }
-
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public void setHeightScaleFactor(double height_scale_factor)
-   {
-      height_scale_factor_ = height_scale_factor;
-   }
-   /**
-            * Z height scale factor for converting between floats and shorts
-            */
-   public double getHeightScaleFactor()
-   {
-      return height_scale_factor_;
-   }
-
-   /**
             * Width of the height map in meters
             */
    public void setWidthInMeters(double width_in_meters)
@@ -223,7 +181,7 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
    /**
             * List of heights, which correspond to the list of keys
             */
-   public us.ihmc.idl.IDLSequence.Integer  getHeights()
+   public us.ihmc.idl.IDLSequence.Float  getHeights()
    {
       return heights_;
    }
@@ -254,17 +212,13 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.origin_y_, other.origin_y_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_offset_, other.height_offset_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_scale_factor_, other.height_scale_factor_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_in_meters_, other.width_in_meters_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cell_size_in_meters_, other.cell_size_in_meters_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cells_per_axis_, other.cells_per_axis_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.heights_, other.heights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
 
 
       return true;
@@ -286,10 +240,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
       if(this.origin_x_ != otherMyClass.origin_x_) return false;
 
       if(this.origin_y_ != otherMyClass.origin_y_) return false;
-
-      if(this.height_offset_ != otherMyClass.height_offset_) return false;
-
-      if(this.height_scale_factor_ != otherMyClass.height_scale_factor_) return false;
 
       if(this.width_in_meters_ != otherMyClass.width_in_meters_) return false;
 
@@ -316,10 +266,6 @@ public class ChunkMessage extends Packet<ChunkMessage> implements Settable<Chunk
       builder.append(this.origin_x_);      builder.append(", ");
       builder.append("origin_y=");
       builder.append(this.origin_y_);      builder.append(", ");
-      builder.append("height_offset=");
-      builder.append(this.height_offset_);      builder.append(", ");
-      builder.append("height_scale_factor=");
-      builder.append(this.height_scale_factor_);      builder.append(", ");
       builder.append("width_in_meters=");
       builder.append(this.width_in_meters_);      builder.append(", ");
       builder.append("cell_size_in_meters=");

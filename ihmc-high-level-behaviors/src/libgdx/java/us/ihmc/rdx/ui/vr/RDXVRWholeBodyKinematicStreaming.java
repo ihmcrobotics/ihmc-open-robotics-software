@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -16,8 +15,8 @@ import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInitialConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -28,6 +27,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ROS2LogMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RobotVersion;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -54,6 +54,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -61,7 +62,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
-import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
+import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRHardwareModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -96,6 +97,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RDXVRMultiContact multiContact;
    private final RDXVRHandControl handControl;
    private final SideDependentList<RDXHandControlMode> handControlModes = new SideDependentList<>(RDXHandControlMode.HAND_CONFIGURATION, RDXHandControlMode.HAND_CONFIGURATION);
+   private final SideDependentList<Boolean> handHasFingers = new SideDependentList<>(true, true);
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final RDXVRContext vrContext;
@@ -161,7 +163,7 @@ public class RDXVRWholeBodyKinematicStreaming
                                            KinematicsStreamingToolboxParameters kstParameters,
                                            boolean createToolbox,
                                            boolean recordKSTOutput,
-                                           RDXHandConfigurationManager handManager,
+                                           RDXHandManager handManager,
                                            FullHumanoidRobotModel miniGhostFullRobotModel,
                                            RobotDefinition miniGhostRobotDefinition)
    {
@@ -252,7 +254,16 @@ public class RDXVRWholeBodyKinematicStreaming
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
       }
 
-      handControl = new RDXVRHandControl(vrContext, handManager, streamToController, handControlModes);
+      RobotVersion robotVersion = syncedRobot.getRobotModel().getRobotVersion();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (!robotVersion.hasHandWithFingers(side))
+         {
+            handControlModes.put(side, RDXHandControlMode.NONE);
+            handHasFingers.put(side, false);
+         }
+      }
+      handControl = new RDXVRHandControl(vrContext, handManager, streamToController, handControlModes, robotVersion);
       multiContact = new RDXVRMultiContact(syncedRobot, ghostFullRobotModel, ros2ControllerHelper, vrContext, streamPeriod, streamToController, handControlModes);
    }
 
@@ -713,25 +724,8 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          setStreamToController(streamToController.get(), true);
       }
-      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
-      {
-         reinitializeToolboxRobotConfiguration();
-      }
       ImGui.checkbox(labels.get("Control Arms Only"), controlArmsOnly);
-
       Set<String> connectedTrackers = vrContext.getAssignedTrackerRoles();
-      if (connectedTrackers.contains(CHEST.getSegmentName()))
-      {
-         if (ImGui.checkbox(labels.get("Arm Scaling"), armScaling))
-         {
-            setKSTEnabled(false);
-         }
-      }
-      else if (armScaling.get())
-      {
-         armScaling.set(false);
-      }
-
       if (connectedTrackers.contains(WAIST.getSegmentName()) &&
           connectedTrackers.contains(LEFT_ANKLE.getSegmentName()) &&
           connectedTrackers.contains(RIGHT_ANKLE.getSegmentName()))
@@ -746,10 +740,55 @@ public class RDXVRWholeBodyKinematicStreaming
          comTracking.set(false);
       }
 
-      ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+      ImGuiTools.separatorText("Visualization Options", ImGuiTools.getSmallBoldFont());
       ImGui.checkbox(labels.get("Show Robot Ghosts during Control"), showGhosts);
-      ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
+      if (miniGhost.isEnabled())
+      {
+         ImGui.checkbox(labels.get("Show Mini Robot Ghost"), showMiniGhost);
+      }
       ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
+
+      ImGuiTools.separatorText("Utility Functions", ImGuiTools.getSmallBoldFont());
+      if (ImGui.button(labels.get("Wakeup Toolbox")))
+      {
+         wakeUpToolbox();
+      }
+      if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
+      {
+         reinitializeToolboxRobotConfiguration();
+      }
+      ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+
+      ImGuiTools.separatorText("Hand Control Mode", ImGuiTools.getSmallBoldFont());
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.text(side.getCamelCaseName() + " Hand:");
+         if (ImGui.radioButton(labels.get("None"), handControlModes.get(side) == RDXHandControlMode.NONE))
+         {
+            handControlModes.put(side, RDXHandControlMode.NONE);
+         }
+         if (!handHasFingers.get(side))
+         {
+            ImGui.beginDisabled();
+         }
+         if (ImGui.radioButton(labels.get("Hand Configuration"), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
+         {
+            handControlModes.put(side, RDXHandControlMode.HAND_CONFIGURATION);
+         }
+         if (ImGui.radioButton(labels.get("Finger Streaming"), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
+         {
+            handControlModes.put(side, RDXHandControlMode.FINGER_STREAMING);
+         }
+         if (!handHasFingers.get(side))
+         {
+            ImGui.endDisabled();
+         }
+         if (ImGui.radioButton(labels.get("Load Bearing"), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
+         {
+            handControlModes.put(side, RDXHandControlMode.LOAD_BEARING);
+         }
+         ImGui.separator();
+      }
    }
 
    public void setKSTEnabled(boolean enabled)
@@ -757,7 +796,7 @@ public class RDXVRWholeBodyKinematicStreaming
       if (enabled)
       {
          initialize();
-         wakeUpToolbox();
+         reinitializeToolboxRobotConfiguration();
          ghostRobotGraphic.setActive(true);
          miniGhost.setActive(true);
       }

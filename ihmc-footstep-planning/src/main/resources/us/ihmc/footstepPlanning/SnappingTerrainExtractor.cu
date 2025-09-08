@@ -7,21 +7,20 @@ extern "C"
 #define HEIGHT_MAP_CENTER_Y 1
 #define CELL_SIZE_IN_CENTIMETERS 2
 #define HEIGHT_MAP_WIDTH_IM_METERS 3
-#define HEIGHT_SCALING_FACTOR 4
-#define HEIGHT_OFFSET 5
-#define FOOT_LENGTH 6
-#define FOOT_WIDTH 7
-#define MIN_DISTANCE_FROM_CLIFF_TOPS 8
-#define MIN_DISTANCE_FROM_CLIFF_BOTTOMS 9
-#define CLIFF_START_HEIGHT_TO_AVOID 10
-#define CLIFF_END_HEIGHT_TO_AVOID 11
-#define MIN_SUPPORT_AREA_FRACTION 12
-#define MIN_SNAP_HEIGHT_THRESHOLD 13
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 14
-#define INEQUALITY_ACTIVATION_SLOPE 15
-#define STEPPING_COSINE_THRESHOLD 16
-#define STEPPING_CONTACT_THRESHOLD 17
-#define CONTACT_WINDOW_SIZE 18
+#define FOOT_LENGTH 4
+#define FOOT_WIDTH 5
+#define MIN_DISTANCE_FROM_BASE_OF_CLIFF 6
+#define MIN_DISTANCE_FROM_EDGE_OF_CLIFF 7
+#define SCALED_FOOT_POLYGON_PERCENTAGE 8
+#define CLIFF_START_HEIGHT_TO_AVOID 9
+#define CLIFF_END_HEIGHT_TO_AVOID 10
+#define MIN_SUPPORT_AREA_FRACTION 11
+#define MIN_SNAP_HEIGHT_THRESHOLD 12
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 13
+#define INEQUALITY_ACTIVATION_SLOPE 14
+#define STEPPING_COSINE_THRESHOLD 15
+#define STEPPING_CONTACT_THRESHOLD 16
+#define CONTACT_WINDOW_SIZE 17
 
 #define SNAP_FAILED 0
 #define CLIFF_TOP 1
@@ -39,9 +38,8 @@ extern "C"
    should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 */
 extern "C"
-__global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeightMap,
+__global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                                    unsigned short *steppabilityMap, size_t pitchSteppability,
-                                   unsigned short *snapHeightMap, size_t pitchSnapHeight,
                                    unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                    unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
@@ -76,7 +74,7 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
     float foot_search_radius = sqrtf(foot_search_radius_squared);
     int foot_offset_indices = static_cast<int>(ceilf(foot_search_radius / map_resolution));
 
-    int max_height_int = -100;
+    float max_height_float = -100.0f;
     int foot_search_min_x = max(terrain_map_index.x - foot_offset_indices, 0);
     int foot_search_max_x = min(terrain_map_index.x + foot_offset_indices + 1, cells_per_axis_for_checking);
     int foot_search_min_y = max(terrain_map_index.y - foot_offset_indices, 0);
@@ -96,13 +94,12 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
 
             int2 query_key = make_int2(x_query, y_query);
 
-            unsigned short *query_height_int = (unsigned short *)((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-            max_height_int = max(*query_height_int, max_height_int);
+            float *query_height_float = (float *)((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+            max_height_float = max(*query_height_float, max_height_float);
         }
     }
 
-    // convert that maximum height from an int representation to an actual height in the world in meters
-    float max_height_under_foot = static_cast<float>(max_height_int) / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+    float max_height_under_foot = max_height_float;
 
     // Setup values to perform a least squares fit of the foot to the height map, but omitting any points that are too far below the foot.
     float n = 0.0f;
@@ -118,15 +115,12 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
 
     int max_points_possible_under_support = 0;
 
-    int samples = 5;
-    float resolution = foot_search_radius / samples;
-
-    for (int x_value_idx = -samples; x_value_idx <= samples; x_value_idx++)
+    for (int x_value_idx = foot_search_min_x; x_value_idx <= foot_search_max_x; x_value_idx++)
     {
-        for (int y_value_idx = -samples; y_value_idx <= samples; y_value_idx++)
+        for (int y_value_idx = foot_search_min_y; y_value_idx <= foot_search_max_y; y_value_idx++)
         {
             // Calculate offset and check distance
-            float2 offset = make_float2((float)x_value_idx * resolution, (float)y_value_idx * resolution);
+            float2 offset = make_float2((float)(x_value_idx - terrain_map_index.x) * map_resolution, (float)(y_value_idx - terrain_map_index.y) * map_resolution);
             float offset_distance_squared = dot2D(offset, offset);
 
             if (offset_distance_squared > foot_search_radius_squared)
@@ -144,8 +138,8 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
             // We want to put this after the bounds check. That way, if it's outside the FOV, we don't count it against the minimum area.
             max_points_possible_under_support++;
 
-            unsigned short *heightValue = (unsigned short *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-            float query_height = (float) *heightValue / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+            float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+            float query_height = *heightValue;
 
             if (isnan(query_height))
                 continue;
@@ -187,7 +181,7 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
     }
 
     // This is the actual height of the snapped foot
-    float snap_height = z / n;
+    float snap_height = z/n;
 
     float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
     float z_variance_vector[3] = {-xz, -yz, -z};
@@ -204,10 +198,6 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
         normal.z = -normal.z;
     }
 
-    // TODO include this?
-    // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
-    int snap_height_int = (snap_height + params[HEIGHT_OFFSET]) * params[HEIGHT_SCALING_FACTOR];
-
     /////////////// Make sure there's enough step area.
 
     float min_points_needed_for_support = (int)(params[MIN_SUPPORT_AREA_FRACTION] * max_points_possible_under_support);
@@ -220,20 +210,14 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
     //////////// Check to make sure we're not stepping too near a cliff base or top
     if (!failed)
     {
-        int cliff_start_height_to_avoid_int = (params[CLIFF_START_HEIGHT_TO_AVOID]) * params[HEIGHT_SCALING_FACTOR];
-        int cliff_end_height_to_avoid_int = (params[CLIFF_END_HEIGHT_TO_AVOID]) * params[HEIGHT_SCALING_FACTOR];
+        int cliff_offset_indices = ceil(params[SCALED_FOOT_POLYGON_PERCENTAGE] / map_resolution);
 
-        float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
-        float cliff_search_offset_squared = cliff_search_offset * cliff_search_offset;
-        int cliff_offset_indices = (int)ceil(cliff_search_offset / map_resolution);
-        float min_distance_from_tops_squared = params[MIN_DISTANCE_FROM_CLIFF_TOPS] * params[MIN_DISTANCE_FROM_CLIFF_TOPS];
-
-        int min_x = max(terrain_map_index.x - cliff_offset_indices,0);
+        int min_x = max(terrain_map_index.x - cliff_offset_indices, 0);
         int max_x = min(terrain_map_index.x + cliff_offset_indices + 1, cells_per_axis_for_checking);
         int min_y = max(terrain_map_index.y - cliff_offset_indices, 0);
         int max_y = min(terrain_map_index.y + cliff_offset_indices + 1, cells_per_axis_for_checking);
 
-        // search for a cliff base that's too close
+        // Search for a cliff base that's too close
         for (int x_query = min_x; x_query < max_x; x_query++)
         {
             for (int y_query = min_y; y_query < max_y; y_query++)
@@ -241,40 +225,27 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
                 float2 vector_to_point_from_foot = make_float2((float)(x_query - terrain_map_index.x) * map_resolution, (float)(y_query - terrain_map_index.y) * map_resolution);
                 float distance_to_point_squared = dot2D(vector_to_point_from_foot, vector_to_point_from_foot);
 
-                // skip this cell if it's too far away from the foot, but also skip it if it's within the foot.
-                if (distance_to_point_squared > cliff_search_offset_squared)
-                    continue;
-
                 int2 query_key = make_int2(x_query, y_query);
 
-                unsigned short *heightValue = (unsigned short *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-                int query_height_int = (int) *heightValue;
+                float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+                float query_height_float = *heightValue;
 
                 // compute the relative height at this point, compared to the height contained in the current cell.
-                int relative_height_of_query_int = query_height_int - snap_height_int;
+                float relative_height_of_query = query_height_float - snap_height;
 
-                if (relative_height_of_query_int > cliff_start_height_to_avoid_int)
+                // If this is positive, the current cell is below (at the bottom) the cliff
+                if (relative_height_of_query > params[MIN_DISTANCE_FROM_BASE_OF_CLIFF])
                 {
-                    float height_alpha = (relative_height_of_query_int - cliff_start_height_to_avoid_int) / (cliff_end_height_to_avoid_int - cliff_start_height_to_avoid_int);
-                    height_alpha = fminf(fmaxf(height_alpha, 0.0f), 1.0f);
-                    float min_distance_from_this_point_to_avoid_cliff = height_alpha * params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS];
-
-                    if (distance_to_point_squared < min_distance_from_this_point_to_avoid_cliff * min_distance_from_this_point_to_avoid_cliff)
-                    {
-                        // we're too close to the cliff bottom!
-                        snap_result = CLIFF_BOTTOM;
-                        failed = true;
-                        break;
-                    }
+                    snap_result = CLIFF_BOTTOM;
+                    failed = true;
+                    break;
                 }
-                else if (relative_height_of_query_int < -cliff_start_height_to_avoid_int)
+                // If this is negative, the current cell is above (at the top) the cliff
+                else if (relative_height_of_query < -params[MIN_DISTANCE_FROM_EDGE_OF_CLIFF])
                 {
-                    if (distance_to_point_squared < min_distance_from_tops_squared)
-                    {
-                        snap_result = CLIFF_TOP;
-                        failed = true;
-                        break;
-                    }
+                    snap_result = CLIFF_TOP;
+                    failed = true;
+                    break;
                 }
             }
 
@@ -283,23 +254,18 @@ __global__ void computeTerrainData(unsigned short *heightMap, size_t pitchHeight
         }
     }
 
-    // Add remaining logic, preserving the structure of the OpenCL kernel and adapting to CUDA constructs.
-
     // Write results back to surfaces.
     int area_fraction = static_cast<int>(255 * n / max_points_possible_under_support);
-    // note these are switched to align with world
 
     // Technically speaking, the z value of the normal doesn't need to be returned, since we know the magnitude of the vector is unitary.
     int normal_x_int = static_cast<int>(255 * (normal.y + 1.0f) / 2.0f);
+    // Note these are switched to align with world, this is correct
     int normal_y_int = static_cast<int>(255 * (normal.x + 1.0f) / 2.0f);
     int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = make_int2(x_index, y_index);
 
     unsigned char *steppabilityMapElement = (unsigned char *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
     *steppabilityMapElement = static_cast<unsigned char>(snap_result);
-
-    unsigned short *snapHeightMapElement = (unsigned short *)((char *)snapHeightMap + storage_key.y * pitchSnapHeight) + storage_key.x;
-    *snapHeightMapElement = static_cast<unsigned short>(snap_height_int);
 
     unsigned char *snappedNormalXMapElement = (unsigned char *)((char *)snapNormalXMap + storage_key.y * pitchSnapNormalX) + storage_key.x;
     *snappedNormalXMapElement = static_cast<unsigned char>(normal_x_int);
@@ -371,7 +337,7 @@ __global__ void computeSteppabilityConnections(unsigned short *steppableMap, siz
 }
 
 extern "C"
-__global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeightMap,
+__global__ void computeTerrainCost(float *heightMap, size_t pitchHeightMap,
                                    unsigned char *costMap, size_t pitchCostMap,
                                    float *params)
 {
@@ -383,7 +349,6 @@ __global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeight
     if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
         return;
 
-    float heightScalingFactor = params[HEIGHT_SCALING_FACTOR];
     float steppingCosineThreshold = params[STEPPING_COSINE_THRESHOLD];
 
     // Sobel operators
@@ -405,8 +370,8 @@ __global__ void computeTerrainCost(unsigned short *heightMap, size_t pitchHeight
             if (xi < 0 || xi >= cells_per_axis || yj < 0 || yj >= cells_per_axis)
                 continue;
 
-            unsigned short *heightPtr = (unsigned short *)((char *)heightMap + yj * pitchHeightMap) + xi;
-            float heightValue = (*heightPtr) / heightScalingFactor;
+            float *heightPtr = (float *)((char *)heightMap + yj * pitchHeightMap) + xi;
+            float heightValue = *heightPtr;
 
             int index = (i + 1) * 3 + (j + 1);
             Kx += heightValue * KxSobel[index];

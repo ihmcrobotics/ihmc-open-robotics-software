@@ -83,9 +83,9 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       if (environmentalConstraints != null)
       {
          // sets up the environmental constraint manager as a planar region consumer in the input manager
-         pluginFactory.addPlanarRegionsListCommandConsumer(environmentalConstraints);
+         pluginFactory.addHeightMapCommandConsumer(environmentalConstraints);
          // Adds functions that adjust the footholds based on the environment.
-         pluginFactory.setFootStepPlanAdjustment(environmentalConstraints.getFootstepPlanAdjustment());
+         pluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
          // Adds checkers for footholds based on the environment
          for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);

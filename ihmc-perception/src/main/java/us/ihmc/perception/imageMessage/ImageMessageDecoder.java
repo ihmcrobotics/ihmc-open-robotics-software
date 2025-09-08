@@ -14,7 +14,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.cuda.CUDACompressionTools;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
 
@@ -24,7 +23,6 @@ public class ImageMessageDecoder
 {
    private final ImageMessageDecompressionInput messageDataExtractor = new ImageMessageDecompressionInput();
 
-   private CUDACompressionTools cudaCompressionTools = null;
    private CUDAJPEGProcessor cudaJpegDecoder = null;
 
    private PixelFormat lastImagePixelFormat = null;
@@ -33,15 +31,6 @@ public class ImageMessageDecoder
    {
       if (CUDATools.hasCUDADevice() && CUDATools.hasNVJPEG())
          cudaJpegDecoder = new CUDAJPEGProcessor();
-
-      try
-      {
-         cudaCompressionTools = new CUDACompressionTools();
-      }
-      catch (Exception e)
-      {
-         LogTools.warn(e);
-      }
    }
 
    public RawImage decodeMessageCPU(ImageMessage messageToDecode)
@@ -101,21 +90,6 @@ public class ImageMessageDecoder
             }
             lastImagePixelFormat = PixelFormat.BGR8;
          }
-         case NVCOMP ->
-         {
-            if (cudaCompressionTools != null)
-            {
-               BytePointer encodedData = messageDataExtractor.getInputPointer();
-               BytePointer decodedData = cudaCompressionTools.decompress(encodedData, encodedData.limit());
-               Mat decodedImage = new Mat(messageToDecode.getImageHeight(), messageToDecode.getImageWidth(), lastImagePixelFormat.toOpenCVType(), decodedData);
-               decodedImage.copyTo(imageToPack);
-            }
-         }
-         case ZSTD_NVJPEG_HYBRID ->
-         {
-            if (cudaCompressionTools != null)
-               cudaCompressionTools.decompressDepth(messageDataExtractor.getInputPointer(), imageToPack);
-         }
          case UNCOMPRESSED ->
          {
             if (imageToPack.elemSize() != lastImagePixelFormat.bytesPerElement)
@@ -171,18 +145,6 @@ public class ImageMessageDecoder
             cudaJpegDecoder.decodeToBGR(encodedData, encodedData.limit(), imageToPack);
             lastImagePixelFormat = PixelFormat.BGR8;
          }
-         case NVCOMP ->
-         {
-            BytePointer encodedData = messageDataExtractor.getInputPointer();
-            BytePointer decodedData = cudaCompressionTools.decompress(encodedData, encodedData.limit(), true);
-            GpuMat decodedImage = new GpuMat(messageToDecode.getImageHeight(),
-                                             messageToDecode.getImageWidth(),
-                                             lastImagePixelFormat.toOpenCVType(),
-                                             decodedData);
-            decodedImage.copyTo(imageToPack);
-            decodedImage.close();
-         }
-         case ZSTD_NVJPEG_HYBRID -> cudaCompressionTools.decompressDepth(messageDataExtractor.getInputPointer(), imageToPack);
          case UNCOMPRESSED ->
          {
             Mat cpuImage = new Mat(imageToPack.size(), lastImagePixelFormat.toOpenCVType(), messageDataExtractor.getInputPointer());
@@ -232,8 +194,6 @@ public class ImageMessageDecoder
 
    public void destroy()
    {
-      if (cudaCompressionTools != null)
-         cudaCompressionTools.destroy();
       if (cudaJpegDecoder != null)
          cudaJpegDecoder.destroy();
 

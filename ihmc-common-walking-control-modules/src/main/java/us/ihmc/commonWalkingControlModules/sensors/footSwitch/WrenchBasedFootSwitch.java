@@ -5,6 +5,9 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -56,9 +59,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final YoFramePoint2D centerOfPressure;
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
-   private final double footLength;
-   private final double footMinX;
-   private final double footMaxX;
+   private final FrameConvexPolygon2D footPolygon;
 
    private final YoFixedFrameSpatialVector yoFootForceTorque;
    private final YoFixedFrameSpatialVector yoFootForceTorqueInSole;
@@ -78,10 +79,10 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
     *                                  is met.
     * @param contactForceThresholdHigh the second force threshold. The foot is considered to have hit
     *                                  the ground if this threshold is met.
-    * @param contactCoPThreshold       the center of pressure threshold. Expressed in percentage of
-    *                                  foot length, this represents the margin away from the toe/heel
-    *                                  line that the CoP needs to pass in order to consider that the
-    *                                  foot has hit the ground.
+    * @param contactCoPThreshold       the center of pressure threshold. This is the distance margin
+    *                                  inside the foot polygon the CoP needs to pass in order to
+    *                                  consider that the foot has hit the ground. A negative value
+    *                                  means the CoP can be outside the foot and trigger touchdown.
     * @param yoGraphicsListRegistry
     * @param parentRegistry
     */
@@ -133,9 +134,8 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
       footWrench = new Wrench(measurementFrame, (ReferenceFrame) null);
 
-      footMinX = computeMinX(contactablePlaneBody);
-      footMaxX = computeMaxX(contactablePlaneBody);
-      footLength = computeLength(contactablePlaneBody);
+      List<? extends FramePoint2DReadOnly> contactPoints = contactablePlaneBody.getContactPoints2D();
+      footPolygon = new FrameConvexPolygon2D(soleFrame, Vertex2DSupplier.asVertex2DSupplier(contactPoints));
 
       parentRegistry.addChild(registry);
    }
@@ -184,15 +184,8 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       }
       else
       {
-         /*
-          * FIXME If we wanted to do the CoP filter properly, we should use make a ConvexPolygon2D from the
-          * ContactablePlaneBody points and assert that the CoP is inside the polygon at a min distance from
-          * the perimeter.
-          */
-         double copThreshold = contactCoPThreshold.getValue() * footLength;
-         double minThresholdX = (footMinX + copThreshold);
-         double maxThresholdX = (footMaxX - copThreshold);
-         isPastCoPThreshold.set(centerOfPressure.getX() >= minThresholdX && centerOfPressure.getX() <= maxThresholdX);
+         double copThreshold = contactCoPThreshold.getValue();
+         isPastCoPThreshold.set(footPolygon.signedDistance(centerOfPressure) < -copThreshold);
          isPastCoPThresholdFiltered.update();
       }
 

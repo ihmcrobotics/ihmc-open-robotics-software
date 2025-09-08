@@ -37,7 +37,7 @@ public class RDXVRMiniGhostPreview
       this.miniGhostFullRobotModel = miniGhostFullRobotModel;
       this.vrContext  = vrContext;
 
-      if (miniGhostFullRobotModel != null)
+      if (isEnabled())
       {
          miniGhostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(miniGhostFullRobotModel);
          miniGhostRobotGraphic = new RDXMultiBodyGraphic(robotName + " (Mini Preview Ghost)");
@@ -57,7 +57,7 @@ public class RDXVRMiniGhostPreview
 
    public void setJoint(int index, double q)
    {
-      if (miniGhostFullRobotModel != null && miniGhostRobotGraphic.isActive())
+      if (isEnabled() && miniGhostRobotGraphic.isActive())
       {
          miniGhostOneDoFJointsExcludingHands[index].setQ(q);
       }
@@ -65,7 +65,7 @@ public class RDXVRMiniGhostPreview
 
    public void updatePose()
    {
-      if (miniGhostFullRobotModel != null && miniGhostRobotGraphic.isActive())
+      if (isEnabled() && miniGhostRobotGraphic.isActive())
       {
          updateGhostPoseWithJoystick();
          updateGhostPitchBasedOnFeet();
@@ -124,14 +124,19 @@ public class RDXVRMiniGhostPreview
 
    public void setActive(boolean active)
    {
-      if (miniGhostFullRobotModel != null)
+      if (isEnabled())
          miniGhostRobotGraphic.setActive(active);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (miniGhostFullRobotModel != null && miniGhostRobotGraphic.isActive())
+      if (isEnabled() && miniGhostRobotGraphic.isActive())
          miniGhostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
+   }
+
+   public boolean isEnabled()
+   {
+      return miniGhostFullRobotModel != null;
    }
 
    public void destroy()

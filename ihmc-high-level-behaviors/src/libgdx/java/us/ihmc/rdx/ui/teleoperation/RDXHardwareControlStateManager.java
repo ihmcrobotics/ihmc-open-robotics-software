@@ -9,10 +9,19 @@ import controller_msgs.msg.dds.MasterGainScaleControllerCommandMessage;
 import controller_msgs.msg.dds.MasterGainScaleControllerStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXArmManager;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 public class RDXHardwareControlStateManager
@@ -21,7 +30,6 @@ public class RDXHardwareControlStateManager
    private final CommunicationHelper communicationHelper;
    private final Timer hpuConnectedTimer = new Timer();
    private final Timer robotServoedConnectedTimer = new Timer();
-   private boolean hpuEnabled = false;
    private boolean isRobotServoed = false;
    private HighLevelControllerName currentHighLevelState = null;
 
@@ -29,11 +37,6 @@ public class RDXHardwareControlStateManager
    {
       this.communicationHelper = communicationHelper;
 
-      communicationHelper.subscribeToControllerViaVolatileCallback(EnableHPUStatusMessage.class, message ->
-      {
-         hpuConnectedTimer.reset();
-         hpuEnabled = message.getHpuEnabled();
-      });
       communicationHelper.subscribeToControllerViaVolatileCallback(MasterGainScaleControllerStatusMessage.class, message ->
       {
          robotServoedConnectedTimer.reset();
@@ -50,30 +53,13 @@ public class RDXHardwareControlStateManager
       });
    }
 
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
    {
-      if (hpuConnectedTimer.isRunning(1.0))
-      {
-         if (hpuEnabled)
-         {
-            ImGui.text("HPU is enabled.");
-         }
-         else
-         {
-            if (ImGui.button(labels.get("Enable HPU")))
-            {
-               EnableHPUCommandMessage enableHPUCommandMessage = new EnableHPUCommandMessage();
-               enableHPUCommandMessage.setEnableHpu(true);
-               communicationHelper.publishToController(enableHPUCommandMessage);
-            }
-         }
-      }
-
       if (robotServoedConnectedTimer.isRunning(1.0))
       {
          if (isRobotServoed)
          {
-            if (ImGui.button(labels.get("Unservo slowly")))
+            if (ImGui.button(labels.get("Unservo Slowly")))
             {
                MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
                masterGainScaleControllerCommandMessage.setUnservoSlowly(true);
@@ -82,7 +68,7 @@ public class RDXHardwareControlStateManager
          }
          else
          {
-            if (ImGui.button(labels.get("Servo robot")))
+            if (ImGui.button(labels.get("Servo Robot")))
             {
                MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
                masterGainScaleControllerCommandMessage.setServoRobot(true);
@@ -91,9 +77,12 @@ public class RDXHardwareControlStateManager
          }
       }
 
-      ImGui.text("Current controller state: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
+      float widgetStartX = 98.0f;
+      ImGui.text("Current Controller State: %s".formatted(currentHighLevelState == null ? "Unknown" : currentHighLevelState.name()));
+
       ImGui.text("Request:");
       ImGui.sameLine();
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.button(labels.get("Calibration")))
       {
          HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
@@ -107,14 +96,21 @@ public class RDXHardwareControlStateManager
          sendFreezeRequest();
       }
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Stand prep")))
+      if (ImGui.button(labels.get("Stand Prep")))
       {
          RDXBaseUI.pushNotification("Commanding stand prep...");
          sendStandPrepRequest();
       }
-
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stand Prep Transition")))
+      {
+         RDXBaseUI.pushNotification("Commanding stand prep transition...");
+         sendStandPrepTransitionRequest();
+      }
+   
       ImGui.text("Command:");
       ImGui.sameLine();
+      ImGui.setCursorPosX(widgetStartX);
       if (ImGui.button(labels.get("Home Pose")))
       {
          double trajectoryTime = 3.0;
@@ -143,6 +139,11 @@ public class RDXHardwareControlStateManager
          RDXBaseUI.pushNotification("Commanding home pose...");
          communicationHelper.publishToController(homeChest);
       }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("N-Pose")))
+      {
+         goNPose(robotModel, referenceFrames, armManager, maxPelvisHeight);
+      }
 
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stop All Trajectories")))
@@ -153,10 +154,50 @@ public class RDXHardwareControlStateManager
       }
    }
 
+   private void goNPose(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
+   {
+      double trajectoryTime = 3.0;
+
+      for (RobotSide side : RobotSide.values)
+         armManager.executeArmAngles(side, PresetArmConfiguration.N_POSE, trajectoryTime);
+
+      if (robotModel.getRobotVersion().hasHead())
+      {
+         NeckJointName[] neckJointNamesArray = robotModel.getJointMap().getNeckJointNames();
+         double[] desiredNeckJointValues = new double[neckJointNamesArray.length];
+         for (int i = 0; i < neckJointNamesArray.length; i++)
+         {
+            desiredNeckJointValues[i] = 0.0; // TODO make 0 robot agnostic
+         }
+         communicationHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(referenceFrames,
+                                                                                                            neckJointNamesArray,
+                                                                                                            desiredNeckJointValues,
+                                                                                                            trajectoryTime));
+      }
+
+      FramePose3D pelvisPose = new FramePose3D(referenceFrames.getMidFeetZUpFrame());
+      pelvisPose.getTranslation().addZ(maxPelvisHeight - 0.02);
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      communicationHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPose));
+
+      GoHomeMessage homeChest = new GoHomeMessage();
+      homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+      homeChest.setTrajectoryTime(trajectoryTime);
+      communicationHelper.publishToController(homeChest);
+      RDXBaseUI.pushNotification("Commanding N-pose...");
+   }
+
    public void sendStandPrepRequest()
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_PREP_STATE.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendStandPrepTransitionRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.STAND_TRANSITION_STATE.toByte());
       communicationHelper.publishToController(highLevelStateMessage);
    }
 

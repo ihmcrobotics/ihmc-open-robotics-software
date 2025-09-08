@@ -44,14 +44,22 @@ public abstract class ImGuiFancyWidget
 
    protected void beforeWidgetRender()
    {
-      if (widgetAligner != null)
+      beforeWidgetRender(false);
+   }
+
+   protected void beforeWidgetRender(boolean hideLabel)
+   {
+      if (!hideLabel)
       {
-         widgetAligner.text(prefixLabel);
-      }
-      else
-      {
-         ImGui.text(prefixLabel);
-         ImGui.sameLine();
+         if (widgetAligner != null)
+         {
+            widgetAligner.text(prefixLabel);
+         }
+         else
+         {
+            ImGui.text(prefixLabel);
+            ImGui.sameLine();
+         }
       }
 
       float itemWidth = ImGui.getColumnWidth();

@@ -1,5 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
+import us.ihmc.handsros2.HandType;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface RobotVersion
@@ -27,6 +28,11 @@ public interface RobotVersion
    default boolean hasBothHandsWithFingers()
    {
       return hasHandWithFingers(RobotSide.LEFT) && hasHandWithFingers(RobotSide.RIGHT);
+   }
+
+   default HandType getHandType(RobotSide side)
+   {
+      return null;
    }
 
    // TODO remove sake gripper - use has hands

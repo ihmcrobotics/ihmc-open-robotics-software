@@ -1,41 +1,63 @@
 package us.ihmc.openAlexander;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensors.zed.ZEDModelData;
 
 public class AlexanderSensorInformation implements HumanoidRobotSensorInformation
 {
-   private static final RigidBodyTransform ZED_2I_TO_CHEST_TRANSFORM = new RigidBodyTransform();
+   // ZED X Mini
+   private static final RigidBodyTransform ZED_X_MINI_TO_HEAD_TRANSFORM = new RigidBodyTransform();
    static
    {
-      ZED_2I_TO_CHEST_TRANSFORM.getTranslation().set(0.13251,  -0.00116,  0.18667 );
-      EuclidCoreMissingTools.setYawPitchRollDegrees(ZED_2I_TO_CHEST_TRANSFORM.getRotation(), 0.0, 42.76840, 0.0);
+      ZED_X_MINI_TO_HEAD_TRANSFORM.getTranslation().set(0.13041,  -0.01079,  -0.00619);
+      EuclidCoreMissingTools.setYawPitchRollDegrees(ZED_X_MINI_TO_HEAD_TRANSFORM.getRotation(), 0.0, 7.87148, 0.0);
+   }
+
+   private static final SideDependentList<RigidBodyTransform> ZED_X_MINI_LENSES_TO_HEAD_TRANSFORM = new SideDependentList<RigidBodyTransform>()
+   {{
+      RigidBodyTransform leftTransform = new RigidBodyTransform(ZED_X_MINI_TO_HEAD_TRANSFORM);
+      leftTransform.getTranslation().add(0.0, ZEDModelData.ZED_X_MINI.getCenterToCameraDistance(), 0.0);
+      set(RobotSide.LEFT, leftTransform);
+
+      RigidBodyTransform rightTransform = new RigidBodyTransform(ZED_X_MINI_TO_HEAD_TRANSFORM);
+      rightTransform.getTranslation().sub(0.0, ZEDModelData.ZED_X_MINI.getCenterToCameraDistance(), 0.0);
+      set(RobotSide.RIGHT, rightTransform);
+   }};
+
+   private static final RigidBodyTransform D457_TO_CHEST_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.092,  0.0,  0.113 );
+      EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), 0.0, 52.0, 0.0);
    }
 
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
    protected final SideDependentList<String> feetForceSensorParentJointNames = new SideDependentList<String>();
 
-   private final String leftShoulderIMUSensor = "left_shoulder_pitch_imu";
-   private final String leftBicepIMUSensor = "left_shoulder_yaw_imu";
-   private final String leftForearmIMUSensor = "left_wrist_yaw_imu";
-   private final String leftHandIMUSensor = null; // "left_gripper_yaw_imu";
+   private final String leftShoulderIMUSensor = "left_shoulder_y_imu";
+   private final String leftBicepIMUSensor = "left_shoulder_z_imu";
+   private final String leftForearmIMUSensor = "left_wrist_z_imu";
+   private final String leftHandIMUSensor = null; // "left_gripper_z_imu";
 
-   private final String rightShoulderIMUSensor = "right_shoulder_pitch_imu";
-   private final String rightBicepIMUSensor = "right_shoulder_yaw_imu";
-   private final String rightForearmIMUSensor = "right_wrist_yaw_imu";
-   private final String rightHandIMUSensor = null; // "right_gripper_yaw_imu";
+   private final String rightShoulderIMUSensor = "right_shoulder_y_imu";
+   private final String rightBicepIMUSensor = "right_shoulder_z_imu";
+   private final String rightForearmIMUSensor = "right_wrist_z_imu";
+   private final String rightHandIMUSensor = null; // "right_gripper_z_imu";
 
    // Torso IMUs
    private final String torsoIMU = "torso_imu";
 
    // Pelvis IMUs
-   private final String pelvisIMU = "pelvis_stim_imu";
+   private final String pelvisIMU = "pelvis_imu";
 
    // Left leg IMUs
    private final String leftHipXIMU = "left_hip_x_imu";
@@ -187,8 +209,32 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    }
 
    @Override
+   public ReferenceFrame getStereoCameraParentFrame(RobotSide side, CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getHeadFrame();
+   }
+
+   @Override
+   public ReferenceFrame getExperimentalCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getHeadFrame();
+   }
+
+   @Override
    public RigidBodyTransform getExperimentalCameraTransform()
    {
-      return ZED_2I_TO_CHEST_TRANSFORM;
+      return ZED_X_MINI_TO_HEAD_TRANSFORM;
+   }
+
+   @Override
+   public RigidBodyTransform getStereoCameraTransform(RobotSide side)
+   {
+      return ZED_X_MINI_LENSES_TO_HEAD_TRANSFORM.get(side);
+   }
+
+   @Override
+   public RigidBodyTransform getSteppingCameraTransform()
+   {
+      return D457_TO_CHEST_TRANSFORM;
    }
 }
