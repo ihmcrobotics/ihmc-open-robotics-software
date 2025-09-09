@@ -63,6 +63,8 @@ public class ICPController implements ICPControllerInterface
    private final BooleanProvider scaleFeedbackWeightWithGain;
 
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
+   final YoFrameVector2D icpCurrent = new YoFrameVector2D( yoNamePrefix + "ICPCurrent", "", worldFrame, registry);
+   final YoFrameVector2D icpDesired = new YoFrameVector2D( yoNamePrefix + "ICPDesired", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFrameVector2D expectedControlICPVelocity = new YoFrameVector2D(yoNamePrefix + "ExpectedControlICPVelocity", worldFrame, registry);
@@ -343,6 +345,8 @@ public class ICPController implements ICPControllerInterface
          this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
       }
 
+      icpCurrent.set(currentICP);
+      icpDesired.set(desiredICP);
       this.icpError.sub(currentICP, desiredICP);
 
       scaleFeedbackWeightWithGain();
