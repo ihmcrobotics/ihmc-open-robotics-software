@@ -122,7 +122,7 @@ public class RapidHeightMapExtractor
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
          tempSumMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         tempCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
+         tempCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32SC1);
          tempSumOfSquaresMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
          tempMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
 
@@ -234,10 +234,10 @@ public class RapidHeightMapExtractor
          CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
 
          // Clearing all the temp maps so they are ready for the next update call
-         cudaMemset2D(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
-         cudaMemset2D(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Float.BYTES, tempCountMap.rows());
-         cudaMemset2D(tempSumOfSquaresMap.data(), tempSumOfSquaresMap.step(), 0, (long) tempSumOfSquaresMap.cols() * Float.BYTES, tempSumOfSquaresMap.rows());
-         cudaMemset2D(tempMotionVarianceMap.data(),
+         cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
+         cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows());
+         cudaMemset2DAsync(tempSumOfSquaresMap.data(), tempSumOfSquaresMap.step(), 0, (long) tempSumOfSquaresMap.cols() * Float.BYTES, tempSumOfSquaresMap.rows());
+         cudaMemset2DAsync(tempMotionVarianceMap.data(),
                       tempMotionVarianceMap.step(),
                       0,
                       (long) tempMotionVarianceMap.cols() * Float.BYTES,

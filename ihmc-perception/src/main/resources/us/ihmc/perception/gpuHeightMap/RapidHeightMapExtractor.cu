@@ -71,7 +71,7 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCa
 extern "C"
 __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ depthImage, size_t pitchDepth,
                                           float* __restrict__ sumMap, size_t pitchSum,
-                                          float* __restrict__ countMap, size_t pitchCount,
+                                          int* __restrict__ countMap, size_t pitchCount,
                                           float* __restrict__ sumOfSquaresMap, size_t pitchSumSq,
                                           float* __restrict__ motionVarianceSumMap, size_t pitchMotionVar,
                                           const float* __restrict__ params,
@@ -101,7 +101,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     float depth = rowPtr[xIndex] * 0.001f; // Scale to meters
 
     // Early exit for invalid depth
-    if (depth < 0.5f)
+    if (depth < 0.25f)
         return;
 
     // Back-project and transform
@@ -118,13 +118,13 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
 
     // Pointers to the target cell in each temporary map
     float* sumPtr = (float*)((char*)sumMap + cellIndex.y * pitchSum) + cellIndex.x;
-    float* countPtr = (float*)((char*)countMap + cellIndex.y * pitchCount) + cellIndex.x;
+    int* countPtr = (int*)((char*)countMap + cellIndex.y * pitchCount) + cellIndex.x;
     float* sumSqPtr = (float*)((char*)sumOfSquaresMap + cellIndex.y * pitchSumSq) + cellIndex.x;
     float* motionVarPtr = (float*)((char*)motionVarianceSumMap + cellIndex.y * pitchMotionVar) + cellIndex.x;
 
     // Atomically add this pixel's contribution
     atomicAdd(sumPtr, queryPointInZUpFrame.z);
-    atomicAdd(countPtr, 1.0f);
+    atomicAdd(countPtr, 1);
     atomicAdd(sumSqPtr, queryPointInZUpFrame.z * queryPointInZUpFrame.z);
 
     // Also calculate and add motion variance contribution
@@ -142,7 +142,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
  */
 extern "C"
 __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSum,
-                                const float* __restrict__ countMap, size_t pitchCount,
+                                const int* __restrict__ countMap, size_t pitchCount,
                                 const float* __restrict__ sumOfSquaresMap, size_t pitchSumSq,
                                 const float* __restrict__ motionVarianceSumMap, size_t pitchMotionVar,
                                 float* __restrict__ localMeanMap, size_t pitchLocalMean,
@@ -160,7 +160,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
         return;
 
     const float* sumPtr = (const float*)((const char*)sumMap + yIndex * pitchSum) + xIndex;
-    const float* countPtr = (const float*)((const char*)countMap + yIndex * pitchCount) + xIndex;
+    const int* countPtr = (const int*)((const char*)countMap + yIndex * pitchCount) + xIndex;
     const float* sumSqPtr = (const float*)((const char*)sumOfSquaresMap + yIndex * pitchSumSq) + xIndex;
     const float* motionVarPtr = (const float*)((const char*)motionVarianceSumMap + yIndex * pitchMotionVar) + xIndex;
 
@@ -170,17 +170,18 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
     float motionVariance = 0.0f;
 
     // Only compute if one or more points landed in this cell
-    if (count > 0.5f)
+    if (count > 0)
     {
         float sum = *sumPtr;
         mean = sum / count;
         motionVariance = *motionVarPtr / count;
 
-        if (count > 1.5f)
+        if (count > 1)
         {
             float sumSq = *sumSqPtr;
-            // Stable one-pass variance formula: (E[X^2] - (E[X])^2 * N) / (N-1)
-            variance = (sumSq - (sum * sum) / count) / (count - 1.0f);
+            // Unbiased sample variance (one-pass), a.k.a. Bessel's Correction:
+            // (Σx² - (Σx)² / N) / (N - 1)
+            variance = (sumSq - (sum * sum) / static_cast<float>(count)) / (static_cast<float>(count) - 1.0f);
             variance = fmaxf(0.0f, variance); // Clamp to zero to avoid negatives from float error
         }
     }
