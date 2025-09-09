@@ -35,7 +35,7 @@ public class RapidHeightMapExtractorTest
 
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform(transformArray);
 
-      for (int i = 0; i < 1; i++)
+      for (int i = 0; i < 1000; i++)
       {
          rapidHeightMapExtractor.update(gpuMat, cameraIntrinsics, rigidBodyTransform, rigidBodyTransform, rigidBodyTransform, new Point3D(1.0, 2.0, 3.0), 0.0);
       }

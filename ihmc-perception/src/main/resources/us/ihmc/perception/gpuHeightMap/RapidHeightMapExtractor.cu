@@ -79,7 +79,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
                                           const float linearMotionMagnitude,
                                           const float angularMotionMagnitude)
 {
-    // Thread indices now correspond to PIXEL coordinates
+    // Thread indices now correspond to pixel coordinates
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
