@@ -1,9 +1,11 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -11,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
+import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMapManager;
@@ -23,9 +26,11 @@ import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
@@ -170,21 +175,25 @@ public class RapidHeightMapManager
 
       if (heightMapParameters.getLogHeightMap())
       {
-         float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
-                                                               heightMapCenterPoint,
-                                                               (float) heightMapParameters.getGlobalWidthInMeters(),
-                                                               (float) heightMapParameters.getCellSize());
+//         float[] floatsToLog = HeightMapTools.packArrayForFile(globalHeightMap,
+//                                                               heightMapCenterPoint,
+//                                                               (float) heightMapParameters.getGlobalWidthInMeters(),
+//                                                               (float) heightMapParameters.getCellSize());
          try
          {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
 
             Path heightMapDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY;
 
-            Path binaryLogPath = heightMapDirectory.resolve(timestamp + "_HeightMapLog.bin");
-            if (heightMapOutputStream == null)
+//            Path binaryLogPath = heightMapDirectory.resolve(timestamp + "_HeightMapLog.bin");
+            Path binaryLogPath = heightMapDirectory.resolve(timestamp + "_HeightMapLog.json");
+//            if (heightMapOutputStream == null)
             {
-               heightMapOutputStream = new FileOutputStream(binaryLogPath.toFile(), true);
-               LogTools.info("Writing height map log to " + binaryLogPath);
+//               heightMapOutputStream = new FileOutputStream(binaryLogPath.toFile(), true);
+//               LogTools.info("Writing height map log to " + binaryLogPath);
+
+               JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+               serializer.serialize(binaryLogPath.toFile(), heightMapMessage);
             }
             if (!Files.exists(heightMapDirectory))
             {
@@ -197,16 +206,17 @@ public class RapidHeightMapManager
          }
          catch (IOException ignored)
          {
+            ignored.printStackTrace();
          }
 
-         try
-         {
-            logHeightMapToFile(heightMapOutputStream, floatsToLog, System.currentTimeMillis());
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
+//         try
+//         {
+//            logHeightMapToFile(heightMapOutputStream, floatsToLog, System.currentTimeMillis());
+//         }
+//         catch (IOException e)
+//         {
+//            throw new RuntimeException(e);
+//         }
       }
 
       if (!heightMapParameters.getLogHeightMap())
