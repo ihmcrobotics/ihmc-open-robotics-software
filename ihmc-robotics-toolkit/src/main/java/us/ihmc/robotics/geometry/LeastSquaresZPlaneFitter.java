@@ -142,12 +142,11 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       planeToPack.getPoint().set(xSolution, ySolution, zSolution);
       planeToPack.getNormal().set(coefficients.get(0), coefficients.get(1), 1.0);
 
-      double squaredError = 0;
       double A = coefficients.get(0);
       double B = coefficients.get(1);
       double C = coefficients.get(2);
 
-      squaredError = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
-      return squaredError/n;
+      double squaredError = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
+      return squaredError / n;
    }
 }

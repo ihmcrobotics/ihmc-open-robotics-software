@@ -35,3 +35,5 @@ byte[<=255000] snapped_area_data
 byte[<=255000] steppability_data
 # The raw data for the steppable connections value, which are stored as chars.
 byte[<=255000] steppable_connections_data
+# Squared error term in the least-squares calculation when fitting normals
+float32[<=255000] squared_error_data

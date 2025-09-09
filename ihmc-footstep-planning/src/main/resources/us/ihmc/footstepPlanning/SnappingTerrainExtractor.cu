@@ -44,7 +44,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                    unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
                                    unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
-                                   unsigned short *squaredErrorMap, size_t pitchSquaredError,
+                                   float *squaredErrorMap, size_t pitchSquaredError,
                                    float *params, int terrainMapXY)
 {
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -256,34 +256,30 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     // Write results back to surfaces.
     int area_fraction = static_cast<int>(255 * n / max_points_possible_under_support);
 
-    // Technically speaking, the z value of the normal doesn't need to be returned, since we know the magnitude of the vector is unitary.
-    int normal_x_int = static_cast<int>(255 * (normal.y + 1.0f) / 2.0f);
     // Note these are switched to align with world, this is correct
-    int normal_y_int = static_cast<int>(255 * (normal.x + 1.0f) / 2.0f);
-    int normal_z_int = static_cast<int>(255 * (normal.z + 1.0f) / 2.0f);
-    int2 storage_key = make_int2(x_index, y_index);
+    unsigned char normal_x_char = scaleAndCastToUnsignedChar(normal.y, -1.0, 1.0);
+    unsigned char normal_y_char = scaleAndCastToUnsignedChar(normal.x, -1.0, 1.0);
+    unsigned char normal_z_char = scaleAndCastToUnsignedChar(normal.z, 0.0, 1.0);
 
-    float squared_error_scale = 0.1;
-    float alpha_squared_error = fminf(fmaxf(squared_error / squared_error_scale, 0.0f), 1.0f);
-    int squared_error_int = static_cast<int>(255 * alpha_squared_error);
+    int2 storage_key = make_int2(x_index, y_index);
 
     unsigned char *steppabilityMapElement = (unsigned char *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
     *steppabilityMapElement = static_cast<unsigned char>(snap_result);
 
     unsigned char *snappedNormalXMapElement = (unsigned char *)((char *)snapNormalXMap + storage_key.y * pitchSnapNormalX) + storage_key.x;
-    *snappedNormalXMapElement = static_cast<unsigned char>(normal_x_int);
+    *snappedNormalXMapElement = normal_x_char;
 
     unsigned char *snappedNormalYMapElement = (unsigned char *)((char *)snapNormalYMap + storage_key.y * pitchSnapNormalY) + storage_key.x;
-    *snappedNormalYMapElement = static_cast<unsigned char>(normal_y_int);
+    *snappedNormalYMapElement = normal_y_char;
 
     unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + storage_key.y * pitchSnapNormalZ) + storage_key.x;
-    *snappedNormalZMapElement = static_cast<unsigned char>(normal_z_int);
+    *snappedNormalZMapElement = normal_z_char;
 
     unsigned char *areaFractionElement = (unsigned char *)((char *)snappedAreaFractionMap + storage_key.y * pitchSnappedAreaFraction) + storage_key.x;
     *areaFractionElement = static_cast<unsigned char>(area_fraction);
 
-    unsigned char *squaredErrorElement = (unsigned char *)((char *)squaredErrorMap + storage_key.y * pitchSquaredError) + storage_key.x;
-    *squaredErrorElement = static_cast<unsigned char>(squared_error_int);
+    float *squaredErrorResult = (float *)((char *)squaredErrorMap + storage_key.y * pitchSquaredError) + storage_key.x;
+    *squaredErrorResult = squared_error;
 }
 
 extern "C"

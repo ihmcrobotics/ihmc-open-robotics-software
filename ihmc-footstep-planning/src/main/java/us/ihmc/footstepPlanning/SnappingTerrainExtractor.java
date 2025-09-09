@@ -6,7 +6,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
@@ -124,7 +123,7 @@ public class SnappingTerrainExtractor
       snapNormalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snappedAreaFractionMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
-      squaredErrorMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      squaredErrorMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
       steppabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       steppabilityConnectionsMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
@@ -246,8 +245,8 @@ public class SnappingTerrainExtractor
          Mat cpuSnappedAreaFractionMap = new Mat();
          snappedAreaFractionMat.download(cpuSnappedAreaFractionMap);
 
-         Mat squaredErrorMap = new Mat();
-         squaredErrorMat.download(squaredErrorMap);
+         Mat cpuSquaredErrorMap = new Mat();
+         squaredErrorMat.download(cpuSquaredErrorMap);
 
          Mat cpuSteppabilityMap = new Mat();
          steppabilityMat.download(cpuSteppabilityMap);
@@ -264,6 +263,7 @@ public class SnappingTerrainExtractor
                                                  cpuSteppabilityMap,
                                                  cpuSteppableConnections,
                                                  cpuSnappedAreaFractionMap,
+                                                 cpuSquaredErrorMap,
                                                  terrainMapData);
 
          cpuHeightMap.close();

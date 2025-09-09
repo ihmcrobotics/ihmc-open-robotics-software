@@ -36,6 +36,8 @@ public class TerrainMapData
    private byte[] steppabilityMap;
    private byte[] steppabilityConnectionsMap;
 
+   private float[] squaredErrorMap;
+
    private int centerIndex;
 
    public TerrainMapData(int cellsPerAxis, double gridResolutionXY, double gridSizeXY)
@@ -56,6 +58,8 @@ public class TerrainMapData
       snappedAreaFractionMap = new byte[cellsPerAxis * cellsPerAxis];
       steppabilityMap = new byte[cellsPerAxis * cellsPerAxis];
       steppabilityConnectionsMap = new byte[cellsPerAxis * cellsPerAxis];
+
+      squaredErrorMap = new float[cellsPerAxis * cellsPerAxis];
    }
 
    public TerrainMapData(TerrainMapData other)
@@ -79,6 +83,8 @@ public class TerrainMapData
       this.snappedAreaFractionMap = Arrays.copyOf(other.snappedAreaFractionMap, size);
       this.steppabilityMap = Arrays.copyOf(other.steppabilityMap, size);
       this.steppabilityConnectionsMap = Arrays.copyOf(other.steppabilityConnectionsMap, size);
+
+      this.squaredErrorMap = Arrays.copyOf(other.squaredErrorMap, size);
    }
 
    public int getLocalXIndex(double coordinate)
@@ -308,6 +314,11 @@ public class TerrainMapData
       this.steppabilityConnectionsMap = steppabilityConnectionsMap;
    }
 
+   public void setSquaredErrorMap(float[] squaredErrorMap)
+   {
+      this.squaredErrorMap = squaredErrorMap;
+   }
+
    public byte[] getSnapNormalXMap()
    {
       return snapNormalXMap;
@@ -336,5 +347,10 @@ public class TerrainMapData
    public byte[] getSteppabilityConnectionsMap()
    {
       return steppabilityConnectionsMap;
+   }
+
+   public float[] getSquaredErrorMap()
+   {
+      return squaredErrorMap;
    }
 }
