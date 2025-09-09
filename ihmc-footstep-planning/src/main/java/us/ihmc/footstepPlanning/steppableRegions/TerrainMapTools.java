@@ -40,13 +40,14 @@ public class TerrainMapTools
                                               Mat steppabilityMap,
                                               Mat steppabilityConnectionsMap,
                                               Mat snappedAreaFractionMap,
+                                              Mat squaredErrorMap,
                                               TerrainMapData terrainMapData)
    {
       // How this looks like is we create a pointer for the Mat object.
       // Doing Pointer.get() takes in a parameter that will be packed with the data that is from the pointer.
       // So it looks like Pointer.get(dataToPack) where dataToPack = TerrainMapData.getMap()
-      FloatPointer floatPointer = new FloatPointer(heightMap.data());
-      floatPointer.get(terrainMapData.getHeightMap());
+      FloatPointer heightMapPointer = new FloatPointer(heightMap.data());
+      heightMapPointer.get(terrainMapData.getHeightMap());
 
       BytePointer bytePointerTerrainMap = new BytePointer(terrainCostMap.data());
       bytePointerTerrainMap.get(terrainMapData.getTerrainCostMap());
@@ -71,6 +72,9 @@ public class TerrainMapTools
 
       BytePointer bytePointerForSteppabilityConnectionsMap = new BytePointer(steppabilityConnectionsMap.data());
       bytePointerForSteppabilityConnectionsMap.get(terrainMapData.getSteppabilityConnectionsMap());
+
+      FloatPointer floatPointerForSquaredErrorMap = new FloatPointer(squaredErrorMap.data());
+      floatPointerForSquaredErrorMap.get(terrainMapData.getSquaredErrorMap());
    }
 
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y)

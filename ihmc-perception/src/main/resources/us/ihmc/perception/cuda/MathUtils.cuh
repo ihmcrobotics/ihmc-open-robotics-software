@@ -20,6 +20,12 @@ __device__ float angle(float x1, float y1, float x2, float y2)
    return atan2(sinTheta, cosTheta);
 }
 
+// maps input value from range (lowerBound, upperBound) -> (0, 255)
+__device__ unsigned char scaleAndCastToUnsignedChar(float val, float lowerBound, float upperBound)
+{
+   return static_cast<unsigned char>(255 * (val - lowerBound) / (upperBound - lowerBound));
+}
+
 __device__ float interpolate(float a, float b, float alpha)
 {
     return (1.0f - alpha) * a + alpha * b;
@@ -144,7 +150,7 @@ __device__ float solveForPlaneCoefficients(float* covariance_matrix, float* z_va
     float yz = -z_variance_vector[1];
     float z = -z_variance_vector[2];
 
-    float squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + C*C;
+    float squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
     return squared_error / n;
 }
 

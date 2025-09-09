@@ -96,9 +96,11 @@ public class SteppableRegionsCalculatorTools
                isBorderCell = Integer.bitCount(connection) != 8;
 
                double z = terrainMapData.getHeightInWorld(x, y);
-               Vector3D normal = new Vector3D(normalValueAsFloat(terrainMapData.getSnapNormalXMap(), terrainMapData.getCellsPerAxis(), x, y),
-                                              normalValueAsFloat(terrainMapData.getSnapNormalYMap(), terrainMapData.getCellsPerAxis(), x, y),
-                                              normalValueAsFloat(terrainMapData.getSnapNormalZMap(), terrainMapData.getCellsPerAxis(), x, y));
+
+               int index = x * terrainMapData.getCellsPerAxis() + y;
+               Vector3D normal = new Vector3D(unpackByteAsFloat(terrainMapData.getSnapNormalXMap(), index, -1.0f, 1.0f),
+                                              unpackByteAsFloat(terrainMapData.getSnapNormalYMap(), index, -1.0f, 1.0f),
+                                              unpackByteAsFloat(terrainMapData.getSnapNormalZMap(), index, 0.0f, 1.0f));
                SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerAxis, isBorderCell);
                steppableRegionsEnvironmentModel.addUnexpandedSteppableCell(cell);
             }
@@ -185,9 +187,9 @@ public class SteppableRegionsCalculatorTools
       return maskedValue > 0;
    }
 
-   public static float normalValueAsFloat(byte[] normalArray, int cellsPerAxis, int x, int y)
+   public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
    {
-      return (float) ((normalArray[x * cellsPerAxis + y] & 0xFF)) * 2 / 255 - 1.0f;
+      return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,

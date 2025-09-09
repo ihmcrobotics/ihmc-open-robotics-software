@@ -15,7 +15,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "327b65bea1c0f0a7c333e50adb8d619cfb8ce3887478b19ea8b8c86cef54f49e";
+   		return "25ed56ec258449579155050c0471a215783b87dbf75154051e412cbc99402c69";
    }
    
    @Override
@@ -81,6 +81,8 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       return current_alignment - initial_alignment;
@@ -149,6 +151,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += (data.getSteppableConnectionsData().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getSquaredErrorData().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -203,6 +209,10 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getSteppableConnectionsData());else
           throw new RuntimeException("steppable_connections_data field exceeds the maximum length: %d > %d".formatted(data.getSteppableConnectionsData().size(), 255000));
 
+      if(data.getSquaredErrorData().size() <= 255000)
+      cdr.write_type_e(data.getSquaredErrorData());else
+          throw new RuntimeException("squared_error_data field exceeds the maximum length: %d > %d".formatted(data.getSquaredErrorData().size(), 255000));
+
    }
 
    public static void read(perception_msgs.msg.dds.TerrainMapMessage data, us.ihmc.idl.CDR cdr)
@@ -228,6 +238,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getSnappedAreaData());	
       cdr.read_type_e(data.getSteppabilityData());	
       cdr.read_type_e(data.getSteppableConnectionsData());	
+      cdr.read_type_e(data.getSquaredErrorData());	
 
    }
 
@@ -249,6 +260,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("snapped_area_data", data.getSnappedAreaData());
       ser.write_type_e("steppability_data", data.getSteppabilityData());
       ser.write_type_e("steppable_connections_data", data.getSteppableConnectionsData());
+      ser.write_type_e("squared_error_data", data.getSquaredErrorData());
    }
 
    @Override
@@ -269,6 +281,7 @@ public class TerrainMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("snapped_area_data", data.getSnappedAreaData());
       ser.read_type_e("steppability_data", data.getSteppabilityData());
       ser.read_type_e("steppable_connections_data", data.getSteppableConnectionsData());
+      ser.read_type_e("squared_error_data", data.getSquaredErrorData());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.TerrainMapMessage src, perception_msgs.msg.dds.TerrainMapMessage dest)
