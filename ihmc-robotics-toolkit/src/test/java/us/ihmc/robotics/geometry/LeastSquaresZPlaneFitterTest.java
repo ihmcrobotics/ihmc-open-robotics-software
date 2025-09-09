@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -93,9 +95,13 @@ public class LeastSquaresZPlaneFitterTest
       performATestWithRandomPoints(numberOfTests, maxXYZ, random, leastSquaresZPlaneFitter, pointNoiseAmplitude, normalEpsilon, pointEpsilon);
    }
 
-   
-   private void performATestWithRandomPoints(int numberOfTests, double maxXYZ, Random random, LeastSquaresZPlaneFitter leastSquaresZPlaneFitter,
-         double pointNoiseAmplitude, double normalEpsilon, double pointEpsilon)
+   private static void performATestWithRandomPoints(int numberOfTests,
+                                                    double maxXYZ,
+                                                    Random random,
+                                                    LeastSquaresZPlaneFitter leastSquaresZPlaneFitter,
+                                                    double pointNoiseAmplitude,
+                                                    double normalEpsilon,
+                                                    double pointEpsilon)
    {
       for (int i = 0; i < numberOfTests; i++)
       {
@@ -123,12 +129,9 @@ public class LeastSquaresZPlaneFitterTest
          Plane3D plane3dSolution = new Plane3D();
          leastSquaresZPlaneFitter.fitPlaneToPoints(listOfPoints, plane3dSolution);
 
-         Point3D pointSolution = new Point3D(plane3dSolution.getPoint());
-         Vector3D normalSolution = new Vector3D(plane3dSolution.getNormal());
+         EuclidCoreTestTools.assertEquals(planeNormal, plane3dSolution.getNormal(), normalEpsilon);
 
-         EuclidCoreTestTools.assertEquals(planeNormal, normalSolution, normalEpsilon);
-
-         double distanceToPlane = plane3d.distance(pointSolution);
+         double distanceToPlane = plane3d.distance(plane3dSolution.getPoint());
          assertTrue(distanceToPlane < pointEpsilon);
       }
    }
@@ -145,9 +148,7 @@ public class LeastSquaresZPlaneFitterTest
       pointList.add(new Point3D(0.0, 0.1, 0.0));
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
-
-      assertTrue(isNaN(new Point3D(plane3d.getPoint())));
-      assertTrue(isNaN(new Vector3D(plane3d.getNormal())));
+      assertTrue(plane3d.containsNaN());
    }
 
 	@Test
@@ -163,19 +164,42 @@ public class LeastSquaresZPlaneFitterTest
       pointList.add(new Point3D(0.0, 0.3, 0.0));
 
       leastSquaresZPlaneFitter.fitPlaneToPoints(pointList, plane3d);
-
-      assertTrue(isNaN(new Point3D(plane3d.getPoint())));
-      assertTrue(isNaN(new Vector3D(plane3d.getNormal())));
+      assertTrue(plane3d.containsNaN());
    }
-   
-   
-   private boolean isNaN(Tuple3DBasics tuple3d)
+
+   @Test
+   public void testSquaredError()
    {
-      if (!Double.isNaN(tuple3d.getX())) return false;
-      if (!Double.isNaN(tuple3d.getY())) return false;
-      if (!Double.isNaN(tuple3d.getZ())) return false;
-      
-      return true;
+      Random random = new Random(342);
+      int numTests = 30;
+
+      for (int i = 0; i < numTests; i++)
+      {
+         List<Point3D> points = new ArrayList<>();
+
+         int numPoints = RandomNumbers.nextInt(random, 5, 50);
+         for (int j = 0; j < numPoints; j++)
+         {
+            double px = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double py = EuclidCoreRandomTools.nextDouble(random, 10.0);
+            double pz = EuclidCoreRandomTools.nextDouble(random, 1.0);
+            points.add(new Point3D(px, py, pz));
+         }
+
+         LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+         Plane3D plane = new Plane3D();
+         double computedSquaredError = planeFitter.fitPlaneToPoints(points, plane);
+
+         // compute actual squared error
+         double error = 0.0;
+         for (int j = 0; j < points.size(); j++)
+         {
+            error += EuclidCoreTools.square(points.get(j).getZ() - plane.getZOnPlane(points.get(j).getX(), points.get(j).getY()));
+         }
+         error /= points.size();
+
+         Assertions.assertTrue(Math.abs(computedSquaredError - error) < 1.0e-15);
+      }
    }
 
    // Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0
@@ -196,8 +220,4 @@ public class LeastSquaresZPlaneFitterTest
 
       EuclidCoreTestTools.assertEquals(new Vector3D(0.0, 1.0, 0.0), new Vector3D(plane3d.getNormal()), 1e-7);
    }
-
-  
-   
-
 }

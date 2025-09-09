@@ -44,4 +44,7 @@ int8[] steppability_data
 # The raw data for the steppable connections value, which are stored as chars.
 int8[] steppable_connections_data
 
+# Squared error term in the least-squares calculation when fitting normals
+float32[] squared_error_data
+
 

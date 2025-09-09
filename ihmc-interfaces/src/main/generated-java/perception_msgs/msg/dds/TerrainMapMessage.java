@@ -68,6 +68,10 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
             * The raw data for the steppable connections value, which are stored as chars.
             */
    public us.ihmc.idl.IDLSequence.Byte  steppable_connections_data_;
+   /**
+            * Squared error term in the least-squares calculation when fitting normals
+            */
+   public us.ihmc.idl.IDLSequence.Float  squared_error_data_;
 
    public TerrainMapMessage()
    {
@@ -88,6 +92,8 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       steppability_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
 
       steppable_connections_data_ = new us.ihmc.idl.IDLSequence.Byte (255000, "type_9");
+
+      squared_error_data_ = new us.ihmc.idl.IDLSequence.Float (255000, "type_5");
 
    }
 
@@ -120,6 +126,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       snapped_area_data_.set(other.snapped_area_data_);
       steppability_data_.set(other.steppability_data_);
       steppable_connections_data_.set(other.steppable_connections_data_);
+      squared_error_data_.set(other.squared_error_data_);
    }
 
    /**
@@ -291,6 +298,15 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
    }
 
 
+   /**
+            * Squared error term in the least-squares calculation when fitting normals
+            */
+   public us.ihmc.idl.IDLSequence.Float  getSquaredErrorData()
+   {
+      return squared_error_data_;
+   }
+
+
    public static Supplier<TerrainMapMessagePubSubType> getPubSubType()
    {
       return TerrainMapMessagePubSubType::new;
@@ -338,6 +354,8 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.steppable_connections_data_, other.steppable_connections_data_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.squared_error_data_, other.squared_error_data_, epsilon)) return false;
+
 
       return true;
    }
@@ -372,6 +390,7 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       if (!this.snapped_area_data_.equals(otherMyClass.snapped_area_data_)) return false;
       if (!this.steppability_data_.equals(otherMyClass.steppability_data_)) return false;
       if (!this.steppable_connections_data_.equals(otherMyClass.steppable_connections_data_)) return false;
+      if (!this.squared_error_data_.equals(otherMyClass.squared_error_data_)) return false;
 
       return true;
    }
@@ -411,7 +430,9 @@ public class TerrainMapMessage extends Packet<TerrainMapMessage> implements Sett
       builder.append("steppability_data=");
       builder.append(this.steppability_data_);      builder.append(", ");
       builder.append("steppable_connections_data=");
-      builder.append(this.steppable_connections_data_);
+      builder.append(this.steppable_connections_data_);      builder.append(", ");
+      builder.append("squared_error_data=");
+      builder.append(this.squared_error_data_);
       builder.append("}");
       return builder.toString();
    }

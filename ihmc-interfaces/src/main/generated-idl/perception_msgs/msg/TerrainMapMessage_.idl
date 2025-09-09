@@ -71,6 +71,10 @@ module perception_msgs
          * The raw data for the steppable connections value, which are stored as chars.
          */
         sequence<octet, 255000> steppable_connections_data;
+        /**
+         * Squared error term in the least-squares calculation when fitting normals
+         */
+        sequence<float, 255000> squared_error_data;
       };
     };
   };
