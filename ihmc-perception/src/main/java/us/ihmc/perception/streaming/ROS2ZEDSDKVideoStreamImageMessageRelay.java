@@ -2,6 +2,7 @@ package us.ihmc.perception.streaming;
 
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -28,6 +29,7 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
    private static int lastCameraId = 0;
 
    private final ROS2Helper ros2Helper;
+   private final ROS2Helper ros2IntraprocessHelper;
    private final RepeatingTaskThread publishThread;
    private final ExecutorService publisherExecutor;
 
@@ -35,7 +37,11 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
    private final ImageMessage lastLeftColorImageMessage;
    private final ImageMessage lastRightColorImageMessage;
 
+   private final Image lastLeftColorImage;
+   private final Image lastRightColorImage;
+
    public ROS2ZEDSDKVideoStreamImageMessageRelay(ROS2Node ros2Node,
+                                                 ROS2Node intraprocessROS2Node,
                                                  ZEDModelData zedModel,
                                                  int slDepthMode,
                                                  String remoteStreamingAddress,
@@ -44,12 +50,16 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
       super(lastCameraId++, zedModel, slDepthMode, remoteStreamingAddress, remoteStreamingPort);
 
       ros2Helper = new ROS2Helper(ros2Node);
+      ros2IntraprocessHelper = new ROS2Helper(intraprocessROS2Node);
       publishThread = new RepeatingTaskThread(getClass().getSimpleName() + "-PublishThread", this::publish);
       publisherExecutor = new ScheduledThreadPoolExecutor(3 * 10);
 
       lastDepthImageMessage = new ImageMessage();
       lastLeftColorImageMessage = new ImageMessage();
       lastRightColorImageMessage = new ImageMessage();
+
+      lastLeftColorImage = new Image();
+      lastRightColorImage = new Image();
 
       publishThread.startRepeating();
    }
@@ -70,10 +80,16 @@ public class ROS2ZEDSDKVideoStreamImageMessageRelay extends ZEDImageSensor
          packImageMessage(leftColorImage, lastLeftColorImageMessage);
          packImageMessage(rightColorImage, lastRightColorImageMessage);
 
+         PerceptionMessageTools.packImageMessage(leftColorImage, sensorFrame.getName(), lastLeftColorImage);
+         PerceptionMessageTools.packImageMessage(rightColorImage, sensorFrame.getName(), lastRightColorImage);
+
          // Publish async to not block receiving new images
-         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_DEPTH, lastDepthImageMessage));
-         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), lastLeftColorImageMessage));
-         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), lastRightColorImageMessage));
+         publisherExecutor.submit(() -> ros2IntraprocessHelper.publish(PerceptionAPI.ZED_DEPTH, lastDepthImageMessage));
+         publisherExecutor.submit(() -> ros2IntraprocessHelper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), lastLeftColorImageMessage));
+         publisherExecutor.submit(() -> ros2IntraprocessHelper.publish(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), lastRightColorImageMessage));
+
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(RobotSide.LEFT), lastLeftColorImage));
+         publisherExecutor.submit(() -> ros2Helper.publish(PerceptionAPI.ROS2_ZED_COLOR_IMAGES.get(RobotSide.RIGHT), lastRightColorImage));
 
          rightColorImage.release();
          leftColorImage.release();
