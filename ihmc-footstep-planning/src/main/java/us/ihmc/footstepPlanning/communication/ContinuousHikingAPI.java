@@ -51,4 +51,7 @@ public class ContinuousHikingAPI
 
    public static final StoredPropertySetROS2TopicPair DEPTH_IMAGE_FILTERING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"depth_image_filtering_parameters");
+
+   public static final StoredPropertySetROS2TopicPair STEPPABLE_REGION_CALCULATOR_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"steppable_region_calculator_parameters");
 }

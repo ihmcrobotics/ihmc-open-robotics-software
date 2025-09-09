@@ -7,11 +7,12 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +29,8 @@ public class SnappingTerrainExtractorTest
    public void testSnappingTerrainKernelRuns()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionCalculatorParameters);
 
       GpuMat fakeHeightMap = new GpuMat(401, 401, opencv_core.CV_16UC1);
       fakeHeightMap.setTo(new Scalar(100));
@@ -61,7 +63,8 @@ public class SnappingTerrainExtractorTest
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      SteppableRegionCalculatorParameters  steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
 
       GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       fakeHeightMap.setTo(new Scalar(32767));
@@ -109,7 +112,8 @@ public class SnappingTerrainExtractorTest
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters);
+      SteppableRegionCalculatorParameters  steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
 
       GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       fakeHeightMap.setTo(new Scalar(32767));

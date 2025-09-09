@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -310,8 +311,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
             // By setting the root joint to be at -footZ, the foot will be at a height of zero.
             rootJointPosition.setZ(-footPositionInWorld.getZ());
-            System.out.println(-footPositionInWorld.getZ());
-            System.out.println(rootJointPosition.getZ());
+            LogTools.info("Robot state initialized.%n-footZ = %.4f%nrootZ = %.4f".formatted(-footPositionInWorld.getZ(), rootJointPosition.getZ()));
          }
       }
       else

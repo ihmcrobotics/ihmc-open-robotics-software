@@ -129,34 +129,38 @@ public class ImGui3DViewInput
 
             int rowAdjustment = aliasedFlippedMouseY * aliasedRenderedAreaWidth * Float.BYTES;
             int columnAdjustment = aliasedMouseX * Float.BYTES;
-            float normalizedDeviceCoordinateZ = 2.0f * depthBuffer.getFloat(rowAdjustment + columnAdjustment) - 1.0f;
-
-            // out of bounds == no collision
-            if (normalizedDeviceCoordinateZ >= 0.0f && normalizedDeviceCoordinateZ < 1.0f)
+            int i = rowAdjustment + columnAdjustment;
+            if (i >= 0 && (depthBuffer.limit() - i) >= Float.BYTES) // can be out of bounds sometimes during initialization
             {
-               fallbackToXYPlaneIntersection = false;
+               float normalizedDeviceCoordinateZ = 2.0f * depthBuffer.getFloat(i) - 1.0f;
 
-               float cameraNear = panel.getCamera3D().near;
-               float cameraFar = panel.getCamera3D().far;
-               float twoXCameraFarNear = 2.0f * cameraNear * cameraFar;
-               float farPlusNear = cameraFar + cameraNear;
-               float farMinusNear = cameraFar - cameraNear;
-               float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
+               // out of bounds == no collision
+               if (normalizedDeviceCoordinateZ >= 0.0f && normalizedDeviceCoordinateZ < 1.0f)
+               {
+                  fallbackToXYPlaneIntersection = false;
 
-               float principalOffsetXPixels = aliasedRenderedAreaWidth / 2.0f;
-               float principalOffsetYPixels = aliasedRenderedAreaHeight / 2.0f;
-               float fieldOfViewY = panel.getCamera3D().getVerticalFieldOfView();
-               float focalLengthPixels = (float) ((aliasedRenderedAreaHeight / 2.0) / Math.tan(Math.toRadians((fieldOfViewY / 2.0))));
-               float zUp3DX = eyeDepth;
-               float zUp3DY = -(aliasedMouseX - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
-               float zUp3DZ = -(aliasedMouseY - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
+                  float cameraNear = panel.getCamera3D().near;
+                  float cameraFar = panel.getCamera3D().far;
+                  float twoXCameraFarNear = 2.0f * cameraNear * cameraFar;
+                  float farPlusNear = cameraFar + cameraNear;
+                  float farMinusNear = cameraFar - cameraNear;
+                  float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
 
-               tempCameraPose.setToZero(panel.getCamera3D().getCameraFrame());
-               tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  float principalOffsetXPixels = aliasedRenderedAreaWidth / 2.0f;
+                  float principalOffsetYPixels = aliasedRenderedAreaHeight / 2.0f;
+                  float fieldOfViewY = panel.getCamera3D().getVerticalFieldOfView();
+                  float focalLengthPixels = (float) ((aliasedRenderedAreaHeight / 2.0) / Math.tan(Math.toRadians((fieldOfViewY / 2.0))));
+                  float zUp3DX = eyeDepth;
+                  float zUp3DY = -(aliasedMouseX - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
+                  float zUp3DZ = -(aliasedMouseY - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
 
-               pickPoint.setIncludingFrame(panel.getCamera3D().getCameraFrame(), zUp3DX, zUp3DY, zUp3DZ);
-               pickPoint.changeFrame(ReferenceFrame.getWorldFrame());
-               lastZCollision = pickPoint.getZ();
+                  tempCameraPose.setToZero(panel.getCamera3D().getCameraFrame());
+                  tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  pickPoint.setIncludingFrame(panel.getCamera3D().getCameraFrame(), zUp3DX, zUp3DY, zUp3DZ);
+                  pickPoint.changeFrame(ReferenceFrame.getWorldFrame());
+                  lastZCollision = pickPoint.getZ();
+               }
             }
          }
 

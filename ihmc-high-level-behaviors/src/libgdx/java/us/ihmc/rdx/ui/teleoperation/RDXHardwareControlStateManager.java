@@ -9,10 +9,19 @@ import controller_msgs.msg.dds.MasterGainScaleControllerCommandMessage;
 import controller_msgs.msg.dds.MasterGainScaleControllerStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXArmManager;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
 public class RDXHardwareControlStateManager
@@ -44,7 +53,7 @@ public class RDXHardwareControlStateManager
       });
    }
 
-   public void renderImGuiWidgets()
+   public void renderImGuiWidgets(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
    {
       if (robotServoedConnectedTimer.isRunning(1.0))
       {
@@ -130,6 +139,11 @@ public class RDXHardwareControlStateManager
          RDXBaseUI.pushNotification("Commanding home pose...");
          communicationHelper.publishToController(homeChest);
       }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("N-Pose")))
+      {
+         goNPose(robotModel, referenceFrames, armManager, maxPelvisHeight);
+      }
 
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stop All Trajectories")))
@@ -138,6 +152,39 @@ public class RDXHardwareControlStateManager
          StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
          communicationHelper.publishToController(stopAllTrajectoryMessage);
       }
+   }
+
+   private void goNPose(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
+   {
+      double trajectoryTime = 3.0;
+
+      for (RobotSide side : RobotSide.values)
+         armManager.executeArmAngles(side, PresetArmConfiguration.N_POSE, trajectoryTime);
+
+      if (robotModel.getRobotVersion().hasHead())
+      {
+         NeckJointName[] neckJointNamesArray = robotModel.getJointMap().getNeckJointNames();
+         double[] desiredNeckJointValues = new double[neckJointNamesArray.length];
+         for (int i = 0; i < neckJointNamesArray.length; i++)
+         {
+            desiredNeckJointValues[i] = 0.0; // TODO make 0 robot agnostic
+         }
+         communicationHelper.publishToController(HumanoidMessageTools.createHeadJointspaceTaskspaceTrajectoryMessage(referenceFrames,
+                                                                                                            neckJointNamesArray,
+                                                                                                            desiredNeckJointValues,
+                                                                                                            trajectoryTime));
+      }
+
+      FramePose3D pelvisPose = new FramePose3D(referenceFrames.getMidFeetZUpFrame());
+      pelvisPose.getTranslation().addZ(maxPelvisHeight - 0.02);
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      communicationHelper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, pelvisPose));
+
+      GoHomeMessage homeChest = new GoHomeMessage();
+      homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+      homeChest.setTrajectoryTime(trajectoryTime);
+      communicationHelper.publishToController(homeChest);
+      RDXBaseUI.pushNotification("Commanding N-pose...");
    }
 
    public void sendStandPrepRequest()

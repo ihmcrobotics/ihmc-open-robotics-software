@@ -278,17 +278,15 @@ public class RDXArmManager
          }
       }
 
-      if (ImGui.collapsingHeader(labels.get("Hands"), ImGuiTreeNodeFlags.DefaultOpen))
+      boolean hasHand = false;
+      for (RobotSide side : RobotSide.values)
+      {
+         hasHand |= handManager.getHand(side) != null;
+      }
+      if (hasHand)
       {
          handManager.renderImGuiWidgets();
-
-         // Pop up warning if notification is set
-         if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
-         {
-            ImGui.openPopup(labels.get("Warning"));
-         }
       }
-
    }
 
    public void destroy()
