@@ -303,7 +303,7 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          controller.setAButtonText(isKSTEnabled.get() ? "Stop preview" : "Start preview");
          if (demonstrationMode.get())
-            controller.setBButtonText("%s demonstrating task %d".formatted(performingDemonstration.get() == -1 ? "Start" : "Stop", demonstrationTaskIndex));
+            controller.setBButtonText("%s demonstrating".formatted(performingDemonstration.get() == -1 ? "Start" : "Stop"));
          else
             controller.setBButtonText("Record motion");
 
