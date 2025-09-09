@@ -66,11 +66,8 @@ public class RapidHeightMapExtractor
    private final CUDAKernel emptyRegisterKernel;
 
    private final float[] worldToGroundTransformArray = new float[16];
-   private final float[] groundToSensorTransformArray = new float[16];
    private final float[] sensorToGroundTransformArray = new float[16];
 
-   private final FloatPointer groundToSensorTransformHostPointer;
-   private final FloatPointer groundToSensorTransformDevicePointer;
    private final FloatPointer sensorToGroundTransformHostPointer;
    private final FloatPointer sensorToGroundTransformDevicePointer;
    private final FloatPointer zUpCameraToWorldAlignedGroundHostPointer;
@@ -142,9 +139,6 @@ public class RapidHeightMapExtractor
          emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
 
          // Initialize transformation pointers
-         groundToSensorTransformHostPointer = new FloatPointer(16);
-         groundToSensorTransformDevicePointer = new FloatPointer();
-
          sensorToGroundTransformHostPointer = new FloatPointer(16);
          sensorToGroundTransformDevicePointer = new FloatPointer();
 
@@ -220,7 +214,7 @@ public class RapidHeightMapExtractor
       CUDATools.memcpyAsync(zUpCameraToWorldAlignedGroundDevicePointer, zUpCameraToWorldAlignedGroundHostPointer, worldToGroundTransformArray.length, stream);
       checkCUDAError();
 
-      // --------- Run the update kernel ---------
+      // --------- Run the temp and local kernel ---------
       {
          // Compute "speed" of the point
          RigidBodyTransform previousToCurrentSensorOrigin = new RigidBodyTransform(previousSensorToWorld);
@@ -234,22 +228,24 @@ public class RapidHeightMapExtractor
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         RigidBodyTransform groundToSensorTransform = new RigidBodyTransform(sensorToGroundTransform);
-         groundToSensorTransform.invert();
-
          sensorToGroundTransform.get(sensorToGroundTransformArray);
          sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
          CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
          CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
 
-         groundToSensorTransform.get(groundToSensorTransformArray);
-         groundToSensorTransformHostPointer.put(groundToSensorTransformArray);
-         CUDATools.mallocAsync(groundToSensorTransformDevicePointer, groundToSensorTransformArray.length, stream);
-         CUDATools.memcpyAsync(groundToSensorTransformDevicePointer, groundToSensorTransformHostPointer, groundToSensorTransformArray.length, stream);
+         // Clearing all the temp maps so they are ready for the next update call
+         cudaMemset2D(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
+         cudaMemset2D(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Float.BYTES, tempCountMap.rows());
+         cudaMemset2D(tempSumOfSquaresMap.data(), tempSumOfSquaresMap.step(), 0, (long) tempSumOfSquaresMap.cols() * Float.BYTES, tempSumOfSquaresMap.rows());
+         cudaMemset2D(tempMotionVarianceMap.data(),
+                      tempMotionVarianceMap.step(),
+                      0,
+                      (long) tempMotionVarianceMap.cols() * Float.BYTES,
+                      tempMotionVarianceMap.rows());
 
          int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 scatterGridDim = new dim3(gridDimX, gridDimY, 1);
+         dim3 updateTempMapsDim = new dim3(gridDimX, gridDimY, 1);
 
          updateTempMapsKernel.withPointer(latestDepthImageGPU.data()).withLong(latestDepthImageGPU.step());
          updateTempMapsKernel.withPointer(tempSumMap.data()).withLong(tempSumMap.step());
@@ -261,13 +257,9 @@ public class RapidHeightMapExtractor
          updateTempMapsKernel.withFloat(linearMotionMagnitude);
          updateTempMapsKernel.withFloat(angularMotionMagnitude);
 
-         // CLEARING ALL THE DATA FOR THE NEXT UPDAT e
-         cudaMemset2D(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
-         cudaMemset2D(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Float.BYTES, tempCountMap.rows());
-         cudaMemset2D(tempSumOfSquaresMap.data(), tempSumOfSquaresMap.step(), 0, (long) tempSumOfSquaresMap.cols() * Float.BYTES, tempSumOfSquaresMap.rows());
-         cudaMemset2D(tempMotionVarianceMap.data(), tempMotionVarianceMap.step(), 0, (long) tempMotionVarianceMap.cols() * Float.BYTES, tempMotionVarianceMap.rows());
+         updateTempMapsKernel.run(stream, updateTempMapsDim, blockSize, 0);
 
-         updateTempMapsKernel.run(stream, scatterGridDim, blockSize, 0);
+         // That is the end of kernel one, now onto the local kernel
 
          localMapKernel.withPointer(tempSumMap.data()).withLong(tempSumMap.step());
          localMapKernel.withPointer(tempCountMap.data()).withLong(tempCountMap.step());
@@ -278,14 +270,14 @@ public class RapidHeightMapExtractor
          localMapKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          localMapKernel.withPointer(parametersDevicePointer);
 
-         int updateKernelGridSizeXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 whattttttttt = new dim3(updateKernelGridSizeXY, updateKernelGridSizeXY, 1);
+         int computeLocalKernelGridXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 localKernelDim = new dim3(computeLocalKernelGridXY, computeLocalKernelGridXY, 1);
 
-         localMapKernel.run(stream, whattttttttt, blockSize, 0);
+         localMapKernel.run(stream, localKernelDim, blockSize, 0);
 
-         //         updateKernelGridDim.close();
+         updateTempMapsDim.close();
+         localKernelDim.close();
          cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
-         cudaFreeAsync(groundToSensorTransformDevicePointer, stream);
          checkCUDAError();
       }
 
@@ -484,6 +476,7 @@ public class RapidHeightMapExtractor
       blockSize.close();
 
       updateTempMapsKernel.close();
+      localMeanMap.close();
       translateKernel.close();
       registerKernel.close();
       terrainCroppingKernel.close();
@@ -491,10 +484,14 @@ public class RapidHeightMapExtractor
       emptyRegisterKernel.close();
 
       // Clean up each resource
-      deallocateFloatPointer(groundToSensorTransformHostPointer, groundToSensorTransformDevicePointer, stream);
       deallocateFloatPointer(sensorToGroundTransformHostPointer, sensorToGroundTransformDevicePointer, stream);
       deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, zUpCameraToWorldAlignedGroundDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
+
+      tempSumMap.close();
+      tempCountMap.close();
+      tempSumOfSquaresMap.close();
+      tempMotionVarianceMap.close();
 
       localMeanMap.close();
       localVarianceMap.close();

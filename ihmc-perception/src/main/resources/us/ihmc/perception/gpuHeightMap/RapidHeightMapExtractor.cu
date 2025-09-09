@@ -31,41 +31,6 @@ extern "C"
 #define SEARCH_SKIP_SIZE 26
 #define GROUND_HEIGHT 27
 
-#define VERTICAL_FOV 1.5707963267948966f
-#define HORIZONTAL_FOV 6.2831853f
-
-const bool DEBUG = false;
-
-__device__ int2 spherical_projection(float3 cellCenter, const float *params)
-{
-    float pitchUnit = VERTICAL_FOV / (params[DEPTH_INPUT_HEIGHT]);
-    float yawUnit = HORIZONTAL_FOV / (params[DEPTH_INPUT_WIDTH]);
-
-    int pitchOffset = params[DEPTH_INPUT_HEIGHT] / 2;
-    int yawOffset = params[DEPTH_INPUT_WIDTH] / 2;
-
-    float x = cellCenter.x;
-    float y = cellCenter.y;
-    float z = cellCenter.z;
-
-    float radius = sqrt(x * x + y * y);
-
-    float pitch = atan2f(z, radius);
-    int pitchCount = (pitchOffset) - static_cast<int>(pitch / pitchUnit);
-
-    float yaw = atan2f(-y, x);
-    int yawCount = (yawOffset) + static_cast<int>(yaw / yawUnit);
-
-    return make_int2(pitchCount, yawCount);
-}
-
-__device__ int2 perspective_projection(float3 point, const float *params)
-{
-    float x = point.x / point.z * params[DEPTH_FX] + params[DEPTH_CX];
-    float y = point.y / point.z * params[DEPTH_FY] + params[DEPTH_CY];
-    return make_int2(static_cast<int>(x), static_cast<int>(y));
-}
-
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)
 {
     float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
@@ -97,17 +62,11 @@ __device__ int2 getGlobalIndexFromLocalIndex(int2 localIndex, const float *zUpCa
     return newCellIndex;
 }
 
-// Compute grid cell center coordinates (cellCenterInZUp) in the Z-Up frame based on thread indices.
-// Transform the grid cell to the sensor frame using the transformation matrix (zUpToSensorFrameTf).
-// Perform projection (spherical or perspective) to map the grid cell to image indices.
-// Iterate over a search window in the depth image to find points within the cell.
-// Back-project these points to the 3D space and transform them back to the Z-Up frame.
-// Compute the average height for points within the grid cell while filtering outliers.
-
 /**
- * @brief SCATTER KERNEL: One thread per depth pixel.
- * Reads depth, back-projects, transforms, and atomically adds the point's
- * contribution to the appropriate height map cell.
+ * @brief Height map update KERNEL: One thread per depth pixel for peak optimization.
+ * Reads in the depth for each pixel in the image.
+ * Back projects the points into the Z-Up frame using transforms.
+ * Atomically adds the points to the maps.
  */
 extern "C"
 __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ depthImage, size_t pitchDepth,
@@ -124,7 +83,6 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
-    // Cache params
     const int depthWidth = static_cast<int>(params[DEPTH_INPUT_WIDTH]);
     const int depthHeight = static_cast<int>(params[DEPTH_INPUT_HEIGHT]);
     const int localCellsPerAxis = static_cast<int>(params[LOCAL_CELLS_PER_AXIS]);
@@ -138,49 +96,49 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
     if (xIndex >= depthWidth || yIndex >= depthHeight)
         return;
 
-    // --- 1. Coalesced Read from Depth Image ---
+    // Coalesced read from depth image
     const unsigned short* rowPtr = (const unsigned short*)((const char*)depthImage + yIndex * pitchDepth);
-    float depth = rowPtr[xIndex] * 0.001f; // scale to meters
+    float depth = rowPtr[xIndex] * 0.001f; // Scale to meters
 
-    if (depth < 0.5f) // Early exit for invalid depth
+    // Early exit for invalid depth
+    if (depth < 0.5f)
         return;
 
-    // --- 2. Back-project and Transform (same as before) ---
-    float3 queryPointInSensor = back_project_perspective(make_int2(xIndex, yIndex), depth, params);
-    float3 queryPointInZUp = transformPoint3D(queryPointInSensor, sensorToZUpFrameTf);
+    // Back-project and transform
+    float3 queryPointInSensorFrame = back_project_perspective(make_int2(xIndex, yIndex), depth, params);
+    float3 queryPointInZUpFrame = transformPoint3D(queryPointInSensorFrame, sensorToZUpFrameTf);
 
-    // --- 3. Find Target Cell ---
-    float2 xyCoords = make_float2(queryPointInZUp.x, queryPointInZUp.y);
+    // Get the correct cell index for the maps
+    float2 xyCoords = make_float2(queryPointInZUpFrame.x, queryPointInZUpFrame.y);
     int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(params[HALF_LOCAL_WIDTH_IN_METERS], 0.0f), cellSize, localCenterIndex);
 
-    // Bounds check against the local map dimensions
+    // Bounds check against the local map dimensions because we are scanning the entire depth image
     if (cellIndex.x < 0 || cellIndex.x >= localCellsPerAxis || cellIndex.y < 0 || cellIndex.y >= localCellsPerAxis)
         return;
 
-    // --- 4. Atomic Updates ---
-    // Pointers to the target cell in each intermediate map
+    // Pointers to the target cell in each temporary map
     float* sumPtr = (float*)((char*)sumMap + cellIndex.y * pitchSum) + cellIndex.x;
     float* countPtr = (float*)((char*)countMap + cellIndex.y * pitchCount) + cellIndex.x;
     float* sumSqPtr = (float*)((char*)sumOfSquaresMap + cellIndex.y * pitchSumSq) + cellIndex.x;
     float* motionVarPtr = (float*)((char*)motionVarianceSumMap + cellIndex.y * pitchMotionVar) + cellIndex.x;
 
     // Atomically add this pixel's contribution
-    atomicAdd(sumPtr, queryPointInZUp.z);
+    atomicAdd(sumPtr, queryPointInZUpFrame.z);
     atomicAdd(countPtr, 1.0f);
-    atomicAdd(sumSqPtr, queryPointInZUp.z * queryPointInZUp.z);
+    atomicAdd(sumSqPtr, queryPointInZUpFrame.z * queryPointInZUpFrame.z);
 
     // Also calculate and add motion variance contribution
-    float distance = sqrtf(queryPointInSensor.x * queryPointInSensor.x + queryPointInSensor.y * queryPointInSensor.y + queryPointInSensor.z * queryPointInSensor.z);
-    float motionVarianceF = distance * varPerMeter + linearMotionMagnitude * varPerTranslationSpeed +
-                            angularMotionMagnitude * distance * varPerRotationSpeed;
+    float distance = sqrtf(queryPointInSensorFrame.x * queryPointInSensorFrame.x +
+                           queryPointInSensorFrame.y * queryPointInSensorFrame.y +
+                           queryPointInSensorFrame.z * queryPointInSensorFrame.z);
+    float motionVarianceF = distance * varPerMeter + linearMotionMagnitude * varPerTranslationSpeed + angularMotionMagnitude * distance * varPerRotationSpeed;
     atomicAdd(motionVarPtr, motionVarianceF);
 }
 
 
 /**
- * @brief FINALIZE KERNEL: One thread per height map cell.
- * Reads the intermediate sum/count buffers and computes the final
- * mean, variance, and motion variance.
+ * @brief Compute Local Map KERNEL: The threads correspond to cell indices
+ * Takes the maps that hold all the sums, and computes the mean, variance, and motion variance per cell
  */
 extern "C"
 __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSum,
@@ -192,7 +150,6 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
                                 float* __restrict__ localMotionVarianceMap, size_t pitchLocalMotionVariance,
                                 const float* __restrict__ params)
 {
-    // Thread indices now correspond to CELL coordinates
     int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
     int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -202,7 +159,6 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
     if (xIndex >= localCellsPerAxis || yIndex >= localCellsPerAxis)
         return;
 
-    // Pointers to the source cell in each intermediate map
     const float* sumPtr = (const float*)((const char*)sumMap + yIndex * pitchSum) + xIndex;
     const float* countPtr = (const float*)((const char*)countMap + yIndex * pitchCount) + xIndex;
     const float* sumSqPtr = (const float*)((const char*)sumOfSquaresMap + yIndex * pitchSumSq) + xIndex;
@@ -214,7 +170,7 @@ __global__ void computeLocalMap(const float* __restrict__ sumMap, size_t pitchSu
     float motionVariance = 0.0f;
 
     // Only compute if one or more points landed in this cell
-    if (count > 0.5f) // Use float comparison
+    if (count > 0.5f)
     {
         float sum = *sumPtr;
         mean = sum / count;
@@ -342,15 +298,6 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
         float kalmanGain = predictedVariance / (predictedVariance + localVarianceF + localMotionVarianceF);
         float updatedMean = predictedMean + kalmanGain * (localMeanF - predictedMean);
         float updatedVariance = (1.0f - kalmanGain) * predictedVariance;
-
-        if (DEBUG && xIndex == 40 && yIndex == 40)
-        {
-            printf("Registration Kernel -----------------------------\n");
-            printf("Global Mean: %f\n", globalMeanF);
-            printf("Kalman Gain: %f\n", kalmanGain);
-            printf("New Mean: %f\n", updatedMean);
-            printf("New Variance: %f\n", updatedVariance);
-        }
 
         *globalMean = updatedMean;
         *globalVariance = updatedVariance;
