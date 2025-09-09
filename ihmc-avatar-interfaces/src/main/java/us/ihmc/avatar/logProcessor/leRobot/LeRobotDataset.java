@@ -17,7 +17,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -130,7 +130,7 @@ public class LeRobotDataset
       MutableBoolean stillGoing = new MutableBoolean(false);
       String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "IKStreamingRTThread");
       String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
-      if (session.getRootRegistry().findVariable(kstStreaming + "isDemonstrationEpisode") instanceof YoBoolean isDemonstrationEpisode)
+      if (session.getRootRegistry().findVariable(kstStreaming + "demonstrationTaskID") instanceof YoInteger demonstrationTaskID)
       {
          ThreadTools.startAThread(() ->
          {
@@ -148,7 +148,7 @@ public class LeRobotDataset
                   boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
                   if (desiredDataIsLoaded)
                   {
-                     if (isDemonstrationEpisode.getBooleanValue())
+                     if (demonstrationTaskID.getValue() > 0)
                      {
                         if (episode == null)
                         {

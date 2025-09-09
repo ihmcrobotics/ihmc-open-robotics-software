@@ -167,7 +167,7 @@ public class RDXLeRobotDatasetCreator
                keepGenerating.set(false);
             ImGui.popStyleColor();
          }
-         ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the isDemonstrationEpisode variable.");
+         ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the demonstrationTaskID variable.");
          ImGui.endDisabled();
 
          boolean noEpisodes = dataset == null || dataset.getEpisodes().isEmpty();
