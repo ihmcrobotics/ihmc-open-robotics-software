@@ -5,46 +5,37 @@ extern "C"
 
 #define HEIGHT_MAP_CENTER_X 0
 #define HEIGHT_MAP_CENTER_Y 1
-#define CELL_SIZE_IN_CENTIMETERS 2
+#define CELL_SIZE_IN_METERS 2
 #define HEIGHT_MAP_WIDTH_IM_METERS 3
-#define FOOT_LENGTH 4
-#define FOOT_WIDTH 5
-#define MIN_DISTANCE_FROM_BASE_OF_CLIFF 6
-#define MIN_DISTANCE_FROM_EDGE_OF_CLIFF 7
-#define SCALED_FOOT_POLYGON_PERCENTAGE 8
-#define CLIFF_START_HEIGHT_TO_AVOID 9
-#define CLIFF_END_HEIGHT_TO_AVOID 10
-#define MIN_SUPPORT_AREA_FRACTION 11
-#define MIN_SNAP_HEIGHT_THRESHOLD 12
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 13
-#define INEQUALITY_ACTIVATION_SLOPE 14
-#define STEPPING_COSINE_THRESHOLD 15
-#define STEPPING_CONTACT_THRESHOLD 16
-#define CONTACT_WINDOW_SIZE 17
+#define NORMAL_SEARCH_RADIUS 4
+#define MIN_SUPPORT_AREA_FRACTION 5
+#define MIN_SNAP_HEIGHT_THRESHOLD 6
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 7
+#define STEPPING_COSINE_THRESHOLD 8
+#define SQUARED_ERROR_THRESHOLD 9
 
-#define SNAP_FAILED 0
-#define CLIFF_TOP 1
-#define CLIFF_BOTTOM 2
-#define NOT_ENOUGH_AREA 0
-#define VALID 4
-
+// Reason for 0 traversability, in order it's checked
+#define VALID 0
+#define SNAP_FAILED 1
+#define NOT_ENOUGH_AREA 2
+#define SQUARED_ERROR 3
+#define TOO_STEEP 4
 
 /*
    This kernel is designed to compute the average snap height for every cell in the window. This can be done by either snapping a rectangular foot down if
    there's a known yaw, or, more efficiently, a circle on the ground, where you don't need to know the yaw. It also computes the local normal at that cell.
-   Additionally, it performs some validity checks about the snap, specifically checking the minimum area, or whether it's too close to a cliff top or bottom.
+   Additionally, it performs some validity checks about the snap, specifically checking the minimum area, roughness, and terrain incline.
    The results of that check is returned in the steppable map image. When performing the snap, points that are too far below the highest point are ignored. This
    enables a better "sharp" edge around corners, to avoid rounding by averaging. It's also how the support area is calculated. In the future, the support area
    should be the area of the convex hull, not just the area of the cells, since that will allow "bridging" gaps.
 */
 extern "C"
 __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
-                                   unsigned short *steppabilityMap, size_t pitchSteppability,
+                                   unsigned short *traversabilityMap, size_t pitchTraversability,
+                                   unsigned short *traversabilityClassMap, size_t pitchTraversabilityClass,
                                    unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,
                                    unsigned short *snapNormalZMap, size_t pitchSnapNormalZ,
-                                   unsigned short *snappedAreaFractionMap, size_t pitchSnappedAreaFraction,
-                                   float *squaredErrorMap, size_t pitchSquaredError,
                                    float *params, int terrainMapXY)
 {
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -53,11 +44,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     if (x_index >= terrainMapXY || y_index >= terrainMapXY)
         return;
 
-    float foot_width = params[FOOT_WIDTH];
-    float foot_length = params[FOOT_LENGTH];
-
-    float map_resolution = params[CELL_SIZE_IN_CENTIMETERS];
-    float max_dimension = fmaxf(params[FOOT_WIDTH], params[FOOT_LENGTH]);
+    float map_resolution = params[CELL_SIZE_IN_METERS];
 
     int terrain_map_center_index = compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], map_resolution);
     float2 terrain_map_center = make_float2(params[HEIGHT_MAP_CENTER_Y], params[HEIGHT_MAP_CENTER_X]);
@@ -67,40 +54,34 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     int2 terrain_map_index = make_int2(x_index, y_index);
 
     float2 foot_position = indices_to_coordinate(terrain_map_index, terrain_map_center, map_resolution, terrain_map_center_index);
+    float normal_search_radius = params[NORMAL_SEARCH_RADIUS];
+    float normal_search_radius_squared = normal_search_radius * normal_search_radius;
+    int index_offset = static_cast<int>(ceilf(normal_search_radius / map_resolution));
 
-    float half_length = foot_length / 2.0f;
-    float half_width = foot_width / 2.0f;
-    float2 half_foot_size = make_float2(half_length, half_width);
-    float foot_search_radius_squared = dot2D(half_foot_size, half_foot_size);
-    float foot_search_radius = sqrtf(foot_search_radius_squared);
-    int foot_offset_indices = static_cast<int>(ceilf(foot_search_radius / map_resolution));
-
-    float max_height_float = -100.0f;
-    int foot_search_min_x = max(terrain_map_index.x - foot_offset_indices, 0);
-    int foot_search_max_x = min(terrain_map_index.x + foot_offset_indices + 1, cells_per_axis_for_checking);
-    int foot_search_min_y = max(terrain_map_index.y - foot_offset_indices, 0);
-    int foot_search_max_y = min(terrain_map_index.y + foot_offset_indices + 1, cells_per_axis_for_checking);
+    float max_height_in_radius = -100.0f;
+    int normal_search_min_x = max(terrain_map_index.x - index_offset, 0);
+    int normal_search_max_x = min(terrain_map_index.x + index_offset + 1, cells_per_axis_for_checking);
+    int normal_search_min_y = max(terrain_map_index.y - index_offset, 0);
+    int normal_search_max_y = min(terrain_map_index.y + index_offset + 1, cells_per_axis_for_checking);
 
     // Get the maximum height of any cell when snapping the foot down. This gives us our highest point on the threshold. Assume the foot is a circle.
-    for (int x_query = foot_search_min_x; x_query < foot_search_max_x; ++x_query)
+    for (int x_query = normal_search_min_x; x_query < normal_search_max_x; ++x_query)
     {
-        for (int y_query = foot_search_min_y; y_query < foot_search_max_y; ++y_query)
+        for (int y_query = normal_search_min_y; y_query < normal_search_max_y; ++y_query)
         {
             float2 vector_to_point_from_foot = make_float2(static_cast<float>(x_query - terrain_map_index.x) * map_resolution,
                                                            static_cast<float>(y_query - terrain_map_index.y) * map_resolution);
 
             // If the magnitude of the vector is greater than the search radius, then the point is outside the foot.
-            if (dot2D(vector_to_point_from_foot, vector_to_point_from_foot) > foot_search_radius_squared)
+            if (dot2D(vector_to_point_from_foot, vector_to_point_from_foot) > normal_search_radius_squared)
                 continue;
 
             int2 query_key = make_int2(x_query, y_query);
 
             float *query_height_float = (float *)((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-            max_height_float = max(*query_height_float, max_height_float);
+            max_height_in_radius = max(*query_height_float, max_height_in_radius);
         }
     }
-
-    float max_height_under_foot = max_height_float;
 
     // Setup values to perform a least squares fit of the foot to the height map, but omitting any points that are too far below the foot.
     float n = 0.0f;
@@ -116,15 +97,15 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     int max_points_possible_under_support = 0;
 
-    for (int x_value_idx = foot_search_min_x; x_value_idx <= foot_search_max_x; x_value_idx++)
+    for (int x_value_idx = normal_search_min_x; x_value_idx <= normal_search_max_x; x_value_idx++)
     {
-        for (int y_value_idx = foot_search_min_y; y_value_idx <= foot_search_max_y; y_value_idx++)
+        for (int y_value_idx = normal_search_min_y; y_value_idx <= normal_search_max_y; y_value_idx++)
         {
             // Calculate offset and check distance
             float2 offset = make_float2((float)(x_value_idx - terrain_map_index.x) * map_resolution, (float)(y_value_idx - terrain_map_index.y) * map_resolution);
             float offset_distance_squared = dot2D(offset, offset);
 
-            if (offset_distance_squared > foot_search_radius_squared)
+            if (offset_distance_squared > normal_search_radius_squared)
                 continue;
 
             float offset_distance = sqrt(offset_distance_squared);
@@ -146,14 +127,13 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
                 continue;
 
             // 0.0 in center, 1.0 at edge
-            float alpha_edge = fminf(fmaxf(offset_distance / foot_search_radius, 0.0f), 1.0f);
-
+            float alpha_edge = clamp(offset_distance / normal_search_radius, 0.0f, 1.0f);
             float snap_height_threshold = interpolate(params[MIN_SNAP_HEIGHT_THRESHOLD], params[SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE], alpha_edge);
-            float min_height_under_foot_to_consider = max_height_under_foot - snap_height_threshold;
+            float min_height_under_foot_to_consider = max_height_in_radius - snap_height_threshold;
 
             if (query_height >= min_height_under_foot_to_consider)
             {
-                n += 1;
+                n += 1.0f;
                 x += point_query.x;
                 y += point_query.y;
                 z += query_height;
@@ -167,298 +147,95 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
         }
     }
 
-    ///////////// Solve for the plane normal, as well as the height of the foot along that plane.
-    bool failed = false;
-    int snap_result = VALID;
+    // Traversability scores: support area, squared error, and incline.
+    // If any are 0.0, traversability_result contains the first detected cause
+    float area_traversability = 0.0f;
+    float squared_error_traversability = 0.0f;
+    float incline_traversability = 0.0f;
+    int traversability_result = VALID;
 
-    // Fail if insufficient data is in the radius
+    // Fail if insufficient data is in the search radius
     if (n < 3)
     {
-        snap_result = SNAP_FAILED;
-        failed = true;
-        n = 1.0f;
+       traversability_result = SNAP_FAILED;
     }
 
-    // This is the actual height of the snapped foot
-    float snap_height = z/n;
-
-    float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-    float z_variance_vector[3] = {-xz, -yz, -z};
-    float coefficients[3] = {0.0f, 0.0f, 0.0f};
-    float squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
-
-    float3 normal = make_float3(coefficients[0], coefficients[1], 1.0);
-    normal = normalize(normal);
-    // If the normal points down, we need to flip it.
-    if (normal.z < 0.0)
+    // Support area percentage check
+    if (traversability_result == VALID)
     {
-        normal.x = -normal.x;
-        normal.y = -normal.y;
-        normal.z = -normal.z;
-    }
+        float min_area_percentage = params[MIN_SUPPORT_AREA_FRACTION];
+        float area_percentage = n / max_points_possible_under_support;
+        area_traversability = clamp((area_percentage - min_area_percentage) / (1.0f - min_area_percentage), 0.0f, 1.0f);
 
-    /////////////// Make sure there's enough step area.
-
-    float min_points_needed_for_support = (int)(params[MIN_SUPPORT_AREA_FRACTION] * max_points_possible_under_support);
-    if (n < min_points_needed_for_support)
-    {
-        snap_result = NOT_ENOUGH_AREA;
-        failed = true;
-    }
-
-    //////////// Check to make sure we're not stepping too near a cliff base or top
-    if (!failed)
-    {
-        int cliff_offset_indices = ceil(params[SCALED_FOOT_POLYGON_PERCENTAGE] / map_resolution);
-
-        int min_x = max(terrain_map_index.x - cliff_offset_indices, 0);
-        int max_x = min(terrain_map_index.x + cliff_offset_indices + 1, cells_per_axis_for_checking);
-        int min_y = max(terrain_map_index.y - cliff_offset_indices, 0);
-        int max_y = min(terrain_map_index.y + cliff_offset_indices + 1, cells_per_axis_for_checking);
-
-        // Search for a cliff base that's too close
-        for (int x_query = min_x; x_query < max_x; x_query++)
+        if (area_percentage < min_area_percentage)
         {
-            for (int y_query = min_y; y_query < max_y; y_query++)
-            {
-                float2 vector_to_point_from_foot = make_float2((float)(x_query - terrain_map_index.x) * map_resolution, (float)(y_query - terrain_map_index.y) * map_resolution);
-                float distance_to_point_squared = dot2D(vector_to_point_from_foot, vector_to_point_from_foot);
-
-                int2 query_key = make_int2(x_query, y_query);
-
-                float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
-                float query_height_float = *heightValue;
-
-                // compute the relative height at this point, compared to the height contained in the current cell.
-                float relative_height_of_query = query_height_float - snap_height;
-
-                // If this is positive, the current cell is below (at the bottom) the cliff
-                if (relative_height_of_query > params[MIN_DISTANCE_FROM_BASE_OF_CLIFF])
-                {
-                    snap_result = CLIFF_BOTTOM;
-                    failed = true;
-                    break;
-                }
-                // If this is negative, the current cell is above (at the top) the cliff
-                else if (relative_height_of_query < -params[MIN_DISTANCE_FROM_EDGE_OF_CLIFF])
-                {
-                    snap_result = CLIFF_TOP;
-                    failed = true;
-                    break;
-                }
-            }
-
-            if (failed)
-                break;
+            traversability_result = NOT_ENOUGH_AREA;
         }
     }
 
-    // Write results back to surfaces.
-    int area_fraction = static_cast<int>(255 * n / max_points_possible_under_support);
+    // Perform best fit plane
+    float3 normal = make_float3(0.0, 0.0, 1.0f);
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
+
+    if (traversability_result == VALID)
+    {
+        // Solve for the plane normal, as well as the height of the foot along that plane.
+        float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
+        float z_variance_vector[3] = {-xz, -yz, -z};
+        float squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
+
+        normal.x = coefficients[0];
+        normal.y = coefficients[1];
+        normal = normalize(normal);
+
+        // If the normal points down, we need to flip it.
+        if (normal.z < 0.0)
+        {
+            normal.x = -normal.x;
+            normal.y = -normal.y;
+            normal.z = -normal.z;
+        }
+
+        // Roughness check
+        float squaredErrorThreshold = params[SQUARED_ERROR_THRESHOLD];
+        squared_error_traversability = clamp(1.0f - squared_error / squaredErrorThreshold, 0.0f, 1.0f);
+        if (squared_error > squaredErrorThreshold)
+        {
+            traversability_result = SQUARED_ERROR;
+        }
+
+        // Incline check
+        float cosineInclineThreshold = params[STEPPING_COSINE_THRESHOLD];
+        float cosineIncline = normal.z;
+        incline_traversability = clamp((cosineIncline - cosineInclineThreshold) / (1.0f - cosineInclineThreshold), 0.0f, 1.0f);
+        if (cosineIncline < cosineInclineThreshold)
+        {
+            traversability_result = TOO_STEEP;
+        }
+    }
 
     // Note these are switched to align with world, this is correct
-    unsigned char normal_x_char = scaleAndCastToUnsignedChar(normal.y, -1.0, 1.0);
-    unsigned char normal_y_char = scaleAndCastToUnsignedChar(normal.x, -1.0, 1.0);
-    unsigned char normal_z_char = scaleAndCastToUnsignedChar(normal.z, 0.0, 1.0);
+    unsigned char normal_x_char = scaleAndCastToUnsignedChar(normal.y, -1.0f, 1.0f);
+    unsigned char normal_y_char = scaleAndCastToUnsignedChar(normal.x, -1.0f, 1.0f);
+    unsigned char normal_z_char = scaleAndCastToUnsignedChar(normal.z, 0.0f, 1.0f);
 
-    int2 storage_key = make_int2(x_index, y_index);
-
-    unsigned char *steppabilityMapElement = (unsigned char *)((char *)steppabilityMap + storage_key.y * pitchSteppability) + storage_key.x;
-    *steppabilityMapElement = static_cast<unsigned char>(snap_result);
-
-    unsigned char *snappedNormalXMapElement = (unsigned char *)((char *)snapNormalXMap + storage_key.y * pitchSnapNormalX) + storage_key.x;
+    // Pack map normal
+    unsigned char *snappedNormalXMapElement = (unsigned char *)((char *)snapNormalXMap + y_index * pitchSnapNormalX) + x_index;
     *snappedNormalXMapElement = normal_x_char;
 
-    unsigned char *snappedNormalYMapElement = (unsigned char *)((char *)snapNormalYMap + storage_key.y * pitchSnapNormalY) + storage_key.x;
+    unsigned char *snappedNormalYMapElement = (unsigned char *)((char *)snapNormalYMap + y_index * pitchSnapNormalY) + x_index;
     *snappedNormalYMapElement = normal_y_char;
 
-    unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + storage_key.y * pitchSnapNormalZ) + storage_key.x;
+    unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + y_index * pitchSnapNormalZ) + x_index;
     *snappedNormalZMapElement = normal_z_char;
 
-    unsigned char *areaFractionElement = (unsigned char *)((char *)snappedAreaFractionMap + storage_key.y * pitchSnappedAreaFraction) + storage_key.x;
-    *areaFractionElement = static_cast<unsigned char>(area_fraction);
+    // Pack traversability data
+    float traversability = area_traversability * squared_error_traversability * incline_traversability;
+    unsigned char traversability_char = scaleAndCastToUnsignedChar(traversability, 0.0, 1.0f);
 
-    float *squaredErrorResult = (float *)((char *)squaredErrorMap + storage_key.y * pitchSquaredError) + storage_key.x;
-    *squaredErrorResult = squared_error;
-}
+    unsigned char *traversablityMapElement = (unsigned char *)((char *)traversabilityMap + y_index * pitchTraversability) + x_index;
+    *traversablityMapElement = traversability_char;
 
-extern "C"
-__global__ void computeSteppabilityConnections(unsigned short *steppableMap, size_t pitchSteppableMap,
-                                               unsigned short *steppableConnectionsMap, size_t pitchSteppableConnectionsMap,
-                                               float* params)
-{
-    int x_index = blockIdx.x * blockDim.x + threadIdx.x;
-    int y_index = blockIdx.y * blockDim.y + threadIdx.y;
-
-    int cells_per_side = 2 * compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
-
-    int2 key = make_int2(x_index, y_index);
-
-    int boundaryConnectionsEncodedAsOnes = 0;
-    int counter = 0;
-
-    unsigned char *steppability_result = (unsigned char *) ((char *)steppableMap + x_index * pitchSteppableMap) + y_index;
-    if (*steppability_result == VALID)
-    {
-        for (int x_offset = -1; x_offset <= 1; x_offset++)
-        {
-            for (int y_offset = -1; y_offset <= 1; y_offset++)
-            {
-                if (x_offset == 0 && y_offset == 0)
-                    continue;
-
-                int x_query = x_index + x_offset;
-                int y_query = y_index + y_offset;
-
-                // Check bounds
-                if (x_query < 0 || x_query >= cells_per_side || y_query < 0 || y_query >= cells_per_side)
-                {
-                    boundaryConnectionsEncodedAsOnes = (0 << counter) | boundaryConnectionsEncodedAsOnes;
-                }
-                else
-                {
-                    int2 query_key = make_int2(x_query, y_query);
-                    unsigned char *steppableValue = (unsigned char *) ((char *)steppableMap + query_key.x * pitchSteppableMap) + query_key.y;
-                    if (*steppableValue == VALID)
-                    {
-                        boundaryConnectionsEncodedAsOnes = (1 << counter) | boundaryConnectionsEncodedAsOnes;
-                    }
-                    else
-                    {
-                        boundaryConnectionsEncodedAsOnes = (0 << counter) | boundaryConnectionsEncodedAsOnes;
-                    }
-                }
-
-                counter++;
-            }
-        }
-    }
-
-    unsigned char *steppableConnectionsElement = (unsigned char *)((char *)steppableConnectionsMap + key.x * pitchSteppableConnectionsMap) + key.y;
-    *steppableConnectionsElement = static_cast<unsigned char>(boundaryConnectionsEncodedAsOnes);
-}
-
-extern "C"
-__global__ void computeTerrainCost(float *heightMap, size_t pitchHeightMap,
-                                   unsigned char *costMap, size_t pitchCostMap,
-                                   float *params)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-    int cells_per_axis = 2 * compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
-
-    // Bounds check
-    if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
-        return;
-
-    float steppingCosineThreshold = params[STEPPING_COSINE_THRESHOLD];
-
-    // Sobel operators
-    const float KxSobel[9] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
-    const float KySobel[9] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
-
-    float Kx = 0.0f;
-    float Ky = 0.0f;
-
-    // Read the 3x3 neighborhood
-    for (int i = -1; i <= 1; ++i)
-    {
-        for (int j = -1; j <= 1; ++j)
-        {
-            int xi = xIndex + i;
-            int yj = yIndex + j;
-
-            // Additional bounds check
-            if (xi < 0 || xi >= cells_per_axis || yj < 0 || yj >= cells_per_axis)
-                continue;
-
-            float *heightPtr = (float *)((char *)heightMap + yj * pitchHeightMap) + xi;
-            float heightValue = *heightPtr;
-
-            int index = (i + 1) * 3 + (j + 1);
-            Kx += heightValue * KxSobel[index];
-            Ky += heightValue * KySobel[index];
-        }
-    }
-
-    // Surface normal
-    float3 surfaceNormal;
-    surfaceNormal.x = -Kx;
-    surfaceNormal.y = -Ky;
-    surfaceNormal.z = 1.0f;
-
-    // Normalize surface normal
-    float norm = sqrtf(surfaceNormal.x * surfaceNormal.x +
-                       surfaceNormal.y * surfaceNormal.y +
-                       surfaceNormal.z * surfaceNormal.z);
-
-    if (norm > 0.0f)
-    {
-        surfaceNormal.x /= norm;
-        surfaceNormal.y /= norm;
-        surfaceNormal.z /= norm;
-    }
-
-    // Dot product with vertical (z-axis)
-    float dotProduct = fabsf(surfaceNormal.z);
-
-    // Map dotProduct to [0, 255]
-    unsigned int cost = (unsigned int)(dotProduct * 255.0f);
-
-    if (dotProduct < steppingCosineThreshold)
-        cost = 0;
-
-    unsigned char *costPtr = (unsigned char *)((char *)costMap + yIndex * pitchCostMap) + xIndex;
-    *costPtr = (unsigned char)cost;
-}
-
-extern "C"
-__global__ void computeContactMap(unsigned char *terrainCost, size_t pitchTerrainCost,
-                                  unsigned char *contactMap, size_t pitchContactMap,
-                                  float *params)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-    int cells_per_axis = 2 * compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], params[CELL_SIZE_IN_CENTIMETERS]) + 1;
-
-    if (xIndex >= cells_per_axis || yIndex >= cells_per_axis)
-        return;
-
-    int windowSize = (int)params[CONTACT_WINDOW_SIZE];
-    float steppingContactThreshold = params[STEPPING_CONTACT_THRESHOLD];
-
-    unsigned int closestDistance = 1000000;
-
-    for (int i = -windowSize; i < windowSize; i++)
-    {
-        for (int j = -windowSize; j < windowSize; j++)
-        {
-            int x_query = xIndex + i;
-            int y_query = yIndex + j;
-
-            if (x_query >= 0 && x_query < cells_per_axis && y_query >= 0 && y_query < cells_per_axis)
-            {
-                unsigned char *terrainCostPtr = (unsigned char *)((char *)terrainCost + y_query * pitchTerrainCost) + x_query;
-                unsigned int steppability = *terrainCostPtr;
-
-                if (steppability <= steppingContactThreshold)
-                {
-                    // Euclidean distance
-                    float distance = sqrtf((float)(i * i + j * j));
-
-                    if (distance < closestDistance && distance > 3.0f)
-                    {
-                        closestDistance = (unsigned int)distance;
-                    }
-                    else if (distance < 3.0f)
-                    {
-                        closestDistance = 0;
-                    }
-                }
-            }
-        }
-    }
-
-    unsigned char *contactMapPtr = (unsigned char *)((char *)contactMap + yIndex * pitchContactMap) + xIndex;
-    *contactMapPtr = (unsigned char)closestDistance;
+    unsigned char *traversabilityMapElemenet = (unsigned char *)((char *)traversabilityClassMap + y_index * pitchTraversabilityClass) + x_index;
+    *traversabilityMapElemenet = static_cast<unsigned char>(traversability_result);
 }

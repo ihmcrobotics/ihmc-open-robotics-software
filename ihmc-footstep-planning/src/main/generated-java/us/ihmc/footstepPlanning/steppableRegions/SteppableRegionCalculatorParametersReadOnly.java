@@ -10,44 +10,9 @@ import static us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculato
  */
 public interface SteppableRegionCalculatorParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default double getDistanceFromCliffBottoms()
+   default double getNormalSearchRadius()
    {
-      return get(distanceFromCliffBottoms);
-   }
-
-   default double getDistanceFromCliffTops()
-   {
-      return get(distanceFromCliffTops);
-   }
-
-   default double getScaledFootInMeters()
-   {
-      return get(scaledFootInMeters);
-   }
-
-   default int getYawDiscretizations()
-   {
-      return get(yawDiscretizations);
-   }
-
-   default double getFootWidth()
-   {
-      return get(footWidth);
-   }
-
-   default double getFootLength()
-   {
-      return get(footLength);
-   }
-
-   default double getCliffStartHeightToAvoid()
-   {
-      return get(cliffStartHeightToAvoid);
-   }
-
-   default double getCliffEndHeightToAvoid()
-   {
-      return get(cliffEndHeightToAvoid);
+      return get(normalSearchRadius);
    }
 
    default double getMinSupportAreaFraction()
@@ -65,33 +30,13 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
       return get(snapHeightThresholdAtSearchEdge);
    }
 
-   default double getInequalityActivationSlope()
+   default double getSteppingCosineThreshold()
    {
-      return get(inequalityActivationSlope);
+      return get(steppingCosineThreshold);
    }
 
-   default int getMaxSearchDepthForRegions()
+   default double getSquaredErrorThreshold()
    {
-      return get(maxSearchDepthForRegions);
-   }
-
-   default double getFractionOfCellToExpandSmallRegions()
-   {
-      return get(fractionOfCellToExpandSmallRegions);
-   }
-
-   default int getMaxInteriorPointsToInclude()
-   {
-      return get(maxInteriorPointsToInclude);
-   }
-
-   default int getMinCellsInARegion()
-   {
-      return get(minCellsInARegion);
-   }
-
-   default double getEdgeLengthThreshold()
-   {
-      return get(edgeLengthThreshold);
+      return get(squaredErrorThreshold);
    }
 }

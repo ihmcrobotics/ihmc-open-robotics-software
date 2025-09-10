@@ -8,44 +8,9 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface SteppableRegionCalculatorParametersBasics extends SteppableRegionCalculatorParametersReadOnly, StoredPropertySetBasics
 {
-   default void setDistanceFromCliffBottoms(double distanceFromCliffBottoms)
+   default void setNormalSearchRadius(double normalSearchRadius)
    {
-      set(SteppableRegionCalculatorParameters.distanceFromCliffBottoms, distanceFromCliffBottoms);
-   }
-
-   default void setDistanceFromCliffTops(double distanceFromCliffTops)
-   {
-      set(SteppableRegionCalculatorParameters.distanceFromCliffTops, distanceFromCliffTops);
-   }
-
-   default void setScaledFootInMeters(double scaledFootInMeters)
-   {
-      set(SteppableRegionCalculatorParameters.scaledFootInMeters, scaledFootInMeters);
-   }
-
-   default void setYawDiscretizations(int yawDiscretizations)
-   {
-      set(SteppableRegionCalculatorParameters.yawDiscretizations, yawDiscretizations);
-   }
-
-   default void setFootWidth(double footWidth)
-   {
-      set(SteppableRegionCalculatorParameters.footWidth, footWidth);
-   }
-
-   default void setFootLength(double footLength)
-   {
-      set(SteppableRegionCalculatorParameters.footLength, footLength);
-   }
-
-   default void setCliffStartHeightToAvoid(double cliffStartHeightToAvoid)
-   {
-      set(SteppableRegionCalculatorParameters.cliffStartHeightToAvoid, cliffStartHeightToAvoid);
-   }
-
-   default void setCliffEndHeightToAvoid(double cliffEndHeightToAvoid)
-   {
-      set(SteppableRegionCalculatorParameters.cliffEndHeightToAvoid, cliffEndHeightToAvoid);
+      set(SteppableRegionCalculatorParameters.normalSearchRadius, normalSearchRadius);
    }
 
    default void setMinSupportAreaFraction(double minSupportAreaFraction)
@@ -63,33 +28,13 @@ public interface SteppableRegionCalculatorParametersBasics extends SteppableRegi
       set(SteppableRegionCalculatorParameters.snapHeightThresholdAtSearchEdge, snapHeightThresholdAtSearchEdge);
    }
 
-   default void setInequalityActivationSlope(double inequalityActivationSlope)
+   default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
-      set(SteppableRegionCalculatorParameters.inequalityActivationSlope, inequalityActivationSlope);
+      set(SteppableRegionCalculatorParameters.steppingCosineThreshold, steppingCosineThreshold);
    }
 
-   default void setMaxSearchDepthForRegions(int maxSearchDepthForRegions)
+   default void setSquaredErrorThreshold(double squaredErrorThreshold)
    {
-      set(SteppableRegionCalculatorParameters.maxSearchDepthForRegions, maxSearchDepthForRegions);
-   }
-
-   default void setFractionOfCellToExpandSmallRegions(double fractionOfCellToExpandSmallRegions)
-   {
-      set(SteppableRegionCalculatorParameters.fractionOfCellToExpandSmallRegions, fractionOfCellToExpandSmallRegions);
-   }
-
-   default void setMaxInteriorPointsToInclude(int maxInteriorPointsToInclude)
-   {
-      set(SteppableRegionCalculatorParameters.maxInteriorPointsToInclude, maxInteriorPointsToInclude);
-   }
-
-   default void setMinCellsInARegion(int minCellsInARegion)
-   {
-      set(SteppableRegionCalculatorParameters.minCellsInARegion, minCellsInARegion);
-   }
-
-   default void setEdgeLengthThreshold(double edgeLengthThreshold)
-   {
-      set(SteppableRegionCalculatorParameters.edgeLengthThreshold, edgeLengthThreshold);
+      set(SteppableRegionCalculatorParameters.squaredErrorThreshold, squaredErrorThreshold);
    }
 }

@@ -18,23 +18,12 @@ public class SteppableRegionCalculatorParameters extends StoredPropertySet imple
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final DoubleStoredPropertyKey distanceFromCliffBottoms = keys.addDoubleKey("Distance from cliff bottoms");
-   public static final DoubleStoredPropertyKey distanceFromCliffTops = keys.addDoubleKey("Distance from cliff tops");
-   public static final DoubleStoredPropertyKey scaledFootInMeters = keys.addDoubleKey("Scaled foot in meters");
-   public static final IntegerStoredPropertyKey yawDiscretizations = keys.addIntegerKey("Yaw discretizations");
-   public static final DoubleStoredPropertyKey footWidth = keys.addDoubleKey("Foot width");
-   public static final DoubleStoredPropertyKey footLength = keys.addDoubleKey("Foot length");
-   public static final DoubleStoredPropertyKey cliffStartHeightToAvoid = keys.addDoubleKey("Cliff start height to avoid");
-   public static final DoubleStoredPropertyKey cliffEndHeightToAvoid = keys.addDoubleKey("Cliff end height to avoid");
+   public static final DoubleStoredPropertyKey normalSearchRadius = keys.addDoubleKey("Normal search radius");
    public static final DoubleStoredPropertyKey minSupportAreaFraction = keys.addDoubleKey("Min support area fraction");
    public static final DoubleStoredPropertyKey minSnapHeightThreshold = keys.addDoubleKey("Min snap height threshold");
    public static final DoubleStoredPropertyKey snapHeightThresholdAtSearchEdge = keys.addDoubleKey("Snap height threshold at search edge");
-   public static final DoubleStoredPropertyKey inequalityActivationSlope = keys.addDoubleKey("Inequality activation slope");
-   public static final IntegerStoredPropertyKey maxSearchDepthForRegions = keys.addIntegerKey("Max search depth for regions");
-   public static final DoubleStoredPropertyKey fractionOfCellToExpandSmallRegions = keys.addDoubleKey("Fraction of cell to expand small regions");
-   public static final IntegerStoredPropertyKey maxInteriorPointsToInclude = keys.addIntegerKey("Max interior points to include");
-   public static final IntegerStoredPropertyKey minCellsInARegion = keys.addIntegerKey("Min cells in a region");
-   public static final DoubleStoredPropertyKey edgeLengthThreshold = keys.addDoubleKey("Edge length threshold");
+   public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
+   public static final DoubleStoredPropertyKey squaredErrorThreshold = keys.addDoubleKey("Squared error threshold");
 
    /**
     * Loads this property set.

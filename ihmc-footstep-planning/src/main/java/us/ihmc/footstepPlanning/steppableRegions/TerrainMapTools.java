@@ -32,15 +32,11 @@ public class TerrainMapTools
     * This method is meant to be as fast as possible, so we don't create local arrays, and we don't do any bounds checks.
     */
    public static void convertToTerrainMapData(Mat heightMap,
-                                              Mat terrainCostMap,
-                                              Mat contactMap,
                                               Mat snapNormalXMap,
                                               Mat snapNormalYMap,
                                               Mat snapNormalZMap,
-                                              Mat steppabilityMap,
-                                              Mat steppabilityConnectionsMap,
-                                              Mat snappedAreaFractionMap,
-                                              Mat squaredErrorMap,
+                                              Mat traversabilityMap,
+                                              Mat traversabilityClassMap,
                                               TerrainMapData terrainMapData)
    {
       // How this looks like is we create a pointer for the Mat object.
@@ -48,12 +44,6 @@ public class TerrainMapTools
       // So it looks like Pointer.get(dataToPack) where dataToPack = TerrainMapData.getMap()
       FloatPointer heightMapPointer = new FloatPointer(heightMap.data());
       heightMapPointer.get(terrainMapData.getHeightMap());
-
-      BytePointer bytePointerTerrainMap = new BytePointer(terrainCostMap.data());
-      bytePointerTerrainMap.get(terrainMapData.getTerrainCostMap());
-
-      BytePointer bytePointerContactMap = new BytePointer(contactMap.data());
-      bytePointerContactMap.get(terrainMapData.getContactMap());
 
       BytePointer bytePointerForSnapNormalXMap = new BytePointer(snapNormalXMap.data());
       bytePointerForSnapNormalXMap.get(terrainMapData.getSnapNormalXMap());
@@ -64,17 +54,11 @@ public class TerrainMapTools
       BytePointer bytePointerForSnapNormalZMap = new BytePointer(snapNormalZMap.data());
       bytePointerForSnapNormalZMap.get(terrainMapData.getSnapNormalZMap());
 
-      BytePointer bytePointerForSnappedAreaFractionMap = new BytePointer(snappedAreaFractionMap.data());
-      bytePointerForSnappedAreaFractionMap.get(terrainMapData.getSnappedAreaFractionMap());
+      BytePointer bytePointerForTraversabilityMap = new BytePointer(traversabilityMap.data());
+      bytePointerForTraversabilityMap.get(terrainMapData.getSnappedAreaFractionMap());
 
-      BytePointer bytePointerForSteppabilityMap = new BytePointer(steppabilityMap.data());
-      bytePointerForSteppabilityMap.get(terrainMapData.getSteppabilityMap());
-
-      BytePointer bytePointerForSteppabilityConnectionsMap = new BytePointer(steppabilityConnectionsMap.data());
-      bytePointerForSteppabilityConnectionsMap.get(terrainMapData.getSteppabilityConnectionsMap());
-
-      FloatPointer floatPointerForSquaredErrorMap = new FloatPointer(squaredErrorMap.data());
-      floatPointerForSquaredErrorMap.get(terrainMapData.getSquaredErrorMap());
+      BytePointer bytePointerForTraversabilityClassMap = new BytePointer(traversabilityClassMap.data());
+      bytePointerForTraversabilityClassMap.get(terrainMapData.getSteppabilityMap());
    }
 
    public static UnitVector3DReadOnly computeSurfaceNormalInWorld(TerrainMapData terrainMapData, double x, double y)
