@@ -119,17 +119,27 @@ public class RDXROS2KSTRobotVisualizer extends RDXROS2SingleTopicVisualizer<Kine
       if (text != null)
          ImGui.textColored(ImGuiTools.DARK_RED, text);
 
-      for (ToolboxState stateEnum : ToolboxState.values)
-      {
-         if (ImGui.button(stateEnum.name()))
-         {
-            ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-            toolboxStateMessage.setRequestedToolboxState(stateEnum.toByte());
-            toolboxStatePublisher.publish(toolboxStateMessage);
-         }
-      }
+      renderButton(ToolboxState.SLEEP);
+      ImGui.sameLine();
+      ImGui.text("->");
+      ImGui.sameLine();
+      renderButton(ToolboxState.REINITIALIZE);
+      ImGui.sameLine();
+      ImGui.text("->");
+      ImGui.sameLine();
+      renderButton(ToolboxState.WAKE_UP);
 
       multiBodyGraphic.renderImGuiWidgets();
+   }
+
+   private void renderButton(ToolboxState state)
+   {
+      if (ImGui.button(state.name()))
+      {
+         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+         toolboxStateMessage.setRequestedToolboxState(state.toByte());
+         toolboxStatePublisher.publish(toolboxStateMessage);
+      }
    }
 
    @Override
