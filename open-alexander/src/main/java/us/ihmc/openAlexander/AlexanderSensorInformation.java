@@ -64,8 +64,6 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final String leftForearmIMU = "left_wrist_z_imu";
    private final String leftHandIMU = "left_gripper_z_imu";
 
-   private final String headIMU = "head_imu";
-
    // Right upper arm IMUs
    private final String rightShoulderIMU = "right_shoulder_y_imu";
    private final String rightBicepIMU = "right_shoulder_z_imu";
@@ -73,6 +71,9 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final String rightForearmIMU = "right_wrist_z_imu";
    private final String rightHandIMU = "right_gripper_z_imu";
 >>>>>>> 3c568f379dc (added in filters for the arm joints)
+
+   // Head IMU
+   private final String headIMU = "head_imu";
 
    // Torso IMUs
    private static final String torsoIMU = "torso_imu";
