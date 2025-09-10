@@ -32,6 +32,7 @@ public class TerrainMapMessageToolsTest
       Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
       Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
       Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
+      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               terrainCostMap,
@@ -42,6 +43,7 @@ public class TerrainMapMessageToolsTest
                                               steppabilityMap,
                                               steppabilityConnectionsMap,
                                               snappedAreaFractionMap,
+                                              squaredErrorMap,
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();
@@ -59,6 +61,7 @@ public class TerrainMapMessageToolsTest
       byte[] steppabilityMapResult = resultingData.getSteppabilityMap();
       byte[] steppabilityConnectionsMapResult = resultingData.getSteppabilityConnectionsMap();
       byte[] snappedAreaFractionMapResult = resultingData.getSnappedAreaFractionMap();
+      float[] squaredErrorMapResults = resultingData.getSquaredErrorMap();
 
       int totalCells = cellsPerAxis * cellsPerAxis;
 
@@ -76,6 +79,7 @@ public class TerrainMapMessageToolsTest
          assertEquals(steppabilityMapResult[i], steppabilityMap.ptr(x, y).get());
          assertEquals(steppabilityConnectionsMapResult[i], steppabilityConnectionsMap.ptr(x, y).get());
          assertEquals(snappedAreaFractionMapResult[i], snappedAreaFractionMap.ptr(x).get());
+         assertEquals(squaredErrorMapResults[i], squaredErrorMap.ptr(x, y).getFloat());
       }
    }
 
@@ -98,6 +102,7 @@ public class TerrainMapMessageToolsTest
       Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
       Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
       Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
+      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               terrainCostMap,
@@ -108,6 +113,7 @@ public class TerrainMapMessageToolsTest
                                               steppabilityMap,
                                               steppabilityConnectionsMap,
                                               snappedAreaFractionMap,
+                                              squaredErrorMap,
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();
@@ -150,6 +156,7 @@ public class TerrainMapMessageToolsTest
       Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
       Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
       Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
+      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               terrainCostMap,
@@ -160,6 +167,7 @@ public class TerrainMapMessageToolsTest
                                               steppabilityMap,
                                               steppabilityConnectionsMap,
                                               snappedAreaFractionMap,
+                                              squaredErrorMap,
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();

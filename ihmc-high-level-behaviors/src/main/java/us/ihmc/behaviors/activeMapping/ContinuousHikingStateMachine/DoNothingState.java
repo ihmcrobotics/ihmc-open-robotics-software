@@ -6,6 +6,7 @@ import us.ihmc.behaviors.activeMapping.TerrainPlanningDebugger;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -59,8 +60,12 @@ public class DoNothingState implements State
          debugger.resetVisualizationForUIPublisher();
       }
 
-      robotFeet.get(RobotSide.LEFT).set(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
-      robotFeet.get(RobotSide.RIGHT).set(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+      // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
+      RigidBodyTransform leftSoldTransform = new RigidBodyTransform(referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
+      RigidBodyTransform rightSoldTransform = new RigidBodyTransform(referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
+
+      robotFeet.get(RobotSide.LEFT).set(leftSoldTransform);
+      robotFeet.get(RobotSide.RIGHT).set(rightSoldTransform);
       debugger.publishStartAndGoalForVisualization(robotFeet, robotFeet);
 
       continuousPlanner.setInitialized(false);

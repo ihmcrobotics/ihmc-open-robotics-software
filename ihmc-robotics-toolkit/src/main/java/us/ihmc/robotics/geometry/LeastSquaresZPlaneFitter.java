@@ -6,6 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -101,10 +102,10 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
          x += point3d.getX();
          y += point3d.getY();
          z += point3d.getZ();
-         xx += Math.pow(point3d.getX(), 2);
+         xx += EuclidCoreTools.square(point3d.getX());
          xy += point3d.getX() * point3d.getY();
          xz += point3d.getX() * point3d.getZ();
-         yy += Math.pow(point3d.getY(), 2);
+         yy += EuclidCoreTools.square(point3d.getY());
          yz += point3d.getY() * point3d.getZ();
          zz += point3d.getZ() * point3d.getZ();
       }
@@ -141,15 +142,11 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       planeToPack.getPoint().set(xSolution, ySolution, zSolution);
       planeToPack.getNormal().set(coefficients.get(0), coefficients.get(1), 1.0);
 
-      double squaredError = 0;
       double A = coefficients.get(0);
       double B = coefficients.get(1);
       double C = coefficients.get(2);
 
-      squaredError = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + C*C;
-      return squaredError/n;
+      double squaredError = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
+      return squaredError / n;
    }
-
-
-
 }

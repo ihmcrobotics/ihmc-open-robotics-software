@@ -75,3 +75,50 @@ __global__ void test_math_utils_transform_point_2(float px, float py, float pz, 
 
     printf("Transformed Point: (%f, %f, %f)\n", transformedPoint.x, transformedPoint.y, transformedPoint.z);
 }
+
+extern "C"
+__global__ void test_best_fit_plane(float* points, int number_of_points, float* point_result, float* normal_result, float* squared_error_result)
+{
+    float n = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float xx = 0.0f;
+    float xy = 0.0f;
+    float xz = 0.0f;
+    float yy = 0.0f;
+    float yz = 0.0f;
+    float zz = 0.0f;
+
+    for (int i = 0; i < number_of_points; i++)
+    {
+        float px = points[3 * i];
+        float py = points[3 * i + 1];
+        float pz = points[3 * i + 2];
+
+        n += 1;
+        x += px;
+        y += py;
+        z += pz;
+        xx += px * px;
+        xy += px * py;
+        xz += px * pz;
+        yy += py * py;
+        yz += py * pz;
+        zz += pz * pz;
+    }
+
+    float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
+    float z_variance_vector[3] = {-xz, -yz, -z};
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
+    float squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
+    squared_error_result[0] = squared_error;
+
+    point_result[0] = x / n;
+    point_result[1] = y / n;
+    point_result[2] = -coefficients[0] * point_result[0] - coefficients[1] * point_result[1] - coefficients[2];
+
+    normal_result[0] = coefficients[0];
+    normal_result[1] = coefficients[1];
+    normal_result[2] = 1.0f;
+}
