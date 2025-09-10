@@ -43,33 +43,33 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
    protected final SideDependentList<String> feetForceSensorParentJointNames = new SideDependentList<String>();
 
-   private final String leftShoulderIMUSensor = "left_shoulder_y_imu";
-   private final String leftBicepIMUSensor = "left_shoulder_z_imu";
-   private final String leftForearmIMUSensor = "left_wrist_z_imu";
-   private final String leftHandIMUSensor = null; // "left_gripper_z_imu";
+   private static final String leftShoulderIMUSensor = "left_shoulder_y_imu";
+   private static final String leftBicepIMUSensor = "left_shoulder_z_imu";
+   private static final String leftForearmIMUSensor = "left_wrist_z_imu";
+   private static final String leftHandIMUSensor = null; // "left_gripper_z_imu";
 
-   private final String rightShoulderIMUSensor = "right_shoulder_y_imu";
-   private final String rightBicepIMUSensor = "right_shoulder_z_imu";
-   private final String rightForearmIMUSensor = "right_wrist_z_imu";
-   private final String rightHandIMUSensor = null; // "right_gripper_z_imu";
+   private static final String rightShoulderIMUSensor = "right_shoulder_y_imu";
+   private static final String rightBicepIMUSensor = "right_shoulder_z_imu";
+   private static final String rightForearmIMUSensor = "right_wrist_z_imu";
+   private static final String rightHandIMUSensor = null; // "right_gripper_z_imu";
 
    // Torso IMUs
-   private final String torsoIMU = "torso_imu";
+   private static final String torsoIMU = "torso_imu";
 
    // Pelvis IMUs
-   private final String pelvisIMU = "pelvis_imu";
+   private static final String pelvisIMU = "pelvis_imu";
 
    // Left leg IMUs
-   private final String leftHipXIMU = "left_hip_x_imu";
-   private final String leftThighIMU = "left_thigh_imu";
-   private final String leftShinIMU = "left_shin_imu";
-   private final String leftFootIMU = "left_foot_imu";
+   private static final String leftHipXIMU = "left_hip_x_imu";
+   private static final String leftThighIMU = "left_thigh_imu";
+   private static final String leftShinIMU = "left_shin_imu";
+   private static final String leftFootIMU = "left_foot_imu";
 
    // Right leg IMUs
-   private final String rightHipXIMU = "right_hip_x_imu";
-   private final String rightThighIMU = "right_thigh_imu";
-   private final String rightShinIMU = "right_shin_imu";
-   private final String rightFootIMU = "right_foot_imu";
+   private static final String rightHipXIMU = "right_hip_x_imu";
+   private static final String rightThighIMU = "right_thigh_imu";
+   private static final String rightShinIMU = "right_shin_imu";
+   private static final String rightFootIMU = "right_foot_imu";
 
    //
    private final SideDependentList<String> hipIMUNames = new SideDependentList<>();
@@ -77,8 +77,11 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final SideDependentList<String> shinIMUNames = new SideDependentList<>();
    private final SideDependentList<String> footIMUNames = new SideDependentList<>();
 
+   private static final String[] imuSensorsToIgnore = {leftBicepIMUSensor, leftForearmIMUSensor,
+                                                rightBicepIMUSensor, rightForearmIMUSensor};
+
    // IMUs to use
-   private final String[] imuSensorsToUse = {pelvisIMU,
+   private static final String[] imuSensorsToUse = {pelvisIMU,
                                              leftHipXIMU,
                                              leftThighIMU,
                                              leftShinIMU,
@@ -236,5 +239,10 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    public RigidBodyTransform getSteppingCameraTransform()
    {
       return D457_TO_CHEST_TRANSFORM;
+   }
+
+   public static String[] getImuSensorsToIgnore()
+   {
+      return imuSensorsToIgnore;
    }
 }
