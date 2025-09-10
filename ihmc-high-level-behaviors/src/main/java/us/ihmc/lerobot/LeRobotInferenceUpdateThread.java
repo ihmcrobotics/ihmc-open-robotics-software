@@ -73,6 +73,8 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
 
       this.syncedRobot = syncedRobot;
 
+      setFrequencyLimit(120.0);
+
       actionHandPoses.forEach(Pose3D::setToNaN);
       ikStreaming = new LeRobotIKStreaming(ros2Node, robotModel, syncedRobot);
 
@@ -131,8 +133,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       }
       statePublisher.publish(stateMessage);
 
-      if (!running.getValue() && controlRobot.getValue())
-         controlRobot.setValue(false);
       ikStreaming.setControlRobot(controlRobot.getValue());
 
       command.setData(running.getValue() ? 2 : 1);

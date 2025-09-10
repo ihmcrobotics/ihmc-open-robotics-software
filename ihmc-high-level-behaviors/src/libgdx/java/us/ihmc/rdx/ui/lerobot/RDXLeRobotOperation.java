@@ -88,11 +88,12 @@ public class RDXLeRobotOperation
 
       ImGui.text("LeRobot: Thread: %s   Python: %3d Hz   Actions: %d".formatted(commsFrequencyText.getText(), (int) pythonStatusFrequency, receivedActions));
       ImGui.text("Python status: " + statusMessage);
-      if (ImGui.checkbox(labels.get("Run inference & preview"), running.getValue()))
+      if (ImGui.checkbox(labels.get("Run inference"), running.getValue()))
          running.setValue(!running.getValue());
-      ImGui.beginDisabled(!running.getValue());
+      ImGui.beginDisabled(running.getValue());
       if (ImGui.checkbox(labels.get("Control robot"), controlRobot.getValue()))
          controlRobot.setValue(!controlRobot.getValue());
+      ImGuiTools.previousWidgetTooltip("Whether to control the robot when you run inference.");
       ImGui.endDisabled();
       ImGui.sameLine();
       ImGui.textColored(ImGuiTools.DARK_RED, "Press SPACE to stop.");
