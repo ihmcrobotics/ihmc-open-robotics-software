@@ -95,7 +95,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
 
    // IMUs to use
    private final List<String> imuSensorsToUse = new ArrayList<>(List.of(pelvisIMU,
-                                                                        torsoIMU,
+                                                                        //torsoIMU,
                                                                         leftHipXIMU,
                                                                         leftThighIMU,
                                                                         leftShinIMU,
@@ -116,32 +116,22 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
       feetForceSensorParentJointNames.put(RobotSide.LEFT, "LEFT_ANKLE_X");
       feetForceSensorParentJointNames.put(RobotSide.RIGHT, "RIGHT_ANKLE_X");
 
-      if (alexanderVersion.hasHead())
-         imuSensorsToUse.add(headIMU);
+      if (!alexanderVersion.hasHead())
+         imuSensorsToUse.remove(headIMU);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (alexanderVersion.hasArm(robotSide))
+         if (!alexanderVersion.hasArm(robotSide))
          {
-            imuSensorsToUse.add(shoulderIMUNames.get(robotSide));
-            imuSensorsToUse.add(bicepIMUNames.get(robotSide));
-            if (alexanderVersion.hasCycloidForearms())
-            {
-               imuSensorsToUse.add(forearmIMUNames.get(robotSide));
-               imuSensorsToUse.add(handIMUNames.get(robotSide));
-            }
-            else
-            {
-               forearmIMUNames.put(robotSide, null);
-               handIMUNames.put(robotSide, null);
-            }
+            imuSensorsToUse.remove(shoulderIMUNames.get(robotSide));
+            imuSensorsToUse.remove(bicepIMUNames.get(robotSide));
+            imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
+            imuSensorsToUse.remove(handIMUNames.get(robotSide));
          }
-         else
+         else if (!alexanderVersion.hasCycloidForearms())
          {
-            shoulderIMUNames.put(robotSide, null);
-            bicepIMUNames.put(robotSide, null);
-            forearmIMUNames.put(robotSide, null);
-            handIMUNames.put(robotSide, null);
+            imuSensorsToUse.remove(forearmIMUNames.get(robotSide));
+            imuSensorsToUse.remove(handIMUNames.get(robotSide));
          }
       }
    }
