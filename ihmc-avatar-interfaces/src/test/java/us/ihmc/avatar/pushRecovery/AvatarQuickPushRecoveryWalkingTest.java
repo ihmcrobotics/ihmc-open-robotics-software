@@ -303,6 +303,9 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       ((YoBoolean) simulationTestHelper.findVariable("leftFootSwingIsSpeedUpEnabled")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("rightFootSwingIsSpeedUpEnabled")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("controllerAllowCrossOverSteps")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("speedUpTransferDynamicsFromError")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("FootNeverHoldRotation")).set(true);
+      ((YoBoolean) simulationTestHelper.findVariable("FootNeverHoldPosition")).set(true);
       ((YoDouble) simulationTestHelper.findVariable("icpDistanceFromFootPolygonThreshold")).set(0.25);
       ((YoDouble) simulationTestHelper.findVariable("controllerminimumTimeForStepAdjustment")).set(-3.0);
       
