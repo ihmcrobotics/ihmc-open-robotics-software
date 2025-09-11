@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.steppableRegions;
 
 public enum SnapResult
 {
-   SNAP_FAILED, CLIFF_TOP, CLIFF_BOTTOM, NOT_ENOUGH_AREA, VALID;
+   VALID, SNAP_FAILED, NOT_ENOUGH_AREA, SQUARED_ERROR, TOO_STEEP;
 
    private static final SnapResult[] values = values();
 

@@ -181,8 +181,8 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       SnapResult snapResult = environmentHandler.getTerrainMapData().getTraversabilityClass(candidateStep.getX(), candidateStep.getY());
       return switch (snapResult)
             {
-               case CLIFF_TOP -> BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
-               case CLIFF_BOTTOM -> BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM;
+               case SQUARED_ERROR -> BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH;
+               case TOO_STEEP -> BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP;
                case NOT_ENOUGH_AREA -> BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA;
                case SNAP_FAILED -> BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP;
                default -> null;
