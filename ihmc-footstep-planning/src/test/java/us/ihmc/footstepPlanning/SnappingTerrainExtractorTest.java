@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import com.esotericsoftware.minlog.Log;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
@@ -12,9 +13,13 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.steppableRegions.SnapResult;
 import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.tools.PerceptionDebugTools;
+import us.ihmc.robotDataLogger.LogIndex;
 
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
@@ -71,7 +76,8 @@ public class SnappingTerrainExtractorTest
 
       SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
 
-      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+      double randomHeight = 2.0;
+      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(randomHeight));
 
       Mat inputDataFloats = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
       fakeHeightMap.download(inputDataFloats);
@@ -97,11 +103,8 @@ public class SnappingTerrainExtractorTest
       {
          for (int j = 0; j < heightMapData.getCellsPerAxis(); j++)
          {
-//            if (traversabilityScoreMap[i * cellsPerAxis + j] < 0.99f)
-//               System.out.println(traversabilityScoreMap[i * cellsPerAxis + j]);
-//            assertTrue(traversabilityScoreMap[i * cellsPerAxis + j] > 0.99f);
-//            assertEquals(traversabilityClassMap[i * cellsPerAxis + j], SnapResult.VALID.ordinal());
-            System.out.println(traversabilityClassMap[i * cellsPerAxis + j]);
+            assertTrue(traversabilityScoreMap[i * cellsPerAxis + j] > 0.99f);
+            assertEquals(traversabilityClassMap[i * cellsPerAxis + j], SnapResult.VALID.ordinal());
          }
       }
 

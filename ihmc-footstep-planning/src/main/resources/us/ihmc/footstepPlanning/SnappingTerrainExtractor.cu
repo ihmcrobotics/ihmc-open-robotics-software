@@ -133,16 +133,20 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
             if (query_height >= min_height_under_foot_to_consider)
             {
+                // Using query_height yields very high squared errors for large heights due to numerical errors in the matrix inversion when plane fitting
+                // Since only the relative z values are important, we subtract relative to the max height
+                float z_relative = max_height_in_radius - query_height;
+
                 n += 1.0f;
                 x += point_query.x;
                 y += point_query.y;
-                z += query_height;
+                z += z_relative;
                 xx += point_query.x * point_query.x;
                 xy += point_query.x * point_query.y;
-                xz += point_query.x * query_height;
+                xz += point_query.x * z_relative;
                 yy += point_query.y * point_query.y;
-                yz += point_query.y * query_height;
-                zz += query_height * query_height;
+                yz += point_query.y * z_relative;
+                zz += z_relative * z_relative;
             }
         }
     }
@@ -230,7 +234,9 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     *snappedNormalZMapElement = normal_z_char;
 
     // Pack traversability data, which is the geometric mean of the various traversability factors
-    float traversability = powf(area_traversability * squared_error_traversability * incline_traversability, 1.0f / 3.0f);
+//     float traversability = powf(area_traversability * squared_error_traversability * incline_traversability, 1.0f / 3.0f);
+    float traversability = squared_error_traversability;
+
     float *traversablityMapElement = (float *)((char *)traversabilityMap + y_index * pitchTraversability) + x_index;
     *traversablityMapElement = traversability;
 

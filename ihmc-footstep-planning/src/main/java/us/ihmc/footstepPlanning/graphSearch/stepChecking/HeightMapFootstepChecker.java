@@ -96,29 +96,6 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    {
       // Do pre-snap validity checks here -- any validity checks before snapping will have big speedups
 
-      double centerOfFootX = candidateStep.getX();
-      double centerOfFootY = candidateStep.getY();
-      if (queryHeightMapTraversabilityDistanceMargin(centerOfFootX, centerOfFootY) < traversabilityThresholdCenter)
-      {
-         rejectionReason.set(HEIGHT_MAP_NONTRAVERSABLE);
-         return;
-      }
-
-      double averageSignedDistanceFunction = 0.0;
-      DiscreteFootstepTools.getFootPolygon(candidateStep, footPolygons.get(candidateStep.getRobotSide()), tmpFootPolygon);
-      for (int i = 0; i < tmpFootPolygon.getNumberOfVertices(); i++)
-      {
-         averageSignedDistanceFunction += queryHeightMapTraversabilityDistanceMargin(tmpFootPolygon.getVertex(i).getX(), tmpFootPolygon.getVertex(i).getY());
-      }
-
-      averageSignedDistanceFunction /= tmpFootPolygon.getNumberOfVertices();
-
-      if (averageSignedDistanceFunction < traversabilityThresholdPerimeter)
-      {
-         rejectionReason.set(HEIGHT_MAP_NONTRAVERSABLE);
-         return;
-      }
-
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
       candidateStepSnapData.set(snapData);
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
@@ -141,7 +118,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       }
 
       // Check step placement
-      if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
+      if (!assumeFlatGround && !isStepPlacementValid())
       {
          return;
       }
@@ -217,32 +194,12 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       return true;
    }
 
-   private boolean isStepPlacementValid(DiscreteFootstep candidateStep, FootstepSnapDataReadOnly snapData)
+   private boolean isStepPlacementValid()
    {
       // Check valid snap
       if (candidateStepSnapData.getSnapTransform().containsNaN())
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return false;
-      }
-
-      // Check wiggle parameters satisfied
-      if (parameters.getWiggleWhilePlanning())
-      {
-         checkWiggleParameters(parameters);
-         if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDeltaMinimum())
-         {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);
-            return false;
-         }
-      }
-
-      // Check incline
-      RigidBodyTransform snappedSoleTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
-      double minimumSurfaceNormalZ = Math.cos(parameters.getMinSurfaceIncline());
-      if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
-      {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
          return false;
       }
 
@@ -344,11 +301,5 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
    {
       return rejectionReason.getValue();
-   }
-
-   private double queryHeightMapTraversabilityDistanceMargin(double x, double y)
-   {
-      // TODO
-      return Double.POSITIVE_INFINITY;
    }
 }
