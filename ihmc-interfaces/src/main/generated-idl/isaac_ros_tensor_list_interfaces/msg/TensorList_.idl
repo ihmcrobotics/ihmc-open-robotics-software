@@ -1,0 +1,26 @@
+#ifndef __isaac_ros_tensor_list_interfaces__msg__TensorList__idl__
+#define __isaac_ros_tensor_list_interfaces__msg__TensorList__idl__
+
+#include "isaac_ros_tensor_list_interfaces/msg/./Tensor_.idl"
+#include "std_msgs/msg/./Header_.idl"
+module isaac_ros_tensor_list_interfaces
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="isaac_ros_tensor_list_interfaces::msg::dds_::TensorList_")
+      struct TensorList
+      {
+        std_msgs::msg::dds::Header header;
+        /**
+         * A list of tensors
+         */
+        sequence<isaac_ros_tensor_list_interfaces::msg::dds::Tensor> tensors;
+      };
+    };
+  };
+};
+
+#endif

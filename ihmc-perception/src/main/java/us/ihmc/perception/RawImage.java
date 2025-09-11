@@ -245,6 +245,28 @@ public class RawImage
                           this.depthDiscretization);
    }
 
+   public RawImage convertTo(PixelFormat newPixelFormat)
+   {
+      if (pixelFormat == newPixelFormat)
+         return new RawImage(this);
+
+      RawImage result;
+      if (hasGpuImage())
+      {
+         GpuMat newImage = new GpuMat();
+         pixelFormat.convertToPixelFormat(gpuImageMat, newImage, newPixelFormat);
+         result = replaceImage(newImage, newPixelFormat);
+      }
+      else
+      {
+         Mat newImage = new Mat();
+         pixelFormat.convertToPixelFormat(cpuImageMat, newImage, newPixelFormat);
+         result = replaceImage(newImage, newPixelFormat);
+      }
+
+      return result;
+   }
+
    public long getSequenceNumber()
    {
       return sequenceNumber;
