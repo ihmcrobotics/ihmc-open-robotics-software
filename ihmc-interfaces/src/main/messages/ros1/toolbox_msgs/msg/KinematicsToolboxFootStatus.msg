@@ -11,4 +11,8 @@ geometry_msgs/Point desired_relative_foot_position_from_stance
 
 geometry_msgs/Quaternion desired_relative_foot_orientation_from_stance
 
+geometry_msgs/Point desired_relative_foot_position_from_pelvis
+
+geometry_msgs/Quaternion desired_relative_foot_orientation_from_pelvis
+
 

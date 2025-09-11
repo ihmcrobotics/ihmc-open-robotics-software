@@ -19,11 +19,15 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
    public boolean foot_in_contact_;
    public us.ihmc.euclid.tuple3D.Point3D desired_relative_foot_position_from_stance_;
    public us.ihmc.euclid.tuple4D.Quaternion desired_relative_foot_orientation_from_stance_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_relative_foot_position_from_pelvis_;
+   public us.ihmc.euclid.tuple4D.Quaternion desired_relative_foot_orientation_from_pelvis_;
 
    public KinematicsToolboxFootStatus()
    {
       desired_relative_foot_position_from_stance_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_relative_foot_orientation_from_stance_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      desired_relative_foot_position_from_pelvis_ = new us.ihmc.euclid.tuple3D.Point3D();
+      desired_relative_foot_orientation_from_pelvis_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public KinematicsToolboxFootStatus(KinematicsToolboxFootStatus other)
@@ -40,6 +44,8 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_relative_foot_position_from_stance_, desired_relative_foot_position_from_stance_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_relative_foot_orientation_from_stance_, desired_relative_foot_orientation_from_stance_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_relative_foot_position_from_pelvis_, desired_relative_foot_position_from_pelvis_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_relative_foot_orientation_from_pelvis_, desired_relative_foot_orientation_from_pelvis_);
    }
 
    /**
@@ -87,6 +93,18 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
    }
 
 
+   public us.ihmc.euclid.tuple3D.Point3D getDesiredRelativeFootPositionFromPelvis()
+   {
+      return desired_relative_foot_position_from_pelvis_;
+   }
+
+
+   public us.ihmc.euclid.tuple4D.Quaternion getDesiredRelativeFootOrientationFromPelvis()
+   {
+      return desired_relative_foot_orientation_from_pelvis_;
+   }
+
+
    public static Supplier<KinematicsToolboxFootStatusPubSubType> getPubSubType()
    {
       return KinematicsToolboxFootStatusPubSubType::new;
@@ -110,6 +128,8 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
 
       if (!this.desired_relative_foot_position_from_stance_.epsilonEquals(other.desired_relative_foot_position_from_stance_, epsilon)) return false;
       if (!this.desired_relative_foot_orientation_from_stance_.epsilonEquals(other.desired_relative_foot_orientation_from_stance_, epsilon)) return false;
+      if (!this.desired_relative_foot_position_from_pelvis_.epsilonEquals(other.desired_relative_foot_position_from_pelvis_, epsilon)) return false;
+      if (!this.desired_relative_foot_orientation_from_pelvis_.epsilonEquals(other.desired_relative_foot_orientation_from_pelvis_, epsilon)) return false;
 
       return true;
    }
@@ -129,6 +149,8 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
 
       if (!this.desired_relative_foot_position_from_stance_.equals(otherMyClass.desired_relative_foot_position_from_stance_)) return false;
       if (!this.desired_relative_foot_orientation_from_stance_.equals(otherMyClass.desired_relative_foot_orientation_from_stance_)) return false;
+      if (!this.desired_relative_foot_position_from_pelvis_.equals(otherMyClass.desired_relative_foot_position_from_pelvis_)) return false;
+      if (!this.desired_relative_foot_orientation_from_pelvis_.equals(otherMyClass.desired_relative_foot_orientation_from_pelvis_)) return false;
 
       return true;
    }
@@ -146,7 +168,11 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
       builder.append("desired_relative_foot_position_from_stance=");
       builder.append(this.desired_relative_foot_position_from_stance_);      builder.append(", ");
       builder.append("desired_relative_foot_orientation_from_stance=");
-      builder.append(this.desired_relative_foot_orientation_from_stance_);
+      builder.append(this.desired_relative_foot_orientation_from_stance_);      builder.append(", ");
+      builder.append("desired_relative_foot_position_from_pelvis=");
+      builder.append(this.desired_relative_foot_position_from_pelvis_);      builder.append(", ");
+      builder.append("desired_relative_foot_orientation_from_pelvis=");
+      builder.append(this.desired_relative_foot_orientation_from_pelvis_);
       builder.append("}");
       return builder.toString();
    }
