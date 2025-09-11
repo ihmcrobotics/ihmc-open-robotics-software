@@ -39,7 +39,7 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
 
    public OpenAlexanderURDFParameters(AlexanderVersionInterface alexanderVersion)
    {
-      urdfModelPath = alexanderVersion.getModelPath();
+      urdfModelPath = alexanderVersion.getURDFDescriptionResources();
    }
 
    @Override
