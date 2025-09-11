@@ -127,6 +127,7 @@ public class LeRobotDataset
    {
       ensureTaskNameInJsonl(taskName);
 
+      int taskID = Integer.parseInt(taskName.substring(0, 1));
       MutableBoolean stillGoing = new MutableBoolean(false);
       String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "IKStreamingRTThread");
       String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
@@ -147,7 +148,7 @@ public class LeRobotDataset
                   boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
                   if (desiredDataIsLoaded)
                   {
-                     if (demonstrationTaskID.getValue() > 0)
+                     if (demonstrationTaskID.getValue() == taskID)
                      {
                         if (episode == null)
                         {
