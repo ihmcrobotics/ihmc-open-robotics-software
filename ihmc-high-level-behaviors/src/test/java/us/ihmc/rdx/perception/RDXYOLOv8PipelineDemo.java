@@ -50,7 +50,8 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXYOLOv8PipelineDemo
 {
-   private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
+//   private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20250902_134118_H1ZEDXMini.svo2").toAbsolutePath().toString();
 
    private static final String SAVE_DIRECTORY = System.getProperty("user.home") + File.separator + "Documents" + File.separator;
 

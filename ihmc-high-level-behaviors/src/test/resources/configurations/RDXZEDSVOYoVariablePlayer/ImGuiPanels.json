@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Options" : true,
+    "SVO Player" : true,
+    "ZED Color###RDXOpenCVVideoVisualizer1:ZED Color" : true,
+    "ZED Depth###RDXOpenCVVideoVisualizer3:ZED Depth" : true
+  }
+}
