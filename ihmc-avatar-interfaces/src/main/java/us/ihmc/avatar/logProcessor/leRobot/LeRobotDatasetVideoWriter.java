@@ -81,15 +81,14 @@ public class LeRobotDatasetVideoWriter
                              sl_mat_get_step_bytes(zedColorImageSLMatPointer, SL_MEM_CPU));
 
       // Resize smaller for better transformer training
-      Size scaleDownSize = new Size(853, 480);
+      Size cropSize = new Size(640, 480); // A nice small 4:3 frame
+      int scaleWidth = imageWidth * cropSize.height() / imageHeight; // Account for aspect ratio
+      Size scaleDownSize = new Size(scaleWidth, cropSize.height());
       Mat resized = new Mat(scaleDownSize, opencv_core.CV_8UC4);
       opencv_imgproc.resize(bgra8Mat, resized, scaleDownSize);
       scaleDownSize.close();
 
-      // Crop the sides of for a minimal 640x480 to make training faster (work?)
-      Size cropSize = new Size(640, 480);
-      Point cropOffset = new Point((resized.cols() - cropSize.width()) / 2,   // Center crop horizontally
-                                   (resized.rows() - cropSize.height()) / 2); // Center crop vertically
+      Point cropOffset = new Point((resized.cols() - cropSize.width()) / 2, 0); // Center crop horizontally
       Rect roi = new Rect(cropOffset, cropSize);
       Mat croppedBgra8 = new Mat(resized, roi);
       resized.close();
