@@ -70,8 +70,8 @@ public class TerrainMapData
       if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
          return Double.NaN;
 
-      int index = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return traversabilityScoreMap[index];
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      return traversabilityScoreMap[key];
    }
 
    public SnapResult getTraversabilityClass(double x, double y)
@@ -82,8 +82,8 @@ public class TerrainMapData
       if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
          return null;
 
-      int index = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return SnapResult.values()[traversabilityClassMap[index]];
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      return SnapResult.values()[traversabilityClassMap[key]];
    }
 
    public UnitVector3DReadOnly getNormal(double x, double y)
@@ -94,10 +94,10 @@ public class TerrainMapData
       if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
          return Axis3D.Z;
 
-      int index = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, index, -1.0f, 1.0f),
-                              unpackByteAsFloat(snapNormalXMap, index, -1.0f, 1.0f),
-                              unpackByteAsFloat(snapNormalXMap, index, 0.0f, 1.0f));
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, key, -1.0f, 1.0f),
+                              unpackByteAsFloat(snapNormalYMap, key, -1.0f, 1.0f),
+                              unpackByteAsFloat(snapNormalZMap, key, 0.0f, 1.0f));
    }
 
    public float[] getTraversabilityScoreMap()

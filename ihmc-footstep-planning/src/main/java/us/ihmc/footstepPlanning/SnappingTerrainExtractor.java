@@ -24,7 +24,7 @@ import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
 public class SnappingTerrainExtractor
 {
-   private static final boolean PRINT_TIMING_FOR_KERNELS = false;
+   private static final boolean PRINT_TIMING_FOR_KERNELS = true;
    /**
     * The choice of 16 here is to utilize more SMs (Multi Processors) on the GPU.
     * This was chosen based on GPU profiling and significantly effects performance.
