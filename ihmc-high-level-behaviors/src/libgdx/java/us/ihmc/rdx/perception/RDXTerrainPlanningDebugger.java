@@ -204,7 +204,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
          action.scale(1 / 50.0f);
          spherePosition.add(action);
 
-         double height = terrainMapData.getHeightInWorld((float) spherePosition.getX(), (float) spherePosition.getY());
+         double height = terrainMapData.getHeightInWorld(spherePosition.getX(), spherePosition.getY());
          spherePosition.setZ(height + 0.01);
 
          if (side == RobotSide.LEFT && leftIndex < expansionSpheres.get(side).size())
