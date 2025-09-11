@@ -144,11 +144,9 @@ public class HeightMapPolygonSnapper
    private RigidBodyTransform computeSnapFromTerrainMap(ConvexPolygon2DReadOnly polygonToSnap, TerrainMapData terrainMapData)
    {
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
-      int rIndex = terrainMapData.getLocalXIndex(centroid.getX());
-      int cIndex = terrainMapData.getLocalYIndex(centroid.getY());
 
-      double height = terrainMapData.getHeightFloatLocal(rIndex, cIndex);
-      UnitVector3DReadOnly normal = terrainMapData.getNormalLocal(rIndex, cIndex);
+      double height = terrainMapData.getHeightInWorld(centroid.getX(), centroid.getY());
+      UnitVector3DReadOnly normal = terrainMapData.getNormal(centroid.getX(), centroid.getY());
 
       // The surface normal must point up. If it does not, recreate it so that it does.
       if (normal.getZ() < 0.0)
@@ -166,7 +164,7 @@ public class HeightMapPolygonSnapper
       snappedPolygon.set(polygonToSnap);
       // TODO need to compute the RMS error on the GPU.
       rootMeanSquaredError = Double.NaN;
-      areaFraction = terrainMapData.getSnappedAreaLocal(rIndex, cIndex);
+      areaFraction = 1.0;
 
       return transformToReturn;
    }

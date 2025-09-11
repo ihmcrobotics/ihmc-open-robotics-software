@@ -85,8 +85,8 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
+//      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+//      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
       refresh(request.getEnvironmentHandler().getTerrainMapData());
    }
 
@@ -95,8 +95,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (terrainMapData.getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
+//      this.offsetX = (int) (terrainMapData.getTerrainMapCenter().getX() * parameters.getNodesPerMeter());
+//      this.offsetY = (int) (terrainMapData.getTerrainMapCenter().getY() * parameters.getNodesPerMeter());
 
 
       //TODO this is hella broken
@@ -294,7 +294,7 @@ public class TerrainPlanningDebugger
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) child;
          float x = footstepNode.getState().getX32() / 50.0f;
          float y = footstepNode.getState().getY32() / 50.0f;
-         float z = terrainMapData.getHeightInWorld(x, y);
+         float z = (float) terrainMapData.getHeightInWorld(x, y);
 
          if (poses.size() < 100)
             poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));

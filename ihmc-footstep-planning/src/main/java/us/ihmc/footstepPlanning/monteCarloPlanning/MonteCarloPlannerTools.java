@@ -337,7 +337,7 @@ public class MonteCarloPlannerTools
 
          float nodeX = (float) (footstepNode.getState().getX32() / parameters.getNodesPerMeter());
          float nodeY = (float) (footstepNode.getState().getY32() / parameters.getNodesPerMeter());
-         float nodeZ = request.getEnvironmentHandler().getTerrainMapData().getHeightInWorld(nodeX, nodeY);
+         float nodeZ = (float) request.getEnvironmentHandler().getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
          ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
@@ -513,7 +513,7 @@ public class MonteCarloPlannerTools
 
       double goalReward = parameters.getGoalReward() * progressToGoal;
 
-      double contactValue = request.getEnvironmentHandler().getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
+      double contactValue = request.getEnvironmentHandler().getTerrainMapData().getTraversabilityScore(currentPosition.getX32(), currentPosition.getY32());
       contactValue = MathTools.clamp(contactValue, parameters.getMinimumContactValue(), parameters.getMaximumContactValue());
       contactValue /= parameters.getMaximumContactValue();
       double contactReward = (contactValue) * parameters.getFeasibleContactReward();

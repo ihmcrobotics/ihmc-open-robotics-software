@@ -178,7 +178,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    private BipedalFootstepPlannerNodeRejectionReason doValidityCheckForTerrainMap(DiscreteFootstep candidateStep)
    {
-      SnapResult snapResult = environmentHandler.getTerrainMapData().getSnapResultInWorld(candidateStep.getX(), candidateStep.getY());
+      SnapResult snapResult = environmentHandler.getTerrainMapData().getTraversabilityClass(candidateStep.getX(), candidateStep.getY());
       return switch (snapResult)
             {
                case CLIFF_TOP -> BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;

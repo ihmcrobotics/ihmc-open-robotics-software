@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.steppableRegions;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapTools;
 
@@ -12,18 +13,16 @@ public class TerrainMapData
 {
    private HeightMapData heightMapData;
 
-   private byte[] traversabilityCostMap;
+   private float[] traversabilityScoreMap;
    private byte[] traversabilityClassMap;
 
    private byte[] snapNormalXMap;
    private byte[] snapNormalYMap;
    private byte[] snapNormalZMap;
 
-   public TerrainMapData(int cellsPerAxis, double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
+   public TerrainMapData(int cellsPerAxis)
    {
-      this.heightMapData = new HeightMapData(gridResolutionXY, gridSizeXY, gridCenterX, gridCenterY);
-
-      traversabilityCostMap = new byte[cellsPerAxis * cellsPerAxis];
+      traversabilityScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityClassMap = new byte[cellsPerAxis * cellsPerAxis];
 
       snapNormalXMap = new byte[cellsPerAxis * cellsPerAxis];
@@ -37,7 +36,7 @@ public class TerrainMapData
 
       int size = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      this.traversabilityCostMap = Arrays.copyOf(other.traversabilityCostMap, size);
+      this.traversabilityScoreMap = Arrays.copyOf(other.traversabilityScoreMap, size);
       this.traversabilityClassMap = Arrays.copyOf(other.traversabilityClassMap, size);
 
       this.snapNormalXMap = Arrays.copyOf(other.snapNormalXMap, size);
@@ -50,26 +49,34 @@ public class TerrainMapData
       return heightMapData;
    }
 
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
+   }
+
    public double getHeightInWorld(double x, double y)
    {
       return heightMapData.getHeight(x, y);
    }
 
-   public double getTraversabilityCost(double x, double y)
+   /**
+    * Returns a traversability score from 0 to 1, where 0 is non-traversable and 1 is perfectly flat and level terrain.
+    */
+   public double getTraversabilityScore(double x, double y)
    {
-      int centerIndex = 2 * heightMapData.getCellsPerAxis() + 1;
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), heightMapData.getCellSize());
       int xIndex = HeightMapTools.coordinateToIndex(x, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(y, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
       if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
          return Double.NaN;
 
       int index = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-      return unpackByteAsFloat(traversabilityCostMap, index, 0.0f, 1.0f);
+      return traversabilityScoreMap[index];
    }
 
    public SnapResult getTraversabilityClass(double x, double y)
    {
-      int centerIndex = 2 * heightMapData.getCellsPerAxis() + 1;
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), heightMapData.getCellSize());
       int xIndex = HeightMapTools.coordinateToIndex(x, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(y, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
       if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
@@ -81,7 +88,7 @@ public class TerrainMapData
 
    public UnitVector3DReadOnly getNormal(double x, double y)
    {
-      int centerIndex = 2 * heightMapData.getCellsPerAxis() + 1;
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), heightMapData.getCellSize());
       int xIndex = HeightMapTools.coordinateToIndex(x, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(y, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
       if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
@@ -93,14 +100,9 @@ public class TerrainMapData
                               unpackByteAsFloat(snapNormalXMap, index, 0.0f, 1.0f));
    }
 
-   public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
+   public float[] getTraversabilityScoreMap()
    {
-      return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
-   }
-
-   public byte[] getTraversabilityCostMap()
-   {
-      return traversabilityCostMap;
+      return traversabilityScoreMap;
    }
 
    public byte[] getTraversabilityClassMap()
@@ -121,5 +123,35 @@ public class TerrainMapData
    public byte[] getSnapNormalZMap()
    {
       return snapNormalZMap;
+   }
+
+   public void setTraversabilityScoreMap(float[] traversabilityScoreMap)
+   {
+      this.traversabilityScoreMap = traversabilityScoreMap;
+   }
+
+   public void setTraversabilityClassMap(byte[] traversabilityClassMap)
+   {
+      this.traversabilityClassMap = traversabilityClassMap;
+   }
+
+   public void setSnapNormalXMap(byte[] snapNormalXMap)
+   {
+      this.snapNormalXMap = snapNormalXMap;
+   }
+
+   public void setSnapNormalYMap(byte[] snapNormalYMap)
+   {
+      this.snapNormalYMap = snapNormalYMap;
+   }
+
+   public void setSnapNormalZMap(byte[] snapNormalZMap)
+   {
+      this.snapNormalZMap = snapNormalZMap;
+   }
+
+   public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
+   {
+      return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
    }
 }

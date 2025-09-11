@@ -16,7 +16,6 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
@@ -32,6 +31,7 @@ import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Set;
 
@@ -44,15 +44,14 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private final RDXChunkedMapRenderer chunkedMapRenderer;
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
-   private final Point3D heightMapCenter = new Point3D();
+   private final ImBoolean colorBasedOnTraversability = new ImBoolean(false);
    private final Stopwatch stopwatch = new Stopwatch();
    private ROS2PublishSubscribeAPI ros2;
    private Mat heightMap;
+   private Mat traversabilityScore;
    private HeightMapData latestHeightMapData;
    private TerrainMapData latestTerrainMapData;
-   private int cellsPerAxisOfHeightMap;
    private int cellsPerAxisOfChunks;
-   private float latestCellSizeInMeters;
 
    public RDXROS2HeightMapVisualizer(String title)
    {
@@ -97,34 +96,14 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      executorService.clearQueueAndExecute(() ->
-                                           {
-                                              long sequenceId = heightMapMessage.getSequenceId();
-                                              //TODO this shouldn't have to be the case, it cause's problems if you want to visualize one message
-                                              if (sequenceId > 1)
+      if (!colorBasedOnTraversability.get())
+      {
+         executorService.clearQueueAndExecute(() ->
                                               {
-                                                 // We add +1 here because the height map is
-                                                 int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getWidthInMeters(),
-                                                                                                     heightMapMessage.getCellSizeInMeters());
-                                                 cellsPerAxisOfHeightMap = 2 * centerIndex + 1;
-                                              }
-
-                                              heightMapCenter.setX(heightMapMessage.getGridCenterX());
-                                              heightMapCenter.setY(heightMapMessage.getGridCenterY());
-                                              latestCellSizeInMeters = (float) heightMapMessage.getCellSizeInMeters();
-
-                                              if (heightMap == null)
-                                              {
-                                                 heightMap = new Mat(heightMapMessage.getCellsPerAxis(), heightMapMessage.getCellsPerAxis(), opencv_core.CV_32FC1);
-                                              }
-
-                                              latestHeightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
-                                              HeightMapTools.convertHeightMapDataToMat(heightMap, latestHeightMapData);
-
-                                              // This prevents the rendering from happening too early, it was throwing exceptions
-                                              if (stopwatch.lapElapsed() > 3)
-                                                 updateHeightMapImage();
-                                           });
+                                                 HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+                                                 processHeightMapData(heightMapData);
+                                              });
+      }
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
    }
@@ -161,7 +140,42 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
+      if (colorBasedOnTraversability.get())
+      {
+         executorService.clearQueueAndExecute(() -> processTerrainMapData(terrainMapMessage));
+      }
+
+      getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
+   }
+
+   private void processHeightMapData(HeightMapData heightMapData)
+   {
+      if (heightMap == null)
+      {
+         heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
+      }
+
+      latestHeightMapData = heightMapData;
+      HeightMapTools.convertHeightMapDataToMat(heightMap, latestHeightMapData);
+
+      // This prevents the rendering from happening too early, it was throwing exceptions
+      if (stopwatch.lapElapsed() > 3)
+         updateHeightMapImage();
+   }
+
+   private void processTerrainMapData(TerrainMapMessage terrainMapMessage)
+   {
       latestTerrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
+      processHeightMapData(latestTerrainMapData.getHeightMapData());
+
+      if (traversabilityScore == null)
+      {
+         traversabilityScore = new Mat(latestHeightMapData.getCellsPerAxis(), latestHeightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
+      }
+
+      float[] traversabilityScoreMap = latestTerrainMapData.getTraversabilityScoreMap();
+      FloatBuffer traversabilityScoreBuffer = traversabilityScore.createBuffer();
+      traversabilityScoreBuffer.put(traversabilityScoreMap);
    }
 
    @Override
@@ -188,6 +202,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       {
          ImGui.checkbox(labels.get("Enable Height Map"), enableHeightMapRenderer);
          ImGui.checkbox(labels.get("Enable Chunked Map"), enableChunkedMapRenderer);
+         ImGui.checkbox(labels.get("Show Traversability"), colorBasedOnTraversability);
       }
       ImGui.unindent();
    }
@@ -201,9 +216,10 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (cellsPerAxisOfHeightMap > 0 && !heightMapRenderer.isHasBeenCreated())
+      if (latestHeightMapData != null && !heightMapRenderer.isHasBeenCreated())
       {
-         heightMapRenderer.create(cellsPerAxisOfHeightMap * cellsPerAxisOfHeightMap);
+         int numberOfCells = latestHeightMapData.getCellsPerAxis() * latestHeightMapData.getCellsPerAxis();
+         heightMapRenderer.create(numberOfCells);
          stopwatch.start();
       }
 
@@ -218,7 +234,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          // An additional check here to make sure that we have data in the image
          if (heightMap != null && heightMap.ptr(0) != null)
          {
-            heightMapRenderer.update(heightMap, heightMapCenter.getX32(), heightMapCenter.getY32(), cellsPerAxisOfHeightMap / 2, latestCellSizeInMeters);
+            double heightMapCenterX = latestHeightMapData.getGridCenter().getX();
+            double heightMapCenterY = latestHeightMapData.getGridCenter().getY();
+            double cellSize = latestHeightMapData.getCellSize();
+            int centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapSize(), cellSize);
+            heightMapRenderer.update(heightMap, traversabilityScore, colorBasedOnTraversability.get(), (float) heightMapCenterX, (float) heightMapCenterY, centerIndex, (float) cellSize);
          }
       }
 
@@ -260,7 +280,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public HeightMapData getLatestHeightMapData()
    {
-      return isActive() ? latestHeightMapData : null;
+      return isActive() ? latestTerrainMapData.getHeightMapData() : null;
    }
 
    public TerrainMapData getLatestTerrainMapData()

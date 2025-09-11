@@ -6,15 +6,13 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
+import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
@@ -95,13 +93,13 @@ public class SnappingTerrainExtractor
 
       computeDerivedParameters();
 
-      terrainMapData = new TerrainMapData(cellsPerAxisTerrain, heightMapParameters.getCellSize(), heightMapParameters.getTerrainWidthInMeters());
+      terrainMapData = new TerrainMapData(cellsPerAxisTerrain);
 
       // Initialize matrices and images
       snapNormalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       snapNormalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
-      traversabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      traversabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
       traversabilityClassMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
 
@@ -119,7 +117,7 @@ public class SnappingTerrainExtractor
    {
       int error;
 
-      Point2D gridCenter = heightMapData.getGridCenter();
+      terrainMapData.setHeightMapData(heightMapData);
 
       Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
       HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
@@ -127,7 +125,7 @@ public class SnappingTerrainExtractor
       gpuHeightMap.upload(heightMap);
 
       // Populate parameters buffer for the snapping kernel
-      float[] snappingParametersArray = populateSnappingParametersArray(gridCenter);
+      float[] snappingParametersArray = populateSnappingParametersArray();
       snappingParametersHostPointer.put(snappingParametersArray);
 
       // Handle memory allocation and copy values to the GPU
@@ -153,9 +151,6 @@ public class SnappingTerrainExtractor
       snappingTerrainKernel.run(stream, snappingKernelGridDim, blockSize, 0);
       checkCUDAError();
 
-      // Update the terrain map data with the new results
-      terrainMapData.setSensorOrigin(gridCenter.getX(), gridCenter.getY());
-
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
@@ -180,8 +175,7 @@ public class SnappingTerrainExtractor
          Mat cpuTraversabilityClassMap = new Mat();
          traversabilityClassMat.download(cpuTraversabilityClassMap);
 
-         TerrainMapTools.convertToTerrainMapData(cpuHeightMap,
-                                                 cpuSnapNormalXMap,
+         TerrainMapTools.convertToTerrainMapData(cpuSnapNormalXMap,
                                                  cpuSnapNormalYMap,
                                                  cpuSnapNormalZMap,
                                                  cpuTraversabilityMap,
@@ -215,14 +209,11 @@ public class SnappingTerrainExtractor
    /**
     * Populate the parameter's array for the snapping kernels.
     *
-    * @param heightMapCenter is the location of the sensor origin, that will be the center of our map
     * @return a float array with the parameters for the snapping kernels. The order matters as it needs to match the order things are defined by in the kernel
     */
-   public float[] populateSnappingParametersArray(Tuple2DReadOnly heightMapCenter)
+   public float[] populateSnappingParametersArray()
    {
-      return new float[] {(float) heightMapCenter.getX(),
-                          (float) heightMapCenter.getY(),
-                          (float) heightMapParameters.getCellSize(),
+      return new float[] {(float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) steppableRegionParameters.getNormalSearchRadius(),
                           (float) steppableRegionParameters.getMinSupportAreaFraction(),
@@ -236,15 +227,9 @@ public class SnappingTerrainExtractor
    {
       snappingTerrainProgram.close();
       snappingTerrainKernel.close();
-//      terrainCostKernel.close();
-//      contactMapKernel.close();
-//      steppableConnectionsKernel.close();
-//      snappingKernelGridDim.close();
-//      terrainCostKernelGridDim.close();
-//      contactMapKernelGridDim.close();
-//      steppableConnectionsKernelGridDim.close();
-//      blockSize.close();
-//
+      snappingKernelGridDim.close();
+      blockSize.close();
+
       snapNormalXMat.close();
       snapNormalYMat.close();
       snapNormalZMat.close();

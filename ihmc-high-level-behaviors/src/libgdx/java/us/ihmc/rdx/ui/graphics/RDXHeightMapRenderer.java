@@ -15,6 +15,7 @@ import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -37,12 +38,16 @@ public class RDXHeightMapRenderer implements RenderableProvider
    private final Renderable renderable = new Renderable();
 
    // Height map data sent to the GPU (as floats)
-   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Generic, 1, "a_height"));
+   private static final int HEIGHT_CHANNEL = 0;
+   private static final int TRAVERSABILITY_CHANNEL = 1;
+   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Generic, 1, GL41.GL_FLOAT, false, "a_height", HEIGHT_CHANNEL),
+                                                                          new VertexAttribute(VertexAttributes.Usage.Generic, 1, GL41.GL_FLOAT, false, "a_traversability", TRAVERSABILITY_CHANNEL));
 
    // Uniforms
    private int centerIndex;
    private final Vector2 gridCenter = new Vector2();
    private float cellSize;
+   private int colorBasedOnTraversability;
    private boolean hasBeenCreated;
 
    public void create(int maxCells)
@@ -101,42 +106,46 @@ public class RDXHeightMapRenderer implements RenderableProvider
          shader.set(inputID, cellSize);
       });
       rdxShader.registerUniform(cellSizeUniform);
+
+      RDXUniform colorBasedOnTraversabilityUniform = RDXUniform.createGlobalUniform("u_colorBasedOnTraversability", (shader, inputID, renderable, combinedAttributes) ->
+      {
+         shader.set(inputID, colorBasedOnTraversability);
+      });
+      rdxShader.registerUniform(colorBasedOnTraversabilityUniform);
    }
 
-   public void update(Mat heightMapImage, float gridCenterX, float gridCenterY, int centerIndex, float cellSizeXYInMeters)
+   public void update(Mat heightMapImage, Mat traversabilityMapImage, boolean colorBasedOnTraversability, float gridCenterX, float gridCenterY, int centerIndex, float cellSizeXYInMeters)
    {
       // Update uniforms
       this.gridCenter.set(gridCenterX, gridCenterY);
       this.centerIndex = centerIndex;
       this.cellSize = cellSizeXYInMeters;
+      this.colorBasedOnTraversability = colorBasedOnTraversability ? 1 : 0;
 
       // Get the vertices buffer (contains the data sent to GPU for the vertex attribute)
-      FloatBuffer verticesBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
+      FloatBuffer dataBuffer = renderable.meshPart.mesh.getVerticesBuffer(true);
 
       // Ensure correct length and initialize buffer
       int cellsPerAxis = 2 * centerIndex + 1;
       int totalCells = cellsPerAxis * cellsPerAxis;
+      int totalFloats = vertexAttributes.size() * totalCells;
+
       if (renderable.meshPart.size != totalCells)
       {
          renderable.meshPart.size = totalCells;
-         verticesBuffer.limit(totalCells);
+         dataBuffer.limit(totalFloats);
       }
 
-      /* NOTE:
-       * We need to copy the short values from the height map image (Mat) to the vertices buffer (FloatBuffer) as floats.
-       * In both objects, the data is in native memory. Copying native -> java -> native is slow,
-       * so we use the Mat#convertTo() method which performs the short to float conversion and memory copy natively.
-       */
-
       // Wrap the vertices buffer into a pointer, then into a Mat
-      FloatPointer verticesPointer = new FloatPointer(verticesBuffer);
-      Mat verticesMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, verticesPointer);
+      FloatPointer bufferPointer = new FloatPointer(dataBuffer);
 
-      // Direct copy (no type conversion)
-      heightMapImage.copyTo(verticesMat);
+      Mat interleaved = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC2, bufferPointer);
+      opencv_core.insertChannel(heightMapImage, interleaved, HEIGHT_CHANNEL);
+      if (colorBasedOnTraversability)
+         opencv_core.insertChannel(traversabilityMapImage, interleaved, TRAVERSABILITY_CHANNEL);
 
-      verticesMat.close();
-      verticesPointer.close();
+      bufferPointer.close();
+      interleaved.close();
    }
 
    @Override

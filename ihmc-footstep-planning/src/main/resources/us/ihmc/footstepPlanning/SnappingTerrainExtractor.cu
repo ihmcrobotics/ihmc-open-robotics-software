@@ -3,16 +3,14 @@
 
 extern "C"
 
-#define HEIGHT_MAP_CENTER_X 0
-#define HEIGHT_MAP_CENTER_Y 1
-#define CELL_SIZE_IN_METERS 2
-#define HEIGHT_MAP_WIDTH_IM_METERS 3
-#define NORMAL_SEARCH_RADIUS 4
-#define MIN_SUPPORT_AREA_FRACTION 5
-#define MIN_SNAP_HEIGHT_THRESHOLD 6
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 7
-#define STEPPING_COSINE_THRESHOLD 8
-#define SQUARED_ERROR_THRESHOLD 9
+#define CELL_SIZE_IN_METERS 0
+#define HEIGHT_MAP_WIDTH_IN_METERS 1
+#define NORMAL_SEARCH_RADIUS 2
+#define MIN_SUPPORT_AREA_FRACTION 3
+#define MIN_SNAP_HEIGHT_THRESHOLD 4
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 5
+#define STEPPING_COSINE_THRESHOLD 6
+#define SQUARED_ERROR_THRESHOLD 7
 
 // Reason for 0 traversability, in order it's checked
 #define VALID 0
@@ -46,12 +44,14 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     float map_resolution = params[CELL_SIZE_IN_METERS];
 
-    int terrain_map_center_index = compute_center_index(params[HEIGHT_MAP_WIDTH_IM_METERS], map_resolution);
-    float2 terrain_map_center = make_float2(params[HEIGHT_MAP_CENTER_Y], params[HEIGHT_MAP_CENTER_X]);
-
+    int terrain_map_center_index = compute_center_index(params[HEIGHT_MAP_WIDTH_IN_METERS], map_resolution);
+    
     int cells_per_axis = 2 * terrain_map_center_index + 1;
     int cells_per_axis_for_checking = cells_per_axis - 1;
     int2 terrain_map_index = make_int2(x_index, y_index);
+
+    // all logic here is relative, so absolute center is not important
+    float2 terrain_map_center = make_float2(0.0f, 0.0f);
 
     float2 foot_position = indices_to_coordinate(terrain_map_index, terrain_map_center, map_resolution, terrain_map_center_index);
     float normal_search_radius = params[NORMAL_SEARCH_RADIUS];
@@ -229,13 +229,11 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + y_index * pitchSnapNormalZ) + x_index;
     *snappedNormalZMapElement = normal_z_char;
 
-    // Pack traversability data
-    float traversability = area_traversability * squared_error_traversability * incline_traversability;
-    unsigned char traversability_char = scaleAndCastToUnsignedChar(traversability, 0.0, 1.0f);
+    // Pack traversability data, which is the geometric mean of the various traversability factors
+    float traversability = powf(area_traversability * squared_error_traversability * incline_traversability, 1.0f / 3.0f);
+    float *traversablityMapElement = (float *)((char *)traversabilityMap + y_index * pitchTraversability) + x_index;
+    *traversablityMapElement = traversability;
 
-    unsigned char *traversablityMapElement = (unsigned char *)((char *)traversabilityMap + y_index * pitchTraversability) + x_index;
-    *traversablityMapElement = traversability_char;
-
-    unsigned char *traversabilityMapElemenet = (unsigned char *)((char *)traversabilityClassMap + y_index * pitchTraversabilityClass) + x_index;
-    *traversabilityMapElemenet = static_cast<unsigned char>(traversability_result);
+    unsigned char *traversabilityClassMapElement = (unsigned char *)((char *)traversabilityClassMap + y_index * pitchTraversabilityClass) + x_index;
+    *traversabilityClassMapElement = static_cast<unsigned char>(traversability_result);
 }
