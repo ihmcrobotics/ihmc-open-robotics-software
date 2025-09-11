@@ -298,6 +298,10 @@ public class KSTTools
             {
                ikController.updateInitialFootPose(side);
             }
+            else if (!isFootInContact && isFootInSupport(side))
+            {
+               ikController.updateInitialPelvisPose();
+            }
             isFootInSupport.put(side, isFootInContact);
             ikController.setIsFootInSupport(side, isFootInSupport.get(side));
             if (!isFootInSupport.get(side))
