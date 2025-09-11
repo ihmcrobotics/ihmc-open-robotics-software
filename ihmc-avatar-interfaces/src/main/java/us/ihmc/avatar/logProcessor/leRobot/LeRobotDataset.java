@@ -388,21 +388,28 @@ public class LeRobotDataset
 
          ObjectNode state = features.putObject("observation.state");
          state.put("dtype", "float32");
-         state.putArray("shape").add(14);
+         state.putArray("shape").add(28);
          ArrayNode motors = state.putObject("names").putArray("motors");
          motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
          motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
          motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
          motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
+         motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
+         motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
+         motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
+         motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
          ObjectNode action = features.putObject("action");
          action.put("dtype", "float32");
-         action.putArray("shape").add(14);
+         action.putArray("shape").add(28);
          motors = action.putObject("names").putArray("motors");
          motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
          motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
          motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
          motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
-
+         motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
+         motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
+         motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
+         motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
          ObjectNode episodeIndex = features.putObject("episode_index");
          episodeIndex.put("dtype", "int64");
          episodeIndex.putArray("shape").add(1);

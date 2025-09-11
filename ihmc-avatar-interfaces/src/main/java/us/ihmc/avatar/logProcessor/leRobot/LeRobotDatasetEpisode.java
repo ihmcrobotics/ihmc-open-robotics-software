@@ -130,7 +130,6 @@ public class LeRobotDatasetEpisode
 
       records.clear();
 
-      int inPoint = session.getBufferProperties().getInPoint();
       double sessionDTSeconds = session.getSessionDTSeconds();
       LogTools.info("Generating episode {}: dt: {}", episodeName, sessionDTSeconds);
 
@@ -190,10 +189,6 @@ public class LeRobotDatasetEpisode
 
          long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
 
-         //         LogTools.info("Current timestamp: %.3f  Writing frame %d Frequency %.3f"
-         //                             .formatted(Conversions.nanosecondsToSeconds(currentVideoTimestamp),
-         //                                        roundedTimestamp,
-         //                                        frequency));
          for (RobotSide side : RobotSide.values)
          {
             ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics);
@@ -256,7 +251,6 @@ public class LeRobotDatasetEpisode
          Mat bgrMat = videoReader.readFrame();
          while (bgrMat != null)
          {
-//            LogTools.info("Read frame at timestamp %d : mat: %s".formatted(videoReader.getCurrentTimestamp(), bgrMat));
             statistics.submitFrame(side, bgrMat);
             bgrMat = videoReader.readFrame();
          }

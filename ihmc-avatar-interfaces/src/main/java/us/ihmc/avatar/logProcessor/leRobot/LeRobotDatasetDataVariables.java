@@ -1,6 +1,5 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
-import org.apache.commons.lang.StringUtils;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,18 +26,16 @@ import java.util.List;
  */
 public class LeRobotDatasetDataVariables
 {
-   public static final boolean USE_HAND_POSES = true;
-
    private final LeRobotDatasetEpisode episode;
 
    private final YoPose3D pelvisPoseCurrent;
    private final YoPose3D pelvisPoseDesired;
    private final SideDependentList<YoPose3D> handPosesCurrent = new SideDependentList<>();
    private final SideDependentList<YoPose3D> handPosesDesired = new SideDependentList<>();
-   private final SideDependentList<YoDouble[]> jointAnglesCurrent = new SideDependentList<>();
-   private final SideDependentList<YoDouble[]> jointAnglesDesired = new SideDependentList<>();
+   private final SideDependentList<YoPose3D> forearmPosesCurrent = new SideDependentList<>();
+   private final SideDependentList<YoPose3D> forearmPosesDesired = new SideDependentList<>();
    private final MutableReferenceFrame pelvisFrame = new MutableReferenceFrame("pelvisFrame");
-   private final FramePose3D handFramePose = new FramePose3D();
+   private final FramePose3D framePose = new FramePose3D();
    private final YoRegistry rootRegistry;
 
    public LeRobotDatasetDataVariables(LeRobotDatasetEpisode episode, SCS2LogSessionWithVideo session)
@@ -49,45 +46,20 @@ public class LeRobotDatasetDataVariables
 
       RobotDefinition robotDefinition = session.getRobotDefinitions().get(0);
 
-      if (USE_HAND_POSES)
-      {
-         pelvisPoseCurrent = findYoPose("pelvis", "Current");
-         pelvisPoseDesired = findYoPose("pelvis", "Desired");
+      pelvisPoseCurrent = findYoPose("pelvis", "Current");
+      pelvisPoseDesired = findYoPose("pelvis", "Desired");
 
-         SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotHandNames(robotDefinition);
-         for (RobotSide side : robotHandNames.sides())
-         {
-            handPosesCurrent.put(side, findYoPose(robotHandNames.get(side), "Current"));
-            handPosesDesired.put(side, findYoPose(robotHandNames.get(side), "Desired"));
-         }
+      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotLinkNames(robotDefinition, "wrist_yaw");
+      for (RobotSide side : robotHandNames.sides())
+      {
+         handPosesCurrent.put(side, findYoPose(robotHandNames.get(side), "Current"));
+         handPosesDesired.put(side, findYoPose(robotHandNames.get(side), "Desired"));
       }
-      else
+      SideDependentList<String> robotForearmNames = LeRobotDatasetTools.getRobotLinkNames(robotDefinition, "wrist_roll");
+      for (RobotSide side : robotHandNames.sides())
       {
-         SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
-         for (RobotSide side : robotArmJointNames.sides())
-         {
-            String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "IKStreamingRTThread");
-            String kstController = kstModule + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
-            String capitalizedRobotName = StringUtils.capitalize(session.getLogProperties().getModel().getNameAsString());
-            String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
-            String ikSolver = kstController + "WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.";
-
-            List<String> armJointNames = robotArmJointNames.get(side);
-            YoDouble[] currentState = new YoDouble[armJointNames.size()];
-            YoDouble[] desiredState = new YoDouble[armJointNames.size()];
-
-            for (int i = 0; i < armJointNames.size(); i++)
-               if (rootRegistry.findVariable("%sMotorState_Position_%s_%s".formatted(hwPosition,
-                                                                                     armJointNames.get(i),
-                                                                                     capitalizedRobotName)) instanceof YoDouble variable)
-                  currentState[i] = variable;
-            for (int i = 0; i < armJointNames.size(); i++)
-               if (rootRegistry.findVariable("%sq_qp_%s".formatted(ikSolver, armJointNames.get(i))) instanceof YoDouble variable)
-                  desiredState[i] = variable;
-
-            jointAnglesCurrent.put(side, currentState);
-            jointAnglesDesired.put(side, desiredState);
-         }
+         forearmPosesCurrent.put(side, findYoPose(robotForearmNames.get(side), "Current"));
+         forearmPosesDesired.put(side, findYoPose(robotForearmNames.get(side), "Desired"));
       }
    }
 
@@ -116,42 +88,47 @@ public class LeRobotDatasetDataVariables
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
 
-      if (USE_HAND_POSES)
+      for (RobotSide side : handPosesCurrent.sides())
       {
-         for (RobotSide side : handPosesCurrent.sides())
-         {
-            pelvisFrame.update(pelvisPoseCurrent::get);
-            handFramePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesCurrent.get(side));
-            handFramePose.changeFrame(pelvisFrame.getReferenceFrame());
-            state.add((float) handFramePose.getX());
-            state.add((float) handFramePose.getY());
-            state.add((float) handFramePose.getZ());
-            state.add((float) handFramePose.getOrientation().getX());
-            state.add((float) handFramePose.getOrientation().getY());
-            state.add((float) handFramePose.getOrientation().getZ());
-            state.add((float) handFramePose.getOrientation().getS());
+         pelvisFrame.update(pelvisPoseCurrent::get);
+         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesCurrent.get(side));
+         framePose.changeFrame(pelvisFrame.getReferenceFrame());
+         state.add((float) framePose.getX());
+         state.add((float) framePose.getY());
+         state.add((float) framePose.getZ());
+         state.add((float) framePose.getOrientation().getX());
+         state.add((float) framePose.getOrientation().getY());
+         state.add((float) framePose.getOrientation().getZ());
+         state.add((float) framePose.getOrientation().getS());
+         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), forearmPosesCurrent.get(side));
+         framePose.changeFrame(pelvisFrame.getReferenceFrame());
+         state.add((float) framePose.getX());
+         state.add((float) framePose.getY());
+         state.add((float) framePose.getZ());
+         state.add((float) framePose.getOrientation().getX());
+         state.add((float) framePose.getOrientation().getY());
+         state.add((float) framePose.getOrientation().getZ());
+         state.add((float) framePose.getOrientation().getS());
 
-            pelvisFrame.update(pelvisPoseDesired::get);
-            handFramePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesDesired.get(side));
-            handFramePose.changeFrame(pelvisFrame.getReferenceFrame());
-            action.add((float) handFramePose.getX());
-            action.add((float) handFramePose.getY());
-            action.add((float) handFramePose.getZ());
-            action.add((float) handFramePose.getOrientation().getX());
-            action.add((float) handFramePose.getOrientation().getY());
-            action.add((float) handFramePose.getOrientation().getZ());
-            action.add((float) handFramePose.getOrientation().getS());
-         }
-      }
-      else
-      {
-         for (RobotSide side : jointAnglesCurrent.sides())
-         {
-            for (int i = 0; i < jointAnglesCurrent.get(side).length; i++)
-               state.add((float) jointAnglesCurrent.get(side)[i].getDoubleValue());
-            for (int i = 0; i < jointAnglesDesired.get(side).length; i++)
-               action.add((float) jointAnglesDesired.get(side)[i].getDoubleValue());
-         }
+         pelvisFrame.update(pelvisPoseDesired::get);
+         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesDesired.get(side));
+         framePose.changeFrame(pelvisFrame.getReferenceFrame());
+         action.add((float) framePose.getX());
+         action.add((float) framePose.getY());
+         action.add((float) framePose.getZ());
+         action.add((float) framePose.getOrientation().getX());
+         action.add((float) framePose.getOrientation().getY());
+         action.add((float) framePose.getOrientation().getZ());
+         action.add((float) framePose.getOrientation().getS());
+         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), forearmPosesDesired.get(side));
+         framePose.changeFrame(pelvisFrame.getReferenceFrame());
+         action.add((float) framePose.getX());
+         action.add((float) framePose.getY());
+         action.add((float) framePose.getZ());
+         action.add((float) framePose.getOrientation().getX());
+         action.add((float) framePose.getOrientation().getY());
+         action.add((float) framePose.getOrientation().getZ());
+         action.add((float) framePose.getOrientation().getS());
       }
 
       float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s

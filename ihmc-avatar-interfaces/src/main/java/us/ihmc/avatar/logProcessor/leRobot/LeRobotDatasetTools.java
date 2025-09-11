@@ -1,5 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import org.apache.commons.lang.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -7,7 +8,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,13 +51,13 @@ public class LeRobotDatasetTools
       return path + "." + result.getName() + ".";
    }
 
-   public static SideDependentList<String> getRobotHandNames(RobotDefinition robotDefinition)
+   public static SideDependentList<String> getRobotLinkNames(RobotDefinition robotDefinition, String linkNamePart)
    {
       SideDependentList<String> handLinkNames = new SideDependentList<>();
       for (RigidBodyDefinition link : robotDefinition.getAllRigidBodies())
       {
          String linkName = link.getName().toLowerCase();
-         if (linkName.contains("wrist_yaw"))
+         if (linkName.contains(linkNamePart))
             for (RobotSide side : RobotSide.values)
                if (linkName.contains(side.getLowerCaseName()))
                   handLinkNames.put(side, link.getName());
@@ -85,6 +88,36 @@ public class LeRobotDatasetTools
       {
          JointDefinition childJoint = joint.getSuccessor().getChildrenJoints().get(0);
          recursivelyAddArmJoints(childJoint, names);
+      }
+   }
+
+   /** Unused for now. Keeping it around in case we need it later. */
+   public static void getJointAngleVariables(RobotDefinition robotDefinition, YoRegistry rootRegistry, LogSession session)
+   {
+      SideDependentList<YoDouble[]> jointAnglesCurrent = new SideDependentList<>();
+      SideDependentList<YoDouble[]> jointAnglesDesired = new SideDependentList<>();
+
+      SideDependentList<List<String>> robotArmJointNames = LeRobotDatasetTools.getRobotArmJointNames(robotDefinition);
+      for (RobotSide side : robotArmJointNames.sides())
+      {
+         String kstModule = LeRobotDatasetTools.findRegistry(rootRegistry, "root.main", "IKStreamingRTThread");
+         String kstController = kstModule + "KinematicsStreamingToolboxController.HumanoidKinematicsToolboxController.";
+         String capitalizedRobotName = StringUtils.capitalize(session.getLogProperties().getModel().getNameAsString());
+         String hwPosition = kstModule + "%sROS2HardwareCommunication.".formatted(capitalizedRobotName);
+         String ikSolver = kstController + "WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.";
+         List<String> armJointNames = robotArmJointNames.get(side);
+         YoDouble[] currentState = new YoDouble[armJointNames.size()];
+         YoDouble[] desiredState = new YoDouble[armJointNames.size()];
+         for (int i = 0; i < armJointNames.size(); i++)
+            if (rootRegistry.findVariable("%sMotorState_Position_%s_%s".formatted(hwPosition,
+                                                                                  armJointNames.get(i),
+                                                                                  capitalizedRobotName)) instanceof YoDouble variable)
+               currentState[i] = variable;
+         for (int i = 0; i < armJointNames.size(); i++)
+            if (rootRegistry.findVariable("%sq_qp_%s".formatted(ikSolver, armJointNames.get(i))) instanceof YoDouble variable)
+               desiredState[i] = variable;
+         jointAnglesCurrent.put(side, currentState);
+         jointAnglesDesired.put(side, desiredState);
       }
    }
 }
