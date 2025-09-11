@@ -280,12 +280,12 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public HeightMapData getLatestHeightMapData()
    {
-      return isActive() ? latestTerrainMapData.getHeightMapData() : null;
+      return isActive() ? latestHeightMapData : null;
    }
 
    public TerrainMapData getLatestTerrainMapData()
    {
-      return latestTerrainMapData;
+      return isActive() ? latestTerrainMapData : null;
    }
 
    public RDXOpenCVVideoVisualizer getHeightMapImageVisualizer()

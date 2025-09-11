@@ -141,7 +141,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       Mat interleaved = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC2, bufferPointer);
       opencv_core.insertChannel(heightMapImage, interleaved, HEIGHT_CHANNEL);
-      if (colorBasedOnTraversability)
+      if (colorBasedOnTraversability && traversabilityMapImage != null)
          opencv_core.insertChannel(traversabilityMapImage, interleaved, TRAVERSABILITY_CHANNEL);
 
       bufferPointer.close();
