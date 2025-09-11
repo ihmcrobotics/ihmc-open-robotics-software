@@ -137,8 +137,7 @@ public class RDXLeRobotDatasetCreator
                dataset.setUsePerfectTimestamps(!dataset.getUsePerfectTimestamps());
             }
          }
-         ImGui.sameLine();
-         ImGui.text("FPS: %.2f".formatted(dataset.getFps()));
+         ImGui.text("Dataset FPS: %.2f".formatted(dataset.getFps()));
 
          ImGuiTools.separatorText("New episode");
 
@@ -159,6 +158,7 @@ public class RDXLeRobotDatasetCreator
             keepGenerating.set(true);
             generating = dataset.addEpisodesAutomatically(imTaskName.get().trim(), logSession.getSession(), keepGenerating::get);
          }
+         ImGui.endDisabled();
          if (keepGenerating.get())
          {
             ImGui.sameLine();
@@ -168,7 +168,6 @@ public class RDXLeRobotDatasetCreator
             ImGui.popStyleColor();
          }
          ImGuiTools.previousWidgetTooltip("Scrub the log from the current position, add the next episode using the demonstrationTaskID variable.");
-         ImGui.endDisabled();
 
          boolean noEpisodes = dataset == null || dataset.getEpisodes().isEmpty();
          if (noEpisodes)
@@ -240,7 +239,7 @@ public class RDXLeRobotDatasetCreator
                   {
                      logSession.getSession().setSessionMode(SessionMode.PAUSE);
                      ThreadTools.park(0.01);
-                     logSession.getSession().submitLogPositionRequest(records.get(0).ihmcLogPosition());
+                     logSession.getSession().submitLogPositionRequest(records.get(0).logPosition());
                      ThreadTools.park(0.01);
                      logSession.getSession().setSessionMode(SessionMode.RUNNING);
                   }, "PlayEpisode");
@@ -252,8 +251,8 @@ public class RDXLeRobotDatasetCreator
                """
                Buffer index: %d -> %d
                Right click for options.
-               """.formatted(records.isEmpty() ? -1 : records.get(0).ihmcLogPosition(),
-                             records.isEmpty() ? -1 : records.get(records.size() - 1).ihmcLogPosition())
+               """.formatted(records.isEmpty() ? -1 : records.get(0).logPosition(),
+                             records.isEmpty() ? -1 : records.get(records.size() - 1).logPosition())
             );
 
             String popupId = "episode_context_menu_" + i;
@@ -292,10 +291,10 @@ public class RDXLeRobotDatasetCreator
             {
                float verticalExtents = i == mouseHoveringEpisode ? 5.0f : 3.0f;
                float notchWidth = i == mouseHoveringEpisode ? 4.0f : 2.0f;
-               int episodeStart = records.get(0).ihmcLogPosition();
+               int episodeStart = records.get(0).logPosition();
                float x = (episodeStart / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth;
                ImGuiTools.renderSliderOrProgressNotch(x, ImGuiTools.DARK_GREEN, verticalExtents, notchWidth);
-               int episodeEnd = records.get(records.size() - 1).ihmcLogPosition();
+               int episodeEnd = records.get(records.size() - 1).logPosition();
                x = (episodeEnd / ((float) logDataReader.getNumberOfEntries() - 1)) * sliderWidth;
                ImGuiTools.renderSliderOrProgressNotch(x, ImGuiTools.DARK_RED, verticalExtents, notchWidth);
             }

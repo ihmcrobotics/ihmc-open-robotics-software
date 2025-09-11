@@ -83,7 +83,7 @@ public class LeRobotDatasetDataVariables
       }
    }
 
-   public void addFrame(long timestampMicros, LeRobotDatasetEpisodeStatistics statistics, int ihmcLogPosition)
+   public void addFrame(long timestampMicros, LeRobotDatasetEpisodeStatistics statistics, int logPosition, String logName)
    {
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
@@ -139,7 +139,8 @@ public class LeRobotDatasetDataVariables
                                                              episode.getEpisodeIndex(),
                                                              episode.getRecords().size(),
                                                              timestamp,
-                                                             ihmcLogPosition,
+                                                             logPosition,
+                                                             logName,
                                                              isLastFrame,
                                                              episode.getDataset().getTotalEpisodeFrames() + episode.getRecords().size(),
                                                              taskIndex);

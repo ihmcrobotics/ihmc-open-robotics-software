@@ -1,6 +1,5 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -31,15 +30,10 @@ public class LeRobotDatasetVideoWriter
 {
    private final RobotSide side;
    private final FFmpegFrameRecorder recorder;
-   private final ZEDSVOScrubber zedSVOScrubber;
 
-   // Stats
-   private final TIntArrayList redMeans = new TIntArrayList();
-
-   public LeRobotDatasetVideoWriter(RobotSide side, Path mp4Path, ZEDSVOScrubber zedSVOScrubber)
+   public LeRobotDatasetVideoWriter(float fps, RobotSide side, Path mp4Path)
    {
       this.side = side;
-      this.zedSVOScrubber = zedSVOScrubber;
 
       // Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'episode_000000.mp4':
       //  Metadata:
@@ -63,13 +57,13 @@ public class LeRobotDatasetVideoWriter
       //            recorder.setVideoOption("preset", "10");
       //            recorder.setVideoOption("threads", String.valueOf(Runtime.getRuntime().availableProcessors()));
       recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-      recorder.setFrameRate(zedSVOScrubber.getFps());
+      recorder.setFrameRate(fps);
       recorder.setVideoBitrate(1352000);
 
       ExceptionTools.handle(() -> recorder.start(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
-   public void writeFrame(long videoTimestampMs, LeRobotDatasetEpisodeStatistics statistics)
+   public void writeFrame(long videoTimestampMs, LeRobotDatasetEpisodeStatistics statistics, ZEDSVOScrubber zedSVOScrubber)
    {
       int imageHeight = zedSVOScrubber.getImageHeight();
       int imageWidth = zedSVOScrubber.getImageWidth();

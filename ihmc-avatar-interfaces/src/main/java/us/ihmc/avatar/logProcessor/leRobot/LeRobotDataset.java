@@ -44,7 +44,7 @@ public class LeRobotDataset
    private final Path infoJsonPath;
    private final Path tasksJsonlPath;
 
-   private float fps;
+   private float fps = 15.0f;
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
    private long totalFrames = 0L;
@@ -112,7 +112,7 @@ public class LeRobotDataset
 
    public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
    {
-      createEpisode(taskName).generateFromActiveBuffer(session, this::writeMetaJson, usePerfectTimestamps);
+      createEpisode(taskName).generateFromActiveBuffer(session);
    }
 
    private LeRobotDatasetEpisode createEpisode(String taskName)
@@ -136,7 +136,6 @@ public class LeRobotDataset
          {
             try
             {
-               stillGoing.setValue(true);
                LeRobotDatasetEpisode episode = null;
                int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
                while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
@@ -153,7 +152,7 @@ public class LeRobotDataset
                         if (episode == null)
                         {
                            episode = createEpisode(taskName);
-                           episode.initializeEpisode(session, this::writeMetaJson, usePerfectTimestamps);
+                           episode.initializeEpisode(session);
                         }
 
                         episode.processFrame();
@@ -489,11 +488,6 @@ public class LeRobotDataset
    public SideDependentList<Path> getZedVideoDirs()
    {
       return zedVideoDirs;
-   }
-
-   public void setFps(float fps)
-   {
-      this.fps = fps;
    }
 
    public float getFps()

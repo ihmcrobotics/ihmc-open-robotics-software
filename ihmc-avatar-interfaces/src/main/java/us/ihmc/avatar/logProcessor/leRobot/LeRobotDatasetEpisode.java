@@ -40,8 +40,6 @@ public class LeRobotDatasetEpisode
    private final String taskName;
 
    private SCS2LogSessionWithVideo session;
-   private Runnable writeMetaJson;
-   private boolean usePerfectTimestamps;
    private long startVideoTimestamp;
    private long lastVideoTimestamp;
    private double episodeFrameTimestampMicros;
@@ -85,16 +83,17 @@ public class LeRobotDatasetEpisode
                                               episodeIndex,
                                               record.frameIndex(),
                                               record.timestamp(),
-                                              record.ihmcLogPosition(),
+                                              record.logPosition(),
+                                              record.logName(),
                                               record.nextDone(),
                                               framesInPreceedingEpisodes + record.frameIndex(),
                                               record.taskIndex()));
       }
    }
 
-   public void generateFromActiveBuffer(SCS2LogSessionWithVideo session, Runnable writeMetaJson, boolean usePerfectTimestamps)
+   public void generateFromActiveBuffer(SCS2LogSessionWithVideo session)
    {
-      initializeEpisode(session, writeMetaJson, usePerfectTimestamps);
+      initializeEpisode(session);
 
       int inPoint = session.getBufferProperties().getInPoint();
       int outPoint = session.getBufferProperties().getOutPoint();
@@ -122,25 +121,18 @@ public class LeRobotDatasetEpisode
       }, "AddEpisode");
    }
 
-   public void initializeEpisode(SCS2LogSessionWithVideo session, Runnable writeMetaJson, boolean usePerfectTimestamps)
+   public void initializeEpisode(SCS2LogSessionWithVideo session)
    {
       this.session = session;
-      this.writeMetaJson = writeMetaJson;
-      this.usePerfectTimestamps = usePerfectTimestamps;
 
       records.clear();
 
       double sessionDTSeconds = session.getSessionDTSeconds();
       LogTools.info("Generating episode {}: dt: {}", episodeName, sessionDTSeconds);
 
-      ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
-      dataset.setFps(zedSVOScrubber.getFps());
-
       ffmpegRecorders = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
-      {
-         ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(side, dataset.getZedVideoDirs().get(side).resolve(episodeName + ".mp4"), zedSVOScrubber));
-      }
+         ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(dataset.getFps(), side, dataset.getZedVideoDirs().get(side).resolve(episodeName + ".mp4")));
 
       dataVariables = new LeRobotDatasetDataVariables(this, session);
       statistics = new LeRobotDatasetEpisodeStatistics();
@@ -159,42 +151,44 @@ public class LeRobotDatasetEpisode
       System.out.printf("\rIndex: %d  In: %d  Out: %d  Time: %d", loadedIndex, inPoint, outPoint, timestamp);
 
       ZEDSVOScrubber zedSVOScrubber = session.getZedSVOScrubbers().get(0);
-      long currentVideoTimestamp;
       synchronized (zedSVOScrubber)
       {
          zedSVOScrubber.scrub(timestamp);
-         currentVideoTimestamp = zedSVOScrubber.getTimestampScrubber().getCurrentVideoTimestamp();
-      }
-      if (startVideoTimestamp < 0)
-         startVideoTimestamp = currentVideoTimestamp;
+         long currentVideoTimestamp = zedSVOScrubber.getTimestampScrubber().getCurrentVideoTimestamp();
 
-      if (currentVideoTimestamp > lastVideoTimestamp) // Write only when a new frame is available
-      {
-         double frequency =
-               lastVideoTimestamp >= 0 ? Conversions.secondsToHertz(Conversions.nanosecondsToSeconds(currentVideoTimestamp - lastVideoTimestamp)) : Double.NaN;
+         if (startVideoTimestamp < 0)
+            startVideoTimestamp = currentVideoTimestamp;
 
-         lastVideoTimestamp = currentVideoTimestamp;
-
-         if (usePerfectTimestamps)
+         long nanosSinceLastFrame = currentVideoTimestamp - lastVideoTimestamp;
+         long minNanosBetweenFrames = Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(dataset.getFps()) * 0.75);
+         if (nanosSinceLastFrame > minNanosBetweenFrames) // Take frames no faster than 133% desired FPS
          {
-            int round = Math.round(dataset.getFps()); // lerobot rounds fps to integer
-            double seconds = UnitConversions.hertzToSeconds(round);
-            double micros = seconds * 1000000.0;
-            episodeFrameTimestampMicros += micros; // important: acrue using double precision
-         }
-         else
-         {
-            episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-         }
+            lastVideoTimestamp = currentVideoTimestamp;
 
-         long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
+            if (dataset.getUsePerfectTimestamps())
+            {
+               int round = Math.round(dataset.getFps()); // lerobot rounds fps to integer
+               double seconds = UnitConversions.hertzToSeconds(round);
+               double micros = seconds * 1000000.0;
+               episodeFrameTimestampMicros += micros; // important: acrue using double precision
+            }
+            else
+            {
+               episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
+            }
 
-         for (RobotSide side : RobotSide.values)
-         {
-            ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics);
+            long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
+
+            for (RobotSide side : RobotSide.values)
+            {
+               ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics, zedSVOScrubber);
+            }
+
+            dataVariables.addFrame(roundedTimestamp,
+                                   statistics,
+                                   session.getLogDataReader().getCurrentLogPosition(),
+                                   session.getLogDataReader().getLogDirectory().getName());
          }
-
-         dataVariables.addFrame(roundedTimestamp, statistics, session.getLogDataReader().getCurrentLogPosition());
       }
    }
 
@@ -211,7 +205,7 @@ public class LeRobotDatasetEpisode
       writeParquetData();
 
       writeEpisodeJsonlLine();
-      writeMetaJson.run();
+      dataset.writeMetaJson();
 
       statistics.calculate();
       writeStatsJsonlLine(statistics);
@@ -302,7 +296,8 @@ public class LeRobotDatasetEpisode
                                                                last.episodeIndex(),
                                                                last.frameIndex(),
                                                                last.timestamp(),
-                                                               last.ihmcLogPosition(),
+                                                               last.logPosition(),
+                                                               last.logName(),
                                                                true, // <-- Main thing we're doing here
                                                                last.index(),
                                                                last.taskIndex()));
