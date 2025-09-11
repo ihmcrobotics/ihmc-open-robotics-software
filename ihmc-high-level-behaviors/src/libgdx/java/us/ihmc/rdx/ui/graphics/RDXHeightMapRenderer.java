@@ -15,7 +15,6 @@ import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
