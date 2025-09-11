@@ -9,9 +9,9 @@ import java.util.Collection;
 
 public interface AlexanderVersionInterface extends RobotVersion
 {
-   Collection<String> getModelPath();
+   Collection<String> getURDFDescriptionResources();
 
-   Collection<String> getHardwareMapResources();
+   Collection<String> getXMLDescriptionResources();
 
    boolean hasCycloidForearms();
 
