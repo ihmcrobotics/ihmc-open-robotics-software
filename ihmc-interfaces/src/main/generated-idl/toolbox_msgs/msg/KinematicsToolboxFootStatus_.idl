@@ -1,0 +1,33 @@
+#ifndef __toolbox_msgs__msg__KinematicsToolboxFootStatus__idl__
+#define __toolbox_msgs__msg__KinematicsToolboxFootStatus__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsToolboxFootStatus_")
+      struct KinematicsToolboxFootStatus
+      {
+        /**
+         * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
+         * Which hand to receive the object
+         */
+        @defaultValue(value=255)
+        octet side;
+        /**
+         * Legged robot-specific contact information (false if not a legged robot)
+         */
+        boolean foot_in_contact;
+        geometry_msgs::msg::dds::Point desired_relative_foot_position_from_stance;
+        geometry_msgs::msg::dds::Quaternion desired_relative_foot_orientation_from_stance;
+      };
+    };
+  };
+};
+
+#endif

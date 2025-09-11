@@ -38,8 +38,7 @@ geometry_msgs/Vector3 desired_root_angular_velocity
 # Support region used by the toolbox
 geometry_msgs/Point[<=32] support_region
 
-# Legged robot-specific contact information (false if not a legged robot)
-bool left_foot_in_contact
-bool right_foot_in_contact
+toolbox_msgs/KinematicsToolboxFootStatus left_foot_status
+toolbox_msgs/KinematicsToolboxFootStatus right_foot_status
 
 float64 solution_quality -1

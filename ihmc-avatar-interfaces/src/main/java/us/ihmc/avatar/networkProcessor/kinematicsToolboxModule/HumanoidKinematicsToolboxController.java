@@ -48,6 +48,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -60,6 +61,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -104,6 +106,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * reachable.
     */
    private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> initialFootFrame = new SideDependentList<>();
    /**
     * Updated during the initialization phase with {@link CapturabilityBasedStatus}, this set of two
     * {@link YoBoolean}s is used to know which hand is currently used for support in the walking controller.
@@ -260,10 +263,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
          isHandInSupport.put(robotSide, new YoBoolean("is" + side + "HandInSupport", registry));
          initialHandPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandInitial", worldFrame, registry));
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
+         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
+         initialFootFrame.put(robotSide, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                initialFootPoses.get(robotSide)));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -421,8 +426,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
-      getSolution().setLeftFootInContact(true);
-      getSolution().setRightFootInContact(true);
+      getSolution().getLeftFootStatus().setFootInContact(true);
+      getSolution().getRightFootStatus().setFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -533,9 +538,31 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       super.updateInternal();
+
+      // Update swing foot pose relative to swing - only needed for status message
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         FramePose3D footPoseStanceRelativeChange = new FramePose3D();
+         if (!isFootInSupport.get(robotSide).getValue())
+         {
+            footPoseStanceRelativeChange.set(desiredFullRobotModel.getFoot(robotSide).getBodyFixedFrame().getTransformToRoot());
+            footPoseStanceRelativeChange.changeFrame(initialFootFrame.get(robotSide));
+         }
+         if (robotSide == RobotSide.LEFT)
+         {
+            getSolution().getLeftFootStatus().getDesiredRelativeFootPositionFromStance().set(footPoseStanceRelativeChange.getPosition());
+            getSolution().getLeftFootStatus().getDesiredRelativeFootOrientationFromStance().set(footPoseStanceRelativeChange.getOrientation());
+         }
+         else
+         {
+            getSolution().getRightFootStatus().getDesiredRelativeFootPositionFromStance().set(footPoseStanceRelativeChange.getPosition());
+            getSolution().getRightFootStatus().getDesiredRelativeFootOrientationFromStance().set(footPoseStanceRelativeChange.getOrientation());
+         }
+      }
+
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
-         // update actuation limits based on current configuration
+         // Update actuation limits based on current configuration
          wholeBodyContactState.updateActuationConstraintVector();
          wholeBodyContactState.updateActuationConstraintMatrix();
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
@@ -588,6 +615,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
       initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       initialFootPoses.get(robotSide).getTranslation().setZ(initialFootHeight);
+      initialFootFrame.get(robotSide).update();
    }
 
    private final Point3D tempMidFeet = new Point3D();
@@ -871,8 +899,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
          isFootInSupport.get(side).set(value);
-         getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
-         getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+         getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+         getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
