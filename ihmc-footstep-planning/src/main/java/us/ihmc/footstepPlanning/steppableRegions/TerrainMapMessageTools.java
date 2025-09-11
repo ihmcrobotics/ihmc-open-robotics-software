@@ -40,6 +40,9 @@ public class TerrainMapMessageTools
 
       message.getSnappedAreaData().resetQuick();
       message.getSnappedAreaData().add(terrainMapData.getSnappedAreaFractionMap());
+
+      message.getSquaredErrorData().resetQuick();
+      message.getSquaredErrorData().add(terrainMapData.getSquaredErrorMap());
    }
 
    public static TerrainMapData unpackMessage(TerrainMapMessage message)
@@ -86,6 +89,10 @@ public class TerrainMapMessageTools
       Byte snappedAreaFractionMap = message.getSnappedAreaData();
       byte[] snappedAreaFractionMapArray = snappedAreaFractionMap.copyArray();
       terrainMapData.setSnappedAreaFractionMap(snappedAreaFractionMapArray);
+
+      Float squaredErrorData = message.getSquaredErrorData();
+      float[] squaredErrorArray = squaredErrorData.toArray();
+      terrainMapData.setSquaredErrorMap(squaredErrorArray);
 
       return terrainMapData;
    }

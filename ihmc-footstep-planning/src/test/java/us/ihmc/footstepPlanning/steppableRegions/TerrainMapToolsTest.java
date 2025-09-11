@@ -31,6 +31,7 @@ public class TerrainMapToolsTest
       Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
       Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
       Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
+      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
 
       TerrainMapTools.convertToTerrainMapData(heightMap,
                                               terrainCostMap,
@@ -41,6 +42,7 @@ public class TerrainMapToolsTest
                                               steppabilityMap,
                                               steppabilityConnectionsMap,
                                               snappedAreaFractionMap,
+                                              squaredErrorMap,
                                               terrainMapData);
 
       int totalCells = cellsPerAxis * cellsPerAxis;
@@ -55,6 +57,7 @@ public class TerrainMapToolsTest
       byte[] steppabilityMapResult = terrainMapData.getSteppabilityMap();
       byte[] steppabilityConnectionsMapResult = terrainMapData.getSteppabilityConnectionsMap();
       byte[] snappedAreaFractionMapResult = terrainMapData.getSnappedAreaFractionMap();
+      float[] squaredErrorMapResult = terrainMapData.getSquaredErrorMap();
 
       for (int i = 0; i < totalCells; i++)
       {
@@ -70,6 +73,7 @@ public class TerrainMapToolsTest
          assertEquals(steppabilityMapResult[i], steppabilityMap.ptr(x, y).get());
          assertEquals(steppabilityConnectionsMapResult[i], steppabilityConnectionsMap.ptr(x, y).get());
          assertEquals(snappedAreaFractionMapResult[i], snappedAreaFractionMap.ptr(x).get());
+         assertEquals(squaredErrorMapResult[i], squaredErrorMap.ptr(x, y).getFloat());
       }
    }
 
@@ -91,6 +95,7 @@ public class TerrainMapToolsTest
       Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
       Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
       Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
+      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
 
       long startTime = System.nanoTime();
 
@@ -105,6 +110,7 @@ public class TerrainMapToolsTest
                                                  steppabilityMap,
                                                  steppabilityConnectionsMap,
                                                  snappedAreaFractionMap,
+                                                 squaredErrorMap,
                                                  terrainMapData);
       }
 

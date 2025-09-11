@@ -50,7 +50,7 @@
     "upperBound": 1.0
   },
   "Variance per meter": {
-    "value": 0.01,
+    "value": 0.1,
     "lowerBound": 0.0,
     "upperBound": 1.0
   },

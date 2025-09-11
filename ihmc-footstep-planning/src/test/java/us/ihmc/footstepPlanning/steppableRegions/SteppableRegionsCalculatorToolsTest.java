@@ -86,7 +86,7 @@ public class SteppableRegionsCalculatorToolsTest
    }
 
    /**
-    * Basic test to make sure the {@link SteppableRegionsCalculatorTools#normalValueAsFloat(byte[], int, int, int)} returns the expected value.
+    * Basic test to make sure the {@link SteppableRegionsCalculatorTools#unpackByteAsFloat(byte[], int, float, float)} returns the expected value.
     */
    @Test
    public void testGetNormalValueAsFloat()
@@ -103,9 +103,10 @@ public class SteppableRegionsCalculatorToolsTest
       }
 
       // We are scaling the normal between [-1.0, 1.0], so from [0 - 255] we expect a result of -1.0
-      float valueAsFloat = SteppableRegionsCalculatorTools.normalValueAsFloat(dataArray, cellsPerAxis, 0, 0);
-      float expectedValue = -1.0f;
-      assertEquals(expectedValue, valueAsFloat);
+      float minValue = -1.0f;
+      float maxValue = 1.0f;
+      float valueAsFloat = SteppableRegionsCalculatorTools.unpackByteAsFloat(dataArray, cellsPerAxis, minValue, maxValue);
+      assertEquals(minValue, valueAsFloat);
    }
 
    /**
