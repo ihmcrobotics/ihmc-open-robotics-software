@@ -1,6 +1,6 @@
 {
   "title" : "SteppableRegionCalculatorParameters",
-  "Normal search radius" : 0.12,
+  "Normal search radius" : 0.145,
   "Cliff search radius" : 0.17,
   "Cliff height threshold" : 0.04,
   "Cliff height tolerance" : 0.02,
