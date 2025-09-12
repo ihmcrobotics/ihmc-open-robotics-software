@@ -18,9 +18,9 @@ public class TerrainMapToolsTest
    {
       double cellResolution = 0.2;
       double gridSizeXY = 1.0;
-      int cellsPerAxis = (int) (gridSizeXY / cellResolution);
 
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, gridSizeXY, 0.0, 0.0);
+      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
 
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
@@ -49,11 +49,11 @@ public class TerrainMapToolsTest
          int x = i % cellsPerAxis;
          int y = i / cellsPerAxis;
 
-         assertEquals(snapNormalXMapResult[i], snapNormalXMap.ptr(x).get());
-         assertEquals(snapNormalYMapResult[i], snapNormalYMap.ptr(x).get());
-         assertEquals(snapNormalZMapResult[i], snapNormalZMap.ptr(x).get());
-         assertEquals(traversabilityResult[i], traversabilityMap.ptr(x).get());
-         assertEquals(traversabilityClassResult[i], traversabilityClassMap.ptr(x).get());
+         assertEquals(snapNormalXMapResult[i], snapNormalXMap.ptr(x, y).get());
+         assertEquals(snapNormalYMapResult[i], snapNormalYMap.ptr(x, y).get());
+         assertEquals(snapNormalZMapResult[i], snapNormalZMap.ptr(x, y).get());
+         assertEquals(traversabilityResult[i], traversabilityMap.ptr(x, y).getFloat());
+         assertEquals(traversabilityClassResult[i], traversabilityClassMap.ptr(x, y).get());
       }
    }
 
@@ -62,9 +62,9 @@ public class TerrainMapToolsTest
    {
       double cellResolution = 0.2;
       double gridSizeXY = 1.0;
-      int cellsPerAxis = (int) (gridSizeXY / cellResolution);
 
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, gridSizeXY, 0.0, 0.0);
+      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
 
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));

@@ -6,6 +6,8 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,7 +23,7 @@ public class TerrainMapMessageToolsTest
       double gridSizeXY = 1.0;
       int cellsPerAxis = (int) (gridSizeXY / cellResolution);
 
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, gridSizeXY, 0.0, 0.0);
 
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
@@ -58,7 +60,7 @@ public class TerrainMapMessageToolsTest
          assertEquals(snapNormalXMapResult[i], snapNormalXMap.ptr(x).get());
          assertEquals(snapNormalYMapResult[i], snapNormalYMap.ptr(x).get());
          assertEquals(snapNormalZMapResult[i], snapNormalZMap.ptr(x).get());
-         assertEquals(traversabilityMapResult[i], traversabilityMap.ptr(x).get());
+         assertEquals(traversabilityMapResult[i], traversabilityMap.ptr(x).getFloat());
          assertEquals(traversabilityClassMapResult[i], traversabilityClassMap.ptr(x).get());
       }
    }
@@ -69,9 +71,8 @@ public class TerrainMapMessageToolsTest
       float widthInMeters = 10.0f;
       float cellResolution = 0.02f;
 
-      int cellsPerAxis = (int) (widthInMeters / cellResolution);
-
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
 
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
@@ -113,9 +114,8 @@ public class TerrainMapMessageToolsTest
       float widthInMeters = 10.0f;
       float cellResolution = 0.02f;
 
-      int cellsPerAxis = (int) (widthInMeters / cellResolution);
-
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
 
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));

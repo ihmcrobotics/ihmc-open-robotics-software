@@ -93,7 +93,7 @@ public class SnappingTerrainExtractor
 
       computeDerivedParameters();
 
-      terrainMapData = new TerrainMapData(cellsPerAxisTerrain);
+      terrainMapData = new TerrainMapData(heightMapParameters.getCellSize(), heightMapParameters.getTerrainWidthInMeters(), 0.0, 0.0);
 
       // Initialize matrices and images
       snapNormalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);

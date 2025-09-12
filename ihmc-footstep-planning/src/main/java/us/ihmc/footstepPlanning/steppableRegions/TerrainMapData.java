@@ -19,8 +19,12 @@ public class TerrainMapData
    private byte[] snapNormalYMap;
    private byte[] snapNormalZMap;
 
-   public TerrainMapData(int cellsPerAxis)
+   public TerrainMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
    {
+      this.heightMapData = new HeightMapData(gridResolutionXY, gridSizeXY, gridCenterX, gridCenterY);
+
+      int cellsPerAxis = heightMapData.getCellsPerAxis();
+
       traversabilityScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityClassMap = new byte[cellsPerAxis * cellsPerAxis];
 
