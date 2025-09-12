@@ -135,7 +135,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             {
                 // Using query_height yields very high squared errors for large heights due to numerical errors in the matrix inversion when plane fitting
                 // Since only the relative z values are important, we subtract relative to the max height
-                float z_relative = max_height_in_radius - query_height;
+                float z_relative = query_height - max_height_in_radius;
 
                 n += 1.0f;
                 x += point_query.x;
