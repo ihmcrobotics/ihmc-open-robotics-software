@@ -15,6 +15,21 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
       return get(normalSearchRadius);
    }
 
+   default double getCliffSearchRadius()
+   {
+      return get(cliffSearchRadius);
+   }
+
+   default double getCliffHeightThreshold()
+   {
+      return get(cliffHeightThreshold);
+   }
+
+   default double getCliffHeightTolerance()
+   {
+      return get(cliffHeightTolerance);
+   }
+
    default double getMinSupportAreaFraction()
    {
       return get(minSupportAreaFraction);

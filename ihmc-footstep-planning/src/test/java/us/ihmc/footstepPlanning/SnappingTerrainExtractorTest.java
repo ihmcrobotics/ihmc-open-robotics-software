@@ -114,7 +114,7 @@ public class SnappingTerrainExtractorTest
       double terrainWidthXY = heightMapParameters.getTerrainWidthInMeters();
 
       Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
-      Vector3D normal = new Vector3D(1.0, 1.0, 1.0);
+      Vector3D normal = new Vector3D(-0.15, 0.2, 1.0);
       normal.normalize();
       Plane3D plane = new Plane3D(gridCenter, normal);
 
@@ -143,6 +143,7 @@ public class SnappingTerrainExtractorTest
       TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
 
       LogTools.info("normal: " + terrainMapData.getNormal(0.3, 0.0));
+      System.out.println(terrainMapData.getTraversabilityClass(0.3, 0.0));
 
       snappingTerrainExtractor.close();
    }

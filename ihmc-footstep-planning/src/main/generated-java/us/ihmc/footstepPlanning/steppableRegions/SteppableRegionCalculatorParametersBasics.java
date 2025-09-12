@@ -13,6 +13,21 @@ public interface SteppableRegionCalculatorParametersBasics extends SteppableRegi
       set(SteppableRegionCalculatorParameters.normalSearchRadius, normalSearchRadius);
    }
 
+   default void setCliffSearchRadius(double cliffSearchRadius)
+   {
+      set(SteppableRegionCalculatorParameters.cliffSearchRadius, cliffSearchRadius);
+   }
+
+   default void setCliffHeightThreshold(double cliffHeightThreshold)
+   {
+      set(SteppableRegionCalculatorParameters.cliffHeightThreshold, cliffHeightThreshold);
+   }
+
+   default void setCliffHeightTolerance(double cliffHeightTolerance)
+   {
+      set(SteppableRegionCalculatorParameters.cliffHeightTolerance, cliffHeightTolerance);
+   }
+
    default void setMinSupportAreaFraction(double minSupportAreaFraction)
    {
       set(SteppableRegionCalculatorParameters.minSupportAreaFraction, minSupportAreaFraction);

@@ -6,11 +6,14 @@ extern "C"
 #define CELL_SIZE_IN_METERS 0
 #define HEIGHT_MAP_WIDTH_IN_METERS 1
 #define NORMAL_SEARCH_RADIUS 2
-#define MIN_SUPPORT_AREA_FRACTION 3
-#define MIN_SNAP_HEIGHT_THRESHOLD 4
-#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 5
-#define STEPPING_COSINE_THRESHOLD 6
-#define SQUARED_ERROR_THRESHOLD 7
+#define CLIFF_SEARCH_RADIUS 3
+#define CLIFF_HEIGHT_THRESHOLD 4
+#define CLIFF_HEIGHT_TOLERANCE 5
+#define MIN_SUPPORT_AREA_FRACTION 6
+#define MIN_SNAP_HEIGHT_THRESHOLD 7
+#define SNAP_HEIGHT_THRESHOLD_AT_SEARCH_EDGE 8
+#define STEPPING_COSINE_THRESHOLD 9
+#define SQUARED_ERROR_THRESHOLD 10
 
 // Reason for 0 traversability, in order it's checked
 #define VALID 0
@@ -18,6 +21,7 @@ extern "C"
 #define NOT_ENOUGH_AREA 2
 #define SQUARED_ERROR 3
 #define TOO_STEEP 4
+#define CLIFF_TOP 5
 
 /*
    This kernel is designed to compute the average snap height for every cell in the window. This can be done by either snapping a rectangular foot down if
@@ -97,12 +101,12 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     int max_points_possible_under_support = 0;
 
-    for (int x_value_idx = normal_search_min_x; x_value_idx <= normal_search_max_x; x_value_idx++)
+    for (int x_query = normal_search_min_x; x_query <= normal_search_max_x; x_query++)
     {
-        for (int y_value_idx = normal_search_min_y; y_value_idx <= normal_search_max_y; y_value_idx++)
+        for (int y_query = normal_search_min_y; y_query <= normal_search_max_y; y_query++)
         {
             // Calculate offset and check distance
-            float2 offset = make_float2((float)(x_value_idx - terrain_map_index.x) * map_resolution, (float)(y_value_idx - terrain_map_index.y) * map_resolution);
+            float2 offset = make_float2((float)(x_query - terrain_map_index.x) * map_resolution, (float)(y_query - terrain_map_index.y) * map_resolution);
             float offset_distance_squared = dot2D(offset, offset);
 
             if (offset_distance_squared > normal_search_radius_squared)
@@ -153,9 +157,10 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     // Traversability scores: support area, squared error, and incline.
     // If any are 0.0, traversability_result contains the first detected cause
-    float area_traversability = 0.0f;
-    float squared_error_traversability = 0.0f;
-    float incline_traversability = 0.0f;
+    float area_traversability = 1.0f;
+    float squared_error_traversability = 1.0f;
+    float incline_traversability = 1.0f;
+    float cliff_traversability = 1.0f;
     int traversability_result = VALID;
 
     // Fail if insufficient data is in the search radius
@@ -178,7 +183,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     }
 
     // Perform best fit plane
-    float3 normal = make_float3(0.0, 0.0, 1.0f);
+    float3 normal = make_float3(0.0f, 0.0f, 1.0f);
     float coefficients[3] = {0.0f, 0.0f, 0.0f};
 
     if (traversability_result == VALID)
@@ -217,6 +222,54 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
             traversability_result = TOO_STEEP;
         }
     }
+    
+    // Check for cliffs near the best-fit plane
+
+    float cliff_search_radius_squared = params[CLIFF_SEARCH_RADIUS] * params[CLIFF_SEARCH_RADIUS];
+    float max_height_relative_to_plane = -100.0f;
+
+    for (int x_query = normal_search_min_x; x_query <= normal_search_max_x; x_query++)
+    {
+        for (int y_query = normal_search_min_y; y_query <= normal_search_max_y; y_query++)
+        {
+            // Calculate offset and check distance
+            float2 offset = make_float2((float)(x_query - terrain_map_index.x) * map_resolution, (float)(y_query - terrain_map_index.y) * map_resolution);
+            float offset_distance_squared = dot2D(offset, offset);
+
+            if (offset_distance_squared > cliff_search_radius_squared)
+                continue;
+
+            float2 point_query = make_float2(offset.x + foot_position.x, offset.y + foot_position.y);
+
+            float2 localXY = make_float2(point_query.x, point_query.y);
+            int2 query_key  = coordinate_to_indices(localXY, terrain_map_center, map_resolution, terrain_map_center_index);
+
+            if (query_key.x < 0 || query_key.x > cells_per_axis_for_checking || query_key.y < 0 || query_key.y > cells_per_axis_for_checking)
+                continue;
+
+            float *heightValue = (float *) ((char *)heightMap + query_key.y * pitchHeightMap) + query_key.x;
+            float query_height = *heightValue;
+
+            if (isnan(query_height))
+                continue;
+
+            float plane_height = - coefficients[0] * point_query.x - coefficients[1] * point_query.y - coefficients[2] + max_height_in_radius;
+            float height_relative_to_plane = query_height - plane_height;
+            max_height_relative_to_plane = max(height_relative_to_plane, max_height_relative_to_plane);
+        }
+    }
+
+    if (max_height_relative_to_plane > params[CLIFF_HEIGHT_THRESHOLD])
+    {
+        traversability_result = CLIFF_TOP;
+        cliff_traversability = 0.0f;
+    }
+    else if (max_height_relative_to_plane > params[CLIFF_HEIGHT_TOLERANCE])
+    {
+        float height_past_threshold = max_height_relative_to_plane - params[CLIFF_HEIGHT_TOLERANCE];
+        float max_past_threshold = params[CLIFF_HEIGHT_THRESHOLD] - params[CLIFF_HEIGHT_TOLERANCE];
+        cliff_traversability = clamp(1.0f - height_past_threshold / max_past_threshold, 0.0f, 1.0f);
+    }
 
     // Note these are switched to align with world, this is correct
     unsigned char normal_x_char = scaleAndCastToUnsignedChar(normal.y, -1.0f, 1.0f);
@@ -233,9 +286,13 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     unsigned char *snappedNormalZMapElement = (unsigned char *)((char *)snapNormalZMap + y_index * pitchSnapNormalZ) + x_index;
     *snappedNormalZMapElement = normal_z_char;
 
-    // Pack traversability data, which is the geometric mean of the various traversability factors
-//     float traversability = powf(area_traversability * squared_error_traversability * incline_traversability, 1.0f / 3.0f);
+    // Squared error is best indication of overall traversability
     float traversability = squared_error_traversability;
+
+    if (traversability_result != VALID)
+    {
+        traversability = 0.0f;
+    }
 
     float *traversablityMapElement = (float *)((char *)traversabilityMap + y_index * pitchTraversability) + x_index;
     *traversablityMapElement = traversability;

@@ -19,6 +19,9 @@ public class SteppableRegionCalculatorParameters extends StoredPropertySet imple
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey normalSearchRadius = keys.addDoubleKey("Normal search radius");
+   public static final DoubleStoredPropertyKey cliffSearchRadius = keys.addDoubleKey("Cliff search radius");
+   public static final DoubleStoredPropertyKey cliffHeightThreshold = keys.addDoubleKey("Cliff height threshold");
+   public static final DoubleStoredPropertyKey cliffHeightTolerance = keys.addDoubleKey("Cliff height tolerance");
    public static final DoubleStoredPropertyKey minSupportAreaFraction = keys.addDoubleKey("Min support area fraction");
    public static final DoubleStoredPropertyKey minSnapHeightThreshold = keys.addDoubleKey("Min snap height threshold");
    public static final DoubleStoredPropertyKey snapHeightThresholdAtSearchEdge = keys.addDoubleKey("Snap height threshold at search edge");

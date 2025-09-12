@@ -216,6 +216,8 @@ public class SnappingTerrainExtractor
       return new float[] {(float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
                           (float) steppableRegionParameters.getNormalSearchRadius(),
+                          (float) steppableRegionParameters.getCliffSearchRadius(),
+                          (float) steppableRegionParameters.getCliffHeightThreshold(),
                           (float) steppableRegionParameters.getMinSupportAreaFraction(),
                           (float) steppableRegionParameters.getMinSnapHeightThreshold(),
                           (float) steppableRegionParameters.getSnapHeightThresholdAtSearchEdge(),
