@@ -49,9 +49,11 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    private String status = "Python not started";
    private final Float32MultiArray stateMessage = new Float32MultiArray();
    private final FrequencyCalculator statusFrequency = new FrequencyCalculator();
-   private final FramePose3D handFramePose = new FramePose3D();
+   private final FramePose3D framePose = new FramePose3D();
    private final SideDependentList<Pose3D> stateHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<Pose3D> stateForearmPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
    private final SideDependentList<Pose3D> actionHandPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<Pose3D> actionForearmPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
    private long actionTimestampNanos = 0L;
    private long numberOfActionsReceived = 0L;
    private final ROS2Publisher<Int32> commandPublisher;
@@ -63,7 +65,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    private long sequenceID = 0L;
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
-   private final CRDTBidirectionalBoolean controlArmsOnly;
    private final TypedNotification<LerobotInferenceOperationMessage> uiCommandSubscription;
    private final ROS2Publisher<LerobotInferenceOperationMessage> uiStatusPublisher;
 
@@ -76,6 +77,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       setFrequencyLimit(120.0);
 
       actionHandPoses.forEach(Pose3D::setToNaN);
+      actionForearmPoses.forEach(Pose3D::setToNaN);
       ikStreaming = new LeRobotIKStreaming(ros2Node, robotModel, syncedRobot);
 
       commandPublisher = ros2Node.createPublisher(COMMAND);
@@ -91,7 +93,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       latestTimestampModifiable.modify(); // On startup, we want the initial state to propagate
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
-      controlArmsOnly = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
       uiCommandSubscription = ROS2Tools.createNotificationSubscription(ros2Node, OPERATOR_UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier()));
       uiStatusPublisher = ros2Node.createPublisher(OPERATOR_UI.getTopic(ROS2ActorDesignation.ROBOT.getOutgoingQualifier()));
@@ -109,7 +110,6 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          if (!wasRunning && running.getValue())
             ikStreaming.wakeUp();
          controlRobot.fromMessage(uiCommand.getControlRobot());
-         controlArmsOnly.fromMessage(uiCommand.getControlArmsOnly());
       }
 
       IDLSequence.Float messageData = stateMessage.getData();
@@ -119,9 +119,9 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          for (RobotSide side : RobotSide.values)
          {
             Pose3D stateHandPose = stateHandPoses.get(side);
-            handFramePose.setToZero(syncedRobot.getFullRobotModel().getHand(side).getParentJoint().getFrameAfterJoint());
-            handFramePose.changeFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
-            stateHandPose.set(handFramePose);
+            framePose.setToZero(syncedRobot.getFullRobotModel().getHand(side).getParentJoint().getFrameAfterJoint());
+            framePose.changeFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+            stateHandPose.set(framePose);
             messageData.add(stateHandPose.getPosition().getX32());
             messageData.add(stateHandPose.getPosition().getY32());
             messageData.add(stateHandPose.getPosition().getZ32());
@@ -129,6 +129,17 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
             messageData.add(stateHandPose.getOrientation().getY32());
             messageData.add(stateHandPose.getOrientation().getZ32());
             messageData.add(stateHandPose.getOrientation().getS32());
+            Pose3D stateForearmPose = stateForearmPoses.get(side);
+            framePose.setToZero(syncedRobot.getFullRobotModel().getForearm(side).getParentJoint().getFrameAfterJoint());
+            framePose.changeFrame(syncedRobot.getReferenceFrames().getPelvisFrame());
+            stateForearmPose.set(framePose);
+            messageData.add(stateForearmPose.getPosition().getX32());
+            messageData.add(stateForearmPose.getPosition().getY32());
+            messageData.add(stateForearmPose.getPosition().getZ32());
+            messageData.add(stateForearmPose.getOrientation().getX32());
+            messageData.add(stateForearmPose.getOrientation().getY32());
+            messageData.add(stateForearmPose.getOrientation().getZ32());
+            messageData.add(stateForearmPose.getOrientation().getS32());
          }
       }
       statePublisher.publish(stateMessage);
@@ -149,15 +160,20 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
             int i = 0;
             for (RobotSide side : RobotSide.values)
             {
-               handFramePose.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
-               handFramePose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
-               handFramePose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
-               handFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               actionHandPoses.get(side).set(handFramePose);
+               framePose.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
+               framePose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
+               framePose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
+               framePose.changeFrame(ReferenceFrame.getWorldFrame());
+               actionHandPoses.get(side).set(framePose);
+               framePose.setToZero(syncedRobot.getReferenceFrames().getPelvisFrame());
+               framePose.getPosition().set(data.get(i++), data.get(i++), data.get(i++));
+               framePose.getOrientation().set(data.get(i++), data.get(i++), data.get(i++), data.get(i++));
+               framePose.changeFrame(ReferenceFrame.getWorldFrame());
+               actionForearmPoses.get(side).set(framePose);
             }
          }
 
-         ikStreaming.update(actionTimestampNanos, actionHandPoses, controlArmsOnly.getValue());
+         ikStreaming.update(actionTimestampNanos, actionHandPoses, actionForearmPoses);
       }
 
       LerobotInferenceOperationMessage uiStatus = new LerobotInferenceOperationMessage();
@@ -165,9 +181,11 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
       uiStatus.setSequenceId(sequenceID++);
       uiStatus.setRunning(running.toMessage());
       uiStatus.setControlRobot(controlRobot.toMessage());
-      uiStatus.setControlArmsOnly(controlArmsOnly.toMessage());
       for (RobotSide side : RobotSide.values)
+      {
          uiStatus.getActionHandPoses()[side.ordinal()].set(actionHandPoses.get(side));
+         uiStatus.getActionForearmPoses()[side.ordinal()].set(actionForearmPoses.get(side));
+      }
       uiStatus.setPythonStatusFrequency(statusFrequency.getFrequencyDecaying());
       uiStatus.setPythonStatusMessage(status);
       uiStatus.setReceivedActions(numberOfActionsReceived);

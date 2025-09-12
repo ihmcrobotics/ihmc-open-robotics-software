@@ -15,7 +15,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d61b9489a091f6f44c0a24d95777f1e62076ac656a43462a67653884eacbdce0";
+   		return "5b21bef7345af3f80dbe8b3a7425c2fe6f028aef6971d319accd33df32f5abb5";
    }
    
    @Override
@@ -60,8 +60,9 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+      for(int i0 = 0; i0 < (2); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
       for(int i0 = 0; i0 < (2); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -94,12 +95,13 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       for(int i0 = 0; i0 < data.getActionHandPoses().length; ++i0)
       {
               current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getActionHandPoses()[i0], current_alignment);
+      }
+      for(int i0 = 0; i0 < data.getActionForearmPoses().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getActionForearmPoses()[i0], current_alignment);
       }
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -122,11 +124,14 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_7(data.getControlRobot());
 
-      cdr.write_type_7(data.getControlArmsOnly());
-
       for(int i0 = 0; i0 < data.getActionHandPoses().length; ++i0)
       {
         	geometry_msgs.msg.dds.PosePubSubType.write(data.getActionHandPoses()[i0], cdr);		
+      }
+
+      for(int i0 = 0; i0 < data.getActionForearmPoses().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PosePubSubType.write(data.getActionForearmPoses()[i0], cdr);		
       }
 
       cdr.write_type_6(data.getPythonStatusFrequency());
@@ -148,11 +153,14 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       	
       data.setControlRobot(cdr.read_type_7());
       	
-      data.setControlArmsOnly(cdr.read_type_7());
-      	
       for(int i0 = 0; i0 < data.getActionHandPoses().length; ++i0)
       {
         	geometry_msgs.msg.dds.PosePubSubType.read(data.getActionHandPoses()[i0], cdr);	
+      }
+      	
+      for(int i0 = 0; i0 < data.getActionForearmPoses().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PosePubSubType.read(data.getActionForearmPoses()[i0], cdr);	
       }
       	
       data.setPythonStatusFrequency(cdr.read_type_6());
@@ -171,8 +179,8 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("running", data.getRunning());
       ser.write_type_7("control_robot", data.getControlRobot());
-      ser.write_type_7("control_arms_only", data.getControlArmsOnly());
       ser.write_type_f("action_hand_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionHandPoses());
+      ser.write_type_f("action_forearm_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionForearmPoses());
       ser.write_type_6("python_status_frequency", data.getPythonStatusFrequency());
       ser.write_type_d("python_status_message", data.getPythonStatusMessage());
       ser.write_type_4("received_actions", data.getReceivedActions());
@@ -186,8 +194,8 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRunning(ser.read_type_7("running"));
       data.setControlRobot(ser.read_type_7("control_robot"));
-      data.setControlArmsOnly(ser.read_type_7("control_arms_only"));
       ser.read_type_f("action_hand_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionHandPoses());
+      ser.read_type_f("action_forearm_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionForearmPoses());
       data.setPythonStatusFrequency(ser.read_type_6("python_status_frequency"));
       ser.read_type_d("python_status_message", data.getPythonStatusMessage());
       data.setReceivedActions(ser.read_type_4("received_actions"));

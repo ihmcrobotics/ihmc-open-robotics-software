@@ -28,13 +28,13 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
             */
    public boolean control_robot_;
    /**
-            * Whether the KST should control just the arms or the rest of the body as well
-            */
-   public boolean control_arms_only_;
-   /**
             * The latest action hand poses
             */
    public us.ihmc.euclid.geometry.Pose3D[] action_hand_poses_;
+   /**
+            * The latest action forearm poses
+            */
+   public us.ihmc.euclid.geometry.Pose3D[] action_forearm_poses_;
    /**
             * Frequency of status from python side
             */
@@ -57,6 +57,12 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
       {
           action_hand_poses_[i1] = new us.ihmc.euclid.geometry.Pose3D();
       }
+      action_forearm_poses_ = new us.ihmc.euclid.geometry.Pose3D[2];
+
+      for(int i3 = 0; i3 < action_forearm_poses_.length; ++i3)
+      {
+          action_forearm_poses_[i3] = new us.ihmc.euclid.geometry.Pose3D();
+      }
       python_status_message_ = new java.lang.StringBuilder(255);
    }
 
@@ -75,11 +81,13 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
 
       control_robot_ = other.control_robot_;
 
-      control_arms_only_ = other.control_arms_only_;
-
-      for(int i3 = 0; i3 < action_hand_poses_.length; ++i3)
+      for(int i5 = 0; i5 < action_hand_poses_.length; ++i5)
       {
-            geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.action_hand_poses_[i3], action_hand_poses_[i3]);}
+            geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.action_hand_poses_[i5], action_hand_poses_[i5]);}
+
+      for(int i7 = 0; i7 < action_forearm_poses_.length; ++i7)
+      {
+            geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.action_forearm_poses_[i7], action_forearm_poses_[i7]);}
 
       python_status_frequency_ = other.python_status_frequency_;
 
@@ -144,21 +152,6 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
       return control_robot_;
    }
 
-   /**
-            * Whether the KST should control just the arms or the rest of the body as well
-            */
-   public void setControlArmsOnly(boolean control_arms_only)
-   {
-      control_arms_only_ = control_arms_only;
-   }
-   /**
-            * Whether the KST should control just the arms or the rest of the body as well
-            */
-   public boolean getControlArmsOnly()
-   {
-      return control_arms_only_;
-   }
-
 
    /**
             * The latest action hand poses
@@ -166,6 +159,15 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    public us.ihmc.euclid.geometry.Pose3D[] getActionHandPoses()
    {
       return action_hand_poses_;
+   }
+
+
+   /**
+            * The latest action forearm poses
+            */
+   public us.ihmc.euclid.geometry.Pose3D[] getActionForearmPoses()
+   {
+      return action_forearm_poses_;
    }
 
    /**
@@ -247,11 +249,14 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.control_robot_, other.control_robot_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.control_arms_only_, other.control_arms_only_, epsilon)) return false;
-
-      for(int i5 = 0; i5 < action_hand_poses_.length; ++i5)
+      for(int i9 = 0; i9 < action_hand_poses_.length; ++i9)
       {
-              if (!this.action_hand_poses_[i5].epsilonEquals(other.action_hand_poses_[i5], epsilon)) return false;
+              if (!this.action_hand_poses_[i9].epsilonEquals(other.action_hand_poses_[i9], epsilon)) return false;
+      }
+
+      for(int i11 = 0; i11 < action_forearm_poses_.length; ++i11)
+      {
+              if (!this.action_forearm_poses_[i11].epsilonEquals(other.action_forearm_poses_[i11], epsilon)) return false;
       }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.python_status_frequency_, other.python_status_frequency_, epsilon)) return false;
@@ -280,11 +285,13 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
 
       if(this.control_robot_ != otherMyClass.control_robot_) return false;
 
-      if(this.control_arms_only_ != otherMyClass.control_arms_only_) return false;
-
-      for(int i7 = 0; i7 < action_hand_poses_.length; ++i7)
+      for(int i13 = 0; i13 < action_hand_poses_.length; ++i13)
       {
-                if (!this.action_hand_poses_[i7].equals(otherMyClass.action_hand_poses_[i7])) return false;
+                if (!this.action_hand_poses_[i13].equals(otherMyClass.action_hand_poses_[i13])) return false;
+      }
+      for(int i15 = 0; i15 < action_forearm_poses_.length; ++i15)
+      {
+                if (!this.action_forearm_poses_[i15].equals(otherMyClass.action_forearm_poses_[i15])) return false;
       }
       if(this.python_status_frequency_ != otherMyClass.python_status_frequency_) return false;
 
@@ -310,10 +317,10 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
       builder.append(this.running_);      builder.append(", ");
       builder.append("control_robot=");
       builder.append(this.control_robot_);      builder.append(", ");
-      builder.append("control_arms_only=");
-      builder.append(this.control_arms_only_);      builder.append(", ");
       builder.append("action_hand_poses=");
       builder.append(java.util.Arrays.toString(this.action_hand_poses_));      builder.append(", ");
+      builder.append("action_forearm_poses=");
+      builder.append(java.util.Arrays.toString(this.action_forearm_poses_));      builder.append(", ");
       builder.append("python_status_frequency=");
       builder.append(this.python_status_frequency_);      builder.append(", ");
       builder.append("python_status_message=");

@@ -12,11 +12,11 @@ bool running
 # Whether to enable controlling the robot instead of just previewing
 bool control_robot
 
-# Whether the KST should control just the arms or the rest of the body as well
-bool control_arms_only
-
 # The latest action hand poses
 geometry_msgs/Pose[] action_hand_poses
+
+# The latest action forearm poses
+geometry_msgs/Pose[] action_forearm_poses
 
 # Frequency of status from python side
 float64 python_status_frequency

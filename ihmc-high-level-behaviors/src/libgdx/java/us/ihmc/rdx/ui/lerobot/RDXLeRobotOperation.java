@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.lerobot;
 
 import behavior_msgs.msg.dds.LerobotInferenceOperationMessage;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -36,7 +37,6 @@ public class RDXLeRobotOperation
    private final LatestTimestampModifiable latestTimestampModifiable;
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
-   private final CRDTBidirectionalBoolean controlArmsOnly;
    private double pythonStatusFrequency = 0.0;
    private long receivedActions = 0L;
    private String statusMessage = "Not yet connected to robot";
@@ -44,13 +44,13 @@ public class RDXLeRobotOperation
    private final ROS2Publisher<LerobotInferenceOperationMessage> commandPublisher;
    private final ImGuiAveragedFrequencyText commsFrequencyText = new ImGuiAveragedFrequencyText();
    private final SideDependentList<RDXReferenceFrameGraphic> actionHandPoseGraphics = new SideDependentList<>();
+   private final SideDependentList<RDXReferenceFrameGraphic> actionForearmPoseGraphics = new SideDependentList<>();
 
    public RDXLeRobotOperation(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
       latestTimestampModifiable = new LatestTimestampModifiable(new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockEstimator));
       running = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
       controlRobot = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
-      controlArmsOnly = new CRDTBidirectionalBoolean(latestTimestampModifiable, false);
 
       statusSubscription = ROS2Tools.createNotificationSubscription(ros2Node, OPERATOR_UI.getTopic(ROS2ActorDesignation.OPERATOR.getIncomingQualifier()));
       commandPublisher = ros2Node.createPublisher(OPERATOR_UI.getTopic(ROS2ActorDesignation.OPERATOR.getOutgoingQualifier()));
@@ -59,7 +59,10 @@ public class RDXLeRobotOperation
    public void create(RDXBaseUI baseUI)
    {
       for (RobotSide side : RobotSide.values)
-         actionHandPoseGraphics.put(side, new RDXReferenceFrameGraphic(0.15));
+      {
+         actionHandPoseGraphics.put(side, new RDXReferenceFrameGraphic(0.15, Color.ORANGE));
+         actionForearmPoseGraphics.put(side, new RDXReferenceFrameGraphic(0.15, Color.OLIVE));
+      }
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
@@ -78,9 +81,11 @@ public class RDXLeRobotOperation
          latestTimestampModifiable.fromMessage(status.getLatestTimestampModifiable());
          running.fromMessage(status.getRunning());
          controlRobot.fromMessage(status.getControlRobot());
-         controlArmsOnly.fromMessage(status.getControlArmsOnly());
          for (RobotSide side : RobotSide.values)
+         {
             actionHandPoseGraphics.get(side).setPoseInWorldFrame(status.getActionHandPoses()[side.ordinal()]);
+            actionForearmPoseGraphics.get(side).setPoseInWorldFrame(status.getActionForearmPoses()[side.ordinal()]);
+         }
          pythonStatusFrequency = status.getPythonStatusFrequency();
          statusMessage = status.getPythonStatusMessageAsString();
          receivedActions = status.getReceivedActions();
@@ -97,8 +102,6 @@ public class RDXLeRobotOperation
       ImGui.endDisabled();
       ImGui.sameLine();
       ImGui.textColored(ImGuiTools.DARK_RED, "Press SPACE to stop.");
-      if (ImGui.checkbox(labels.get("Control arms only"), controlArmsOnly.getValue()))
-         controlArmsOnly.setValue(!controlArmsOnly.getValue());
 
       if (ImGui.isKeyPressed(ImGuiTools.getSpaceKey()))
       {
@@ -114,7 +117,6 @@ public class RDXLeRobotOperation
          latestTimestampModifiable.toMessage(command.getLatestTimestampModifiable());
          command.setRunning(running.toMessage());
          command.setControlRobot(controlRobot.toMessage());
-         command.setControlArmsOnly(controlArmsOnly.toMessage());
          commandPublisher.publish(command);
       }
    }
@@ -123,6 +125,9 @@ public class RDXLeRobotOperation
    {
       if (running.getValue())
          for (RobotSide side : RobotSide.values)
+         {
             actionHandPoseGraphics.get(side).getRenderables(renderables, pool);
+            actionForearmPoseGraphics.get(side).getRenderables(renderables, pool);
+         }
    }
 }
