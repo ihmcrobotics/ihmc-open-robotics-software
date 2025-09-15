@@ -21,16 +21,22 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.ImageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.zed.global.zed;
+import vision_msgs.msg.dds.Detection3DArray;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class IsaacROSFoundationPoseDemo
 {
@@ -40,11 +46,14 @@ public class IsaacROSFoundationPoseDemo
    private final ROS2Topic<Image> depthTopic = reliableQoS.withModule("depth_image").withType(Image.class);
    private final ROS2Topic<Image> segmentationTopic = reliableQoS.withModule("segmentation").withType(Image.class);
    private final ROS2Topic<CameraInfo> cameraInfoTopic = reliableQoS.withModule("camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<Detection3DArray> trackingResultTopic = new ROS2Topic<>().withModule("tracking/output").withType(Detection3DArray.class);
+   private static final ROS2Topic<Detection3DArray> registrationResultTopic = new ROS2Topic<>().withModule("pose_estimation/output")
+                                                                                               .withType(Detection3DArray.class);
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
 
-   private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node);
+   private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node, 0.5);
 
    private final ZEDImageSensor zedImageSensor;
    private final ROS2FollowingFrame ros2ZEDFrame;
@@ -53,6 +62,15 @@ public class IsaacROSFoundationPoseDemo
    private final YOLOv8DetectionExecutor yoloExecutor;
 
    private final RepeatingTaskThread taskThread;
+
+   // For measuring registration time (start FoundationPose first, then this process)
+   private final AtomicReference<Instant> firstSegmentationPublished = new AtomicReference<>(null);
+   private final AtomicReference<Instant> firstTrackingReceived = new AtomicReference<>(null);
+   private final AtomicReference<Instant> firstRegistrationReceived = new AtomicReference<>(null);
+   private ROS2Subscription<Detection3DArray> trackingSubscription
+         = ros2Node.createSubscription2(trackingResultTopic, result -> firstTrackingReceived.compareAndSet(null, Instant.now()));
+   private ROS2Subscription<Detection3DArray> registrationSubscription
+         = ros2Node.createSubscription2(registrationResultTopic, result -> firstRegistrationReceived.compareAndSet(null, Instant.now()));
 
    private IsaacROSFoundationPoseDemo()
    {
@@ -66,6 +84,7 @@ public class IsaacROSFoundationPoseDemo
       detectionManager = new DetectionManager(ros2Node);
       yoloExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator), () -> true);
       yoloExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
+      yoloExecutor.disableAllModels();
 
       taskThread = new RepeatingTaskThread(getClass().getSimpleName() + "Thread", this::task);
       taskThread.startRepeating();
@@ -85,7 +104,7 @@ public class IsaacROSFoundationPoseDemo
 
          // Get the color, and convert to RGB for FoundationPose
          RawImage color = zedImageSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-         RawImage rgb = color.convertTo(PixelFormat.RGB8);
+         RawImage rgb = ImageTools.convertColor(color, PixelFormat.RGB8);
 
          // Get the depth and convert it to 32F for FoundationPose
          RawImage depth = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
@@ -116,6 +135,27 @@ public class IsaacROSFoundationPoseDemo
          rgb.release();
          depth.release();
          depth32F.release();
+
+         // Print stuff
+         if (trackingSubscription != null && firstSegmentationPublished.get() != null && firstTrackingReceived.get() != null)
+         {
+            trackingSubscription.remove();
+            trackingSubscription = null;
+
+            Instant segmentation = firstSegmentationPublished.get();
+            Instant result = firstTrackingReceived.get();
+            LogTools.info("Segmentation to tracking result time: {}", Duration.between(segmentation, result));
+         }
+
+         if (registrationSubscription != null && firstSegmentationPublished.get() != null && firstRegistrationReceived.get() != null)
+         {
+            registrationSubscription.remove();
+            registrationSubscription = null;
+
+            Instant segmentation = firstSegmentationPublished.get();
+            Instant result = firstRegistrationReceived.get();
+            LogTools.info("Segmentation to registration result time: {}", Duration.between(segmentation, result));
+         }
       }
       catch (InterruptedException ignored) {}
    }
@@ -168,6 +208,7 @@ public class IsaacROSFoundationPoseDemo
          }
 
          imagePublisher.publishImage(segmentationTopic, resizedSegmentation, ros2ZEDFrame);
+         firstSegmentationPublished.compareAndSet(null, Instant.now());
 
          resizedSegmentation.release();
          segmentation.release();
@@ -192,16 +233,17 @@ public class IsaacROSFoundationPoseDemo
       }
       catch (Throwable t)
       {
+         Throwable throwable = t;
          LogTools.error("OOPS");
-         LogTools.error(t.getMessage());
-         LogTools.error(t.getCause());
-         while (t != null) {
-            for (StackTraceElement frame : t.getStackTrace()) {
+         LogTools.error(throwable.getMessage());
+         LogTools.error(throwable.getCause());
+         while (throwable != null) {
+            for (StackTraceElement frame : throwable.getStackTrace()) {
                System.err.println(frame.toString());
             }
-            t = t.getCause();
-            if (t != null) {
-               System.err.println("Caused by: " + t.getMessage());
+            throwable = throwable.getCause();
+            if (throwable != null) {
+               System.err.println("Caused by: " + throwable.getMessage());
             }
          }
       }

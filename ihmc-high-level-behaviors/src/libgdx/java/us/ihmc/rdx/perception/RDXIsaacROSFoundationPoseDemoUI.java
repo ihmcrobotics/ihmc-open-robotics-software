@@ -1,8 +1,10 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence;
@@ -16,7 +18,6 @@ import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 import vision_msgs.msg.dds.Detection3D;
 import vision_msgs.msg.dds.Detection3DArray;
@@ -26,15 +27,23 @@ import java.util.Set;
 
 public class RDXIsaacROSFoundationPoseDemoUI
 {
+   private static final RotationMatrix FOUNDATIONPOSE_TO_IHMC_ROTATION = new RotationMatrix(new double[] {0, 0, 1,
+                                                                                                         -1, 0, 0,
+                                                                                                          0,-1, 0});
+
+   private static final ROS2Topic<Detection3DArray> trackingResultTopic = new ROS2Topic<>().withModule("tracking/output").withType(Detection3DArray.class);
+   private static final ROS2Topic<Detection3DArray> registrationResultTopic = new ROS2Topic<>().withModule("pose_estimation/output")
+                                                                                               .withType(Detection3DArray.class);
+
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
-   private final ROS2Subscription<Detection3DArray> outputSubscription = ros2Node.createSubscription2(new ROS2Topic<>().withModule("tracking/output")
-                                                                                                                       .withType(Detection3DArray.class),
-                                                                                                      this::receiveOutput);
    private final Set<Box3D> detectedBoundingBoxes = new HashSet<>();
 
    public RDXIsaacROSFoundationPoseDemoUI()
    {
+      ros2Node.createSubscription2(trackingResultTopic, this::receiveOutput);
+      ros2Node.createSubscription2(registrationResultTopic, this::receiveOutput);
+
       RDXBaseUI baseUI = new RDXBaseUI();
       RDXPerceptionVisualizersPanel visualizers = new RDXPerceptionVisualizersPanel();
       Set<RDXBoxVisualizer> boxVisualizers = new HashSet<>();
@@ -79,7 +88,10 @@ public class RDXIsaacROSFoundationPoseDemoUI
                for (Box3D boundingBox : detectedBoundingBoxes)
                {
                   RDXBoxVisualizer visualizer = new RDXBoxVisualizer();
+                  visualizer.setLineWidth(0.01);
+                  visualizer.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
                   visualizer.generateMesh(boundingBox);
+                  visualizer.update();
                   boxVisualizers.add(visualizer);
                   baseUI.getPrimaryScene().addRenderableProvider(visualizer, visualizer);
                }
@@ -93,7 +105,6 @@ public class RDXIsaacROSFoundationPoseDemoUI
             baseUI.dispose();
 
             peerClockOffsetEstimator.destroy();
-            outputSubscription.remove();
             ros2Node.destroy();
          }
       });
@@ -111,6 +122,7 @@ public class RDXIsaacROSFoundationPoseDemoUI
          {
             Detection3D detection = detections.get(i);
             Pose3D pose = detection.getBbox().getCenter();
+            pose.prependRotation(FOUNDATIONPOSE_TO_IHMC_ROTATION);
             Vector3D size = detection.getBbox().getSize();
             detectedBoundingBoxes.add(new Box3D(pose, size));
          }
