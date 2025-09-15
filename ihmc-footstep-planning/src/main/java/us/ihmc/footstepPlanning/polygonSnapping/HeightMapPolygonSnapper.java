@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -11,15 +10,14 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +28,6 @@ public class HeightMapPolygonSnapper
    private final Plane3D bestFitPlane = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private final ConvexPolygon2D snappedPolygon = new ConvexPolygon2D();
-
-   private double maxPossibleRMSError;
-   private double rootMeanSquaredError;
-   private double areaFraction;
-
    private double snapAreaResolution = 0.2;
 
    public void setSnapAreaResolution(double snapAreaResolution)
@@ -115,10 +108,6 @@ public class HeightMapPolygonSnapper
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
 
-         // FIXME if using the terrain map, this will not have value.
-         snapData.setRMSErrorHeightMap(rootMeanSquaredError / maxPossibleRMSError);
-         snapData.setSnapAreaFraction(areaFraction);
-
          // get the cropped polygon back in sole frame.
          // FIXME if using the terrain map, this will not have value.
          snapData.getCroppedFoothold().set(snappedPolygon);
@@ -144,11 +133,9 @@ public class HeightMapPolygonSnapper
    private RigidBodyTransform computeSnapFromTerrainMap(ConvexPolygon2DReadOnly polygonToSnap, TerrainMapData terrainMapData)
    {
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
-      int rIndex = terrainMapData.getLocalXIndex(centroid.getX());
-      int cIndex = terrainMapData.getLocalYIndex(centroid.getY());
 
-      double height = terrainMapData.getHeightFloatLocal(rIndex, cIndex);
-      UnitVector3DReadOnly normal = terrainMapData.getNormalLocal(rIndex, cIndex);
+      double height = terrainMapData.getHeightInWorld(centroid.getX(), centroid.getY());
+      UnitVector3DReadOnly normal = terrainMapData.getNormal(centroid.getX(), centroid.getY());
 
       // The surface normal must point up. If it does not, recreate it so that it does.
       if (normal.getZ() < 0.0)
@@ -164,9 +151,6 @@ public class HeightMapPolygonSnapper
 
       // TODO need to compute the snapped polygon
       snappedPolygon.set(polygonToSnap);
-      // TODO need to compute the RMS error on the GPU.
-      rootMeanSquaredError = Double.NaN;
-      areaFraction = terrainMapData.getSnappedAreaLocal(rIndex, cIndex);
 
       return transformToReturn;
    }
@@ -181,31 +165,13 @@ public class HeightMapPolygonSnapper
 
       if (!computeFootPointsInTheEnvironment(polygonToSnap, heightMapData, terrainMapData, snapHeightThreshold, minSurfaceIncline, minimumHeightToConsider, footPointsInEnvironment))
       {
-         areaFraction = Double.NaN;
          return null;
       }
 
       bestFitPlane.setToNaN();
 
       snappedPolygon.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
-      areaFraction = snappedPolygon.getArea() / polygonToSnap.getArea();
-
       planeFitter.fitPlaneToPoints(footPointsInEnvironment, bestFitPlane);
-      rootMeanSquaredError = 0.0;
-
-      for (Point3DReadOnly heightMapPoint : footPointsInEnvironment)
-      {
-         double predictedHeight = bestFitPlane.getZOnPlane(heightMapPoint.getX(), heightMapPoint.getY());
-         rootMeanSquaredError += MathTools.square(predictedHeight - heightMapPoint.getZ());
-      }
-      maxPossibleRMSError = MathTools.square(1.0 / snapAreaResolution) * MathTools.square(0.5 * snapHeightThreshold);
-
-      if (bestFitPlane.containsNaN())
-      {
-         return null;
-      }
-
-      rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / footPointsInEnvironment.size());
 
       // get the point that is the center of the plane.
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
@@ -323,26 +289,6 @@ public class HeightMapPolygonSnapper
    public Plane3D getBestFitPlane()
    {
       return bestFitPlane;
-   }
-
-   public double getRMSError()
-   {
-      return rootMeanSquaredError;
-   }
-
-   public double getMaxPossibleRMSError()
-   {
-      return maxPossibleRMSError;
-   }
-
-   public double getNormalizedRMSError()
-   {
-      return rootMeanSquaredError / maxPossibleRMSError;
-   }
-
-   public double getAreaFraction()
-   {
-      return areaFraction;
    }
 
    public ConvexPolygon2DReadOnly getSnappedPolygonInWorld()

@@ -1,6 +1,7 @@
 #ifndef __perception_msgs__msg__TerrainMapMessage__idl__
 #define __perception_msgs__msg__TerrainMapMessage__idl__
 
+#include "perception_msgs/msg/./HeightMapMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -19,34 +20,17 @@ module perception_msgs
          */
         unsigned long long sequence_id;
         /**
-         * X coordinate of the center of the terrain map
+         * Height map message
          */
-        double map_center_x;
+        perception_msgs::msg::dds::HeightMapMessage height_map;
         /**
-         * Y coordinate of the center of the terrain map
+         * Traversability score, on a 0 to 1 scale
          */
-        double map_center_y;
+        sequence<float, 255000> traversability_score;
         /**
-         * The number of cells per side of the terrain map grid
+         * Classifying traversability according to SnapResult
          */
-        double width_in_meters;
-        /**
-         * The number of cells contained per meter. This defines the resolution of the grid.
-         */
-        octet cells_per_meter;
-        /**
-         * Cell size in meters of an individual cell
-         */
-        double cell_size_in_meters;
-        /**
-         * The raw data for the terrain cost value, which are stored as chars.
-         */
-        sequence<octet, 255000> terrain_cost_data;
-        /**
-         * The raw data for the contact map value, which are stored as chars.
-         */
-        sequence<octet, 255000> contact_map_data;
-        sequence<float, 255000> heights;
+        sequence<octet, 255000> traversability_class;
         /**
          * The raw data for the snap normal x value, which are stored as chars.
          */
@@ -59,22 +43,6 @@ module perception_msgs
          * The raw data for the snap normal z value, which are stored as chars.
          */
         sequence<octet, 255000> snapped_normal_z_data;
-        /**
-         * The raw data for the snapped support area, which are stored as chars.
-         */
-        sequence<octet, 255000> snapped_area_data;
-        /**
-         * The raw data for the steppability area, which are stored as chars.
-         */
-        sequence<octet, 255000> steppability_data;
-        /**
-         * The raw data for the steppable connections value, which are stored as chars.
-         */
-        sequence<octet, 255000> steppable_connections_data;
-        /**
-         * Squared error term in the least-squares calculation when fitting normals
-         */
-        sequence<float, 255000> squared_error_data;
       };
     };
   };
