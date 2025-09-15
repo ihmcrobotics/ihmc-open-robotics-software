@@ -95,15 +95,16 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
 
    // IMUs to use
    private final List<String> imuSensorsToUse = new ArrayList<>(List.of(pelvisIMU,
-                                                                        //torsoIMU,
-                                                                        leftHipXIMU,
+                                                                        torsoIMU,
+//                                                                        leftHipXIMU,
                                                                         leftThighIMU,
                                                                         leftShinIMU,
                                                                         leftFootIMU,
-                                                                        rightHipXIMU,
+//                                                                        rightHipXIMU,
                                                                         rightThighIMU,
                                                                         rightShinIMU,
-                                                                        rightFootIMU));
+                                                                        rightFootIMU,
+                                                                        headIMU));
 
    private AlexanderVersionInterface alexanderVersion;
 
@@ -214,10 +215,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
 
    public String getHeadIMUName()
    {
-      if (imuSensorsToUse.contains(headIMU))
-         return headIMU;
-      else
-         return null;
+      return headIMU;
    }
 
    public String getHipIMUName(RobotSide robotSide)
