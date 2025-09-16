@@ -152,6 +152,7 @@ public class YOLOv8Tools
          opencv_imgproc.putText(annotatedImage, text, textLocation, FONT, FONT_SCALE, WHITE, FONT_THICKNESS, LINE_TYPE, false);
 
          // Add green tint to show mask
+         // FIXME: A simple resize isn't accurate here as the mask and input image may have different aspect ratios.
          RawImage mask = detection.mask();
          Mat resizedMask = new Mat();
          opencv_imgproc.resize(mask.getCpuImageMat(), resizedMask, annotatedImage.size());
