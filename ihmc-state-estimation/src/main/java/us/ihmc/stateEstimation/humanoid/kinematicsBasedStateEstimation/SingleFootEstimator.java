@@ -6,10 +6,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
@@ -42,7 +40,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-class SingleFootEstimator implements SCS2YoGraphicHolder
+public class SingleFootEstimator implements SCS2YoGraphicHolder
 {
    private final RigidBodyBasics foot;
 
@@ -175,6 +173,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
       footToRootJointPosition.reset();
       copFilteredInFootFrame.reset();
       copFilteredInFootFrame.update(0.0, 0.0);
+      copFusedPositionInWorld.setMatchingFrame(copFilteredInFootFrame, 0.0);
       copVelocityInWorld.setToZero();
    }
 
@@ -191,11 +190,11 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    /**
     * Updates the different kinematics related stuff that is used to estimate the pelvis state. This should be called before calling the other objectives.
     */
-   public void updateKinematics(TwistReadOnly rootBodyTwist)
+   public void updateStateFromKinematics(TwistReadOnly rootBodyTwist)
    {
-      computeFootTwistInWorld(rootBodyTwist);
-      computeCoPLinearVelocityInWorld(copVelocityInWorld);
+      computeFootTwistInWorldFusingBaseStateAndFootIMU(rootBodyTwist);
 
+      // Update the vector from the root joint to the foot, based on the kinematics
       tempFramePoint.setToZero(rootJointFrame);
       tempFramePoint.changeFrame(soleFrame);
 
@@ -216,42 +215,33 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
     * @param useControllerDesiredCoP
     * @param zPosition
     */
-   public void updateCoPAndFootSettingZ(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP, double zPosition)
+   public void computeStateSettingCoPZ(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP, double zPosition)
    {
-      updateCoPPosition(trustCoPAsNonSlippingContactPoint, useControllerDesiredCoP);
+      updateCoPState(trustCoPAsNonSlippingContactPoint, useControllerDesiredCoP);
       copFusedPositionInWorld.setZ(zPosition);
-      correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint);
-   }
-
-   public void updateCoPAndFootPosition(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP)
-   {
-      updateCoPPosition(trustCoPAsNonSlippingContactPoint, useControllerDesiredCoP);
-      correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint);
-   }
-
-   public void setFootZPositionInWorld(double zPosition)
-   {
-      footPositionInWorld.setZ(zPosition);
-   }
-
-
-   /**
-    * Estimates the pelvis position and linear velocity using the leg kinematics
-    *
-    * @param trustedFoot          is the foot used to estimates the pelvis state
-    * @param numberOfTrustedSides is only one or both legs used to estimate the pelvis state
-    */
-   public void correctPelvisFromKinematics(int numberOfTrustedFeet,
-                                           double alphaVelocityUpdate,
-                                           FixedFramePoint3DBasics rootJointPosition,
-                                           FixedFrameVector3DBasics rootJointLinearVelocity)
-   {
-      double scaleFactor = 1.0 / numberOfTrustedFeet;
+      if (trustCoPAsNonSlippingContactPoint)
+         correctFootPositionUsingCoP();
 
       rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
-      rootJointPosition.scaleAdd(scaleFactor, rootJointPositionPerFoot, rootJointPosition);
+   }
 
-      rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaVelocityUpdate, copVelocityInWorld, rootJointLinearVelocity);
+   public void computeState(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP)
+   {
+      updateCoPState(trustCoPAsNonSlippingContactPoint, useControllerDesiredCoP);
+      if (trustCoPAsNonSlippingContactPoint)
+         correctFootPositionUsingCoP();
+
+      rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
+   }
+
+   public void computeStateSettingFootZ(double zPosition)
+   {
+      footPositionInWorld.setZ(zPosition);
+      // Update the CoP position from this foot position
+      copIKPositionInWorld.set(footPositionInWorld);
+      copFusedPositionInWorld.set(footPositionInWorld);
+
+      rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
    }
 
    /**
@@ -269,25 +259,30 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
     */
    public void correctFootPositionFromRootJoint(boolean isTrusted, boolean trustCoPAsNonSlippingContactPoint, FramePoint3DReadOnly rootJointPosition)
    {
+      // Store the old, uncorrected foot position.
       tempPoint.set(footPositionInWorld);
+      // Update the foot position
       footPositionInWorld.sub(rootJointPosition, footToRootJointPosition);
 
       if (!isTrusted)
       {
+         // If the foot isn't trusted, the CoP position isn't relevant, and we can set it to zero in the foot frame.
          copFusedPositionInWorld.set(footPositionInWorld);
          copRawInFootFrame.setToZero();
          copFilteredInFootFrame.setToZero();
       }
       else if (trustCoPAsNonSlippingContactPoint)
       {
+         // If the foot is trusted, but we allow the CoP to move, we need to shift the CoP position to account for this drift. That means computing the drift
+         // delta correction, and then adding it to the position.
          tempFrameVector.sub(footPositionInWorld, tempPoint); // Delta from previous to new foot position
          copFusedPositionInWorld.add(tempFrameVector); // New CoP position
       }
    }
 
-   public FrameVector3DReadOnly getFootToRootJointPosition()
+   public FramePoint3DReadOnly getRootJointPositionFromKinematics()
    {
-      return footToRootJointPosition;
+      return rootJointPositionPerFoot;
    }
 
    public FrameVector3DReadOnly getCopVelocityInWorld()
@@ -313,7 +308,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    private final FramePoint2D tempCoP2d = new FramePoint2D();
    private final FrameVector3D tempCoPOffset = new FrameVector3D();
 
-   private void updateCoPPosition(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP)
+   private void updateCoPState(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP)
    {
       if (trustCoPAsNonSlippingContactPoint)
       {
@@ -379,25 +374,28 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
          tempCoP2d.setToZero(soleFrame);
          // Update the CoP value to match the center of the foot.
          copIKPositionInWorld.setFromReferenceFrame(soleFrame);
+         copFusedPositionInWorld.setFromReferenceFrame(soleFrame);
       }
 
+      // If we have an IMU and are using it, we should update the fused value.
       if (useIMUData.getValue() && footIMU != null)
       {
          // Integrate the fused position using the velocity, which is from the kinematics and the IMU.
          computeLinearVelocityAtPointInWorld(copFusedPositionInWorld, tempFrameVector);
          copIMUPositionInWorld.scaleAdd(footAlphaLeakIMUOnly.getValue() * estimatorDT, tempFrameVector, copFusedPositionInWorld);
 
-         // Fuse the kinematic data with the IMU data
+         // Fuse the kinematic data with the IMU data. A higher break frequency equals a lower alpha value, trusting the kinematics more. If break frequency is
+         // zero, alpha equals one, and we trust the IMU completely.
          double alpha = AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
          copFusedPositionInWorld.interpolate(copIKPositionInWorld, copIMUPositionInWorld, alpha);
       }
+
+      // Update the velocity of the foot at the CoP position
+      computeLinearVelocityAtPointInWorld(copFusedPositionInWorld, copVelocityInWorld);
    }
 
-   private void correctFootPositionsUsingCoP(boolean trustCoPAsNonSlippingContactPoint)
+   private void correctFootPositionUsingCoP()
    {
-      if (!trustCoPAsNonSlippingContactPoint)
-         return;
-
       // Compute where the CoP position is in the world, according to the kinematics
       tempCoPOffset.setIncludingFrame(copFilteredInFootFrame, 0.0);
       tempCoPOffset.changeFrame(worldFrame);
@@ -408,7 +406,7 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
    private final FrameVector3D linearAcceleration = new FrameVector3D();
    private final FrameVector3D angularVelocity = new FrameVector3D();
 
-   private void computeFootTwistInWorld(TwistReadOnly rootBodyTwist)
+   private void computeFootTwistInWorldFusingBaseStateAndFootIMU(TwistReadOnly rootBodyTwist)
    {
       tempRootBodyTwist.setIncludingFrame(rootBodyTwist);
       tempRootBodyTwist.setBaseFrame(worldFrame);
@@ -476,11 +474,6 @@ class SingleFootEstimator implements SCS2YoGraphicHolder
          footFusedLinearVelocityInWorld.set(footTwistInWorld.getLinearPart());
          footFusedAngularVelocityInWorld.set(footTwistInWorld.getAngularPart());
       }
-   }
-
-   private void computeCoPLinearVelocityInWorld(FixedFrameVector3DBasics footLinearVelocityToPack)
-   {
-      computeLinearVelocityAtPointInWorld(copFusedPositionInWorld, footLinearVelocityToPack);
    }
 
    private void computeLinearVelocityAtPointInWorld(FramePoint3DReadOnly point, FixedFrameVector3DBasics footLinearVelocityToPack)
