@@ -63,9 +63,11 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
 
    private final YoFrameVector3D copVelocityInWorld;
    private final AlphaFilteredYoFrameVector3D footToRootJointPosition;
+   private final AlphaFilteredYoFrameVector3D footToRootJointVelocity;
    private final YoFramePoint3D footPositionInWorld;
    /** Debug variable */
    private final YoFramePoint3D rootJointPositionPerFoot;
+   private final YoFrameVector3D rootJointVelocityPerFoot;
 
    private final YoFramePoint3D copIKPositionInWorld;
    private final YoFramePoint3D copIMUPositionInWorld;
@@ -131,7 +133,9 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
 
       DoubleProvider alphaFoot = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(), estimatorDT);
       footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
+      footToRootJointVelocity = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointVelocity", "", registry, alphaFoot, worldFrame);
       rootJointPositionPerFoot = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
+      rootJointVelocityPerFoot = new YoFrameVector3D(namePrefix + "BasedRootJointVelocity", worldFrame, registry);
       footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
       footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
       footCenterCoPLineSegment = new FrameLineSegment2D(soleFrame);
@@ -182,6 +186,7 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
    public void initialize()
    {
       footToRootJointPosition.reset();
+      footToRootJointVelocity.reset();
       copFilteredInFootFrame.reset();
       copFilteredInFootFrame.update(0.0, 0.0);
       copFusedPositionInWorld.setMatchingFrame(copFilteredInFootFrame, 0.0);
@@ -236,6 +241,7 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
          correctFootPositionUsingCoP();
 
       rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
+      rootJointVelocityPerFoot.sub(footFusedLinearVelocityInWorld, footToRootJointVelocity);
    }
 
    public void computeState(boolean trustCoPAsNonSlippingContactPoint, boolean useControllerDesiredCoP)
@@ -245,6 +251,7 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
          correctFootPositionUsingCoP();
 
       rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
+      rootJointVelocityPerFoot.sub(footFusedLinearVelocityInWorld, footToRootJointVelocity);
    }
 
    public void computeStateSettingFootZ(double zPosition)
@@ -255,6 +262,7 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
       copFusedPositionInWorld.set(footPositionInWorld);
 
       rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
+      rootJointVelocityPerFoot.sub(footFusedLinearVelocityInWorld, footToRootJointVelocity);
    }
 
    /**
@@ -296,6 +304,11 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
    public FramePoint3DReadOnly getRootJointPositionFromKinematics()
    {
       return rootJointPositionPerFoot;
+   }
+
+   public FrameVector3DReadOnly getRootJointVelocityFromKinematics()
+   {
+      return rootJointVelocityPerFoot;
    }
 
    public FrameVector3DReadOnly getCopVelocityInWorld()
@@ -426,6 +439,11 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
       tempRootBodyTwist.changeFrame(foot.getBodyFixedFrame());
 
       foot.getBodyFixedFrame().getTwistRelativeToOther(rootJointFrame, footTwistInWorld);
+
+      tempFrameVector.setIncludingFrame(footTwistInWorld.getLinearPart());
+      tempFrameVector.changeFrame(worldFrame);
+      footToRootJointVelocity.update(tempFrameVector);
+
       footTwistInWorld.add(tempRootBodyTwist);
       footTwistInWorld.setBodyFrame(soleFrame);
       footTwistInWorld.changeFrame(worldFrame);

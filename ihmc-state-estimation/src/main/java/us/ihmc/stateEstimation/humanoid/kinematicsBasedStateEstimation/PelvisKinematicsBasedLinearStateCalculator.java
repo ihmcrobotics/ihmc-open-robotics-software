@@ -45,6 +45,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final YoFramePoint3D rootJointPosition = new YoFramePoint3D("estimatedRootJointPositionKinematics", worldFrame, registry);
    private final YoFrameVector3D rootJointLinearVelocity = new YoFrameVector3D("estimatedRootJointLinearVelocityKinematics", worldFrame, registry);
+   private final YoFrameVector3D averagedTrustedFootVelocity = new YoFrameVector3D("averagedTrustedFootVelocity", worldFrame, registry);
    private final DoubleProvider alphaRootJointLinearVelocity;
 
    /** Debug variable */
@@ -180,17 +181,23 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
       else
       {
+         averagedTrustedFootVelocity.setToZero();
          for (int i = 0; i < trustedFeet.size(); i++)
          {
             SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
 
             double scaleFactor = 1.0 / trustedFeet.size();
 
+            // The root joint position is zeroed when we call #updateKinematics
             rootJointPosition.scaleAdd(scaleFactor, footEstimator.getRootJointPositionFromKinematics(), rootJointPosition);
-            rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaRootJointLinearVelocity.getValue(),
-                                             footEstimator.getCopVelocityInWorld(),
-                                             rootJointLinearVelocity);
+            averagedTrustedFootVelocity.scaleAdd(scaleFactor, footEstimator.getCopVelocityInWorld(), averagedTrustedFootVelocity);
+
          }
+
+         // We want the average velocity of the feet to trend to zero, since the trusted feet are assumed to not be moving.
+         rootJointLinearVelocity.scaleAdd(-alphaRootJointLinearVelocity.getValue(),
+                                          averagedTrustedFootVelocity,
+                                          rootJointLinearVelocity);
       }
 
       rootJointLinearVelocityFDDebug.update();
