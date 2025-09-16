@@ -74,7 +74,7 @@ public class IsaacROSFoundationPoseDemo
 
    private IsaacROSFoundationPoseDemo()
    {
-      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2I, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL);
+      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
       zedImageSensor.enablePositionalTracking(true);
       zedImageSensor.setSensorFrame(zedImageSensor.getTrackedSensorFrame());
       zedImageSensor.run(true);
