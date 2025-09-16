@@ -5,7 +5,6 @@ plugins {
 
 ihmc {
    loadProductProperties("../product.properties")
-   maintainer = "Daniel Duran (dduran@ihmc.us)"
 
    configureDependencyResolution()
    configurePublications()
@@ -35,35 +34,4 @@ testDependencies {
 
 dataSetsDependencies {
    api(ihmc.sourceSetProject("main"))
-}
-
-task updateDataSetList {
-   doFirst {
-      def resourcesDir = "src/data-sets/resources/us/ihmc/pathPlanning/dataSets"
-      def srcDir = "src/data-sets/java/us/ihmc/pathPlanning"
-      def className = "DataSetName"
-
-      def dataSetDir = new File(resourcesDir)
-      def dataSetList = files { dataSetDir.listFiles().sort().reverse() }
-
-      File classFile = new File(srcDir + "/" + className + ".java")
-      println classFile.getAbsolutePath()
-
-      if(classFile.exists())
-         classFile.delete()
-      classFile.createNewFile()
-
-      FileWriter fileWriter = new FileWriter(classFile, true)
-      fileWriter.write("package us.ihmc.pathPlanning;\n\n")
-      fileWriter.write("public enum " + className + "\n")
-      fileWriter.write("{\n")
-
-      dataSetList.each {
-         fileWriter.write("\t_" + it.name + ",\n")
-      }
-
-      fileWriter.write("}")
-      fileWriter.flush()
-      fileWriter.close()
-   }
 }
