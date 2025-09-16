@@ -265,8 +265,8 @@ public class YOLOv8Model
    /**
     * Run YOLO object detection and segmentation on the passed in {@code image}.
     *
-    * @param image               Image to run YOLO on. If this image isn't in BGR format, it will be converted to BGR.
-    *                            Pass in BGR images for optimal performance.
+    * @param image Image to run YOLO on. If this image isn't in BGR format, it will be converted to BGR.
+    *              Pass in BGR images for optimal performance.
     * @return List of {@link YOLOv8Detection}s found in the image.
     */
    public synchronized YOLOv8DetectionList run(RawImage image)
@@ -293,11 +293,6 @@ public class YOLOv8Model
       yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
       blob.close();
-
-      // Get some useful stuff
-      CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(bgrInputImage);
-      int shiftWidth = (bgrInputImage.getWidth() - DETECTION_SIZE.width()) / 2;
-      int shiftHeight = (bgrInputImage.getHeight() - DETECTION_SIZE.height()) / 2;
 
       /*
        * Output 0 contains data of all bounding boxes + mask weights detected by the model.
@@ -370,8 +365,6 @@ public class YOLOv8Model
                      .withInt(unfilteredDetectionCount)
                      .withPointer(confidenceThresholds)
                      .withPointer(ignoredObjectClasses)
-                     .withInt(shiftWidth)
-                     .withInt(shiftHeight)
                      .withPointer(filteredDetections)
                      .withPointer(filteredDetectionCountPointer)
                      .run(cudaStream, gridDims, blockDims, 0);
@@ -408,12 +401,22 @@ public class YOLOv8Model
                                                   cudaMemcpyDefault,
                                                   cudaStream));
 
+         // Get some useful stuff
+         CameraIntrinsics maskIntrinsics = computeMaskIntrinsics(bgrInputImage);
+         float scaleFactor = Math.min((float) bgrInputImage.getWidth() / DETECTION_SIZE.width(), (float) bgrInputImage.getHeight() / DETECTION_SIZE.height());
+         float offsetX = 0.5f * (bgrInputImage.getWidth() / scaleFactor - DETECTION_SIZE.width());
+         float offsetY = 0.5f * (bgrInputImage.getHeight() / scaleFactor - DETECTION_SIZE.height());
+
+         // Create the list of YOLOv8Detections
          for (int i = 0; i < remainingDetectionCount; ++i)
          {
             int index = includedRows.get(i);
             FloatPointer row = filteredDetections.getPointer((long) FILTERED_FLOATS_PER_ROW * index);
 
-            Rect boundingBox = new Rect(Math.round(row.get(0)), Math.round(row.get(1)), Math.round(row.get(2)), Math.round(row.get(3)));
+            Rect boundingBox = new Rect(Math.round(scaleFactor * row.get(0) + offsetX),
+                                        Math.round(scaleFactor * row.get(1) + offsetY),
+                                        Math.round(scaleFactor * row.get(2)),
+                                        Math.round(scaleFactor * row.get(3)));
             float confidence = row.get(4);
             int classID = (int) row.get(5);
             RawImage mask = computeDetectionMask(filteredDetections, prototypeMasks, index, maskThresholds[classID], maskIntrinsics, bgrInputImage);
@@ -438,12 +441,15 @@ public class YOLOv8Model
       int maskHeight = outputBlobs.get(1).size(2);
       int maskWidth = outputBlobs.get(1).size(3);
 
-      float xScaleFactor = (float) maskWidth / bgrInputImage.getWidth();
-      float yScaleFactor = (float) maskHeight / bgrInputImage.getHeight();
-      float maskFocalLengthX = xScaleFactor * bgrInputImage.getFocalLengthX();
-      float maskFocalLengthY = yScaleFactor * bgrInputImage.getFocalLengthY();
-      float maskPrincipalPointX = xScaleFactor * bgrInputImage.getPrincipalPointX();
-      float maskPrincipalPointY = yScaleFactor * bgrInputImage.getPrincipalPointY();
+      float scaleFactor = Math.max((float) maskWidth / bgrInputImage.getWidth(), (float) maskHeight / bgrInputImage.getHeight());
+
+      float offsetX = 0.5f * (maskWidth - scaleFactor * bgrInputImage.getWidth());
+      float offsetY = 0.5f * (maskHeight - scaleFactor * bgrInputImage.getHeight());
+
+      float maskFocalLengthX = scaleFactor * bgrInputImage.getFocalLengthX();
+      float maskFocalLengthY = scaleFactor * bgrInputImage.getFocalLengthY();
+      float maskPrincipalPointX = scaleFactor * bgrInputImage.getPrincipalPointX() + offsetX;
+      float maskPrincipalPointY = scaleFactor * bgrInputImage.getPrincipalPointY() + offsetY;
 
       return new CameraIntrinsics(maskHeight, maskWidth, maskFocalLengthX, maskFocalLengthY, maskPrincipalPointX, maskPrincipalPointY);
    }
