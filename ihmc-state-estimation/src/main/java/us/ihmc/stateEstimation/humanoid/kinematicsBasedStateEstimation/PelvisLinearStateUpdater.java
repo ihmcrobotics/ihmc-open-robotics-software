@@ -189,12 +189,16 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                                   stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz());
       DoubleProvider copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
       YoBoolean useFootIMUData = new YoBoolean("useFootIMUData", registry);
+      YoDouble footLinearVelocityMovingThreshold = new YoDouble("footLinearVelocityMovingThreshold", registry);
+      YoDouble footAngularVelocityMovingThreshold = new YoDouble("footAngularVelocityMovingThreshold", registry);
       YoDouble footAlphaLeakIMUOnly = new YoDouble("footIMUOnlyAlphaLeak", registry);
       YoDouble footImuAgainstKinematicsForVelocityBreakFrequency = new YoDouble("footIMUAgainstKinematicsForVelocityBreakFrequency", registry);
       YoDouble footImuAgainstKinematicsForPositionBreakFrequency = new YoDouble("footIMUAgainstKinematicsForPositionBreakFrequency", registry);
       footImuAgainstKinematicsForPositionBreakFrequency.set(12.0);
       footImuAgainstKinematicsForVelocityBreakFrequency.set(2.0);
       footAlphaLeakIMUOnly.set(0.999);
+      footLinearVelocityMovingThreshold.set(0.3);
+      footAngularVelocityMovingThreshold.set(0.6);
 
       RigidBodyBasics[] feetRigidBodies = feetContactablePlaneBodies.keySet().toArray(new RigidBodyBasics[0]);
 
@@ -213,6 +217,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                                                      copFilterBreakFrequency,
                                                      centerOfPressureDataHolderFromController,
                                                      cancelGravityFromAccelerationMeasurement,
+                                                     footLinearVelocityMovingThreshold,
+                                                     footAngularVelocityMovingThreshold,
                                                      gravityVector,
                                                      useFootIMUData,
                                                      footImuAgainstKinematicsForPositionBreakFrequency,

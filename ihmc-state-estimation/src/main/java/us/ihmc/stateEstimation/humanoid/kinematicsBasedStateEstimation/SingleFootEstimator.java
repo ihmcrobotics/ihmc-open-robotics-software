@@ -39,6 +39,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SingleFootEstimator implements SCS2YoGraphicHolder
 {
@@ -56,6 +57,8 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
    private final YoFrameVector3D footFusedLinearVelocityInWorld;
    private final YoFrameVector3D footFusedAngularVelocityInWorld;
 
+   private final YoDouble footLinearVelocity;
+   private final YoDouble footAngularVelocity;
    private final YoBoolean footIsMoving;
 
    private final YoFrameVector3D copVelocityInWorld;
@@ -81,6 +84,8 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
    private final DoubleProvider imuAgainstKinematicsForVelocityBreakFrequency;
    private final DoubleProvider imuAgainstKinematicsForPositionBreakFrequency;
    private final BooleanProvider cancelGravityFromAccelerationMeasurement;
+   private final DoubleProvider footLinearVelocityMovingThreshold;
+   private final DoubleProvider footAngularVelocityMovingThreshold;
    private final FrameVector3DReadOnly gravityVector;
    private final double estimatorDT;
 
@@ -95,6 +100,8 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
                               DoubleProvider copFilterBreakFrequency,
                               CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
                               BooleanProvider cancelGravityFromAccelerationMeasurement,
+                              DoubleProvider footLinearVelocityMovingThreshold,
+                              DoubleProvider footAngularVelocityMovingThreshold,
                               FrameVector3DReadOnly gravityVector,
                               BooleanProvider useIMUData,
                               DoubleProvider imuAgainstKinematicsForPositionBreakFrequency,
@@ -109,6 +116,8 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
       this.imuBiasProvider = imuBiasProvider;
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
       this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
+      this.footLinearVelocityMovingThreshold = footLinearVelocityMovingThreshold;
+      this.footAngularVelocityMovingThreshold = footAngularVelocityMovingThreshold;
       this.gravityVector = gravityVector;
       this.useIMUData = useIMUData;
       this.imuAgainstKinematicsForPositionBreakFrequency = imuAgainstKinematicsForPositionBreakFrequency;
@@ -129,6 +138,8 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
       copRawInFootFrame = new YoFramePoint2D(namePrefix + "CoPRawInFootFrame", soleFrame, registry);
       previousCoPInFootFrame = new YoFramePoint2D(namePrefix + "PreviousCoPInFootFrame", soleFrame, registry);
 
+      footLinearVelocity = new YoDouble(namePrefix + "LinearVelocity", registry);
+      footAngularVelocity = new YoDouble(namePrefix + "AngularVelocity", registry);
       footIsMoving = new YoBoolean(namePrefix + "IsMoving", registry);
 
       footIKLinearVelocityInWorld = new YoFrameVector3D(namePrefix + "IKLinearVelocityInWorld", worldFrame, registry);
@@ -203,9 +214,11 @@ public class SingleFootEstimator implements SCS2YoGraphicHolder
 
       footToRootJointPosition.update(tempFrameVector);
 
-      // FIXME remove magic parameters
+      footLinearVelocity.set(getFootLinearVelocityInWorld().norm());
+      footAngularVelocity.set(getFootAngularVelocityInWorld().norm());
+
       if (useIMUData.getValue() && footIMU != null)
-         footIsMoving.set(getFootLinearVelocityInWorld().norm() > 0.5 || getFootAngularVelocityInWorld().norm() > 1.0);
+         footIsMoving.set(footLinearVelocity.getDoubleValue() > footLinearVelocityMovingThreshold.getValue() || footAngularVelocity.getDoubleValue() > footAngularVelocityMovingThreshold.getValue());
       else
          footIsMoving.set(false);
    }
