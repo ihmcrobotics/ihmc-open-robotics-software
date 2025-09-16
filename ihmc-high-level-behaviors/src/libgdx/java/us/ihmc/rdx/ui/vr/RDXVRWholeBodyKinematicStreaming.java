@@ -244,7 +244,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Enable IK preview", "A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Control robot", "X button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Show/hide ghosts (while streaming)", "Y button");
          RDXBaseUI.getInstance().getKeyBindings().register("Start/stop recording motion", "B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Cycle demonstration task", "Y button");
@@ -253,7 +252,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Enable IK preview", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Control robot", "Left A button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Show/hide ghosts (while streaming)", "Left B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Start/stop recording motion", "Right B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Cycle demonstration task", "Left B button");
@@ -287,8 +285,6 @@ public class RDXVRWholeBodyKinematicStreaming
          controller.setAButtonText(streamToController.get() ? "Stop control" : "Start control");
          if (demonstrationMode.get())
             controller.setBButtonText("Task %d: x%d".formatted(demonstrationTaskIndex, demonstrationCounts[demonstrationTaskIndex]));
-         else
-            controller.setBButtonText(showGhosts.get() ? "Hide ghosts" : "Show ghosts");
 
          InputDigitalActionData aButton = controller.getAButtonActionData();
          InputDigitalActionData bButton = controller.getBButtonActionData();
@@ -358,8 +354,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          if (demonstrationMode.get())
             demonstrationTaskIndex = (demonstrationTaskIndex + 1) % demonstrationCounts.length;
-         else if (streamToController.get())
-            showGhosts.set(!showGhosts.get());
       }
    }
 
@@ -772,8 +766,6 @@ public class RDXVRWholeBodyKinematicStreaming
          demonstrationTaskIndex = 0;
          demonstrationCounts[0] = 0;
          demonstrationCounts[1] = 0;
-         if (demonstrationMode.get())
-            showGhosts.set(false);
       }
 
       ImGuiTools.separatorText("Hand Control Mode", ImGuiTools.getSmallBoldFont());
