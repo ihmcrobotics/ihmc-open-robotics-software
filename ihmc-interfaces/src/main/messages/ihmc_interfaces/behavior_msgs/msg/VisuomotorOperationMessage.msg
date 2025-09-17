@@ -1,6 +1,5 @@
-# A message for remotely operationg the lerobot policies
+# A message for remotely operating the visuomotor policies
 
-# Allows the user to operate the inference of visuomotor policies
 ihmc_common_msgs/LatestModificationMessage latest_timestamp_modifiable
 
 # Monotonically increasing, number of updates of robot thread

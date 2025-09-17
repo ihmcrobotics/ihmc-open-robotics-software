@@ -7,13 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * A message for remotely operationg the lerobot policies
+       * A message for remotely operating the visuomotor policies
        */
-public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOperationMessage> implements Settable<LerobotInferenceOperationMessage>, EpsilonComparable<LerobotInferenceOperationMessage>
+public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessage> implements Settable<VisuomotorOperationMessage>, EpsilonComparable<VisuomotorOperationMessage>
 {
-   /**
-            * Allows the user to operate the inference of visuomotor policies
-            */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    /**
             * Monotonically increasing, number of updates of robot thread
@@ -48,7 +45,7 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
             */
    public long received_actions_;
 
-   public LerobotInferenceOperationMessage()
+   public VisuomotorOperationMessage()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       action_hand_poses_ = new us.ihmc.euclid.geometry.Pose3D[2];
@@ -66,13 +63,13 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
       python_status_message_ = new java.lang.StringBuilder(255);
    }
 
-   public LerobotInferenceOperationMessage(LerobotInferenceOperationMessage other)
+   public VisuomotorOperationMessage(VisuomotorOperationMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(LerobotInferenceOperationMessage other)
+   public void set(VisuomotorOperationMessage other)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       sequence_id_ = other.sequence_id_;
@@ -99,9 +96,6 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    }
 
 
-   /**
-            * Allows the user to operate the inference of visuomotor policies
-            */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestTimestampModifiable()
    {
       return latest_timestamp_modifiable_;
@@ -225,19 +219,19 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    }
 
 
-   public static Supplier<LerobotInferenceOperationMessagePubSubType> getPubSubType()
+   public static Supplier<VisuomotorOperationMessagePubSubType> getPubSubType()
    {
-      return LerobotInferenceOperationMessagePubSubType::new;
+      return VisuomotorOperationMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return LerobotInferenceOperationMessagePubSubType::new;
+      return VisuomotorOperationMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(LerobotInferenceOperationMessage other, double epsilon)
+   public boolean epsilonEquals(VisuomotorOperationMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -274,9 +268,9 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof LerobotInferenceOperationMessage)) return false;
+      if(!(other instanceof VisuomotorOperationMessage)) return false;
 
-      LerobotInferenceOperationMessage otherMyClass = (LerobotInferenceOperationMessage) other;
+      VisuomotorOperationMessage otherMyClass = (VisuomotorOperationMessage) other;
 
       if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
@@ -308,7 +302,7 @@ public class LerobotInferenceOperationMessage extends Packet<LerobotInferenceOpe
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("LerobotInferenceOperationMessage {");
+      builder.append("VisuomotorOperationMessage {");
       builder.append("latest_timestamp_modifiable=");
       builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("sequence_id=");

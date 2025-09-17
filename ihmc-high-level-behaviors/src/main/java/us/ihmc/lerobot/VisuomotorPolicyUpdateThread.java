@@ -1,6 +1,6 @@
 package us.ihmc.lerobot;
 
-import behavior_msgs.msg.dds.LerobotInferenceOperationMessage;
+import behavior_msgs.msg.dds.VisuomotorOperationMessage;
 import std_msgs.msg.dds.Float32MultiArray;
 import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -27,21 +27,21 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 
 /**
- * Autonomy process thread for managing a LeRobot inference and supporting remote UI.
+ * Autonomy process thread for managing visuomotor inference and supporting remote UI.
  * Manages communication with the Python side, which is running the LeRobot code
  * with pytorch inference of the visuomotor policy. We use a ROS 2 API to interface with it.
  */
-public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
+public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
 {
-   private static final ROS2Topic<?> LEROBOT = new ROS2Topic<>().withPrefix("lerobot");
+   private static final ROS2Topic<?> VISUOMOTOR = new ROS2Topic<>().withPrefix("lerobot");
    /** 0: stop, 1: pause, 2: run */
-   private static final ROS2Topic<std_msgs.msg.dds.Int32> COMMAND = LEROBOT.withSuffix("command").withType(std_msgs.msg.dds.Int32.class);
-   private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = LEROBOT.withSuffix("status").withType(std_msgs.msg.dds.String.class);
-   private static final ROS2Topic<Float32MultiArray> STATE = LEROBOT.withSuffix("state").withType(Float32MultiArray.class);
-   private static final ROS2Topic<Float32MultiArray> ACTION = LEROBOT.withSuffix("action").withType(Float32MultiArray.class);
+   private static final ROS2Topic<std_msgs.msg.dds.Int32> COMMAND = VISUOMOTOR.withSuffix("command").withType(std_msgs.msg.dds.Int32.class);
+   private static final ROS2Topic<std_msgs.msg.dds.String> STATUS = VISUOMOTOR.withSuffix("status").withType(std_msgs.msg.dds.String.class);
+   private static final ROS2Topic<Float32MultiArray> STATE = VISUOMOTOR.withSuffix("state").withType(Float32MultiArray.class);
+   private static final ROS2Topic<Float32MultiArray> ACTION = VISUOMOTOR.withSuffix("action").withType(Float32MultiArray.class);
 
-   public static final ROS2IOTopicPair<LerobotInferenceOperationMessage> OPERATOR_UI
-         = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(LerobotInferenceOperationMessage.class));
+   public static final ROS2IOTopicPair<VisuomotorOperationMessage> OPERATOR_UI
+         = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(VisuomotorOperationMessage.class));
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final LeRobotIKStreaming ikStreaming;
@@ -60,17 +60,17 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    private final ROS2Publisher<Float32MultiArray> statePublisher;
    private final TypedNotification<Float32MultiArray> actionSubscription;
 
-   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("lerobot_update_thread");
+   private final ROS2Node ros2Node = new ROS2NodeBuilder().build("visuomotor_update_thread");
    private final LatestTimestampModifiable latestTimestampModifiable;
    private long sequenceID = 0L;
    private final CRDTBidirectionalBoolean running;
    private final CRDTBidirectionalBoolean controlRobot;
-   private final TypedNotification<LerobotInferenceOperationMessage> uiCommandSubscription;
-   private final ROS2Publisher<LerobotInferenceOperationMessage> uiStatusPublisher;
+   private final TypedNotification<VisuomotorOperationMessage> uiCommandSubscription;
+   private final ROS2Publisher<VisuomotorOperationMessage> uiStatusPublisher;
 
-   public LeRobotInferenceUpdateThread(ROS2PeerClockOffsetEstimator clockOffsetEstimator, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   public VisuomotorPolicyUpdateThread(ROS2PeerClockOffsetEstimator clockOffsetEstimator, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
-      super(LeRobotInferenceUpdateThread.class.getSimpleName());
+      super(VisuomotorPolicyUpdateThread.class.getSimpleName());
 
       this.syncedRobot = syncedRobot;
 
@@ -103,7 +103,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
    {
       if (uiCommandSubscription.poll())
       {
-         LerobotInferenceOperationMessage uiCommand = uiCommandSubscription.read();
+         VisuomotorOperationMessage uiCommand = uiCommandSubscription.read();
          latestTimestampModifiable.fromMessage(uiCommand.getLatestTimestampModifiable());
          boolean wasRunning = running.getValue();
          running.fromMessage(uiCommand.getRunning());
@@ -176,7 +176,7 @@ public class LeRobotInferenceUpdateThread extends RepeatingTaskThread
          ikStreaming.update(actionTimestampNanos, actionHandPoses, actionForearmPoses);
       }
 
-      LerobotInferenceOperationMessage uiStatus = new LerobotInferenceOperationMessage();
+      VisuomotorOperationMessage uiStatus = new VisuomotorOperationMessage();
       latestTimestampModifiable.toMessage(uiStatus.getLatestTimestampModifiable());
       uiStatus.setSequenceId(sequenceID++);
       uiStatus.setRunning(running.toMessage());

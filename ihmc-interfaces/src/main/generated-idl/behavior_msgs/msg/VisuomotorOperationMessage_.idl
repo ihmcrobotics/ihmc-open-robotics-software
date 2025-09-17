@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__LerobotInferenceOperationMessage__idl__
-#define __behavior_msgs__msg__LerobotInferenceOperationMessage__idl__
+#ifndef __behavior_msgs__msg__VisuomotorOperationMessage__idl__
+#define __behavior_msgs__msg__VisuomotorOperationMessage__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
@@ -11,14 +11,11 @@ module behavior_msgs
     {
 
       /**
-       * A message for remotely operationg the lerobot policies
+       * A message for remotely operating the visuomotor policies
        */
-      @TypeCode(type="behavior_msgs::msg::dds_::LerobotInferenceOperationMessage_")
-      struct LerobotInferenceOperationMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::VisuomotorOperationMessage_")
+      struct VisuomotorOperationMessage
       {
-        /**
-         * Allows the user to operate the inference of visuomotor policies
-         */
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         /**
          * Monotonically increasing, number of updates of robot thread

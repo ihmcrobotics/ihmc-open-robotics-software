@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "LerobotInferenceOperationMessage" defined in "LerobotInferenceOperationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "VisuomotorOperationMessage" defined in "VisuomotorOperationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from LerobotInferenceOperationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit LerobotInferenceOperationMessage_.idl instead.
+* This file was automatically generated from VisuomotorOperationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit VisuomotorOperationMessage_.idl instead.
 *
 */
-public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.LerobotInferenceOperationMessage>
+public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.VisuomotorOperationMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::LerobotInferenceOperationMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::VisuomotorOperationMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5b21bef7345af3f80dbe8b3a7425c2fe6f028aef6971d319accd33df32f5abb5";
+   		return "fcce36fba02a2ffbf8f1b7eabe17ebd5f7d56ad5533f1b3025893ca29b0f9a8c";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.LerobotInferenceOperationMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.VisuomotorOperationMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -75,12 +75,12 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.VisuomotorOperationMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -115,7 +115,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
       cdr.write_type_4(data.getSequenceId());
@@ -144,7 +144,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
 
    }
 
-   public static void read(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
       data.setSequenceId(cdr.read_type_4());
@@ -172,7 +172,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -187,7 +187,7 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.LerobotInferenceOperationMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.VisuomotorOperationMessage data)
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -201,15 +201,15 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       data.setReceivedActions(ser.read_type_4("received_actions"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.LerobotInferenceOperationMessage src, behavior_msgs.msg.dds.LerobotInferenceOperationMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.VisuomotorOperationMessage src, behavior_msgs.msg.dds.VisuomotorOperationMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.LerobotInferenceOperationMessage createData()
+   public behavior_msgs.msg.dds.VisuomotorOperationMessage createData()
    {
-      return new behavior_msgs.msg.dds.LerobotInferenceOperationMessage();
+      return new behavior_msgs.msg.dds.VisuomotorOperationMessage();
    }
    @Override
    public int getTypeSize()
@@ -223,24 +223,24 @@ public class LerobotInferenceOperationMessagePubSubType implements us.ihmc.pubsu
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.LerobotInferenceOperationMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.LerobotInferenceOperationMessage src, behavior_msgs.msg.dds.LerobotInferenceOperationMessage dest)
+   public void copy(behavior_msgs.msg.dds.VisuomotorOperationMessage src, behavior_msgs.msg.dds.VisuomotorOperationMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public LerobotInferenceOperationMessagePubSubType newInstance()
+   public VisuomotorOperationMessagePubSubType newInstance()
    {
-      return new LerobotInferenceOperationMessagePubSubType();
+      return new VisuomotorOperationMessagePubSubType();
    }
 }
