@@ -3,15 +3,20 @@ package us.ihmc.lerobot;
 import behavior_msgs.msg.dds.VisuomotorOperationMessage;
 import std_msgs.msg.dds.Float32MultiArray;
 import std_msgs.msg.dds.Int32;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -44,7 +49,6 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
          = new ROS2IOTopicPair<>(new ROS2Topic<>().withPrefix("lerobot_ui").withTypeName(VisuomotorOperationMessage.class));
 
    private final ROS2SyncedRobotModel syncedRobot;
-   private final LeRobotIKStreaming ikStreaming;
    private final std_msgs.msg.dds.Int32 command = new std_msgs.msg.dds.Int32();
    private String status = "Python not started";
    private final Float32MultiArray stateMessage = new Float32MultiArray();
@@ -68,6 +72,9 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
    private final TypedNotification<VisuomotorOperationMessage> uiCommandSubscription;
    private final ROS2Publisher<VisuomotorOperationMessage> uiStatusPublisher;
 
+   private final ROS2Publisher<KinematicsStreamingToolboxInputMessage> kstInputPublisher;
+   private final ROS2Publisher<ToolboxStateMessage> kstStatePublisher;
+
    public VisuomotorPolicyUpdateThread(ROS2PeerClockOffsetEstimator clockOffsetEstimator, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
       super(VisuomotorPolicyUpdateThread.class.getSimpleName());
@@ -78,7 +85,6 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
 
       actionHandPoses.forEach(Pose3D::setToNaN);
       actionForearmPoses.forEach(Pose3D::setToNaN);
-      ikStreaming = new LeRobotIKStreaming(ros2Node, robotModel, syncedRobot);
 
       commandPublisher = ros2Node.createPublisher(COMMAND);
       statePublisher = ros2Node.createPublisher(STATE);
@@ -96,6 +102,9 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
 
       uiCommandSubscription = ROS2Tools.createNotificationSubscription(ros2Node, OPERATOR_UI.getTopic(ROS2ActorDesignation.ROBOT.getIncomingQualifier()));
       uiStatusPublisher = ros2Node.createPublisher(OPERATOR_UI.getTopic(ROS2ActorDesignation.ROBOT.getOutgoingQualifier()));
+
+      kstInputPublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingInputTopic(robotModel.getSimpleRobotName()));
+      kstStatePublisher = ros2Node.createPublisher(ToolboxAPIs.getIKStreamingStateTopic(robotModel.getSimpleRobotName()));
    }
 
    @Override
@@ -108,7 +117,11 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
          boolean wasRunning = running.getValue();
          running.fromMessage(uiCommand.getRunning());
          if (!wasRunning && running.getValue())
-            ikStreaming.wakeUp();
+         {
+            ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+            toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
+            kstStatePublisher.publish(toolboxStateMessage);
+         }
          controlRobot.fromMessage(uiCommand.getControlRobot());
       }
 
@@ -144,8 +157,6 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
       }
       statePublisher.publish(stateMessage);
 
-      ikStreaming.setControlRobot(controlRobot.getValue());
-
       command.setData(running.getValue() ? 2 : 1);
       commandPublisher.publish(command);
 
@@ -173,7 +184,33 @@ public class VisuomotorPolicyUpdateThread extends RepeatingTaskThread
             }
          }
 
-         ikStreaming.update(actionTimestampNanos, actionHandPoses, actionForearmPoses);
+         KinematicsStreamingToolboxInputMessage ikInputMessage = new KinematicsStreamingToolboxInputMessage();
+         ikInputMessage.setStreamToController(controlRobot.getValue());
+         ikInputMessage.setTimestamp(actionTimestampNanos);
+         for (RobotSide side : RobotSide.values)
+         {
+            KinematicsToolboxRigidBodyMessage rigidBodyMessage = new KinematicsToolboxRigidBodyMessage();
+            rigidBodyMessage.setEndEffectorHashCode(syncedRobot.getFullRobotModel().getHand(side).hashCode());
+            rigidBodyMessage.getDesiredPositionInWorld().set(actionHandPoses.get(side).getTranslation());
+            rigidBodyMessage.getDesiredOrientationInWorld().set(actionHandPoses.get(side).getRotation());
+            rigidBodyMessage.getAngularWeightMatrix().setXWeight(0.02);
+            rigidBodyMessage.getAngularWeightMatrix().setYWeight(0.02);
+            rigidBodyMessage.getAngularWeightMatrix().setZWeight(0.02);
+            ikInputMessage.getInputs().add().set(rigidBodyMessage);
+
+            rigidBodyMessage = new KinematicsToolboxRigidBodyMessage();
+            rigidBodyMessage.setEndEffectorHashCode(syncedRobot.getFullRobotModel().getForearm(side).hashCode());
+            rigidBodyMessage.getDesiredPositionInWorld().set(actionForearmPoses.get(side).getTranslation());
+            rigidBodyMessage.getLinearSelectionMatrix().setXSelected(false); // Disable position tracking for forearm
+            rigidBodyMessage.getLinearSelectionMatrix().setYSelected(false);
+            rigidBodyMessage.getLinearSelectionMatrix().setZSelected(false);
+            rigidBodyMessage.getDesiredOrientationInWorld().set(actionForearmPoses.get(side).getRotation());
+            rigidBodyMessage.getAngularWeightMatrix().setXWeight(0.01);
+            rigidBodyMessage.getAngularWeightMatrix().setYWeight(0.01);
+            rigidBodyMessage.getAngularWeightMatrix().setZWeight(0.001);
+            ikInputMessage.getInputs().add().set(rigidBodyMessage);
+         }
+         kstInputPublisher.publish(ikInputMessage);
       }
 
       VisuomotorOperationMessage uiStatus = new VisuomotorOperationMessage();
