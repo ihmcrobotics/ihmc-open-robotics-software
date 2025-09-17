@@ -15,6 +15,7 @@ import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
@@ -114,8 +115,10 @@ public class RDXVRWholeBodyKinematicStreaming
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
 
-   private final ImBoolean enableDemonstrationButton = new ImBoolean(false);
-   private final ImBoolean performingDemonstration = new ImBoolean(false);
+   private final ImBoolean demonstrationMode = new ImBoolean(false);
+   private int demonstrationTaskIndex = 0;
+   private final int[] demonstrationCounts = new int[2];
+   private final ImInt performingDemonstration = new ImInt(-1);
    private final ROS2Publisher<ROS2LogMessage> ros2LogMessagePublisher;
    private boolean recordRequest = false;
    private ModelInstance recordingGraphics;
@@ -241,17 +244,17 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Enable IK preview", "A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Control robot", "X button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Show/hide ghosts (while streaming)", "Y button");
          RDXBaseUI.getInstance().getKeyBindings().register("Start/stop recording motion", "B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Cycle demonstration task", "Y button");
       }
       else
       {
          RDXBaseUI.getInstance().getKeyBindings().register("Enable IK preview", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Control robot", "Left A button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Show/hide ghosts (while streaming)", "Left B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Start/stop recording motion", "Right B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Cycle demonstration task", "Left B button");
       }
 
       RobotVersion robotVersion = syncedRobot.getRobotModel().getRobotVersion();
@@ -280,7 +283,8 @@ public class RDXVRWholeBodyKinematicStreaming
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          controller.setAButtonText(streamToController.get() ? "Stop control" : "Start control");
-         controller.setBButtonText(showGhosts.get() ? "Hide ghosts" : "Show ghosts");
+         if (demonstrationMode.get())
+            controller.setBButtonText("Task %d: x%d".formatted(demonstrationTaskIndex, demonstrationCounts[demonstrationTaskIndex]));
 
          InputDigitalActionData aButton = controller.getAButtonActionData();
          InputDigitalActionData bButton = controller.getBButtonActionData();
@@ -294,8 +298,8 @@ public class RDXVRWholeBodyKinematicStreaming
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          controller.setAButtonText(isKSTEnabled.get() ? "Stop preview" : "Start preview");
-        if (enableDemonstrationButton.get())
-            controller.setBButtonText(performingDemonstration.get() ? "Stop demonstration" : "Start demonstration");
+         if (demonstrationMode.get())
+            controller.setBButtonText("%s demonstrating".formatted(performingDemonstration.get() == -1 ? "Start" : "Stop"));
          else
             controller.setBButtonText("Record motion");
 
@@ -328,7 +332,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
          if (isKSTEnabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
-         toolboxInputMessage.setIsDemonstrationEpisode(performingDemonstration.get());
+         toolboxInputMessage.setDemonstrationTaskId(performingDemonstration.get());
          toolboxInputMessage.setTimestamp(controllerLastPollTimeNanos);
 
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
@@ -348,8 +352,8 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (leftBButtonPressed)
       {
-         if (streamToController.get())
-            showGhosts.set(!showGhosts.get());
+         if (demonstrationMode.get())
+            demonstrationTaskIndex = (demonstrationTaskIndex + 1) % demonstrationCounts.length;
       }
    }
 
@@ -362,14 +366,14 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (rightBButtonPressed)
       {
-         if (enableDemonstrationButton.get())
+         if (demonstrationMode.get())
          {
-            performingDemonstration.set(!performingDemonstration.get());
+            if (performingDemonstration.get() > -1) // demonstration completed
+               ++demonstrationCounts[demonstrationTaskIndex];
+            performingDemonstration.set(performingDemonstration.get() == -1 ? demonstrationTaskIndex : -1);
          }
          else
-         {
             handleRecordRequest();
-         }
       }
    }
 
@@ -757,7 +761,12 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          reinitializeToolboxRobotConfiguration();
       }
-      ImGui.checkbox(labels.get("Enable Demonstration Button"), enableDemonstrationButton);
+      if (ImGui.checkbox(labels.get("Demonstration Mode"), demonstrationMode))
+      {
+         demonstrationTaskIndex = 0;
+         demonstrationCounts[0] = 0;
+         demonstrationCounts[1] = 0;
+      }
 
       ImGuiTools.separatorText("Hand Control Mode", ImGuiTools.getSmallBoldFont());
       for (RobotSide side : RobotSide.values)
@@ -825,7 +834,7 @@ public class RDXVRWholeBodyKinematicStreaming
             robotVisualizer.setActive(true);
             ghostRobotGraphic.setActive(true);
             miniGhost.setActive(true);
-            performingDemonstration.set(false);
+            performingDemonstration.set(-1);
          }
       }
 
