@@ -189,8 +189,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
          isPastCoPThresholdFiltered.update();
       }
 
-      // if we have already hit the ground, stop checking whether the CoP is past the threshold. Otherwise, the foot is on the ground and the CoP moves to the
-      // edge, we stop thinking it had hit the ground.
       boolean validCoP =  isPastCoPThresholdFiltered.getValue();
       hasFootHitGround.set((isPastForceThresholdLowFiltered.getValue() && validCoP) || isPastForceThresholdHigh.getValue());
       hasFootHitGroundFiltered.update();
