@@ -86,6 +86,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             Camera camera = magewellScrubber.getCamera();
             RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            perceptionVisualizersPanel.addVisualizer(visualizer);
             MagewellLogVideo magewellLogVideo = new MagewellLogVideo(magewellScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
             magewellLogVideos.add(magewellLogVideo);
          }
@@ -93,6 +94,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          {
             Camera camera = blackMagicScrubber.getCamera();
             RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            perceptionVisualizersPanel.addVisualizer(visualizer);
             BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
             blackmagicLogVideos.add(blackmagicLogVideo);
          }

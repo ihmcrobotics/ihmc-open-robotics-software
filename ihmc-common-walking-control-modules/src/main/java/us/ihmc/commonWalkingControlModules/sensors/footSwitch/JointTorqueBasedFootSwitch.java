@@ -410,7 +410,10 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
          verticalVelocity.set(linearVelocity.getZ());
 
-         hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
+//       This is the former condition that we were using, we took out the horizontal velocity because the robot in single support was shaking too much
+//       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
+//                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
+         hasFootHitGround.set(isPastForceThreshold.getValue()
                               && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
          hasFootHitGroundFiltered.update();
 

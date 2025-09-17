@@ -2,6 +2,7 @@
 #version 410
 
 layout(location = 0) in float a_height;
+layout(location = 1) in float a_traversability;
 
 out vec4 v_color;
 
@@ -12,6 +13,7 @@ uniform float u_screenWidth;
 uniform int u_centerIndex;
 uniform vec2 u_gridCenter;
 uniform float u_cellSize;
+uniform int u_colorBasedOnTraversability;
 
 float indexToCoordinate(int index, float gridCenter)
 {
@@ -23,7 +25,21 @@ float linearInterpolate(float a, float b, float alpha)
     return (1.0f - alpha) * a + alpha * b;
 }
 
-vec4 getColor(float height)
+vec4 getColorTraversability()
+{
+    // Contrast is better for cubed value
+    float t = a_traversability * a_traversability * a_traversability;
+    if (a_traversability < 0.001)
+    { // Non-traversable
+        return vec4(0.6f, 0.0f, 0.0f, 1.0f);
+    }
+    else
+    { // Traversable, 0 (barely) = dark blue --> 1 (ideal) = green
+        return vec4(0.6f * (1.0f - t), t, 0.0f, 1.0f);
+    }
+}
+
+vec4 getColorFromHeight()
 {
     // Using interpolation between key color points
     float r = 0, g = 0, b = 0;
@@ -34,7 +50,7 @@ vec4 getColor(float height)
     float greenR = 0.0, greenG = 1.0, greenB = 0.0;
     float gradientSize = 0.2;
     float gradientLength = 1.0;
-    float alpha = mod(height, gradientLength);
+    float alpha = mod(a_height, gradientLength);
     if (alpha < 0)
         alpha = 1 + alpha;
     while (alpha > 5 * gradientSize)
@@ -95,7 +111,10 @@ void main()
 
 	gl_Position = u_projTrans * pointInCameraFrame;
 
-	v_color = getColor(zPosition);
+    if (u_colorBasedOnTraversability > 0)
+    	v_color = getColorTraversability();
+    else
+    	v_color = getColorFromHeight();
 }
 
 #type fragment

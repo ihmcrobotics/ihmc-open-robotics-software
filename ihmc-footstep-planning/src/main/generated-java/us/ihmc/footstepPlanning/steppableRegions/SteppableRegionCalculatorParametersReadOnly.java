@@ -10,39 +10,24 @@ import static us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculato
  */
 public interface SteppableRegionCalculatorParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default double getDistanceFromCliffBottoms()
+   default double getNormalSearchRadius()
    {
-      return get(distanceFromCliffBottoms);
+      return get(normalSearchRadius);
    }
 
-   default double getDistanceFromCliffTops()
+   default double getCliffSearchRadius()
    {
-      return get(distanceFromCliffTops);
+      return get(cliffSearchRadius);
    }
 
-   default int getYawDiscretizations()
+   default double getCliffHeightThreshold()
    {
-      return get(yawDiscretizations);
+      return get(cliffHeightThreshold);
    }
 
-   default double getFootWidth()
+   default double getCliffHeightTolerance()
    {
-      return get(footWidth);
-   }
-
-   default double getFootLength()
-   {
-      return get(footLength);
-   }
-
-   default double getCliffStartHeightToAvoid()
-   {
-      return get(cliffStartHeightToAvoid);
-   }
-
-   default double getCliffEndHeightToAvoid()
-   {
-      return get(cliffEndHeightToAvoid);
+      return get(cliffHeightTolerance);
    }
 
    default double getMinSupportAreaFraction()
@@ -60,33 +45,13 @@ public interface SteppableRegionCalculatorParametersReadOnly extends StoredPrope
       return get(snapHeightThresholdAtSearchEdge);
    }
 
-   default double getInequalityActivationSlope()
+   default double getSteppingCosineThreshold()
    {
-      return get(inequalityActivationSlope);
+      return get(steppingCosineThreshold);
    }
 
-   default int getMaxSearchDepthForRegions()
+   default double getSquaredErrorThreshold()
    {
-      return get(maxSearchDepthForRegions);
-   }
-
-   default double getFractionOfCellToExpandSmallRegions()
-   {
-      return get(fractionOfCellToExpandSmallRegions);
-   }
-
-   default int getMaxInteriorPointsToInclude()
-   {
-      return get(maxInteriorPointsToInclude);
-   }
-
-   default int getMinCellsInARegion()
-   {
-      return get(minCellsInARegion);
-   }
-
-   default double getEdgeLengthThreshold()
-   {
-      return get(edgeLengthThreshold);
+      return get(squaredErrorThreshold);
    }
 }

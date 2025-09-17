@@ -115,7 +115,9 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       this(robotVersion, robotTarget, null, true);
    }
 
-   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion, RobotTarget robotTarget, RobotContactPointParameters<RobotSide> contactPointParameters)
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
+                                  RobotTarget robotTarget,
+                                  RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this(robotVersion, robotTarget, null, contactPointParameters);
    }
@@ -148,7 +150,8 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
                                   RobotTarget robotTarget,
                                   MaterialDefinition robotMaterial,
                                   RobotContactPointParameters<RobotSide> contactPointParameters,
-                                  boolean createContactPointDefinition)
+                                  boolean createContactPointDefinition,
+                                  String... imusToIgnore)
    {
       this.robotVersion = robotVersion;
       this.robotTarget = robotTarget;
@@ -167,7 +170,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
       diagnosticParameters = new AlexanderDiagnosticParameters(robotTarget, jointMap, sensorInformation, highLevelControllerParameters);
       stateEstimatorParameters = new OpenAlexanderStateEstimatorParameters(getEstimatorDT(), robotTarget, sensorInformation, jointMap);
 
-      modelFactory = new AlexanderModelFactory(robotVersion, jointMap, contactPointParameters, new AlexanderRigidBodyMutator(getPhysicalProperties()));
+      modelFactory = new AlexanderModelFactory(robotVersion, jointMap, contactPointParameters, new AlexanderRigidBodyMutator(getPhysicalProperties(), imusToIgnore));
       logModelProvider = modelFactory.createLogModelProvider();
       scs1RobotDefinition = modelFactory.getSCS1RobotDefinition(createContactPointDefinition);
       controllerRobotDefinition = modelFactory.getControllerRobotDefinition();
@@ -485,7 +488,6 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    {
       return stepGeneratorDT;
    }
-
 
    @Override
    public Transform getJmeTransformWristToHand(RobotSide robotSide)

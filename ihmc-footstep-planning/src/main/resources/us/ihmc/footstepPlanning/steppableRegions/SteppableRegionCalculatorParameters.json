@@ -1,19 +1,12 @@
 {
   "title" : "SteppableRegionCalculatorParameters",
-  "Distance from cliff bottoms" : 0.13999999999999999,
-  "Distance from cliff tops" : 0.05,
-  "Yaw discretizations" : 5,
-  "Foot width" : 0.12,
-  "Foot length" : 0.2,
-  "Cliff start height to avoid" : 0.05,
-  "Cliff end height to avoid" : 0.19999999999999907,
-  "Min support area fraction" : 0.8,
+  "Normal search radius" : 0.145,
+  "Cliff search radius" : 0.17,
+  "Cliff height threshold" : 0.04,
+  "Cliff height tolerance" : 0.02,
+  "Min support area fraction" : 0.88,
   "Min snap height threshold" : 0.04,
-  "Snap height threshold at search edge" : 0.06,
-  "Inequality activation slope" : 50000.0,
-  "Max search depth for regions" : 500,
-  "Fraction of cell to expand small regions" : 0.75,
-  "Max interior points to include" : 10000,
-  "Min cells in a region" : 4,
-  "Edge length threshold" : 0.3
+  "Snap height threshold at search edge" : 0.07,
+  "Stepping cosine threshold": 0.8,
+  "Squared error threshold": 0.00032
 }

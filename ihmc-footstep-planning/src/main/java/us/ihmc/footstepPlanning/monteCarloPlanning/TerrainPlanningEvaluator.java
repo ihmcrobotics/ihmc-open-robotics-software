@@ -21,7 +21,7 @@ public class TerrainPlanningEvaluator
 
          totalReward += MathTools.clamp(1.0f / distanceFromLastOppositeStepToGoal + 1.0f / distanceFromLastStepToGoal, 0.0, 20) * 10;
 
-         double contactScore = terrainMap.getContactScoreInWorld((float) footstep.getFootstepPose().getPosition().getX(),
+         double contactScore = terrainMap.getTraversabilityScore((float) footstep.getFootstepPose().getPosition().getX(),
                                                                  (float) footstep.getFootstepPose().getPosition().getY());
 
          totalReward += contactScore;

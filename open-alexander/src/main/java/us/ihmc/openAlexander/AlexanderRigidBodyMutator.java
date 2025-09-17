@@ -1,34 +1,58 @@
 package us.ihmc.openAlexander;
 
+import us.ihmc.ekf.filter.sensor.Sensor;
+import us.ihmc.log.LogTools;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
+import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SensorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.function.Consumer;
 
 public class AlexanderRigidBodyMutator implements Consumer<RobotDefinition>
 {
    private AlexanderPhysicalProperties physicalProperties;
+   private final String[] imuSensorsToIgnore;
 
-   public AlexanderRigidBodyMutator(AlexanderPhysicalProperties physicalProperties)
+   public AlexanderRigidBodyMutator(AlexanderPhysicalProperties physicalProperties, String... imuSensorsToIgnore)
    {
       this.physicalProperties = physicalProperties;
+      this.imuSensorsToIgnore = imuSensorsToIgnore;
    }
 
    @Override
    public void accept(RobotDefinition definition)
    {
       Random random = new Random(1);
+
+      for (JointDefinition jointDefinition : definition.getAllJoints())
+      {
+         for (int sensorIdx = 0; sensorIdx < jointDefinition.getSensorDefinitions().size(); sensorIdx++)
+         {
+            SensorDefinition sensor = jointDefinition.getSensorDefinitions().get(sensorIdx);
+            if (sensor instanceof IMUSensorDefinition imuSensor)
+            {
+               if (Arrays.stream(imuSensorsToIgnore).anyMatch(string -> string.equals(imuSensor.getName())))
+               {
+                  LogTools.info("Removing imu {} from the model, as we should be ignoring it", imuSensor.getName());
+                  jointDefinition.getSensorDefinitions().remove(sensor);
+                  break;
+               }
+            }
+         }
+      }
 
       for (RigidBodyDefinition rigidBody : definition.getAllRigidBodies())
       {

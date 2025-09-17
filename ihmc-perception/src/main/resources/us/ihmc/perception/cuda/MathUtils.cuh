@@ -20,6 +20,17 @@ __device__ float angle(float x1, float y1, float x2, float y2)
    return atan2(sinTheta, cosTheta);
 }
 
+// maps input value from range (lowerBound, upperBound) -> (0, 255)
+__device__ unsigned char scaleAndCastToUnsignedChar(float val, float lowerBound, float upperBound)
+{
+   return static_cast<unsigned char>(255 * (val - lowerBound) / (upperBound - lowerBound));
+}
+
+__device__ float interpolate(float a, float b, float alpha)
+{
+    return (1.0f - alpha) * a + alpha * b;
+}
+
 __device__ float3 transformPoint3D(float3 point, const float* transform)
 {
     return make_float3(dot(make_float3(transform[0], transform[1], transform[2]), point) + transform[3],
@@ -107,7 +118,7 @@ __device__ float* invert3x3Matrix(float* matrix, float* result)
    result[8] = detMinor22 / det;
 }
 
-__device__ void solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector, float* coefficients)
+__device__ float solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector, float zz, float* coefficients)
 {
     // Invert the 3x3 covariance matrix (this should be done on the device as well)
     float inverse_covariance_matrix[9];
@@ -122,6 +133,25 @@ __device__ void solveForPlaneCoefficients(float* covariance_matrix, float* z_var
             coefficients[row] += inverse_covariance_matrix[row * 3 + col] * z_variance_vector[col];
         }
     }
+
+    // Compute squared error, from LeastSquaresPlaneFitter#fitPlaneToPoints
+    float A = coefficients[0];
+    float B = coefficients[1];
+    float C = coefficients[2];
+
+    float xx = covariance_matrix[0];
+    float xy = covariance_matrix[1];
+    float x = covariance_matrix[2];
+    float yy = covariance_matrix[4];
+    float y = covariance_matrix[5];
+    float n = covariance_matrix[8];
+
+    float xz = -z_variance_vector[0];
+    float yz = -z_variance_vector[1];
+    float z = -z_variance_vector[2];
+
+    float squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
+    return squared_error / n;
 }
 
 #endif // MATH_UTILS

@@ -153,6 +153,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                                                                                                             createFramePoint2dArrayList());
 
    protected final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
+   protected final YoFramePoint3D yoAngularCapturePoint = new YoFramePoint3D("angularCapturePoint", worldFrame, registry);
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
 
@@ -501,6 +502,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       capturePointCalculator.compute(capturePoint2d, omega0.getValue());
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d, 0.0);
+
+      double mass = totalMass.getValue();
+      double desiredPendulumHeight = gravity / MathTools.square(omega0.getValue());
+      double wmh = omega0.getDoubleValue() * mass * desiredPendulumHeight;
+
+      yoAngularCapturePoint.set(yoCapturePoint);
+
+      FrameVector3DReadOnly angularMomentum = angularExcursionCalculator.getAngularMomentum();
+      yoAngularCapturePoint.addX(1.0 / wmh * angularMomentum.getY());
+      yoAngularCapturePoint.addY(-1.0 / wmh * angularMomentum.getX());
    }
 
    @Override
@@ -547,6 +558,21 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void getCapturePoint(FixedFramePoint3DBasics capturePointToPack)
    {
       capturePointToPack.setMatchingFrame(yoCapturePoint);
+   }
+
+   public void getAngularCapturePoint(FixedFramePoint2DBasics angularCapturePointToPack)
+   {
+      angularCapturePointToPack.set(yoAngularCapturePoint);
+   }
+
+   public FramePoint3DReadOnly getAngularCapturePoint()
+   {
+      return yoAngularCapturePoint;
+   }
+
+   public void getAngularCapturePoint(FixedFramePoint3DBasics angularCapturePointToPack)
+   {
+      angularCapturePointToPack.setMatchingFrame(yoAngularCapturePoint);
    }
 
    private final FramePoint2D copDesired = new FramePoint2D();

@@ -1,5 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Disabled;
@@ -18,16 +19,18 @@ public class RapidHeightMapExtractorTest
     * Manually check the memory management with htop and nvidia-smi
     */
    @Test
-   @Disabled
    public void testRapidHeightMapExtractor()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       RapidHeightMapExtractor rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
 
       // Create fake data for the test
-      GpuMat gpuMat = new GpuMat();
-      gpuMat.setTo(new Scalar(100));
+      GpuMat gpuMat = new GpuMat(1280, 720, opencv_core.CV_16UC1);
+      gpuMat.setTo(new Scalar(3000));
       CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
+      // Need to set these to the size of the image
+      cameraIntrinsics.setWidth(1280);
+      cameraIntrinsics.setHeight(720);
       double[] transformArray = getDoubles();
 
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform(transformArray);

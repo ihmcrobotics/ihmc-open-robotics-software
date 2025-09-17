@@ -85,7 +85,6 @@ public class AlexanderModelFactory
                                                                          jointMap,
                                                                          true,
                                                                          parserProperties);
-
          if (alexanderVersion.getSensorInformation() != null)
          {
             addForceSensors(simulationRobotDefinition, alexanderVersion.getSensorInformation());
