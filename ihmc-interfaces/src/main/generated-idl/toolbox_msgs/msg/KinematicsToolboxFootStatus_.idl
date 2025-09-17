@@ -23,10 +23,16 @@ module toolbox_msgs
          * Legged robot-specific contact information (false if not a legged robot)
          */
         boolean foot_in_contact;
-        geometry_msgs::msg::dds::Point desired_relative_foot_position_from_stance;
-        geometry_msgs::msg::dds::Quaternion desired_relative_foot_orientation_from_stance;
-        geometry_msgs::msg::dds::Point desired_relative_foot_position_from_pelvis;
-        geometry_msgs::msg::dds::Quaternion desired_relative_foot_orientation_from_pelvis;
+        /**
+         * Relative position of the foot wrt the pelvis frame
+         */
+        geometry_msgs::msg::dds::Point relative_foot_position_from_pelvis;
+        geometry_msgs::msg::dds::Quaternion relative_foot_orientation_from_pelvis;
+        /**
+         * Relative position of the foot wrt the pelvis frame at the beginning of a step
+         */
+        geometry_msgs::msg::dds::Point relative_foot_position_from_pelvis_step_start;
+        geometry_msgs::msg::dds::Quaternion relative_foot_orientation_from_pelvis_step_start;
       };
     };
   };

@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxFootStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -545,31 +546,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       // Update swing foot pose relative to swing - only needed for status message
       for (RobotSide robotSide : RobotSide.values())
       {
+         KinematicsToolboxFootStatus footStatus = robotSide == RobotSide.LEFT ? getSolution().getLeftFootStatus() : getSolution().getRightFootStatus();
+
          FramePose3D footPoseRelativeChange = new FramePose3D();
-         if (!isFootInSupport.get(robotSide).getValue())
-         {
-            footPoseRelativeChange.set(desiredFullRobotModel.getFoot(robotSide).getBodyFixedFrame().getTransformToRoot());
-         }
-         if (robotSide == RobotSide.LEFT)
-         {
-            footPoseRelativeChange.changeFrame(initialFootFrame.get(robotSide));
-            getSolution().getLeftFootStatus().getDesiredRelativeFootPositionFromStance().set(footPoseRelativeChange.getPosition());
-            getSolution().getLeftFootStatus().getDesiredRelativeFootOrientationFromStance().set(footPoseRelativeChange.getOrientation());
+         footPoseRelativeChange.set(desiredFullRobotModel.getSoleFrame(robotSide).getTransformToRoot());
 
-            footPoseRelativeChange.changeFrame(initialPelvisFrame);
-            getSolution().getLeftFootStatus().getDesiredRelativeFootPositionFromPelvis().set(footPoseRelativeChange.getPosition());
-            getSolution().getLeftFootStatus().getDesiredRelativeFootOrientationFromPelvis().set(footPoseRelativeChange.getOrientation());
-         }
-         else
-         {
-            footPoseRelativeChange.changeFrame(initialFootFrame.get(robotSide));
-            getSolution().getRightFootStatus().getDesiredRelativeFootPositionFromStance().set(footPoseRelativeChange.getPosition());
-            getSolution().getRightFootStatus().getDesiredRelativeFootOrientationFromStance().set(footPoseRelativeChange.getOrientation());
+         footPoseRelativeChange.changeFrame(initialPelvisFrame);
+         footStatus.getRelativeFootPositionFromPelvisStepStart().set(footPoseRelativeChange.getPosition());
+         footStatus.getRelativeFootOrientationFromPelvisStepStart().set(footPoseRelativeChange.getOrientation());
 
-            footPoseRelativeChange.changeFrame(initialPelvisFrame);
-            getSolution().getRightFootStatus().getDesiredRelativeFootPositionFromPelvis().set(footPoseRelativeChange.getPosition());
-            getSolution().getRightFootStatus().getDesiredRelativeFootOrientationFromPelvis().set(footPoseRelativeChange.getOrientation());
-         }
+         footPoseRelativeChange.changeFrame(desiredFullRobotModel.getPelvis().getBodyFixedFrame());
+         footStatus.getRelativeFootPositionFromPelvis().set(footPoseRelativeChange.getPosition());
+         footStatus.getRelativeFootOrientationFromPelvis().set(footPoseRelativeChange.getOrientation());
       }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())

@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a957b367b35470b25d59ddde7a411a4e1c553ca0318cd66bd3d3554762805144";
+   		return "c593716294d0ef55d93238c2d87438cecffa6d7d831f9e60cc7db64672066981";
    }
    
    @Override
