@@ -41,14 +41,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class IsaacROSFoundationPoseDemo
 {
    // Topics we publish to FoundationPose
-   private final ROS2Topic<?> reliableQoS = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
-   private final ROS2Topic<Image> rgbTopic = reliableQoS.withModule("image").withType(Image.class);
-   private final ROS2Topic<Image> depthTopic = reliableQoS.withModule("depth_image").withType(Image.class);
-   private final ROS2Topic<Image> segmentationTopic = reliableQoS.withModule("segmentation").withType(Image.class);
-   private final ROS2Topic<CameraInfo> cameraInfoTopic = reliableQoS.withModule("camera_info").withType(CameraInfo.class);
-   private static final ROS2Topic<Detection3DArray> trackingResultTopic = new ROS2Topic<>().withModule("tracking/output").withType(Detection3DArray.class);
-   private static final ROS2Topic<Detection3DArray> registrationResultTopic = new ROS2Topic<>().withModule("pose_estimation/output")
-                                                                                               .withType(Detection3DArray.class);
+   private static final ROS2Topic<?> RELIABLE_QOS = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
+   private static final ROS2Topic<Image> RGB_TOPIC = RELIABLE_QOS.withModule("image").withType(Image.class);
+   private static final ROS2Topic<Image> DEPTH_TOPIC = RELIABLE_QOS.withModule("depth_image").withType(Image.class);
+   private static final ROS2Topic<Image> SEGMENTATION_TOPIC = RELIABLE_QOS.withModule("segmentation").withType(Image.class);
+   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = RELIABLE_QOS.withModule("camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = new ROS2Topic<>().withModule("tracking/output").withType(Detection3DArray.class);
+   private static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = new ROS2Topic<>().withModule("pose_estimation/output")
+                                                                                                 .withType(Detection3DArray.class);
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
@@ -67,10 +67,12 @@ public class IsaacROSFoundationPoseDemo
    private final AtomicReference<Instant> firstSegmentationPublished = new AtomicReference<>(null);
    private final AtomicReference<Instant> firstTrackingReceived = new AtomicReference<>(null);
    private final AtomicReference<Instant> firstRegistrationReceived = new AtomicReference<>(null);
-   private ROS2Subscription<Detection3DArray> trackingSubscription
-         = ros2Node.createSubscription2(trackingResultTopic, result -> firstTrackingReceived.compareAndSet(null, Instant.now()));
-   private ROS2Subscription<Detection3DArray> registrationSubscription
-         = ros2Node.createSubscription2(registrationResultTopic, result -> firstRegistrationReceived.compareAndSet(null, Instant.now()));
+   private ROS2Subscription<Detection3DArray> trackingSubscription = ros2Node.createSubscription2(TRACKING_RESULT_TOPIC,
+                                                                                                  result -> firstTrackingReceived.compareAndSet(null,
+                                                                                                                                                Instant.now()));
+   private ROS2Subscription<Detection3DArray> registrationSubscription = ros2Node.createSubscription2(REGISTRATION_RESULT_TOPIC,
+                                                                                                      result -> firstRegistrationReceived.compareAndSet(null,
+                                                                                                                                                        Instant.now()));
 
    private IsaacROSFoundationPoseDemo()
    {
@@ -114,9 +116,9 @@ public class IsaacROSFoundationPoseDemo
          RawImage depth32F = depth.replaceImage(depthImage32F, PixelFormat.GRAY_F32);
 
          // Publish the color and depth
-         imagePublisher.publishImage(rgbTopic, rgb, ros2ZEDFrame);
-         imagePublisher.publishImage(depthTopic, depth32F, ros2ZEDFrame);
-         imagePublisher.publishImage(cameraInfoTopic, rgb, ros2ZEDFrame);
+         imagePublisher.publishImage(RGB_TOPIC, rgb, ros2ZEDFrame);
+         imagePublisher.publishImage(DEPTH_TOPIC, depth32F, ros2ZEDFrame);
+         imagePublisher.publishImage(CAMERA_INFO_TOPIC, rgb, ros2ZEDFrame);
 
          // Also publish for the UI
          imagePublisher.publishImage(PerceptionAPI.ZED_DEPTH, depth);
@@ -207,7 +209,7 @@ public class IsaacROSFoundationPoseDemo
             resizedSegmentation = segmentation.get();
          }
 
-         imagePublisher.publishImage(segmentationTopic, resizedSegmentation, ros2ZEDFrame);
+         imagePublisher.publishImage(SEGMENTATION_TOPIC, resizedSegmentation, ros2ZEDFrame);
          firstSegmentationPublished.compareAndSet(null, Instant.now());
 
          resizedSegmentation.release();
@@ -237,12 +239,15 @@ public class IsaacROSFoundationPoseDemo
          LogTools.error("OOPS");
          LogTools.error(throwable.getMessage());
          LogTools.error(throwable.getCause());
-         while (throwable != null) {
-            for (StackTraceElement frame : throwable.getStackTrace()) {
+         while (throwable != null)
+         {
+            for (StackTraceElement frame : throwable.getStackTrace())
+            {
                System.err.println(frame.toString());
             }
             throwable = throwable.getCause();
-            if (throwable != null) {
+            if (throwable != null)
+            {
                System.err.println("Caused by: " + throwable.getMessage());
             }
          }

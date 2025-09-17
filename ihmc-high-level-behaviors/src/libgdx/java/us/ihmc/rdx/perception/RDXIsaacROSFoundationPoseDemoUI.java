@@ -3,8 +3,11 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.Color;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.communication.ros2.tf2.ROS2Frame;
+import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence;
@@ -38,6 +41,8 @@ public class RDXIsaacROSFoundationPoseDemoUI
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
    private final Set<Box3D> detectedBoundingBoxes = new HashSet<>();
+
+   private final ROS2Frame zedFrame = new ROS2MutableFrame(ros2Node, "zed_frame", ReferenceFrame.getWorldFrame());
 
    public RDXIsaacROSFoundationPoseDemoUI()
    {
@@ -114,6 +119,8 @@ public class RDXIsaacROSFoundationPoseDemoUI
    {
       IDLSequence.Object<Detection3D> detections = output.getDetections();
 
+      zedFrame.update();
+
       synchronized (detectedBoundingBoxes)
       {
          detectedBoundingBoxes.clear();
@@ -121,9 +128,10 @@ public class RDXIsaacROSFoundationPoseDemoUI
          for (int i = 0; i < detections.size(); ++i)
          {
             Detection3D detection = detections.get(i);
-            Pose3D pose = detection.getBbox().getCenter();
-            pose.prependRotation(FOUNDATIONPOSE_TO_IHMC_ROTATION);
             Vector3D size = detection.getBbox().getSize();
+            FramePose3D pose = new FramePose3D(zedFrame, detection.getBbox().getCenter());
+            pose.prependRotation(FOUNDATIONPOSE_TO_IHMC_ROTATION);
+            pose.changeFrame(ReferenceFrame.getWorldFrame());
             detectedBoundingBoxes.add(new Box3D(pose, size));
          }
       }
