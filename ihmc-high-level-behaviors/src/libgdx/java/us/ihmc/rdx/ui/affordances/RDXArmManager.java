@@ -23,15 +23,12 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.lerobot.RDXLeRobotOperation;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.hands.RDXHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
@@ -71,13 +68,12 @@ public class RDXArmManager
 
    private final RDXTeleoperationParameters teleoperationParameters;
    private final SideDependentList<RDXInteractableHand> interactableHands;
-   private final BooleanSupplier wholeBodyIKEnabled;
+   private final BooleanSupplier enableWholeBodyIK;
 
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
    private final RDXHandManager handManager;
-   private RDXLeRobotOperation leRobotOperation;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -94,14 +90,12 @@ public class RDXArmManager
    private final TypedNotification<RobotSide> showWarningNotification = new TypedNotification<>();
 
    public RDXArmManager(CommunicationHelper communicationHelper,
-                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                         DRCRobotModel robotModel,
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
                         RDXTeleoperationParameters teleoperationParameters,
                         SideDependentList<RDXInteractableHand> interactableHands,
-                        BooleanSupplier wholeBodyIKEnabled,
-                        ROS2Helper ros2Helper)
+                        BooleanSupplier enableWholeBodyIK)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
@@ -109,7 +103,7 @@ public class RDXArmManager
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
-      this.wholeBodyIKEnabled = wholeBodyIKEnabled;
+      this.enableWholeBodyIK = enableWholeBodyIK;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -128,8 +122,6 @@ public class RDXArmManager
       }
 
       handManager = new RDXHandManager(robotModel);
-      if (peerClockEstimator != null)
-         leRobotOperation = new RDXLeRobotOperation(communicationHelper.getROS2Node(), peerClockEstimator);
    }
 
    public void create(RDXBaseUI baseUI)
@@ -137,17 +129,11 @@ public class RDXArmManager
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
       handManager.create(baseUI);
-
-      if (leRobotOperation != null)
-         leRobotOperation.create(baseUI);
    }
 
    public void update(boolean interactablesEnabled)
    {
       handManager.update();
-
-      if (leRobotOperation != null)
-         leRobotOperation.update();
 
       boolean showWrench = indicateWrenchOnScreen.get();
 
@@ -161,7 +147,7 @@ public class RDXArmManager
          }
       }
 
-      if (!wholeBodyIKEnabled.getAsBoolean() && interactablesEnabled)
+      if (!enableWholeBodyIK.getAsBoolean() && interactablesEnabled)
       {
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
@@ -233,9 +219,6 @@ public class RDXArmManager
    {
       if (ImGui.collapsingHeader(labels.get("Arms")))
       {
-         if (leRobotOperation != null)
-            leRobotOperation.renderImGuiWidgets();
-      
          float widgetStartX = 112.0f;
 
          ImGui.text("Arm Presets:");
