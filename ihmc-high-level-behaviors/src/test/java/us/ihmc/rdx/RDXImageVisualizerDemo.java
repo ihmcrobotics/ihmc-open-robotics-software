@@ -2,7 +2,6 @@ package us.ihmc.rdx;
 
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
@@ -74,10 +73,22 @@ public class RDXImageVisualizerDemo
    {
       zedSensor.waitForGrab();
       RawImage colorImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-//      Mat resized = new Mat();
-//      opencv_imgproc.resize(colorImage.getCpuImageMat(), resized, new Size(colorImage.getWidth() * 2, colorImage.getHeight() * 2));
-//      visualizer.setImage(RDXBaseUI.getInstance().getRenderIndex() % 100 < 50 ? colorImage.getCpuImageMat() : resized, opencv_imgproc.COLOR_BGR2RGBA);
-      visualizer.setImage(colorImage.getCpuImageMat(), opencv_imgproc.COLOR_BGR2RGBA);
+      Mat rgbaMat = new Mat();
+      opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), rgbaMat, opencv_imgproc.COLOR_BGR2RGBA);
+
+//      if (RDXBaseUI.getInstance().getRenderIndex() % 100 < 50)
+//      {
+//         Mat resized = new Mat();
+//         opencv_imgproc.resize(rgbaMat, resized, new Size(colorImage.getWidth() * 2, colorImage.getHeight() * 2));
+//         visualizer.setImage(resized.data(), resized.cols(), resized.rows());
+//         resized.close();
+//      }
+//      else
+      {
+         visualizer.setImage(rgbaMat.data(), colorImage.getWidth(), colorImage.getHeight());
+      }
+
+      rgbaMat.close();
       colorImage.release();
    }
 

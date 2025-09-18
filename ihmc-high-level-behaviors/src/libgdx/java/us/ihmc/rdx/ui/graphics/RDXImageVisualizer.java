@@ -1,23 +1,18 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.GLTexture;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.tools.thread.GuidedSwapReference;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXImageVisualizer extends RDXVisualizer
 {
-   // TODO: Finish converting to swap reference
-   private final SwapReference<Mat> rgbaSwapReference = new SwapReference<>(Mat::new);
-   private Mat rgbaMat;
-   private MatTexture texture;
+   private DirectTexture2D texture;
+   private final SwapReference<ImageData> imageDataSwapReference;
    private final AtomicBoolean newImageReceived;
 
    private final RDXImagePanel imagePanel;
@@ -25,6 +20,8 @@ public class RDXImageVisualizer extends RDXVisualizer
    public RDXImageVisualizer(String title, String panelName, boolean flipY)
    {
       super(title);
+
+      imageDataSwapReference = new SwapReference<>(ImageData::new);
 
       newImageReceived = new AtomicBoolean(false);
 
@@ -46,14 +43,15 @@ public class RDXImageVisualizer extends RDXVisualizer
       {
          if (texture == null)
          {
-            texture = new MatTexture();
+            texture = new DirectTexture2D();
             imagePanel.setTexture(texture);
          }
 
          texture.prepareForUpload();
-         synchronized (this)
+         synchronized (imageDataSwapReference)
          {
-            texture.upload(rgbaMat);
+            ImageData imageData = imageDataSwapReference.getForThreadOne();
+            texture.upload(imageData.dataPointer, imageData.width, imageData.height);
          }
       }
    }
@@ -64,38 +62,22 @@ public class RDXImageVisualizer extends RDXVisualizer
       return imagePanel;
    }
 
-   public void updateImageDimensions(int imageWidth, int imageHeight)
+   public void setImage(BytePointer imageData, int imageWidth, int imageHeight)
    {
-      if (rgbaMat == null || imageWidth != rgbaMat.cols() || imageHeight != rgbaMat.rows())
+      ImageData dataToPack = imageDataSwapReference.getForThreadTwo();
+      dataToPack.width = imageWidth;
+      dataToPack.height = imageHeight;
+
+      int imageSize = 4 * imageWidth * imageHeight; // RGBA - 4 bytes per pixel
+      if (dataToPack.dataPointer == null || dataToPack.dataPointer.capacity() != imageSize)
       {
-         synchronized (this)
-         {
-            // Dispose of objects that are about to be reallocated
-            if (rgbaMat != null)
-               rgbaMat.close();
-
-            rgbaMat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4);
-         }
+         if (dataToPack.dataPointer != null)
+            dataToPack.dataPointer.close();
+         dataToPack.dataPointer = new BytePointer(imageSize);
       }
-   }
 
-   public Mat getRGBAMat()
-   {
-      return rgbaMat;
-   }
-
-   public void setImage(Mat rgbMat)
-   {
-      setImage(rgbMat, opencv_imgproc.COLOR_RGB2RGBA);
-   }
-
-   public void setImage(Mat mat, int toRGBAConversion)
-   {
-      synchronized (this)
-      {
-         updateImageDimensions(mat.cols(), mat.rows());
-         opencv_imgproc.cvtColor(mat, rgbaMat, toRGBAConversion);
-      }
+      BytePointer.memcpy(dataToPack.dataPointer, imageData, imageSize);
+      imageDataSwapReference.swap();
       newImageReceived.set(true);
    }
 
@@ -104,21 +86,27 @@ public class RDXImageVisualizer extends RDXVisualizer
    {
       super.destroy();
 
-      synchronized (this)
-      {
-         if (texture != null)
-            texture.dispose();
-         if (rgbaMat != null)
-            rgbaMat.close();
-      }
+      if (texture != null)
+         texture.dispose();
+      if (imageDataSwapReference.getA().dataPointer != null)
+         imageDataSwapReference.getA().dataPointer.close();
+      if (imageDataSwapReference.getB().dataPointer != null)
+         imageDataSwapReference.getB().dataPointer.close();
    }
 
-   private static class MatTexture extends GLTexture
+   private static class ImageData
+   {
+      public BytePointer dataPointer = null;
+      public int width = 0;
+      public int height = 0;
+   }
+
+   private static class DirectTexture2D extends GLTexture
    {
       private int width = 0;
       private int height = 0;
 
-      public MatTexture()
+      public DirectTexture2D()
       {
          super(GL41.GL_TEXTURE_2D);
       }
@@ -160,11 +148,12 @@ public class RDXImageVisualizer extends RDXVisualizer
          GL41.glTexParameteri(GL41.GL_TEXTURE_2D, GL41.GL_TEXTURE_MAG_FILTER, GL41.GL_LINEAR);
       }
 
-      public void upload(Mat mat)
+      public void upload(BytePointer rgbaData, int width, int height)
       {
-         width = mat.cols();
-         height = mat.rows();
-         GL41.glTexImage2D(glTarget, 0, GL41.GL_RGBA, width, height, 0, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE, mat.data().address());
+         this.width = width;
+         this.height = height;
+
+         GL41.glTexImage2D(glTarget, 0, GL41.GL_RGBA, width, height, 0, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE, rgbaData.address());
       }
    }
 }
