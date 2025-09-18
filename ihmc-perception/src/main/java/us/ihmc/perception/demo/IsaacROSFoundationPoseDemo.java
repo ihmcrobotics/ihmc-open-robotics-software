@@ -21,7 +21,7 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.tools.ImageTools;
+import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -77,6 +77,7 @@ public class IsaacROSFoundationPoseDemo
    private IsaacROSFoundationPoseDemo()
    {
       zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
+//      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
       zedImageSensor.enablePositionalTracking(true);
       zedImageSensor.setSensorFrame(zedImageSensor.getTrackedSensorFrame());
       zedImageSensor.run(true);
@@ -106,7 +107,7 @@ public class IsaacROSFoundationPoseDemo
 
          // Get the color, and convert to RGB for FoundationPose
          RawImage color = zedImageSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-         RawImage rgb = ImageTools.convertColor(color, PixelFormat.RGB8);
+         RawImage rgb = RawImageTools.convertColor(color, PixelFormat.RGB8);
 
          // Get the depth and convert it to 32F for FoundationPose
          RawImage depth = zedImageSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
