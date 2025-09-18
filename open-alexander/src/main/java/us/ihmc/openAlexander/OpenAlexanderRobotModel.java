@@ -143,7 +143,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
                                   MaterialDefinition robotMaterial,
                                   RobotContactPointParameters<RobotSide> contactPointParameters)
    {
-      this(robotVersion, robotTarget, robotMaterial, contactPointParameters, true);
+      this(robotVersion, robotTarget, robotMaterial, contactPointParameters, true, AlexanderSensorInformation.getImuSensorsToIgnore());
    }
 
    public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
