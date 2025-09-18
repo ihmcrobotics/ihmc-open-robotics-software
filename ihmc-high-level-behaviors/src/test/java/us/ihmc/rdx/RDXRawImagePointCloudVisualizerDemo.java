@@ -1,10 +1,10 @@
-package us.ihmc.rdx.ui;
+package us.ihmc.rdx;
 
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.perception.RawImage;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXRawImagePointCloudVisualizer;
 import us.ihmc.robotics.time.TimeTools;

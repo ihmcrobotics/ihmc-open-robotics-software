@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui;
 
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.GLTexture;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.RDXPanel;
 
@@ -9,7 +9,7 @@ public class RDXImagePanel extends RDXPanel
    public static final boolean FLIP_Y = true;
    public static final boolean DO_NOT_FLIP_Y = false;
 
-   private Texture texture;
+   private GLTexture texture;
    private final boolean flipY;
    private float mouseXRightFromLeft;
    private float mouseYDownFromTop;
@@ -23,7 +23,7 @@ public class RDXImagePanel extends RDXPanel
       this.flipY = flipY;
    }
 
-   public void setTexture(Texture texture)
+   public void setTexture(GLTexture texture)
    {
       this.texture = texture;
       setFirstTimeWidth(texture.getWidth());
