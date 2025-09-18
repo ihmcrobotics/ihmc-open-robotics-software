@@ -49,6 +49,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private LogDataReader logDataReader;
 
    private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
+   private final List<ZEDSVODepthScrubber> zedDepthScrubbers = new ArrayList<>();
    private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();
    private record MagewellLogVideo(MagewellScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXOpenCVVideoVisualizer visualizer) { }
    private final List<MagewellLogVideo> magewellLogVideos = new ArrayList<>();
@@ -105,6 +106,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
             zedLogVideos.add(zedLogVideo);
          }
+
+         // Build depth-enabled ZED scrubbers
+         File logDir = logSession.getLogDataReader().getLogDirectory();
+         for (File datFile : ZEDSVODepthScrubber.findZEDSensorDatFiles(logDir))
+         {
+            zedDepthScrubbers.add(new ZEDSVODepthScrubber(datFile));
+         }
+
 
          for (Runnable onSessionStartedRunnable : getOnSessionStartedRunnables())
          {
@@ -167,6 +176,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
                mat.close();
             }
          }
+         for (ZEDSVODepthScrubber depthScrubber : zedDepthScrubbers)
+         {
+            synchronized (depthScrubber)
+            {
+               depthScrubber.scrub(yoTimestamp.getLongValue());
+            }
+         }
+
       }
    }
 
@@ -233,6 +250,8 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          blackmagicLogVideo.visualizer.destroy();
       for (ZEDLogVideo zedLogVideo : zedLogVideos)
          zedLogVideo.visualizer.destroy();
+      for (ZEDSVODepthScrubber depthScrubber : zedDepthScrubbers)
+         depthScrubber.close();
 
       session.shutdownSession();
 
@@ -246,6 +265,15 @@ public class RDXSCS2LogSession extends RDXSCS2Session
       else
          return zedLogVideos.get(0).scrubber;
    }
+
+   public ZEDSVODepthScrubber getFirstZEDDepthScrubber()
+   {
+      if (zedDepthScrubbers.isEmpty())
+         return null;
+      else
+         return zedDepthScrubbers.get(0);
+   }
+
 
    @Override
    public SCS2LogSessionWithVideo getSession()
