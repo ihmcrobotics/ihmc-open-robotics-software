@@ -108,6 +108,7 @@ public class AStarFootstepPlanner
                                                       snapper,
                                                       referenceBasedIdealStepCalculator,
                                                       distanceAndYawHeuristics::compute,
+                                                      environmentHandler,
                                                       registry);
 
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(nominalExpansion,

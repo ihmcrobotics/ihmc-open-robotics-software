@@ -40,9 +40,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final DoubleStoredPropertyKey localWidthInMeters = keys.addDoubleKey("Local width in meters");
    public static final DoubleStoredPropertyKey terrainWidthInMeters = keys.addDoubleKey("Terrain width in meters");
    public static final DoubleStoredPropertyKey globalWidthInMeters = keys.addDoubleKey("Global width in meters");
-   public static final IntegerStoredPropertyKey steppingContactThreshold = keys.addIntegerKey("Stepping contact threshold");
-   public static final IntegerStoredPropertyKey contactWindowSize = keys.addIntegerKey("Contact window size");
-   public static final DoubleStoredPropertyKey steppingCosineThreshold = keys.addDoubleKey("Stepping cosine threshold");
 
    /**
     * Loads this property set.

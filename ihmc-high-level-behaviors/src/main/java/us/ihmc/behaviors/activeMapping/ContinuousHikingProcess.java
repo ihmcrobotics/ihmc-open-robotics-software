@@ -9,7 +9,6 @@ import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
 import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionsManager;
 import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.RapidHeightMapThread;
 import us.ihmc.perception.RawImage;
