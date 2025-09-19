@@ -99,6 +99,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
                   }
 
                   texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+                  imagePanel.setTexture(texture);
                }
 
                for (Consumer<Mat> overlay : overlays)
@@ -107,7 +108,6 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
                }
 
                texture.draw(pixmap, 0, 0);
-               imagePanel.setTexture(texture);
             }
          }
       }
