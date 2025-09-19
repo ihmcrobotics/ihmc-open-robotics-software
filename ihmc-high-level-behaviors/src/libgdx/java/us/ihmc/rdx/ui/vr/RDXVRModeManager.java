@@ -239,8 +239,10 @@ public class RDXVRModeManager
 
       if (perceptionVisualizers.getZedLeftColorImageVisualizer() != null && perceptionVisualizers.getZedRightColorImageVisualizer() != null)
       {
-         stereoPanel.update(perceptionVisualizers.getZedLeftColorImageVisualizer().getOpenCVVideoVisualizer().getTexture(),
-                            perceptionVisualizers.getZedRightColorImageVisualizer().getOpenCVVideoVisualizer().getTexture(),
+         stereoPanel.update(perceptionVisualizers.getZedLeftColorImageVisualizer().getImage(),
+                            perceptionVisualizers.getZedLeftColorImageVisualizer().getPixelFormat(),
+                            perceptionVisualizers.getZedRightColorImageVisualizer().getImage(),
+                            perceptionVisualizers.getZedRightColorImageVisualizer().getPixelFormat(),
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.LEFT),
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.RIGHT),
                             perceptionVisualizers.getZEDModelData().getVerticalFOV());

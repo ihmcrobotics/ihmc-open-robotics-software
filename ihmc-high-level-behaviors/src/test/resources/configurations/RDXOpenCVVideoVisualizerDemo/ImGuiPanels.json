@@ -2,6 +2,10 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : false,
-    "Visualizer Panel###RDXOpenCVVideoVisualizer1:Visualizer Panel" : true
+    "BGR Panel###RDXOpenCVVideoVisualizer3:BGR Panel" : true,
+    "Depth Panel###RDXOpenCVVideoVisualizer9:Depth Panel" : true,
+    "GRAY Panel###RDXOpenCVVideoVisualizer7:GRAY Panel" : true,
+    "RGB Panel###RDXOpenCVVideoVisualizer1:RGB Panel" : true,
+    "YUV Panel###RDXOpenCVVideoVisualizer5:YUV Panel" : true
   }
 }

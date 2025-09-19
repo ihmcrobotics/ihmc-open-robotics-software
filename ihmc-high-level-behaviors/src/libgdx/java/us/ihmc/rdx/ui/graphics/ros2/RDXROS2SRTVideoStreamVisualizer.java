@@ -10,12 +10,9 @@ import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.streaming.ROS2SRTVideoSubscriber;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.ros2.ROS2Topic;
 
-import javax.annotation.Nullable;
-
-public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualizer<SRTStreamStatus>
+public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2ImageVisualizer<SRTStreamStatus>
 {
    private static final String DELAY_PLOT_TEXT = "Delay (ms)";
 
@@ -43,28 +40,12 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
       });
    }
 
-   @Override
-   public void update()
-   {
-      super.update();
-      getOpenCVVideoVisualizer().setActive(isActive());
-      getOpenCVVideoVisualizer().update();
-   }
-
    private void updateImage(RawImage newImage)
    {
       getFrequency().ping();
-      getOpenCVVideoVisualizer().updateImageDimensions(newImage.getWidth(), newImage.getHeight());
-      newImage.getCpuImageMat().copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
+      submitImageUpdate(imageVisualizer -> imageVisualizer.setImage(newImage));
       float delayMS = (float) Conversions.secondsToMilliseconds(subscriber.getLastFrameDelay());
       alphaFilteredDelayMS = 0.1f * delayMS + 0.9f * alphaFilteredDelayMS;
-   }
-
-   @Nullable
-   @Override
-   public RDXPanel getPanel()
-   {
-      return getOpenCVVideoVisualizer().getPanel();
    }
 
    @Override
@@ -75,7 +56,7 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
       delayPlot.render(alphaFilteredDelayMS);
       ImGui.popStyleColor();
 
-      getOpenCVVideoVisualizer().renderImGuiWidgets();
+      super.renderImGuiWidgets();
    }
 
    @Override
@@ -89,6 +70,5 @@ public class RDXROS2SRTVideoStreamVisualizer extends RDXROS2OpenCVVideoVisualize
    {
       super.destroy();
       subscriber.destroy();
-      getOpenCVVideoVisualizer().destroy();
    }
 }

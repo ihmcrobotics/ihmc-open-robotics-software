@@ -1,10 +1,10 @@
 package us.ihmc.rdx;
 
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.imageMessage.PixelFormat;
+import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -19,7 +19,11 @@ public class RDXImageVisualizerDemo
 {
    private static final String SVO_FILE = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
 
-   private final RDXImageVisualizer visualizer;
+   private final RDXImageVisualizer rgbVisualizer;
+   private final RDXImageVisualizer bgrVisualizer;
+   private final RDXImageVisualizer yuvVisualizer;
+   private final RDXImageVisualizer grayVisualizer;
+   private final RDXImageVisualizer depthVisualizer;
 
    private final ROS2Node ros2Node;
 
@@ -28,7 +32,11 @@ public class RDXImageVisualizerDemo
 
    private RDXImageVisualizerDemo()
    {
-      visualizer = new RDXImageVisualizer("ZED Color", "Visualizer Panel", false);
+      rgbVisualizer = new RDXImageVisualizer("ZED Color", "RGB Panel", false);
+      bgrVisualizer = new RDXImageVisualizer("ZED Color", "BGR Panel", false);
+      yuvVisualizer = new RDXImageVisualizer("ZED Color", "YUV Panel", false);
+      grayVisualizer = new RDXImageVisualizer("ZED Color", "GRAY Panel", false);
+      depthVisualizer = new RDXImageVisualizer("ZED Depth", "Depth Panel", false);
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
 
@@ -41,10 +49,26 @@ public class RDXImageVisualizerDemo
          @Override
          public void create()
          {
-            visualizer.create();
-            visualizer.setActive(true);
+            rgbVisualizer.create();
+            rgbVisualizer.setActive(true);
+            baseUI.getImGuiPanelManager().addPanel(rgbVisualizer.getPanel());
 
-            baseUI.getImGuiPanelManager().addPanel(visualizer.getPanel());
+            bgrVisualizer.create();
+            bgrVisualizer.setActive(true);
+            baseUI.getImGuiPanelManager().addPanel(bgrVisualizer.getPanel());
+
+            yuvVisualizer.create();
+            yuvVisualizer.setActive(true);
+            baseUI.getImGuiPanelManager().addPanel(yuvVisualizer.getPanel());
+
+            grayVisualizer.create();
+            grayVisualizer.setActive(true);
+            baseUI.getImGuiPanelManager().addPanel(grayVisualizer.getPanel());
+
+            depthVisualizer.create();
+            depthVisualizer.setActive(true);
+            baseUI.getImGuiPanelManager().addPanel(depthVisualizer.getPanel());
+
             baseUI.create();
 
             zedSensor.run(true);
@@ -54,7 +78,11 @@ public class RDXImageVisualizerDemo
          @Override
          public void render()
          {
-            visualizer.update();
+            rgbVisualizer.update();
+            bgrVisualizer.update();
+            yuvVisualizer.update();
+            grayVisualizer.update();
+            depthVisualizer.update();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -64,7 +92,11 @@ public class RDXImageVisualizerDemo
          {
             destroy();
             baseUI.dispose();
-            visualizer.destroy();
+            rgbVisualizer.destroy();
+            bgrVisualizer.destroy();
+            yuvVisualizer.destroy();
+            grayVisualizer.destroy();
+            depthVisualizer.destroy();
          }
       });
    }
@@ -73,23 +105,25 @@ public class RDXImageVisualizerDemo
    {
       zedSensor.waitForGrab();
       RawImage colorImage = zedSensor.getImage(ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      Mat rgbaMat = new Mat();
-      opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), rgbaMat, opencv_imgproc.COLOR_BGR2RGBA);
+      RawImage depthImage = zedSensor.getImage(ZEDImageSensor.DEPTH_IMAGE_KEY);
 
-//      if (RDXBaseUI.getInstance().getRenderIndex() % 100 < 50)
-//      {
-//         Mat resized = new Mat();
-//         opencv_imgproc.resize(rgbaMat, resized, new Size(colorImage.getWidth() * 2, colorImage.getHeight() * 2));
-//         visualizer.setImage(resized.data(), resized.cols(), resized.rows());
-//         resized.close();
-//      }
-//      else
-      {
-         visualizer.setImage(rgbaMat.data(), colorImage.getWidth(), colorImage.getHeight());
-      }
+      RawImage rgbImage = RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
+      RawImage bgrImage = RawImageTools.convertColor(colorImage, PixelFormat.BGR8);
+      RawImage yuvImage = RawImageTools.convertColor(colorImage, PixelFormat.YUV444P);
+      RawImage grayImage = RawImageTools.convertColor(colorImage, PixelFormat.GRAY8);
 
-      rgbaMat.close();
+      rgbVisualizer.setImage(rgbImage);
+      bgrVisualizer.setImage(bgrImage);
+      yuvVisualizer.setImage(yuvImage);
+      grayVisualizer.setImage(grayImage);
+      depthVisualizer.setImage(depthImage);
+
       colorImage.release();
+      depthImage.release();
+      rgbImage.release();
+      bgrImage.release();
+      yuvImage.release();
+      grayImage.release();
    }
 
    private void destroy()

@@ -2,6 +2,8 @@ package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -16,11 +18,14 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -75,18 +80,25 @@ public class RDX3DSituatedImagePanel
       context.addVRInputProcessor(this::processVRInput);
    }
 
-   public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
+   public void create(Mat image, PixelFormat pixelFormat, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
       topLeftPosition.set(points[0]);
       bottomLeftPosition.set(points[1]);
       bottomRightPosition.set(points[2]);
       topRightPosition.set(points[3]);
-      create(texture, centerOfPanelFrame, flipY, verticalFOV);
+      create(image, pixelFormat, centerOfPanelFrame, flipY, verticalFOV);
    }
 
-   private void create(Texture texture, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
+   private void create(Mat image, PixelFormat pixelFormat, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
-      this.texture = texture;
+      Pixmap pixmap = new Pixmap(image.cols(), image.rows(), Format.RGBA8888);
+      Mat rgbaImage = new Mat(image.size(), image.type(), new BytePointer(pixmap.getPixels()));
+      pixelFormat.convertToRGBA(image, rgbaImage);
+
+      if (texture == null)
+         texture = new Texture(pixmap);
+      texture.draw(pixmap, 0, 0);
+
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
 
@@ -229,20 +241,20 @@ public class RDX3DSituatedImagePanel
       LibGDXTools.toLibGDX(tempFramePoint, positionToTransform);
    }
 
-   public void update(Texture imageTexture, ReferenceFrame cameraFrame, float verticalFOV)
+   public void update(Mat image, PixelFormat pixelFormat, ReferenceFrame cameraFrame, float verticalFOV)
    {
       // Prevent ever having an invisible panel out there, which is very confusing
       // to the VR user when the controllers are colliding with and invisible box.
-      boolean somethingToShow = imageTexture != null || texture != null;
+      boolean somethingToShow = image != null || texture != null;
       isShowing = somethingToShow && vrControls.getShowFloatingVideoPanel().get();
 
       // Update the texture if necessary
-      if (isShowing && imageTexture != null)
+      if (isShowing && image != null && !image.isNull() && pixelFormat != null)
       {
          boolean flipY = false;
          // Calculate panel size in meters from FOV
          float panelHeightMeters = 2.0f * panelDistance * (float) Math.tan(Math.toRadians(verticalFOV) / 2.0f);
-         float aspectRatio = imageTexture.getWidth() / (float) imageTexture.getHeight();
+         float aspectRatio = image.cols() / (float) image.rows();
          float panelWidthMeters = panelHeightMeters * aspectRatio;
          float halfWidth = panelWidthMeters * 0.5f;
          float halfHeight = panelHeightMeters * 0.5f;
@@ -256,7 +268,8 @@ public class RDX3DSituatedImagePanel
          floatingPanelTransformToWorld.invert();
          floatingPanelFrame.update();
 
-         create(imageTexture,
+         create(image,
+                pixelFormat,
                 new Vector3[] {new Vector3(0.0f, halfWidth, halfHeight),
                                new Vector3(0.0f, halfWidth, -halfHeight),
                                new Vector3(0.0f, -halfWidth, -halfHeight),
