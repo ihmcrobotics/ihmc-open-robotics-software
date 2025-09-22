@@ -6,17 +6,28 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static org.bytedeco.cuda.global.cudart.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,6 +80,94 @@ public class MathUtilsTest
 
       cpuResultPointer.close();
       gpuResultPointer.close();
+
+      kernel.close();
+      program.close();
+      CUDAStreamManager.releaseStream(stream);
+   }
+
+   @Test
+   public void testSolveForPlaneCoefficients() throws Exception
+   {
+      Random random = new Random(32900);
+
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
+
+      CUstream_st stream = CUDAStreamManager.getStream();
+      CUDAProgram program = new CUDAProgram(programPath, headerPath);
+      CUDAKernel kernel = program.loadKernel("test_best_fit_plane");
+
+      int minPoints = 3;
+      int maxPoints = 15;
+
+      // cpu --> gpu
+      FloatPointer gpuPointsPointer = new FloatPointer();
+      FloatPointer cpuPointsPointer = new FloatPointer(3 * maxPoints);
+      CUDATools.mallocAsync(gpuPointsPointer, 3 * maxPoints, stream);
+
+      // gpu --> cpu
+      FloatPointer pointSolutionPointer = new FloatPointer();
+      FloatPointer normalSolutionPointer = new FloatPointer();
+      FloatPointer squaredErrorPointer = new FloatPointer();
+
+      cudaMallocHost(pointSolutionPointer, 3);
+      cudaMallocHost(normalSolutionPointer, 3);
+      cudaMallocHost(squaredErrorPointer, 1);
+
+      LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+      Plane3D expectedPlane = new Plane3D();
+
+      int numTests = 30;
+      for (int i = 0; i < numTests; i++)
+      {
+         int numPoints = minPoints + random.nextInt(maxPoints - minPoints + 1);
+         List<Point3D> points = new ArrayList<>();
+
+         for (int j = 0; j < numPoints; j++)
+         {
+            points.add(EuclidCoreRandomTools.nextPoint3D(random, 5.0));
+         }
+
+         double expectedSquaredError = planeFitter.fitPlaneToPoints(points, expectedPlane);
+
+         float[] pointsArray = new float[3 * maxPoints];
+         for (int j = 0; j < points.size(); j++)
+         {
+            points.get(j).get(3 * j, pointsArray);
+         }
+
+         cpuPointsPointer.put(pointsArray);
+
+         CUDATools.memcpyAsync(gpuPointsPointer, cpuPointsPointer, pointsArray.length, stream);
+
+         // run kernel
+         kernel.withPointer(gpuPointsPointer);
+         kernel.withInt(points.size());
+         kernel.withPointer(pointSolutionPointer);
+         kernel.withPointer(normalSolutionPointer);
+         kernel.withPointer(squaredErrorPointer);
+
+         kernel.run(stream, new dim3(), new dim3(), 0);
+         cudaStreamSynchronize(stream);
+
+         Plane3D computedPlane = new Plane3D();
+         computedPlane.getPoint().set(pointSolutionPointer.get(0), pointSolutionPointer.get(1), pointSolutionPointer.get(2));
+         computedPlane.getNormal().set(normalSolutionPointer.get(0), normalSolutionPointer.get(1), normalSolutionPointer.get(2));
+
+         Assertions.assertTrue(expectedPlane.epsilonEquals(computedPlane, 1.0e-5));
+         Assertions.assertTrue(Math.abs(expectedSquaredError - squaredErrorPointer.get(0)) < 1.0e-4);
+      }
+
+      cudaFreeAsync(gpuPointsPointer, stream);
+      cudaFreeHost(pointSolutionPointer);
+      cudaFreeHost(normalSolutionPointer);
+      cudaFreeHost(squaredErrorPointer);
+
+      gpuPointsPointer.close();
+      pointSolutionPointer.close();
+      normalSolutionPointer.close();
+      squaredErrorPointer.close();
 
       kernel.close();
       program.close();

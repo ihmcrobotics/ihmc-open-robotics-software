@@ -20,7 +20,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.FileNotFoundException;
@@ -130,7 +129,8 @@ public class RapidHeightMapManager
    public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       // Update the sensor origin here with the latest reference frame
-      RigidBodyTransform heightMapFrameToWorldFrame = heightMapCenter.getTransformToWorldFrame();
+      // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
+      RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
       Point3D heightMapCenterOrigin = new Point3D(heightMapFrameToWorldFrame.getTranslation());
 
       updateInternal(latestDepthImage, depthIntrinsics, cameraFrame, cameraZUpFrame, heightMapCenterOrigin);
@@ -312,10 +312,18 @@ public class RapidHeightMapManager
       double thicknessOfTheFoot = 0.02;
       double height = Double.POSITIVE_INFINITY;
 
+      // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
+      RigidBodyTransform[] feetTransforms = new RigidBodyTransform[footSoleFrames.size()];
       for (int i = 0; i < footSoleFrames.size(); i++)
       {
-         height = Math.min(footSoleFrames.get(i).getTransformToWorldFrame().getTranslationZ(), height);
+         feetTransforms[i] = new RigidBodyTransform(footSoleFrames.get(i).getTransformToWorldFrame());
       }
+
+      for (RigidBodyTransform transform : feetTransforms)
+      {
+         height = Math.min(transform.getTranslationZ(), height);
+      }
+
       if (Double.isInfinite(height))
          height = 0.0;
 

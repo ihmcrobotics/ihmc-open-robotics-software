@@ -117,19 +117,4 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
    }
-
-   default void setSteppingContactThreshold(int steppingContactThreshold)
-   {
-      set(HeightMapParameters.steppingContactThreshold, steppingContactThreshold);
-   }
-
-   default void setContactWindowSize(int contactWindowSize)
-   {
-      set(HeightMapParameters.contactWindowSize, contactWindowSize);
-   }
-
-   default void setSteppingCosineThreshold(double steppingCosineThreshold)
-   {
-      set(HeightMapParameters.steppingCosineThreshold, steppingCosineThreshold);
-   }
 }

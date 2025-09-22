@@ -13,6 +13,8 @@ public class ElasticityCompensatorYoVariable extends YoDouble implements Process
    private final DoubleProvider jointTau;
    private final DoubleProvider maximumDeflection;
 
+   private final YoDouble deflection;
+
    public ElasticityCompensatorYoVariable(String name, DoubleProvider stiffness, DoubleProvider maximumDeflection, YoRegistry registry)
    {
       this(name, stiffness, maximumDeflection, null, null, registry);
@@ -26,6 +28,7 @@ public class ElasticityCompensatorYoVariable extends YoDouble implements Process
       this.stiffness = stiffness;
       this.rawJointPosition = rawJointPosition;
       this.jointTau = jointTau;
+      deflection = new YoDouble(name + "_Deflect", registry);
    }
 
    @Override
@@ -48,6 +51,7 @@ public class ElasticityCompensatorYoVariable extends YoDouble implements Process
          jointDeflection = jointTau / stiffness.getValue();
          jointDeflection = MathTools.clamp(jointDeflection, maximumDeflection.getValue());
          this.set(rawJointPosition - jointDeflection);
+         deflection.set(jointDeflection);
       }
       else
       {

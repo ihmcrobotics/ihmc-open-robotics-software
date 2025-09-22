@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
 import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -154,11 +153,8 @@ public class StancePoseCalculator
       leftPose.setZ(heightLeft);
       rightPose.setZ(heightRight);
 
-      double contactCostLeft = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(),
-                                                                                                                      leftPose.getPosition().getY32()));
-
-      double contactCostRight = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(),
-                                                                                                                       rightPose.getPosition().getY32()));
+      double contactCostLeft = stancePoseParameters.getMaxContactValue() * (1.0 - terrainMap.getTraversabilityScore(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
+      double contactCostRight = stancePoseParameters.getMaxContactValue() * (1.0 - terrainMap.getTraversabilityScore(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
 
       leftPose.changeFrame(midStanceFrame);
       rightPose.changeFrame(midStanceFrame);
@@ -217,7 +213,7 @@ public class StancePoseCalculator
 
    private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
    {
-      UnitVector3DReadOnly normal = TerrainMapTools.computeSurfaceNormalInWorld(terrainMapData, (float) poseToSnap.getX(), (float) poseToSnap.getY());
+      UnitVector3DReadOnly normal = terrainMapData.getNormal(poseToSnap.getX(), poseToSnap.getY());
       RigidBodyTransform snapTransform = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
       poseToSnap.applyTransform(snapTransform);
    }

@@ -45,7 +45,7 @@ public class FootstepCostCalculatorTest
                                                                                                                       n.getRobotSide().getOppositeSide()));
 
       YoRegistry registry = new YoRegistry("testRegistry");
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, registry);
+      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, null, registry);
       int numberOfTests = 1000;
 
       for (int i = 0; i < numberOfTests; i++)
