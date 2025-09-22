@@ -42,7 +42,7 @@ public class LeRobotDatasetEpisode
    private SCS2LogSessionWithVideo session;
    private long startVideoTimestamp;
    private long lastVideoTimestamp;
-   private double episodeFrameTimestampMicros;
+   private double episodeFrameTimestamp; // important: acrue using double precision
    private SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders;
    private LeRobotDatasetDataVariables dataVariables;
    private LeRobotDatasetEpisodeStatistics statistics;
@@ -139,7 +139,7 @@ public class LeRobotDatasetEpisode
 
       startVideoTimestamp = -1;
       lastVideoTimestamp = -1;
-      episodeFrameTimestampMicros = -Math.round(UnitConversions.hertzToSeconds(dataset.getFps()));
+      episodeFrameTimestamp = 0.0;
    }
 
    public void processFrame()
@@ -165,29 +165,15 @@ public class LeRobotDatasetEpisode
          {
             lastVideoTimestamp = currentVideoTimestamp;
 
-            if (dataset.getUsePerfectTimestamps())
-            {
-               int round = Math.round(dataset.getFps()); // lerobot rounds fps to integer
-               double seconds = UnitConversions.hertzToSeconds(round);
-               double micros = seconds * 1000000.0;
-               episodeFrameTimestampMicros += micros; // important: acrue using double precision
-            }
-            else
-            {
-               episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-            }
-
-            long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
-
             for (RobotSide side : RobotSide.values)
-            {
-               ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics, zedSVOScrubber);
-            }
+               ffmpegRecorders.get(side).writeFrame(statistics, zedSVOScrubber);
 
-            dataVariables.addFrame(roundedTimestamp,
+            dataVariables.addFrame(episodeFrameTimestamp,
                                    statistics,
                                    session.getLogDataReader().getCurrentLogPosition(),
                                    session.getLogDataReader().getLogDirectory().getName());
+
+            episodeFrameTimestamp += UnitConversions.hertzToSeconds(Math.round(dataset.getFps())); // lerobot rounds fps to integer
          }
       }
    }

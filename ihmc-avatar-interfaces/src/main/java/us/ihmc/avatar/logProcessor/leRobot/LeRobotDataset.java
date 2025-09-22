@@ -48,7 +48,6 @@ public class LeRobotDataset
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
    private long totalFrames = 0L;
-   private boolean usePerfectTimestamps = true;
 
    public LeRobotDataset(Path directory)
    {
@@ -517,15 +516,5 @@ public class LeRobotDataset
    public long getTotalFrames()
    {
       return totalFrames;
-   }
-
-   public void setUsePerfectTimestamps(boolean usePerfectTimestamps)
-   {
-      this.usePerfectTimestamps = usePerfectTimestamps;
-   }
-
-   public boolean getUsePerfectTimestamps()
-   {
-      return usePerfectTimestamps;
    }
 }

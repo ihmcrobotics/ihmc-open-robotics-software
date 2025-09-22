@@ -83,7 +83,7 @@ public class LeRobotDatasetDataVariables
       }
    }
 
-   public void addFrame(long timestampMicros, LeRobotDatasetEpisodeStatistics statistics, int logPosition, String logName)
+   public void addFrame(double timestamp, LeRobotDatasetEpisodeStatistics statistics, int logPosition, String logName)
    {
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
@@ -131,14 +131,13 @@ public class LeRobotDatasetDataVariables
          action.add((float) framePose.getOrientation().getS());
       }
 
-      float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s
       int taskIndex = 0; // We're only training one task at a time for now
       boolean isLastFrame = false;
       LeRobotEpisodeRecord record = new LeRobotEpisodeRecord(state,
                                                              action,
                                                              episode.getEpisodeIndex(),
                                                              episode.getRecords().size(),
-                                                             timestamp,
+                                                             (float) timestamp,
                                                              logPosition,
                                                              logName,
                                                              isLastFrame,
