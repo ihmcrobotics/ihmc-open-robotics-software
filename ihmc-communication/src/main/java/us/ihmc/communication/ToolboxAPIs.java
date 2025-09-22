@@ -2,6 +2,7 @@ package us.ihmc.communication;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
@@ -56,6 +57,11 @@ public final class ToolboxAPIs
    public static ROS2Topic<KinematicsStreamingToolboxInputMessage> getIKStreamingInputTopic(String robotName)
    {
       return getIKStreamingInputBaseTopic(robotName).withTypeName(KinematicsStreamingToolboxInputMessage.class);
+   }
+
+   public static ROS2Topic<ToolboxStateMessage> getIKStreamingStateTopic(String robotName)
+   {
+      return getIKStreamingInputBaseTopic(robotName).withTypeName(ToolboxStateMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)
