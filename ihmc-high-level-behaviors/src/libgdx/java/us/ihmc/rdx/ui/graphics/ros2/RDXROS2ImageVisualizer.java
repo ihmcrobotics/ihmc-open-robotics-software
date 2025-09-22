@@ -7,6 +7,8 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -16,6 +18,7 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
    private final ImBoolean subscriptionOnly = new ImBoolean();
 
    private final AtomicReference<Consumer<RDXImageVisualizer>> latestImageUpdate = new AtomicReference<>(null);
+   private final List<Runnable> onImageUpdateRunnables = new ArrayList<>();
    private final RepeatingTaskThread imageUpdateThread = new RepeatingTaskThread("ImageUpdateThread", this::updateImage);
 
    private boolean destroyed = false;
@@ -65,6 +68,11 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
       return imageVisualizer.getPanel();
    }
 
+   public void onImageUpdate(Runnable runnable)
+   {
+      onImageUpdateRunnables.add(runnable);
+   }
+
    public void submitImageUpdate(Consumer<RDXImageVisualizer> imageUpdate)
    {
       synchronized (latestImageUpdate)
@@ -106,7 +114,12 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
 
          // Run the update
          if (imageUpdate != null)
+         {
             imageUpdate.accept(imageVisualizer);
+
+            for (Runnable runnable : onImageUpdateRunnables)
+               runnable.run();
+         }
       }
       catch (InterruptedException ignored) {}
    }

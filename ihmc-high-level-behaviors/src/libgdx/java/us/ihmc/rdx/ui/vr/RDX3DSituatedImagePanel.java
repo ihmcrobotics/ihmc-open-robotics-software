@@ -9,15 +9,16 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
-import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
 public class RDX3DSituatedImagePanel
 {
@@ -46,6 +46,8 @@ public class RDX3DSituatedImagePanel
 
    private ModelInstance modelInstance;
    private ModelInstance hoverFrustumMesh;
+   private Pixmap pixmap;
+   private Mat pixmapImage;
    private Texture texture;
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final Vector3 topLeftPosition = new Vector3();
@@ -91,12 +93,16 @@ public class RDX3DSituatedImagePanel
 
    private void create(Mat image, PixelFormat pixelFormat, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
-      Pixmap pixmap = new Pixmap(image.cols(), image.rows(), Format.RGBA8888);
-      Mat rgbaImage = new Mat(image.size(), image.type(), new BytePointer(pixmap.getPixels()));
-      pixelFormat.convertToRGBA(image, rgbaImage);
+      if (pixmap == null)
+      {
+         pixmap = new Pixmap(image.cols(), image.rows(), Format.RGBA8888);
+         pixmapImage = new Mat(image.size(), image.type(), new BytePointer(pixmap.getPixels()));
+      }
+
+      pixelFormat.convertToRGBA(image, pixmapImage);
 
       if (texture == null)
-         texture = new Texture(pixmap);
+         texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       texture.draw(pixmap, 0, 0);
 
       ModelBuilder modelBuilder = new ModelBuilder();
@@ -321,6 +327,17 @@ public class RDX3DSituatedImagePanel
 
    public void destroy()
    {
+      if (pixmapImage != null)
+      {
+         pixmapImage.close();
+      }
+
+      if (pixmap != null)
+      {
+         pixmap.dispose();
+         pixmap = null;
+      }
+
       // Dispose the texture if we own it
       if (texture != null)
       {
