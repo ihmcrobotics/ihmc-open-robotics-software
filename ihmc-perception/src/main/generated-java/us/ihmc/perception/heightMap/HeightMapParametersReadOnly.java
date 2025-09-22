@@ -119,19 +119,4 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(globalWidthInMeters);
    }
-
-   default int getSteppingContactThreshold()
-   {
-      return get(steppingContactThreshold);
-   }
-
-   default int getContactWindowSize()
-   {
-      return get(contactWindowSize);
-   }
-
-   default double getSteppingCosineThreshold()
-   {
-      return get(steppingCosineThreshold);
-   }
 }

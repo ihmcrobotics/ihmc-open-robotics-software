@@ -1,20 +1,23 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.session.log.LogDataReader;
 import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,7 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BooleanSupplier;
 
 /**
  * Represents a LeRobot dataset (a huggingface format) in our system for generating datasets from IHMC logs.
@@ -41,6 +44,7 @@ public class LeRobotDataset
    private final Path infoJsonPath;
    private final Path tasksJsonlPath;
 
+   private float fps = 15.0f;
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
    private long totalFrames = 0L;
@@ -82,6 +86,9 @@ public class LeRobotDataset
 
    public void loadData() // TODO: Load completely
    {
+      JSONFileTools.load(infoJsonPath, rootNode -> {
+         fps = rootNode.get("fps").floatValue();
+      });
       taskNames.clear();
       JSONFileTools.loadLines(tasksJsonlPath, lineRoot ->
       {
@@ -90,177 +97,180 @@ public class LeRobotDataset
       episodes.clear();
       JSONFileTools.loadLines(episodesJsonlPath, lineRoot ->
       {
-         int episodeIndex = episodes.size();
-         String taskName = lineRoot.get("tasks").get(0).textValue();
-         int length = lineRoot.get("length").intValue();
-         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                   taskName,
-                                                                   length,
-                                                                   totalFrames,
-                                                                   episodesJsonlPath,
-                                                                   episodeStatsJsonlPath,
-                                                                   dataChunk0Path,
-                                                                   zedVideoDirs);
+         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, lineRoot);
          episode.loadParquetData();
          episodes.add(episode);
-
-         totalFrames += length;
+         totalFrames += episode.getLength();
+      });
+      MutableInt i = new MutableInt();
+      JSONFileTools.loadLines(episodeStatsJsonlPath, lineRoot ->
+      {
+         episodes.get(i.intValue()).getStatistics().loadJSON(lineRoot);
+         i.increment();
       });
    }
 
-   public void addEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public void addEpisode(String taskName, SCS2LogSessionWithVideo session)
    {
-      if (!taskNames.contains(taskName))
-      {
-         taskNames.add(taskName);
-         writeTaskJsonlLine(taskName);
-      }
+      createEpisode(taskName).generateFromActiveBuffer(session);
+   }
 
-      int episodeIndex = episodes.size();
-      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(episodeIndex,
-                                                                taskName,
-                                                                0,
-                                                                totalFrames,
-                                                                episodesJsonlPath,
-                                                                episodeStatsJsonlPath,
-                                                                dataChunk0Path,
-                                                                zedVideoDirs);
-      episode.startGeneratingEpisode(session, this::writeMetaJson, frameProcessingQueue, usePerfectTimestamps);
+   private LeRobotDatasetEpisode createEpisode(String taskName)
+   {
+      ensureTaskNameInJsonl(taskName);
+      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, episodes.size(), taskName);
       episodes.add(episode);
+      return episode;
    }
 
-   public void calculateEpisode(String taskName, SCS2LogSessionWithVideo session, Consumer<Runnable> frameProcessingQueue)
+   public BooleanSupplier addEpisodesAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
+   {
+      ensureTaskNameInJsonl(taskName);
+
+      int taskID = Integer.parseInt(taskName.substring(0, 1));
+      MutableBoolean stillGoing = new MutableBoolean(false);
+      String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "IKStreamingRTThread");
+      String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
+      if (session.getRootRegistry().findVariable(kstStreaming + "demonstrationTaskID") instanceof YoInteger demonstrationTaskID)
+      {
+         ThreadTools.startAThread(() ->
+         {
+            try
+            {
+               LeRobotDatasetEpisode episode = null;
+               int desiredLoadedIndex = Math.max(0, session.getLogDataReader().getCurrentLogPosition() - 1);
+               while (keepGoing.getAsBoolean() && desiredLoadedIndex > -1)
+               {
+                  // The current log position is actually referring to the next log index to read
+                  // so when currentLogPosition is 7, it mean we have just read position 6 into the buffer
+                  int indexToLoad = session.getLogDataReader().getCurrentLogPosition();
+                  int loadedIndex = indexToLoad - 1;
+                  boolean desiredDataIsLoaded = loadedIndex == desiredLoadedIndex;
+                  if (desiredDataIsLoaded)
+                  {
+                     if (demonstrationTaskID.getValue() == taskID)
+                     {
+                        if (episode == null)
+                        {
+                           episode = createEpisode(taskName);
+                           episode.initializeEpisode(session);
+                        }
+
+                        episode.processFrame();
+                     }
+                     else if (episode != null)
+                     {
+                        episode.finalizeEpisodeGeneration();
+                        episode = null;
+                     }
+                  }
+
+                  if (indexToLoad < session.getLogDataReader().getNumberOfEntries())
+                  {
+                     session.submitLogPositionRequest(indexToLoad);
+                     desiredLoadedIndex = indexToLoad;
+                  }
+                  else // we hit the end
+                  {
+                     break;
+                  }
+                  ThreadTools.park(0.000001);
+               }
+            }
+            catch (Exception e)
+            {
+               DefaultExceptionHandler.MESSAGE_AND_STACKTRACE.handleException(e);
+            }
+            finally
+            {
+               stillGoing.setValue(false);
+            }
+         }, "ScrubToNextEpisode");
+      }
+      return stillGoing::booleanValue;
+   }
+
+   private void ensureTaskNameInJsonl(String taskName)
    {
       if (!taskNames.contains(taskName))
       {
          taskNames.add(taskName);
          writeTaskJsonlLine(taskName);
       }
-
-      String highLevelController = "root.main.DRCControllerThread." + "DRCMomentumBasedController.HumanoidHighLevelControllerManager.";
-      String wbcc = highLevelController + "HighLevelHumanoidControllerFactory.WholeBodyControllerCoreFactory.WholeBodyControllerCore.";
-      String feedbackController = wbcc + "WholeBodyFeedbackController.FeedbackControllerToolbox.";
-      String booleanVarName = String.format("%sPELVIS_LINKisPointFBControllerEnabled", feedbackController);
-      String timestampVarName = "root.LogDataReader.robotTime";
-
-      YoBoolean recordingFlag = (YoBoolean) session.getRootRegistry().findVariable(booleanVarName);
-      YoDouble timestamp = (YoDouble) session.getRootRegistry().findVariable(timestampVarName);
-
-      LogDataReader reader = session.getLogDataReader();
-      long totalFrames = reader.getNumberOfEntries();
-
-      boolean currentlyRecording = false;
-      int episodeStart = -1;
-
-      for (long frame = 0; frame < totalFrames; frame++)
-      {
-         session.runTick();
-
-         boolean flagValue = (int) timestamp.getValue()%1000 == 0;
-
-         if (flagValue && !currentlyRecording)
-         {
-            episodeStart = (int) frame;
-            currentlyRecording = true;
-         }
-         else if (!flagValue && currentlyRecording)
-         {
-            int episodeEnd = (int) frame;
-            int episodeLength = episodeEnd - episodeStart;
-            System.out.println(episodeLength);
-            currentlyRecording = false;
-            episodeStart = -1;
-         }
-      }
-
-      if (currentlyRecording)
-      {
-         int episodeEnd = (int) totalFrames;
-         int episodeLength = episodeEnd - episodeStart;
-         System.out.println(episodeLength);
-      }
    }
 
-   public void removeEpisode(int index) throws IOException
+   public void removeEpisodes(boolean[] episodesToRemove)
    {
-      if (episodes.isEmpty())
+      ExceptionTools.handle(() ->
       {
-         LogTools.warn("No episodes to remove.");
-         return;
-      }
+         List<String> statsLines = Files.readAllLines(episodeStatsJsonlPath);
 
-      LeRobotDatasetEpisode lastEpisode = episodes.get(index);
-      String episodeName = lastEpisode.getEpisodeName();
-
-      Path parquetToDelete = dataChunk0Path.resolve(episodeName + ".parquet");
-      if (Files.exists(parquetToDelete))
-      {
-         FileTools.deleteQuietly(parquetToDelete);
-         changeNumbers(index, episodes.size(), dataChunk0Path, ".parquet");
-         LogTools.info("Deleted Parquet: " + parquetToDelete);
-      }
-      else
-      {
-         LogTools.warn("Parquet does not exist: " + parquetToDelete);
-         return;
-      }
-
-      for (RobotSide side : RobotSide.values)
-      {
-         Path mp4Path = zedVideoDirs.get(side).resolve(episodeName + ".mp4");
-         if (Files.exists(mp4Path))
+         for (int i = 0, j = 0; i < episodesToRemove.length; i++, j++)
          {
-            FileTools.deleteQuietly(mp4Path);
-            changeNumbers(index, episodes.size(), zedVideoDirs.get(side), ".mp4");
-            LogTools.info("Deleted MP4: " + mp4Path);
-         }
-         else
-         {
-            LogTools.warn("MP4 does not exist: " + mp4Path);
-            return;
-         }
-      }
+            if (episodesToRemove[i])
+            {
+               FileTools.deleteQuietly(dataChunk0Path.resolve("episode_%06d".formatted(j) + ".parquet"));
+               for (RobotSide side : RobotSide.values)
+                  FileTools.deleteQuietly(zedVideoDirs.get(side).resolve("episode_%06d".formatted(j) + ".mp4"));
 
-      removeLineFromJsonl(episodesJsonlPath, index);
-      removeLineFromJsonl(episodeStatsJsonlPath, index);
-      shiftEpisodeIndicesInJsonl(episodesJsonlPath, index);
-      shiftEpisodeIndicesInJsonl(episodeStatsJsonlPath, index);
+               episodes.remove(j);
+               statsLines.remove(j);
 
-      episodes.remove(episodes.size() - 1);
-      LogTools.info("Removed episode: " + episodeName);
-      regenerateAndRewriteMetadata();
-   }
+               for (int k = j; k < episodes.size(); k++)
+               {
+                  episodes.get(k).reindex(k);
 
-   private void changeNumbers(int index, int finalNumber, Path fileSpot, String fileType)
-   {
-      for (int i = index + 1; i < finalNumber; i++)
-      {
-         LeRobotDatasetEpisode moveEpisode = episodes.get(i);
-         String episodeName = moveEpisode.getEpisodeName();
-         LeRobotDatasetEpisode newEpisode = episodes.get(i - 1);
-         String newEpisodeName = newEpisode.getEpisodeName();
+                  Files.move(dataChunk0Path.resolve("episode_%06d".formatted(k + 1) + ".parquet"),
+                             dataChunk0Path.resolve("episode_%06d".formatted(k) + ".parquet"));
+                  for (RobotSide side : RobotSide.values)
+                     Files.move(zedVideoDirs.get(side).resolve("episode_%06d".formatted(k + 1) + ".mp4"),
+                                zedVideoDirs.get(side).resolve("episode_%06d".formatted(k) + ".mp4"));
 
-         Path parquetToMove = fileSpot.resolve(episodeName + fileType);
-         Path parquetSpot = fileSpot.resolve(newEpisodeName + fileType);
-         try
-         {
-            Files.move(parquetToMove, parquetSpot);
+                  final String statsLine = statsLines.get(k);
+                  ObjectNode node = (ObjectNode) ExceptionTools.handle(() -> new ObjectMapper(new JsonFactory()).readTree(statsLine),
+                                                                       DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+                  node.put("episode_index", k);
+                  ObjectNode episodeIndex = (ObjectNode) node.get("stats").get("episode_index");
+                  episodeIndex.putArray("min").add(k);
+                  episodeIndex.putArray("max").add(k);
+                  episodeIndex.putArray("mean").add((double) k);
+                  LeRobotIntegerStatisticsCalculator indexStats = new LeRobotIntegerStatisticsCalculator();
+                  int priorFrames = 0;
+                  for (int l = 0; l < k; l++)
+                     priorFrames += episodes.get(l).getLength();
+                  for (int l = priorFrames; l < priorFrames + episodes.get(k).getLength(); l++)
+                     indexStats.addValue(l);
+                  indexStats.calculate();
+                  ObjectNode index = (ObjectNode) node.get("stats").get("index");
+                  index.putArray("min").add(indexStats.getMin());
+                  index.putArray("max").add(indexStats.getMax());
+                  index.putArray("mean").add(indexStats.getMean());
+                  index.putArray("std").add(indexStats.getStddev());
+
+                  statsLines.set(k, node.toString());
+               }
+
+               --j;
+            }
          }
-         catch (IOException e)
-         {
-            LogTools.error("Failed to move parquet file: " + parquetToMove);
-         }
-      }
+
+         for (LeRobotDatasetEpisode episode : episodes)
+            episode.writeParquetData();
+
+         FileTools.write(episodesJsonlPath, new byte[0], WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_MESSAGE);
+         for (LeRobotDatasetEpisode episode : episodes)
+            episode.writeEpisodeJsonlLine();
+
+         Files.write(episodeStatsJsonlPath, statsLines, StandardOpenOption.TRUNCATE_EXISTING);
+
+         writeMetaJson();
+
+      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    private void shiftEpisodeIndicesInJsonl(Path jsonlPath, int removedIndex) throws IOException
    {
       List<String> allLines = Files.readAllLines(jsonlPath);
-      if (allLines.isEmpty())
-      {
-         LogTools.warn("JSONL is empty, nothing to shift: " + jsonlPath);
-         return;
-      }
 
       ObjectMapper mapper = new ObjectMapper();
       List<String> rewritten = new ArrayList<>(allLines.size());
@@ -294,22 +304,12 @@ public class LeRobotDataset
    private void removeLineFromJsonl(Path jsonlPath, int index) throws IOException
    {
       List<String> allLines = Files.readAllLines(jsonlPath);
-
-      if (allLines.isEmpty())
-      {
-         LogTools.warn("JSONL file is empty (nothing to remove): " + jsonlPath);
-         return;
-      }
       List<String> linesToWrite = new ArrayList<>();
       List<String> secondLines = new ArrayList<>();
       if (index > 0)
-      {
          linesToWrite = allLines.subList(0, index - 1);
-      }
       if (index < allLines.size())
-      {
          secondLines = allLines.subList(index + 1, allLines.size());
-      }
       linesToWrite.addAll(secondLines);
       Files.write(jsonlPath, linesToWrite, StandardOpenOption.TRUNCATE_EXISTING);
       LogTools.info("Removed last line from " + jsonlPath + " (now has " + linesToWrite.size() + " lines).");
@@ -353,7 +353,6 @@ public class LeRobotDataset
       JSONFileTools.save(infoJsonPath, rootNode ->
       {
          totalFrames = 0;
-         float fps = episodes.isEmpty() ? 1.0f : episodes.get(0).getFps();
          for (LeRobotDatasetEpisode episode : episodes)
          {
             totalFrames += episode.getLength();
@@ -389,21 +388,28 @@ public class LeRobotDataset
 
          ObjectNode state = features.putObject("observation.state");
          state.put("dtype", "float32");
-         state.putArray("shape").add(14);
+         state.putArray("shape").add(28);
          ArrayNode motors = state.putObject("names").putArray("motors");
          motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
          motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
          motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
          motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
+         motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
+         motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
+         motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
+         motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
          ObjectNode action = features.putObject("action");
          action.put("dtype", "float32");
-         action.putArray("shape").add(14);
+         action.putArray("shape").add(28);
          motors = action.putObject("names").putArray("motors");
          motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
          motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
          motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
          motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
-
+         motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
+         motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
+         motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
+         motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
          ObjectNode episodeIndex = features.putObject("episode_index");
          episodeIndex.put("dtype", "int64");
          episodeIndex.putArray("shape").add(1);
@@ -470,9 +476,24 @@ public class LeRobotDataset
       return dataChunk0Path;
    }
 
+   public Path getEpisodesJsonlPath()
+   {
+      return episodesJsonlPath;
+   }
+
+   public Path getEpisodeStatsJsonlPath()
+   {
+      return episodeStatsJsonlPath;
+   }
+
    public SideDependentList<Path> getZedVideoDirs()
    {
       return zedVideoDirs;
+   }
+
+   public float getFps()
+   {
+      return fps;
    }
 
    public List<String> getTaskNames()
@@ -483,6 +504,14 @@ public class LeRobotDataset
    public List<LeRobotDatasetEpisode> getEpisodes()
    {
       return episodes;
+   }
+
+   public int getTotalEpisodeFrames()
+   {
+      int totalFrames = 0;
+      for (LeRobotDatasetEpisode episode : episodes)
+         totalFrames += episode.getLength();
+      return totalFrames;
    }
 
    public long getTotalFrames()

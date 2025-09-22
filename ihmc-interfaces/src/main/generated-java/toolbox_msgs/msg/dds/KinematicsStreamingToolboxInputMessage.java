@@ -64,10 +64,10 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
    public toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage center_of_mass_input_;
    /**
             * Used to synchronize the marking of demonstration episodes to enable automatic dataset generation
-            * True when this motion is part of a demonstration episode
-            * False at all other times
+            * 0 or greater when this motion is part of a demonstration episode, the number is the task ID
+            * -1 at all other times
             */
-   public boolean is_demonstration_episode_;
+   public int demonstration_task_id_ = -1;
 
    public KinematicsStreamingToolboxInputMessage()
    {
@@ -100,7 +100,7 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       use_center_of_mass_input_ = other.use_center_of_mass_input_;
 
       toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.staticCopy(other.center_of_mass_input_, center_of_mass_input_);
-      is_demonstration_episode_ = other.is_demonstration_episode_;
+      demonstration_task_id_ = other.demonstration_task_id_;
 
    }
 
@@ -255,21 +255,21 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
    /**
             * Used to synchronize the marking of demonstration episodes to enable automatic dataset generation
-            * True when this motion is part of a demonstration episode
-            * False at all other times
+            * 0 or greater when this motion is part of a demonstration episode, the number is the task ID
+            * -1 at all other times
             */
-   public void setIsDemonstrationEpisode(boolean is_demonstration_episode)
+   public void setDemonstrationTaskId(int demonstration_task_id)
    {
-      is_demonstration_episode_ = is_demonstration_episode;
+      demonstration_task_id_ = demonstration_task_id;
    }
    /**
             * Used to synchronize the marking of demonstration episodes to enable automatic dataset generation
-            * True when this motion is part of a demonstration episode
-            * False at all other times
+            * 0 or greater when this motion is part of a demonstration episode, the number is the task ID
+            * -1 at all other times
             */
-   public boolean getIsDemonstrationEpisode()
+   public int getDemonstrationTaskId()
    {
-      return is_demonstration_episode_;
+      return demonstration_task_id_;
    }
 
 
@@ -312,7 +312,7 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_center_of_mass_input_, other.use_center_of_mass_input_, epsilon)) return false;
 
       if (!this.center_of_mass_input_.epsilonEquals(other.center_of_mass_input_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_demonstration_episode_, other.is_demonstration_episode_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.demonstration_task_id_, other.demonstration_task_id_, epsilon)) return false;
 
 
       return true;
@@ -343,7 +343,7 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       if(this.use_center_of_mass_input_ != otherMyClass.use_center_of_mass_input_) return false;
 
       if (!this.center_of_mass_input_.equals(otherMyClass.center_of_mass_input_)) return false;
-      if(this.is_demonstration_episode_ != otherMyClass.is_demonstration_episode_) return false;
+      if(this.demonstration_task_id_ != otherMyClass.demonstration_task_id_) return false;
 
 
       return true;
@@ -373,8 +373,8 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       builder.append(this.use_center_of_mass_input_);      builder.append(", ");
       builder.append("center_of_mass_input=");
       builder.append(this.center_of_mass_input_);      builder.append(", ");
-      builder.append("is_demonstration_episode=");
-      builder.append(this.is_demonstration_episode_);
+      builder.append("demonstration_task_id=");
+      builder.append(this.demonstration_task_id_);
       builder.append("}");
       return builder.toString();
    }

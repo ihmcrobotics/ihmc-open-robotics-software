@@ -1,2 +1,0 @@
-SteppableRegionDebugImageMessage[<=10] steppability_images
-SteppableRegionDebugImageMessage[<=10] region_images

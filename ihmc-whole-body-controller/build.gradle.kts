@@ -2,8 +2,6 @@ plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.log-tools-plugin") version "0.6.3"
    id("us.ihmc.scs") version "0.4"
-
-   id("org.hidetake.ssh") version "2.9.0"
 }
 
 ihmc {
@@ -16,7 +14,7 @@ ihmc {
 mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.36.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.36.3")
 }
 
 benchmarksDependencies {
@@ -25,13 +23,4 @@ benchmarksDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-convex-optimization:0.17.23")
-}
-
-remotes {
-   rtComputer {
-      host = "<ip address>"
-      user = "<username>"
-      password = "<password>"
-      fileTransfer = "scp"
-   }
 }

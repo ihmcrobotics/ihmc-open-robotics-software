@@ -6,6 +6,8 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.heightMap.HeightMapTools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,29 +23,19 @@ public class TerrainMapMessageToolsTest
       double gridSizeXY = 1.0;
       int cellsPerAxis = (int) (gridSizeXY / cellResolution);
 
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis, cellResolution, gridSizeXY);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, gridSizeXY, 0.0, 0.0);
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(100));
-      Mat terrainCostMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
-      Mat contactMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
-      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
-      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(4));
-      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
-      Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
-      Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
-      Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
-      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
+      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
+      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
+      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
+      Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
+      Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
 
-      TerrainMapTools.convertToTerrainMapData(heightMap,
-                                              terrainCostMap,
-                                              contactMap,
-                                              snapNormalXMap,
+      TerrainMapTools.convertToTerrainMapData(snapNormalXMap,
                                               snapNormalYMap,
                                               snapNormalZMap,
-                                              steppabilityMap,
-                                              steppabilityConnectionsMap,
-                                              snappedAreaFractionMap,
-                                              squaredErrorMap,
+                                              traversabilityMap,
+                                              traversabilityClassMap,
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();
@@ -52,16 +44,11 @@ public class TerrainMapMessageToolsTest
       TerrainMapData resultingData = TerrainMapMessageTools.unpackMessage(message);
 
       // Check results match the input
-      float[] heightMapResult = resultingData.getHeightMap();
-      byte[] terrainCostMapResult = resultingData.getTerrainCostMap();
-      byte[] contactMapResult = resultingData.getContactMap();
       byte[] snapNormalXMapResult = resultingData.getSnapNormalXMap();
       byte[] snapNormalYMapResult = resultingData.getSnapNormalYMap();
       byte[] snapNormalZMapResult = resultingData.getSnapNormalZMap();
-      byte[] steppabilityMapResult = resultingData.getSteppabilityMap();
-      byte[] steppabilityConnectionsMapResult = resultingData.getSteppabilityConnectionsMap();
-      byte[] snappedAreaFractionMapResult = resultingData.getSnappedAreaFractionMap();
-      float[] squaredErrorMapResults = resultingData.getSquaredErrorMap();
+      float[] traversabilityMapResult = resultingData.getTraversabilityScoreMap();
+      byte[] traversabilityClassMapResult = resultingData.getTraversabilityClassMap();
 
       int totalCells = cellsPerAxis * cellsPerAxis;
 
@@ -70,16 +57,11 @@ public class TerrainMapMessageToolsTest
          int x = i % cellsPerAxis;
          int y = i / cellsPerAxis;
 
-         assertEquals(heightMapResult[i], heightMap.ptr(x, y).getFloat());
-         assertEquals(terrainCostMapResult[i], terrainCostMap.ptr(x, y).get());
-         assertEquals(contactMapResult[i], contactMap.ptr(x, y).get());
          assertEquals(snapNormalXMapResult[i], snapNormalXMap.ptr(x).get());
          assertEquals(snapNormalYMapResult[i], snapNormalYMap.ptr(x).get());
          assertEquals(snapNormalZMapResult[i], snapNormalZMap.ptr(x).get());
-         assertEquals(steppabilityMapResult[i], steppabilityMap.ptr(x, y).get());
-         assertEquals(steppabilityConnectionsMapResult[i], steppabilityConnectionsMap.ptr(x, y).get());
-         assertEquals(snappedAreaFractionMapResult[i], snappedAreaFractionMap.ptr(x).get());
-         assertEquals(squaredErrorMapResults[i], squaredErrorMap.ptr(x, y).getFloat());
+         assertEquals(traversabilityMapResult[i], traversabilityMap.ptr(x).getFloat());
+         assertEquals(traversabilityClassMapResult[i], traversabilityClassMap.ptr(x).get());
       }
    }
 
@@ -89,31 +71,20 @@ public class TerrainMapMessageToolsTest
       float widthInMeters = 10.0f;
       float cellResolution = 0.02f;
 
-      int cellsPerAxis = (int) (widthInMeters / cellResolution);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
 
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis, cellResolution, widthInMeters);
+      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
+      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
+      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
+      Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
+      Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(100));
-      Mat terrainCostMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
-      Mat contactMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
-      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
-      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(4));
-      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
-      Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
-      Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
-      Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
-      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
-
-      TerrainMapTools.convertToTerrainMapData(heightMap,
-                                              terrainCostMap,
-                                              contactMap,
-                                              snapNormalXMap,
+      TerrainMapTools.convertToTerrainMapData(snapNormalXMap,
                                               snapNormalYMap,
                                               snapNormalZMap,
-                                              steppabilityMap,
-                                              steppabilityConnectionsMap,
-                                              snappedAreaFractionMap,
-                                              squaredErrorMap,
+                                              traversabilityMap,
+                                              traversabilityClassMap,
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();
@@ -143,32 +114,22 @@ public class TerrainMapMessageToolsTest
       float widthInMeters = 10.0f;
       float cellResolution = 0.02f;
 
-      int cellsPerAxis = (int) (widthInMeters / cellResolution);
+      TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
+      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
 
-      TerrainMapData terrainMapData = new TerrainMapData(cellsPerAxis, cellResolution, widthInMeters);
+      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
+      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
+      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
+      Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
+      Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
 
-      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(100));
-      Mat terrainCostMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
-      Mat contactMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
-      Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
-      Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(4));
-      Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
-      Mat steppabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(6));
-      Mat steppabilityConnectionsMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(7));
-      Mat snappedAreaFractionMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(8));
-      Mat squaredErrorMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(9));
-
-      TerrainMapTools.convertToTerrainMapData(heightMap,
-                                              terrainCostMap,
-                                              contactMap,
-                                              snapNormalXMap,
+      TerrainMapTools.convertToTerrainMapData(snapNormalXMap,
                                               snapNormalYMap,
                                               snapNormalZMap,
-                                              steppabilityMap,
-                                              steppabilityConnectionsMap,
-                                              snappedAreaFractionMap,
-                                              squaredErrorMap,
+                                              traversabilityMap,
+                                              traversabilityClassMap,
                                               terrainMapData);
+
 
       TerrainMapMessage message = new TerrainMapMessage();
       TerrainMapMessageTools.toMessage(terrainMapData, message);
