@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -20,6 +19,7 @@ import com.badlogic.gdx.utils.Pool;
 import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -96,13 +96,13 @@ public class RDX3DSituatedImagePanel
       if (pixmap == null)
       {
          pixmap = new Pixmap(image.cols(), image.rows(), Format.RGBA8888);
-         pixmapImage = new Mat(image.size(), image.type(), new BytePointer(pixmap.getPixels()));
+         pixmapImage = new Mat(image.size(), opencv_core.CV_8UC4, new BytePointer(pixmap.getPixels()));
       }
 
       pixelFormat.convertToRGBA(image, pixmapImage);
 
       if (texture == null)
-         texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+         texture = new Texture(pixmap);
       texture.draw(pixmap, 0, 0);
 
       ModelBuilder modelBuilder = new ModelBuilder();
@@ -251,11 +251,11 @@ public class RDX3DSituatedImagePanel
    {
       // Prevent ever having an invisible panel out there, which is very confusing
       // to the VR user when the controllers are colliding with and invisible box.
-      boolean somethingToShow = image != null || texture != null;
+      boolean somethingToShow = (image != null && !image.isNull() && pixelFormat != null) || texture != null;
       isShowing = somethingToShow && vrControls.getShowFloatingVideoPanel().get();
 
       // Update the texture if necessary
-      if (isShowing && image != null && !image.isNull() && pixelFormat != null)
+      if (isShowing)
       {
          boolean flipY = false;
          // Calculate panel size in meters from FOV

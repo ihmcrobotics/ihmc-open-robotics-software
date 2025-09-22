@@ -40,12 +40,11 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
    @Override
    public void renderImGuiWidgetsPost()
    {
-      if (ImGuiTools.smallCheckbox(labels.get("Subscription only"), subscriptionOnly))
-      {
-         RDXPanel panel = getPanel();
-         if (panel != null)
-            panel.getIsShowing().set(!subscriptionOnly.get());
-      }
+      ImGuiTools.smallCheckbox(labels.get("Subscription only"), subscriptionOnly);
+
+      RDXPanel panel = imageVisualizer.getPanel();
+      if (panel != null)
+         panel.getIsShowing().set(isActive() && !subscriptionOnly.get());
    }
 
    @Override
