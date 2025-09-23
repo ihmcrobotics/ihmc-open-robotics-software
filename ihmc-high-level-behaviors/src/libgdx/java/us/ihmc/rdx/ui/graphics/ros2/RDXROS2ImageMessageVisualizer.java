@@ -21,7 +21,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
    private final ImageMessageDecoder decoder = new ImageMessageDecoder();
    private final SwapReference<ImageMessage> imageMessageSwapReference = new SwapReference<>(new ImageMessage(), new ImageMessage());
    private final Mat decompressedImage = new Mat();
-   private PixelFormat pixelFormat;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private volatile boolean hasRenderedOne = false;
@@ -81,7 +80,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
             ImageMessage imageMessageB = imageMessageSwapReference.getForThreadTwo();
 
             decoder.decodeMessage(imageMessageB, decompressedImage);
-            pixelFormat = decoder.getDecodedImagePixelFormat();
+            PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
 
             imageVisualizer.setImage(decompressedImage, pixelFormat);
             hasRenderedOne = true;
@@ -118,15 +117,5 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
    public ROS2Topic<ImageMessage> getTopic()
    {
       return topic;
-   }
-
-   public Mat getImage()
-   {
-      return decompressedImage;
-   }
-
-   public PixelFormat getPixelFormat()
-   {
-      return pixelFormat;
    }
 }

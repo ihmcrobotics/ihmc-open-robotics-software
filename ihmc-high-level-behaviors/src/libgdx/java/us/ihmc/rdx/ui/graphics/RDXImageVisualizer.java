@@ -1,6 +1,10 @@
 package us.ihmc.rdx.ui.graphics;
 
-import com.badlogic.gdx.graphics.GLTexture;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -15,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXImageVisualizer extends RDXVisualizer
 {
-   private ImageTexture texture;
+   private Texture texture;
    private final SwapReference<ImageTextureData> imageDataSwapReference;
    private final AtomicBoolean newImageSet;
 
@@ -47,18 +51,21 @@ public class RDXImageVisualizer extends RDXVisualizer
       // Only update the texture if the visualizer is active AND a new image was set
       if (isActive() && newImageSet.getAndSet(false))
       {
-         // If the texture hasn't been created yet, create one
-         if (texture == null)
-         {
-            texture = new ImageTexture();
-            imagePanel.setTexture(texture);
-         }
-
          // Update the texture (synchronized over the swap reference to avoid image tearing and other race conditions)
          synchronized (imageDataSwapReference)
          {
             ImageTextureData imageData = imageDataSwapReference.getForThreadOne();
-            texture.draw(imageData);
+
+            // If the texture hasn't been created yet, create one
+            if (texture == null)
+            {
+               texture = new Texture(imageData);
+               imagePanel.setTexture(texture);
+            }
+            else
+            {
+               texture.load(imageData);
+            }
          }
       }
    }
@@ -73,21 +80,7 @@ public class RDXImageVisualizer extends RDXVisualizer
    {
       // Set the metadata
       ImageTextureData dataToPack = imageDataSwapReference.getForThreadTwo();
-      dataToPack.width = imageWidth;
-      dataToPack.height = imageHeight;
-      dataToPack.glColorFormat = glColorFormat;
-      dataToPack.glType = glType;
-
-      // Ensure data pointer allocation is correct size
-      long imageSize = bytesPerPixel * imageWidth * imageHeight;
-      if (dataToPack.pointer.capacity() != imageSize)
-      {
-         dataToPack.pointer.close();
-         dataToPack.pointer = new BytePointer(imageSize);
-      }
-
-      // Copy image data to the pointer location
-      BytePointer.memcpy(dataToPack.pointer, imageData, imageSize);
+      dataToPack.setImage(imageData, imageWidth, imageHeight, bytesPerPixel, glColorFormat, glType);
       newImageSet.set(true);
       imageDataSwapReference.swap();
    }
@@ -152,7 +145,7 @@ public class RDXImageVisualizer extends RDXVisualizer
       image.release();
    }
 
-   public GLTexture getTexture()
+   public Texture getTexture()
    {
       return texture;
    }
@@ -164,29 +157,96 @@ public class RDXImageVisualizer extends RDXVisualizer
 
       if (texture != null)
          texture.dispose();
-      if (imageDataSwapReference.getA().pointer != null)
-         imageDataSwapReference.getA().pointer.close();
-      if (imageDataSwapReference.getB().pointer != null)
-         imageDataSwapReference.getB().pointer.close();
+
+      imageDataSwapReference.getA().dispose();
+      imageDataSwapReference.getB().dispose();
    }
 
-   private static class ImageTextureData
+   private static class ImageTextureData implements TextureData
    {
-      public BytePointer pointer = new BytePointer();
-      public int width = 0;
-      public int height = 0;
-      public int glColorFormat = GL33.GL_RGBA;
-      public int glType = GL33.GL_UNSIGNED_BYTE;
-   }
-
-   private static class ImageTexture extends GLTexture
-   {
+      private BytePointer dataPointer = new BytePointer();
       private int width = 0;
       private int height = 0;
+      private int colorFormat = GL33.GL_RGBA;
+      private int type = GL33.GL_UNSIGNED_BYTE;
 
-      public ImageTexture()
+      private boolean isPrepared = false;
+
+      public void setImage(BytePointer imageData, int imageWidth, int imageHeight, long bytesPerPixel, int glColorFormat, int glType)
       {
-         super(GL33.GL_TEXTURE_2D);
+         width = imageWidth;
+         height = imageHeight;
+         colorFormat = glColorFormat;
+         type = glType;
+
+         // Ensure data pointer allocation is correct size
+         long imageSize = bytesPerPixel * imageWidth * imageHeight;
+         if (dataPointer.capacity() != imageSize)
+         {
+            dataPointer.close();
+            dataPointer = new BytePointer(imageSize);
+         }
+
+         // Copy image data to the pointer location
+         BytePointer.memcpy(dataPointer, imageData, imageSize);
+      }
+
+      public void dispose()
+      {
+         dataPointer.close();
+      }
+
+      @Override
+      public TextureDataType getType()
+      {
+         return TextureDataType.Custom;
+      }
+
+      @Override
+      public boolean isPrepared()
+      {
+         return isPrepared;
+      }
+
+      @Override
+      public void prepare()
+      {
+         if (isPrepared)
+            throw new GdxRuntimeException("Already Prepared");
+         else
+            isPrepared = true;
+      }
+
+      @Override
+      public Pixmap consumePixmap()
+      {
+         throw new GdxRuntimeException("This TextureData implementation does not return a Pixmap");      }
+
+      @Override
+      public boolean disposePixmap()
+      {
+         throw new GdxRuntimeException("This TextureData implementation does not return a Pixmap");
+      }
+
+      @Override
+      public void consumeCustomData(int target)
+      {
+         // If the color format is monochrome (single color), render it gray scale
+         if (colorFormat == GL33.GL_RED)
+         {
+            GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_G, GL33.GL_RED);
+            GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_B, GL33.GL_RED);
+         }
+
+         // Get a good internal color format
+         int internalFormat = switch (colorFormat)
+         {
+            case GL33.GL_BGR -> GL33.GL_RGB;
+            case GL33.GL_BGRA -> GL33.GL_RGBA;
+            default -> colorFormat;
+         };
+
+         GL33.glTexImage2D(target, 0, internalFormat, width, height, 0, colorFormat, type, dataPointer.address());
       }
 
       @Override
@@ -202,52 +262,27 @@ public class RDXImageVisualizer extends RDXVisualizer
       }
 
       @Override
-      public int getDepth()
+      public Format getFormat()
       {
-         return 0;
+         return switch (colorFormat)
+         {
+            case GL33.GL_RGB, GL33.GL_BGR -> Format.RGB888;
+            case GL33.GL_RGBA, GL33.GL_BGRA -> Format.RGBA8888;
+            case GL33.GL_RED -> Format.Alpha;
+            default -> throw new GdxRuntimeException("Color format not implemented");
+         };
+      }
+
+      @Override
+      public boolean useMipMaps()
+      {
+         return false;
       }
 
       @Override
       public boolean isManaged()
       {
          return false;
-      }
-
-      @Override
-      protected void reload()
-      {
-         throw new RuntimeException("I don't know how to reload :(");
-      }
-
-      public void draw(ImageTextureData data)
-      {
-         this.width = data.width;
-         this.height = data.height;
-
-         // Bind this texture
-         bind();
-
-         // Set some parameters
-         GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MIN_FILTER, GL33.GL_LINEAR);
-         GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_MAG_FILTER, GL33.GL_LINEAR);
-
-         // If the color format is monochrome (single color), render it gray scale
-         if (data.glColorFormat == GL33.GL_RED)
-         {
-            GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_G, GL33.GL_RED);
-            GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_B, GL33.GL_RED);
-         }
-
-         // Get a good internal color format
-         int internalFormat = switch (data.glColorFormat)
-         {
-            case GL33.GL_BGR -> GL33.GL_RGB;
-            case GL33.GL_BGRA -> GL33.GL_RGBA;
-            default -> data.glColorFormat;
-         };
-
-         // Upload the texture data to the GPU
-         GL33.glTexImage2D(glTarget, 0, internalFormat, width, height, 0, data.glColorFormat, data.glType, data.pointer.address());
       }
    }
 }

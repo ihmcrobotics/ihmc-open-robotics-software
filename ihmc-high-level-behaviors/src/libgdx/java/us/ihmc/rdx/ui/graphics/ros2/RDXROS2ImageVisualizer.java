@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
+import com.badlogic.gdx.graphics.Texture;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -7,8 +8,6 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -18,7 +17,6 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
    private final ImBoolean subscriptionOnly = new ImBoolean();
 
    private final AtomicReference<Consumer<RDXImageVisualizer>> latestImageUpdate = new AtomicReference<>(null);
-   private final List<Runnable> afterImageUpdateRunnables = new ArrayList<>();
    private final RepeatingTaskThread imageUpdateThread = new RepeatingTaskThread(getClass().getSimpleName() + "ImageUpdateThread", this::updateImage);
 
    private boolean destroyed = false;
@@ -41,10 +39,6 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
    public void renderImGuiWidgetsPost()
    {
       ImGuiTools.smallCheckbox(labels.get("Subscription only"), subscriptionOnly);
-
-      RDXPanel panel = imageVisualizer.getPanel();
-      if (panel != null)
-         panel.getIsShowing().set(isActive() && !subscriptionOnly.get());
    }
 
    @Override
@@ -52,6 +46,10 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
    {
       super.update();
       imageVisualizer.update();
+
+      RDXPanel panel = imageVisualizer.getPanel();
+      if (panel != null)
+         panel.getIsShowing().set(isActive() && !subscriptionOnly.get());
    }
 
    @Override
@@ -76,14 +74,14 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
       }
    }
 
-   public void runAfterImageUpdate(Runnable runnable)
-   {
-      afterImageUpdateRunnables.add(runnable);
-   }
-
    public ImBoolean getSubscriptionOnly()
    {
       return subscriptionOnly;
+   }
+
+   public Texture getTexture()
+   {
+      return imageVisualizer.getTexture();
    }
 
    @Override
@@ -113,12 +111,7 @@ public abstract class RDXROS2ImageVisualizer<T> extends RDXROS2SingleTopicVisual
 
          // Run the update
          if (imageUpdate != null)
-         {
             imageUpdate.accept(imageVisualizer);
-
-            for (Runnable runnable : afterImageUpdateRunnables)
-               runnable.run();
-         }
       }
       catch (InterruptedException ignored) {}
    }

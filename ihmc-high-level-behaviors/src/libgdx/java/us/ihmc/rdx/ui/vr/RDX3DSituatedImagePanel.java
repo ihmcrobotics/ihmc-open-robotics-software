@@ -2,13 +2,13 @@ package us.ihmc.rdx.ui.vr;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
+import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -16,17 +16,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import net.mgsx.gltf.scene3d.attributes.PBRColorAttribute;
-import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -37,6 +31,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
+import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
 public class RDX3DSituatedImagePanel
 {
@@ -46,8 +41,6 @@ public class RDX3DSituatedImagePanel
 
    private ModelInstance modelInstance;
    private ModelInstance hoverFrustumMesh;
-   private Pixmap pixmap;
-   private Mat pixmapImage;
    private Texture texture;
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final Vector3 topLeftPosition = new Vector3();
@@ -82,29 +75,18 @@ public class RDX3DSituatedImagePanel
       context.addVRInputProcessor(this::processVRInput);
    }
 
-   public void create(Mat image, PixelFormat pixelFormat, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
+   public void create(Texture texture, Vector3[] points, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
       topLeftPosition.set(points[0]);
       bottomLeftPosition.set(points[1]);
       bottomRightPosition.set(points[2]);
       topRightPosition.set(points[3]);
-      create(image, pixelFormat, centerOfPanelFrame, flipY, verticalFOV);
+      create(texture, centerOfPanelFrame, flipY, verticalFOV);
    }
 
-   private void create(Mat image, PixelFormat pixelFormat, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
+   private void create(Texture texture, ReferenceFrame centerOfPanelFrame, boolean flipY, float verticalFOV)
    {
-      if (pixmap == null)
-      {
-         pixmap = new Pixmap(image.cols(), image.rows(), Format.RGBA8888);
-         pixmapImage = new Mat(image.size(), opencv_core.CV_8UC4, new BytePointer(pixmap.getPixels()));
-      }
-
-      pixelFormat.convertToRGBA(image, pixmapImage);
-
-      if (texture == null)
-         texture = new Texture(pixmap);
-      texture.draw(pixmap, 0, 0);
-
+      this.texture = texture;
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
 
@@ -247,20 +229,20 @@ public class RDX3DSituatedImagePanel
       LibGDXTools.toLibGDX(tempFramePoint, positionToTransform);
    }
 
-   public void update(Mat image, PixelFormat pixelFormat, ReferenceFrame cameraFrame, float verticalFOV)
+   public void update(Texture imageTexture, ReferenceFrame cameraFrame, float verticalFOV)
    {
       // Prevent ever having an invisible panel out there, which is very confusing
       // to the VR user when the controllers are colliding with and invisible box.
-      boolean somethingToShow = (image != null && !image.isNull() && pixelFormat != null) || texture != null;
+      boolean somethingToShow = imageTexture != null || texture != null;
       isShowing = somethingToShow && vrControls.getShowFloatingVideoPanel().get();
 
       // Update the texture if necessary
-      if (isShowing)
+      if (isShowing && imageTexture != null)
       {
          boolean flipY = false;
          // Calculate panel size in meters from FOV
          float panelHeightMeters = 2.0f * panelDistance * (float) Math.tan(Math.toRadians(verticalFOV) / 2.0f);
-         float aspectRatio = image.cols() / (float) image.rows();
+         float aspectRatio = imageTexture.getWidth() / (float) imageTexture.getHeight();
          float panelWidthMeters = panelHeightMeters * aspectRatio;
          float halfWidth = panelWidthMeters * 0.5f;
          float halfHeight = panelHeightMeters * 0.5f;
@@ -274,8 +256,7 @@ public class RDX3DSituatedImagePanel
          floatingPanelTransformToWorld.invert();
          floatingPanelFrame.update();
 
-         create(image,
-                pixelFormat,
+         create(imageTexture,
                 new Vector3[] {new Vector3(0.0f, halfWidth, halfHeight),
                                new Vector3(0.0f, halfWidth, -halfHeight),
                                new Vector3(0.0f, -halfWidth, -halfHeight),
@@ -327,17 +308,6 @@ public class RDX3DSituatedImagePanel
 
    public void destroy()
    {
-      if (pixmapImage != null)
-      {
-         pixmapImage.close();
-      }
-
-      if (pixmap != null)
-      {
-         pixmap.dispose();
-         pixmap = null;
-      }
-
       // Dispose the texture if we own it
       if (texture != null)
       {

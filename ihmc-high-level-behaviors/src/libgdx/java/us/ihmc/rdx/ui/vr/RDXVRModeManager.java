@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.UnitConversions;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -70,7 +69,6 @@ public class RDXVRModeManager
    private ROS2SyncedRobotModel syncedRobot;
    private RDXStereoImagePanel stereoPanel;
    private final Throttler panelOcclusionRateLimiter = new Throttler();
-   private final SideDependentList<Notification> imageUpdateNotifications = new SideDependentList<>(Notification::new);
    private final SideDependentList<List<RigidBodyBasics>> syncedRobotArmRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final SideDependentList<List<RigidBodyBasics>> ghostIKRobotArmRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
@@ -100,11 +98,6 @@ public class RDXVRModeManager
       vrManager = baseUI.getVRManager();
       this.perceptionVisualizers = perceptionVisualizers;
       this.syncedRobot = syncedRobot;
-
-      if (perceptionVisualizers.getZedLeftColorImageVisualizer() != null)
-         perceptionVisualizers.getZedLeftColorImageVisualizer().runAfterImageUpdate(() -> imageUpdateNotifications.get(RobotSide.LEFT).set());
-      if (perceptionVisualizers.getZedRightColorImageVisualizer() != null)
-         perceptionVisualizers.getZedRightColorImageVisualizer().runAfterImageUpdate(() -> imageUpdateNotifications.get(RobotSide.RIGHT).set());
 
       Collection<RDXPanel> baseUIPanels =  RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
       for (RDXPanel panel : baseUIPanels)
@@ -244,15 +237,10 @@ public class RDXVRModeManager
          vrModeControls3DPanel.update();
       vrModeControls.update();
 
-      boolean updateStereoPanel = perceptionVisualizers.getZedLeftColorImageVisualizer() != null;
-      updateStereoPanel &= perceptionVisualizers.getZedRightColorImageVisualizer() != null;
-      updateStereoPanel &= imageUpdateNotifications.get(RobotSide.LEFT).poll() || imageUpdateNotifications.get(RobotSide.RIGHT).poll();
-      if (updateStereoPanel)
+      if (perceptionVisualizers.getZedLeftColorImageVisualizer() != null && perceptionVisualizers.getZedRightColorImageVisualizer() != null)
       {
-         stereoPanel.update(perceptionVisualizers.getZedLeftColorImageVisualizer().getImage(),
-                            perceptionVisualizers.getZedLeftColorImageVisualizer().getPixelFormat(),
-                            perceptionVisualizers.getZedRightColorImageVisualizer().getImage(),
-                            perceptionVisualizers.getZedRightColorImageVisualizer().getPixelFormat(),
+         stereoPanel.update(perceptionVisualizers.getZedLeftColorImageVisualizer().getTexture(),
+                            perceptionVisualizers.getZedRightColorImageVisualizer().getTexture(),
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.LEFT),
                             syncedRobot.getReferenceFrames().getStereoCameraFrame(RobotSide.RIGHT),
                             perceptionVisualizers.getZEDModelData().getVerticalFOV());
