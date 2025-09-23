@@ -78,7 +78,6 @@ public class RDXImageVisualizer extends RDXVisualizer
 
    public void setImage(BytePointer imageData, int imageWidth, int imageHeight, long bytesPerPixel, int glColorFormat, int glType)
    {
-      // Set the metadata
       ImageTextureData dataToPack = imageDataSwapReference.getForThreadTwo();
       dataToPack.setImage(imageData, imageWidth, imageHeight, bytesPerPixel, glColorFormat, glType);
       newImageSet.set(true);
@@ -174,6 +173,7 @@ public class RDXImageVisualizer extends RDXVisualizer
 
       public void setImage(BytePointer imageData, int imageWidth, int imageHeight, long bytesPerPixel, int glColorFormat, int glType)
       {
+         // Set the metadata
          width = imageWidth;
          height = imageHeight;
          colorFormat = glColorFormat;
@@ -220,7 +220,8 @@ public class RDXImageVisualizer extends RDXVisualizer
       @Override
       public Pixmap consumePixmap()
       {
-         throw new GdxRuntimeException("This TextureData implementation does not return a Pixmap");      }
+         throw new GdxRuntimeException("This TextureData implementation does not return a Pixmap");
+      }
 
       @Override
       public boolean disposePixmap()
@@ -231,7 +232,7 @@ public class RDXImageVisualizer extends RDXVisualizer
       @Override
       public void consumeCustomData(int target)
       {
-         // If the color format is monochrome (single color), render it gray scale
+         // If the color format is monochrome (single color), render it in gray scale
          if (colorFormat == GL33.GL_RED)
          {
             GL33.glTexParameteri(GL33.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_G, GL33.GL_RED);

@@ -79,9 +79,11 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageM
          {
             ImageMessage imageMessageB = imageMessageSwapReference.getForThreadTwo();
 
+            // Decode the message and get the decoded pixel format (it may be different from the pixel format in the message)
             decoder.decodeMessage(imageMessageB, decompressedImage);
             PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
 
+            // Update the visualized image
             imageVisualizer.setImage(decompressedImage, pixelFormat);
             hasRenderedOne = true;
          }
