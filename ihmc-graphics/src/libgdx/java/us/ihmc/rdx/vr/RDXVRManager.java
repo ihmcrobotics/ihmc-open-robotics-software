@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.StringUtils;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.FrequencyCalculator;
@@ -34,7 +33,6 @@ public class RDXVRManager
    private boolean contextInitialized = false;
    private boolean initializing = false;
    private boolean skipHeadset = false;
-   private final Object syncObject = new Object();
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
    private final ImBoolean vrEnabled = new ImBoolean(false);
@@ -50,12 +48,6 @@ public class RDXVRManager
    private final ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 180, 50);
    private final FrequencyCalculator pollEventsFrequencyCalculator = new FrequencyCalculator();
    private final ImGuiPlot contextInitializedPlot = new ImGuiPlot(labels.get("contextInitialized"), 1000, 180, 50);
-   private final ImGuiPlot initSystemCountPlot = new ImGuiPlot(labels.get("initSystemCount"), 1000, 180, 50);
-   private volatile int initSystemCount = 0;
-   private final ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 180, 50);
-   private volatile int setupEyesCount = 0;
-   private final Notification waitOnPosesNotification = new Notification();
-   private volatile boolean waitGetPosesThreadRunning = false;
    private final RDXVRTeleporter teleporter = new RDXVRTeleporter();
    private final List<RDXVRTrackerRoleManager> trackerRoleManagers = new ArrayList<>();
 
@@ -67,13 +59,6 @@ public class RDXVRManager
          trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, tracker));
    }
 
-   /**
-    * Doing poll and render close together makes VR performance the best it can be
-    * and reduce dizziness.
-    *
-    * TODO: This thread has to be a multiple of the parent (240?)
-    * TODO: If the rest of the app is too slow, can we run this one faster?
-    */
    public void pollEventsAndRender(RDXBaseUI baseUI, RDX3DScene scene)
    {
       boolean posesReady = pollEvents(baseUI);
@@ -82,10 +67,7 @@ public class RDXVRManager
          skipHeadset = true;
          vrFPSCalculator.ping();
          waitGetToRenderDuration = waitGetToRenderStopwatch.totalElapsed();
-         synchronized (syncObject)
-         {
-            context.renderEyes(scene);
-         }
+         context.renderEyes(scene);
          skipHeadset = false;
       }
    }
@@ -99,110 +81,78 @@ public class RDXVRManager
          {
             initializing = true;
             contextCreatedNotification = new Notification();
-            ThreadTools.startAsDaemon(() ->
-            {
-               synchronized (syncObject)
-               {
-                  initSystemCount++;
-                  context.initSystem();
-               }
-               contextCreatedNotification.set();
-            }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, getClass().getSimpleName() + "-initSystem");
+            context.initSystem(); // May block for a bit
          }
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {
             initializing = false;
 
-            synchronized (syncObject)
-            {
-               setupEyesCount++;
-               context.setupEyes();
-            }
+            context.setupEyes();
 
             scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
             scenePoseGizmo.create(baseUI.getPrimary3DPanel());
             contextInitialized = true;
-            waitGetPosesThreadRunning = true;
-            ThreadTools.startAsDaemon(this::waitOnPoses, getClass().getSimpleName() + "WaitOnPosesThread");
          }
 
          if (contextInitialized)
          {
-            // Waiting for the poses on a thread allows for the rest of the application to keep
-            // cranking faster than VR can do stuff. This also makes the performance graph in Steam
-            // show the correct value and the OpenVR stack work much better.
-            // TODO: This whole thing might have major issues because
-            // there's a delay waiting for the next time this method is called
-            posesReadyThisFrame = posesReady.poll();
+            waitOnPoses();
 
-            if (!posesReadyThisFrame && !waitingOnPoses)
-            {
-               waitingOnPoses = true;
-               waitOnPosesNotification.set();
-            }
-            else
-            {
-               waitingOnPoses = false;
-            }
+            // pollEventsFrequencyCalculator.ping();
+            context.pollEvents();
 
-            if (posesReadyThisFrame)
+            // A tracker has disconnected
+            List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
+            for (String removedSerialNumber : removedTrackersSerialNumbers)
             {
-               // pollEventsFrequencyCalculator.ping();
-               context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
-
-               // A tracker has disconnected
-               List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
-               for (String removedSerialNumber : removedTrackersSerialNumbers)
+               for (int i = 0; i < trackerRoleManagers.size(); i++)
                {
-                  for (int i = 0; i < trackerRoleManagers.size(); i++)
+                  if (trackerRoleManagers.get(i).getTrackerSerialNumber().equals(removedSerialNumber))
                   {
-                     if (trackerRoleManagers.get(i).getTrackerSerialNumber().equals(removedSerialNumber))
+                     String assignedRole = trackerRoleManagers.get(i).getAssignedRole();
+                     if (assignedRole != null)
                      {
-                        String assignedRole = trackerRoleManagers.get(i).getAssignedRole();
-                        if (assignedRole != null)
-                        {
-                           context.setTrackerRoleAsAvailable(assignedRole);
-                        }
-                        trackerRoleManagers.remove(i);
+                        context.setTrackerRoleAsAvailable(assignedRole);
                      }
+                     trackerRoleManagers.remove(i);
                   }
-                  context.getTrackers().remove(removedSerialNumber);
-                  LogTools.warn("Tracker {} removed", removedSerialNumber);
                }
+               context.getTrackers().remove(removedSerialNumber);
+               LogTools.warn("Tracker {} removed", removedSerialNumber);
+            }
 
-               // A new tracker has been detected
-               List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
-               for (String newSerialNumber : newTrackersSerialNumbers)
+            // A new tracker has been detected
+            List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
+            for (String newSerialNumber : newTrackersSerialNumbers)
+            {
+               trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
+            }
+
+            // A reset of roles has been triggered from the UI
+            if (context.getRolesResetNotification().poll())
+            {
+               for (var trackerRoleManager : trackerRoleManagers)
                {
-                  trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
+                  trackerRoleManager.reset();
                }
+            }
 
-               // A reset of roles has been triggered from the UI
-               if (context.getRolesResetNotification().poll())
+            // A loading of preset roles has been triggered from the UI
+            if (context.getLoadingRolesNotification().poll())
+            {
+               var trackerRoleMap = context.getTrackersRoleMap();
+               for (var trackerRole : trackerRoleMap.entrySet())
                {
                   for (var trackerRoleManager : trackerRoleManagers)
                   {
-                     trackerRoleManager.reset();
-                  }
-               }
-
-               // A loading of preset roles has been triggered from the UI
-               if (context.getLoadingRolesNotification().poll())
-               {
-                  var trackerRoleMap = context.getTrackersRoleMap();
-                  for (var trackerRole : trackerRoleMap.entrySet())
-                  {
-                     for (var trackerRoleManager : trackerRoleManagers)
+                     // if serial numbers match
+                     if (trackerRole.getValue().equals(trackerRoleManager.getTrackerSerialNumber()))
                      {
-                        // if serial numbers match
-                        if (trackerRole.getValue().equals(trackerRoleManager.getTrackerSerialNumber()))
-                        {
-                           trackerRoleManager.setActive(trackerRole.getKey());
-                        }
+                        trackerRoleManager.setActive(trackerRole.getKey());
                      }
                   }
-                  LogTools.info("Loaded roles");
                }
+               LogTools.info("Loaded roles");
             }
          }
       }
@@ -219,21 +169,9 @@ public class RDXVRManager
 
    private void waitOnPoses()
    {
-      while (waitGetPosesThreadRunning)
-      {
-         waitOnPosesNotification.blockingPoll();
-
-         if (waitGetPosesThreadRunning)
-         {
-            waitGetPosesFrequencyCalculator.ping();
-            synchronized (syncObject)
-            {
-               context.waitGetPoses();
-            }
-            waitGetToRenderStopwatch.reset();
-            posesReady.set();
-         }
-      }
+      waitGetPosesFrequencyCalculator.ping();
+      context.waitGetPoses();
+      waitGetToRenderStopwatch.reset();
    }
 
    public void renderMenuBar()
@@ -294,8 +232,6 @@ public class RDXVRManager
    {
       ImGui.checkbox(labels.get("Show scene pose gizmo"), showScenePoseGizmo);
       contextInitializedPlot.render(contextInitialized ? 1.0 : 0.0);
-      initSystemCountPlot.render(initSystemCount);
-      setupEyesCountPlot.render(setupEyesCount);
       waitGetPosesPlot.render(waitGetPosesFrequencyCalculator.getFrequency());
       pollEventsPlot.render(pollEventsFrequencyCalculator.getFrequency());
       vrFPSPlot.render(vrFPSCalculator.getFrequency());
@@ -314,8 +250,6 @@ public class RDXVRManager
 
    public void dispose()
    {
-      waitGetPosesThreadRunning = false;
-      waitOnPosesNotification.set();
       if (contextCreatedNotification != null && contextInitialized)
       {
          contextCreatedNotification = null;
