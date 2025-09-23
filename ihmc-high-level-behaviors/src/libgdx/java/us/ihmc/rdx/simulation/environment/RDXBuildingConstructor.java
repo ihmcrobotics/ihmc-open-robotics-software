@@ -45,7 +45,6 @@ public class RDXBuildingConstructor extends RDXPanel
 
    private String selectedFileName = "";
    private final WorkspaceResourceDirectory environmentFilesDirectory = new WorkspaceResourceDirectory(getClass(), "/buildings");
-   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXEnvironmentBuilder.class, "Constructor");
    private final ArrayList<RDXSimpleObject> virtualObjects = new ArrayList<>();
    private RDXSimpleObject selectedObject;
    private RDXSimpleObject intersectedObject;
@@ -69,7 +68,7 @@ public class RDXBuildingConstructor extends RDXPanel
 
    public RDXBuildingConstructor(RDX3DPanel panel3D)
    {
-      super(WINDOW_NAME);
+      super("Building Constructor");
       this.panel3D = panel3D;
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
