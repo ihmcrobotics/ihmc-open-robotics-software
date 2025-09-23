@@ -36,8 +36,6 @@ public class RDXVRManager
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
    private final ImBoolean vrEnabled = new ImBoolean(false);
-   private final Notification posesReady = new Notification();
-   private volatile boolean waitingOnPoses = false;
    private final ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 180, 50);
    private final FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
    private final ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 180, 50);
@@ -82,6 +80,7 @@ public class RDXVRManager
             initializing = true;
             contextCreatedNotification = new Notification();
             context.initSystem(); // May block for a bit
+            contextCreatedNotification.set();
          }
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {
@@ -96,7 +95,9 @@ public class RDXVRManager
 
          if (contextInitialized)
          {
-            waitOnPoses();
+            waitGetPosesFrequencyCalculator.ping();
+            context.waitGetPoses();
+            waitGetToRenderStopwatch.reset();
 
             // pollEventsFrequencyCalculator.ping();
             context.pollEvents();
@@ -165,13 +166,6 @@ public class RDXVRManager
       }
 
       return posesReadyThisFrame;
-   }
-
-   private void waitOnPoses()
-   {
-      waitGetPosesFrequencyCalculator.ping();
-      context.waitGetPoses();
-      waitGetToRenderStopwatch.reset();
    }
 
    public void renderMenuBar()
