@@ -102,9 +102,9 @@ public class RDXVRModeManager
       this.syncedRobot = syncedRobot;
 
       if (perceptionVisualizers.getZedLeftColorImageVisualizer() != null)
-         perceptionVisualizers.getZedLeftColorImageVisualizer().onImageUpdate(() -> imageUpdateNotifications.get(RobotSide.LEFT).set());
+         perceptionVisualizers.getZedLeftColorImageVisualizer().runAfterImageUpdate(() -> imageUpdateNotifications.get(RobotSide.LEFT).set());
       if (perceptionVisualizers.getZedRightColorImageVisualizer() != null)
-         perceptionVisualizers.getZedRightColorImageVisualizer().onImageUpdate(() -> imageUpdateNotifications.get(RobotSide.RIGHT).set());
+         perceptionVisualizers.getZedRightColorImageVisualizer().runAfterImageUpdate(() -> imageUpdateNotifications.get(RobotSide.RIGHT).set());
 
       Collection<RDXPanel> baseUIPanels =  RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
       for (RDXPanel panel : baseUIPanels)
