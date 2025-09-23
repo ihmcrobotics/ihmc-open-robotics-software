@@ -208,4 +208,13 @@ public class RDXSCS2YoImPlotManager
    {
       variableWidgets.add(new RDXLinkedYoBooleanWidget(yoManager, variableName));
    }
+
+   public ImPlotModifiableYoPlotPanel getPlotPanel(String name)
+   {
+      for (ImPlotModifiableYoPlotPanel plotPanel : plotPanels)
+         if (plotPanel.getPanelName().equals(name))
+            return plotPanel;
+
+      return null;
+   }
 }

@@ -69,15 +69,10 @@ public class RDXSCS2Session
 
    public RDXSCS2Session(RDXBaseUI baseUI)
    {
-      this(baseUI, null);
-   }
-
-   public RDXSCS2Session(RDXBaseUI baseUI, RDXPanel plotManagerParentPanel)
-   {
       baseUI.getImGuiPanelManager().addPanel(controlPanel);
 
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
-      plotManager.create(baseUI.getLayoutManager(), plotManagerParentPanel == null ? controlPanel : plotManagerParentPanel);
+      plotManager.create(baseUI.getLayoutManager(), controlPanel);
    }
 
    /**
