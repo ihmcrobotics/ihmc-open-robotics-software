@@ -20,13 +20,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.editor.RDXUIActionMap;
 import us.ihmc.rdx.input.editor.RDXUITrigger;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,7 +34,7 @@ import java.util.function.Consumer;
 
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private String startPlacementButtonText = "Place Goal";
    private String startPlacementButtonDisabledText = "Placing Goal";
    private String stopPlacementButtonText = "Clear Goal";

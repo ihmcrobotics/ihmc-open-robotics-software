@@ -560,23 +560,6 @@ public class ImGuiTools
       return new ImVec2(end.x - start.x, end.y - start.y);
    }
 
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueLabel(String label)
-   {
-      return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
-   }
-
-   public static String uniqueLabel(String id, String label)
-   {
-      return label + "###" + id + ":" + label;
-   }
-
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueLabel(Object thisObject, String label)
-   {
-      return label + "###" + thisObject.getClass().getName() + ":" + label;
-   }
-
    /**
     * See <a href="https://github.com/ocornut/imgui/blob/master/docs/FONTS.md">FONTS.md</a>
     * and ImGuiGlfwFreeTypeDemo in this project

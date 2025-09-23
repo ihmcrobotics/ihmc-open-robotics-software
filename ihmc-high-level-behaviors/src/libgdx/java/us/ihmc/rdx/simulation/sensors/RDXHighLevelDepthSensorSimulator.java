@@ -14,7 +14,6 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
@@ -47,7 +46,6 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXPointCloudRendererOld;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -77,8 +75,6 @@ import static us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator.FLO
 
 public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 {
-   private static final MutableInt INDEX = new MutableInt();
-
    private Mat depthImageMat;
    private final BytePointer compressedColorPointer = new BytePointer();
    private final BytePointer compressedDepthPointer = new BytePointer();;
@@ -176,7 +172,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
                                            boolean simulateL515Noise,
                                            double publishRateHz)
    {
-      super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
+      super(new ImGuiUniqueLabelMap(RDXHighLevelDepthSensorSimulator.class).get(sensorName + " Simulator"));
       this.sensorName = sensorName;
       setRenderMethod(this::renderImGuiWidgets);
       depthSensorSimulator = new RDXLowLevelDepthSensorSimulator(sensorName,
