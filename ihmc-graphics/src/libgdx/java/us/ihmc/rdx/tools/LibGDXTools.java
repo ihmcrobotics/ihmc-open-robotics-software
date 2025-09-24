@@ -352,25 +352,6 @@ public class LibGDXTools
       modelInstance.transform.setTranslation(Float.NaN, Float.NaN, Float.NaN);
    }
 
-   public static void toLibGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
-   {
-      gdxColor.set((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
-   }
-
-   public static Color toLibGDX(javafx.scene.paint.Color javaFXColor)
-   {
-      return new Color((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
-   }
-
-   /**
-    * JavaFX colors are immutable so we have to return a new one and there isn't a garbage free option
-    * unless we look em up.
-    */
-   public static javafx.scene.paint.Color toJavaFX(Color gdxColor)
-   {
-      return javafx.scene.paint.Color.color(gdxColor.r, gdxColor.g, gdxColor.b, gdxColor.a);
-   }
-
    /**
     * @param hue 0.0 to 360.0
     * @param saturation 0.0 to 1.0
