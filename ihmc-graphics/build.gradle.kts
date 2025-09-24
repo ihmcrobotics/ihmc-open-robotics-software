@@ -58,9 +58,6 @@ libgdxDependencies {
    }
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
-
-   val javaFXVersion = "17.0.8"
-   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 }
 
 libgdxTestDependencies {
