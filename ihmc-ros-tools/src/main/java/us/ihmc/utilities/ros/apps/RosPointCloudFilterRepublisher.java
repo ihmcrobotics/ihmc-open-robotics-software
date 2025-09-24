@@ -64,7 +64,7 @@ public class RosPointCloudFilterRepublisher implements Runnable
             }
 
             System.out.println("Publishing " + pointCloud.getHeader().getSeq() + " " + growablePointCloud.size() + " points");
-            publisher.publish(growablePointCloud.getPoints(), growablePointCloud.getColors(), pointCloud.getHeader().getFrameId());
+//            publisher.publish(growablePointCloud.getPoints(), growablePointCloud.getColors(), pointCloud.getHeader().getFrameId());
 
             /*
              * Transform3d pinkBlobTransform = new Transform3d();

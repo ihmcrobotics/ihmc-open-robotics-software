@@ -8,7 +8,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImString;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import us.ihmc.avatar.logProcessor.SCS2LogProcessor;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
