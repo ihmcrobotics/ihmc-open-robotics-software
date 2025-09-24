@@ -87,7 +87,6 @@ public class RDXROS2ARViaBackgroundDemo
             highLevelDepthSensorSimulator.setupForROS2Color(PerceptionAPI.BIG_VIDEO);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
-            highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);

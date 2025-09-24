@@ -141,7 +141,6 @@ public class RDXIterativeClosestPointReverseDemo
             // Some BS that Duncan had and, I dont want to fuck around with, because I trust him.
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
-            highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(true);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);
