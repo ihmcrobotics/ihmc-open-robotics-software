@@ -5,8 +5,6 @@ import java.util.Arrays;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
-
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,7 +21,6 @@ public class LidarScan
    public RigidBodyTransform localTransformEnd;
    public RigidBodyTransform averageTransform;
 
-   @Optional("TranformationInterpolationCalculator")
    private final TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
 
    public float[] ranges;
@@ -108,10 +105,6 @@ public class LidarScan
       return getLineSegment(index, ranges[index]);
    }
 
-   /**
-    * @param index of the point with respect to {@link #getPoint(int)}
-    * @return
-    */
    public float getRange(int i)
    {
       return ranges[i];
