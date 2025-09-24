@@ -25,10 +25,6 @@ javafxDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
-javafxTestDependencies {
-   api(ihmc.sourceSetProject("javafx"))
-}
-
 libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
