@@ -1,7 +1,7 @@
 package us.ihmc.utilities.ros;
 
-import org.ros.master.client.MasterStateClient;
-import org.ros.master.client.TopicType;
+//import org.ros.master.client.MasterStateClient;
+//import org.ros.master.client.TopicType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
@@ -18,14 +18,14 @@ public class RosTopicList
    public static void main(String[] args)
    {
       RosMainNode node = RosTools.createRosNode(NetworkParameters.getROSURI(), "topic_list");
-      MasterStateClient masterStateClient = new MasterStateClient(node.getConnectedNode(), Objects.requireNonNull(NetworkParameters.getROSURI()));
+//      MasterStateClient masterStateClient = new MasterStateClient(node.getConnectedNode(), Objects.requireNonNull(NetworkParameters.getROSURI()));
       node.execute();
 
       ThreadTools.sleepSeconds(1.0);
-      for (TopicType topicType : masterStateClient.getTopicTypes())
-      {
-         LogTools.info("Topic type: {}", topicType);
-      }
+//      for (TopicType topicType : masterStateClient.getTopicTypes())
+//      {
+//         LogTools.info("Topic type: {}", topicType);
+//      }
 
       ThreadTools.sleepSeconds(1.0);
    }

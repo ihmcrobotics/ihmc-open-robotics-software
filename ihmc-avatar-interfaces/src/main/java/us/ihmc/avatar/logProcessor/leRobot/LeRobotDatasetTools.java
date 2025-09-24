@@ -1,6 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
