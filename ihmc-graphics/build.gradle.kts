@@ -29,19 +29,6 @@ javafxTestDependencies {
    api(ihmc.sourceSetProject("javafx"))
 }
 
-jmonkeyengineDependencies {
-   api(ihmc.sourceSetProject("main"))
-
-   api("us.ihmc:simulation-construction-set-tools:source")
-
-   var javaFXVersion = "17.0.8"
-   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
-}
-
-jmonkeyengineTestDependencies {
-   api(ihmc.sourceSetProject("jmonkeyengine"))
-}
-
 libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")

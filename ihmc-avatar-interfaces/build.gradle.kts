@@ -24,7 +24,6 @@ mainDependencies {
 
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-manipulation-planning:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
