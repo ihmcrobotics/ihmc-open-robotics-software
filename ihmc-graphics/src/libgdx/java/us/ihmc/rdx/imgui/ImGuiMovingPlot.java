@@ -31,7 +31,7 @@ public class ImGuiMovingPlot
 
    public ImGuiMovingPlot(String name, int bufferSize, int width, int height)
    {
-      this.name = ImGuiTools.uniqueLabel(getClass().getSimpleName() + ID.getAndIncrement(), name);
+      this.name = new ImGuiUniqueLabelMap(getClass()).get(name);
       this.bufferSize = bufferSize;
       valuesA = new float[bufferSize];
       valuesB = new float[bufferSize];

@@ -41,7 +41,7 @@ import java.util.*;
 
 public class RDXSCS2EnvironmentBuilder extends RDXPanel
 {
-   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(RDXSCS2EnvironmentBuilder.class, "Environment");
+   private final static String WINDOW_NAME = "Environment Builder";
    private final ArrayList<RDXSCS2EnvironmentObject> allObjects = new ArrayList<>();
    private final ArrayList<RDXSCS2EnvironmentObject> lightObjects = new ArrayList<>();
    private boolean loadedFilesOnce = false;
@@ -210,7 +210,7 @@ public class RDXSCS2EnvironmentBuilder extends RDXPanel
       {
          loadEnvironment(selectedEnvironmentFile);
       }
-      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
+      boolean reindexClicked = ImGui.button(labels.get("Reindex scripts"));
       if (!loadedFilesOnce || reindexClicked)
       {
          loadedFilesOnce = true;
