@@ -241,7 +241,7 @@ public abstract class AvatarQuickPushRecoveryWalkingTest implements MultiRobotTe
       setupTest();
 
       // setup all parameters
-      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
+      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
 
