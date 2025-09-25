@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c593716294d0ef55d93238c2d87438cecffa6d7d831f9e60cc7db64672066981";
+   		return "dda6dd260ab950a30388dd57d682095bf461df71daa2a65bfa9e014ba4e965ee";
    }
    
    @Override
@@ -73,6 +73,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 32; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -122,6 +126,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getSupportRegion().get(i0), current_alignment);}
 
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredTorsoPosition(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredTorsoOrientation(), current_alignment);
+
       current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getCdrSerializedSize(data.getLeftFootStatus(), current_alignment);
 
       current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getCdrSerializedSize(data.getRightFootStatus(), current_alignment);
@@ -157,6 +165,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getSupportRegion());else
           throw new RuntimeException("support_region field exceeds the maximum length: %d > %d".formatted(data.getSupportRegion().size(), 32));
 
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredTorsoPosition(), cdr);
+      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredTorsoOrientation(), cdr);
       toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.write(data.getLeftFootStatus(), cdr);
       toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.write(data.getRightFootStatus(), cdr);
       cdr.write_type_6(data.getSolutionQuality());
@@ -178,6 +188,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootAngularVelocity(), cdr);	
       cdr.read_type_e(data.getSupportRegion());	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredTorsoPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredTorsoOrientation(), cdr);	
       toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.read(data.getLeftFootStatus(), cdr);	
       toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.read(data.getRightFootStatus(), cdr);	
       data.setSolutionQuality(cdr.read_type_6());
@@ -202,6 +214,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.write_type_e("support_region", data.getSupportRegion());
+      ser.write_type_a("desired_torso_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTorsoPosition());
+
+      ser.write_type_a("desired_torso_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredTorsoOrientation());
+
       ser.write_type_a("left_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getLeftFootStatus());
 
       ser.write_type_a("right_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getRightFootStatus());
@@ -226,6 +242,10 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("desired_root_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootAngularVelocity());
 
       ser.read_type_e("support_region", data.getSupportRegion());
+      ser.read_type_a("desired_torso_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTorsoPosition());
+
+      ser.read_type_a("desired_torso_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredTorsoOrientation());
+
       ser.read_type_a("left_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getLeftFootStatus());
 
       ser.read_type_a("right_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getRightFootStatus());

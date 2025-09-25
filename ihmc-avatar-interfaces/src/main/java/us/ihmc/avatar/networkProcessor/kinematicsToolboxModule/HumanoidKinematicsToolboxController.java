@@ -543,7 +543,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       super.updateInternal();
 
-      // Update swing foot pose relative to swing - only needed for status message
+      // Update chest pose - only needed for status message
+      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getBodyFixedFrame().getTransformToRoot();
+      getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
+      getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
+      // Update foot poses - only needed for status message
       for (RobotSide robotSide : RobotSide.values())
       {
          KinematicsToolboxFootStatus footStatus = robotSide == RobotSide.LEFT ? getSolution().getLeftFootStatus() : getSolution().getRightFootStatus();

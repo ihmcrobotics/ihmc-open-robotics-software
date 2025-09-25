@@ -81,6 +81,8 @@ module toolbox_msgs
          * Support region used by the toolbox
          */
         sequence<geometry_msgs::msg::dds::Point, 32> support_region;
+        geometry_msgs::msg::dds::Point desired_torso_position;
+        geometry_msgs::msg::dds::Quaternion desired_torso_orientation;
         toolbox_msgs::msg::dds::KinematicsToolboxFootStatus left_foot_status;
         toolbox_msgs::msg::dds::KinematicsToolboxFootStatus right_foot_status;
         @defaultValue(value=-1.0)
