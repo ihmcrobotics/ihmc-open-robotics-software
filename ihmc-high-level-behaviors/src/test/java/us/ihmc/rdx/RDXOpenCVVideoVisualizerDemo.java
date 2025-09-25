@@ -100,7 +100,8 @@ public class RDXOpenCVVideoVisualizerDemo
             bgrVisualizer.destroy();
             yuvVisualizer.destroy();
             grayVisualizer.destroy();
-            depthVisualizer.destroy();         }
+            depthVisualizer.destroy();
+         }
       });
    }
 
