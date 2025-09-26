@@ -75,7 +75,6 @@ public class RDXROS2VideoSensorDemo
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.getLowLevelSimulator().setDepthEnabled(false);
-            highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(false);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);

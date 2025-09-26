@@ -89,7 +89,6 @@ public class RDXFFMPEGL515DepthLoggingDemo
                                                         publishRateHz);
             baseUI.getImGuiPanelManager().addPanel(l515);
             l515.setSensorEnabled(true);
-            l515.setPublishPointCloudROS2(false);
             l515.setRenderPointCloudDirectly(false);
             l515.setDebugCoordinateFrame(false);
             l515.setRenderColorVideoDirectly(true);

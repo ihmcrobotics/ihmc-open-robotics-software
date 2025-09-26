@@ -83,7 +83,6 @@ public class RDXHighLevelDepthSensorDemo
                                                                                  publishRateHz);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
-            highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
             highLevelDepthSensorSimulator.setDebugCoordinateFrame(false);
             highLevelDepthSensorSimulator.setRenderColorVideoDirectly(true);

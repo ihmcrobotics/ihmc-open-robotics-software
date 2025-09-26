@@ -132,10 +132,6 @@ public class RDXLeRobotDatasetCreator
          if (logSession.getFirstZEDScrubber() != null)
          {
             ImGui.text("ZED SVO fps: %.3f".formatted(logSession.getFirstZEDScrubber().getFps()));
-            if (ImGui.checkbox(labels.get("Record perfect timestamps"), dataset.getUsePerfectTimestamps()))
-            {
-               dataset.setUsePerfectTimestamps(!dataset.getUsePerfectTimestamps());
-            }
          }
          ImGui.text("Dataset FPS: %.2f".formatted(dataset.getFps()));
 

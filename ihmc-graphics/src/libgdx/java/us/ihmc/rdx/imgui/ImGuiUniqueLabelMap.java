@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Use this class to create ImGui labels without reallocating the Strings every tick.
  * This is necessary for some widgets to have unique IDs so they display the same text
  * but are still addressable under the hood uniquely.
+ *
+ * TODO: Rename to ImGuiLabelMap or ImGuiLabels?
  */
 public class ImGuiUniqueLabelMap
 {
@@ -19,7 +21,12 @@ public class ImGuiUniqueLabelMap
 
    public ImGuiUniqueLabelMap(Class<?> clazz)
    {
-      classSimpleName = clazz.getSimpleName();
+      this(clazz.getSimpleName());
+   }
+
+   public ImGuiUniqueLabelMap(String classSimpleName)
+   {
+      this.classSimpleName = classSimpleName;
       AtomicInteger classIndex = CLASS_TO_INDEX.get(classSimpleName);
       if (classIndex == null)
       {
@@ -34,7 +41,7 @@ public class ImGuiUniqueLabelMap
       String label = namesToLabels.get(visibleLabel);
       if (label == null)
       {
-         label = ImGuiTools.uniqueLabel(classSimpleName + index, visibleLabel);
+         label = uniqueLabel(classSimpleName + index, visibleLabel);
          namesToLabels.put(visibleLabel, label);
       }
       return label;
@@ -56,7 +63,7 @@ public class ImGuiUniqueLabelMap
       String label = namesToLabels.get(visibleLabel + hiddenQualifier);
       if (label == null)
       {
-         label = ImGuiTools.uniqueLabel(classSimpleName + index + "_" + hiddenQualifier, visibleLabel);
+         label = uniqueLabel(classSimpleName + index + "_" + hiddenQualifier, visibleLabel);
          namesToLabels.put(visibleLabel, label);
       }
       return label;
@@ -67,7 +74,7 @@ public class ImGuiUniqueLabelMap
       String label = namesToLabels.get(visibleLabel + moreSpecificIndex);
       if (label == null)
       {
-         label = ImGuiTools.uniqueLabel(classSimpleName + index + "_" + moreSpecificIndex, visibleLabel);
+         label = uniqueLabel(classSimpleName + index + "_" + moreSpecificIndex, visibleLabel);
          namesToLabels.put(visibleLabel + moreSpecificIndex, label);
       }
       return label;
@@ -78,9 +85,14 @@ public class ImGuiUniqueLabelMap
       String label = namesToLabels.get(visibleLabel + hiddenQualifier + moreSpecificIndex);
       if (label == null)
       {
-         label = ImGuiTools.uniqueLabel(classSimpleName + index + "_" + moreSpecificIndex + "_" + hiddenQualifier, visibleLabel);
+         label = uniqueLabel(classSimpleName + index + "_" + moreSpecificIndex + "_" + hiddenQualifier, visibleLabel);
          namesToLabels.put(visibleLabel + moreSpecificIndex, label);
       }
       return label;
+   }
+
+   private String uniqueLabel(String id, String label)
+   {
+      return label + "###" + id + ":" + label;
    }
 }

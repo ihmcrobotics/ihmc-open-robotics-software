@@ -27,7 +27,6 @@ mainDependencies {
    api("us.ihmc:mecano:17-0.19.2")
    api("us.ihmc:mecano-yovariables:17-0.19.2")
    api("us.ihmc:ihmc-commons:0.35.1")
-   api("us.ihmc:ihmc-messager-kryo:0.2.1")
    api("us.ihmc:ihmc-matrix-library:0.19.3")
    api("us.ihmc:ihmc-graphics-description:0.26.2")
    api("us.ihmc:simulation-construction-set-utilities:0.25.3")
