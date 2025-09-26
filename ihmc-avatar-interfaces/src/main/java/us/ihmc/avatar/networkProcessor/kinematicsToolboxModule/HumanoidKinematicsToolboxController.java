@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
@@ -62,7 +61,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,8 +106,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> initialFootFrame = new SideDependentList<>();
-   private final ReferenceFrame initialPelvisFrame;
-   private final RigidBodyTransform initialPelvisPose = new RigidBodyTransform();
+   private final ReferenceFrame referencePelvisFrame;
+   private final RigidBodyTransform referencePelvisPose = new RigidBodyTransform();
    /**
     * Updated during the initialization phase with {@link CapturabilityBasedStatus}, this set of two
     * {@link YoBoolean}s is used to know which hand is currently used for support in the walking controller.
@@ -273,7 +271,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          initialFootFrame.put(robotSide, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                 initialFootPoses.get(robotSide)));
       }
-      initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), initialPelvisPose);
+      referencePelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), referencePelvisPose);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -557,11 +555,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          footStatus.getDesiredFootPosition().set(footPose.getPosition());
          footStatus.getDesiredFootOrientation().set(footPose.getOrientation());
 
-         footPose.changeFrame(initialPelvisFrame);
+         footPose.changeFrame(referencePelvisFrame);
          footStatus.getRelativeFootPositionFromPelvisStepStart().set(footPose.getPosition());
          footStatus.getRelativeFootOrientationFromPelvisStepStart().set(footPose.getOrientation());
 
-         footPose.changeFrame(desiredFullRobotModel.getPelvis().getBodyFixedFrame());
+         footPose.changeFrame(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
          footStatus.getRelativeFootPositionFromPelvis().set(footPose.getPosition());
          footStatus.getRelativeFootOrientationFromPelvis().set(footPose.getOrientation());
       }
@@ -619,15 +617,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
       double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
-      initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getParentJoint().getFrameAfterJoint());
+      initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       initialFootPoses.get(robotSide).getTranslation().setZ(initialFootHeight);
       initialFootFrame.get(robotSide).update();
    }
 
    public void updateInitialPelvisPose()
    {
-      initialPelvisPose.set(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToRoot());
-      initialPelvisFrame.update();
+      referencePelvisPose.set(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToRoot());
+      referencePelvisFrame.update();
    }
 
    private final Point3D tempMidFeet = new Point3D();
