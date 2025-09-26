@@ -554,7 +554,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
          FramePose3D footPose = new FramePose3D();
          footPose.set(desiredFullRobotModel.getFoot(robotSide).getBodyFixedFrame().getTransformToRoot());
-
+         footStatus.getDesiredFootPosition().set(footPose.getPosition());
+         footStatus.getDesiredFootOrientation().set(footPose.getOrientation());
 
          footPose.changeFrame(initialPelvisFrame);
          footStatus.getRelativeFootPositionFromPelvisStepStart().set(footPose.getPosition());
