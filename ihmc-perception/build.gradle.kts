@@ -35,19 +35,11 @@ mainDependencies {
    api("us.ihmc:opencl:$openclVersion:linux-arm64")
    api("us.ihmc:opencl:$openclVersion:linux-x86_64")
    api("us.ihmc:opencl:$openclVersion:windows-x86_64")
-   val spinnakerVersion = "4.0.0.116-1.5.11-ihmc-2"
-   api("us.ihmc:spinnaker:$spinnakerVersion")
-   api("us.ihmc:spinnaker:$spinnakerVersion:linux-x86_64")
-   api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64")
    val librealsense2Version = "2.53.1-1.5.11-ihmc-2"
    api("us.ihmc:librealsense2:$librealsense2Version")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-arm64")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-x86_64")
    api("us.ihmc:librealsense2:$librealsense2Version:windows-x86_64")
-   val hdf5Version = "1.14.3-1.5.11-ihmc-2"
-   api("us.ihmc:hdf5:$hdf5Version")
-   api("us.ihmc:hdf5:$hdf5Version:linux-x86_64")
-   api("us.ihmc:hdf5:$hdf5Version:windows-x86_64")
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
