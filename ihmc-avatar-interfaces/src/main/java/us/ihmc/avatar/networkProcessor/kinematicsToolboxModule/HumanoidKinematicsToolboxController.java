@@ -544,7 +544,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       super.updateInternal();
 
       // Update chest pose - only needed for status message
-      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getBodyFixedFrame().getTransformToRoot();
+      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
       getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
       getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
       // Update foot poses - only needed for status message
@@ -553,7 +553,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          KinematicsToolboxFootStatus footStatus = robotSide == RobotSide.LEFT ? getSolution().getLeftFootStatus() : getSolution().getRightFootStatus();
 
          FramePose3D footPose = new FramePose3D();
-         footPose.set(desiredFullRobotModel.getFoot(robotSide).getBodyFixedFrame().getTransformToRoot());
+         footPose.set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTransformToRoot());
          footStatus.getDesiredFootPosition().set(footPose.getPosition());
          footStatus.getDesiredFootOrientation().set(footPose.getOrientation());
 
@@ -619,14 +619,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
       double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
-      initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+      initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getParentJoint().getFrameAfterJoint());
       initialFootPoses.get(robotSide).getTranslation().setZ(initialFootHeight);
       initialFootFrame.get(robotSide).update();
    }
 
    public void updateInitialPelvisPose()
    {
-      initialPelvisPose.set(desiredFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToRoot());
+      initialPelvisPose.set(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToRoot());
       initialPelvisFrame.update();
    }
 
