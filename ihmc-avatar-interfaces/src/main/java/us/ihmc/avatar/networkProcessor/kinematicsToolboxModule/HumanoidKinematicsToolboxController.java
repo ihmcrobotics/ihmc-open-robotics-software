@@ -552,16 +552,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          KinematicsToolboxFootStatus footStatus = robotSide == RobotSide.LEFT ? getSolution().getLeftFootStatus() : getSolution().getRightFootStatus();
 
-         FramePose3D footPoseRelativeChange = new FramePose3D();
-         footPoseRelativeChange.set(desiredFullRobotModel.getSoleFrame(robotSide).getTransformToRoot());
+         FramePose3D footPose = new FramePose3D();
+         footPose.set(desiredFullRobotModel.getFoot(robotSide).getBodyFixedFrame().getTransformToRoot());
 
-         footPoseRelativeChange.changeFrame(initialPelvisFrame);
-         footStatus.getRelativeFootPositionFromPelvisStepStart().set(footPoseRelativeChange.getPosition());
-         footStatus.getRelativeFootOrientationFromPelvisStepStart().set(footPoseRelativeChange.getOrientation());
 
-         footPoseRelativeChange.changeFrame(desiredFullRobotModel.getPelvis().getBodyFixedFrame());
-         footStatus.getRelativeFootPositionFromPelvis().set(footPoseRelativeChange.getPosition());
-         footStatus.getRelativeFootOrientationFromPelvis().set(footPoseRelativeChange.getOrientation());
+         footPose.changeFrame(initialPelvisFrame);
+         footStatus.getRelativeFootPositionFromPelvisStepStart().set(footPose.getPosition());
+         footStatus.getRelativeFootOrientationFromPelvisStepStart().set(footPose.getOrientation());
+
+         footPose.changeFrame(desiredFullRobotModel.getPelvis().getBodyFixedFrame());
+         footStatus.getRelativeFootPositionFromPelvis().set(footPose.getPosition());
+         footStatus.getRelativeFootOrientationFromPelvis().set(footPose.getOrientation());
       }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
