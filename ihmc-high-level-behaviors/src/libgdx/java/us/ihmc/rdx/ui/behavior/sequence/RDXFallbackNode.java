@@ -6,11 +6,13 @@ import us.ihmc.behaviors.sequence.FallbackNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.ui.widgets.ImGuiFallbackWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, FallbackNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiFallbackWidget fallbackWidget = new ImGuiFallbackWidget();
 
    public RDXFallbackNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -21,6 +23,15 @@ public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, Fall
    public void update()
    {
       super.update();
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      fallbackWidget.render(ImGui.getFrameHeight());
+      ImGui.sameLine();
    }
 
    @Override
