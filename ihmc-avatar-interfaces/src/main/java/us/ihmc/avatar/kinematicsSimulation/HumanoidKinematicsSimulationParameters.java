@@ -2,6 +2,7 @@ package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commons.UnitConversions;
+import us.ihmc.ros2.ROS2NodeBuilder;
 
 /**
  * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
@@ -20,6 +21,7 @@ public class HumanoidKinematicsSimulationParameters
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
+   private ROS2NodeBuilder ros2NodeBuilder = null;
 
    public double getInitialGroundHeight()
    {
@@ -139,5 +141,15 @@ public class HumanoidKinematicsSimulationParameters
    public void setEnablePeriodicThread(boolean createPeriodicThread)
    {
       this.createPeriodicThread = createPeriodicThread;
+   }
+
+   public void setRos2NodeBuilder(ROS2NodeBuilder ros2NodeBuilder)
+   {
+      this.ros2NodeBuilder = ros2NodeBuilder;
+   }
+
+   public ROS2NodeBuilder getRos2NodeBuilder()
+   {
+      return ros2NodeBuilder;
    }
 }
