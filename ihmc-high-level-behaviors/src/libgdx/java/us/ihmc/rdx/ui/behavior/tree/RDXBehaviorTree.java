@@ -38,7 +38,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
-   private final ImGuiExpandCollapseRenderer expandCollapseAllRenderer = new ImGuiExpandCollapseRenderer();
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
@@ -184,16 +183,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
          if (enableChildScrollableAreas)
             ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
 
-         if (expandCollapseAllRenderer.render(false, true))
-            expandCollapseAll(true, rootNode);
-         if (expandCollapseAllRenderer.getIsHovered())
-            ImGui.setTooltip("Expand all nodes");
-         ImGui.sameLine();
-         if (expandCollapseAllRenderer.render(true, true))
-            expandCollapseAll(false, rootNode);
-         if (expandCollapseAllRenderer.getIsHovered())
-            ImGui.setTooltip("Collapse all nodes");
-
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
 
          boolean updatedEnableChildScrollableAreas;
@@ -258,16 +247,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 
       // Perform any modifications that were made via user interaction.
       modifyTreeTopology();
-   }
-
-   private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
-   {
-      node.setTreeWidgetExpanded(expandOrCollapse);
-
-      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
-      {
-         expandCollapseAll(expandOrCollapse, child);
-      }
    }
 
    private void renderSelectedNodeSettingsWidgets(RDXBehaviorTreeNode<?, ?> node)

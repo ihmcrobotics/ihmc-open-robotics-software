@@ -12,7 +12,6 @@ import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVerticalAligner;
@@ -48,7 +47,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final ImBoolean selected = new ImBoolean();
    private transient final ImVec2 lineMin = new ImVec2();
    private transient final ImVec2 lineMax = new ImVec2();
-   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private boolean mouseHoveringNodeLine;
    private boolean anySpecificWidgetOnLineClicked = false;
    private boolean treeWidgetExpanded = false;
@@ -132,22 +130,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
       }
-
-      if (!getChildren().isEmpty())
-      {
-         if (expandCollapseRenderer.render(treeWidgetExpanded, false, ImGui.getFrameHeight()))
-         {
-            anySpecificWidgetOnLineClicked = true;
-            treeWidgetExpanded = !treeWidgetExpanded;
-         }
-         ImGui.sameLine();
-      }
-      else
-      {
-         // Add spacing to make up for expand collapse not being there
-         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiExpandCollapseRenderer.getPlaceholderWidth());
-         treeWidgetExpanded = false;
-      }
    }
 
    public void renderTreeViewIconArea()
@@ -221,6 +203,14 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
          ImGui.separator();
       }
+      else
+      {
+         if (ImGui.menuItem(labels.get("Expand all nodes"))) // TODO: Maybe render the icon too
+            expandCollapseAll(true, this);
+         if (ImGui.menuItem(labels.get("Collapse all nodes")))
+            expandCollapseAll(false, this);
+         ImGui.separator();
+      }
 
       if (definition.isJSONRoot())
       {
@@ -245,6 +235,16 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (ImGui.menuItem(labels.get("Draw to SVG")))
       {
          state.drawToSVG();
+      }
+   }
+
+   private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.setTreeWidgetExpanded(expandOrCollapse);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         expandCollapseAll(expandOrCollapse, child);
       }
    }
 
