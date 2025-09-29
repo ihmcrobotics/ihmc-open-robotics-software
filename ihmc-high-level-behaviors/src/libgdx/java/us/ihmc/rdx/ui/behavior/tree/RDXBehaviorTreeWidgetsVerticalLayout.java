@@ -115,7 +115,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       if (node.getTreeWidgetExpanded())
       {
-         float indentAmount = 10.0f;
+         float indentAmount = ImGui.getFontSize() * 0.5f;
          ImGui.indent(indentAmount);
 
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())

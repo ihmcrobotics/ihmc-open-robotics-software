@@ -14,7 +14,7 @@ public class ImGuiRootIconWidget
    {
       float lineHeight = ImGui.getFrameHeight();
       float fontSize = ImGui.getFontSize();
-      float scale = 0.7f * fontSize; // Make parameter if desired
+      float scale = 0.7f * fontSize;
 
       float wide = 0.4f;
       float down = 0.7f;

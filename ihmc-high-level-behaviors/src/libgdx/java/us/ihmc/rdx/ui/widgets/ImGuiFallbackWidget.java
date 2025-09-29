@@ -63,7 +63,7 @@ public class ImGuiFallbackWidget
       float scale = 0.7f; // Make parameter if desired
       scale *= fontSize;
 
-      center.set(0.4f * fontSize, 0.35f * fontSize);
+      center.set(0.6f * fontSize, 0.35f * fontSize);
 
       if (lineHeight == ImGui.getFrameHeight())
          center.addY(ImGui.getStyle().getFramePaddingY());
