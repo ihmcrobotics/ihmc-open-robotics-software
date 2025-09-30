@@ -91,7 +91,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private final SideDependentList<String> forearmIMUNames = new SideDependentList<>(leftForearmIMU, rightForearmIMU);
    private final SideDependentList<String> handIMUNames = new SideDependentList<>(leftHandIMU, rightHandIMU);
 
-   private static final String[] imuSensorsToIgnore = {leftBicepIMU, leftForearmIMU, rightBicepIMU, rightForearmIMU};
+   private static final String[] imuSensorsToIgnore = {leftBicepIMU, rightBicepIMU};
 
    // IMUs to use
    private final List<String> imuSensorsToUse = new ArrayList<>(List.of(pelvisIMU,
