@@ -41,7 +41,7 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.perception.gpuHeightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;

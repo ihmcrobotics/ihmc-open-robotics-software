@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap.worldModel;
+package us.ihmc.perception.heightMap.worldModel;
 
 import com.esotericsoftware.kryo.util.IntMap;
 import org.bytedeco.opencv.opencv_core.Mat;

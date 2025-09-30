@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -6,6 +6,7 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -18,14 +19,12 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.net.URL;
 
 import static org.bytedeco.cuda.global.cudart.*;
 
-public class RapidHeightMapExtractor
+public class HeightMapExtractor
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    /**
@@ -54,14 +53,12 @@ public class RapidHeightMapExtractor
    private final GpuMat globalVarianceMap;
    private final GpuMat previousGlobalMeanMap;
    private final GpuMat previousGlobalVarianceMap;
-   private final GpuMat terrainCroppedHeightMap;
    private final GpuMat emptyGlobalHeightMap;
 
    private final CUDAKernel updateTempMapsKernel;
    private final CUDAKernel localMapKernel;
    private final CUDAKernel translateKernel;
    private final CUDAKernel registerKernel;
-   private final CUDAKernel terrainCroppingKernel;
    private final CUDAKernel planOffsetKernel;
    private final CUDAKernel emptyRegisterKernel;
 
@@ -79,16 +76,17 @@ public class RapidHeightMapExtractor
    private int centerIndexLocal;
    private int cellsPerAxisLocal;
    private int centerIndexGlobal;
-   private int centerIndexTerrain;
    private int cellsPerAxisGlobal;
-   private int cellsPerAxisTerrain;
 
    private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
    private int previousCellX;
    private int previousCellY;
    private float resetOffset;
 
-   public RapidHeightMapExtractor(HeightMapParameters heightMapParameters)
+   private final HeightMapData heightMapData;
+   private final Point3D heightMapCenterPoint = new Point3D();
+
+   public HeightMapExtractor(HeightMapParameters heightMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
       stream = CUDAStreamManager.getStream();
@@ -109,7 +107,6 @@ public class RapidHeightMapExtractor
          localMapKernel = heightMapProgram.loadKernel("computeLocalMap");
          translateKernel = heightMapProgram.loadKernel("translateHeightMapKernel");
          registerKernel = heightMapProgram.loadKernel("heightMapRegistrationKernel");
-         terrainCroppingKernel = heightMapProgram.loadKernel("terrainCroppingHeightMapKernel");
          planOffsetKernel = heightMapProgram.loadKernel("planOffsetKernel");
          emptyRegisterKernel = heightMapProgram.loadKernel("heightMapEmptyRegistrationKernel");
 
@@ -117,7 +114,6 @@ public class RapidHeightMapExtractor
          localMapKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          translateKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          registerKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
-         terrainCroppingKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
@@ -135,8 +131,7 @@ public class RapidHeightMapExtractor
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         terrainCroppedHeightMap = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
-         emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_16UC1);
+         emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
 
          // Initialize transformation pointers
          sensorToGroundTransformHostPointer = new FloatPointer(16);
@@ -152,6 +147,8 @@ public class RapidHeightMapExtractor
       {
          throw new RuntimeException(e);
       }
+
+      heightMapData = new HeightMapData(heightMapParameters.getCellSize(), heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
    }
 
    private void computeDerivedParameters()
@@ -161,9 +158,6 @@ public class RapidHeightMapExtractor
 
       centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
       cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
-
-      centerIndexTerrain = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), heightMapParameters.getCellSize());
-      cellsPerAxisTerrain = 2 * centerIndexTerrain + 1;
    }
 
    public void reset(double footHeight)
@@ -186,7 +180,7 @@ public class RapidHeightMapExtractor
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
                       float zDriftInMeters,
-                      Point3D heightMapFrameToWorldFrame,
+                      Point3D heightMapCenter,
                       double footHeight)
    {
       int error;
@@ -237,12 +231,16 @@ public class RapidHeightMapExtractor
          // Clearing all the temp maps so they are ready for the next update call
          cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
          cudaMemset2DAsync(tempCountMap.data(), tempCountMap.step(), 0, (long) tempCountMap.cols() * Integer.BYTES, tempCountMap.rows());
-         cudaMemset2DAsync(tempSumOfSquaresMap.data(), tempSumOfSquaresMap.step(), 0, (long) tempSumOfSquaresMap.cols() * Float.BYTES, tempSumOfSquaresMap.rows());
+         cudaMemset2DAsync(tempSumOfSquaresMap.data(),
+                           tempSumOfSquaresMap.step(),
+                           0,
+                           (long) tempSumOfSquaresMap.cols() * Float.BYTES,
+                           tempSumOfSquaresMap.rows());
          cudaMemset2DAsync(tempMotionVarianceMap.data(),
-                      tempMotionVarianceMap.step(),
-                      0,
-                      (long) tempMotionVarianceMap.cols() * Float.BYTES,
-                      tempMotionVarianceMap.rows());
+                           tempMotionVarianceMap.step(),
+                           0,
+                           (long) tempMotionVarianceMap.cols() * Float.BYTES,
+                           tempMotionVarianceMap.rows());
 
          int gridDimX = (latestDepthImageGPU.cols() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          int gridDimY = (latestDepthImageGPU.rows() + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -284,8 +282,8 @@ public class RapidHeightMapExtractor
 
       // ---------- Run the translate kernel ---------
       {
-         int currentCellX = (int) Math.round(heightMapFrameToWorldFrame.getX32() / heightMapParameters.getCellSize());
-         int currentCellY = (int) Math.round(heightMapFrameToWorldFrame.getY32() / heightMapParameters.getCellSize());
+         int currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize());
+         int currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize());
 
          // This means we have moved more than 2cm. So each cell should shift to one of its neighboring cells
          if (currentCellX != previousCellX || currentCellY != previousCellY)
@@ -338,23 +336,23 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      // TODO fix plan offset kernel
       // ---------- Run the plan offset kernel ----------
-//      {
-//         int planOffsetGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-//         dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
-//
-//         // Run the plan offset kernel
-//         planOffsetKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-//         planOffsetKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-//         planOffsetKernel.withFloat(zDriftInMeters).withInt(globalMeanMap.rows()).withInt(globalMeanMap.cols());
-//         planOffsetKernel.withFloat(resetOffset);
-//
-//         planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
-//
-//         planOffsetKernelGridDim.destroy();
-//         checkCUDAError();
-//      }
+      {
+         int planOffsetGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
+
+         // Run the plan offset kernel
+         planOffsetKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+         planOffsetKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
+         planOffsetKernel.withFloat(zDriftInMeters);
+         planOffsetKernel.withFloat(resetOffset);
+         planOffsetKernel.withPointer(parametersDevicePointer);
+
+         planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
+
+         planOffsetKernelGridDim.close();
+         checkCUDAError();
+      }
 
       // ---------- Run the registration kernel ----------
       {
@@ -376,27 +374,26 @@ public class RapidHeightMapExtractor
          checkCUDAError();
       }
 
-      // ---------- Run the Terrain cropping kernel ----------
-      {
-         int terrainKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 terrainKernelGridDim = new dim3(terrainKernelGridSizeXY, terrainKernelGridSizeXY, 1);
-
-         terrainCroppingKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         terrainCroppingKernel.withPointer(terrainCroppedHeightMap.data()).withLong(terrainCroppedHeightMap.step());
-         terrainCroppingKernel.withInt(centerIndexTerrain);
-         terrainCroppingKernel.withPointer(parametersDevicePointer);
-
-         terrainCroppingKernel.run(stream, terrainKernelGridDim, blockSize, 0);
-
-         terrainKernelGridDim.close();
-         checkCUDAError();
-      }
-
       // All that memory we allocated on the GPU, need to free that up now
       cudaFreeAsync(parametersDevicePointer, stream);
       cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
       error = cudaStreamSynchronize(stream);
       CUDATools.checkCUDAError(error);
+
+      // The center of this map should be centered in the world grid
+      // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
+      double currentCellX = (int) Math.round(heightMapCenter.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      double currentCellY = (int) Math.round(heightMapCenter.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
+      heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+
+      // Finished GPU kernels, let pack this into the height map data object
+      Mat hostHeightMap = new Mat();
+      globalMeanMap.download(hostHeightMap);
+      HeightMapTools.convertToHeightMapData(hostHeightMap,
+                                            heightMapData,
+                                            heightMapCenterPoint,
+                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                            (float) heightMapParameters.getCellSize());
 
       // Save sensorOrigin as previous for next update
       previousSensorToWorld.set(sensorToWorldTransform);
@@ -434,6 +431,11 @@ public class RapidHeightMapExtractor
                           (float) groundHeightGuess};
    }
 
+   public HeightMapData getHeightMapData()
+   {
+      return heightMapData;
+   }
+
    public void destroy()
    {
       heightMapProgram.close();
@@ -443,7 +445,6 @@ public class RapidHeightMapExtractor
       localMeanMap.close();
       translateKernel.close();
       registerKernel.close();
-      terrainCroppingKernel.close();
       planOffsetKernel.close();
       emptyRegisterKernel.close();
 
@@ -465,7 +466,6 @@ public class RapidHeightMapExtractor
       globalVarianceMap.close();
       previousGlobalMeanMap.close();
       previousGlobalVarianceMap.close();
-      terrainCroppedHeightMap.close();
       emptyGlobalHeightMap.close();
 
       // At the end we have to destroy the stream to release the memory
@@ -473,7 +473,7 @@ public class RapidHeightMapExtractor
    }
 
    /**
-    * If we are debugging the kernels with {@link RapidHeightMapExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
+    * If we are debugging the kernels with {@link HeightMapExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
     * The reason we synchronize because we are checking for errors, so this would help identify where the error is happening
     */
    private void checkCUDAError()
@@ -497,15 +497,5 @@ public class RapidHeightMapExtractor
    public GpuMat getHeightMap()
    {
       return globalMeanMap;
-   }
-
-   public GpuMat getTerrainCroppedHeightMap()
-   {
-      return terrainCroppedHeightMap;
-   }
-
-   public int getCellsPerAxis()
-   {
-      return cellsPerAxisGlobal;
    }
 }

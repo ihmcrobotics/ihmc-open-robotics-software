@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -43,7 +43,7 @@ public class RapidHeightMapDriftOffset
       // While the robot isn't walking, this message will be null
       PlanOffsetStatus latestPlanOffsetMessage = controllerFootstepQueueMonitor.pollPlanOffsetMessage();
       if (latestPlanOffsetMessage == null)
-         return Float.NaN;
+         return 0.0f;
 
       Vector3D latestPlanOffset = latestPlanOffsetMessage.getOffsetVector();
 

@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -8,7 +8,6 @@ import us.ihmc.tools.IHMCCommonPaths;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;

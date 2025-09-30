@@ -3,14 +3,14 @@ package us.ihmc.perception.gpuHeightMap;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.camera.CameraIntrinsics;
+import us.ihmc.perception.heightMap.HeightMapExtractor;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 
-public class RapidHeightMapExtractorTest
+public class HeightMapExtractorTest
 {
 
    /**
@@ -22,7 +22,7 @@ public class RapidHeightMapExtractorTest
    public void testRapidHeightMapExtractor()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      RapidHeightMapExtractor rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
+      HeightMapExtractor heightMapExtractor = new HeightMapExtractor(heightMapParameters);
 
       // Create fake data for the test
       GpuMat gpuMat = new GpuMat(1280, 720, opencv_core.CV_16UC1);
@@ -37,10 +37,10 @@ public class RapidHeightMapExtractorTest
 
       for (int i = 0; i < 1000; i++)
       {
-         rapidHeightMapExtractor.update(gpuMat, cameraIntrinsics, rigidBodyTransform, rigidBodyTransform, rigidBodyTransform, 0.0f, new Point3D(1.0, 2.0, 3.0), 0.0);
+         heightMapExtractor.update(gpuMat, cameraIntrinsics, rigidBodyTransform, rigidBodyTransform, rigidBodyTransform, 0.0f, new Point3D(1.0, 2.0, 3.0), 0.0);
       }
 
-      rapidHeightMapExtractor.destroy();
+      heightMapExtractor.destroy();
    }
 
    /**

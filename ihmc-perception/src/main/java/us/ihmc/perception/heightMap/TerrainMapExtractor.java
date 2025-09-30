@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -10,10 +10,6 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 
 import java.net.URL;
 
@@ -72,9 +68,9 @@ public class TerrainMapExtractor
       try
       {
          // Load header and main file
-         URL heightMapUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/gpuHeightMap/HeightMapUtils.cuh");
+         URL heightMapUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/heightMap/HeightMapUtils.cuh");
          URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
-         URL kernelPath = getClass().getResource("SnappingTerrainExtractor.cu");
+         URL kernelPath = getClass().getResource("TerrainMapExtractor.cu");
 
          snappingTerrainProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
          snappingTerrainKernel = snappingTerrainProgram.loadKernel("computeTerrainData");

@@ -1,10 +1,8 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapTools;
 
 import java.util.Arrays;
 

@@ -20,8 +20,8 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequ
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloTreeNode;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
-import us.ihmc.perception.gpuHeightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.HeatMapGenerator;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

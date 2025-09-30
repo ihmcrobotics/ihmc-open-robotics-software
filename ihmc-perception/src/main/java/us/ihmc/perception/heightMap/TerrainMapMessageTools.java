@@ -1,10 +1,9 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.idl.IDLSequence.Float;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 public class TerrainMapMessageTools
 {

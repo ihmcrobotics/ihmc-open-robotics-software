@@ -306,31 +306,8 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 }
 
 extern "C"
-__global__ void terrainCroppingHeightMapKernel(const float *__restrict__ globalHeightMap, size_t pitchGlobal,
-                                               float *__restrict__ terrainMap, size_t pitchTerrain,
-                                               int centerIndexTerrain, float *params)
-{
-    int xIndex = blockIdx.x * blockDim.x + threadIdx.x;
-    int yIndex = blockIdx.y * blockDim.y + threadIdx.y;
-
-    int terrainCellsPerAxis = 2 * centerIndexTerrain + 1;
-    if (xIndex >= terrainCellsPerAxis || yIndex >= terrainCellsPerAxis)
-        return;
-
-    // Compute coordinates in the global map
-    int globalX = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + xIndex;
-    int globalY = params[GLOBAL_CENTER_INDEX] - centerIndexTerrain + yIndex;
-
-    // Set the terrain map index to the equivalent index in the global map
-    float *globalRow = (float *)((char *)globalHeightMap + globalX * pitchGlobal);
-    float *terrainRow = (float *)((char *)terrainMap + xIndex * pitchTerrain);
-
-    terrainRow[yIndex] = globalRow[globalY];
-}
-
-extern "C"
-__global__ void heightMapEmptyRegistrationKernel(unsigned short *localMap, size_t pitchLocal,
-                                                 unsigned short *globalMap, size_t pitchGlobal,
+__global__ void heightMapEmptyRegistrationKernel(float *localMap, size_t pitchLocal,
+                                                 float *globalMap, size_t pitchGlobal,
                                                  float *zUpCameraToWorldAlignedGround,
                                                  float *params, float resetOffset)
 {
@@ -352,33 +329,34 @@ __global__ void heightMapEmptyRegistrationKernel(unsigned short *localMap, size_
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;
 
-    unsigned short *localHeight = (unsigned short *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
+    float *localHeight = (float *)((char *)localMap + localIndex.x * pitchLocal) + localIndex.y;
 
-    if (*localHeight == 0)
+    if (*localHeight == 0.0f)
         return;
 
-    unsigned short *globalHeight = (unsigned short *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
+    float *globalHeight = (float *)((char *)globalMap + globalIndex.x * pitchGlobal) + globalIndex.y;
     *globalHeight = *localHeight;
 }
 
 extern "C"
 __global__ void planOffsetKernel(float *matrixToModify, size_t pitchMatrixToModify,
-                                 unsigned short *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
-                                 float offsetInZ, int rowsMatrixToModify, int colsMatrixToModify,
-                                 float resetOffset)
+                                 float *matrixValuesToSkip, size_t pitchMatrixValuesToSkip,
+                                 float offsetInZ, float resetOffset, float *params)
 {
     int indexX = blockIdx.x * blockDim.x + threadIdx.x;
     int indexY = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (indexX >= colsMatrixToModify || indexY >= rowsMatrixToModify)
+    int globalCellsPerAxis = static_cast<int>(params[GLOBAL_CELLS_PER_AXIS]);
+
+    if (indexX >= globalCellsPerAxis || indexY >= globalCellsPerAxis)
         return;
 
-    unsigned short *skipRow = (unsigned short *)((char *)matrixValuesToSkip + indexY * pitchMatrixValuesToSkip);
+    float *skipRow = (float *)((char *)matrixValuesToSkip + indexX * pitchMatrixValuesToSkip);
     // This is less then or equal to due to a round error that can give +- 1 offsets
     // This skips the cells that have real data in them coming from the values to skip
-    if (abs((int) skipRow[indexX] - resetOffset) >= 2)
+    if (fabsf(skipRow[indexY] - resetOffset) >= 2.0f)
         return;
 
-    float *matrixRow = (float *)((char *)matrixToModify + indexY * pitchMatrixToModify);
-    matrixRow[indexX] += offsetInZ;
+    float *matrixRow = (float *)((char *)matrixToModify + indexX * pitchMatrixToModify);
+    matrixRow[indexY] += offsetInZ;
 }

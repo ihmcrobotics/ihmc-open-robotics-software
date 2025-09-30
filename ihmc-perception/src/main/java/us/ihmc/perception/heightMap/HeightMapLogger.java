@@ -1,11 +1,9 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.FileNotFoundException;

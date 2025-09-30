@@ -1,7 +1,6 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.perception.heightMap.HeightMapData;
 
 public class PlanarityChecker
 {

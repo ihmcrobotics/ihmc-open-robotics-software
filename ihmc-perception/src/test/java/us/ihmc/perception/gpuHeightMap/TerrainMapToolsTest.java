@@ -5,6 +5,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 

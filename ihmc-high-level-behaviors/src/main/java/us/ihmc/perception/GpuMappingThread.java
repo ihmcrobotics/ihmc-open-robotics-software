@@ -16,7 +16,8 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
-import us.ihmc.perception.gpuHeightMap.TerrainMapManager;
+import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.GpuMappingManager;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.imageMessage.CompressionType;
@@ -30,26 +31,26 @@ import us.ihmc.ros2.ROS2Publisher;
 
 import java.util.concurrent.BlockingQueue;
 
-public class RapidHeightMapThread extends RepeatingTaskThread
+public class GpuMappingThread extends RepeatingTaskThread
 {
    private final DepthImageBodyCollisionFilter bodyCollisionFilter;
    private final DepthImageFlyingPointsFilter flyingPointsFilter;
-   private final TerrainMapManager heightMapManager;
-   private final Object heightMapLock = new Object();
+   private final GpuMappingManager gpuMappingManager;
+   private final Object terrainMapLock = new Object();
 
    private final HeightMapParameters heightMapParameters;
    private final ROS2Publisher<ImageMessage> filteredDepthPublisher;
    private final BlockingQueue<RawImage> rawImageCollection;
 
-   public RapidHeightMapThread(ROS2Node ros2Node,
-                               ROS2SyncedRobotModel syncedRobotModel,
-                               RobotCollisionModel robotCollisionModel,
-                               BlockingQueue<RawImage> rawImageCollection,
-                               ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                               HeightMapParameters heightMapParameters,
-                               DepthImageFilteringParameters depthImageFilteringParameters)
+   public GpuMappingThread(ROS2Node ros2Node,
+                           ROS2SyncedRobotModel syncedRobotModel,
+                           RobotCollisionModel robotCollisionModel,
+                           BlockingQueue<RawImage> rawImageCollection,
+                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                           HeightMapParameters heightMapParameters,
+                           DepthImageFilteringParameters depthImageFilteringParameters)
    {
-      super(RapidHeightMapThread.class.getSimpleName());
+      super(GpuMappingThread.class.getSimpleName());
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
 
@@ -64,13 +65,13 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
       flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
-      heightMapManager = new TerrainMapManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
-                                               ros2Node,
-                                               leftFootFrame,
-                                               rightFootFrame,
-                                               heightMapCenterFrame,
-                                               controllerFootstepQueueMonitor,
-                                               heightMapParameters);
+      gpuMappingManager = new GpuMappingManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
+                                                ros2Node,
+                                                leftFootFrame,
+                                                rightFootFrame,
+                                                heightMapCenterFrame,
+                                                controllerFootstepQueueMonitor,
+                                                heightMapParameters);
    }
 
    @Override
@@ -121,9 +122,9 @@ public class RapidHeightMapThread extends RepeatingTaskThread
          }
 
          // Update height map
-         synchronized (heightMapLock)
+         synchronized (terrainMapLock)
          {
-            heightMapManager.updateAndPublish(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
+            gpuMappingManager.updateAndPublish(filteredDepthImage, depthIntrinsicsCopy, cameraFrameInWorld, cameraZUpFrameInWorld);
          }
 
          filteredDepthImage.close();
@@ -140,9 +141,17 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
    public HeightMapData getLatestHeightMapData()
    {
-      synchronized (heightMapLock)
+      synchronized (terrainMapLock)
       {
-         return heightMapManager.getLatestHeightMapData();
+         return gpuMappingManager.getLatestHeightMapData();
+      }
+   }
+
+   public TerrainMapData getlatestTerrainMapData()
+   {
+      synchronized (terrainMapLock)
+      {
+          return gpuMappingManager.getLatestTerrainMapData();
       }
    }
 
@@ -154,6 +163,6 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
       bodyCollisionFilter.close();
       flyingPointsFilter.destroy();
-      heightMapManager.destroy();
+      gpuMappingManager.destroy();
    }
 }

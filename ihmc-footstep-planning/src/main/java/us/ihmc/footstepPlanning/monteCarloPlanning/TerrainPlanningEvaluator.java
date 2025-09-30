@@ -4,7 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.perception.gpuHeightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class TerrainPlanningEvaluator

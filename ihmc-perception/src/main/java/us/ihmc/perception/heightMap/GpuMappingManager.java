@@ -1,9 +1,10 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
@@ -12,29 +13,24 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMapManager;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.heightMap.worldModel.ChunkedMapManager;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapParameters;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class takes care of managing the {@link RapidHeightMapExtractor}. This class can be used in a remote process, or locally as well.
+ * This class takes care of managing the {@link HeightMapExtractor}. This class can be used in a remote process, or locally as well.
  */
-public class TerrainMapManager
+public class GpuMappingManager
 {
    private final HeightMapLogger heightMapLogger;
 
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
    private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
-   private final RapidHeightMapExtractor rapidHeightMapExtractor;
+   private final HeightMapExtractor heightMapExtractor;
    private final TerrainMapExtractor terrainMapExtractor;
    private final ChunkedMapManager chunkedMapManager;
 
@@ -43,19 +39,18 @@ public class TerrainMapManager
    private final Notification resetHeightMapRequested = new Notification();
    private final Notification lowerHeightMapBackdropRequested = new Notification();
 
-
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final ROS2Publisher<HeightMapMessage> controllerHeightMapMessagePublisher;
+   private final ROS2Publisher<TerrainMapMessage> terrainMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
-   private final HeightMapData lastestGlobalHeightMapData;
-   private final HeightMapData latestTerrainHeightMapData;
    private final Point3D heightMapCenterPoint = new Point3D();
 
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
+   private final TerrainMapMessage terrainMapMessage;
    private long sequenceId = 0;
 
-   public TerrainMapManager(String robotName,
+   public GpuMappingManager(String robotName,
                             ROS2Node ros2Node,
                             ReferenceFrame leftFootSoleFrame,
                             ReferenceFrame rightFootSoleFrame,
@@ -66,26 +61,22 @@ public class TerrainMapManager
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
 
-      lastestGlobalHeightMapData = new HeightMapData((float) heightMapParameters.getCellSize(), (float) heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
-      latestTerrainHeightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
-                                                     (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                     0.0,
-                                                     0.0);
-
       footSoleFrames.add(leftFootSoleFrame);
       footSoleFrames.add(rightFootSoleFrame);
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
+      heightMapExtractor = new HeightMapExtractor(heightMapParameters);
       terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, new SteppableRegionCalculatorParameters());
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
       // Again we do this to optimize the speed of the rapid height map
       heightMapMessage = new HeightMapMessage();
+      terrainMapMessage = new TerrainMapMessage();
       heightMapLogger = new HeightMapLogger(heightMapParameters);
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
+      terrainMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.TERRAIN_MAP);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
@@ -99,7 +90,7 @@ public class TerrainMapManager
       {
          double footHeight = computeFootHeight();
          float loweredFootHeight = 1.0f;
-         rapidHeightMapExtractor.reset(footHeight, loweredFootHeight);
+         heightMapExtractor.reset(footHeight, loweredFootHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
             rapidHeightMapDriftOffset.reset();
@@ -110,7 +101,7 @@ public class TerrainMapManager
       if (resetHeightMapRequested.poll())
       {
          double footHeight = computeFootHeight();
-         rapidHeightMapExtractor.reset(footHeight);
+         heightMapExtractor.reset(footHeight);
          if (heightMapParameters.getDriftOffsetFilter())
          {
             rapidHeightMapDriftOffset.reset();
@@ -122,10 +113,11 @@ public class TerrainMapManager
       // Publish the height map to anyone who is subscribing
       Mat hostGlobalHeightMap = new Mat();
       // Don't destroy this mat as its being used in the extractor till that finish's
-      GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
+      GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      publishHeightMap(hostGlobalHeightMap);
+      publishHeightMap(heightMapExtractor.getHeightMapData());
+      publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
 
       if (heightMapParameters.getEnableChunkedMap())
       {
@@ -135,17 +127,19 @@ public class TerrainMapManager
       hostGlobalHeightMap.close();
    }
 
-   private void publishHeightMap(Mat globalHeightMap)
+    private void publishTerrainMapData(TerrainMapData terrainMapData)
+    {
+        TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
+        terrainMapMessage.setSequenceId(sequenceId++);
+
+        terrainMapMessagePublisher.publish(terrainMapMessage);
+    }
+
+   private void publishHeightMap(HeightMapData heightMapData)
    {
-      HeightMapTools.convertToHeightMapData(globalHeightMap,
-                                            lastestGlobalHeightMapData,
-                                            heightMapCenterPoint,
-                                            (float) heightMapParameters.getGlobalWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize());
+      HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
 
-      HeightMapMessageTools.toMessage(lastestGlobalHeightMapData, heightMapMessage);
-
-      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
+//      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
 
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
@@ -181,14 +175,14 @@ public class TerrainMapManager
       }
 
       // Perform update, this actually creates the height map
-      rapidHeightMapExtractor.update(latestDepthImage,
-                                     depthIntrinsicsCopy,
-                                     sensorToWorld,
-                                     sensorToGround,
-                                     groundToWorld,
-                                     driftOffsetInZ,
-                                     heightMapCenterOrigin,
-                                     computeFootHeight());
+      heightMapExtractor.update(latestDepthImage,
+                                depthIntrinsicsCopy,
+                                sensorToWorld,
+                                sensorToGround,
+                                groundToWorld,
+                                driftOffsetInZ,
+                                heightMapCenterOrigin,
+                                computeFootHeight());
 
       terrainMapExtractor.update(getLatestHeightMapData());
 
@@ -201,16 +195,12 @@ public class TerrainMapManager
 
    public HeightMapData getLatestHeightMapData()
    {
-      GpuMat terrainCroppedHeightMap = rapidHeightMapExtractor.getTerrainCroppedHeightMap();
-      Mat terrainHeightMap = new Mat();
-      terrainCroppedHeightMap.download(terrainHeightMap);
+      return heightMapExtractor.getHeightMapData();
+   }
 
-      HeightMapTools.convertToHeightMapData(terrainHeightMap,
-                                            latestTerrainHeightMapData,
-                                            heightMapCenterPoint,
-                                            (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize());
-      return latestTerrainHeightMapData;
+   public TerrainMapData getLatestTerrainMapData()
+   {
+       return terrainMapExtractor.getTerrainMapData();
    }
 
    private double computeFootHeight()
@@ -242,7 +232,7 @@ public class TerrainMapManager
    {
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
-      rapidHeightMapExtractor.destroy();
+      heightMapExtractor.destroy();
       terrainMapExtractor.destroy();
       chunkedMapManager.destroy();
    }

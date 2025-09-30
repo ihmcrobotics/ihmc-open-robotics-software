@@ -1,4 +1,4 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.perception.heightMap;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
@@ -8,7 +8,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKey;

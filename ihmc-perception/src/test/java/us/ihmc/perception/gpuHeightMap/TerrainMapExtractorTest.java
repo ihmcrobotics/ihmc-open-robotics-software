@@ -14,7 +14,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.SnapResult;
 import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapExtractor;
 
 import static org.junit.jupiter.api.Assertions.*;
 
