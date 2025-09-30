@@ -77,6 +77,7 @@ public class AlexanderModelFactory
          // The URDF loading doesn't work because the 4-bar creates duplicate children
          URDFTools.URDFParserProperties parserProperties = new URDFTools.URDFParserProperties();
          parserProperties.setTransformToZUp(false);
+         parserProperties.setHandleImplicitJointDefinitions(false);
          simulationRobotDefinition = RobotDefinitionLoader.loadURDFModel(urdfParameters.getURDFAsInputStream(),
                                                                          Arrays.asList(urdfParameters.getResourceDirectories()),
                                                                          getClass().getClassLoader(),
