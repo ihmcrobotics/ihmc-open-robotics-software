@@ -14,7 +14,8 @@ public class TerrainMapTools
    /**
     * This method is meant to be as fast as possible, so we don't create local arrays, and we don't do any bounds checks.
     */
-   public static void convertToTerrainMapData(Mat snapNormalXMap,
+   public static void convertToTerrainMapData(Mat heightMap,
+                                              Mat snapNormalXMap,
                                               Mat snapNormalYMap,
                                               Mat snapNormalZMap,
                                               Mat traversabilityMap,
@@ -24,6 +25,9 @@ public class TerrainMapTools
       // How this looks like is we create a pointer for the Mat object.
       // Doing Pointer.get() takes in a parameter that will be packed with the data that is from the pointer.
       // So it looks like Pointer.get(dataToPack) where dataToPack = TerrainMapData.getMap()
+      FloatPointer bytePointerForHeightMap = new FloatPointer(heightMap.data());
+      bytePointerForHeightMap.get(terrainMapData.getHeightMap());
+
       BytePointer bytePointerForSnapNormalXMap = new BytePointer(snapNormalXMap.data());
       bytePointerForSnapNormalXMap.get(terrainMapData.getSnapNormalXMap());
 

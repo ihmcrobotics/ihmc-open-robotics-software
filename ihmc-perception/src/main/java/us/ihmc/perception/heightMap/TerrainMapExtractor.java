@@ -107,14 +107,12 @@ public class TerrainMapExtractor
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
-   public void update(HeightMapData heightMapData)
+   public void update(Mat heightMap)
    {
       int error;
 
-      terrainMapData.setHeightMapData(heightMapData);
-
-      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
-      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
+//      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
+//      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
       GpuMat gpuHeightMap = new GpuMat();
       gpuHeightMap.upload(heightMap);
 
@@ -169,7 +167,8 @@ public class TerrainMapExtractor
          Mat cpuTraversabilityClassMap = new Mat();
          traversabilityClassMat.download(cpuTraversabilityClassMap);
 
-         TerrainMapTools.convertToTerrainMapData(cpuSnapNormalXMap,
+         TerrainMapTools.convertToTerrainMapData(heightMap,
+                                                 cpuSnapNormalXMap,
                                                  cpuSnapNormalYMap,
                                                  cpuSnapNormalZMap,
                                                  cpuTraversabilityMap,

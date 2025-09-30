@@ -85,8 +85,8 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getHeightMapData().getGridCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getHeightMapData().getGridCenter().getY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterY() * parameters.getNodesPerMeter());
       refresh(request.getEnvironmentHandler().getTerrainMapData());
    }
 
@@ -95,8 +95,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getHeightMapData().getGridCenter().getX() * parameters.getNodesPerMeter());
-      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getHeightMapData().getGridCenter().getY() * parameters.getNodesPerMeter());
+      this.offsetX = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getEnvironmentHandler().getTerrainMapData().getGridCenterY() * parameters.getNodesPerMeter());
 
       //TODO this is hella broken
 //      PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);

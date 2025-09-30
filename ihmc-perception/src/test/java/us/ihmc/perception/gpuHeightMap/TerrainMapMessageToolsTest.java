@@ -26,13 +26,15 @@ public class TerrainMapMessageToolsTest
 
       TerrainMapData terrainMapData = new TerrainMapData(cellResolution, gridSizeXY, 0.0, 0.0);
 
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
       Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
       Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
       Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
 
-      TerrainMapTools.convertToTerrainMapData(snapNormalXMap,
+      TerrainMapTools.convertToTerrainMapData(heightMap,
+                                              snapNormalXMap,
                                               snapNormalYMap,
                                               snapNormalZMap,
                                               traversabilityMap,
@@ -73,15 +75,17 @@ public class TerrainMapMessageToolsTest
       float cellResolution = 0.02f;
 
       TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
-      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
+      int cellsPerAxis = terrainMapData.getCellsPerAxis();
 
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
       Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
       Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
       Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
 
-      TerrainMapTools.convertToTerrainMapData(snapNormalXMap,
+      TerrainMapTools.convertToTerrainMapData(heightMap,
+                                              snapNormalXMap,
                                               snapNormalYMap,
                                               snapNormalZMap,
                                               traversabilityMap,
@@ -116,15 +120,17 @@ public class TerrainMapMessageToolsTest
       float cellResolution = 0.02f;
 
       TerrainMapData terrainMapData = new TerrainMapData(cellResolution, widthInMeters, 0.0, 0.0);
-      int cellsPerAxis = terrainMapData.getHeightMapData().getCellsPerAxis();
+      int cellsPerAxis = terrainMapData.getCellsPerAxis();
 
+      Mat heightMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(0));
       Mat snapNormalXMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(1));
       Mat snapNormalYMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(2));
       Mat snapNormalZMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(3));
       Mat traversabilityMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(4));
       Mat traversabilityClassMap = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_8UC1, new Scalar(5));
 
-      TerrainMapTools.convertToTerrainMapData(snapNormalXMap,
+      TerrainMapTools.convertToTerrainMapData(heightMap,
+                                              snapNormalXMap,
                                               snapNormalYMap,
                                               snapNormalZMap,
                                               traversabilityMap,

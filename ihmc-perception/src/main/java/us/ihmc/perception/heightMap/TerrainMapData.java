@@ -8,7 +8,14 @@ import java.util.Arrays;
 
 public class TerrainMapData
 {
-   private HeightMapData heightMapData;
+   private final double cellSize;
+   private final double mapSize;
+   private final double gridCenterX;
+   private final double gridCenterY;
+   private final int centerIndex;
+   private final int cellsPerAxis;
+
+   private float[] heightMap;
 
    private float[] traversabilityScoreMap;
    private byte[] traversabilityClassMap;
@@ -17,11 +24,15 @@ public class TerrainMapData
    private byte[] snapNormalYMap;
    private byte[] snapNormalZMap;
 
-   public TerrainMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
+   public TerrainMapData(double cellSize, double mapSize, double gridCenterX, double gridCenterY)
    {
-      this.heightMapData = new HeightMapData(gridResolutionXY, gridSizeXY, gridCenterX, gridCenterY);
+      this.cellSize = cellSize;
+      this.mapSize = mapSize;
+      this.gridCenterX = gridCenterX;
+      this.gridCenterY = gridCenterY;
 
-      int cellsPerAxis = heightMapData.getCellsPerAxis();
+      this.centerIndex = HeightMapTools.computeCenterIndex(mapSize, cellSize);
+      this.cellsPerAxis = 2 * centerIndex + 1;
 
       traversabilityScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityClassMap = new byte[cellsPerAxis * cellsPerAxis];
@@ -33,9 +44,17 @@ public class TerrainMapData
 
    public TerrainMapData(TerrainMapData other)
    {
-      this.heightMapData = new HeightMapData(other.heightMapData);
+      this.cellSize = other.cellSize;
+      this.mapSize = other.mapSize;
+      this.gridCenterX = other.gridCenterX;
+      this.gridCenterY = other.gridCenterY;
 
-      int size = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
+      this.centerIndex = HeightMapTools.computeCenterIndex(mapSize, cellSize);
+      this.cellsPerAxis = 2 * centerIndex + 1;
+
+      int size = cellsPerAxis * cellsPerAxis;
+
+      this.heightMap = Arrays.copyOf(other.heightMap, size);
 
       this.traversabilityScoreMap = Arrays.copyOf(other.traversabilityScoreMap, size);
       this.traversabilityClassMap = Arrays.copyOf(other.traversabilityClassMap, size);
@@ -57,7 +76,13 @@ public class TerrainMapData
 
    public double getHeightInWorld(double x, double y)
    {
-      return heightMapData.getHeight(x, y);
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, xIndex, yIndex))
+         return Double.NaN;
+
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      return heightMap[key];
    }
 
    /**
@@ -65,10 +90,9 @@ public class TerrainMapData
     */
    public double getTraversabilityScore(double x, double y)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), heightMapData.getCellSize());
-      int xIndex = HeightMapTools.coordinateToIndex(x, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(y, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
-      if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, xIndex, yIndex))
          return Double.NaN;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
@@ -77,10 +101,9 @@ public class TerrainMapData
 
    public SnapResult getTraversabilityClass(double x, double y)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), heightMapData.getCellSize());
-      int xIndex = HeightMapTools.coordinateToIndex(x, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(y, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
-      if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, xIndex, yIndex))
          return null;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
@@ -89,16 +112,20 @@ public class TerrainMapData
 
    public UnitVector3DReadOnly getNormal(double x, double y)
    {
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getMapSize(), heightMapData.getCellSize());
-      int xIndex = HeightMapTools.coordinateToIndex(x, heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(y, heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
-      if (TerrainMapTools.isOutOfBounds(heightMapData.getCellsPerAxis(), xIndex, yIndex))
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
+      if (TerrainMapTools.isOutOfBounds(cellsPerAxis, xIndex, yIndex))
          return Axis3D.Z;
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
       return new UnitVector3D(unpackByteAsFloat(snapNormalXMap, key, -1.0f, 1.0f),
                               unpackByteAsFloat(snapNormalYMap, key, -1.0f, 1.0f),
                               unpackByteAsFloat(snapNormalZMap, key, 0.0f, 1.0f));
+   }
+
+   public float[] getHeightMap()
+   {
+      return heightMap;
    }
 
    public float[] getTraversabilityScoreMap()
@@ -154,5 +181,20 @@ public class TerrainMapData
    public static float unpackByteAsFloat(byte[] byteArray, int index, float minValue, float maxValue)
    {
       return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
+   }
+
+   public int getCellsPerAxis()
+   {
+      return cellsPerAxis;
+   }
+
+   public double getGridCenterX()
+   {
+      return gridCenterX;
+   }
+
+   public double getGridCenterY()
+   {
+      return gridCenterY;
    }
 }
