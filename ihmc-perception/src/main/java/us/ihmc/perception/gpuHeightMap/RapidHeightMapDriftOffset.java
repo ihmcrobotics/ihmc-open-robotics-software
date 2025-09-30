@@ -31,7 +31,7 @@ public class RapidHeightMapDriftOffset
     */
    public float getUpdateDriftOffset()
    {
-      incrementalOffset.setToNaN();
+      incrementalOffset.setToZero();
 
       if (controllerFootstepQueueMonitor.pollIsWalking() || controllerFootstepQueueMonitor.getReceivedNewFootstepPlanWithOverride())
       {

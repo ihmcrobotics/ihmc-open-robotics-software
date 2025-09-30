@@ -170,40 +170,4 @@ public class HeightMapTools
 
       heightMapDataToPack.setHeights(values);
    }
-
-   public static float[] packArrayForFile(Mat heightMap, Point3D gridCenter, float widthInMeters, float cellSizeInMeters)
-   {
-      // Snap to cell resolution
-      widthInMeters = (float) (Math.floor(widthInMeters / cellSizeInMeters) * cellSizeInMeters);
-      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
-      int cellsPerAxis = 2 * centerIndex + 1;
-      int totalCells = cellsPerAxis * cellsPerAxis;
-
-      // Ensure the Mat is a 16-bit unsigned single channel
-      if (heightMap.type() != opencv_core.CV_16UC1)
-         throw new IllegalArgumentException("Expected CV_16UC1 Mat");
-
-      // Read the short values from the Mat
-      ShortBuffer shortBuffer = heightMap.createBuffer();
-      short[] shortHeights = new short[totalCells];
-      shortBuffer.get(shortHeights);
-
-      // Prepare an output array with a header
-      final int headerFloats = 4;
-      float[] packedArray = new float[headerFloats + totalCells];
-
-      // Write header
-      packedArray[0] = widthInMeters;
-      packedArray[1] = cellSizeInMeters;
-      packedArray[2] = (float) gridCenter.getX();
-      packedArray[3] = (float) gridCenter.getY();
-
-      // Convert shorts to floats and copy into a packed array
-      for (int i = 0; i < totalCells; ++i)
-      {
-         packedArray[headerFloats + i] = shortHeights[i];
-      }
-
-      return packedArray;
-   }
 }

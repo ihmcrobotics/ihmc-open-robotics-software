@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
-import us.ihmc.footstepPlanning.SnappingTerrainManager;
+import us.ihmc.footstepPlanning.TerrainMapManagerNormals;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.ROS2ImageSensors;
@@ -34,7 +34,7 @@ public class ContinuousHikingProcess
    private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
-   private final SnappingTerrainManager snappingTerrainManager;
+   private final TerrainMapManagerNormals terrainMapManagerNormals;
    private final RapidHeightMapThread rapidHeightMapThread;
    //   private final SteppableRegionsManager steppableRegionsManager;
 
@@ -74,9 +74,9 @@ public class ContinuousHikingProcess
                                                          activeMappingParameterToolBox.getHeightMapParameters(),
                                                          activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
-         snappingTerrainManager = new SnappingTerrainManager(ros2Node,
-                                                             activeMappingParameterToolBox.getHeightMapParameters(),
-                                                             activeMappingParameterToolBox.getSteppableRegionCalculatorParameters());
+         terrainMapManagerNormals = new TerrainMapManagerNormals(ros2Node,
+                                                                 activeMappingParameterToolBox.getHeightMapParameters(),
+                                                                 activeMappingParameterToolBox.getSteppableRegionCalculatorParameters());
          //         steppableRegionsManager = new SteppableRegionsManager(ros2Node);
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
@@ -109,8 +109,8 @@ public class ContinuousHikingProcess
 
       // Update environment
       environmentHandler.setHeightMapData(rapidHeightMapThread.getLatestHeightMapData());
-      snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
-      environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
+      terrainMapManagerNormals.updateAndPublish(environmentHandler.getHeightMapData());
+      environmentHandler.setTerrainMapData(terrainMapManagerNormals.getTerrainMapData());
       //      steppableRegionsManager.update(environmentHandler.getTerrainMapData());
       continuousPlanningStateMachine.setLatestEnvironmentHandler(environmentHandler);
    }
@@ -119,7 +119,7 @@ public class ContinuousHikingProcess
    {
       rapidHeightMapThread.blockingKill();
       continuousPlanningStateMachine.destroy();
-      snappingTerrainManager.close();
+      terrainMapManagerNormals.close();
       //      steppableRegionsManager.destroy();
    }
 }

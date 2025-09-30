@@ -19,7 +19,7 @@ import us.ihmc.perception.heightMap.HeightMapTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SnappingTerrainExtractorTest
+public class TerrainMapExtractorTest
 {
    public static final boolean DEBUG = false;
 
@@ -33,7 +33,7 @@ public class SnappingTerrainExtractorTest
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionCalculatorParameters);
+      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionCalculatorParameters);
 
       GpuMat fakeHeightMap = new GpuMat(401, 401, opencv_core.CV_16UC1);
       fakeHeightMap.setTo(new Scalar(100));
@@ -47,8 +47,8 @@ public class SnappingTerrainExtractorTest
 
       HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F);
 
-      snappingTerrainExtractor.update(heightMapData);
-      snappingTerrainExtractor.close();
+      terrainMapExtractor.update(heightMapData);
+      terrainMapExtractor.close();
    }
 
    @Test
@@ -66,7 +66,7 @@ public class SnappingTerrainExtractorTest
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
+      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
 
       double randomHeight = 2.0;
       GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(randomHeight));
@@ -85,9 +85,9 @@ public class SnappingTerrainExtractorTest
                                             (float) heightMapParameters.getTerrainWidthInMeters(),
                                             (float) heightMapParameters.getCellSize());
 
-      snappingTerrainExtractor.update(heightMapData);
+      terrainMapExtractor.update(heightMapData);
 
-      TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
+      TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
       float[] traversabilityScoreMap = terrainMapData.getTraversabilityScoreMap();
       byte[] traversabilityClassMap = terrainMapData.getTraversabilityClassMap();
 
@@ -100,7 +100,7 @@ public class SnappingTerrainExtractorTest
          }
       }
 
-      snappingTerrainExtractor.close();
+      terrainMapExtractor.close();
    }
 
    // WIP -- test normal given flat, inclined plane as input
@@ -123,7 +123,7 @@ public class SnappingTerrainExtractorTest
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      SnappingTerrainExtractor snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, steppableRegionParameters);
+      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
 
       HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
                                                       (float) heightMapParameters.getTerrainWidthInMeters(),
@@ -138,13 +138,13 @@ public class SnappingTerrainExtractorTest
          heightMapData.setHeight(x, y, z);
       }
 
-      snappingTerrainExtractor.update(heightMapData);
+      terrainMapExtractor.update(heightMapData);
 
-      TerrainMapData terrainMapData = snappingTerrainExtractor.getTerrainMapData();
+      TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
 
       LogTools.info("normal: " + terrainMapData.getNormal(0.3, 0.0));
       System.out.println(terrainMapData.getTraversabilityClass(0.3, 0.0));
 
-      snappingTerrainExtractor.close();
+      terrainMapExtractor.close();
    }
 }

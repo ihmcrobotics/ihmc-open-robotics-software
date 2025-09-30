@@ -22,7 +22,7 @@ import java.net.URL;
 import static org.bytedeco.cuda.global.cudart.cudaFree;
 import static org.bytedeco.cuda.global.cudart.cudaStreamSynchronize;
 
-public class SnappingTerrainExtractor
+public class TerrainMapExtractor
 {
    private static final boolean PRINT_TIMING_FOR_KERNELS = false;
    /**
@@ -63,7 +63,7 @@ public class SnappingTerrainExtractor
     *
     * @param heightMapParameters parameters used to compute terrain data
     */
-   public SnappingTerrainExtractor(HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters steppableRegionCalculatorParameters)
+   public TerrainMapExtractor(HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters steppableRegionCalculatorParameters)
    {
       this.heightMapParameters = heightMapParameters;
       this.steppableRegionParameters = steppableRegionCalculatorParameters;
@@ -192,7 +192,7 @@ public class SnappingTerrainExtractor
    }
 
    /**
-    * If we are debugging the kernels with {@link SnappingTerrainExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
+    * If we are debugging the kernels with {@link TerrainMapExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
     * The reason we synchronize because we are checking for errors, so this would help identify where the error is happening
     */
    private void checkCUDAError()

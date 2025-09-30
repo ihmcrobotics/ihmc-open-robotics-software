@@ -10,26 +10,26 @@ import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 
-public class SnappingTerrainManager
+public class TerrainMapManagerNormals
 {
-   private final SnappingTerrainExtractor snappingTerrainExtractor;
+   private final TerrainMapExtractor terrainMapExtractor;
    private ROS2Publisher<TerrainMapMessage> snappingTerrainPublisher;
    private final TerrainMapMessage terrainMapMessage;
    private long sequenceId = 0;
 
-   public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters footstepPlannerParameters)
+   public TerrainMapManagerNormals(ROS2Node ros2Node, HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters footstepPlannerParameters)
    {
       if (ros2Node != null)
          snappingTerrainPublisher = ros2Node.createPublisher(ContinuousHikingAPI.TERRAIN_MAP);
 
       terrainMapMessage = new TerrainMapMessage();
-      snappingTerrainExtractor = new SnappingTerrainExtractor(heightMapParameters, footstepPlannerParameters);
+      terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, footstepPlannerParameters);
    }
 
    public void updateAndPublish(HeightMapData heightMapData)
    {
-      snappingTerrainExtractor.update(heightMapData);
-      publishTerrainMapData(snappingTerrainExtractor.getTerrainMapData());
+      terrainMapExtractor.update(heightMapData);
+      publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
    }
 
    private void publishTerrainMapData(TerrainMapData terrainMapData)
@@ -43,11 +43,11 @@ public class SnappingTerrainManager
 
    public TerrainMapData getTerrainMapData()
    {
-      return snappingTerrainExtractor.getTerrainMapData();
+      return terrainMapExtractor.getTerrainMapData();
    }
 
    public void close()
    {
-      snappingTerrainExtractor.close();
+      terrainMapExtractor.close();
    }
 }

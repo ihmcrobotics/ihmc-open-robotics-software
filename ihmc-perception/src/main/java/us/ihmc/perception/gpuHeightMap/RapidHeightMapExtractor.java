@@ -185,6 +185,7 @@ public class RapidHeightMapExtractor
                       RigidBodyTransform sensorToWorldTransform,
                       RigidBodyTransform sensorToGroundTransform,
                       RigidBodyTransformReadOnly groundToWorldTransform,
+                      float zDriftInMeters,
                       Point3D heightMapFrameToWorldFrame,
                       double footHeight)
    {
@@ -317,6 +318,44 @@ public class RapidHeightMapExtractor
          }
       }
 
+      // ---------- Run the registration kernel for an empty global height map ----------
+      {
+         int emptyRegistrationGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         dim3 registerKernelGridDim = new dim3(emptyRegistrationGridSizeXY, emptyRegistrationGridSizeXY, 1);
+
+         // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
+         emptyGlobalHeightMap.setTo(new Scalar(resetOffset));
+
+         emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
+         emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
+         emptyRegisterKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
+         emptyRegisterKernel.withPointer(parametersDevicePointer);
+         emptyRegisterKernel.withFloat(resetOffset);
+
+         emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
+
+         registerKernelGridDim.close();
+         checkCUDAError();
+      }
+
+      // TODO fix plan offset kernel
+      // ---------- Run the plan offset kernel ----------
+//      {
+//         int planOffsetGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+//         dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
+//
+//         // Run the plan offset kernel
+//         planOffsetKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
+//         planOffsetKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
+//         planOffsetKernel.withFloat(zDriftInMeters).withInt(globalMeanMap.rows()).withInt(globalMeanMap.cols());
+//         planOffsetKernel.withFloat(resetOffset);
+//
+//         planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
+//
+//         planOffsetKernelGridDim.close();
+//         checkCUDAError();
+//      }
+
       // ---------- Run the registration kernel ----------
       {
          int registerKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
@@ -361,81 +400,6 @@ public class RapidHeightMapExtractor
 
       // Save sensorOrigin as previous for next update
       previousSensorToWorld.set(sensorToWorldTransform);
-   }
-
-   public void updateHeightOffset(RigidBodyTransform groundToWorldTransform, float z, CameraIntrinsics cameraIntrinsics, double footHeight)
-   {
-      int error;
-
-      // Populate parameter buffers with the necessary values
-      float[] parametersArray = populateParameterArray(heightMapParameters, cameraIntrinsics, footHeight);
-      parametersHostPointer.put(parametersArray);
-      CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
-      CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
-
-      // ---------- Run the registration kernel for an empty global height map ----------
-      {
-         RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
-         // Remove rotation from transformation
-         groundToWorldNoRotation.getRotation().setIdentity();
-
-         RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
-         // Invert translation-only transform
-         worldToGroundNoRotation.invert();
-
-         // This transformation only has rotation
-         RigidBodyTransform groundToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
-         groundToWorldAlignedGround.multiply(groundToWorldTransform);
-
-         groundToWorldAlignedGround.get(worldToGroundTransformArray);
-         zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
-         CUDATools.mallocAsync(zUpCameraToWorldAlignedGroundDevicePointer, worldToGroundTransformArray.length, stream);
-         CUDATools.memcpyAsync(zUpCameraToWorldAlignedGroundDevicePointer,
-                               zUpCameraToWorldAlignedGroundHostPointer,
-                               worldToGroundTransformArray.length,
-                               stream);
-         checkCUDAError();
-
-         int emptyRegistrationGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 registerKernelGridDim = new dim3(emptyRegistrationGridSizeXY, emptyRegistrationGridSizeXY, 1);
-
-         // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
-         emptyGlobalHeightMap.setTo(new Scalar(resetOffset));
-
-         emptyRegisterKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
-         emptyRegisterKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         emptyRegisterKernel.withPointer(zUpCameraToWorldAlignedGroundDevicePointer);
-         emptyRegisterKernel.withPointer(parametersDevicePointer);
-         emptyRegisterKernel.withFloat(resetOffset);
-
-         emptyRegisterKernel.run(stream, registerKernelGridDim, blockSize, 0);
-
-         registerKernelGridDim.close();
-         checkCUDAError();
-      }
-
-      // ---------- Run the plan offset kernel ----------
-      {
-         int planOffsetGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-         dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
-
-         // Run the plan offset kernel
-         planOffsetKernel.withPointer(globalMeanMap.data()).withLong(globalMeanMap.step());
-         planOffsetKernel.withPointer(emptyGlobalHeightMap.data()).withLong(emptyGlobalHeightMap.step());
-         planOffsetKernel.withFloat(z).withInt(globalMeanMap.rows()).withInt(globalMeanMap.cols());
-         planOffsetKernel.withFloat(resetOffset);
-
-         planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
-
-         planOffsetKernelGridDim.close();
-         checkCUDAError();
-      }
-
-      cudaFreeAsync(parametersDevicePointer, stream);
-      cudaFreeAsync(zUpCameraToWorldAlignedGroundDevicePointer, stream);
-      // Synchronize the stream so the cpu has the data when this method returns
-      error = cudaStreamSynchronize(stream);
-      CUDATools.checkCUDAError(error);
    }
 
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)

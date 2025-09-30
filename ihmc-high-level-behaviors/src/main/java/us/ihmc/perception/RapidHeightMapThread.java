@@ -16,7 +16,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.filters.DepthImageBodyCollisionFilter;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
 import us.ihmc.perception.filters.DepthImageFlyingPointsFilter;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapManager;
+import us.ihmc.perception.gpuHeightMap.TerrainMapManager;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.imageMessage.CompressionType;
@@ -34,7 +34,7 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 {
    private final DepthImageBodyCollisionFilter bodyCollisionFilter;
    private final DepthImageFlyingPointsFilter flyingPointsFilter;
-   private final RapidHeightMapManager heightMapManager;
+   private final TerrainMapManager heightMapManager;
    private final Object heightMapLock = new Object();
 
    private final HeightMapParameters heightMapParameters;
@@ -64,13 +64,13 @@ public class RapidHeightMapThread extends RepeatingTaskThread
 
       bodyCollisionFilter = new DepthImageBodyCollisionFilter(robotCollisionModel, syncedRobotModel.getFullRobotModel().getRootBody());
       flyingPointsFilter = new DepthImageFlyingPointsFilter(depthImageFilteringParameters);
-      heightMapManager = new RapidHeightMapManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
-                                                   ros2Node,
-                                                   leftFootFrame,
-                                                   rightFootFrame,
-                                                   heightMapCenterFrame,
-                                                   controllerFootstepQueueMonitor,
-                                                   heightMapParameters);
+      heightMapManager = new TerrainMapManager(syncedRobotModel.getRobotModel().getSimpleRobotName(),
+                                               ros2Node,
+                                               leftFootFrame,
+                                               rightFootFrame,
+                                               heightMapCenterFrame,
+                                               controllerFootstepQueueMonitor,
+                                               heightMapParameters);
    }
 
    @Override
