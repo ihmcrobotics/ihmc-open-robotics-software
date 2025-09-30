@@ -16,6 +16,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.cuda.CUDAJPEGProcessor;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.time.Instant;
 
@@ -92,7 +93,7 @@ public class ImageMessageDecoder
          }
          case UNCOMPRESSED ->
          {
-            if (imageToPack.elemSize() != lastImagePixelFormat.bytesPerElement)
+            if (imageToPack.elemSize() != lastImagePixelFormat.bytesPerPixel)
             {
                Mat correctSizedMat = new Mat(messageToDecode.getImageHeight(), messageToDecode.getImageWidth(), lastImagePixelFormat.toOpenCVType());
                correctSizedMat.copyTo(imageToPack);

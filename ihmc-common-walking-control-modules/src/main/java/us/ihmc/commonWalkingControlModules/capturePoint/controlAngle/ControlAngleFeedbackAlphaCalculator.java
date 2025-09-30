@@ -13,8 +13,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControlAngleFeedbackAlphaCalculator implements ICPControllerParameters.FeedbackAlphaCalculator
 {
-   private static final double defaultAngleToStartDecreasingControl = Math.PI / 2.0;
-   private static final double defaultAngleToEndDecreasingControl = Math.toRadians(20.0);
+   private static final double defaultAngleToStartDecreasingControl = Math.toRadians(40.0);
+   private static final double defaultAngleToEndDecreasingControl = Math.toRadians(10.0);
 
    private final BooleanParameter useICPFeedbackScaling;
    private final DoubleParameter angleToStartDecreasingControl;

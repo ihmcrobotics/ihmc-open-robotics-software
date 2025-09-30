@@ -21,8 +21,8 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -42,7 +42,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final static boolean APPLY_REACHABLE_REGION_ELLIPTICAL_CONSTRAINT = false;
    private static final double MAX_DISTANCE_MULTIPLIER = 3.0;
 
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXInteractableFootstep footstepBeingPlaced;
    private boolean footstepBeingPlacedIsReachable;
    private boolean modeNewlyActivated = false;

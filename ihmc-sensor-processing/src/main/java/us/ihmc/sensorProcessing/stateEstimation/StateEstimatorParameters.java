@@ -176,6 +176,14 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return MomentumEstimatorMode.NONE;
    }
 
+   /**
+    * Parameter for whether the CoM position and velocity adjustment in the {@link MomentumEstimatorMode#DISTRIBUTED_IMUS} module is used
+    */
+   public boolean enableCoMAdjustment()
+   {
+      return false;
+   }
+
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getCenterOfMassVelocityFusingFrequency();
 

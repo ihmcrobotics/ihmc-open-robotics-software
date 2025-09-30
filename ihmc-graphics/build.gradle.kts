@@ -25,28 +25,24 @@ javafxDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
-javafxTestDependencies {
-   api(ihmc.sourceSetProject("javafx"))
-}
-
-jmonkeyengineDependencies {
-   api(ihmc.sourceSetProject("main"))
-
-   api("us.ihmc:simulation-construction-set-tools:source")
-
-   var javaFXVersion = "17.0.8"
-   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
-}
-
-jmonkeyengineTestDependencies {
-   api(ihmc.sourceSetProject("jmonkeyengine"))
-}
-
 libgdxDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.36.0")
-//   api("us.ihmc:ihmc-humanoid-robotics:source")
+
+   val javacppVersion = "1.5.11-ihmc-2"
+   api("us.ihmc:javacpp:$javacppVersion")
+   api("us.ihmc:javacpp:$javacppVersion:linux-arm64")
+   api("us.ihmc:javacpp:$javacppVersion:linux-x86_64")
+   api("us.ihmc:javacpp:$javacppVersion:windows-x86_64")
+
+   val opencvVersion = "4.10.0-1.5.11-ihmc-3" // Hosted on https://robotlabfiles.ihmc.us/repository
+   api("us.ihmc:opencv:$opencvVersion")
+   api("us.ihmc:opencv:$opencvVersion:linux-arm64")
+   api("us.ihmc:opencv:$opencvVersion:linux-arm64-gpu")
+   api("us.ihmc:opencv:$opencvVersion:linux-x86_64")
+   api("us.ihmc:opencv:$opencvVersion:linux-x86_64-gpu")
+   api("us.ihmc:opencv:$opencvVersion:windows-x86_64")
+   api("us.ihmc:opencv:$opencvVersion:windows-x86_64-gpu")
 
    val gdxVersion = "1.12.1"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
@@ -75,9 +71,6 @@ libgdxDependencies {
    }
    api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
    api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
-
-   val javaFXVersion = "17.0.8"
-   api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
 }
 
 libgdxTestDependencies {

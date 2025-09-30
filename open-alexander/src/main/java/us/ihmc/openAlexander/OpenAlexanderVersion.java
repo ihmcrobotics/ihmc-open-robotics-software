@@ -165,6 +165,18 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
+   public boolean hasCycloidHands(RobotSide side)
+   {
+      switch (this)
+      {
+         case V1_FULL_ROBOT:
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   @Override
    public AlexanderSensorInformation getSensorInformation()
    {
       if (sensorInformation != null)

@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import perception_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
@@ -13,6 +12,8 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import sensor_msgs.PointCloud2;
+//import org.jboss.netty.buffer.ChannelBuffer;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -97,14 +98,14 @@ public class PointCloud2ToLidarScanMessageConverter
                           for (int i = 0; i < numberOfPoints; i++)
                           {
                              int startIndex = (int) pointStep * i;
-                             packBytes(bytes, startIndex + 0, pointCloud.getData());
-                             float x = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
-                             packBytes(bytes, startIndex + 4, pointCloud.getData());
-                             float y = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
-                             packBytes(bytes, startIndex + 8, pointCloud.getData());
-                             float z = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
+//                             packBytes(bytes, startIndex + 0, pointCloud.getData());
+//                             float x = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
+//                             packBytes(bytes, startIndex + 4, pointCloud.getData());
+//                             float y = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
+//                             packBytes(bytes, startIndex + 8, pointCloud.getData());
+//                             float z = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
 
-                             Pose3D dataPoint = new Pose3D(x, y, z, 0.0, 0.0, 0.0);
+                             Pose3D dataPoint = null;
                              dataPoint.applyTransform(transform);
 
                              points[3 * i + 0] = (float) dataPoint.getX();
@@ -127,13 +128,13 @@ public class PointCloud2ToLidarScanMessageConverter
       pointCloudSubscriber.wailTillRegistered();
    }
 
-   private static void packBytes(byte[] bytes, int startIndex, ChannelBuffer data)
-   {
-      for (int i = 0; i < 4; i++)
-      {
-         bytes[i] = data.getByte(startIndex + i);
-      }
-   }
+//   private static void packBytes(byte[] bytes, int startIndex, ChannelBuffer data)
+//   {
+//      for (int i = 0; i < 4; i++)
+//      {
+//         bytes[i] = data.getByte(startIndex + i);
+//      }
+//   }
 
    public static void main(String[] args)
    {

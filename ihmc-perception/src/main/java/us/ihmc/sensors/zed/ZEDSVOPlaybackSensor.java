@@ -49,8 +49,7 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
          svoStatusMessage.setLength(getLength());
 
          ros2.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
-      }).setFrequencyLimit(sl_get_camera_fps(cameraID));
-      publishInfoThread.startRepeating();
+      });
    }
 
    public void useTrackedPose(boolean useTrackedPose)
@@ -58,6 +57,14 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
       enablePositionalTracking(useTrackedPose);
       if (useTrackedPose)
          setSensorFrame(getTrackedSensorFrame());
+   }
+
+   @Override
+   protected boolean startSensor()
+   {
+      boolean b = super.startSensor();
+      publishInfoThread.setFrequencyLimit(getFps()).startRepeating();
+      return b;
    }
 
    @Override
