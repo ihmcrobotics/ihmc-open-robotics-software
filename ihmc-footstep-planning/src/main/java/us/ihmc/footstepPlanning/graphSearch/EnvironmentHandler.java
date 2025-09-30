@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuHeightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.HeightMapData;
 
 public class EnvironmentHandler

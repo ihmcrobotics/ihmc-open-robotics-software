@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.steppableRegions;
+package us.ihmc.perception.gpuHeightMap;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;

@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.steppableRegions;
+package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;

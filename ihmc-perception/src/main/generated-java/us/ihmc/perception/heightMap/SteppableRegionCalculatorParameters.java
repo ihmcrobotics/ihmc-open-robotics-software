@@ -1,6 +1,9 @@
-package us.ihmc.footstepPlanning.steppableRegions;
+package us.ihmc.perception.heightMap;
 
-import us.ihmc.tools.property.*;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertyKeyList;
+import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 /**
  * The JSON file for this property set is located here:

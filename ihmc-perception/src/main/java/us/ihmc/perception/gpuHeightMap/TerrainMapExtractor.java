@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -6,9 +6,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
@@ -16,6 +13,7 @@ import us.ihmc.perception.cuda.CUDATools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 
 import java.net.URL;
 
@@ -225,7 +223,7 @@ public class TerrainMapExtractor
                           (float) steppableRegionParameters.getSquaredErrorThreshold()};
    }
 
-   public void close()
+   public void destroy()
    {
       snappingTerrainProgram.close();
       snappingTerrainKernel.close();

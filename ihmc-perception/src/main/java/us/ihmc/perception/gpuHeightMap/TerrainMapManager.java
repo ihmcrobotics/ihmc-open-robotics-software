@@ -11,26 +11,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.worldModel.ChunkedMapManager;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.tools.IHMCCommonPaths;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,14 +33,16 @@ public class TerrainMapManager
 
    private final ReferenceFrame heightMapCenter;
    private final HeightMapParameters heightMapParameters;
+   private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
    private final RapidHeightMapExtractor rapidHeightMapExtractor;
+   private final TerrainMapExtractor terrainMapExtractor;
+   private final ChunkedMapManager chunkedMapManager;
 
    private final List<ReferenceFrame> footSoleFrames = new ArrayList<>();
 
    private final Notification resetHeightMapRequested = new Notification();
    private final Notification lowerHeightMapBackdropRequested = new Notification();
 
-   private final RapidHeightMapDriftOffset rapidHeightMapDriftOffset;
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
    private final ROS2Publisher<HeightMapMessage> controllerHeightMapMessagePublisher;
@@ -61,7 +53,6 @@ public class TerrainMapManager
 
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
-   private final ChunkedMapManager chunkedMapManager;
    private long sequenceId = 0;
 
    public TerrainMapManager(String robotName,
@@ -86,6 +77,7 @@ public class TerrainMapManager
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       rapidHeightMapExtractor = new RapidHeightMapExtractor(heightMapParameters);
+      terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, new SteppableRegionCalculatorParameters());
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
       // Again we do this to optimize the speed of the rapid height map
@@ -129,7 +121,7 @@ public class TerrainMapManager
 
       // Publish the height map to anyone who is subscribing
       Mat hostGlobalHeightMap = new Mat();
-      // Don't close this mat as its being used in the extractor till that finish's
+      // Don't destroy this mat as its being used in the extractor till that finish's
       GpuMat deviceGlobalHeightMap = rapidHeightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
@@ -198,6 +190,8 @@ public class TerrainMapManager
                                      heightMapCenterOrigin,
                                      computeFootHeight());
 
+      terrainMapExtractor.update(getLatestHeightMapData());
+
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
       double currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
@@ -249,6 +243,7 @@ public class TerrainMapManager
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
       rapidHeightMapExtractor.destroy();
+      terrainMapExtractor.destroy();
       chunkedMapManager.destroy();
    }
 }

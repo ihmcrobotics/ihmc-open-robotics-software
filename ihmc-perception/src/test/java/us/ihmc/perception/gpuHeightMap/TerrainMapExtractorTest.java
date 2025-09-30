@@ -1,21 +1,20 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.steppableRegions.SnapResult;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,7 +47,7 @@ public class TerrainMapExtractorTest
       HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F);
 
       terrainMapExtractor.update(heightMapData);
-      terrainMapExtractor.close();
+      terrainMapExtractor.destroy();
    }
 
    @Test
@@ -96,11 +95,11 @@ public class TerrainMapExtractorTest
          for (int j = 0; j < heightMapData.getCellsPerAxis(); j++)
          {
             assertTrue(traversabilityScoreMap[i * cellsPerAxis + j] > 0.99f);
-            assertEquals(traversabilityClassMap[i * cellsPerAxis + j], SnapResult.VALID.ordinal());
+            Assertions.assertEquals(traversabilityClassMap[i * cellsPerAxis + j], SnapResult.VALID.ordinal());
          }
       }
 
-      terrainMapExtractor.close();
+      terrainMapExtractor.destroy();
    }
 
    // WIP -- test normal given flat, inclined plane as input
@@ -145,6 +144,6 @@ public class TerrainMapExtractorTest
       LogTools.info("normal: " + terrainMapData.getNormal(0.3, 0.0));
       System.out.println(terrainMapData.getTraversabilityClass(0.3, 0.0));
 
-      terrainMapExtractor.close();
+      terrainMapExtractor.destroy();
    }
 }

@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.steppableRegions;
+package us.ihmc.perception.gpuHeightMap;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -6,8 +6,6 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.TerrainMapMessage;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

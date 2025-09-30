@@ -1,10 +1,8 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.perception.gpuHeightMap;
 
 import perception_msgs.msg.dds.TerrainMapMessage;
-import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.perception.heightMap.HeightMapData;
@@ -20,7 +18,7 @@ public class TerrainMapManagerNormals
    public TerrainMapManagerNormals(ROS2Node ros2Node, HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters footstepPlannerParameters)
    {
       if (ros2Node != null)
-         snappingTerrainPublisher = ros2Node.createPublisher(ContinuousHikingAPI.TERRAIN_MAP);
+         snappingTerrainPublisher = ros2Node.createPublisher(PerceptionAPI.TERRAIN_MAP);
 
       terrainMapMessage = new TerrainMapMessage();
       terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, footstepPlannerParameters);
@@ -48,6 +46,6 @@ public class TerrainMapManagerNormals
 
    public void close()
    {
-      terrainMapExtractor.close();
+      terrainMapExtractor.destroy();
    }
 }

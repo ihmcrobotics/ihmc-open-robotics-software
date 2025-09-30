@@ -5,10 +5,10 @@ import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
+import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 

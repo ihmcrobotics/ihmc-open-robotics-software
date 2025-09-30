@@ -352,7 +352,7 @@ public class RapidHeightMapExtractor
 //
 //         planOffsetKernel.run(stream, planOffsetKernelGridDim, blockSize, 0);
 //
-//         planOffsetKernelGridDim.close();
+//         planOffsetKernelGridDim.destroy();
 //         checkCUDAError();
 //      }
 

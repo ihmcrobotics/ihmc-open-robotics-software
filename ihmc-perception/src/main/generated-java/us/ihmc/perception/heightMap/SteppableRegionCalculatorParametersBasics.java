@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.steppableRegions;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.tools.property.StoredPropertySetBasics;
 

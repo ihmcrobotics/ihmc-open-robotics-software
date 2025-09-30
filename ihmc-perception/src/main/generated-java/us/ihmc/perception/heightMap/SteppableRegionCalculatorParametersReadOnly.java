@@ -1,8 +1,8 @@
-package us.ihmc.footstepPlanning.steppableRegions;
+package us.ihmc.perception.heightMap;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters.*;
+import static us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
