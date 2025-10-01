@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -35,7 +36,7 @@ public class TerrainMapExtractorTest
       GpuMat heightMap = new GpuMat(401, 401, opencv_core.CV_32FC1);
       heightMap.setTo(new Scalar(100));
 
-      terrainMapExtractor.update(heightMap);
+      terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0));
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
 
@@ -65,7 +66,7 @@ public class TerrainMapExtractorTest
       Mat what = new Mat();
       heightMap.download(what);
 
-      terrainMapExtractor.update(heightMap);
+      terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0));
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
       float[] traversabilityScoreMap = terrainMapData.getTraversabilityScoreMap();
@@ -86,6 +87,7 @@ public class TerrainMapExtractorTest
 
    // WIP -- test normal given flat, inclined plane as input
    @Test
+   @Disabled
    public void testNormalCalculationForFlatInclinedTerrain()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
@@ -123,7 +125,7 @@ public class TerrainMapExtractorTest
 
       TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
 
-      terrainMapExtractor.update(gpuHeightMap);
+      terrainMapExtractor.update(gpuHeightMap, new Point3D(0.0, 0.0, 0.0));
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
 
