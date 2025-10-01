@@ -10,6 +10,7 @@ import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -107,14 +108,9 @@ public class TerrainMapExtractor
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
-   public void update(Mat heightMap)
+   public void update(GpuMat gpuHeightMap)
    {
       int error;
-
-//      Mat heightMap = new Mat(heightMapData.getCellsPerAxis(), heightMapData.getCellsPerAxis(), opencv_core.CV_32FC1);
-//      HeightMapTools.convertHeightMapDataToMat(heightMap, heightMapData);
-      GpuMat gpuHeightMap = new GpuMat();
-      gpuHeightMap.upload(heightMap);
 
       // Populate parameters buffer for the snapping kernel
       float[] snappingParametersArray = populateSnappingParametersArray();
@@ -167,7 +163,7 @@ public class TerrainMapExtractor
          Mat cpuTraversabilityClassMap = new Mat();
          traversabilityClassMat.download(cpuTraversabilityClassMap);
 
-         TerrainMapTools.convertToTerrainMapData(heightMap,
+         TerrainMapTools.convertToTerrainMapData(cpuHeightMap,
                                                  cpuSnapNormalXMap,
                                                  cpuSnapNormalYMap,
                                                  cpuSnapNormalZMap,
@@ -185,21 +181,6 @@ public class TerrainMapExtractor
    }
 
    /**
-    * If we are debugging the kernels with {@link TerrainMapExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
-    * The reason we synchronize because we are checking for errors, so this would help identify where the error is happening
-    */
-   private void checkCUDAError()
-   {
-      int error;
-      if (PRINT_TIMING_FOR_KERNELS)
-      {
-         // Check for errors after the async calls
-         error = cudaStreamSynchronize(stream);
-         CUDATools.checkCUDAError(error);
-      }
-   }
-
-   /**
     * Populate the parameter's array for the snapping kernels.
     *
     * @return a float array with the parameters for the snapping kernels. The order matters as it needs to match the order things are defined by in the kernel
@@ -211,6 +192,7 @@ public class TerrainMapExtractor
                           (float) steppableRegionParameters.getNormalSearchRadius(),
                           (float) steppableRegionParameters.getCliffSearchRadius(),
                           (float) steppableRegionParameters.getCliffHeightThreshold(),
+                          (float) steppableRegionParameters.getCliffHeightTolerance(),
                           (float) steppableRegionParameters.getMinSupportAreaFraction(),
                           (float) steppableRegionParameters.getMinSnapHeightThreshold(),
                           (float) steppableRegionParameters.getSnapHeightThresholdAtSearchEdge(),
@@ -239,6 +221,21 @@ public class TerrainMapExtractor
 
       // At the end we have to destroy the stream to release the memory
       CUDAStreamManager.releaseStream(stream);
+   }
+
+   /**
+    * If we are debugging the kernels with {@link TerrainMapExtractor#PRINT_TIMING_FOR_KERNELS} then we want to synchronize the GPU
+    * The reason we synchronize because we are checking for errors, so this would help identify where the error is happening
+    */
+   private void checkCUDAError()
+   {
+      int error;
+      if (PRINT_TIMING_FOR_KERNELS)
+      {
+         // Check for errors after the async calls
+         error = cudaStreamSynchronize(stream);
+         CUDATools.checkCUDAError(error);
+      }
    }
 
    public TerrainMapData getTerrainMapData()

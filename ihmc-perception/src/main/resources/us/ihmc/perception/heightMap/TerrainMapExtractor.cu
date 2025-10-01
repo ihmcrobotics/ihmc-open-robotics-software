@@ -33,7 +33,7 @@ extern "C"
 */
 extern "C"
 __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
-                                   unsigned short *traversabilityMap, size_t pitchTraversability,
+                                   float *traversabilityMap, size_t pitchTraversability,
                                    unsigned short *traversabilityClassMap, size_t pitchTraversabilityClass,
                                    unsigned short *snapNormalXMap, size_t pitchSnapNormalX,
                                    unsigned short *snapNormalYMap, size_t pitchSnapNormalY,

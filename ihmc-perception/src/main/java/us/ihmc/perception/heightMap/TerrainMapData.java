@@ -34,6 +34,8 @@ public class TerrainMapData
       this.centerIndex = HeightMapTools.computeCenterIndex(mapSize, cellSize);
       this.cellsPerAxis = 2 * centerIndex + 1;
 
+      heightMap = new float[cellsPerAxis * cellsPerAxis];
+
       traversabilityScoreMap = new float[cellsPerAxis * cellsPerAxis];
       traversabilityClassMap = new byte[cellsPerAxis * cellsPerAxis];
 
@@ -62,16 +64,6 @@ public class TerrainMapData
       this.snapNormalXMap = Arrays.copyOf(other.snapNormalXMap, size);
       this.snapNormalYMap = Arrays.copyOf(other.snapNormalYMap, size);
       this.snapNormalZMap = Arrays.copyOf(other.snapNormalZMap, size);
-   }
-
-   public HeightMapData getHeightMapData()
-   {
-      return heightMapData;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
    }
 
    public double getHeightInWorld(double x, double y)
@@ -151,6 +143,11 @@ public class TerrainMapData
    public byte[] getSnapNormalZMap()
    {
       return snapNormalZMap;
+   }
+
+   public void setHeightMap(float[] heightMap)
+   {
+      this.heightMap = heightMap;
    }
 
    public void setTraversabilityScoreMap(float[] traversabilityScoreMap)

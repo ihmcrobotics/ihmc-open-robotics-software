@@ -5,13 +5,11 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.SnapResult;
@@ -23,81 +21,62 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TerrainMapExtractorTest
 {
-   public static final boolean DEBUG = false;
-
    /**
     * This test only proves that the kernel doesn't have a compilation issue.
     * Future tests should expand on this to test the methods themselves
     */
    @Test
-   @Disabled
    public void testSnappingTerrainKernelRuns()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
       TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionCalculatorParameters);
 
-      GpuMat fakeHeightMap = new GpuMat(401, 401, opencv_core.CV_16UC1);
-      fakeHeightMap.setTo(new Scalar(100));
-      Mat heightMap = new Mat(401, 401, opencv_core.CV_8UC1);
-      fakeHeightMap.download(heightMap);
+      GpuMat heightMap = new GpuMat(401, 401, opencv_core.CV_32FC1);
+      heightMap.setTo(new Scalar(100));
 
-      Point3D heightMapCenter = new Point3D();
-      heightMapCenter.set(new Point3D(0.0, 0.0, 0.0));
+      terrainMapExtractor.update(heightMap);
 
-      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(), (float) heightMapParameters.getTerrainWidthInMeters(), 0, 0);
+      TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
 
-      HeightMapTools.convertToHeightMapData(heightMap, heightMapData, new Point3D(0.0, 0.0, 0.0), (float) 4.0, 0.02F);
+      assertNotNull(terrainMapData);
 
-      terrainMapExtractor.update(heightMapData);
       terrainMapExtractor.destroy();
    }
 
    @Test
-   @Disabled
    public void testFullTraversabilityOnFlatTerrain()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SteppableRegionCalculatorParameters  steppableRegionParameters = new SteppableRegionCalculatorParameters();
-      double gridResolution = heightMapParameters.getCellSize();
-      double terrainWidthXY = heightMapParameters.getTerrainWidthInMeters();
-
-      Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
+      double gridResolution = 0.02;
+      double terrainWidthXY = 1.0;
       heightMapParameters.setCellSize(gridResolution);
       heightMapParameters.setTerrainWidthInMeters(terrainWidthXY);
+
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
+      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
       TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
 
       double randomHeight = 2.0;
-      GpuMat fakeHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(randomHeight));
+      GpuMat heightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1, new Scalar(randomHeight));
 
-      Mat inputDataFloats = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
-      fakeHeightMap.download(inputDataFloats);
+      Mat what = new Mat();
+      heightMap.download(what);
 
-      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
-                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                      gridCenter.getX(),
-                                                      gridCenter.getY());
-
-      HeightMapTools.convertToHeightMapData(inputDataFloats,
-                                            heightMapData,
-                                            gridCenter,
-                                            (float) heightMapParameters.getTerrainWidthInMeters(),
-                                            (float) heightMapParameters.getCellSize());
-
-      terrainMapExtractor.update(heightMapData);
+      terrainMapExtractor.update(heightMap);
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
       float[] traversabilityScoreMap = terrainMapData.getTraversabilityScoreMap();
+
       byte[] traversabilityClassMap = terrainMapData.getTraversabilityClassMap();
 
-      for (int i = 0; i < heightMapData.getCellsPerAxis(); i++)
+      for (int i = 0; i < heightMap.rows(); i++)
       {
-         for (int j = 0; j < heightMapData.getCellsPerAxis(); j++)
+         for (int j = 0; j < heightMap.cols(); j++)
          {
-            assertTrue(traversabilityScoreMap[i * cellsPerAxis + j] > 0.99f);
+            assertEquals(1.0f, traversabilityScoreMap[i * cellsPerAxis + j], "The values was: (" + traversabilityScoreMap[i * cellsPerAxis + j] + ")");
             Assertions.assertEquals(traversabilityClassMap[i * cellsPerAxis + j], SnapResult.VALID.ordinal());
          }
       }
@@ -107,11 +86,10 @@ public class TerrainMapExtractorTest
 
    // WIP -- test normal given flat, inclined plane as input
    @Test
-   @Disabled
    public void testNormalCalculationForFlatInclinedTerrain()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SteppableRegionCalculatorParameters  steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
       double gridResolution = heightMapParameters.getCellSize();
       double terrainWidthXY = heightMapParameters.getTerrainWidthInMeters();
 
@@ -125,27 +103,46 @@ public class TerrainMapExtractorTest
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
+      Mat heightMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
 
-      HeightMapData heightMapData = new HeightMapData((float) heightMapParameters.getCellSize(),
-                                                      (float) heightMapParameters.getTerrainWidthInMeters(),
-                                                      gridCenter.getX(),
-                                                      gridCenter.getY());
-
-      for (int key = 0; key < cellsPerAxis * cellsPerAxis; key++)
+      for (int row = 0; row < cellsPerAxis; row++)
       {
-         double x = HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), heightMapParameters.getCellSize(), centerIndex);
-         double y = HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), heightMapParameters.getCellSize(), centerIndex);
-         double z = plane.getZOnPlane(x, y);
-         heightMapData.setHeight(x, y, z);
+         for (int col = 0; col < cellsPerAxis; col++)
+         {
+            int key = row * cellsPerAxis + col;
+            double x = HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), gridResolution, centerIndex);
+            double y = HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), gridResolution, centerIndex);
+
+            double z = plane.getZOnPlane(x, y);
+
+            heightMat.ptr(row, col).putFloat((float) z);
+         }
       }
 
-      terrainMapExtractor.update(heightMapData);
+      GpuMat gpuHeightMap = new GpuMat(heightMat);
+
+      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
+
+      terrainMapExtractor.update(gpuHeightMap);
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
 
+      byte[] snapNormalXMap = terrainMapData.getSnapNormalXMap();
+      byte[] snapNormalYMap = terrainMapData.getSnapNormalYMap();
+      byte[] snapNormalZMap = terrainMapData.getSnapNormalZMap();
+
       LogTools.info("normal: " + terrainMapData.getNormal(0.3, 0.0));
       System.out.println(terrainMapData.getTraversabilityClass(0.3, 0.0));
+
+      for (int i = 0; i < cellsPerAxis; i++)
+      {
+         for (int j = 0; j < cellsPerAxis; j++)
+         {
+            assertEquals(114, snapNormalXMap[i * cellsPerAxis + j], "Normal x value is: (" + snapNormalXMap[i * cellsPerAxis + j] + ")");
+            assertEquals(-113, snapNormalYMap[i * cellsPerAxis + j], "Normal y value is: (" + snapNormalYMap[i * cellsPerAxis + j] + ")");
+            assertEquals(-5, snapNormalZMap[i * cellsPerAxis + j], "Normal z value is: (" + snapNormalZMap[i * cellsPerAxis + j] + ")");
+         }
+      }
 
       terrainMapExtractor.destroy();
    }

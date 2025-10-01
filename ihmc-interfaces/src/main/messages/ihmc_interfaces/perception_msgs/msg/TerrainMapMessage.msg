@@ -3,9 +3,6 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
-# Unique ID used to identify this message, should preferably be consecutively increasing.
-uint64 sequence_id
-
 # X coordinate of the center of the height map
 float64 grid_center_x 0.0
 

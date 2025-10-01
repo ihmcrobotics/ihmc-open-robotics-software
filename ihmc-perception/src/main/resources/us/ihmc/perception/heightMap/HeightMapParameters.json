@@ -4,21 +4,6 @@
   "Flying points filter": false,
   "Enable chunked map": false,
   "Log height map": false,
-  "Search window height": {
-    "value": 450,
-    "lowerBound": 100,
-    "upperBound": 800
-  },
-  "Search window width": {
-    "value": 300,
-    "lowerBound": 100,
-    "upperBound": 800
-  },
-  "Search skip size": {
-    "value": 4,
-    "lowerBound": 1,
-    "upperBound": 16
-  },
   "Min height registration": {
     "value": -1.5,
     "lowerBound": -10.0,
@@ -28,16 +13,6 @@
     "value": 5.0,
     "lowerBound": -1.0,
     "upperBound": 10.0
-  },
-  "Min height difference": {
-    "value": -0.05,
-    "lowerBound": -0.15,
-    "upperBound": 0.05
-  },
-  "Max height difference": {
-    "value": 1.0,
-    "lowerBound": 0.01,
-    "upperBound": 0.4
   },
   "Kalman filter prediction noise": {
     "value": 0.001,

@@ -1,6 +1,5 @@
 package us.ihmc.perception.heightMap;
 
-import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.idl.IDLSequence.Byte;
 import us.ihmc.idl.IDLSequence.Float;
@@ -9,7 +8,8 @@ public class TerrainMapMessageTools
 {
    public static void toMessage(TerrainMapData terrainMapData, TerrainMapMessage message)
    {
-      HeightMapMessageTools.toMessage(terrainMapData.getHeightMapData(), message.getHeightMap());
+      message.getHeightMap().resetQuick();
+      message.getHeightMap().add(terrainMapData.getHeightMap());
 
       message.getTraversabilityScore().resetQuick();
       message.getTraversabilityScore().add(terrainMapData.getTraversabilityScoreMap());
@@ -26,9 +26,14 @@ public class TerrainMapMessageTools
 
    public static TerrainMapData unpackMessage(TerrainMapMessage message)
    {
-      HeightMapMessage heightMapMessage = message.getHeightMap();
-      TerrainMapData terrainMapData = new TerrainMapData(heightMapMessage.getCellSizeInMeters(), heightMapMessage.getWidthInMeters(), heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
-      terrainMapData.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage));
+      TerrainMapData terrainMapData = new TerrainMapData(message.getCellSizeInMeters(),
+                                                         message.getWidthInMeters(),
+                                                         message.getGridCenterX(),
+                                                         message.getGridCenterY());
+
+      Float heightMap = message.getHeightMap();
+      float[] heightMapArray = heightMap.toArray();
+      terrainMapData.setHeightMap(heightMapArray);
 
       Float traversabilityScoreMap = message.getTraversabilityScore();
       float[] traversabilityScoreArray = traversabilityScoreMap.toArray();

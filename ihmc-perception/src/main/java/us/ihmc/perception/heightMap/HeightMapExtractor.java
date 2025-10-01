@@ -32,7 +32,6 @@ public class HeightMapExtractor
     * This was chosen based on GPU profiling and significantly effects performance.
     */
    private static final int BLOCK_SIZE_XY = 8;
-   private static final int MODE = 1; // 0 -> Ouster, 1 -> Realsense
 
    private final HeightMapParameters heightMapParameters;
    private final CUstream_st stream;
@@ -405,7 +404,6 @@ public class HeightMapExtractor
                           (float) centerIndexLocal,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
-                          (float) MODE,
                           (float) cameraIntrinsics.getCx(),
                           (float) cameraIntrinsics.getCy(),
                           (float) cameraIntrinsics.getFx(),
@@ -416,10 +414,6 @@ public class HeightMapExtractor
                           (float) cellsPerAxisGlobal,
                           (float) parameters.getMinHeightRegistration(),
                           (float) parameters.getMaxHeightRegistration(),
-                          (float) parameters.getMinHeightDifference(),
-                          (float) parameters.getMaxHeightDifference(),
-                          (float) parameters.getSearchWindowHeight(),
-                          (float) parameters.getSearchWindowWidth(),
                           (float) parameters.getMinClampHeight(),
                           (float) parameters.getMaxClampHeight(),
                           (float) parameters.getKalmanFilterPredictionNoise(),
@@ -427,7 +421,6 @@ public class HeightMapExtractor
                           (float) parameters.getVariancePerMeter(),
                           (float) parameters.getVariancePerTranslationSpeed(),
                           (float) parameters.getVariancePerRotationSpeed(),
-                          (float) parameters.getSearchSkipSize(),
                           (float) groundHeightGuess};
    }
 

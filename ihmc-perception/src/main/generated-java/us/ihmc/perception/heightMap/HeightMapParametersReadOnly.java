@@ -30,21 +30,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
       return get(logHeightMap);
    }
 
-   default int getSearchWindowHeight()
-   {
-      return get(searchWindowHeight);
-   }
-
-   default int getSearchWindowWidth()
-   {
-      return get(searchWindowWidth);
-   }
-
-   default int getSearchSkipSize()
-   {
-      return get(searchSkipSize);
-   }
-
    default double getMinHeightRegistration()
    {
       return get(minHeightRegistration);
@@ -53,16 +38,6 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    default double getMaxHeightRegistration()
    {
       return get(maxHeightRegistration);
-   }
-
-   default double getMinHeightDifference()
-   {
-      return get(minHeightDifference);
-   }
-
-   default double getMaxHeightDifference()
-   {
-      return get(maxHeightDifference);
    }
 
    default double getKalmanFilterPredictionNoise()

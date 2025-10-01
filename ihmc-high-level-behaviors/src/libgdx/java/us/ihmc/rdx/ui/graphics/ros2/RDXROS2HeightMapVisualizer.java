@@ -165,7 +165,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private void processTerrainMapData(TerrainMapMessage terrainMapMessage)
    {
       latestTerrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
-      processHeightMapData(latestTerrainMapData.getHeightMapData());
 
       if (traversabilityScore == null)
       {

@@ -6,7 +6,6 @@ extern "C"
 #define LOCAL_CENTER_INDEX 1
 #define DEPTH_INPUT_HEIGHT 2
 #define DEPTH_INPUT_WIDTH 3
-#define MODE 4
 #define DEPTH_CX 5
 #define DEPTH_CY 6
 #define DEPTH_FX 7
@@ -17,10 +16,6 @@ extern "C"
 #define GLOBAL_CELLS_PER_AXIS 12
 #define MIN_HEIGHT_REGISTRATION 13
 #define MAX_HEIGHT_REGISTRATION 14
-#define MIN_HEIGHT_DIFFERENCE 15
-#define MAX_HEIGHT_DIFFERENCE 16
-#define SEARCH_WINDOW_HEIGHT 17
-#define SEARCH_WINDOW_WIDTH 18
 #define MIN_CLAMP_HEIGHT 19
 #define MAX_CLAMP_HEIGHT 20
 #define KALMAN_FILTER_PREDICTION_NOISE 21
@@ -28,7 +23,6 @@ extern "C"
 #define VARIANCE_PER_METER 23
 #define VARIANCE_PER_TRANSLATION_SPEED 24
 #define VARIANCE_PER_ROTATION_SPEED 25
-#define SEARCH_SKIP_SIZE 26
 #define GROUND_HEIGHT 27
 
 __device__ float3 back_project_perspective(int2 pos, float Z, const float *params)

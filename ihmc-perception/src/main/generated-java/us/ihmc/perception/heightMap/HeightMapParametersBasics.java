@@ -28,21 +28,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.logHeightMap, logHeightMap);
    }
 
-   default void setSearchWindowHeight(int searchWindowHeight)
-   {
-      set(HeightMapParameters.searchWindowHeight, searchWindowHeight);
-   }
-
-   default void setSearchWindowWidth(int searchWindowWidth)
-   {
-      set(HeightMapParameters.searchWindowWidth, searchWindowWidth);
-   }
-
-   default void setSearchSkipSize(int searchSkipSize)
-   {
-      set(HeightMapParameters.searchSkipSize, searchSkipSize);
-   }
-
    default void setMinHeightRegistration(double minHeightRegistration)
    {
       set(HeightMapParameters.minHeightRegistration, minHeightRegistration);
@@ -51,16 +36,6 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    default void setMaxHeightRegistration(double maxHeightRegistration)
    {
       set(HeightMapParameters.maxHeightRegistration, maxHeightRegistration);
-   }
-
-   default void setMinHeightDifference(double minHeightDifference)
-   {
-      set(HeightMapParameters.minHeightDifference, minHeightDifference);
-   }
-
-   default void setMaxHeightDifference(double maxHeightDifference)
-   {
-      set(HeightMapParameters.maxHeightDifference, maxHeightDifference);
    }
 
    default void setKalmanFilterPredictionNoise(double kalmanFilterPredictionNoise)

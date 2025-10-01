@@ -184,7 +184,7 @@ public class GpuMappingManager
                                 heightMapCenterOrigin,
                                 computeFootHeight());
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMapData());
+      terrainMapExtractor.update(heightMapExtractor.getHeightMap());
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center

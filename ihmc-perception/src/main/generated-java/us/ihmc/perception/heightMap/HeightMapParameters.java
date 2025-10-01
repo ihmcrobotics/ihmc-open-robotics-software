@@ -22,13 +22,8 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
    public static final BooleanStoredPropertyKey flyingPointsFilter = keys.addBooleanKey("Flying points filter");
    public static final BooleanStoredPropertyKey enableChunkedMap = keys.addBooleanKey("Enable chunked map");
    public static final BooleanStoredPropertyKey logHeightMap = keys.addBooleanKey("Log height map");
-   public static final IntegerStoredPropertyKey searchWindowHeight = keys.addIntegerKey("Search window height");
-   public static final IntegerStoredPropertyKey searchWindowWidth = keys.addIntegerKey("Search window width");
-   public static final IntegerStoredPropertyKey searchSkipSize = keys.addIntegerKey("Search skip size");
    public static final DoubleStoredPropertyKey minHeightRegistration = keys.addDoubleKey("Min height registration");
    public static final DoubleStoredPropertyKey maxHeightRegistration = keys.addDoubleKey("Max height registration");
-   public static final DoubleStoredPropertyKey minHeightDifference = keys.addDoubleKey("Min height difference");
-   public static final DoubleStoredPropertyKey maxHeightDifference = keys.addDoubleKey("Max height difference");
    public static final DoubleStoredPropertyKey kalmanFilterPredictionNoise = keys.addDoubleKey("Kalman filter prediction noise");
    public static final DoubleStoredPropertyKey additionalTranslationalVarianceAdded = keys.addDoubleKey("Additional translational variance added");
    public static final DoubleStoredPropertyKey variancePerMeter = keys.addDoubleKey("Variance per meter");
