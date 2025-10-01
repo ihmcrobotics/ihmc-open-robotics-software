@@ -20,6 +20,7 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.GpuMappingManager;
 import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.heightMap.TerrainMapParameters;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -48,6 +49,7 @@ public class GpuMappingThread extends RepeatingTaskThread
                            BlockingQueue<RawImage> rawImageCollection,
                            ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                            HeightMapParameters heightMapParameters,
+                           TerrainMapParameters terrainMapParameters,
                            DepthImageFilteringParameters depthImageFilteringParameters)
    {
       super(GpuMappingThread.class.getSimpleName());
@@ -71,7 +73,8 @@ public class GpuMappingThread extends RepeatingTaskThread
                                                 rightFootFrame,
                                                 heightMapCenterFrame,
                                                 controllerFootstepQueueMonitor,
-                                                heightMapParameters);
+                                                heightMapParameters,
+                                                terrainMapParameters);
    }
 
    @Override
@@ -151,7 +154,7 @@ public class GpuMappingThread extends RepeatingTaskThread
    {
       synchronized (terrainMapLock)
       {
-          return gpuMappingManager.getLatestTerrainMapData();
+         return gpuMappingManager.getLatestTerrainMapData();
       }
    }
 

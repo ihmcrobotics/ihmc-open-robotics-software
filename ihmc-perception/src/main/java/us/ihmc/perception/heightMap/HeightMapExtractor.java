@@ -139,7 +139,7 @@ public class HeightMapExtractor
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(28);
+         parametersHostPointer = new FloatPointer(21);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)

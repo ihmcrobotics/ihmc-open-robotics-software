@@ -2,13 +2,13 @@ package us.ihmc.perception.heightMap;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters.*;
+import static us.ihmc.perception.heightMap.TerrainMapParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
  */
-public interface SteppableRegionCalculatorParametersReadOnly extends StoredPropertySetReadOnly
+public interface TerrainMapParametersReadOnly extends StoredPropertySetReadOnly
 {
    default double getNormalSearchRadius()
    {

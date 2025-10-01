@@ -10,8 +10,8 @@ public class TerrainMapData
 {
    private final double cellSize;
    private final double mapSize;
-   private final double gridCenterX;
-   private final double gridCenterY;
+   private double gridCenterX;
+   private double gridCenterY;
    private final int centerIndex;
    private final int cellsPerAxis;
 
@@ -180,9 +180,24 @@ public class TerrainMapData
       return (float) (byteArray[index] & 0xFF) * (maxValue - minValue) / 255 + minValue;
    }
 
+   public void setGridCenterX(double gridCenterX)
+   {
+      this.gridCenterX = gridCenterX;
+   }
+
+   public void setGridCenterY(double gridCenterY)
+   {
+      this.gridCenterY = gridCenterY;
+   }
+
    public int getCellsPerAxis()
    {
       return cellsPerAxis;
+   }
+
+   public double getMapSize()
+   {
+      return mapSize;
    }
 
    public double getGridCenterX()

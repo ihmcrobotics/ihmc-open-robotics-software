@@ -3,6 +3,7 @@ package us.ihmc.perception.heightMap;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class TerrainMapTools
 {
@@ -20,8 +21,12 @@ public class TerrainMapTools
                                               Mat snapNormalZMap,
                                               Mat traversabilityMap,
                                               Mat traversabilityClassMap,
+                                              Point3DReadOnly gridCenter,
                                               TerrainMapData terrainMapData)
    {
+      terrainMapData.setGridCenterX(gridCenter.getX());
+      terrainMapData.setGridCenterY(gridCenter.getY());
+
       // How this looks like is we create a pointer for the Mat object.
       // Doing Pointer.get() takes in a parameter that will be packed with the data that is from the pointer.
       // So it looks like Pointer.get(dataToPack) where dataToPack = TerrainMapData.getMap()

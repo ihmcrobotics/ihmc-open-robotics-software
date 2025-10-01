@@ -5,6 +5,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapTools;
 
@@ -37,6 +38,7 @@ public class TerrainMapToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 
       int totalCells = cellsPerAxis * cellsPerAxis;
@@ -87,6 +89,7 @@ public class TerrainMapToolsTest
                                                  snapNormalZMap,
                                                  traversabilityMap,
                                                  traversabilityClassMap,
+                                                 new Point3D(0.0, 0.0, 0.0),
                                                  terrainMapData);
       }
 

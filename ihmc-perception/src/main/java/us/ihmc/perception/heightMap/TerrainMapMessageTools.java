@@ -8,6 +8,11 @@ public class TerrainMapMessageTools
 {
    public static void toMessage(TerrainMapData terrainMapData, TerrainMapMessage message)
    {
+      message.setCellsPerAxis(terrainMapData.getCellsPerAxis());
+      message.setCellSizeInMeters(terrainMapData.getMapSize());
+      message.setGridCenterX(terrainMapData.getGridCenterX());
+      message.setGridCenterY(terrainMapData.getGridCenterY());
+
       message.getHeightMap().resetQuick();
       message.getHeightMap().add(terrainMapData.getHeightMap());
 

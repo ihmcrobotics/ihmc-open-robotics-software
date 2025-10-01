@@ -56,7 +56,8 @@ public class GpuMappingManager
                             ReferenceFrame rightFootSoleFrame,
                             ReferenceFrame heightMapCenter,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                            HeightMapParameters heightMapParameters)
+                            HeightMapParameters heightMapParameters,
+                            TerrainMapParameters terrainMapParameters)
    {
       this.heightMapCenter = heightMapCenter;
       this.heightMapParameters = heightMapParameters;
@@ -66,7 +67,7 @@ public class GpuMappingManager
 
       rapidHeightMapDriftOffset = new RapidHeightMapDriftOffset(controllerFootstepQueueMonitor);
       heightMapExtractor = new HeightMapExtractor(heightMapParameters);
-      terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, new SteppableRegionCalculatorParameters());
+      terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, terrainMapParameters);
       chunkedMapManager = new ChunkedMapManager(ros2Node, heightMapParameters);
 
       // Again we do this to optimize the speed of the rapid height map
@@ -184,7 +185,7 @@ public class GpuMappingManager
                                 heightMapCenterOrigin,
                                 computeFootHeight());
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMap());
+      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center

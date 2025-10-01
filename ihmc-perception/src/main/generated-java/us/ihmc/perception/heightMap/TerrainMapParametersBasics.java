@@ -6,50 +6,50 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
  */
-public interface SteppableRegionCalculatorParametersBasics extends SteppableRegionCalculatorParametersReadOnly, StoredPropertySetBasics
+public interface TerrainMapParametersBasics extends TerrainMapParametersReadOnly, StoredPropertySetBasics
 {
    default void setNormalSearchRadius(double normalSearchRadius)
    {
-      set(SteppableRegionCalculatorParameters.normalSearchRadius, normalSearchRadius);
+      set(TerrainMapParameters.normalSearchRadius, normalSearchRadius);
    }
 
    default void setCliffSearchRadius(double cliffSearchRadius)
    {
-      set(SteppableRegionCalculatorParameters.cliffSearchRadius, cliffSearchRadius);
+      set(TerrainMapParameters.cliffSearchRadius, cliffSearchRadius);
    }
 
    default void setCliffHeightThreshold(double cliffHeightThreshold)
    {
-      set(SteppableRegionCalculatorParameters.cliffHeightThreshold, cliffHeightThreshold);
+      set(TerrainMapParameters.cliffHeightThreshold, cliffHeightThreshold);
    }
 
    default void setCliffHeightTolerance(double cliffHeightTolerance)
    {
-      set(SteppableRegionCalculatorParameters.cliffHeightTolerance, cliffHeightTolerance);
+      set(TerrainMapParameters.cliffHeightTolerance, cliffHeightTolerance);
    }
 
    default void setMinSupportAreaFraction(double minSupportAreaFraction)
    {
-      set(SteppableRegionCalculatorParameters.minSupportAreaFraction, minSupportAreaFraction);
+      set(TerrainMapParameters.minSupportAreaFraction, minSupportAreaFraction);
    }
 
    default void setMinSnapHeightThreshold(double minSnapHeightThreshold)
    {
-      set(SteppableRegionCalculatorParameters.minSnapHeightThreshold, minSnapHeightThreshold);
+      set(TerrainMapParameters.minSnapHeightThreshold, minSnapHeightThreshold);
    }
 
    default void setSnapHeightThresholdAtSearchEdge(double snapHeightThresholdAtSearchEdge)
    {
-      set(SteppableRegionCalculatorParameters.snapHeightThresholdAtSearchEdge, snapHeightThresholdAtSearchEdge);
+      set(TerrainMapParameters.snapHeightThresholdAtSearchEdge, snapHeightThresholdAtSearchEdge);
    }
 
    default void setSteppingCosineThreshold(double steppingCosineThreshold)
    {
-      set(SteppableRegionCalculatorParameters.steppingCosineThreshold, steppingCosineThreshold);
+      set(TerrainMapParameters.steppingCosineThreshold, steppingCosineThreshold);
    }
 
    default void setSquaredErrorThreshold(double squaredErrorThreshold)
    {
-      set(SteppableRegionCalculatorParameters.squaredErrorThreshold, squaredErrorThreshold);
+      set(TerrainMapParameters.squaredErrorThreshold, squaredErrorThreshold);
    }
 }

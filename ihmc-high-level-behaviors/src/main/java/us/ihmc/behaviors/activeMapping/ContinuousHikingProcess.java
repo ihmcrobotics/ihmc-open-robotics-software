@@ -69,6 +69,7 @@ public class ContinuousHikingProcess
                                                          rawImageCollection,
                                                          controllerFootstepQueueMonitor,
                                                          activeMappingParameterToolBox.getHeightMapParameters(),
+                                                         activeMappingParameterToolBox.getTerrainMapParameters(),
                                                          activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,

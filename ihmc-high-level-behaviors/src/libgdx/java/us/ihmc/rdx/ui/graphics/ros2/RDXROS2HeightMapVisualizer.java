@@ -95,14 +95,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (!colorBasedOnTraversability.get())
-      {
-         executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
-                                                 processHeightMapData(heightMapData);
-                                              });
-      }
+      executorService.clearQueueAndExecute(() ->
+                                           {
+                                              HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+                                              processHeightMapData(heightMapData);
+                                           });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
    }
@@ -236,7 +233,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             double heightMapCenterY = latestHeightMapData.getGridCenter().getY();
             double cellSize = latestHeightMapData.getCellSize();
             int centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapSize(), cellSize);
-            heightMapRenderer.update(heightMap, traversabilityScore, colorBasedOnTraversability.get(), (float) heightMapCenterX, (float) heightMapCenterY, centerIndex, (float) cellSize);
+            heightMapRenderer.update(heightMap,
+                                     traversabilityScore,
+                                     colorBasedOnTraversability.get(),
+                                     (float) heightMapCenterX,
+                                     (float) heightMapCenterY,
+                                     centerIndex,
+                                     (float) cellSize);
          }
       }
 

@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.TerrainMapMessage;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapMessageTools;
 import us.ihmc.perception.heightMap.TerrainMapTools;
@@ -39,6 +40,7 @@ public class TerrainMapMessageToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();
@@ -90,6 +92,7 @@ public class TerrainMapMessageToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 
       TerrainMapMessage message = new TerrainMapMessage();
@@ -135,6 +138,7 @@ public class TerrainMapMessageToolsTest
                                               snapNormalZMap,
                                               traversabilityMap,
                                               traversabilityClassMap,
+                                              new Point3D(0.0, 0.0, 0.0),
                                               terrainMapData);
 
 

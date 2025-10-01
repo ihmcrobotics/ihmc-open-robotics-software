@@ -6,11 +6,11 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
 import us.ihmc.perception.cuda.CUDATools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.net.URL;
 
@@ -28,26 +28,26 @@ public class TerrainMapExtractor
 
    private final TerrainMapData terrainMapData;
    private final HeightMapParameters heightMapParameters;
-   private final SteppableRegionCalculatorParameters steppableRegionParameters;
+   private final TerrainMapParameters terrainMapParameters;
 
    private final CUstream_st stream;
-   private final CUDAProgram snappingTerrainProgram;
-   private final CUDAKernel snappingTerrainKernel;
+   private final CUDAProgram terrainMapProgram;
+   private final CUDAKernel terrainMapKernel;
 
-   private dim3 snappingKernelGridDim;
+   private dim3 terrainKernelGridDim;
    private dim3 blockSize;
    private int cellsPerAxisTerrain;
 
-   private final FloatPointer snappingParametersHostPointer;
-   private final FloatPointer snappingParametersDevicePointer;
+   private final FloatPointer terrainMapParametersHostPointer;
+   private final FloatPointer terrainMapParametersDevicePointer;
 
    /**
     * The types of these mats depend on the data we are trying to store.
     * Check the {@link perception_msgs.msg.dds.TerrainMapMessage} to ensure these are the same
     */
-   private final GpuMat snapNormalXMat;
-   private final GpuMat snapNormalYMat;
-   private final GpuMat snapNormalZMat;
+   private final GpuMat normalXMat;
+   private final GpuMat normalYMat;
+   private final GpuMat normalZMat;
    private final GpuMat traversabilityMat;
    private final GpuMat traversabilityClassMat;
 
@@ -58,10 +58,10 @@ public class TerrainMapExtractor
     *
     * @param heightMapParameters parameters used to compute terrain data
     */
-   public TerrainMapExtractor(HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters steppableRegionCalculatorParameters)
+   public TerrainMapExtractor(HeightMapParameters heightMapParameters, TerrainMapParameters terrainMapParameters)
    {
       this.heightMapParameters = heightMapParameters;
-      this.steppableRegionParameters = steppableRegionCalculatorParameters;
+      this.terrainMapParameters = terrainMapParameters;
 
       stream = CUDAStreamManager.getStream();
 
@@ -73,9 +73,9 @@ public class TerrainMapExtractor
          URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
          URL kernelPath = getClass().getResource("TerrainMapExtractor.cu");
 
-         snappingTerrainProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
-         snappingTerrainKernel = snappingTerrainProgram.loadKernel("computeTerrainData");
-         snappingTerrainKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
+         terrainMapProgram = new CUDAProgram(kernelPath, heightMapUtilsHeaderPath, mathUtilsHeaderPath);
+         terrainMapKernel = terrainMapProgram.loadKernel("computeTerrainData");
+         terrainMapKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
       }
       catch (Exception e)
       {
@@ -83,17 +83,17 @@ public class TerrainMapExtractor
       }
 
       // This is the number of parameters being passed in as floats to the kernel
-      snappingParametersHostPointer = new FloatPointer(18);
-      snappingParametersDevicePointer = new FloatPointer();
+      terrainMapParametersHostPointer = new FloatPointer(18);
+      terrainMapParametersDevicePointer = new FloatPointer();
 
       computeDerivedParameters();
 
       terrainMapData = new TerrainMapData(heightMapParameters.getCellSize(), heightMapParameters.getTerrainWidthInMeters(), 0.0, 0.0);
 
       // Initialize matrices and images
-      snapNormalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
-      snapNormalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
-      snapNormalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      normalXMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      normalYMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
+      normalZMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
       traversabilityMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_32FC1);
       traversabilityClassMat = new GpuMat(cellsPerAxisTerrain, cellsPerAxisTerrain, opencv_core.CV_8UC1);
    }
@@ -108,35 +108,35 @@ public class TerrainMapExtractor
       cellsPerAxisTerrain = 2 * terrainCenterIndex + 1;
    }
 
-   public void update(GpuMat gpuHeightMap)
+   public void update(GpuMat gpuHeightMap, Point3DReadOnly gridCenter)
    {
       int error;
 
-      // Populate parameters buffer for the snapping kernel
-      float[] snappingParametersArray = populateSnappingParametersArray();
-      snappingParametersHostPointer.put(snappingParametersArray);
+      // Populate parameters buffer for the terrain map kernel
+      float[] terrainMapParametersArray = populationTerrainMapParameters();
+      terrainMapParametersHostPointer.put(terrainMapParametersArray);
 
       // Handle memory allocation and copy values to the GPU
-      CUDATools.mallocAsync(snappingParametersDevicePointer, snappingParametersArray.length, stream);
-      CUDATools.memcpyAsync(snappingParametersDevicePointer, snappingParametersHostPointer, snappingParametersArray.length, stream);
+      CUDATools.mallocAsync(terrainMapParametersDevicePointer, terrainMapParametersArray.length, stream);
+      CUDATools.memcpyAsync(terrainMapParametersDevicePointer, terrainMapParametersHostPointer, terrainMapParametersArray.length, stream);
       checkCUDAError();
 
       // Pass all the parameters to the kernel so that its setup to run correctly
-      snappingTerrainKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
-      snappingTerrainKernel.withPointer(traversabilityMat.data()).withLong(traversabilityMat.step());
-      snappingTerrainKernel.withPointer(traversabilityClassMat.data()).withLong(traversabilityClassMat.step());
-      snappingTerrainKernel.withPointer(snapNormalXMat.data()).withLong(snapNormalXMat.step());
-      snappingTerrainKernel.withPointer(snapNormalYMat.data()).withLong(snapNormalYMat.step());
-      snappingTerrainKernel.withPointer(snapNormalZMat.data()).withLong(snapNormalZMat.step());
-      snappingTerrainKernel.withPointer(snappingParametersDevicePointer).withInt(cellsPerAxisTerrain);
+      terrainMapKernel.withPointer(gpuHeightMap.data()).withLong(gpuHeightMap.step());
+      terrainMapKernel.withPointer(traversabilityMat.data()).withLong(traversabilityMat.step());
+      terrainMapKernel.withPointer(traversabilityClassMat.data()).withLong(traversabilityClassMat.step());
+      terrainMapKernel.withPointer(normalXMat.data()).withLong(normalXMat.step());
+      terrainMapKernel.withPointer(normalYMat.data()).withLong(normalYMat.step());
+      terrainMapKernel.withPointer(normalZMat.data()).withLong(normalZMat.step());
+      terrainMapKernel.withPointer(terrainMapParametersDevicePointer).withInt(cellsPerAxisTerrain);
 
       // Compute the correct number of threads to run with the kernel
-      int snappedKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
-      snappingKernelGridDim = new dim3(snappedKernelGridSizeXY, snappedKernelGridSizeXY, 1);
+      int terrainMapKernelGridSizeXY = (cellsPerAxisTerrain + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+      terrainKernelGridDim = new dim3(terrainMapKernelGridSizeXY, terrainMapKernelGridSizeXY, 1);
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       // Run the kernel and check for errors
-      snappingTerrainKernel.run(stream, snappingKernelGridDim, blockSize, 0);
+      terrainMapKernel.run(stream, terrainKernelGridDim, blockSize, 0);
       checkCUDAError();
 
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
@@ -148,14 +148,14 @@ public class TerrainMapExtractor
          Mat cpuHeightMap = new Mat();
          gpuHeightMap.download(cpuHeightMap);
 
-         Mat cpuSnapNormalXMap = new Mat();
-         snapNormalXMat.download(cpuSnapNormalXMap);
+         Mat cpuNormalXMap = new Mat();
+         normalXMat.download(cpuNormalXMap);
 
-         Mat cpuSnapNormalYMap = new Mat();
-         snapNormalYMat.download(cpuSnapNormalYMap);
+         Mat cpuNormalYMap = new Mat();
+         normalYMat.download(cpuNormalYMap);
 
-         Mat cpuSnapNormalZMap = new Mat();
-         snapNormalZMat.download(cpuSnapNormalZMap);
+         Mat cpuNormalZMap = new Mat();
+         normalZMat.download(cpuNormalZMap);
 
          Mat cpuTraversabilityMap = new Mat();
          traversabilityMat.download(cpuTraversabilityMap);
@@ -164,59 +164,60 @@ public class TerrainMapExtractor
          traversabilityClassMat.download(cpuTraversabilityClassMap);
 
          TerrainMapTools.convertToTerrainMapData(cpuHeightMap,
-                                                 cpuSnapNormalXMap,
-                                                 cpuSnapNormalYMap,
-                                                 cpuSnapNormalZMap,
+                                                 cpuNormalXMap,
+                                                 cpuNormalYMap,
+                                                 cpuNormalZMap,
                                                  cpuTraversabilityMap,
                                                  cpuTraversabilityClassMap,
+                                                 gridCenter,
                                                  terrainMapData);
 
          cpuHeightMap.close();
-         cpuSnapNormalXMap.close();
-         cpuSnapNormalYMap.close();
-         cpuSnapNormalZMap.close();
+         cpuNormalXMap.close();
+         cpuNormalYMap.close();
+         cpuNormalZMap.close();
          cpuTraversabilityMap.close();
          cpuTraversabilityClassMap.close();
       }
    }
 
    /**
-    * Populate the parameter's array for the snapping kernels.
+    * Populate the parameter's array for the terrain map kernels.
     *
-    * @return a float array with the parameters for the snapping kernels. The order matters as it needs to match the order things are defined by in the kernel
+    * @return a float array with the parameters for the terrain map kernels. The order matters as it needs to match the order things are defined by in the kernel
     */
-   public float[] populateSnappingParametersArray()
+   public float[] populationTerrainMapParameters()
    {
       return new float[] {(float) heightMapParameters.getCellSize(),
                           (float) heightMapParameters.getTerrainWidthInMeters(),
-                          (float) steppableRegionParameters.getNormalSearchRadius(),
-                          (float) steppableRegionParameters.getCliffSearchRadius(),
-                          (float) steppableRegionParameters.getCliffHeightThreshold(),
-                          (float) steppableRegionParameters.getCliffHeightTolerance(),
-                          (float) steppableRegionParameters.getMinSupportAreaFraction(),
-                          (float) steppableRegionParameters.getMinSnapHeightThreshold(),
-                          (float) steppableRegionParameters.getSnapHeightThresholdAtSearchEdge(),
-                          (float) steppableRegionParameters.getSteppingCosineThreshold(),
-                          (float) steppableRegionParameters.getSquaredErrorThreshold()};
+                          (float) terrainMapParameters.getNormalSearchRadius(),
+                          (float) terrainMapParameters.getCliffSearchRadius(),
+                          (float) terrainMapParameters.getCliffHeightThreshold(),
+                          (float) terrainMapParameters.getCliffHeightTolerance(),
+                          (float) terrainMapParameters.getMinSupportAreaFraction(),
+                          (float) terrainMapParameters.getMinSnapHeightThreshold(),
+                          (float) terrainMapParameters.getSnapHeightThresholdAtSearchEdge(),
+                          (float) terrainMapParameters.getSteppingCosineThreshold(),
+                          (float) terrainMapParameters.getSquaredErrorThreshold()};
    }
 
    public void destroy()
    {
-      snappingTerrainProgram.close();
-      snappingTerrainKernel.close();
-      snappingKernelGridDim.close();
+      terrainMapProgram.close();
+      terrainMapKernel.close();
+      terrainKernelGridDim.close();
       blockSize.close();
 
-      snapNormalXMat.close();
-      snapNormalYMat.close();
-      snapNormalZMat.close();
+      normalXMat.close();
+      normalYMat.close();
+      normalZMat.close();
       traversabilityMat.close();
       traversabilityClassMat.close();
 
-      snappingParametersHostPointer.close();
-      snappingParametersDevicePointer.close();
+      terrainMapParametersHostPointer.close();
+      terrainMapParametersDevicePointer.close();
 
-      int error = cudaFree(snappingParametersDevicePointer);
+      int error = cudaFree(terrainMapParametersDevicePointer);
       CUDATools.checkCUDAError(error);
 
       // At the end we have to destroy the stream to release the memory

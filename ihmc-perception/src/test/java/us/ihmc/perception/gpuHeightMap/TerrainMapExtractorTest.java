@@ -13,7 +13,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.perception.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.SnapResult;
-import us.ihmc.perception.heightMap.SteppableRegionCalculatorParameters;
+import us.ihmc.perception.heightMap.TerrainMapParameters;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapExtractor;
 
@@ -29,8 +29,8 @@ public class TerrainMapExtractorTest
    public void testSnappingTerrainKernelRuns()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
-      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionCalculatorParameters);
+      TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
+      TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, terrainMapParameters);
 
       GpuMat heightMap = new GpuMat(401, 401, opencv_core.CV_32FC1);
       heightMap.setTo(new Scalar(100));
@@ -56,7 +56,7 @@ public class TerrainMapExtractorTest
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
-      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      TerrainMapParameters steppableRegionParameters = new TerrainMapParameters();
       TerrainMapExtractor terrainMapExtractor = new TerrainMapExtractor(heightMapParameters, steppableRegionParameters);
 
       double randomHeight = 2.0;
@@ -89,7 +89,7 @@ public class TerrainMapExtractorTest
    public void testNormalCalculationForFlatInclinedTerrain()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SteppableRegionCalculatorParameters steppableRegionParameters = new SteppableRegionCalculatorParameters();
+      TerrainMapParameters steppableRegionParameters = new TerrainMapParameters();
       double gridResolution = heightMapParameters.getCellSize();
       double terrainWidthXY = heightMapParameters.getTerrainWidthInMeters();
 
