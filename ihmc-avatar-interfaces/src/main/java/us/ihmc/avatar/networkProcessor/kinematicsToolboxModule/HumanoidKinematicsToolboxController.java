@@ -562,6 +562,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          footPose.changeFrame(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
          footStatus.getRelativeFootPositionFromPelvis().set(footPose.getPosition());
          footStatus.getRelativeFootOrientationFromPelvis().set(footPose.getOrientation());
+
+         FrameVector3D linearVelocity = new FrameVector3D();
+         FrameVector3D angularVelocity = new FrameVector3D();
+         linearVelocity.set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTwistOfFrame().getLinearPart());
+         angularVelocity.set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPart());
+         footStatus.getLinearVelocity().set(linearVelocity);
+         footStatus.getAngularVelocity().set(angularVelocity);
       }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
