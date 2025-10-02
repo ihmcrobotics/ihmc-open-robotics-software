@@ -93,7 +93,7 @@ public class HeightMapExtractor
       // Load header and main file
       URL heightMapUtilsHeaderPath = getClass().getResource("HeightMapUtils.cuh");
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
-      URL kernelPath = getClass().getResource("RapidHeightMapExtractor.cu");
+      URL kernelPath = getClass().getResource("HeightMapExtractor.cu");
 
       computeDerivedParameters();
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
