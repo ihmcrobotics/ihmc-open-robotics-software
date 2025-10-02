@@ -14,7 +14,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.zed.global.zed;
 
@@ -30,7 +30,7 @@ public class RDXOpenCVVideoVisualizerDemo
 
    private final ROS2Node ros2Node;
 
-   private final ZEDSVOPlaybackSensor zedSensor;
+   private final ROS2ZEDSVOPlaybackSensor zedSensor;
    private final RepeatingTaskThread zedGrabThread;
 
    private RDXOpenCVVideoVisualizerDemo()
@@ -43,7 +43,7 @@ public class RDXOpenCVVideoVisualizerDemo
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
 
-      zedSensor = new ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+      zedSensor = new ROS2ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zedGrabThread = new RepeatingTaskThread("ZEDGrabThread", this::zedGrabThread);
 
       RDXBaseUI baseUI = new RDXBaseUI();
