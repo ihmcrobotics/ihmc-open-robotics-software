@@ -16,7 +16,6 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
 import java.util.ArrayList;
@@ -134,7 +133,7 @@ public class HeightMapPolygonSnapper
    {
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
 
-      double height = terrainMapData.getHeightInWorld(centroid.getX(), centroid.getY());
+      double height = terrainMapData.getHeight(centroid.getX(), centroid.getY());
       UnitVector3DReadOnly normal = terrainMapData.getNormal(centroid.getX(), centroid.getY());
 
       // The surface normal must point up. If it does not, recreate it so that it does.
@@ -156,14 +155,13 @@ public class HeightMapPolygonSnapper
    }
 
    private RigidBodyTransform computeSnapFromHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
-                                                       HeightMapData heightMapData,
                                                        TerrainMapData terrainMapData,
                                                        double snapHeightThreshold,
                                                        double minSurfaceIncline,
                                                        double minimumHeightToConsider)
    {
 
-      if (!computeFootPointsInTheEnvironment(polygonToSnap, heightMapData, terrainMapData, snapHeightThreshold, minSurfaceIncline, minimumHeightToConsider, footPointsInEnvironment))
+      if (!computeFootPointsInTheEnvironment(polygonToSnap, terrainMapData, snapHeightThreshold, minSurfaceIncline, minimumHeightToConsider, footPointsInEnvironment))
       {
          return null;
       }
@@ -186,7 +184,6 @@ public class HeightMapPolygonSnapper
    }
 
    public boolean computeFootPointsInTheEnvironment(ConvexPolygon2DReadOnly polygonToSnap,
-                                                    HeightMapData heightMapData,
                                                     TerrainMapData terrainMapData,
                                                     double snapHeightThreshold,
                                                     double minSurfaceIncline,
@@ -221,11 +218,9 @@ public class HeightMapPolygonSnapper
          {
             footPointToSnap.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
 
-            double height;
+            double height = Double.NaN;
             if (terrainMapData != null)
-               height = terrainMapData.getHeightInWorld(footPointToSnap.getX(), footPointToSnap.getY());
-            else
-               height = heightMapData.getHeight(footPointToSnap.getX(), footPointToSnap.getY());
+               height = terrainMapData.getHeight(footPointToSnap.getX(), footPointToSnap.getY());
 
             if (Double.isNaN(height) || height < minimumHeightToConsider)
             {
@@ -267,7 +262,6 @@ public class HeightMapPolygonSnapper
       RigidBodyTransform transformToReturn;
 
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      HeightMapData heightMapData = environmentHandler.getHeightMapData();
 
       if (environmentHandler.hasTerrainMapData())
       {
@@ -276,7 +270,6 @@ public class HeightMapPolygonSnapper
       else
       {
          transformToReturn = computeSnapFromHeightMap(polygonToSnap,
-                                                      heightMapData,
                                                       terrainMapData,
                                                       snapHeightThreshold,
                                                       minSurfaceIncline,

@@ -135,7 +135,6 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setTimeout(1.0);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
       request.setStartFootPoses(defaultStepWidth, initialStanceFootPose);
       request.setRequestedInitialStanceSide(initialStanceFootSide);
       request.setGoalFootPoses(defaultStepWidth, goalPose);

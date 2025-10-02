@@ -27,6 +27,7 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
@@ -93,7 +94,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
    private final List<YoFrameVector3D> collisionGradientsViz = new ArrayList<>();
 
    private PlanarRegionsList planarRegionsList;
-   private HeightMapData heightMapData;
+   private TerrainMapData terrainMapData;
    private final int footstepGraphicCapacity = 100;
    private final SideDependentList<FootstepVisualizer[]> footstepVisualizers = new SideDependentList<>();
    private final SideDependentList<MutableInt> footstepVisualizerIndices = new SideDependentList<>(side -> new MutableInt());
@@ -220,15 +221,15 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
       this.planarRegionsList = planarRegionsList;
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapData;
+      this.terrainMapData = terrainMapData;
    }
 
    public void computeSwingTrajectories(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
       swingTrajectories.clear();
-      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && heightMapData == null)
+      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && terrainMapData == null)
       {
          return;
       }
@@ -272,7 +273,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
          // FIXME figure out how to avoid using the height map data when possible.
 
          swingKnotOptimizationResult.reset();
-         optimizeKnotPoints(planarRegionsList, heightMapData);
+         optimizeKnotPoints(planarRegionsList, terrainMapData);
          //LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
 
          footstep.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -344,7 +345,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
       }
    }
 
-   private void optimizeKnotPoints(PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
+   private void optimizeKnotPoints(PlanarRegionsList planarRegionsList, TerrainMapData terrainMapData)
    {
       collisionFound.set(false);
       planPhase.set(PlanPhase.PERFORM_COLLISION_CHECK);
@@ -380,7 +381,7 @@ public class CollisionFreeSwingCalculator implements SCS2YoGraphicHolder
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
 
             // collision gradient
-            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData);
+            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, terrainMapData);
             swingKnotOptimizationResult.setKnotCollisions(j, collisionDetected);
             if (collisionDetected)
             {

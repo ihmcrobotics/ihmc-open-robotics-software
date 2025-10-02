@@ -42,7 +42,7 @@ public class HeightMapSnapWigglerTest
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       HeightMapSnapWiggler wiggler = new HeightMapSnapWiggler(footPolygons, new WiggleParameters());
-      environmentHandler.setHeightMapData(heightMapData);
+//      environmentHandler.setTerrainMapData(heightMapData);
 
       FootstepSnapData snapData = new FootstepSnapData();
       DiscreteFootstep footstep = new DiscreteFootstep(0.0, 0.0);

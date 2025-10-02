@@ -293,7 +293,7 @@ public class TerrainPlanningDebugger
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) child;
          float x = footstepNode.getState().getX32() / 50.0f;
          float y = footstepNode.getState().getY32() / 50.0f;
-         float z = (float) terrainMapData.getHeightInWorld(x, y);
+         float z = (float) terrainMapData.getHeight(x, y);
 
          if (poses.size() < 100)
             poses.add(new Pose3D(x, y, z, footstepNode.getValue(), footstepNode.getLevel(), footstepNode.getRobotSide() == RobotSide.LEFT ? 0 : 1));

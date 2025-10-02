@@ -102,7 +102,6 @@ public class ContinuousHikingProcess
       activeMappingParameterToolBox.update();
 
       // Update environment
-      environmentHandler.setHeightMapData(gpuMappingThread.getLatestHeightMapData());
       environmentHandler.setTerrainMapData(gpuMappingThread.getlatestTerrainMapData());
       continuousPlanningStateMachine.setLatestEnvironmentHandler(environmentHandler);
    }

@@ -32,7 +32,6 @@ public class HeightMapFootstepPlanner
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      environmentHandler.setHeightMapData(heightMap);
 
       for (int i = 0; i < stepsToDebug.size(); i++)
       {
@@ -86,7 +85,6 @@ public class HeightMapFootstepPlanner
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      environmentHandler.setHeightMapData(heightMap);
 
       List<Pose2D> poses = generateTurnWalkTurnPoses(start, goal, parameters);
       RobotSide stepSide = RobotSide.LEFT;

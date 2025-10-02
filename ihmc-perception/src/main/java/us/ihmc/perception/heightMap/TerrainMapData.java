@@ -1,5 +1,6 @@
 package us.ihmc.perception.heightMap;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
@@ -66,7 +67,13 @@ public class TerrainMapData
       this.snapNormalZMap = Arrays.copyOf(other.snapNormalZMap, size);
    }
 
-   public double getHeightInWorld(double x, double y)
+   public void setHeight(double x, double y, double z)
+   {
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenterX, gridCenterY, cellSize, centerIndex);
+      heightMap[key] = (float) z;
+   }
+
+   public double getHeight(double x, double y)
    {
       int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterX, cellSize, centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterY, cellSize, centerIndex);
@@ -75,6 +82,18 @@ public class TerrainMapData
 
       int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
       return heightMap[key];
+   }
+
+   public double getMinHeight()
+   {
+      double minValue = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < heightMap.length; i++)
+      {
+         if (!Double.isNaN(heightMap[i]) && heightMap[i] < minValue)
+            minValue = heightMap[i];
+      }
+
+      return minValue;
    }
 
    /**
@@ -198,6 +217,16 @@ public class TerrainMapData
    public double getMapSize()
    {
       return mapSize;
+   }
+
+   public double getCellSize()
+   {
+      return cellSize;
+   }
+
+   public int getCenterIndex()
+   {
+      return centerIndex;
    }
 
    public double getGridCenterX()

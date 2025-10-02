@@ -209,11 +209,6 @@ public class MonteCarloFootstepPlannerRequest
       this.environmentHandler = environmentHandler;
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      environmentHandler.setHeightMapData(heightMapData);
-   }
-
    public void setTerrainMapData(TerrainMapData terrainMapData)
    {
       environmentHandler.setTerrainMapData(terrainMapData);

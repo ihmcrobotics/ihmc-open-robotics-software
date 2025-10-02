@@ -1,13 +1,11 @@
 package us.ihmc.perception.heightMap;
 
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:

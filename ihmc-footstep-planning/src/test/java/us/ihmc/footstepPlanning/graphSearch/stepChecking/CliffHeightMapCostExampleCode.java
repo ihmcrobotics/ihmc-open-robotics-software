@@ -58,7 +58,6 @@ public class CliffHeightMapCostExampleCode
       ConvexPolygon2D candidateFootPolygon = new ConvexPolygon2D();
       DiscreteFootstepTools.getFootPolygon(footstep, footPolygon, candidateFootPolygon);
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      environmentHandler.setHeightMapData(heightMapData);
 
       RigidBodyTransform snapTransform = heightMapSnapper.snapPolygonToHeightMap(candidateFootPolygon, environmentHandler);
       System.out.println("snap transform");

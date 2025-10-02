@@ -207,7 +207,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snappedFootPolygonInWorld.applyTransform(transformToFootPose, false);
 
       heightMapSnapper.computeFootPointsInTheEnvironment(snappedFootPolygonInWorld,
-                                                         environmentHandler.getHeightMapData(),
                                                          environmentHandler.getTerrainMapData(),
                                                          parameters.getHeightMapSnapThreshold(),
                                                          parameters.getMinSurfaceIncline(),

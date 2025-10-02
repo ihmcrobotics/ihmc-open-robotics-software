@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -27,7 +28,6 @@ import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -52,7 +52,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private LocomotionParameters locomotionParameters;
    private SwingPlannerParametersBasics swingPlannerParameters;
 
-   private final AtomicReference<HeightMapData> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<TerrainMapData> terrainMapDataAtomicReference = new AtomicReference<>();
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -86,11 +86,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       clear();
    }
 
-   public void setHeightMapMessage(HeightMapData heightMapData)
+   public void setHeightMapMessage(TerrainMapData terrainMapData)
    {
-      heightMapDataReference.set(heightMapData);
+      terrainMapDataAtomicReference.set(terrainMapData);
       if (swingPlanningModule != null)
-         swingPlanningModule.setHeightMapData(heightMapData);
+         swingPlanningModule.setTerrainMapData(terrainMapData);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -219,9 +219,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         HeightMapData heightMapData = heightMapDataReference.getAndSet(null);
-         if (heightMapData != null)
-            swingPlanningModule.setHeightMapData(heightMapData);
+         TerrainMapData terrainMapData = terrainMapDataAtomicReference.getAndSet(null);
+         if (terrainMapData != null)
+            swingPlanningModule.setTerrainMapData(terrainMapData);
 
          swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);

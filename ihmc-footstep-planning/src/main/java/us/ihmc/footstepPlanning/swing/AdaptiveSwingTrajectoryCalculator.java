@@ -18,9 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -43,7 +43,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
-   private HeightMapData heightMapData;
+   private TerrainMapData heightMapData;
 
    private final FramePose3D startOfSwingPose = new FramePose3D();
    private final FramePose3D endOfSwingPose = new FramePose3D();
@@ -178,9 +178,9 @@ public class AdaptiveSwingTrajectoryCalculator
       return HeightMapCollisionDetector.evaluateCollision(collisionBox, heightMapData).areShapesColliding();
    }
    
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapData;
+      this.heightMapData = terrainMapData;
    }
 
    public void setSwingParameters(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)

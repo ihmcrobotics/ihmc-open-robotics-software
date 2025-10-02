@@ -19,8 +19,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -44,7 +44,7 @@ public class AStarBodyPathPlanner
 
    private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private final AStarBodyPathEdgeData edgeData;
-   private HeightMapData heightMapData;
+   private TerrainMapData terrainMapData;
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
@@ -136,19 +136,19 @@ public class AStarBodyPathPlanner
       smoother = new AStarBodyPathSmoother(plannerParameters);
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      if (this.heightMapData == null || !EuclidCoreTools.epsilonEquals(this.heightMapData.getCellSize(), heightMapData.getCellSize(), 1e-3))
+      if (this.terrainMapData == null || !EuclidCoreTools.epsilonEquals(this.terrainMapData.getCellSize(), terrainMapData.getCellSize(), 1e-3))
       {
-         collisionDetector.initialize(heightMapData.getCellSize(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
+         collisionDetector.initialize(terrainMapData.getCellSize(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
       }
 
-      this.heightMapData = heightMapData;
+      this.terrainMapData = terrainMapData;
    }
 
-   static void packRadialOffsets(HeightMapData heightMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
+   static void packRadialOffsets(TerrainMapData terrainMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
    {
-      int minMaxOffsetXY = (int) Math.round(radius / heightMapData.getCellSize());
+      int minMaxOffsetXY = (int) Math.round(radius / terrainMapData.getCellSize());
 
       xOffsets.clear();
       yOffsets.clear();
@@ -157,8 +157,8 @@ public class AStarBodyPathPlanner
       {
          for (int j = -minMaxOffsetXY; j <= minMaxOffsetXY; j++)
          {
-            double x = i * heightMapData.getCellSize();
-            double y = j * heightMapData.getCellSize();
+            double x = i * terrainMapData.getCellSize();
+            double y = j * terrainMapData.getCellSize();
             if (EuclidCoreTools.norm(x, y) < radius && !(i == 0 && j == 0))
             {
                xOffsets.add(i);
@@ -189,9 +189,9 @@ public class AStarBodyPathPlanner
       iterationData.clear();
       edgeDataMap.clear();
       gridHeightMap.clear();
-      setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
+      setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
 
-      packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
+      packRadialOffsets(terrainMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 
       Pose3D startPose = new Pose3D();
       Pose3D goalPose = new Pose3D();
@@ -283,7 +283,7 @@ public class AStarBodyPathPlanner
             double distanceFromStart = EuclidCoreTools.norm(startPose.getX() - neighbor.getX(), startPose.getY() - neighbor.getY());
             if (plannerParameters.getCheckForCollisions() && distanceFromStart > plannerParameters.getCollisionStartTolerance())
             {
-               this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
+               this.containsCollision.set(collisionDetector.collisionDetected(terrainMapData,
                                                                               neighbor,
                                                                               neighborIndex,
                                                                               snapHeight.getDoubleValue(),
@@ -380,7 +380,7 @@ public class AStarBodyPathPlanner
 
       if (performSmoothing)
       {
-         List<Pose3D> smoothedPath = smoother.doSmoothing(bodyPath, heightMapData);
+         List<Pose3D> smoothedPath = smoother.doSmoothing(bodyPath, terrainMapData);
          for (int i = 0; i < bodyPath.size(); i++)
          {
             Pose3D waypoint = new Pose3D(smoothedPath.get(i));
@@ -488,16 +488,16 @@ public class AStarBodyPathPlanner
          return gridHeightMap.get(latticePoint);
       }
 
-      int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
+      int centerIndex = terrainMapData.getCenterIndex();
+      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), terrainMapData.getGridCenterX(), terrainMapData.getCellSize(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), terrainMapData.getGridCenterY(), terrainMapData.getCellSize(), centerIndex);
 
       TDoubleArrayList heights = new TDoubleArrayList();
       for (int i = 0; i < xSnapOffsets.size(); i++)
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
+         double heightQuery = terrainMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery))
          {
             heights.add(heightQuery);
@@ -520,7 +520,7 @@ public class AStarBodyPathPlanner
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
+         double heightQuery = terrainMapData.getHeight(xQuery, yQuery);
          if (!Double.isNaN(heightQuery) && heightQuery > minHeight)
          {
             runningSum += heightQuery;

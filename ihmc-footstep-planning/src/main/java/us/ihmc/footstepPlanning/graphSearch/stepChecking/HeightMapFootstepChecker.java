@@ -215,7 +215,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       {
          try
          {
-            obstacleBetweenStepsChecker.setHeightMapData(environmentHandler.getHeightMapData());
+            obstacleBetweenStepsChecker.setTerrainMapData(environmentHandler.getTerrainMapData());
 
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
@@ -249,7 +249,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
       double candidateStepHeight = DiscreteFootstepTools.getSnappedStepHeight(candidateStep, candidateStepSnapData.getSnapTransform());
       double stanceStepHeight = DiscreteFootstepTools.getSnappedStepHeight(stanceStep, stanceStepSnapData.getSnapTransform());
-      collisionDetector.setHeightMapData(environmentHandler.getHeightMapData());
+      collisionDetector.setTerrainMapData(environmentHandler.getTerrainMapData());
       boolean collisionDetected = collisionDetector.checkForCollision(candidateStep,
                                                                       stanceStep,
                                                                       candidateStepHeight,

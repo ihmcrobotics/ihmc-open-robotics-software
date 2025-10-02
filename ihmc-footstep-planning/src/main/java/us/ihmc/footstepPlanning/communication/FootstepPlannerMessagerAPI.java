@@ -65,8 +65,7 @@ public class FootstepPlannerMessagerAPI
 
    // Perception data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
-   public static final Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
-   public static final Topic<TerrainMapMessage> TerrainMapData = topic("TerrainMapData");
+   public static final Topic<TerrainMapMessage> terrainMapMessage = topic("TerrainMapData");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
    public static final Topic<OcTreeKeyListMessage> OcTreeData = topic("OcTreeData");
 

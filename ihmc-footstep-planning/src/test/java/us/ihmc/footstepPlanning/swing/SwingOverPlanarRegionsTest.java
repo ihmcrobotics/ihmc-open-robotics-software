@@ -339,7 +339,6 @@ public class SwingOverPlanarRegionsTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 

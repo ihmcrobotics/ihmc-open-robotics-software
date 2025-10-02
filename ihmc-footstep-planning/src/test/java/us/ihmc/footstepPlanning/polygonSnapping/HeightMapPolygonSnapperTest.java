@@ -63,7 +63,7 @@ public class HeightMapPolygonSnapperTest
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
          EnvironmentHandler environmentHandler = new EnvironmentHandler();
-         environmentHandler.setHeightMapData(heightMapData);
+//         environmentHandler.setTerrainMapData(heightMapData);
          RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
          // Check XY position of centroid isn't changed
@@ -136,7 +136,7 @@ public class HeightMapPolygonSnapperTest
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
          EnvironmentHandler environmentHandler = new EnvironmentHandler();
-         environmentHandler.setHeightMapData(heightMapData);
+//         environmentHandler.setTerrainMapData(heightMapData);
          snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
          Assertions.assertTrue(plane.getNormal().epsilonEquals(snapper.getBestFitPlane().getNormal(), 1e-10));

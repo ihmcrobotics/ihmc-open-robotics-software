@@ -51,7 +51,6 @@ public class FootstepPlannerLoggerTest
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataSet.getPlanarRegionsList())));
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(true);
    }

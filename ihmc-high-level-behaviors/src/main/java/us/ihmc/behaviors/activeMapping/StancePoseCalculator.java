@@ -148,8 +148,8 @@ public class StancePoseCalculator
       leftPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
-      double heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
+      double heightLeft = terrainMap.getHeight(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
+      double heightRight = terrainMap.getHeight(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
       leftPose.setZ(heightLeft);
       rightPose.setZ(heightRight);
 

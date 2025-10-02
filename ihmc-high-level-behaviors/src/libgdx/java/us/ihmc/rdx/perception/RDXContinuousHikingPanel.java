@@ -19,7 +19,6 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -56,7 +55,6 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -199,7 +197,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.addChild(storedPropertySetPanel);
    }
 
-   public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
+   public void update(TerrainMapData terrainMapData)
    {
       updateRos2StoredPropertySets();
 
@@ -209,7 +207,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
       latestFootstepPlan = null;
       terrainPlanningDebugger.update(terrainMapData);
-      stancePoseSelectionPanel.update(terrainMapData, heightMapData);
+      stancePoseSelectionPanel.update(terrainMapData);
    }
 
    /**
