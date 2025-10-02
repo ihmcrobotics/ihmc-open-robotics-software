@@ -45,13 +45,7 @@ public class HeightMapFootstepPlanner
          footstepTransform.getTranslation().setZ(0.0);
          footstepTransform.getRotation().setToYawOrientation(pose.getYaw());
 
-         FootstepSnapData snapData = snapper.computeSnapData(pose.getX(),
-                                                             pose.getY(),
-                                                             pose.getYaw(),
-                                                             footPolygons.get(RobotSide.LEFT),
-                                                             environmentHandler,
-                                                             0.06,
-                                                             Math.toRadians(45.0));
+         FootstepSnapData snapData = snapper.computeSnapData(pose.getX(), pose.getY(), pose.getYaw(), footPolygons.get(RobotSide.LEFT), environmentHandler);
 
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
@@ -63,10 +57,10 @@ public class HeightMapFootstepPlanner
             System.out.println("step translation: " + step.getPosition());
             System.out.println("step ypr: " + step.getOrientation().getYaw() + ", " + step.getOrientation().getPitch() + ", " + step.getRoll());
 
-//            double zOnPlane = snapper.getBestFitPlane().getZOnPlane(pose.getX(), pose.getY());
-//            step.getPosition().set(pose.getX(), pose.getY(), zOnPlane);
-//
-//            EuclidGeometryTools.orientation3DFromZUpToVector3D(snapper.getBestFitPlane().getNormal(), step.getOrientation());
+            //            double zOnPlane = snapper.getBestFitPlane().getZOnPlane(pose.getX(), pose.getY());
+            //            step.getPosition().set(pose.getX(), pose.getY(), zOnPlane);
+            //
+            //            EuclidGeometryTools.orientation3DFromZUpToVector3D(snapper.getBestFitPlane().getNormal(), step.getOrientation());
             footstepPlan.addFootstep(RobotSide.LEFT, step);
          }
       }
@@ -98,13 +92,7 @@ public class HeightMapFootstepPlanner
          footstepTransform.getTranslation().set(pose.getPosition());
          footstepTransform.getRotation().setToYawOrientation(pose.getYaw());
 
-         FootstepSnapData snapData = snapper.computeSnapData(pose.getX(),
-                                                             pose.getY(),
-                                                             pose.getYaw(),
-                                                             footPolygons.get(RobotSide.LEFT),
-                                                             environmentHandler,
-                                                             parameters.getHeightMapSnapThreshold(),
-                                                             parameters.getMinSurfaceIncline());
+         FootstepSnapData snapData = snapper.computeSnapData(pose.getX(), pose.getY(), pose.getYaw(), footPolygons.get(RobotSide.LEFT), environmentHandler);
 
          FramePose3D step = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepTransform);
          if (snapData.getSnapTransform() != null)

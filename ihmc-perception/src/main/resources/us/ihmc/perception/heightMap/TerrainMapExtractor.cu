@@ -88,16 +88,16 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
     }
 
     // Setup values to perform a least squares fit of the foot to the height map, but omitting any points that are too far below the foot.
-    float n = 0.0f;
-    float x = 0.0f;
-    float y = 0.0f;
-    float z = 0.0f;
-    float xx = 0.0f;
-    float xy = 0.0f;
-    float xz = 0.0f;
-    float yy = 0.0f;
-    float yz = 0.0f;
-    float zz = 0.0f;
+    double n = 0.0f;
+    double x = 0.0f;
+    double y = 0.0f;
+    double z = 0.0f;
+    double xx = 0.0f;
+    double xy = 0.0f;
+    double xz = 0.0f;
+    double yy = 0.0f;
+    double yz = 0.0f;
+    double zz = 0.0f;
 
     int max_points_possible_under_support = 0;
 
@@ -184,17 +184,17 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
     // Perform best fit plane
     float3 normal = make_float3(0.0f, 0.0f, 1.0f);
-    float coefficients[3] = {0.0f, 0.0f, 0.0f};
+    double coefficients[3] = {0.0, 0.0, 0.0};
 
     if (traversability_result == VALID)
     {
         // Solve for the plane normal, as well as the height of the foot along that plane.
-        float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-        float z_variance_vector[3] = {-xz, -yz, -z};
-        float squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
+        double covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
+        double z_variance_vector[3] = {-xz, -yz, -z};
+        double squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
 
-        normal.x = coefficients[0];
-        normal.y = coefficients[1];
+        normal.x = static_cast<float>(coefficients[0]);
+        normal.y = static_cast<float>(coefficients[1]);
         normal = normalize(normal);
 
         // If the normal points down, we need to flip it.
@@ -207,7 +207,7 @@ __global__ void computeTerrainData(float *heightMap, size_t pitchHeightMap,
 
         // Roughness check
         float squaredErrorThreshold = params[SQUARED_ERROR_THRESHOLD];
-        squared_error_traversability = clamp(1.0f - squared_error / squaredErrorThreshold, 0.0f, 1.0f);
+        squared_error_traversability = clamp(1.0f - static_cast<float>(squared_error) / squaredErrorThreshold, 0.0f, 1.0f);
         if (squared_error > squaredErrorThreshold)
         {
             traversability_result = SQUARED_ERROR;

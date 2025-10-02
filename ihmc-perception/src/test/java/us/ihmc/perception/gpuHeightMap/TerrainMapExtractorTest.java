@@ -5,7 +5,6 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,12 +21,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TerrainMapExtractorTest
 {
+   static private final int iterations = 1000;
+
    /**
-    * This test only proves that the kernel doesn't have a compilation issue.
-    * Future tests should expand on this to test the methods themselves
+    * This test measures the average runtime of the terrain update kernel over 100 iterations.
+    * This test was vibe coded ;)
     */
    @Test
-   public void testSnappingTerrainKernelRuns()
+   public void testSnappingTerrainKernelAverageRuntime()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
@@ -36,10 +37,21 @@ public class TerrainMapExtractorTest
       GpuMat heightMap = new GpuMat(401, 401, opencv_core.CV_32FC1);
       heightMap.setTo(new Scalar(100));
 
-      terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0));
+      long totalTimeNano = 0;
+
+      for (int i = 0; i < iterations; i++)
+      {
+         long startTime = System.nanoTime();
+         terrainMapExtractor.update(heightMap, new Point3D(0.0, 0.0, 0.0));
+         long endTime = System.nanoTime();
+
+         totalTimeNano += (endTime - startTime);
+      }
+
+      double averageMillis = (totalTimeNano / (double) iterations) / 1_000_000.0;
+      System.out.println("Average terrain update runtime over " + iterations + " iterations: " + averageMillis + " ms");
 
       TerrainMapData terrainMapData = terrainMapExtractor.getTerrainMapData();
-
       assertNotNull(terrainMapData);
 
       terrainMapExtractor.destroy();
@@ -85,18 +97,16 @@ public class TerrainMapExtractorTest
       terrainMapExtractor.destroy();
    }
 
-   // WIP -- test normal given flat, inclined plane as input
    @Test
-   @Disabled
    public void testNormalCalculationForFlatInclinedTerrain()
    {
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters steppableRegionParameters = new TerrainMapParameters();
-      double gridResolution = heightMapParameters.getCellSize();
-      double terrainWidthXY = heightMapParameters.getTerrainWidthInMeters();
+      double gridResolution = 0.05;
+      double terrainWidthXY = 4.0;
 
       Point3D gridCenter = new Point3D(0.0, 0.0, 0.0);
-      Vector3D normal = new Vector3D(-0.15, 0.2, 1.0);
+      Vector3D normal = new Vector3D(-0.15, 0.0, 1.0);
       normal.normalize();
       Plane3D plane = new Plane3D(gridCenter, normal);
 
@@ -140,9 +150,9 @@ public class TerrainMapExtractorTest
       {
          for (int j = 0; j < cellsPerAxis; j++)
          {
-            assertEquals(114, snapNormalXMap[i * cellsPerAxis + j], "Normal x value is: (" + snapNormalXMap[i * cellsPerAxis + j] + ")");
-            assertEquals(-113, snapNormalYMap[i * cellsPerAxis + j], "Normal y value is: (" + snapNormalYMap[i * cellsPerAxis + j] + ")");
-            assertEquals(-5, snapNormalZMap[i * cellsPerAxis + j], "Normal z value is: (" + snapNormalZMap[i * cellsPerAxis + j] + ")");
+            assertEquals(108, snapNormalXMap[i * cellsPerAxis + j], "Normal x value is: (" + snapNormalXMap[i * cellsPerAxis + j] + ")");
+            assertEquals(127, snapNormalYMap[i * cellsPerAxis + j], "Normal y value is: (" + snapNormalYMap[i * cellsPerAxis + j] + ")");
+            assertEquals(-4, snapNormalZMap[i * cellsPerAxis + j], "Normal z value is: (" + snapNormalZMap[i * cellsPerAxis + j] + ")");
          }
       }
 

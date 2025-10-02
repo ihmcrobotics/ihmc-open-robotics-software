@@ -193,7 +193,7 @@ public class StancePoseCalculator
       ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
       footPolygon.applyTransform(poseToSnap);
 
-      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.05, Math.toRadians(45.0));
+      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler);
 
       if (snapTransform != null)
       {

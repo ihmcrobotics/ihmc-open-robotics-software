@@ -356,7 +356,7 @@ public class MonteCarloPlannerTools
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler, 0.1, Math.toRadians(45));
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler);
 
       double minTraversability = 0.2;
       if (snapTransform != null && (terrainMapData.getTraversabilityScore(footPolygonInWorld.getCentroid().getX(), footPolygonInWorld.getCentroid().getY()) > minTraversability))
