@@ -25,17 +25,17 @@ mainDependencies {
 
    // ffmpeg, openblas, opencv, zed-java-api come from the logger
 
-   val cudaVersion = "12.6-9.5-1.5.11-ihmc-2"
-   api("us.ihmc:cuda:$cudaVersion")
-   api("us.ihmc:cuda:$cudaVersion:linux-arm64")
-   api("us.ihmc:cuda:$cudaVersion:linux-x86_64")
-   api("us.ihmc:cuda:$cudaVersion:windows-x86_64")
-   val openclVersion = "3.0-1.5.11-ihmc-2"
-   api("us.ihmc:opencl:$openclVersion")
-   api("us.ihmc:opencl:$openclVersion:linux-arm64")
-   api("us.ihmc:opencl:$openclVersion:linux-x86_64")
-   api("us.ihmc:opencl:$openclVersion:windows-x86_64")
-   val librealsense2Version = "2.53.1-1.5.11-ihmc-2"
+   val cudaVersion = "12.6-9.5-1.5.11"
+   api("org.bytedeco:cuda:$cudaVersion")
+   api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
+   api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
+   api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
+   val openclVersion = "3.0-1.5.11"
+   api("org.bytedeco:opencl:$openclVersion")
+   api("org.bytedeco:opencl:$openclVersion:linux-arm64")
+   api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
+   api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
+   val librealsense2Version = "2.53.1-1.5.11"
    api("us.ihmc:librealsense2:$librealsense2Version")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-arm64")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-x86_64")
@@ -56,6 +56,6 @@ testDependencies {
 }
 
 slamWrapperDependencies {
-   api("us.ihmc:javacpp:1.5.11-ihmc-2")
+   api("org.bytedeco:javacpp:1.5.11")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
