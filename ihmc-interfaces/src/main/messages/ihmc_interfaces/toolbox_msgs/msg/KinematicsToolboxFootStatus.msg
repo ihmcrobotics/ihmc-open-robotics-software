@@ -9,10 +9,6 @@ bool foot_in_contact
 geometry_msgs/Point desired_foot_position
 geometry_msgs/Quaternion desired_foot_orientation
 
-# Pose of the foot in world frame
-geometry_msgs/Point desired_foot_position
-geometry_msgs/Quaternion desired_foot_orientation
-
 # Desired linear velocity expressed in local frame.
 geometry_msgs/Vector3 desired_foot_linear_velocity
 # Desired angular velocity expressed in local frame.
