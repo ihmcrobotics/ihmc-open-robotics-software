@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import org.ros.internal.message.GenerateInterfaces;
+//import org.ros.internal.message.GenerateInterfaces;
 
 import com.google.common.collect.Lists;
 
@@ -47,8 +47,8 @@ public class MessageAndServiceInterfaceGenerator
       }
 
       log("InterfaceFromSpoof: packagePath is " + packagePath);
-      GenerateInterfaces generateInterfaces = new GenerateInterfaces();
-      generateInterfaces.generate(outputDirectory, arguments, packagePath);
+//      GenerateInterfaces generateInterfaces = new GenerateInterfaces();
+//      generateInterfaces.generate(outputDirectory, arguments, packagePath);
    }
 
    private static void log(String aMessage)

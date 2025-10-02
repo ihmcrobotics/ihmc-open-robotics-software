@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.jfree.svg.SVGGraphics2D;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;

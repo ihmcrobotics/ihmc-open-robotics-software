@@ -34,8 +34,6 @@ __global__ void filterDetections(float* unfilteredDetection,
                                  int detectionCount,
                                  float* confidenceThresholds,
                                  bool* ignoredClasses,
-                                 int shiftX,
-                                 int shiftY,
                                  float* filteredDetections,
                                  int* filteredDetectionCount)
 {
@@ -76,10 +74,6 @@ __global__ void filterDetections(float* unfilteredDetection,
         float height = *row(unfilteredColumn, sizeof(float) * detectionCount, HEIGHT_INDEX);
         float x = *row(unfilteredColumn, sizeof(float) * detectionCount, X_INDEX) - width / 2.0f;
         float y = *row(unfilteredColumn, sizeof(float) * detectionCount, Y_INDEX) - height / 2.0f;
-
-        // Apply shift to X and Y
-        x += shiftX;
-        y += shiftY;
 
         // Assign the values to the filtered column
         float* filteredRow = row(filteredDetections, sizeof(float) * FILTERED_FLOATS_PER_ROW, filteredRowIndex);

@@ -1,8 +1,9 @@
 name: Gradle test (slow)
 
+# Run at midnight CST every day
 on:
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:

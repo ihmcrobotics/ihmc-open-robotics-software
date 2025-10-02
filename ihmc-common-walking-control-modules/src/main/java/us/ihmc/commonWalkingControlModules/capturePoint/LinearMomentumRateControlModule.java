@@ -193,8 +193,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       this.gravityZ = gravityZ;
       this.angularVelocityCalculator = wholeBodyAngularVelocityCalculator;
 
-      useAngularCapturePoint.set(walkingControllerParameters.useAngularCapturePointForFeedback());
-
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
       recoveryLinearMomentumRateWeight = new ParameterVector3D("RecoveryLinearMomentumRateWeight",
@@ -308,6 +306,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
             heightControlCommand = input.getCenterOfMassHeightControlCommand();
       }
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
+      this.useAngularCapturePoint.set(input.getUseAngularCapturePoint());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
       this.desiredCapturePointAtEndOfState.setMatchingFrame(input.getDesiredCapturePointAtEndOfState());

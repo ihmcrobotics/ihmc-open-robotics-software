@@ -15,6 +15,7 @@ public class SnappingTerrainManager
    private final SnappingTerrainExtractor snappingTerrainExtractor;
    private ROS2Publisher<TerrainMapMessage> snappingTerrainPublisher;
    private final TerrainMapMessage terrainMapMessage;
+   private long sequenceId = 0;
 
    public SnappingTerrainManager(ROS2Node ros2Node, HeightMapParameters heightMapParameters, SteppableRegionCalculatorParameters footstepPlannerParameters)
    {
@@ -34,6 +35,8 @@ public class SnappingTerrainManager
    private void publishTerrainMapData(TerrainMapData terrainMapData)
    {
       TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
+      terrainMapMessage.setSequenceId(sequenceId++);
+
       if (snappingTerrainPublisher != null)
          snappingTerrainPublisher.publish(terrainMapMessage);
    }

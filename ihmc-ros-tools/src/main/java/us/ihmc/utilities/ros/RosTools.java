@@ -7,19 +7,13 @@ import java.awt.image.DataBufferByte;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
-import javax.imageio.ImageIO;
-
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.node.NodeConfiguration;
 
 import geometry_msgs.Point;
@@ -110,13 +104,13 @@ public class RosTools
       int width = imageMessage.getWidth();
       int height = imageMessage.getHeight();
 
-      byte[] payload = imageMessage.getData().array();
+//      byte[] payload = imageMessage.getData().array();
       BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-      DataBuffer dataBuffer = new DataBufferByte(payload, payload.length, imageMessage.getData().arrayOffset());
-      SampleModel sampleModel = colorModel.createCompatibleSampleModel(width, height);
-
-      WritableRaster raster = Raster.createWritableRaster(sampleModel, dataBuffer, null);
-      ret.setData(raster);
+//      DataBuffer dataBuffer = new DataBufferByte(payload, payload.length, imageMessage.getData().arrayOffset());
+//      SampleModel sampleModel = colorModel.createCompatibleSampleModel(width, height);
+//
+//      WritableRaster raster = Raster.createWritableRaster(sampleModel, dataBuffer, null);
+//      ret.setData(raster);
 
       return ret;
    }
@@ -130,16 +124,16 @@ public class RosTools
    {
 
       BufferedImage ret = null;
-      byte[] payload = imageMessage.getData().array();
-      try
-      {
-         int offset = imageMessage.getData().arrayOffset();
-         ret = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+//      byte[] payload = imageMessage.getData().array();
+//      try
+//      {
+//         int offset = imageMessage.getData().arrayOffset();
+//         ret = ImageIO.read(new ByteArrayInputStream(payload, offset, payload.length - offset));
+//      }
+//      catch (IOException e)
+//      {
+//         e.printStackTrace();
+//      }
 
       return ret;
    }
@@ -147,13 +141,13 @@ public class RosTools
    /**
     * Returns a ByteBuffer that starts with the data part.
     */
-   public static ByteBuffer sliceNettyBuffer(ChannelBuffer channelBuffer)
-   {
-      ByteBuffer originalByteBuffer = channelBuffer.toByteBuffer();
-      int arrayOffset = channelBuffer.arrayOffset();
-      originalByteBuffer.position(arrayOffset);
-      return originalByteBuffer.slice();
-   }
+//   public static ByteBuffer sliceNettyBuffer(ChannelBuffer channelBuffer)
+//   {
+//      ByteBuffer originalByteBuffer = channelBuffer.toByteBuffer();
+//      int arrayOffset = channelBuffer.arrayOffset();
+//      originalByteBuffer.position(arrayOffset);
+//      return originalByteBuffer.slice();
+//   }
 
    @Deprecated
    public static Object cameraIntrisicsFromCameraInfo(CameraInfo cameraInfo)
@@ -245,21 +239,21 @@ public class RosTools
       }
    }
 
-   public static ByteBuffer wrapPointCloud2Array(PointCloud2 pointCloud2)
-   {
-      int numberOfPoints = pointCloud2.getWidth() * pointCloud2.getHeight();
-      int offset = pointCloud2.getData().arrayOffset();
-      int pointStep = pointCloud2.getPointStep();
-
-      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud2.getData().array(), offset, numberOfPoints * pointStep);
-
-      if (pointCloud2.getIsBigendian())
-         byteBuffer.order(ByteOrder.BIG_ENDIAN);
-      else
-         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
-      return byteBuffer;
-   }
+//   public static ByteBuffer wrapPointCloud2Array(PointCloud2 pointCloud2)
+//   {
+////      int numberOfPoints = pointCloud2.getWidth() * pointCloud2.getHeight();
+////      int offset = pointCloud2.getData().arrayOffset();
+////      int pointStep = pointCloud2.getPointStep();
+////
+////      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud2.getData().array(), offset, numberOfPoints * pointStep);
+////
+////      if (pointCloud2.getIsBigendian())
+////         byteBuffer.order(ByteOrder.BIG_ENDIAN);
+////      else
+////         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+//
+//      return byteBuffer;
+//   }
 
    public static void printPointCloud2Info(String name, PointCloud2 pointCloud2)
    {

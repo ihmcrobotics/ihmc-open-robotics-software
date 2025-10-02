@@ -66,7 +66,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
    private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
-   private final YoBoolean enableAdjustment = new YoBoolean("enableAdjustment", registry);
+   private final YoBoolean enableCoMAdjustment = new YoBoolean("enableCoMAdjustment", registry);
    private final YoFrameVector3D positionAdjustment = new YoFrameVector3D("estimatedCenterOfMassPositionAdjustment", worldFrame, registry);
    private final YoFrameVector3D velocityAdjustment = new YoFrameVector3D("estimatedCenterOfMassVelocityAdjustment", worldFrame, registry);
 
@@ -85,12 +85,14 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
                                                       List<? extends RigidBodyReadOnly> listOfTrustedFeet,
                                                       double dt,
                                                       double gravitationalAcceleration,
+                                                      boolean enableCoMAdjustment,
                                                       CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.listOfTrustedFeet = listOfTrustedFeet;
       this.dt = dt;
       this.gravitationalAcceleration = gravitationalAcceleration;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
+      this.enableCoMAdjustment.set(enableCoMAdjustment);
 
       linearVelocityKp = new YoDouble("linearVelocityKp", registry);
       linearVelocityKi = new YoDouble("linearVelocityKi", registry);
@@ -135,18 +137,9 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       buildEstimatorsRecursive(0, rootEstimator, imuSensorMap);
       estimatorMap = Arrays.stream(estimators).collect(Collectors.toMap(estimator -> estimator.rigidBody, Function.identity()));
 
-      if (MORE_VARIABLES)
-      {
-         centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getPredecessor(), worldFrame);
-         rawCoMPosition = new YoFramePoint3D("rawCenterOfMassPosition", worldFrame, registry);
-         rawCoMVelocity = new YoFrameVector3D("rawCenterOfMassVelocity", worldFrame, registry);
-      }
-      else
-      {
-         centerOfMassJacobian = null;
-         rawCoMPosition = null;
-         rawCoMVelocity = null;
-      }
+      centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getPredecessor(), worldFrame);
+      rawCoMPosition = new YoFramePoint3D("rawCenterOfMassPosition", worldFrame, registry);
+      rawCoMVelocity = new YoFrameVector3D("rawCenterOfMassVelocity", worldFrame, registry);
    }
 
    private int buildEstimatorsRecursive(int index, RigidBodyStateEstimator parent, Map<RigidBodyBasics, IMUSensorReadOnly> imuSensorMap)
@@ -267,7 +260,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             velocityAdjustment.add(tempVector);
          }
 
-         if (enableAdjustment.getValue())
+         if (enableCoMAdjustment.getValue())
          {
             estimatedCoMPosition.add(positionAdjustment);
             velocityAdjustment.add(velocityAdjustment);
@@ -284,12 +277,9 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
          centerOfMassDataHolder.clear();
       }
 
-      if (MORE_VARIABLES)
-      {
-         centerOfMassJacobian.reset();
-         rawCoMPosition.set(centerOfMassJacobian.getCenterOfMass());
-         rawCoMVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
-      }
+      centerOfMassJacobian.reset();
+      rawCoMPosition.set(centerOfMassJacobian.getCenterOfMass());
+      rawCoMVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
    }
 
    @Override

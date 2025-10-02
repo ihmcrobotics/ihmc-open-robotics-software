@@ -189,7 +189,8 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
          isPastCoPThresholdFiltered.update();
       }
 
-      hasFootHitGround.set((isPastForceThresholdLowFiltered.getValue() && isPastCoPThresholdFiltered.getValue()) || isPastForceThresholdHigh.getValue());
+      boolean validCoP =  isPastCoPThresholdFiltered.getValue();
+      hasFootHitGround.set((isPastForceThresholdLowFiltered.getValue() && validCoP) || isPastForceThresholdHigh.getValue());
       hasFootHitGroundFiltered.update();
    }
 

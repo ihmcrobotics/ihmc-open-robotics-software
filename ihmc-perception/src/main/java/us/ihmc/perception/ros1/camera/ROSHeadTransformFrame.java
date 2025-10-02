@@ -1,15 +1,10 @@
 package us.ihmc.perception.ros1.camera;
 
-import org.ros.message.Time;
-
-import geometry_msgs.Transform;
 import transform_provider.TransformProvider;
 import transform_provider.TransformProviderRequest;
 import transform_provider.TransformProviderResponse;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotSensorParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -38,19 +33,19 @@ public class ROSHeadTransformFrame extends ReferenceFrame implements Runnable
       {
          ThreadTools.sleep(1); // Don't hog CPU
          TransformProviderRequest request = client.getMessage();
-         request.setTime(new Time(0));
+//         request.setTime(new Time(0));
          request.setSrc(cameraParameters.getBaseFrameForRosTransform());
          request.setDest(cameraParameters.getEndFrameForRosTransform());
          response = client.call(request);
       }
-      Transform transform = response.getTransform().getTransform();
-      Vector3D translation = new Vector3D(transform.getTranslation().getX(), transform.getTranslation().getY(), transform.getTranslation().getZ());
-      Quaternion rotation = new Quaternion(transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ(), transform.getRotation()
-            .getW());
+//      Transform transform = response.getTransform().getTransform();
+//      Vector3D translation = new Vector3D(transform.getTranslation().getX(), transform.getTranslation().getY(), transform.getTranslation().getZ());
+//      Quaternion rotation = new Quaternion(transform.getRotation().getX(), transform.getRotation().getY(), transform.getRotation().getZ(), transform.getRotation()
+//            .getW());
 
       synchronized (headToCameraTransform)
       {
-         headToCameraTransform.set(rotation, translation);
+//         headToCameraTransform.set(rotation, translation);
          System.out.println("Got head to camera transform");
          System.out.println(headToCameraTransform);
       }

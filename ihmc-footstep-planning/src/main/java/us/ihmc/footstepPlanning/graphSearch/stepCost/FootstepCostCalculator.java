@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -22,6 +23,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final FootstepSnapperReadOnly snapper;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final ToDoubleFunction<FootstepGraphNode> heuristics;
+   private final EnvironmentHandler environmentHandler;
 
    private final RigidBodyTransform stanceStepTransform = new RigidBodyTransform();
    private final RigidBodyTransform idealStepTransform = new RigidBodyTransform();
@@ -42,12 +44,14 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstepGraphNode> heuristics,
+                                 EnvironmentHandler environmentHandler,
                                  YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
+      this.environmentHandler = environmentHandler;
 
       parentRegistry.addChild(registry);
    }
@@ -83,15 +87,17 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       edgeCost.add(Math.abs(pitchOffset.getValue() * parameters.getPitchWeight()));
       edgeCost.add(Math.abs(rollOffset.getValue() * parameters.getRollWeight()));
 
-      double rmsError = candidateSnapData.getSnapRMSError();
-      if (!Double.isNaN(rmsError))
+      if (environmentHandler != null && environmentHandler.hasTerrainMapData())
       {
-         double rmsAlpha = EuclidCoreTools.clamp(
-               (rmsError - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()), 0.0, 1.0);
-         edgeCost.add(rmsAlpha * parameters.getRMSErrorCost());
+         // cost: 0 (level, flat) - 1 (rough, inclined)
+         double traversabilityCost = 1.0 - environmentHandler.getTerrainMapData().getTraversabilityScore(candidateStep.getX(), candidateStep.getY());
+
+         // hard-coding for now, TODO add as param
+         double traversabilityScale = 0.8;
+
+         edgeCost.add(EuclidCoreTools.clamp(traversabilityCost, 0.0, 1.0) * traversabilityScale);
       }
 
-      edgeCost.add(computeAreaCost(candidateStep));
       edgeCost.add(parameters.getCostPerStep());
 
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
@@ -110,25 +116,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 
       totalCost.set(edgeCost.getDoubleValue() + heuristicCost.getDoubleValue());
       return edgeCost.getValue();
-   }
-
-   private double computeAreaCost(DiscreteFootstep footstep)
-   {
-      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
-      if (snapData != null)
-      {
-         double areaFraction = snapData.getSnapAreaFraction();
-         if (Double.isNaN(areaFraction))
-         {
-            return 0.0;
-         }
-         double percentAreaUnoccupied = Math.max(0.0, 1.0 - areaFraction);
-         return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
-      }
-      else
-      {
-         return 0.0;
-      }
    }
 
    public void resetLoggedVariables()
