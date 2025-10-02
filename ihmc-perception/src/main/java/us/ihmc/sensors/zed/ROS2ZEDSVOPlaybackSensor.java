@@ -14,7 +14,8 @@ public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
    {
       super(cameraID, zedModel, slDepthMode, svoFileName);
 
-      // Subscription to set position message
+      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, this::pause);
+      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, this::play);
       ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, position ->
       {
          setCurrentPosition((int) position.getData());
@@ -22,19 +23,12 @@ public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
             getGrabThread().setScheduled(1);
       });
 
-      // Subscribe for pause message
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, this::pause);
-
-      // Subscribe to play message
-      ros2.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, this::play);
-
       publishInfoThread = new RepeatingTaskThread("PublishSVOInfoThread", () ->
       {
          svoStatusMessage.setCurrentFileName(svoFileName);
          svoStatusMessage.setRecordMode((byte) 1); // playback
          svoStatusMessage.setCurrentPosition(getCurrentPosition());
          svoStatusMessage.setLength(getLength());
-
          ros2.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, svoStatusMessage);
       });
    }
