@@ -567,8 +567,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          FrameVector3D angularVelocity = new FrameVector3D();
          linearVelocity.set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTwistOfFrame().getLinearPart());
          angularVelocity.set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPart());
-         footStatus.getLinearVelocity().set(linearVelocity);
-         footStatus.getAngularVelocity().set(angularVelocity);
+         footStatus.getDesiredFootLinearVelocity().set(linearVelocity);
+         footStatus.getDesiredFootAngularVelocity().set(angularVelocity);
       }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
