@@ -96,7 +96,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ * We built {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} to replace this,
+ * but apparently this one still works better for some reason.
  */
 public class HumanoidKinematicsSimulation
 {

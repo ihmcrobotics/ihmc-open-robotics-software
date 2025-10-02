@@ -1,11 +1,10 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
-import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.ros2.ROS2NodeBuilder;
 
 /**
- * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ * To be used with {@link HumanoidKinematicsSimulation}.
  */
 public class HumanoidKinematicsSimulationParameters
 {
@@ -62,7 +61,7 @@ public class HumanoidKinematicsSimulationParameters
    {
       this.initialRobotY = initialRobotY;
    }
-   
+
    public double getInitialRobotZ()
    {
       return initialRobotZ;
@@ -122,7 +121,7 @@ public class HumanoidKinematicsSimulationParameters
    {
       return runNoFasterThanMaxRealtimeRate;
    }
-   
+
    public void setMaxRealtimeRate(double maxRealtimeRate)
    {
       this.maxRealtimeRate = maxRealtimeRate;
