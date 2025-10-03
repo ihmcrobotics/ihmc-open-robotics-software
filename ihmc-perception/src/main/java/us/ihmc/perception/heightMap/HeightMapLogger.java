@@ -92,7 +92,7 @@ public class HeightMapLogger
       {
          float[] floatsToLog = packArrayForFile(globalHeightMap,
                                                 heightMapCenterPoint,
-                                                (float) heightMapParameters.getGlobalWidthInMeters(),
+                                                (float) heightMapParameters.getWidthInMeters(),
                                                 (float) heightMapParameters.getCellSize());
          try
          {

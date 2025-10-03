@@ -48,7 +48,7 @@ public class ChunkedMapManager
    {
       if (heightMapParameters.getEnableChunkedMap())
       {
-         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
+         addHeightMap(latestHeightMap, heightMapCenterPoint, heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
          publishChunkedMap(chunkMessagePublisher);
       }
    }

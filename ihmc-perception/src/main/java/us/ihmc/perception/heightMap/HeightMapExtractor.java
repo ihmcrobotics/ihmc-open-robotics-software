@@ -72,10 +72,8 @@ public class HeightMapExtractor
    private final FloatPointer parametersHostPointer;
    private final FloatPointer parametersDevicePointer;
 
-   private int centerIndexLocal;
-   private int cellsPerAxisLocal;
-   private int centerIndexGlobal;
-   private int cellsPerAxisGlobal;
+   private int centerIndex;
+   private int cellsPerAxis;
 
    private final RigidBodyTransform previousSensorToWorld = new RigidBodyTransform();
    private int previousCellX;
@@ -95,7 +93,8 @@ public class HeightMapExtractor
       URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
       URL kernelPath = getClass().getResource("HeightMapExtractor.cu");
 
-      computeDerivedParameters();
+      centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), heightMapParameters.getCellSize());
+      cellsPerAxis = 2 * centerIndex + 1;
       blockSize = new dim3(BLOCK_SIZE_XY, BLOCK_SIZE_XY, 1);
 
       try
@@ -116,21 +115,21 @@ public class HeightMapExtractor
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         tempSumMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         tempCountMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32SC1);
-         tempSumOfSquaresMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         tempMotionVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         tempSumMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         tempCountMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32SC1);
+         tempSumOfSquaresMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         tempMotionVarianceMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
 
          // Initialize matrices and images
-         localMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         localVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         localMotionVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         localMeanMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         localVarianceMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         localMotionVarianceMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
 
-         globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         previousGlobalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         previousGlobalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
-         emptyGlobalHeightMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         globalMeanMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         globalVarianceMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         previousGlobalMeanMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         previousGlobalVarianceMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
+         emptyGlobalHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
 
          // Initialize transformation pointers
          sensorToGroundTransformHostPointer = new FloatPointer(16);
@@ -139,7 +138,7 @@ public class HeightMapExtractor
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
 
-         parametersHostPointer = new FloatPointer(21);
+         parametersHostPointer = new FloatPointer(19);
          parametersDevicePointer = new FloatPointer();
       }
       catch (Exception e)
@@ -147,16 +146,7 @@ public class HeightMapExtractor
          throw new RuntimeException(e);
       }
 
-      heightMapData = new HeightMapData(heightMapParameters.getCellSize(), heightMapParameters.getGlobalWidthInMeters(), 0.0, 0.0);
-   }
-
-   private void computeDerivedParameters()
-   {
-      centerIndexLocal = HeightMapTools.computeCenterIndex(heightMapParameters.getLocalWidthInMeters(), heightMapParameters.getCellSize());
-      cellsPerAxisLocal = 2 * centerIndexLocal + 1;
-
-      centerIndexGlobal = HeightMapTools.computeCenterIndex(heightMapParameters.getGlobalWidthInMeters(), heightMapParameters.getCellSize());
-      cellsPerAxisGlobal = 2 * centerIndexGlobal + 1;
+      heightMapData = new HeightMapData(heightMapParameters.getCellSize(), heightMapParameters.getWidthInMeters(), 0.0, 0.0);
    }
 
    public void reset(double footHeight)
@@ -275,7 +265,7 @@ public class HeightMapExtractor
          localMapKernel.withPointer(localMotionVarianceMap.data()).withLong(localMotionVarianceMap.step());
          localMapKernel.withPointer(parametersDevicePointer);
 
-         int computeLocalKernelGridXY = (cellsPerAxisLocal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int computeLocalKernelGridXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 localKernelDim = new dim3(computeLocalKernelGridXY, computeLocalKernelGridXY, 1);
 
          localMapKernel.run(stream, localKernelDim, blockSize, 0);
@@ -298,7 +288,7 @@ public class HeightMapExtractor
             globalMeanMap.copyTo(previousGlobalMeanMap);
             globalVarianceMap.copyTo(previousGlobalVarianceMap);
 
-            int translateKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+            int translateKernelGridSizeXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
             dim3 translateKernelGridDim = new dim3(translateKernelGridSizeXY, translateKernelGridSizeXY, 1);
 
             int shiftX = currentCellX - previousCellX;
@@ -324,7 +314,7 @@ public class HeightMapExtractor
 
       // ---------- Run the registration kernel for an empty global height map ----------
       {
-         int emptyRegistrationGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int emptyRegistrationGridSizeXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(emptyRegistrationGridSizeXY, emptyRegistrationGridSizeXY, 1);
 
          // Need to reset the empty global map before using it so when its filled it starts with all "zero" values
@@ -344,7 +334,7 @@ public class HeightMapExtractor
 
       // ---------- Run the plan offset kernel ----------
       {
-         int planOffsetGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int planOffsetGridSizeXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 planOffsetKernelGridDim = new dim3(planOffsetGridSizeXY, planOffsetGridSizeXY, 1);
 
          // Run the plan offset kernel
@@ -362,7 +352,7 @@ public class HeightMapExtractor
 
       // ---------- Run the registration kernel ----------
       {
-         int registerKernelGridSizeXY = (cellsPerAxisGlobal + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
+         int registerKernelGridSizeXY = (cellsPerAxis + BLOCK_SIZE_XY - 1) / BLOCK_SIZE_XY;
          dim3 registerKernelGridDim = new dim3(registerKernelGridSizeXY, registerKernelGridSizeXY, 1);
 
          registerKernel.withPointer(localMeanMap.data()).withLong(localMeanMap.step());
@@ -398,7 +388,7 @@ public class HeightMapExtractor
       HeightMapTools.convertToHeightMapData(hostHeightMap,
                                             heightMapData,
                                             heightMapCenterPoint,
-                                            (float) heightMapParameters.getGlobalWidthInMeters(),
+                                            (float) heightMapParameters.getWidthInMeters(),
                                             (float) heightMapParameters.getCellSize());
 
       // Save sensorOrigin as previous for next update
@@ -408,17 +398,14 @@ public class HeightMapExtractor
    public float[] populateParameterArray(HeightMapParameters parameters, CameraIntrinsics cameraIntrinsics, double groundHeightGuess)
    {
       return new float[] {(float) parameters.getCellSize(),
-                          (float) centerIndexLocal,
+                          (float) centerIndex,
+                          (float) cellsPerAxis,
                           (float) cameraIntrinsics.getHeight(),
                           (float) cameraIntrinsics.getWidth(),
                           (float) cameraIntrinsics.getCx(),
                           (float) cameraIntrinsics.getCy(),
                           (float) cameraIntrinsics.getFx(),
                           (float) cameraIntrinsics.getFy(),
-                          (float) centerIndexGlobal,
-                          (float) heightMapParameters.getLocalWidthInMeters() / 2,
-                          (float) cellsPerAxisLocal,
-                          (float) cellsPerAxisGlobal,
                           (float) parameters.getMinHeightRegistration(),
                           (float) parameters.getMaxHeightRegistration(),
                           (float) parameters.getMinClampHeight(),

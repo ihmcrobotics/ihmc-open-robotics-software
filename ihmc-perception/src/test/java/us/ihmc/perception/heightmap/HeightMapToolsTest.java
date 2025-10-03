@@ -100,7 +100,7 @@ public class HeightMapToolsTest
       HeightMapParameters heightMapParameters = new HeightMapParameters();
 
       double cellSize = heightMapParameters.getCellSize();
-      double terrainWidth = heightMapParameters.getTerrainWidthInMeters();
+      double terrainWidth = heightMapParameters.getWidthInMeters();
       double centerX = 0.0;
       double centerY = 0.0;
 
@@ -180,7 +180,7 @@ public class HeightMapToolsTest
          HeightMapTools.convertToHeightMapData(heightMapMat,
                                                heightMapData,
                                                new Point3D(0.0, 0.0, 0.0),
-                                               (float) heightMapParameters.getTerrainWidthInMeters(),
+                                               (float) heightMapParameters.getWidthInMeters(),
                                                (float) heightMapParameters.getCellSize());
       }
 

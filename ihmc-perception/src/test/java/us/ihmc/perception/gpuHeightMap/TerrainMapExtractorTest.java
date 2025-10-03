@@ -64,9 +64,9 @@ public class TerrainMapExtractorTest
       double gridResolution = 0.02;
       double terrainWidthXY = 1.0;
       heightMapParameters.setCellSize(gridResolution);
-      heightMapParameters.setTerrainWidthInMeters(terrainWidthXY);
+      heightMapParameters.setWidthInMeters(terrainWidthXY);
 
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), gridResolution);
       int cellsPerAxis = (centerIndex * 2) + 1;
 
       TerrainMapParameters steppableRegionParameters = new TerrainMapParameters();
@@ -111,8 +111,8 @@ public class TerrainMapExtractorTest
       Plane3D plane = new Plane3D(gridCenter, normal);
 
       heightMapParameters.setCellSize(gridResolution);
-      heightMapParameters.setTerrainWidthInMeters(terrainWidthXY);
-      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getTerrainWidthInMeters(), gridResolution);
+      heightMapParameters.setWidthInMeters(terrainWidthXY);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getWidthInMeters(), gridResolution);
       int cellsPerAxis = 2 * centerIndex + 1;
 
       Mat heightMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);

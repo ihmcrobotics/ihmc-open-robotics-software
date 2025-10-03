@@ -78,18 +78,8 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
       set(HeightMapParameters.cellSize, cellSize);
    }
 
-   default void setLocalWidthInMeters(double localWidthInMeters)
+   default void setWidthInMeters(double widthInMeters)
    {
-      set(HeightMapParameters.localWidthInMeters, localWidthInMeters);
-   }
-
-   default void setTerrainWidthInMeters(double terrainWidthInMeters)
-   {
-      set(HeightMapParameters.terrainWidthInMeters, terrainWidthInMeters);
-   }
-
-   default void setGlobalWidthInMeters(double globalWidthInMeters)
-   {
-      set(HeightMapParameters.globalWidthInMeters, globalWidthInMeters);
+      set(HeightMapParameters.widthInMeters, widthInMeters);
    }
 }
