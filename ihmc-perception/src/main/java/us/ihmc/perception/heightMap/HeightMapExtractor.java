@@ -62,10 +62,10 @@ public class HeightMapExtractor
    private final CUDAKernel emptyRegisterKernel;
 
    private final float[] worldToGroundTransformArray = new float[16];
-   private final float[] sensorToGroundTransformArray = new float[16];
+   private final float[] sensorToWorldAlignedGroundTransformArray = new float[16];
 
-   private final FloatPointer sensorToGroundTransformHostPointer;
-   private final FloatPointer sensorToGroundTransformDevicePointer;
+   private final FloatPointer sensorToWorldAlignedGroundTransformHostPointer;
+   private final FloatPointer sensorToWorldAlignedGroundTransformDevicePointer;
    private final FloatPointer zUpCameraToWorldAlignedGroundHostPointer;
    private final FloatPointer zUpCameraToWorldAlignedGroundDevicePointer;
 
@@ -132,8 +132,8 @@ public class HeightMapExtractor
          emptyGlobalHeightMap = new GpuMat(cellsPerAxis, cellsPerAxis, opencv_core.CV_32FC1);
 
          // Initialize transformation pointers
-         sensorToGroundTransformHostPointer = new FloatPointer(16);
-         sensorToGroundTransformDevicePointer = new FloatPointer();
+         sensorToWorldAlignedGroundTransformHostPointer = new FloatPointer(16);
+         sensorToWorldAlignedGroundTransformDevicePointer = new FloatPointer();
 
          zUpCameraToWorldAlignedGroundHostPointer = new FloatPointer(16);
          zUpCameraToWorldAlignedGroundDevicePointer = new FloatPointer();
@@ -219,10 +219,13 @@ public class HeightMapExtractor
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         sensorToWorldAlignedGround.get(sensorToGroundTransformArray);
-         sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
-         CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
-         CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
+         sensorToWorldAlignedGround.get(this.sensorToWorldAlignedGroundTransformArray);
+         sensorToWorldAlignedGroundTransformHostPointer.put(this.sensorToWorldAlignedGroundTransformArray);
+         CUDATools.mallocAsync(sensorToWorldAlignedGroundTransformDevicePointer, this.sensorToWorldAlignedGroundTransformArray.length, stream);
+         CUDATools.memcpyAsync(sensorToWorldAlignedGroundTransformDevicePointer,
+                               sensorToWorldAlignedGroundTransformHostPointer,
+                               this.sensorToWorldAlignedGroundTransformArray.length,
+                               stream);
 
          // Clearing all the temp maps so they are ready for the next update call
          cudaMemset2DAsync(tempSumMap.data(), tempSumMap.step(), 0, (long) tempSumMap.cols() * Float.BYTES, tempSumMap.rows());
@@ -248,7 +251,7 @@ public class HeightMapExtractor
          updateTempMapsKernel.withPointer(tempSumOfSquaresMap.data()).withLong(tempSumOfSquaresMap.step());
          updateTempMapsKernel.withPointer(tempMotionVarianceMap.data()).withLong(tempMotionVarianceMap.step());
          updateTempMapsKernel.withPointer(parametersDevicePointer);
-         updateTempMapsKernel.withPointer(sensorToGroundTransformDevicePointer);
+         updateTempMapsKernel.withPointer(sensorToWorldAlignedGroundTransformDevicePointer);
          updateTempMapsKernel.withFloat(linearMotionMagnitude);
          updateTempMapsKernel.withFloat(angularMotionMagnitude);
 
@@ -272,7 +275,7 @@ public class HeightMapExtractor
 
          updateTempMapsDim.close();
          localKernelDim.close();
-         cudaFreeAsync(sensorToGroundTransformDevicePointer, stream);
+         cudaFreeAsync(sensorToWorldAlignedGroundTransformDevicePointer, stream);
          checkCUDAError();
       }
 
@@ -436,7 +439,7 @@ public class HeightMapExtractor
       emptyRegisterKernel.close();
 
       // Clean up each resource
-      deallocateFloatPointer(sensorToGroundTransformHostPointer, sensorToGroundTransformDevicePointer, stream);
+      deallocateFloatPointer(sensorToWorldAlignedGroundTransformHostPointer, sensorToWorldAlignedGroundTransformDevicePointer, stream);
       deallocateFloatPointer(zUpCameraToWorldAlignedGroundHostPointer, zUpCameraToWorldAlignedGroundDevicePointer, stream);
       deallocateFloatPointer(parametersHostPointer, parametersDevicePointer, stream);
 
