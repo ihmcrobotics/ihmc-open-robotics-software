@@ -28,9 +28,6 @@ module perception_msgs
       const octet ARUCO_MARKER_NODE_TYPE =
       3;
 
-      const octet CENTERPOSE_NODE_TYPE =
-      4;
-
       const octet STATIC_RELATIVE_NODE_TYPE =
       5;
 

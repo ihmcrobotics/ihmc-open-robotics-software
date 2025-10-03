@@ -18,7 +18,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public static final byte DETECTABLE_SCENE_NODE_TYPE = (byte) 1;
    public static final byte PREDEFINED_RIGID_BODY_NODE_TYPE = (byte) 2;
    public static final byte ARUCO_MARKER_NODE_TYPE = (byte) 3;
-   public static final byte CENTERPOSE_NODE_TYPE = (byte) 4;
    public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 5;
    public static final byte PRIMITIVE_RIGID_BODY_NODE_TYPE = (byte) 6;
    public static final byte YOLO_NODE_TYPE = (byte) 7;
