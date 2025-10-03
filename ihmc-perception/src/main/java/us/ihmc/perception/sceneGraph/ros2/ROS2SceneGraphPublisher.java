@@ -1,7 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
-import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
@@ -24,7 +23,6 @@ import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
@@ -121,22 +119,6 @@ public class ROS2SceneGraphPublisher
             arUcoMarkerNodeMessage.setMarkerSize((float) arUcoMarkerNode.getMarkerSize());
             arUcoMarkerNodeMessage.setBreakFrequency((float) arUcoMarkerNode.getBreakFrequency());
             detectableSceneNodeMessage = arUcoMarkerNodeMessage.getDetectableSceneNode();
-         }
-         else if (sceneNode instanceof CenterposeNode centerposeNode)
-         {
-            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.CENTERPOSE_NODE_TYPE);
-            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCenterposeSceneNodes().size());
-            CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().add();
-            centerposeNodeMessage.setConfidence(centerposeNode.getConfidence());
-            centerposeNodeMessage.setObjectType(centerposeNode.getObjectType());
-            centerposeNodeMessage.setObjectId(centerposeNode.getObjectID());
-            for (int i = 0; i < 8; ++i)
-            {
-               centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);
-               centerposeNodeMessage.getBoundingBoxVertices2d()[i].set(centerposeNode.getVertices2D()[i]);
-            }
-            centerposeNodeMessage.setEnableTracking(centerposeNode.isEnableTracking());
-            detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
          }
          else if (sceneNode instanceof YOLOv8Node yoloNode)
          {
