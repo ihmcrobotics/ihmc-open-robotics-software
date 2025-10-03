@@ -104,7 +104,7 @@ __global__ void heightMapUpdateDataKernel(const unsigned short* __restrict__ dep
 
     // Get the correct cell index for the maps
     float2 xyCoords = make_float2(queryPointInZUpFrame.x, queryPointInZUpFrame.y);
-    int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(params[HALF_LOCAL_WIDTH_IN_METERS], 0.0f), cellSize, localCenterIndex);
+    int2 cellIndex = coordinate_to_indices(xyCoords, make_float2(0.0f, 0.0f), cellSize, localCenterIndex);
 
     // Bounds check against the local map dimensions because we are scanning the entire depth image
     if (cellIndex.x < 0 || cellIndex.x >= localCellsPerAxis || cellIndex.y < 0 || cellIndex.y >= localCellsPerAxis)
@@ -256,7 +256,7 @@ __global__ void heightMapRegistrationKernel(const float *__restrict__ localMeanM
 
     int2 localIndex = make_int2(xIndex, yIndex);
 
-    int2 globalIndex = getGlobalIndexFromLocalIndex(localIndex, zUpCameraToWorldAlignedGround, params);
+    int2 globalIndex = make_int2(xIndex, yIndex);// getGlobalIndexFromLocalIndex(localIndex, zUpCameraToWorldAlignedGround, params);
 
     if (globalIndex.x < 0 || globalIndex.x >= globalCellsPerAxis || globalIndex.y < 0 || globalIndex.y >= globalCellsPerAxis)
         return;

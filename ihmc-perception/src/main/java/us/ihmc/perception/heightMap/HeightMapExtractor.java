@@ -116,15 +116,15 @@ public class HeightMapExtractor
          planOffsetKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
          emptyRegisterKernel.enableKernelTimings(PRINT_TIMING_FOR_KERNELS);
 
-         tempSumMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         tempCountMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32SC1);
-         tempSumOfSquaresMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         tempMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
+         tempSumMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         tempCountMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32SC1);
+         tempSumOfSquaresMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         tempMotionVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
 
          // Initialize matrices and images
-         localMeanMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         localVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
-         localMotionVarianceMap = new GpuMat(cellsPerAxisLocal, cellsPerAxisLocal, opencv_core.CV_32FC1);
+         localMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         localVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
+         localMotionVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
 
          globalMeanMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
          globalVarianceMap = new GpuMat(cellsPerAxisGlobal, cellsPerAxisGlobal, opencv_core.CV_32FC1);
@@ -190,17 +190,24 @@ public class HeightMapExtractor
       CUDATools.mallocAsync(parametersDevicePointer, parametersArray.length, stream);
       CUDATools.memcpyAsync(parametersDevicePointer, parametersHostPointer, parametersArray.length, stream);
 
-      RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
       // Remove rotation from transformation
+      RigidBodyTransform groundToWorldNoRotation = new RigidBodyTransform(groundToWorldTransform);
       groundToWorldNoRotation.getRotation().setIdentity();
 
-      RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
       // Invert translation-only transform
+      RigidBodyTransform worldToGroundNoRotation = new RigidBodyTransform(groundToWorldNoRotation);
       worldToGroundNoRotation.invert();
 
       // This transformation only has rotation
       RigidBodyTransform groundToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
       groundToWorldAlignedGround.multiply(groundToWorldTransform);
+
+      // Step 3: Multiply with full ground->world to keep rotation, giving aligned ground
+      RigidBodyTransform sensorToWorldAlignedGround = new RigidBodyTransform(worldToGroundNoRotation);
+      sensorToWorldAlignedGround.multiply(groundToWorldTransform);
+
+      // Step 4: Apply sensor->ground transform
+      sensorToWorldAlignedGround.multiply(sensorToGroundTransform);
 
       groundToWorldAlignedGround.get(worldToGroundTransformArray);
       zUpCameraToWorldAlignedGroundHostPointer.put(worldToGroundTransformArray);
@@ -222,7 +229,7 @@ public class HeightMapExtractor
          AxisAngle axisAngle = new AxisAngle(rotation);
          float angularMotionMagnitude = (float) Math.abs(axisAngle.getAngle());
 
-         sensorToGroundTransform.get(sensorToGroundTransformArray);
+         sensorToWorldAlignedGround.get(sensorToGroundTransformArray);
          sensorToGroundTransformHostPointer.put(sensorToGroundTransformArray);
          CUDATools.mallocAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformArray.length, stream);
          CUDATools.memcpyAsync(sensorToGroundTransformDevicePointer, sensorToGroundTransformHostPointer, sensorToGroundTransformArray.length, stream);
