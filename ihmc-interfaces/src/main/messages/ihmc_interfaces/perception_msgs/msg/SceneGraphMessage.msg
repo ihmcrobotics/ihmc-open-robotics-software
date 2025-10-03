@@ -40,9 +40,6 @@ perception_msgs/PredefinedRigidBodySceneNodeMessage[<=200] predefined_rigid_body
 # ArUco marker scene nodes
 perception_msgs/ArUcoMarkerNodeMessage[<=200] aruco_marker_scene_nodes
 
-# Centerpose scene nodes
-perception_msgs/CenterposeNodeMessage[<=200] centerpose_scene_nodes
-
 # Static relative scene nodes
 perception_msgs/StaticRelativeSceneNodeMessage[<=200] static_relative_scene_nodes
 

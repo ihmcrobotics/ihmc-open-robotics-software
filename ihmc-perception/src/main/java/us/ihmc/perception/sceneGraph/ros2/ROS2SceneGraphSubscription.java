@@ -2,7 +2,6 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
-import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
@@ -268,13 +267,6 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setArUcoMarkerNodeMessage(arUcoMarkerNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode().getSceneNode());
-         }
-         case SceneGraphMessage.CENTERPOSE_NODE_TYPE ->
-         {
-            CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().get(indexInTypesList);
-            subscriptionNode.setCenterposeNodeMessage(centerposeNodeMessage);
-            subscriptionNode.setDetectableSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode());
-            subscriptionNode.setSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.YOLO_NODE_TYPE ->
          {
