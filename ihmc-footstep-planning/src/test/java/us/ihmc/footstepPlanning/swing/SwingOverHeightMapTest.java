@@ -81,7 +81,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
    private static final double heightMapResolution = 0.03;
 
    private SimulationConstructionSet2 scs;
@@ -485,6 +485,7 @@ public class SwingOverHeightMapTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
+      request.setTerrainMapData(terrainMapData);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
