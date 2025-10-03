@@ -19,7 +19,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.zed.global.zed;
 
@@ -30,7 +30,7 @@ public class RDXDepthStreamingDemo
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(RDXDepthStreamingDemo.class.getSimpleName());
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-   private final ZEDSVOPlaybackSensor zedPlaybackSensor = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+   private final ROS2ZEDSVOPlaybackSensor zedPlaybackSensor = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, zed.SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
 
    private final CUDADepthColorizer depthColorizer = new CUDADepthColorizer();
    private final ROS2SRTSensorStreamer sensorStreamer = new ROS2SRTSensorStreamer(ros2Node);
