@@ -108,11 +108,11 @@ __global__ void test_best_fit_plane(float* points, int number_of_points, float* 
         zz += pz * pz;
     }
 
-    float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
-    float z_variance_vector[3] = {-xz, -yz, -z};
-    float coefficients[3] = {0.0f, 0.0f, 0.0f};
-    float squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
-    squared_error_result[0] = squared_error;
+    double covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
+    double z_variance_vector[3] = {-xz, -yz, -z};
+    double coefficients[3] = {0.0f, 0.0f, 0.0f};
+    double squared_error = solveForPlaneCoefficients(covariance_matrix, z_variance_vector, zz, coefficients);
+    squared_error_result[0] = static_cast<float>(squared_error);
 
     point_result[0] = x / n;
     point_result[1] = y / n;

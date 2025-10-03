@@ -78,7 +78,7 @@ __device__ float3 cross3(const float3 &a, const float3 &b)
  * Returns a 9 element array that is the inverse of a 9 element argument. The data is expected to be row major,
  * or [row1, row2, row3];
  **/
-__device__ double* invert3x3Matrix(double* matrix, double* result)
+__device__ void invert3x3Matrix(double* matrix, double* result)
 {
     double m00 = matrix[0];
     double m01 = matrix[1];
