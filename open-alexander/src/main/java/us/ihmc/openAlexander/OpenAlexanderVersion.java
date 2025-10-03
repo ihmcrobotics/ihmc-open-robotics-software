@@ -216,7 +216,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public HumanoidURDFParameterInterface getURDFParameters()
+   public OpenAlexanderURDFParameters getURDFParameters()
    {
       if (urdfParameters != null)
          return urdfParameters;

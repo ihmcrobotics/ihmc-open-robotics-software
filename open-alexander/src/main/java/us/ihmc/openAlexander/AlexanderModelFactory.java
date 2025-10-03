@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -21,7 +22,7 @@ import java.util.function.Predicate;
 public class AlexanderModelFactory
 {
    private final String[] resourceModelsToBeLogged;
-   private final HumanoidURDFParameterInterface urdfParameters;
+   private final OpenAlexanderURDFParameters urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
    private final AlexanderVersionInterface alexanderVersion;
@@ -67,7 +68,7 @@ public class AlexanderModelFactory
 
       // Nadia supports URDF models
       Class<?> clazz = URDFModel.class;
-      return new DefaultLogModelProvider<>(clazz, urdfParameters.getURDFModelName(), urdfParameters.getURDFAsInputStream(), filter, urdfParameters.getResourceDirectories());
+      return new DefaultLogModelProvider<>(clazz, urdfParameters.getURDFModelName(), urdfParameters.getURDFAsInputStreamForLog(), filter, urdfParameters.getLoggedResourceDirectories());
    }
 
    public RobotDefinition getSCS1RobotDefinition()

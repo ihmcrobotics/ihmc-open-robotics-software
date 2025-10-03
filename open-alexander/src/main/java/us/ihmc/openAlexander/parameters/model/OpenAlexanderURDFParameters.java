@@ -23,6 +23,8 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
    private static final String[] RESOURCE_DIRECTORIES = new String[] {"alexander_V1_description/",
                                                                       "alexander_V1_description/urdf/",
                                                                       "alexander_V1_description/meshes/"};
+
+   private static final String[] LOGGED_RESOURCE_DIRECTORIES = new String[] {};
    private static final String[] LOGGED_RESOURCES = {"alexander_V1_description/"};
 
    public static final String URDF_FULL_BODY = "alexander_V1_description/urdf/alexander_v1.fullBody.urdf";
@@ -58,6 +60,16 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
    public String[] getLoggedResources()
    {
       return LOGGED_RESOURCES;
+   }
+
+   public String[] getLoggedResourceDirectories()
+   {
+      return LOGGED_RESOURCE_DIRECTORIES;
+   }
+
+   public InputStream getURDFAsInputStreamForLog()
+   {
+      return null;
    }
 
    @Override
