@@ -130,6 +130,17 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
       }
+
+      if (!getChildren().isEmpty() && !treeWidgetExpanded)
+      {
+         float offsetX = ImGui.getCursorScreenPosX();
+         float offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.2f;
+         float width = ImGui.getFontSize() / 2.5f;
+         float height = ImGui.getFrameHeight() * 0.5f;
+         int color = ImGui.getColorU32(ImGuiCol.Text);
+         ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY + height, color);
+         ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY, color);
+      }
    }
 
    public void renderTreeViewIconArea()

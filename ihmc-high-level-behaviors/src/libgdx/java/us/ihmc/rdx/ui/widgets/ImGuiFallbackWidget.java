@@ -3,7 +3,9 @@ package us.ihmc.rdx.ui.widgets;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.rdx.imgui.ImGuiTools;
 
 import java.util.ArrayList;
 
@@ -56,14 +58,15 @@ public class ImGuiFallbackWidget
          bottomPolygon[i] = new ImVec2();
    }
 
-   public void render(float lineHeight)
+   public boolean render()
    {
+      float lineHeight = ImGui.getFrameHeight();
       float fontSize = ImGui.getFontSize();
 
       float scale = 0.7f; // Make parameter if desired
       scale *= fontSize;
 
-      center.set(0.6f * fontSize, 0.35f * fontSize);
+      center.set(0.3f * fontSize, 0.35f * fontSize);
 
       if (lineHeight == ImGui.getFrameHeight())
          center.addY(ImGui.getStyle().getFramePaddingY());
@@ -86,6 +89,7 @@ public class ImGuiFallbackWidget
       }
 
       float itemWidth = xMax - xMin;
+      boolean isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();
@@ -94,7 +98,7 @@ public class ImGuiFallbackWidget
       for (int i = 0; i < bottomPolygon.length; i++)
          bottomPolygon[i].set(cursorScreenPosX + bottomPolygon[i].x, cursorScreenPosY + bottomPolygon[i].y);
 
-      lineColor = ImGui.getColorU32(ImGuiCol.Text);
+      lineColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text); // TODO: Need to fill instead
 
       for (int i = 0; i < topPolygon.length - 1; i++)
          drawLine(topPolygon[i].x, topPolygon[i].y, topPolygon[i + 1].x, topPolygon[i + 1].y);
@@ -104,6 +108,7 @@ public class ImGuiFallbackWidget
       ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 0.8f));
 
       ImGui.newLine();
+      return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
    }
 
    private void drawLine(float x0, float y0, float x1, float y1)

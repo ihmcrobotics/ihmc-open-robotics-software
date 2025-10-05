@@ -54,20 +54,18 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
       RDXBehaviorTreeRootNode actionSequence = RDXBehaviorTreeTools.findRootNode(this);
       if (actionSequence != null)
       {
-         // The arrow can move back to take the place of the expand collapse, since this is a leaf node
-         ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiExpandCollapseRenderer.getPlaceholderWidth());
+         // Give the arrow a little space to the left, like the other icons
+         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
 
          // Not displaying this now until we calculate it correctly. @dcalvert
          if (state.getConcurrencyRank() != 1)
          {
             ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-            ImGui.text(state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank()));
+            String text = state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank());
+            ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiTools.calcTextSizeX(text) - ImGui.getStyle().getItemSpacingX());
+            ImGui.text(text);
             ImGui.popStyleColor();
             ImGui.sameLine();
-         }
-         else
-         {
-            ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("2") + ImGui.getStyle().getItemSpacingX());
          }
 
          boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
