@@ -35,8 +35,8 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
       node.renderGeneralRowBeginWidgets();
       node.renderTreeViewIconArea();
 
-      if (node.getParent() != null)
-         node.getParent().getChildrenDescriptionAligner().align();
+//      if (node.getParent() != null)
+//         node.getParent().getChildrenDescriptionAligner().align();
       node.renderNodeName();
 
       ImGui.popStyleVar();
