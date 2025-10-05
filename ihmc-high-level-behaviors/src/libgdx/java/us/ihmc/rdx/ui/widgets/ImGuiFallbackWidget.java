@@ -48,7 +48,6 @@ public class ImGuiFallbackWidget
    private final Point2D32 center = new Point2D32();
    private final ImVec2[] topPolygon = new ImVec2[topPart.size()];
    private final ImVec2[] bottomPolygon = new ImVec2[bottomPart.size()];
-   private int lineColor;
 
    public ImGuiFallbackWidget()
    {
@@ -98,21 +97,56 @@ public class ImGuiFallbackWidget
       for (int i = 0; i < bottomPolygon.length; i++)
          bottomPolygon[i].set(cursorScreenPosX + bottomPolygon[i].x, cursorScreenPosY + bottomPolygon[i].y);
 
-      lineColor = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text); // TODO: Need to fill instead
+      int hoverColor = ImGui.getColorU32(ImGuiCol.ButtonHovered);
+      int lineColor = ImGui.getColorU32(ImGuiCol.Text);
+
+      if (isHovered)
+      {
+         int offset = 14;
+         int size = 6;
+         ImVec2[] subpoly = new ImVec2[size];
+         for (int i = 0; i < size; i++)
+            subpoly[i] = topPolygon[(i + offset) % topPolygon.length];
+         ImGui.getWindowDrawList().addConvexPolyFilled(subpoly, subpoly.length, hoverColor);
+
+         offset = 5;
+         for (int i = 0; i < size; i++)
+            subpoly[i] = topPolygon[(i + offset) % topPolygon.length];
+         ImGui.getWindowDrawList().addConvexPolyFilled(subpoly, subpoly.length, hoverColor);
+
+         subpoly = new ImVec2[4];
+         subpoly[0] = topPolygon[13];
+         subpoly[1] = topPolygon[14];
+         subpoly[2] = topPolygon[1];
+         subpoly[3] = topPolygon[2];
+         ImGui.getWindowDrawList().addConvexPolyFilled(subpoly, subpoly.length, hoverColor);
+         subpoly[0] = topPolygon[12];
+         subpoly[1] = topPolygon[13];
+         subpoly[2] = topPolygon[2];
+         subpoly[3] = topPolygon[3];
+         ImGui.getWindowDrawList().addConvexPolyFilled(subpoly, subpoly.length, hoverColor);
+         subpoly[0] = topPolygon[11];
+         subpoly[1] = topPolygon[12];
+         subpoly[2] = topPolygon[3];
+         subpoly[3] = topPolygon[4];
+         ImGui.getWindowDrawList().addConvexPolyFilled(subpoly, subpoly.length, hoverColor);
+         subpoly[0] = topPolygon[10];
+         subpoly[1] = topPolygon[11];
+         subpoly[2] = topPolygon[4];
+         subpoly[3] = topPolygon[5];
+         ImGui.getWindowDrawList().addConvexPolyFilled(subpoly, subpoly.length, hoverColor);
+
+         ImGui.getWindowDrawList().addRectFilled(bottomPolygon[0].x, bottomPolygon[0].y, bottomPolygon[2].x, bottomPolygon[2].y, hoverColor);
+      }
 
       for (int i = 0; i < topPolygon.length - 1; i++)
-         drawLine(topPolygon[i].x, topPolygon[i].y, topPolygon[i + 1].x, topPolygon[i + 1].y);
+         ImGui.getWindowDrawList().addLine(topPolygon[i].x, topPolygon[i].y, topPolygon[i + 1].x, topPolygon[i + 1].y, lineColor);
       for (int i = 0; i < bottomPolygon.length - 1; i++)
-         drawLine(bottomPolygon[i].x, bottomPolygon[i].y, bottomPolygon[i + 1].x, bottomPolygon[i + 1].y);
+         ImGui.getWindowDrawList().addLine(bottomPolygon[i].x, bottomPolygon[i].y, bottomPolygon[i + 1].x, bottomPolygon[i + 1].y, lineColor);
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 0.8f));
 
       ImGui.newLine();
       return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
-   }
-
-   private void drawLine(float x0, float y0, float x1, float y1)
-   {
-      ImGui.getWindowDrawList().addLine(x0, y0, x1, y1, lineColor);
    }
 }
