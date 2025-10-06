@@ -2,7 +2,6 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
-import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
@@ -18,13 +17,11 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -38,7 +35,6 @@ import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -166,15 +162,6 @@ public class ROS2SceneGraphSubscription
             arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
             // TODO: FIXME TOMASZ PLEASE ADD INSTANT DETECTION UPDATE
          }
-         if (localNode instanceof CenterposeNode centerposeNode)
-         {
-            centerposeNode.setConfidence(subscriptionNode.getCenterposeNodeMessage().getConfidence());
-            centerposeNode.setBoundingBoxVertices(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
-            centerposeNode.setBoundingBoxVertices2D(Arrays.stream(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices2d())
-                                                          .map(Point2D::new)
-                                                          .toArray(Point2D[]::new));
-            centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
-         }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
             yoloNode.fromMessage(subscriptionNode.getYOLONodeMessage());
@@ -280,13 +267,6 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setArUcoMarkerNodeMessage(arUcoMarkerNodeMessage);
             subscriptionNode.setDetectableSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(arUcoMarkerNodeMessage.getDetectableSceneNode().getSceneNode());
-         }
-         case SceneGraphMessage.CENTERPOSE_NODE_TYPE ->
-         {
-            CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().get(indexInTypesList);
-            subscriptionNode.setCenterposeNodeMessage(centerposeNodeMessage);
-            subscriptionNode.setDetectableSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode());
-            subscriptionNode.setSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode().getSceneNode());
          }
          case SceneGraphMessage.YOLO_NODE_TYPE ->
          {

@@ -3,18 +3,13 @@ package us.ihmc.avatar.networkProcessor;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlModule;
-import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
-import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
-import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarStereoREAStateUpdater;
-import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -23,10 +18,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
-import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
-import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
@@ -35,8 +26,6 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class HumanoidNetworkProcessor implements CloseableAndDisposable
 {
@@ -80,17 +69,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 //      if (parameters.isUseHeightQuadTreeToolboxModule())
 //         humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
       if (parameters.isUseFiducialDetectorToolboxModule())
-         humanoidNetworkProcessor.setupFiducialDetectorToolboxModule();
-      if (parameters.isUseObjectDetectorToolboxModule())
-         humanoidNetworkProcessor.setupObjectDetectorToolboxModule();
-      if (parameters.isUseRobotEnvironmentAwerenessModule())
-         humanoidNetworkProcessor.setupRobotEnvironmentAwerenessModule(parameters.getREAConfigurationFilePath());
-      if (parameters.isUseBipedalSupportPlanarRegionPublisherModule())
-         humanoidNetworkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       if (parameters.isUseWalkingPreviewModule())
          humanoidNetworkProcessor.setupWalkingPreviewModule(parameters.isVisualizeWalkingPreviewModule());
-      if (parameters.isUseHumanoidAvatarREAStateUpdater())
-         humanoidNetworkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       if (parameters.isUseDirectionalControlModule())
     	 humanoidNetworkProcessor.setupDirectionalControlModule(false);
 
@@ -341,89 +321,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 //      }
 //   }
 
-   public FiducialDetectorToolboxModule setupFiducialDetectorToolboxModule()
-   {
-      checkIfModuleCanBeCreated(FiducialDetectorToolboxModule.class);
-
-      try
-      {
-         FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
-                                                                                  robotModel.getTarget(),
-                                                                                  robotModel.createFullRobotModel(),
-                                                                                  robotModel.getLogModelProvider());
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public ObjectDetectorToolboxModule setupObjectDetectorToolboxModule()
-   {
-      checkIfModuleCanBeCreated(ObjectDetectorToolboxModule.class);
-
-      try
-      {
-         ObjectDetectorToolboxModule module = new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),
-                                                                              robotModel.createFullRobotModel(),
-                                                                              robotModel.getLogModelProvider());
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public LIDARBasedREAModule setupRobotEnvironmentAwerenessModule(String reaConfigurationFilePath)
-   {
-      checkIfModuleCanBeCreated(LIDARBasedREAModule.class);
-
-      try
-      {
-         LIDARBasedREAModule module;
-
-         REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(getOrCreateROS2Node(), outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
-         FilePropertyHelper filePropertyHelper;
-         if (reaConfigurationFilePath != null)
-            filePropertyHelper = new FilePropertyHelper(reaConfigurationFilePath);
-         else
-            filePropertyHelper = new FilePropertyHelper(DEFAULT_REA_CONFIG_FILE_PATH);
-         module = LIDARBasedREAModule.createRemoteModule(filePropertyHelper, networkProvider);
-         modulesToClose.add(module::stop);
-         modulesToStart.add(module::start);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public BipedalSupportPlanarRegionPublisher setupBipedalSupportPlanarRegionPublisherModule()
-   {
-      checkIfModuleCanBeCreated(BipedalSupportPlanarRegionPublisher.class);
-
-      try
-      {
-         BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel, getOrCreateROS2Node());
-         modulesToClose.add(module);
-         modulesToStart.add(module::start);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
    public WalkingControllerPreviewToolboxModule setupWalkingPreviewModule(boolean enableYoVariableServer)
    {
       checkIfModuleCanBeCreated(WalkingControllerPreviewToolboxModule.class);
@@ -441,40 +338,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public HumanoidAvatarREAStateUpdater setupHumanoidAvatarLidarREAStateUpdater()
-   {
-      checkIfModuleCanBeCreated(HumanoidAvatarREAStateUpdater.class);
-
-      try
-      {
-         HumanoidAvatarREAStateUpdater module = new HumanoidAvatarREAStateUpdater(robotModel, getOrCreateROS2Node());
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public HumanoidAvatarStereoREAStateUpdater setupHumanoidAvatarRealSenseREAStateUpdater()
-   {
-      checkIfModuleCanBeCreated(HumanoidAvatarStereoREAStateUpdater.class);
-
-      try
-      {
-         HumanoidAvatarStereoREAStateUpdater module = new HumanoidAvatarStereoREAStateUpdater(robotModel, stereoInputTopic);
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-   
    public DirectionalControlModule setupDirectionalControlModule(boolean enableYoVariableServer)
    {
 	  checkIfModuleCanBeCreated(DirectionalControlModule.class);

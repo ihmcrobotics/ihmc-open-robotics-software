@@ -1,7 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
-import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.FoundationPoseNodeMessage;
@@ -25,7 +24,6 @@ public class ROS2SceneGraphSubscriptionNode
    private DetectableSceneNodeMessage detectableSceneNodeMessage;
    private PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
-   private CenterposeNodeMessage centerposeNodeMessage;
    private YOLOv8NodeMessage yoloNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
@@ -40,7 +38,6 @@ public class ROS2SceneGraphSubscriptionNode
       detectableSceneNodeMessage = null;
       predefinedRigidBodySceneNodeMessage = null;
       arUcoMarkerNodeMessage = null;
-      centerposeNodeMessage = null;
       yoloNodeMessage = null;
       staticRelativeSceneNodeMessage = null;
       doorNodeMessage = null;
@@ -96,16 +93,6 @@ public class ROS2SceneGraphSubscriptionNode
    public void setArUcoMarkerNodeMessage(ArUcoMarkerNodeMessage arUcoMarkerNodeMessage)
    {
       this.arUcoMarkerNodeMessage = arUcoMarkerNodeMessage;
-   }
-
-   public CenterposeNodeMessage getCenterposeNodeMessage()
-   {
-      return centerposeNodeMessage;
-   }
-
-   public void setCenterposeNodeMessage(CenterposeNodeMessage centerposeNodeMessage)
-   {
-      this.centerposeNodeMessage = centerposeNodeMessage;
    }
 
    public YOLOv8NodeMessage getYOLONodeMessage()

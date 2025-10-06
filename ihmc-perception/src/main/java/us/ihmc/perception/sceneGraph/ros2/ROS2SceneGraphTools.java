@@ -7,12 +7,10 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
-import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.foundationPose.FoundationPoseNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
@@ -23,8 +21,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMecha
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
-
-import java.util.Arrays;
 
 public class ROS2SceneGraphTools
 {
@@ -76,20 +72,6 @@ public class ROS2SceneGraphTools
                                          subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId(),
                                          subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize(),
                                          crdtInfo);
-      }
-      else if (nodeType == SceneGraphMessage.CENTERPOSE_NODE_TYPE)
-      {
-         sceneNode = new CenterposeNode(nodeID,
-                                        nodeName,
-                                        subscriptionNode.getCenterposeNodeMessage().getEnableTracking(),
-                                        subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString(),
-                                        subscriptionNode.getCenterposeNodeMessage().getObjectId(),
-                                        subscriptionNode.getCenterposeNodeMessage().getConfidence(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
-                                        Arrays.stream(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices2d())
-                                              .map(Point2D::new)
-                                              .toArray(Point2D[]::new),
-                                        crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
       {
