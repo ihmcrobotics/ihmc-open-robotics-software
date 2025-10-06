@@ -35,7 +35,7 @@ mainDependencies {
    api("org.bytedeco:opencl:$openclVersion:linux-arm64")
    api("org.bytedeco:opencl:$openclVersion:linux-x86_64")
    api("org.bytedeco:opencl:$openclVersion:windows-x86_64")
-   val librealsense2Version = "2.53.1-1.5.11"
+   val librealsense2Version = "2.53.1-1.5.11-ihmc-3" // https://robotlabfiles.ihmc.us/repository/us/ihmc/librealsense2/2.53.1-1.5.11-ihmc-3/
    api("us.ihmc:librealsense2:$librealsense2Version")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-arm64")
    api("us.ihmc:librealsense2:$librealsense2Version:linux-x86_64")
