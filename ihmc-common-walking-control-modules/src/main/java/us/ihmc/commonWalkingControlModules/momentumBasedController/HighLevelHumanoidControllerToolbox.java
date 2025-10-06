@@ -954,9 +954,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.controllerFailureListeners.add(listener);
    }
 
-   public boolean detachControllerFailureListener(ControllerFailureListener listener)
+   public void detachControllerFailureListener(ControllerFailureListener listener)
    {
-      return this.controllerFailureListeners.add(listener);
+      controllerFailureListeners.remove(listener);
    }
 
    public void reportControllerFailureToListeners(FrameVector2D fallingDirection)
