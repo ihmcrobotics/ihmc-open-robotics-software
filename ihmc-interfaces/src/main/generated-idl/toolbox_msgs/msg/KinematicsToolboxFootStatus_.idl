@@ -1,9 +1,6 @@
 #ifndef __toolbox_msgs__msg__KinematicsToolboxFootStatus__idl__
 #define __toolbox_msgs__msg__KinematicsToolboxFootStatus__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
-#include "geometry_msgs/msg/./Quaternion_.idl"
-#include "geometry_msgs/msg/./Vector3_.idl"
 module toolbox_msgs
 {
   module msg
@@ -24,29 +21,6 @@ module toolbox_msgs
          * Legged robot-specific contact information (false if not a legged robot)
          */
         boolean foot_in_contact;
-        /**
-         * Pose of the foot in world frame
-         */
-        geometry_msgs::msg::dds::Point desired_foot_position;
-        geometry_msgs::msg::dds::Quaternion desired_foot_orientation;
-        /**
-         * Desired linear velocity expressed in local frame.
-         */
-        geometry_msgs::msg::dds::Vector3 desired_foot_linear_velocity;
-        /**
-         * Desired angular velocity expressed in local frame.
-         */
-        geometry_msgs::msg::dds::Vector3 desired_foot_angular_velocity;
-        /**
-         * Relative pose of the foot wrt the pelvis frame
-         */
-        geometry_msgs::msg::dds::Point relative_foot_position_from_pelvis;
-        geometry_msgs::msg::dds::Quaternion relative_foot_orientation_from_pelvis;
-        /**
-         * Relative pose of the foot wrt the pelvis frame at the beginning of a step
-         */
-        geometry_msgs::msg::dds::Point relative_foot_position_from_pelvis_step_start;
-        geometry_msgs::msg::dds::Quaternion relative_foot_orientation_from_pelvis_step_start;
       };
     };
   };

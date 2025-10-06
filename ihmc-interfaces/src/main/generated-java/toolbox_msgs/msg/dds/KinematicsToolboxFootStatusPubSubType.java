@@ -15,7 +15,7 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "21ef03a2c0f6a47850b99b4f99416bd7adf7dba63011b4faf50787195e36a5e3";
+   		return "8aea7f2e2700e6870d70e177ddd37ec4cc0b20188a6da5a8c21f453d6651df86";
    }
    
    @Override
@@ -56,22 +56,6 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -91,22 +75,6 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredFootPosition(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredFootOrientation(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredFootLinearVelocity(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredFootAngularVelocity(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRelativeFootPositionFromPelvis(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRelativeFootOrientationFromPelvis(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRelativeFootPositionFromPelvisStepStart(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRelativeFootOrientationFromPelvisStepStart(), current_alignment);
-
 
       return current_alignment - initial_alignment;
    }
@@ -117,14 +85,6 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
 
       cdr.write_type_7(data.getFootInContact());
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredFootPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredFootOrientation(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredFootLinearVelocity(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredFootAngularVelocity(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getRelativeFootPositionFromPelvis(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRelativeFootOrientationFromPelvis(), cdr);
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getRelativeFootPositionFromPelvisStepStart(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRelativeFootOrientationFromPelvisStepStart(), cdr);
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxFootStatus data, us.ihmc.idl.CDR cdr)
@@ -133,14 +93,6 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
       	
       data.setFootInContact(cdr.read_type_7());
       	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredFootPosition(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredFootOrientation(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredFootLinearVelocity(), cdr);	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredFootAngularVelocity(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getRelativeFootPositionFromPelvis(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRelativeFootOrientationFromPelvis(), cdr);	
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getRelativeFootPositionFromPelvisStepStart(), cdr);	
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRelativeFootOrientationFromPelvisStepStart(), cdr);	
 
    }
 
@@ -149,22 +101,6 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_9("side", data.getSide());
       ser.write_type_7("foot_in_contact", data.getFootInContact());
-      ser.write_type_a("desired_foot_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredFootPosition());
-
-      ser.write_type_a("desired_foot_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredFootOrientation());
-
-      ser.write_type_a("desired_foot_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredFootLinearVelocity());
-
-      ser.write_type_a("desired_foot_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredFootAngularVelocity());
-
-      ser.write_type_a("relative_foot_position_from_pelvis", new geometry_msgs.msg.dds.PointPubSubType(), data.getRelativeFootPositionFromPelvis());
-
-      ser.write_type_a("relative_foot_orientation_from_pelvis", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRelativeFootOrientationFromPelvis());
-
-      ser.write_type_a("relative_foot_position_from_pelvis_step_start", new geometry_msgs.msg.dds.PointPubSubType(), data.getRelativeFootPositionFromPelvisStepStart());
-
-      ser.write_type_a("relative_foot_orientation_from_pelvis_step_start", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRelativeFootOrientationFromPelvisStepStart());
-
    }
 
    @Override
@@ -172,22 +108,6 @@ public class KinematicsToolboxFootStatusPubSubType implements us.ihmc.pubsub.Top
    {
       data.setSide(ser.read_type_9("side"));
       data.setFootInContact(ser.read_type_7("foot_in_contact"));
-      ser.read_type_a("desired_foot_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredFootPosition());
-
-      ser.read_type_a("desired_foot_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredFootOrientation());
-
-      ser.read_type_a("desired_foot_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredFootLinearVelocity());
-
-      ser.read_type_a("desired_foot_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredFootAngularVelocity());
-
-      ser.read_type_a("relative_foot_position_from_pelvis", new geometry_msgs.msg.dds.PointPubSubType(), data.getRelativeFootPositionFromPelvis());
-
-      ser.read_type_a("relative_foot_orientation_from_pelvis", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRelativeFootOrientationFromPelvis());
-
-      ser.read_type_a("relative_foot_position_from_pelvis_step_start", new geometry_msgs.msg.dds.PointPubSubType(), data.getRelativeFootPositionFromPelvisStepStart());
-
-      ser.read_type_a("relative_foot_orientation_from_pelvis_step_start", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRelativeFootOrientationFromPelvisStepStart());
-
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsToolboxFootStatus src, toolbox_msgs.msg.dds.KinematicsToolboxFootStatus dest)

@@ -17,40 +17,9 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
             * Legged robot-specific contact information (false if not a legged robot)
             */
    public boolean foot_in_contact_;
-   /**
-            * Pose of the foot in world frame
-            */
-   public us.ihmc.euclid.tuple3D.Point3D desired_foot_position_;
-   public us.ihmc.euclid.tuple4D.Quaternion desired_foot_orientation_;
-   /**
-            * Desired linear velocity expressed in local frame.
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D desired_foot_linear_velocity_;
-   /**
-            * Desired angular velocity expressed in local frame.
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D desired_foot_angular_velocity_;
-   /**
-            * Relative pose of the foot wrt the pelvis frame
-            */
-   public us.ihmc.euclid.tuple3D.Point3D relative_foot_position_from_pelvis_;
-   public us.ihmc.euclid.tuple4D.Quaternion relative_foot_orientation_from_pelvis_;
-   /**
-            * Relative pose of the foot wrt the pelvis frame at the beginning of a step
-            */
-   public us.ihmc.euclid.tuple3D.Point3D relative_foot_position_from_pelvis_step_start_;
-   public us.ihmc.euclid.tuple4D.Quaternion relative_foot_orientation_from_pelvis_step_start_;
 
    public KinematicsToolboxFootStatus()
    {
-      desired_foot_position_ = new us.ihmc.euclid.tuple3D.Point3D();
-      desired_foot_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      desired_foot_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      desired_foot_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      relative_foot_position_from_pelvis_ = new us.ihmc.euclid.tuple3D.Point3D();
-      relative_foot_orientation_from_pelvis_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      relative_foot_position_from_pelvis_step_start_ = new us.ihmc.euclid.tuple3D.Point3D();
-      relative_foot_orientation_from_pelvis_step_start_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public KinematicsToolboxFootStatus(KinematicsToolboxFootStatus other)
@@ -65,14 +34,6 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
 
       foot_in_contact_ = other.foot_in_contact_;
 
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_foot_position_, desired_foot_position_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_foot_orientation_, desired_foot_orientation_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_foot_linear_velocity_, desired_foot_linear_velocity_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_foot_angular_velocity_, desired_foot_angular_velocity_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.relative_foot_position_from_pelvis_, relative_foot_position_from_pelvis_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.relative_foot_orientation_from_pelvis_, relative_foot_orientation_from_pelvis_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.relative_foot_position_from_pelvis_step_start_, relative_foot_position_from_pelvis_step_start_);
-      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.relative_foot_orientation_from_pelvis_step_start_, relative_foot_orientation_from_pelvis_step_start_);
    }
 
    /**
@@ -108,69 +69,6 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
    }
 
 
-   /**
-            * Pose of the foot in world frame
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getDesiredFootPosition()
-   {
-      return desired_foot_position_;
-   }
-
-
-   public us.ihmc.euclid.tuple4D.Quaternion getDesiredFootOrientation()
-   {
-      return desired_foot_orientation_;
-   }
-
-
-   /**
-            * Desired linear velocity expressed in local frame.
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D getDesiredFootLinearVelocity()
-   {
-      return desired_foot_linear_velocity_;
-   }
-
-
-   /**
-            * Desired angular velocity expressed in local frame.
-            */
-   public us.ihmc.euclid.tuple3D.Vector3D getDesiredFootAngularVelocity()
-   {
-      return desired_foot_angular_velocity_;
-   }
-
-
-   /**
-            * Relative pose of the foot wrt the pelvis frame
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getRelativeFootPositionFromPelvis()
-   {
-      return relative_foot_position_from_pelvis_;
-   }
-
-
-   public us.ihmc.euclid.tuple4D.Quaternion getRelativeFootOrientationFromPelvis()
-   {
-      return relative_foot_orientation_from_pelvis_;
-   }
-
-
-   /**
-            * Relative pose of the foot wrt the pelvis frame at the beginning of a step
-            */
-   public us.ihmc.euclid.tuple3D.Point3D getRelativeFootPositionFromPelvisStepStart()
-   {
-      return relative_foot_position_from_pelvis_step_start_;
-   }
-
-
-   public us.ihmc.euclid.tuple4D.Quaternion getRelativeFootOrientationFromPelvisStepStart()
-   {
-      return relative_foot_orientation_from_pelvis_step_start_;
-   }
-
-
    public static Supplier<KinematicsToolboxFootStatusPubSubType> getPubSubType()
    {
       return KinematicsToolboxFootStatusPubSubType::new;
@@ -192,14 +90,6 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.foot_in_contact_, other.foot_in_contact_, epsilon)) return false;
 
-      if (!this.desired_foot_position_.epsilonEquals(other.desired_foot_position_, epsilon)) return false;
-      if (!this.desired_foot_orientation_.epsilonEquals(other.desired_foot_orientation_, epsilon)) return false;
-      if (!this.desired_foot_linear_velocity_.epsilonEquals(other.desired_foot_linear_velocity_, epsilon)) return false;
-      if (!this.desired_foot_angular_velocity_.epsilonEquals(other.desired_foot_angular_velocity_, epsilon)) return false;
-      if (!this.relative_foot_position_from_pelvis_.epsilonEquals(other.relative_foot_position_from_pelvis_, epsilon)) return false;
-      if (!this.relative_foot_orientation_from_pelvis_.epsilonEquals(other.relative_foot_orientation_from_pelvis_, epsilon)) return false;
-      if (!this.relative_foot_position_from_pelvis_step_start_.epsilonEquals(other.relative_foot_position_from_pelvis_step_start_, epsilon)) return false;
-      if (!this.relative_foot_orientation_from_pelvis_step_start_.epsilonEquals(other.relative_foot_orientation_from_pelvis_step_start_, epsilon)) return false;
 
       return true;
    }
@@ -217,14 +107,6 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
 
       if(this.foot_in_contact_ != otherMyClass.foot_in_contact_) return false;
 
-      if (!this.desired_foot_position_.equals(otherMyClass.desired_foot_position_)) return false;
-      if (!this.desired_foot_orientation_.equals(otherMyClass.desired_foot_orientation_)) return false;
-      if (!this.desired_foot_linear_velocity_.equals(otherMyClass.desired_foot_linear_velocity_)) return false;
-      if (!this.desired_foot_angular_velocity_.equals(otherMyClass.desired_foot_angular_velocity_)) return false;
-      if (!this.relative_foot_position_from_pelvis_.equals(otherMyClass.relative_foot_position_from_pelvis_)) return false;
-      if (!this.relative_foot_orientation_from_pelvis_.equals(otherMyClass.relative_foot_orientation_from_pelvis_)) return false;
-      if (!this.relative_foot_position_from_pelvis_step_start_.equals(otherMyClass.relative_foot_position_from_pelvis_step_start_)) return false;
-      if (!this.relative_foot_orientation_from_pelvis_step_start_.equals(otherMyClass.relative_foot_orientation_from_pelvis_step_start_)) return false;
 
       return true;
    }
@@ -238,23 +120,7 @@ public class KinematicsToolboxFootStatus extends Packet<KinematicsToolboxFootSta
       builder.append("side=");
       builder.append(this.side_);      builder.append(", ");
       builder.append("foot_in_contact=");
-      builder.append(this.foot_in_contact_);      builder.append(", ");
-      builder.append("desired_foot_position=");
-      builder.append(this.desired_foot_position_);      builder.append(", ");
-      builder.append("desired_foot_orientation=");
-      builder.append(this.desired_foot_orientation_);      builder.append(", ");
-      builder.append("desired_foot_linear_velocity=");
-      builder.append(this.desired_foot_linear_velocity_);      builder.append(", ");
-      builder.append("desired_foot_angular_velocity=");
-      builder.append(this.desired_foot_angular_velocity_);      builder.append(", ");
-      builder.append("relative_foot_position_from_pelvis=");
-      builder.append(this.relative_foot_position_from_pelvis_);      builder.append(", ");
-      builder.append("relative_foot_orientation_from_pelvis=");
-      builder.append(this.relative_foot_orientation_from_pelvis_);      builder.append(", ");
-      builder.append("relative_foot_position_from_pelvis_step_start=");
-      builder.append(this.relative_foot_position_from_pelvis_step_start_);      builder.append(", ");
-      builder.append("relative_foot_orientation_from_pelvis_step_start=");
-      builder.append(this.relative_foot_orientation_from_pelvis_step_start_);
+      builder.append(this.foot_in_contact_);
       builder.append("}");
       return builder.toString();
    }

@@ -541,31 +541,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       super.updateInternal();
 
-      // Update chest pose - only needed for status message
+      // Update anchor base (chest) pose - only needed for status message
       RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
       getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
       getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
-      // Update foot poses - only needed for status message
-      for (RobotSide robotSide : RobotSide.values())
-      {
-         KinematicsToolboxFootStatus footStatus = robotSide == RobotSide.LEFT ? getSolution().getLeftFootStatus() : getSolution().getRightFootStatus();
-
-         FramePose3D footPose = new FramePose3D();
-         footPose.set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTransformToRoot());
-         footStatus.getDesiredFootPosition().set(footPose.getPosition());
-         footStatus.getDesiredFootOrientation().set(footPose.getOrientation());
-
-         footPose.changeFrame(referencePelvisFrame);
-         footStatus.getRelativeFootPositionFromPelvisStepStart().set(footPose.getPosition());
-         footStatus.getRelativeFootOrientationFromPelvisStepStart().set(footPose.getOrientation());
-
-         footPose.changeFrame(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
-         footStatus.getRelativeFootPositionFromPelvis().set(footPose.getPosition());
-         footStatus.getRelativeFootOrientationFromPelvis().set(footPose.getOrientation());
-
-         footStatus.getDesiredFootLinearVelocity().set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTwistOfFrame().getLinearPart());
-         footStatus.getDesiredFootAngularVelocity().set(desiredFullRobotModel.getFoot(robotSide).getParentJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPart());
-      }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
