@@ -75,6 +75,18 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       }
    }
 
+   @Override
+   public boolean hasCycloidForearm(RobotSide side)
+   {
+      switch (this)
+      {
+         case V1_FULL_ROBOT:
+            return true;
+         default:
+            return false;
+      }
+   }
+
    public boolean armsNeedCalibration()
    {
       return false;
@@ -158,18 +170,6 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       switch (this)
       {
          case V1_FULL_ROBOT, V1_NUB_FOREARMS:
-            return true;
-         default:
-            return false;
-      }
-   }
-
-   @Override
-   public boolean hasCycloidHands(RobotSide side)
-   {
-      switch (this)
-      {
-         case V1_FULL_ROBOT:
             return true;
          default:
             return false;

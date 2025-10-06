@@ -16,11 +16,11 @@ public interface AlexanderVersionInterface extends RobotVersion
 
    boolean hasCycloidForearms();
 
+   boolean hasCycloidForearm(RobotSide robotSide);
+
    AlexanderJointMap getJointMap();
 
    boolean hasNubHands(RobotSide side);
-   
-   boolean hasCycloidHands(RobotSide side);
 
    AlexanderSensorInformation getSensorInformation();
 
