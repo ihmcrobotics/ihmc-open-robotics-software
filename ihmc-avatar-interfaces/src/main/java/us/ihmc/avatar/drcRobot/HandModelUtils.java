@@ -1,7 +1,7 @@
 package us.ihmc.avatar.drcRobot;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
+import us.ihmc.handsros2.HandModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
