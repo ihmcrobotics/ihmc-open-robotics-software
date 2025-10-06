@@ -1,20 +1,18 @@
 package us.ihmc.avatar.simulationStarter;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.javaFXToolkit.JavaFXTools;
-import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
-import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class DRCSimulationTools
 {
@@ -62,11 +60,6 @@ public abstract class DRCSimulationTools
 
       boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE);
       boolean startREAUI = modulesToStart.contains(Modules.REA_UI);
-
-      if (startREAModule && startREAUI)
-         new JavaProcessSpawner(true, true).spawn(LidarBasedREAStandaloneLauncher.class);
-      else if (startREAUI)
-         new JavaProcessSpawner(true, true).spawn(RemoteLidarBasedREAUILauncher.class);
    }
 
    public static HumanoidNetworkProcessorParameters createNetworkProcessorParameters(List<Modules> modulesToStart)

@@ -15,7 +15,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
@@ -36,7 +35,6 @@ import us.ihmc.messager.javafx.JavaFXMessager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -92,7 +90,6 @@ public class StepGeneratorJavaFXController
 
    private final ROS2Publisher<FootstepDataListMessage> footstepPublisher;
    private final ROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
-   private final ROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
@@ -123,12 +120,9 @@ public class StepGeneratorJavaFXController
                                                                                                                            .getRobotMotionStatus())));
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(FootstepStatusMessage.class),
                                   s -> queuedTasksToProcess.add(() -> continuousStepController.consumeFootstepStatus(s.takeNextData())));
-      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
-                                  s -> queuedTasksToProcess.add(() -> continuousStepController.consumePlanarRegionsListMessage(s.takeNextData())));
 
       pauseWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(PauseWalkingMessage.class));
       footstepPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(FootstepDataListMessage.class));
-      reaStateRequestPublisher = ros2Node.createPublisher(REACommunicationProperties.inputTopic.withTypeName(REAStateRequestMessage.class));
 
       continuousStepController.setFootstepMessenger(this::prepareFootsteps);
       continuousStepController.setPauseWalkingPublisher(this::sendPauseWalkingMessage);
@@ -307,14 +301,12 @@ public class StepGeneratorJavaFXController
    {
       REAStateRequestMessage clearRequest = new REAStateRequestMessage();
       clearRequest.setRequestClear(true);
-      reaStateRequestPublisher.publish(clearRequest);
    }
 
    private void sendREAResumeRequest()
    {
       REAStateRequestMessage resumeRequest = new REAStateRequestMessage();
       resumeRequest.setRequestResume(true);
-      reaStateRequestPublisher.publish(resumeRequest);
    }
 
    private Node createFootstep(FootstepDataMessage footstepDataMessage)
