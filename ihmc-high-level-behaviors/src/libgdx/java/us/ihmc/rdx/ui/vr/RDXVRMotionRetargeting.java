@@ -372,8 +372,8 @@ public class RDXVRMotionRetargeting
 
             newFootFramePoses.get(side).set(footTrackerTransform);
             // Zero roll and pitch orientation variation as it can lead to unfeasible robot foot motions
-            newFootFramePoses.get(side).changeFrame(initialFootFrames.get(side));
-            newFootFramePoses.get(side).getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
+//            newFootFramePoses.get(side).changeFrame(initialFootFrames.get(side));
+//            newFootFramePoses.get(side).getRotation().setYawPitchRoll(newFootFramePoses.get(side).getRotation().getYaw(), 0.0,0.0);
             newFootFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
             constrainedFootFrames.get(side).update();
 

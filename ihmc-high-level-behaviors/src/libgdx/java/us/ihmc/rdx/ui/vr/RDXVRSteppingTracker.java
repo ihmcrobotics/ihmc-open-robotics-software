@@ -11,8 +11,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRSteppingTracker
 {
-    private static final double STEP_THRESHOLD = 0.02;
-    private static final double LIFT_THRESHOLD = 0.02;
+    private static final double STEP_THRESHOLD = 0.01;
+    private static final double LIFT_THRESHOLD = 0.01;
     private static final double STABILITY_THRESHOLD = 0.01;
     private static final int STABILITY_ITERATIONS = 3;
     private final SideDependentList<Boolean> isUserStepping = new SideDependentList<>();
