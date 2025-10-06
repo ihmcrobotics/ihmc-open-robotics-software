@@ -10,12 +10,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.cuda.CUDAKernel;
 import us.ihmc.perception.cuda.CUDAProgram;
 import us.ihmc.perception.cuda.CUDAStreamManager;
@@ -25,7 +22,6 @@ import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -308,6 +304,8 @@ public class MathUtilsTest
                .withPointer(transformGPUPointer)
                .withPointer(resultPoint)
                .run(stream, new dim3(), new dim3(), 0);
+
+         cudaStreamSynchronize(stream);
 
          // Calculate transform using Euclid library (on CPU)
          point.applyTransform(transform);
