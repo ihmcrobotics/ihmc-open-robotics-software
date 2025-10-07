@@ -126,8 +126,8 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       {
          boolean deactivate = !getPanel().getIsShowing().get();
 
-         if (this instanceof RDXROS2ImageVisualizer<?> openCVVideoVisualizer)
-            deactivate &= !openCVVideoVisualizer.getSubscriptionOnly().get();
+         if (this instanceof RDXROS2ImageVisualizer<?> imageVisualizer)
+            deactivate &= !imageVisualizer.getSubscriptionOnly().get();
 
          if (deactivate)
             setActive(false);
