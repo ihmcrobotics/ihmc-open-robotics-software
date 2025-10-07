@@ -68,7 +68,7 @@ public class AlexanderModelFactory
 
       // Nadia supports URDF models
       Class<?> clazz = URDFModel.class;
-      return new DefaultLogModelProvider<>(clazz, urdfParameters.getURDFModelName(), urdfParameters.getURDFAsInputStreamForLog(), filter, urdfParameters.getLoggedResourceDirectories());
+      return new DefaultLogModelProvider<>(clazz, urdfParameters.getURDFModelName(), urdfParameters.getURDFAsInputStream(), filter, urdfParameters.getResourceDirectories());
    }
 
    public RobotDefinition getSCS1RobotDefinition()
