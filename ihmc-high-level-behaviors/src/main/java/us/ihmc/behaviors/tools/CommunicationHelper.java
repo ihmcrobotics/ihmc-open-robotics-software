@@ -2,14 +2,12 @@ package us.ihmc.behaviors.tools;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
-import perception_msgs.msg.dds.DoorLocationPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
@@ -17,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -59,8 +56,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    protected final ROS2ControllerHelper ros2Helper;
 
    private RemoteHumanoidRobotInterface robot;
-   private RemoteREAInterface rea;
-   private RemoteEnvironmentMapInterface environmentMap;
    private VisibilityGraphPathPlanner bodyPathPlanner;
    private FootstepPlanningModule footstepPlanner;
    private RobotLowLevelMessenger lowLevelMessenger;
@@ -84,20 +79,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       if (robot == null)
          robot = new RemoteHumanoidRobotInterface(ros2Helper.getROS2Node(), robotModel);
       return robot;
-   }
-
-   public RemoteREAInterface getOrCreateREAInterface()
-   {
-      if (rea == null)
-         rea = new RemoteREAInterface(ros2Helper.getROS2Node());
-      return rea; // REA toolbox
-   }
-
-   public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
-   {
-      if (environmentMap == null)
-         environmentMap = new RemoteEnvironmentMapInterface(ros2Helper.getROS2Node());
-      return environmentMap;
    }
 
    public VisibilityGraphPathPlanner getOrCreateBodyPathPlanner()
@@ -241,11 +222,6 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    {
       ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2Node(), topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
-   }
-
-   public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
-   {
-      subscribeViaCallback(ObjectDetectorToolboxModule.getOutputTopic(getRobotModel().getSimpleRobotName()).withTypeName(DoorLocationPacket.class), callback);
    }
 
    @Override

@@ -15,7 +15,7 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
@@ -73,7 +73,7 @@ class ROS2ImagePublishingDemo
    private final ROS2Topic<Image> depthImageTopic;
    private final ROS2Topic<CameraInfo> depthCameraInfoTopic;
 
-   private final ZEDSVOPlaybackSensor zed;
+   private final ROS2ZEDSVOPlaybackSensor zed;
 
    // Field for predefined publish thread
    private ImageSensorPublishThread imageSensorPublishThread;
@@ -99,7 +99,7 @@ class ROS2ImagePublishingDemo
       depthCameraInfoTopic = zedTopic.withModule("depth").withSuffix("camera_info").withType(CameraInfo.class);
 
       // Create a ZED sensor (in this case we use an SVO playback)
-      zed = new ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2, SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+      zed = new ROS2ZEDSVOPlaybackSensor(new ROS2Helper(ros2Node), 0, ZEDModelData.ZED_2, SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zed.useTrackedPose(true);
 
       // Add shutdown hook to properly close/destroy everything
