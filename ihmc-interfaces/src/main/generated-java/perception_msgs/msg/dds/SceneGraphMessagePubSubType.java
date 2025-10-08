@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6ad797bf99e1e3e1296fb27b80375351878da67593eb29b6f53ab86814f7fb9f";
+   		return "4f5622470323b41bc0247be7d25264137f3ec9046ccc55183ae766b4cd8906f1";
    }
    
    @Override
@@ -72,9 +72,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.ArUcoMarkerNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
-      {
-          current_alignment += perception_msgs.msg.dds.CenterposeNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -138,11 +135,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
           current_alignment += perception_msgs.msg.dds.ArUcoMarkerNodeMessagePubSubType.getCdrSerializedSize(data.getArucoMarkerSceneNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getCenterposeSceneNodes().size(); ++i0)
-      {
-          current_alignment += perception_msgs.msg.dds.CenterposeNodeMessagePubSubType.getCdrSerializedSize(data.getCenterposeSceneNodes().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getStaticRelativeSceneNodes().size(); ++i0)
       {
           current_alignment += perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType.getCdrSerializedSize(data.getStaticRelativeSceneNodes().get(i0), current_alignment);}
@@ -201,10 +193,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getArucoMarkerSceneNodes());else
           throw new RuntimeException("aruco_marker_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getArucoMarkerSceneNodes().size(), 200));
 
-      if(data.getCenterposeSceneNodes().size() <= 200)
-      cdr.write_type_e(data.getCenterposeSceneNodes());else
-          throw new RuntimeException("centerpose_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getCenterposeSceneNodes().size(), 200));
-
       if(data.getStaticRelativeSceneNodes().size() <= 200)
       cdr.write_type_e(data.getStaticRelativeSceneNodes());else
           throw new RuntimeException("static_relative_scene_nodes field exceeds the maximum length: %d > %d".formatted(data.getStaticRelativeSceneNodes().size(), 200));
@@ -239,7 +227,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getDetectableSceneNodes());	
       cdr.read_type_e(data.getPredefinedRigidBodySceneNodes());	
       cdr.read_type_e(data.getArucoMarkerSceneNodes());	
-      cdr.read_type_e(data.getCenterposeSceneNodes());	
       cdr.read_type_e(data.getStaticRelativeSceneNodes());	
       cdr.read_type_e(data.getPrimitiveRigidBodySceneNodes());	
       cdr.read_type_e(data.getYoloSceneNodes());	
@@ -259,7 +246,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("detectable_scene_nodes", data.getDetectableSceneNodes());
       ser.write_type_e("predefined_rigid_body_scene_nodes", data.getPredefinedRigidBodySceneNodes());
       ser.write_type_e("aruco_marker_scene_nodes", data.getArucoMarkerSceneNodes());
-      ser.write_type_e("centerpose_scene_nodes", data.getCenterposeSceneNodes());
       ser.write_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
       ser.write_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
       ser.write_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
@@ -278,7 +264,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("detectable_scene_nodes", data.getDetectableSceneNodes());
       ser.read_type_e("predefined_rigid_body_scene_nodes", data.getPredefinedRigidBodySceneNodes());
       ser.read_type_e("aruco_marker_scene_nodes", data.getArucoMarkerSceneNodes());
-      ser.read_type_e("centerpose_scene_nodes", data.getCenterposeSceneNodes());
       ser.read_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
       ser.read_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
       ser.read_type_e("yolo_scene_nodes", data.getYoloSceneNodes());

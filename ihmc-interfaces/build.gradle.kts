@@ -1,11 +1,13 @@
 buildscript {
    repositories {
       maven { url = uri("https://plugins.gradle.org/m2/") }
+      maven { url = uri("https://robotlabfiles.ihmc.us/repository/") }
+      maven { url = uri("https://robotlabfiles.ihmc.us/repository/") }
       mavenCentral()
       mavenLocal()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:1.2.3")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:1.2.4")
    }
 }
 
@@ -27,8 +29,8 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:euclid-geometry:0.22.5")
-   api("us.ihmc:ihmc-pub-sub:1.2.3")
-   api("us.ihmc:ros2-common-interfaces:1.2.3") {
+   api("us.ihmc:ihmc-pub-sub:1.2.4")
+   api("us.ihmc:ros2-common-interfaces:1.2.4") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
@@ -38,13 +40,13 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ros2-library:1.2.3")
+   api("us.ihmc:ros2-library:1.2.4")
 }
 
 generatorDependencies {
    api("us.ihmc:euclid:0.22.5")
    api("us.ihmc:ihmc-commons:0.35.1")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:1.2.3")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:1.2.4")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
