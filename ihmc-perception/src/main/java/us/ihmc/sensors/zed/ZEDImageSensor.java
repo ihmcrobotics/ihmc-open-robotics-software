@@ -77,7 +77,7 @@ public class ZEDImageSensor extends ImageSensor
    protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
-   private boolean positionalTrackingEnabled = false;
+   private boolean positionalTrackingEnabled = true;
    private final MutableReferenceFrame trackedSensorFrame;
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();

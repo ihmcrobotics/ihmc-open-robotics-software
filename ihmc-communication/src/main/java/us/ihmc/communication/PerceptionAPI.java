@@ -106,6 +106,13 @@ public final class PerceptionAPI
    public static final ROS2Topic<CameraInfo> ROS2_ZED_DEPTH_CAMERA_INFO = ROS2_ZED_DEPTH.withSuffix("camera_info").withType(CameraInfo.class);
 
    /*
+    * ZED odometry
+    */
+   public static final ROS2Topic<RigidBodyTransformMessage> ZED_TRACKED_POSE = ROS2_ZED.withModule("odometry")
+                                                                                       .withSuffix("tracked_pose")
+                                                                                       .withType(RigidBodyTransformMessage.class);
+
+   /*
     * RealSense image topics (IHMC ImageMessage type)
     */
    public static final ROS2Topic<Empty> REQUEST_REALSENSE = PERCEPTION_MODULE.withSuffix("request_realsense").withType(Empty.class);
