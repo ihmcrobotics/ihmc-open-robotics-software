@@ -1,19 +1,16 @@
 package us.ihmc.rdx.ui.graphics;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.imageMessage.CompressionType;
-import us.ihmc.perception.streaming.ROS2SRTVideoStreamImageMessageRelay;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2KSTRobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.zed.ZEDModelData;
@@ -27,7 +24,6 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    // Common — always present
    protected final RDXROS2RobotVisualizer robotVisualizer;
    protected final RDXROS2KSTRobotVisualizer kinematicsStreamingSolutionVisualizer;
-   protected final ROS2SRTVideoStreamImageMessageRelay videoStreamImageMessageRelay;
 
    // Optional — may be null in some robots
    protected RDXROS2ColoredPointCloudVisualizer zedColoredPointCloudVisualizer;
@@ -57,10 +53,6 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
       // Kinematics streaming solution visualizer
       kinematicsStreamingSolutionVisualizer = new RDXROS2KSTRobotVisualizer(ros2Helper.getROS2Node(), syncedRobot.getRobotModel());
       addVisualizer(kinematicsStreamingSolutionVisualizer);
-
-      videoStreamImageMessageRelay = new ROS2SRTVideoStreamImageMessageRelay(PerceptionAPI.SRT_STREAM_IMAGE_MESSAGE_TOPIC_PAIRS,
-                                                                             ros2Node,
-                                                                             CompressionType.UNCOMPRESSED);
 
       // Additional visualizers instantiated in robot specific class
    }
@@ -92,7 +84,6 @@ public abstract class RDXRobotPerceptionVisualizersPanel extends RDXPerceptionVi
    public void destroy()
    {
       super.destroy();
-      videoStreamImageMessageRelay.destroy();
    }
 
    // Getters for common/optional visualizers

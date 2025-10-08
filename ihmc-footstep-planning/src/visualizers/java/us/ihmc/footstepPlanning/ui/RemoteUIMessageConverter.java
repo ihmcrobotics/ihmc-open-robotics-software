@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
@@ -14,6 +13,7 @@ import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
@@ -29,7 +29,6 @@ import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -50,7 +49,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -198,10 +196,6 @@ public class RemoteUIMessageConverter
                                   s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       ros2Node.createSubscription(FootstepPlannerAPI.outputTopic(robotName).withTypeName(FootstepPlanningToolboxOutputStatus.class),
                                   s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
-                                  s -> processIncomingPlanarRegionMessage(s.takeNextData()));
-      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(OcTreeKeyListMessage.class),
-                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
       ros2Node.createSubscription(FootstepPlannerAPI.swingReplanOutputTopic(robotName), subscriber ->
       {
          LogTools.info("Received replanned swing");
@@ -251,17 +245,6 @@ public class RemoteUIMessageConverter
       messager.addTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
       messager.addTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
-
-      ROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher
-            = ros2Node.createPublisher(PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                                                   .withInput()
-                                                                                   .withType(BipedalSupportPlanarRegionParametersMessage.class));
-
-      messager.addTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
-      {
-         LogTools.info("Publishing bipedal support regions message. Enabled: " + message.getEnable());
-         supportRegionsParametersPublisher.publish(message);
-      });
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.RequestedArmJointAngles, request ->
       {

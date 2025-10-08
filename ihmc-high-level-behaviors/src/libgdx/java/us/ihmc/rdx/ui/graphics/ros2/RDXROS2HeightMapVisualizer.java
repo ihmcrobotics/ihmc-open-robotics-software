@@ -18,15 +18,17 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.heightMap.TerrainMapMessageTools;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
+import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXChunkedMapRenderer;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapRenderer;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -38,7 +40,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ResettableExceptionHandlingExecutorService executorService;
-   private final RDXOpenCVVideoVisualizer heightMapImageVisualizer = new RDXOpenCVVideoVisualizer("Height Map Image", "Height Map Image Panel", true);
+   private final RDXImageVisualizer heightMapImageVisualizer = new RDXImageVisualizer("Height Map Image", "Height Map Image Panel", true);
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXChunkedMapRenderer chunkedMapRenderer;
    private final ImBoolean enableChunkedMapRenderer = new ImBoolean(false);
@@ -123,11 +125,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       Mat colorized = new Mat();
       opencv_imgproc.applyColorMap(normalized, colorized, opencv_imgproc.COLORMAP_JET);
 
-      // Convert to RGBA for display/publishing
-      Mat colorizedRGBA = new Mat();
-      opencv_imgproc.cvtColor(colorized, colorizedRGBA, opencv_imgproc.COLOR_BGR2RGBA);
-
-      heightMapImageVisualizer.setImage(colorizedRGBA);
+      heightMapImageVisualizer.setImage(colorized, PixelFormat.BGR8);
    }
 
    public void acceptTerrainMapMessage(TerrainMapMessage terrainMapMessage)
@@ -289,7 +287,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       return isActive() ? latestTerrainMapData : null;
    }
 
-   public RDXOpenCVVideoVisualizer getHeightMapImageVisualizer()
+   public RDXImageVisualizer getHeightMapImageVisualizer()
    {
       return heightMapImageVisualizer;
    }

@@ -22,7 +22,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.perception.depthData.CollisionShapeTester;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
-import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -44,7 +43,6 @@ public class DelayFixedPlanarRegionsSubscription
    public static final double INITIAL_DELAY_OFFSET = 0.07; // TODO: Put in a stored property set
 
    private final ResettableExceptionHandlingExecutorService executorService;
-   private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final HumanoidReferenceFrames referenceFrames;
    private final ROS2Node ros2Node;
@@ -81,13 +79,9 @@ public class DelayFixedPlanarRegionsSubscription
       ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
                                    rosClockCalculator::receivedRobotConfigurationData);
 
-      ros2Node.createSubscription2(PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
-
       boolean daemon = true;
       int queueSize = 1;
       executorService = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
-
-      gpuPlanarRegionUpdater.attachROS2Tuner(ros2Node);
 
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -169,47 +163,47 @@ public class DelayFixedPlanarRegionsSubscription
             long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
             if (selectedTimestamp != -1L)
             {
-               long currentTimeInWall = ros1Node.getCurrentTime().totalNsecs();
-               long selectedTimeInWall = selectedTimestamp - rosClockCalculator.getCurrentTimestampOffset();
-               delay = Conversions.nanosecondsToSeconds(currentTimeInWall - selectedTimeInWall);
-
-               try
-               {
-                  referenceFrames.updateFrames();
-               }
-               catch (NotARotationMatrixException e)
-               {
-                  LogTools.error(e.getMessage());
-               }
-
-               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-               try
-               {
-                  planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-                  planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
-
-                  collisionFilter.update();
-                  gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
-
-                  if(posePublisherEnabled)
-                  {
-                     RigidBodyTransform transform = referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame();
-                     sensorPosePublisher.publish("world",
-                                                 (Vector3D) transform.getTranslation(),
-                                                 new Quaternion(transform.getRotation()),
-                                                 new Time(currentTimeInWall));
-                     transform = referenceFrames.getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
-                     pelvisPosePublisher.publish("world",
-                                                 (Vector3D) transform.getTranslation(),
-                                                 new Quaternion(transform.getRotation()),
-                                                 new Time(currentTimeInWall));
-                  }
-               }
-               catch (NotARotationMatrixException e)
-               {
-                  LogTools.error(e.getMessage());
-               }
-               callback.accept(Pair.of(currentTimeInWall, planarRegionsList));
+//               long currentTimeInWall = ros1Node.getCurrentTime().totalNsecs();
+//               long selectedTimeInWall = selectedTimestamp - rosClockCalculator.getCurrentTimestampOffset();
+//               delay = Conversions.nanosecondsToSeconds(currentTimeInWall - selectedTimeInWall);
+//
+//               try
+//               {
+//                  referenceFrames.updateFrames();
+//               }
+//               catch (NotARotationMatrixException e)
+//               {
+//                  LogTools.error(e.getMessage());
+//               }
+//
+//               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+//               try
+//               {
+//                  planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
+//                  planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
+//
+//                  collisionFilter.update();
+//                  gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
+//
+//                  if(posePublisherEnabled)
+//                  {
+//                     RigidBodyTransform transform = referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame();
+//                     sensorPosePublisher.publish("world",
+//                                                 (Vector3D) transform.getTranslation(),
+//                                                 new Quaternion(transform.getRotation()),
+//                                                 new Time(currentTimeInWall));
+//                     transform = referenceFrames.getMidFeetUnderPelvisFrame().getTransformToWorldFrame();
+//                     pelvisPosePublisher.publish("world",
+//                                                 (Vector3D) transform.getTranslation(),
+//                                                 new Quaternion(transform.getRotation()),
+//                                                 new Time(currentTimeInWall));
+//                  }
+//               }
+//               catch (NotARotationMatrixException e)
+//               {
+//                  LogTools.error(e.getMessage());
+//               }
+//               callback.accept(Pair.of(currentTimeInWall, planarRegionsList));
             }
          });
       }

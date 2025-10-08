@@ -20,7 +20,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,7 +41,7 @@ public class RDXDoorDetectionManagerDemo
 
    private final DoorDetectionManager doorDetectionManager;
 
-   private final ZEDSVOPlaybackSensor zed;
+   private final ROS2ZEDSVOPlaybackSensor zed;
    private final YOLOv8DetectionThread yoloThread;
    private final RapidPlanarRegionsExtractionThread planarRegionThread;
 
@@ -68,7 +68,7 @@ public class RDXDoorDetectionManagerDemo
       doorDetectionManager = new DoorDetectionManager(ros2Node);
 
       boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
-      zed = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
+      zed = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE);
       zed.useTrackedPose(true);
 
       yoloThread = new YOLOv8DetectionThread(robotClockOffsetEstimator, () -> true);
