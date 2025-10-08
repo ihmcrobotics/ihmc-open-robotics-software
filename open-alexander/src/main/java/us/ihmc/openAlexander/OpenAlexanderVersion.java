@@ -75,6 +75,18 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
       }
    }
 
+   @Override
+   public boolean hasCycloidForearm(RobotSide side)
+   {
+      switch (this)
+      {
+         case V1_FULL_ROBOT:
+            return true;
+         default:
+            return false;
+      }
+   }
+
    public boolean armsNeedCalibration()
    {
       return false;
@@ -165,18 +177,6 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public boolean hasCycloidHands(RobotSide side)
-   {
-      switch (this)
-      {
-         case V1_FULL_ROBOT:
-            return true;
-         default:
-            return false;
-      }
-   }
-
-   @Override
    public AlexanderSensorInformation getSensorInformation()
    {
       if (sensorInformation != null)
@@ -216,7 +216,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public HumanoidURDFParameterInterface getURDFParameters()
+   public OpenAlexanderURDFParameters getURDFParameters()
    {
       if (urdfParameters != null)
          return urdfParameters;
