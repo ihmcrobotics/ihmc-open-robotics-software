@@ -41,13 +41,13 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public Collection<String> getModelPath()
+   public Collection<String> getURDFDescriptionResources()
    {
       return urdfModelPath;
    }
 
    @Override
-   public Collection<String> getHardwareMapResources()
+   public Collection<String> getXMLDescriptionResources()
    {
       return hardwareMapResources;
    }
