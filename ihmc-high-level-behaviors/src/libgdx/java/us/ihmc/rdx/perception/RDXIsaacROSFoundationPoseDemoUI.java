@@ -15,12 +15,14 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import vision_msgs.msg.dds.Detection3D;
 import vision_msgs.msg.dds.Detection3DArray;
@@ -34,9 +36,10 @@ public class RDXIsaacROSFoundationPoseDemoUI
                                                                                                          -1, 0, 0,
                                                                                                           0,-1, 0});
 
-   private static final ROS2Topic<Detection3DArray> trackingResultTopic = new ROS2Topic<>().withModule("tracking/output").withType(Detection3DArray.class);
-   private static final ROS2Topic<Detection3DArray> registrationResultTopic = new ROS2Topic<>().withModule("pose_estimation/output")
-                                                                                               .withType(Detection3DArray.class);
+   private static final ROS2Topic<?> MUSTARD_NAMESPACE = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE()).withPrefix("foundationpose/mustard");
+   private static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("tracking/output").withType(Detection3DArray.class);
+   private static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("pose_estimation/output")
+                                                                                                 .withType(Detection3DArray.class);
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
@@ -46,12 +49,13 @@ public class RDXIsaacROSFoundationPoseDemoUI
 
    public RDXIsaacROSFoundationPoseDemoUI()
    {
-      ros2Node.createSubscription2(trackingResultTopic, this::receiveOutput);
-      ros2Node.createSubscription2(registrationResultTopic, this::receiveOutput);
+      ros2Node.createSubscription2(TRACKING_RESULT_TOPIC, this::receiveOutput);
+      ros2Node.createSubscription2(REGISTRATION_RESULT_TOPIC, this::receiveOutput);
 
       RDXBaseUI baseUI = new RDXBaseUI();
       RDXPerceptionVisualizersPanel visualizers = new RDXPerceptionVisualizersPanel();
       Set<RDXBoxVisualizer> boxVisualizers = new HashSet<>();
+      Set<RDXReferenceFrameGraphic> referenceFrameGraphics = new HashSet<>();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -87,18 +91,32 @@ public class RDXIsaacROSFoundationPoseDemoUI
                baseUI.getPrimaryScene().removeRenderable(boxVisualizer);
                boxVisualizer.dispose();
             }
+            boxVisualizers.clear();
+
+            for (RDXReferenceFrameGraphic referenceFrameGraphic : referenceFrameGraphics)
+            {
+               baseUI.getPrimaryScene().removeRenderable(referenceFrameGraphic);
+               referenceFrameGraphic.dispose();
+            }
+            referenceFrameGraphics.clear();
 
             synchronized (detectedBoundingBoxes)
             {
                for (Box3D boundingBox : detectedBoundingBoxes)
                {
-                  RDXBoxVisualizer visualizer = new RDXBoxVisualizer();
-                  visualizer.setLineWidth(0.01);
-                  visualizer.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
-                  visualizer.generateMesh(boundingBox);
-                  visualizer.update();
-                  boxVisualizers.add(visualizer);
-                  baseUI.getPrimaryScene().addRenderableProvider(visualizer, visualizer);
+                  RDXBoxVisualizer boxVisualizer = new RDXBoxVisualizer();
+                  boxVisualizer.setLineWidth(0.01);
+                  boxVisualizer.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
+                  boxVisualizer.generateMesh(boundingBox);
+                  boxVisualizer.update();
+                  boxVisualizers.add(boxVisualizer);
+                  baseUI.getPrimaryScene().addRenderableProvider(boxVisualizer, boxVisualizer);
+
+                  RDXReferenceFrameGraphic referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
+                  referenceFrameGraphic.getFramePose3D().set(boundingBox.getPose());
+                  referenceFrameGraphic.updateFromFramePose();
+                  referenceFrameGraphics.add(referenceFrameGraphic);
+                  baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic, referenceFrameGraphic);
                }
             }
          }

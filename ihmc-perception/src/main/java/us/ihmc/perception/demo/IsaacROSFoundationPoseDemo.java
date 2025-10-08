@@ -41,13 +41,13 @@ import java.util.concurrent.atomic.AtomicReference;
 public class IsaacROSFoundationPoseDemo
 {
    // Topics we publish to FoundationPose
-   private static final ROS2Topic<?> RELIABLE_QOS = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE());
-   private static final ROS2Topic<Image> RGB_TOPIC = RELIABLE_QOS.withModule("image").withType(Image.class);
-   private static final ROS2Topic<Image> DEPTH_TOPIC = RELIABLE_QOS.withModule("depth_image").withType(Image.class);
-   private static final ROS2Topic<Image> SEGMENTATION_TOPIC = RELIABLE_QOS.withModule("segmentation").withType(Image.class);
-   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = RELIABLE_QOS.withModule("camera_info").withType(CameraInfo.class);
-   private static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = new ROS2Topic<>().withModule("tracking/output").withType(Detection3DArray.class);
-   private static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = new ROS2Topic<>().withModule("pose_estimation/output")
+   private static final ROS2Topic<?> MUSTARD_NAMESPACE = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE()).withPrefix("foundationpose/mustard");
+   private static final ROS2Topic<Image> RGB_TOPIC = MUSTARD_NAMESPACE.withModule("image").withType(Image.class);
+   private static final ROS2Topic<Image> DEPTH_TOPIC = MUSTARD_NAMESPACE.withModule("depth_image").withType(Image.class);
+   private static final ROS2Topic<Image> SEGMENTATION_TOPIC = MUSTARD_NAMESPACE.withModule("segmentation").withType(Image.class);
+   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = MUSTARD_NAMESPACE.withModule("camera_info").withType(CameraInfo.class);
+   private static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("tracking/output").withType(Detection3DArray.class);
+   private static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("pose_estimation/output")
                                                                                                  .withType(Detection3DArray.class);
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
