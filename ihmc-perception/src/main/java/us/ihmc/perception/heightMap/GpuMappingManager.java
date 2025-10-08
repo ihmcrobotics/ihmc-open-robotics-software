@@ -77,7 +77,7 @@ public class GpuMappingManager
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
-      terrainMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.TERRAIN_MAP);
+      terrainMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.TERRAIN_MAP_MESSAGE);
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 

@@ -11,6 +11,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import perception_msgs.msg.dds.YOLOv8ExecutorParameters;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import sensor_msgs.msg.dds.CameraInfo;
@@ -34,6 +35,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule("perception");
    public static final ROS2Topic<?> SCENE_GRAPH_MODULE = IHMC_ROOT.withModule("scene_graph");
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule("height_map");
+   public static final ROS2Topic<?> TERRAIN_MAP_MODULE = IHMC_ROOT.withModule("terrain_map");
 
    public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
 
@@ -147,6 +149,11 @@ public final class PerceptionAPI
    public static final ROS2Topic<ChunkMessage> CHUNK = PERCEPTION_MODULE.withOutput().withTypeName(ChunkMessage.class).withSuffix("chunk");
    public static final ROS2Topic<Empty> RESET_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("reset_height_map").withType(Empty.class);
    public static final ROS2Topic<Empty> LOWER_HEIGHT_MAP_BACKDROP = PERCEPTION_MODULE.withSuffix("lower_height_map_backdrop").withType(Empty.class);
+
+   /*
+    * Terrain map
+    */
+   public static final ROS2Topic<TerrainMapMessage> TERRAIN_MAP_MESSAGE = TERRAIN_MAP_MODULE.withOutput().withTypeName(TerrainMapMessage.class);
 
    /*
     * SLAM (old, not used)
