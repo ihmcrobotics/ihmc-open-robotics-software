@@ -1,6 +1,8 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
+import imgui.ImGui;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.communication.ros2.tf2.ROS2Frame;
@@ -22,13 +24,14 @@ import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2Publisher;
 import vision_msgs.msg.dds.Detection3D;
 import vision_msgs.msg.dds.Detection3DArray;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static us.ihmc.perception.demo.IsaacROSFoundationPoseDemo.*;
 
 public class RDXIsaacROSFoundationPoseDemoUI
 {
@@ -36,13 +39,9 @@ public class RDXIsaacROSFoundationPoseDemoUI
                                                                                                          -1, 0, 0,
                                                                                                           0,-1, 0});
 
-   private static final ROS2Topic<?> MUSTARD_NAMESPACE = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE()).withPrefix("foundationpose/mustard");
-   private static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("tracking/output").withType(Detection3DArray.class);
-   private static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("pose_estimation/output")
-                                                                                                 .withType(Detection3DArray.class);
-
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+   private final ROS2Publisher<Empty> trackingResetPublisher = ros2Node.createPublisher(TRACKING_RESET_TOPIC);
    private final Set<Box3D> detectedBoundingBoxes = new HashSet<>();
 
    private final ROS2Frame zedFrame = new ROS2MutableFrame(ros2Node, "zed_frame", ReferenceFrame.getWorldFrame());
@@ -81,7 +80,16 @@ public class RDXIsaacROSFoundationPoseDemoUI
             updateBoundingBoxes();
 
             baseUI.renderBeforeOnScreenUI();
+            renderSettings();
             baseUI.renderEnd();
+         }
+
+         private void renderSettings()
+         {
+            if (ImGui.button("Reset Tracking"))
+            {
+               trackingResetPublisher.publish(new Empty());
+            }
          }
 
          private void updateBoundingBoxes()

@@ -5,6 +5,8 @@ import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
+import std_msgs.msg.dds.Empty;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -41,17 +43,24 @@ import java.util.concurrent.atomic.AtomicReference;
 public class IsaacROSFoundationPoseDemo
 {
    // Topics we publish to FoundationPose
-   private static final ROS2Topic<?> MUSTARD_NAMESPACE = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE()).withPrefix("foundationpose/mustard");
-   private static final ROS2Topic<Image> RGB_TOPIC = MUSTARD_NAMESPACE.withModule("image").withType(Image.class);
-   private static final ROS2Topic<Image> DEPTH_TOPIC = MUSTARD_NAMESPACE.withModule("depth_image").withType(Image.class);
-   private static final ROS2Topic<Image> SEGMENTATION_TOPIC = MUSTARD_NAMESPACE.withModule("segmentation").withType(Image.class);
-   private static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = MUSTARD_NAMESPACE.withModule("camera_info").withType(CameraInfo.class);
-   private static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("tracking/output").withType(Detection3DArray.class);
-   private static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("pose_estimation/output")
+   public static final ROS2Topic<?> MUSTARD_NAMESPACE = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE()).withPrefix("foundationpose/mustard");
+   public static final ROS2Topic<Image> RGB_TOPIC = MUSTARD_NAMESPACE.withModule("image").withType(Image.class);
+   public static final ROS2Topic<Image> DEPTH_TOPIC = MUSTARD_NAMESPACE.withModule("depth_image").withType(Image.class);
+   public static final ROS2Topic<Image> SEGMENTATION_TOPIC = MUSTARD_NAMESPACE.withModule("segmentation").withType(Image.class);
+   public static final ROS2Topic<CameraInfo> CAMERA_INFO_TOPIC = MUSTARD_NAMESPACE.withModule("camera_info").withType(CameraInfo.class);
+   public static final ROS2Topic<Detection3DArray> TRACKING_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("tracking/output").withType(Detection3DArray.class);
+   public static final ROS2Topic<Detection3DArray> REGISTRATION_RESULT_TOPIC = MUSTARD_NAMESPACE.withModule("pose_estimation/output")
                                                                                                  .withType(Detection3DArray.class);
+
+   public static final ROS2Topic<Empty> TRACKING_RESET_TOPIC = new ROS2Topic<>().withQoS(ROS2QosProfile.RELIABLE())
+                                                                                .withModule("ihmc/isaac_ros_foundationpose_demo/tracking_reset")
+                                                                                .withType(Empty.class);
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+
+   private final Notification resetTracking = new Notification();
+   private final ROS2Subscription<Empty> trackingResetSubscription = ros2Node.createSubscription2(TRACKING_RESET_TOPIC, m -> resetTracking.set());
 
    private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node, 0.5);
 
@@ -76,8 +85,8 @@ public class IsaacROSFoundationPoseDemo
 
    private IsaacROSFoundationPoseDemo()
    {
-      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
-//      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
+//      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
+      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
       zedImageSensor.enablePositionalTracking(true);
       zedImageSensor.setSensorFrame(zedImageSensor.getTrackedSensorFrame());
       zedImageSensor.run(true);
@@ -133,6 +142,12 @@ public class IsaacROSFoundationPoseDemo
 
          // Publish any segmentations
          publishSegmentations(rgb);
+
+         // Publish to pose estimation topics to reset the tracking
+         if (resetTracking.poll())
+         {
+
+         }
 
          color.release();
          rgb.release();
@@ -224,6 +239,7 @@ public class IsaacROSFoundationPoseDemo
       imagePublisher.close();
       zedImageSensor.close();
       yoloExecutor.destroy();
+      trackingSubscription.remove();
       peerClockOffsetEstimator.destroy();
       ros2Node.destroy();
    }
