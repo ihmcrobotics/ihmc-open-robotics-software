@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__EStopMasterGainStatusMessage__idl__
+#define __controller_msgs__msg__EStopMasterGainStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A message for allowing operator to observe estop and master gain values
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::EStopMasterGainStatusMessage_")
+      struct EStopMasterGainStatusMessage
+      {
+        /**
+         * Current SOFT-E-STOP value
+         */
+        boolean estop;
+        /**
+         * Current masterGain value
+         */
+        double master_gain;
+      };
+    };
+  };
+};
+
+#endif

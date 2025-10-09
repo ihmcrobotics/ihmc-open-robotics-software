@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__EStopMasterGainCommandMessage__idl__
+#define __controller_msgs__msg__EStopMasterGainCommandMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A message for operating the e-stop and master gain controller variables
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::EStopMasterGainCommandMessage_")
+      struct EStopMasterGainCommandMessage
+      {
+        /**
+         * SOFT-E-STOP to set
+         */
+        boolean estop;
+        /**
+         * AvatarLowLevelOutputProcessor masterGain variable to set
+         */
+        double master_gain;
+      };
+    };
+  };
+};
+
+#endif
