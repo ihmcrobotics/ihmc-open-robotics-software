@@ -1,7 +1,6 @@
 package us.ihmc.perception.odometry;
 
 import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,16 +11,14 @@ import us.ihmc.sensors.zed.ZEDImageSensor;
 public class ZEDOdometryPublisherThread extends RepeatingTaskThread
 {
    private final ZEDImageSensor zedSensor;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2Publisher<StampedOdometryPacket> odometryPublisher;
    private volatile boolean initialPoseReceived = false;
    
-   public ZEDOdometryPublisherThread(ROS2Node ros2Node, ZEDImageSensor zedSensor, ROS2SyncedRobotModel syncedRobot)
+   public ZEDOdometryPublisherThread(ROS2Node ros2Node, ZEDImageSensor zedSensor, String robotName)
    {
       super(zedSensor.getSensorName() + "OdometryPublishThread");
       this.zedSensor = zedSensor;
-      this.syncedRobot = syncedRobot;
-      this.odometryPublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedOdometryPacket.class, syncedRobot.getRobotModel().getSimpleRobotName().toLowerCase()));
+      this.odometryPublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedOdometryPacket.class, robotName.toLowerCase()));
    }
 
    @Override

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -32,8 +33,9 @@ public final class StateEstimatorAPI
    {
       // Input types
       if (messageClass.equals(StampedPosePacket.class)
-       || messageClass.equals(PelvisPoseErrorPacket.class)
-       || messageClass.equals(LocalizationPacket.class))
+          || messageClass.equals(StampedOdometryPacket.class)
+          || messageClass.equals(PelvisPoseErrorPacket.class)
+          || messageClass.equals(LocalizationPacket.class))
       {
          return HumanoidControllerAPI.getInputTopic(robotName).withTypeName(messageClass).withQoS(ROS2QosProfile.BEST_EFFORT());
       }

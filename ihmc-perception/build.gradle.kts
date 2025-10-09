@@ -43,11 +43,6 @@ mainDependencies {
 
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:robot-environment-awareness:source")
-   api("us.ihmc:ihmc-avatar-interfaces:source") {
-      exclude(group = "org.openjfx")
-      exclude(group = "org.jmonkeyengine")
-      exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
-   }
    // Previously used for HeightMapAutoencoder and FootstepPredictor
    // This is a very large dependency, only uncomment for testing purposes
    // api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
