@@ -4,6 +4,7 @@ import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.sensors.zed.ZEDImageSensor;
@@ -12,7 +13,6 @@ public class ZEDOdometryPublisherThread extends RepeatingTaskThread
 {
    private final ZEDImageSensor zedSensor;
    private final ROS2Publisher<StampedOdometryPacket> odometryPublisher;
-   private volatile boolean initialPoseReceived = false;
    
    public ZEDOdometryPublisherThread(ROS2Node ros2Node, ZEDImageSensor zedSensor, String robotName)
    {
@@ -24,10 +24,6 @@ public class ZEDOdometryPublisherThread extends RepeatingTaskThread
    @Override
    protected void runTask()
    {
-      while (!initialPoseReceived) {
-         return;
-      }
-
       long timestamp = zedSensor.getLastGrabTimestamp();
       // Get the pose of ZED in world frame
       RigidBodyTransform zedInWorld = zedSensor.getTrackedSensorFrame().getTransformToRoot();
@@ -59,6 +55,7 @@ public class ZEDOdometryPublisherThread extends RepeatingTaskThread
       newestStampedOdometryPacket.setTimestamp(timestamp);
       newestStampedOdometryPacket.getImuOrientation().set(zedSensor.getImuOrientation());
       odometryPublisher.publish(newestStampedOdometryPacket);
+      LogTools.info("Publishing data {}", estimatedPelvisInWorld.getTranslation());
    }
    
    @Override
