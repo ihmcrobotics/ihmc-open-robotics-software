@@ -8,7 +8,7 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -396,8 +396,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       request.getStartLeftFootPose().set(leftFoot);
       request.getStartRightFootPose().set(rightFoot);
 
-      HeightMapMessage heightMap = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      request.getHeightMapMessage().set(heightMap);
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      request.getTerrainMapMessage().set(terrainMapMessage);
 
       SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalPose, footstepPlannerParameters.getIdealFootstepWidth());
       request.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));

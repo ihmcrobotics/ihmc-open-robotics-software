@@ -14,6 +14,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerActionMessage;
@@ -89,7 +90,6 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> snapGoalSteps;
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
-   private final AtomicReference<HeightMapMessage> heightMapReference;
    private final AtomicReference<TerrainMapMessage> terrainMapReference;
    private final AtomicReference<Boolean> planBodyPath;
    private final AtomicReference<Boolean> planNarrowPassage;
@@ -156,8 +156,7 @@ public class RemoteUIMessageConverter
       snapGoalSteps = messager.createInput(FootstepPlannerMessagerAPI.SnapGoalSteps);
       abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
-      heightMapReference = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
-      terrainMapReference = messager.createInput(FootstepPlannerMessagerAPI.TerrainMapData);
+      terrainMapReference = messager.createInput(FootstepPlannerMessagerAPI.terrainMapMessage);
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
       planNarrowPassage = messager.createInput(FootstepPlannerMessagerAPI.PlanNarrowPassage, false);
       performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
@@ -478,8 +477,6 @@ public class RemoteUIMessageConverter
          packet.setPlannerRequestId(plannerRequestIdReference.get());
       if (plannerHorizonLengthReference.get() != null)
          packet.setHorizonLength(plannerHorizonLengthReference.get());
-      if (heightMapReference.get() != null)
-         packet.getHeightMapMessage().set(heightMapReference.get());
       if (terrainMapReference.get() != null)
          packet.getTerrainMapMessage().set(terrainMapReference.get());
 

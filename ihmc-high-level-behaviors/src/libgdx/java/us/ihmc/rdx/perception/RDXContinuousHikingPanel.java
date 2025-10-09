@@ -19,7 +19,6 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.footstepPlanning.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -42,7 +41,8 @@ import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapParameters;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -55,8 +55,7 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -154,7 +153,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       hostStoredPropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Node);
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
-      SteppableRegionCalculatorParameters  steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
+      TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -173,11 +172,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       createParametersPanel(swingPlannerParameters, swingPlannerParametersPanel, hostStoredPropertySets, ContinuousHikingAPI.SWING_PLANNING_PARAMETERS);
       RDXStoredPropertySetTuner heightMapParametersPanel = new RDXStoredPropertySetTuner("Height Map Parameters (CH)");
       createParametersPanel(heightMapParameters, heightMapParametersPanel, hostStoredPropertySets, PerceptionComms.HEIGHT_MAP_PARAMETERS);
-      RDXStoredPropertySetTuner steppableRegionCalculatorParametersPanel = new RDXStoredPropertySetTuner("Steppable Region Parameters (CH)");
-      createParametersPanel(steppableRegionCalculatorParameters,
-                            steppableRegionCalculatorParametersPanel,
-                            hostStoredPropertySets,
-                            ContinuousHikingAPI.STEPPABLE_REGION_CALCULATOR_PARAMETERS);
+      RDXStoredPropertySetTuner terrainMapParametersPanel = new RDXStoredPropertySetTuner("Terrain Map Parameters (CH)");
+      createParametersPanel(terrainMapParameters, terrainMapParametersPanel, hostStoredPropertySets, PerceptionComms.TERRAIN_MAP_PARAMETERS);
 
       RDXStoredPropertySetTuner depthImageFilteringParametersPanel = new RDXStoredPropertySetTuner("Depth Image Filtering Parameters");
       createParametersPanel(depthImageFilteringParameters,
@@ -201,7 +197,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.addChild(storedPropertySetPanel);
    }
 
-   public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
+   public void update(TerrainMapData terrainMapData)
    {
       updateRos2StoredPropertySets();
 
@@ -211,7 +207,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
       latestFootstepPlan = null;
       terrainPlanningDebugger.update(terrainMapData);
-      stancePoseSelectionPanel.update(terrainMapData, heightMapData);
+      stancePoseSelectionPanel.update(terrainMapData);
    }
 
    /**

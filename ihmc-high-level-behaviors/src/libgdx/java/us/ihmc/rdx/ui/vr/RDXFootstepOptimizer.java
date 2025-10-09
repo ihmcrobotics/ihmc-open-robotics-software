@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;

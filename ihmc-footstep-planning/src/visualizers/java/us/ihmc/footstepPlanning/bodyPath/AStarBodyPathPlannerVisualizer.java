@@ -2,12 +2,11 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessagePubSubType;
+import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
@@ -18,9 +17,9 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -66,13 +65,13 @@ public class AStarBodyPathPlannerVisualizer
       }
 
       ObjectMapper objectMapper = new ObjectMapper();
-      HeightMapMessage heightMapMessage;
+      TerrainMapMessage terrainMapMessage;
       try
       {
-         JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+         JSONSerializer<TerrainMapMessage> serializer = new JSONSerializer<>(new TerrainMapMessagePubSubType());
          InputStream inputStream = new FileInputStream(file);
          JsonNode jsonNode = objectMapper.readTree(inputStream);
-         heightMapMessage = serializer.deserialize(jsonNode.toString());
+         terrainMapMessage = serializer.deserialize(jsonNode.toString());
          inputStream.close();
       }
       catch (IOException e)
@@ -81,15 +80,15 @@ public class AStarBodyPathPlannerVisualizer
          return;
       }
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);
 
-      scs.addStaticLinkGraphics(heightMapGraphics(heightMapData));
+      scs.addStaticLinkGraphics(heightMapGraphics(terrainMapData));
 
       AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(new AStarBodyPathPlannerParameters());
-      bodyPathPlanner.setHeightMapData(heightMapData);
+      bodyPathPlanner.setTerrainMapData(terrainMapData);
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       for(RobotSide robotSide : RobotSide.values())
@@ -99,7 +98,6 @@ public class AStarBodyPathPlannerVisualizer
          request.getStartFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
          request.getGoalFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
       }
-      request.setHeightMapData(heightMapData);
 
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 
@@ -125,29 +123,28 @@ public class AStarBodyPathPlannerVisualizer
       return fileChooser.getSelectedFile();
    }
 
-   private static Graphics3DObject heightMapGraphics(HeightMapData heightMapData)
+   private static Graphics3DObject heightMapGraphics(TerrainMapData terrainMapData)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.1);
 
-      double groundHeight = heightMapData.getMinHeight();
+      double groundHeight = terrainMapData.getMinHeight();
       AppearanceDefinition cellColor = YoAppearance.Olive();
-      int numberOfCells = heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis();
 
-      for (int key = 0; key < numberOfCells; key++)
+      for (int i = 0; i < terrainMapData.getCellsPerAxis(); i++)
       {
-         Point2D cellPosition = heightMapData.getCellPosition(key);
-         double height = heightMapData.getHeight(key);
-         double renderedHeight = (height - groundHeight);
+         for (int j = 0; j < terrainMapData.getCellsPerAxis(); j++)
+         {
+            double height = terrainMapData.getHeight(i, j);
+            double renderedHeight = (height - groundHeight);
 
-         graphics3DObject.identity();
-         graphics3DObject.translate(cellPosition.getX(), cellPosition.getY(), groundHeight + 0.5 * renderedHeight);
-         graphics3DObject.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), renderedHeight, true, cellColor);
+            graphics3DObject.identity();
+            graphics3DObject.addCube(terrainMapData.getCellSize(), terrainMapData.getCellSize(), renderedHeight, true, cellColor);
+         }
       }
 
       graphics3DObject.identity();
-      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getMinHeight());
-      graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), 0.01, YoAppearance.Blue());
+      graphics3DObject.addCube(terrainMapData.getMapSize(), terrainMapData.getMapSize(), 0.01, YoAppearance.Blue());
 
       return graphics3DObject;
    }

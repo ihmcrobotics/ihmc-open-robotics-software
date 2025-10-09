@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.util.List;
 
@@ -17,27 +17,27 @@ public class PlanarRegionToHeightMapConverter
    public static final double defaultResolution = 0.02;
    public static final double defaultEstimatedGroundHeight = 0.0;
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionsList, defaultResolution);
    }
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY);
    }
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionList, resolutionXY, defaultEstimatedGroundHeight);
    }
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY, double estimatedGroundHeight)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(PlanarRegionsList planarRegionsList, double resolutionXY, double estimatedGroundHeight)
    {
       return convertFromPlanarRegionsToHeightMap(planarRegionsList.getPlanarRegionsAsList(), resolutionXY, estimatedGroundHeight);
    }
 
-   public static HeightMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY, double estimatedGroundHeight)
+   public static TerrainMapMessage convertFromPlanarRegionsToHeightMap(List<PlanarRegion> planarRegionList, double resolutionXY, double estimatedGroundHeight)
    {
       BoundingBox2D occupiedArea = new BoundingBox2D();
       planarRegionList.forEach(planarRegion ->
@@ -57,7 +57,7 @@ public class PlanarRegionToHeightMapConverter
       double gridCenterY = 0.5 * (occupiedArea.getMaxY() + occupiedArea.getMinY());
       double sideLength = Math.max(width, height);
 
-      HeightMapMessage message = new HeightMapMessage();
+      TerrainMapMessage message = new TerrainMapMessage();
       message.setWidthInMeters(sideLength);
       message.setGridCenterX(gridCenterX);
       message.setGridCenterY(gridCenterY);
@@ -79,7 +79,7 @@ public class PlanarRegionToHeightMapConverter
 
             if (projectedPoint != null && Double.isFinite(projectedPoint.getZ()) && !MathTools.epsilonEquals(projectedPoint.getZ(), estimatedGroundHeight, 1e-2))
             {
-               message.getHeights().add((int) projectedPoint.getZ());
+               message.getHeightMap().add((int) projectedPoint.getZ());
             }
          }
       }

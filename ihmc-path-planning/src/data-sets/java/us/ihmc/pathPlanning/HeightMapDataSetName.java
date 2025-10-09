@@ -1,11 +1,11 @@
 package us.ihmc.pathPlanning;
 
-import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.HeightMapMessagePubSubType;
+import perception_msgs.msg.dds.TerrainMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 
 import java.io.*;
 
@@ -29,8 +29,8 @@ public enum HeightMapDataSetName
 
    private static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/heightMapDataSets";
 
-   private final HeightMapData heightMapData;
-   private final HeightMapMessage message;
+   private final TerrainMapData terrainMapData;
+   private final TerrainMapMessage message;
    private final Pose3D start, goal;
 
    HeightMapDataSetName(Pose3D start, Pose3D goal)
@@ -41,12 +41,12 @@ public enum HeightMapDataSetName
       Class<DataSetIOTools> loadingClass = DataSetIOTools.class;
       String dataSetPlanarRegionsPath = DATA_SET_DIRECTORY_PATH + "/" + name().toLowerCase() + ".json";
       InputStream inputStream = loadingClass.getClassLoader().getResourceAsStream(dataSetPlanarRegionsPath);
-      JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+      JSONSerializer<TerrainMapMessage> serializer = new JSONSerializer<>(new TerrainMapMessagePubSubType());
 
       try
       {
          message = serializer.deserialize(inputStream);
-         heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(message);
+         terrainMapData = TerrainMapMessageTools.unpackMessage(message);
       }
       catch (IOException e)
       {
@@ -54,14 +54,14 @@ public enum HeightMapDataSetName
       }
    }
 
-   public HeightMapMessage getMessage()
+   public TerrainMapMessage getMessage()
    {
       return message;
    }
 
-   public HeightMapData getHeightMapData()
+   public TerrainMapData getTerrainMapData()
    {
-      return heightMapData;
+      return terrainMapData;
    }
 
    public Pose3D getStart()
