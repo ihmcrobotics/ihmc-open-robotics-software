@@ -59,7 +59,8 @@ public class RDXHardwareControlStateManager
          ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
          boolean changed = ImGui.checkbox(labels.get("SOFT-E-STOP"), estop);
          ImGui.sameLine();
-         changed |= ImGuiTools.sliderDouble(labels.get("Master Gain"), masterGain, 0.0, 1.0);
+         ImGui.setNextItemWidth(ImGui.getColumnWidth());
+         changed |= ImGuiTools.sliderDouble(labels.getHidden("Master Gain"), masterGain, 0.0, 1.0, "Master Gain: %.2f");
          ImGui.popStyleColor(2);
 
          if (changed)
