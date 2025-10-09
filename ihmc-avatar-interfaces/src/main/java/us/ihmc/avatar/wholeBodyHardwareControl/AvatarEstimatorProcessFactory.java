@@ -1,9 +1,15 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.humanoidRobotics.communication.subscribers.CameraOdometryListener;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
@@ -54,6 +60,10 @@ public class AvatarEstimatorProcessFactory
    // Output processor
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
 
+   //  The external corrector
+   private final CameraOdometryListener cameraOdometryListener;
+   private final PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
+
    // The remaining constructor arguments
    private final MonotonicTime period;
    private final double masterThreadDt;
@@ -101,6 +111,15 @@ public class AvatarEstimatorProcessFactory
 
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
+
+      cameraOdometryListener = new CameraOdometryListener(rootRegistry);
+      estimatorRealtimeROS2Node.createSubscription(
+                  StateEstimatorAPI.getTopic(StampedOdometryPacket.class, robotModel.getSimpleRobotName().toLowerCase()),
+                  cameraOdometryListener);
+
+      pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName().toLowerCase());
+      estimatorRealtimeROS2Node.createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotModel.getSimpleRobotName().toLowerCase()),
+                                          s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
    }
 
    public void start()
@@ -181,6 +200,7 @@ public class AvatarEstimatorProcessFactory
       avatarEstimatorThreadFactory.setEstimatorFullRobotModel(fullRobotModel);
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
+      avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
 
       return avatarEstimatorThreadFactory;
