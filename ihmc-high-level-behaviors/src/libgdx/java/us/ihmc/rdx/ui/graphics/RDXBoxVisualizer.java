@@ -13,11 +13,14 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class RDXBoxVisualizer implements RenderableProvider
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private ModelInstance modelInstance;
-   private Model lastModel;
+   private Model lastModel = null;
+   private final AtomicBoolean disposeLastModel = new AtomicBoolean(false);
    private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private final Point3D[] vertices = new Point3D[8];
@@ -69,20 +72,27 @@ public class RDXBoxVisualizer implements RenderableProvider
 
       buildMeshAndCreateModelInstance = () ->
       {
-         if (lastModel != null)
+         if (disposeLastModel.getAndSet(false))
             lastModel.dispose();
 
-         lastModel = RDXModelBuilder.buildModel(meshBuilder ->
+         synchronized (disposeLastModel)
          {
-            meshBuilder.addMultiLineBox(vertices, lineWidth, color);
-         }, "box");
-         modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+            lastModel = RDXModelBuilder.buildModel(meshBuilder ->meshBuilder.addMultiLineBox(vertices, lineWidth, color), "box");
+            modelInstance = new ModelInstance(lastModel); // TODO: Look into reusing the Model
+            disposeLastModel.set(true);
+         }
       };
    }
 
    public void dispose()
    {
       executorService.destroy();
+
+      synchronized (disposeLastModel)
+      {
+         if (disposeLastModel.getAndSet(false))
+            lastModel.dispose();
+      }
    }
 
    @Override
