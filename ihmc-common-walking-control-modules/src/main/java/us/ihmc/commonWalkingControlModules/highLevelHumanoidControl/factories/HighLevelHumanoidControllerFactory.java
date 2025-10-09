@@ -345,6 +345,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.EXIT_WALKING, controllerStateFactory);
    }
 
+   public void addCustomSmoothTransitionControlState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName startState, HighLevelControllerName endState)
+   {
+      HighLevelControllerStateFactory controllerStateFactory = new SmoothTransitionControllerStateFactory(transitionName, transitionStateEnum, startState, endState);
+
+      controllerStateFactories.add(controllerStateFactory);
+      controllerFactoriesMap.put(transitionStateEnum, controllerStateFactory);
+   }
+
    public void useDefaultFreezeControlState()
    {
       FreezeControllerStateFactory controllerStateFactory = new FreezeControllerStateFactory();
