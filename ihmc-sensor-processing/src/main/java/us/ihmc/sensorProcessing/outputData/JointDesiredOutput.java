@@ -61,6 +61,31 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    }
 
    @Override
+   public boolean isEmpty()
+   {
+      //@formatter:off
+      return controlMode == null &&
+             loadMode == null &&
+             Double.isNaN(desiredTorque) &&
+             Double.isNaN(desiredPosition) &&
+             Double.isNaN(desiredVelocity) &&
+             Double.isNaN(desiredAcceleration) &&
+             !resetIntegrators &&
+             Double.isNaN(stiffness) &&
+             Double.isNaN(damping) &&
+             Double.isNaN(masterGain) &&
+             Double.isNaN(velocityScaling) &&
+             Double.isNaN(velocityIntegrationBreakFrequency) &&
+             Double.isNaN(positionIntegrationBreakFrequency) &&
+             Double.isNaN(positionIntegrationMaxError) &&
+             Double.isNaN(velocityIntegrationMaxError) &&
+             Double.isNaN(positionFeedbackMaxError) &&
+             Double.isNaN(velocityFeedbackMaxError) &&
+             Double.isNaN(maxTorque);
+      //@formatter:on
+   }
+
+   @Override
    public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode = controlMode;
@@ -303,6 +328,4 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    {
       this.maxTorque = feedbackMaxTorque;
    }
-   
-   
 }
