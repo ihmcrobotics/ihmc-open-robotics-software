@@ -305,6 +305,8 @@ public class MathUtilsTest
                .withPointer(resultPoint)
                .run(stream, new dim3(), new dim3(), 0);
 
+         cudaStreamSynchronize(stream);
+
          // Calculate transform using Euclid library (on CPU)
          point.applyTransform(transform);
 

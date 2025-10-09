@@ -22,6 +22,8 @@ import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.handsros2.HandModel;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel;
+import us.ihmc.handsros2.ezGripper.EZGripperModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
 import us.ihmc.openAlexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
@@ -172,12 +174,16 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
       for (RobotSide side : RobotSide.values)
       {
-         if (robotVersion.hasSakeGripperJoints(side))
+         if (robotVersion.hasHandWithFingers(side))
          {
-            //            TODO
+            HandModel handModel = switch (robotVersion.getHandType(side))
+            {
+               case EZ_GRIPPER -> new EZGripperModel(true);
+               case ABILITY_HAND -> new AbilityHandModel();
+            };
+
+            handModels.put(side, handModel);
          }
-         else if (robotVersion.hasNubHands(side))
-            handModels.put(side, new AlexanderNubHandModel());
       }
 
       for (RobotSide side : RobotSide.values)

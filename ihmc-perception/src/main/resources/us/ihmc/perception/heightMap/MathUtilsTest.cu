@@ -73,7 +73,7 @@ __global__ void test_math_utils_transform_point_2(float px, float py, float pz, 
     result.y = transformedPoint.y;
     result.z = transformedPoint.z;
 
-    printf("Transformed Point: (%f, %f, %f)\n", transformedPoint.x, transformedPoint.y, transformedPoint.z);
+    printf("Transformed Point (we are on the GPU rn): (%f, %f, %f)\n", result.x, result.y, result.z);
 }
 
 extern "C"

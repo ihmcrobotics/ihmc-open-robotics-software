@@ -83,7 +83,7 @@ public class RawImagePublisher implements AutoCloseable
             imageToCompress = imageToPublish.replaceImage(bgr8Image, PixelFormat.BGR8);
          case BGR8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
-            OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
+            OpenCVTools.compressImagePNG(imageToCompress.getCpuImageMat(), compressedImage);
             compressionType = PNG;
             break;
 
@@ -93,13 +93,13 @@ public class RawImagePublisher implements AutoCloseable
             imageToCompress = imageToPublish.replaceImage(rgb8Image, PixelFormat.RGB8);
          case RGB8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
-            OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
+            OpenCVTools.compressImagePNG(imageToCompress.getCpuImageMat(), compressedImage);
             compressionType = PNG;
             break;
 
          case GRAY8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
-            OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
+            OpenCVTools.compressImagePNG(imageToCompress.getCpuImageMat(), compressedImage);
             compressionType = PNG;
             break;
          default:
