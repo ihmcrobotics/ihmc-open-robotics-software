@@ -564,6 +564,21 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
+   {
+      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum);
+   }
+
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)
+   {
+      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry);
+   }
+
+   public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
+   {
+      controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
+   }
+
    public YoRegistry getEstimatorRegistry()
    {
       return estimatorThread.get().getYoRegistry();
