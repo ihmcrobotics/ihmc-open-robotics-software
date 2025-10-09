@@ -60,17 +60,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public boolean isEmpty()
-   {
-      for (int i = 0; i < lowLevelJointDataList.length; i++)
-      {
-         if (!lowLevelJointDataList[i].isEmpty())
-            return false;
-      }
-      return true;
-   }
-
-   @Override
    public JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode)
    {
       return lowLevelJointDataMap.get(jointHashCode);
