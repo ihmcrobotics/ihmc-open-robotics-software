@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.cuda.cudart.CUstream_st;
 import org.bytedeco.cuda.cudart.dim3;
@@ -69,7 +69,7 @@ public class TerrainMapExtractor
       try
       {
          // Load header and main file
-         URL heightMapUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/heightMap/HeightMapUtils.cuh");
+         URL heightMapUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/gpuMapping/HeightMapUtils.cuh");
          URL mathUtilsHeaderPath = getClass().getResource("/us/ihmc/perception/cuda/MathUtils.cuh");
          URL kernelPath = getClass().getResource("TerrainMapExtractor.cu");
 

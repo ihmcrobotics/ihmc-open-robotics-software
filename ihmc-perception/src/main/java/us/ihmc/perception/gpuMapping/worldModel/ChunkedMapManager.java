@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap.worldModel;
+package us.ihmc.perception.gpuMapping.worldModel;
 
 import com.esotericsoftware.kryo.util.IntMap;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -6,9 +6,9 @@ import perception_msgs.msg.dds.ChunkMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 

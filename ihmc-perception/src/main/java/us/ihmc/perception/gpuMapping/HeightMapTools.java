@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;

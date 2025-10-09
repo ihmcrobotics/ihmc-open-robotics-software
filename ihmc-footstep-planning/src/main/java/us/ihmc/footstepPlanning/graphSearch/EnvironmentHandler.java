@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 public class EnvironmentHandler
 {

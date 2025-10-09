@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import controller_msgs.msg.dds.PlanOffsetStatus;
 import us.ihmc.euclid.tuple3D.Vector3D;

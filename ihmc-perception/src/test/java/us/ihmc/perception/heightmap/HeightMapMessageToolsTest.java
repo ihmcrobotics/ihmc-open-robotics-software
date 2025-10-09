@@ -3,9 +3,9 @@ package us.ihmc.perception.heightmap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 

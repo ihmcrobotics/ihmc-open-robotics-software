@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 public enum SnapResult
 {

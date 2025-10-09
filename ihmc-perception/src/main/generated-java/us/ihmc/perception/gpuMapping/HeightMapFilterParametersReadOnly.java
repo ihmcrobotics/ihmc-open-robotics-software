@@ -1,8 +1,8 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.perception.heightMap.HeightMapFilterParameters.*;
+import static us.ihmc.perception.gpuMapping.HeightMapFilterParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file

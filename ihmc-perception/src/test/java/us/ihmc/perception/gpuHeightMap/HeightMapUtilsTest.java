@@ -114,8 +114,8 @@ public class HeightMapUtilsTest
 
    private float[] runIndicesToCoordinateOnCUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/heightMap/HeightMapUtilsTest.cu");
-      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/heightMap/HeightMapUtils.cuh");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/HeightMapUtilsTest.cu");
+      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/HeightMapUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
       CUDAProgram program = new CUDAProgram(programPath, headerPath);
@@ -180,8 +180,8 @@ public class HeightMapUtilsTest
 
    private float[] runCoordinateToIndicesOnCUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/heightMap/HeightMapUtilsTest.cu");
-      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/heightMap/HeightMapUtils.cuh");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/HeightMapUtilsTest.cu");
+      URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/HeightMapUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
       CUDAProgram program = new CUDAProgram(programPath, headerPath);

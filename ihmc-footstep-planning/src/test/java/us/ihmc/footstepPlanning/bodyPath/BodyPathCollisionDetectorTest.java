@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 import java.util.Random;
 

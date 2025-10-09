@@ -8,9 +8,9 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.perception.heightMap.TerrainMapParameters;
+import us.ihmc.perception.gpuMapping.TerrainMapParameters;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
 
 public class ActiveMappingParameterToolBox
 {

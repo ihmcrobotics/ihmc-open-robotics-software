@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.idl.IDLSequence.Byte;

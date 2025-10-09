@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;

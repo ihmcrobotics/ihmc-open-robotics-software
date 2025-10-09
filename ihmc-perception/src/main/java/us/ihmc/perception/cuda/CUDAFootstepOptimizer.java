@@ -10,8 +10,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.PlanarityChecker;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.PlanarityChecker;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 
 import java.net.URL;
 

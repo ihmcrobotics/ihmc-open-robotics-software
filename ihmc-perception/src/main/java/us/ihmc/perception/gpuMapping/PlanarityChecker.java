@@ -1,4 +1,4 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 

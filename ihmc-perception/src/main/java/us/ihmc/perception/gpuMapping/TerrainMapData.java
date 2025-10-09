@@ -1,6 +1,5 @@
-package us.ihmc.perception.heightMap;
+package us.ihmc.perception.gpuMapping;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;

@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.camera.CameraIntrinsics;
-import us.ihmc.perception.heightMap.HeightMapExtractor;
-import us.ihmc.perception.heightMap.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapExtractor;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
 
 public class HeightMapExtractorTest
 {

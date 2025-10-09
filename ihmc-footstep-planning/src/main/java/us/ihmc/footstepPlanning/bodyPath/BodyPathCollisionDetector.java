@@ -2,8 +2,8 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 /* package-private */
 class BodyPathCollisionDetector

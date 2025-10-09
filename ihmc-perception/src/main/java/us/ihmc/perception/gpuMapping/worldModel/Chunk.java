@@ -1,10 +1,10 @@
-package us.ihmc.perception.heightMap.worldModel;
+package us.ihmc.perception.gpuMapping.worldModel;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 
 import java.nio.FloatBuffer;
 

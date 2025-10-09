@@ -10,12 +10,12 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.HeightMapParameters;
-import us.ihmc.perception.heightMap.HeightMapTools;
-import us.ihmc.perception.heightMap.SnapResult;
-import us.ihmc.perception.heightMap.TerrainMapParameters;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.TerrainMapExtractor;
+import us.ihmc.perception.gpuMapping.HeightMapParameters;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.SnapResult;
+import us.ihmc.perception.gpuMapping.TerrainMapParameters;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapExtractor;
 
 import static org.junit.jupiter.api.Assertions.*;
 

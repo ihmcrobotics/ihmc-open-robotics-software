@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.TerrainMapMessageTools;
-import us.ihmc.perception.heightMap.TerrainMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
+import us.ihmc.perception.gpuMapping.TerrainMapTools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

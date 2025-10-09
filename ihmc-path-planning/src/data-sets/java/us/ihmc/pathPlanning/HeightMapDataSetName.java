@@ -4,8 +4,8 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessagePubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.perception.heightMap.TerrainMapMessageTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 
 import java.io.*;
 
