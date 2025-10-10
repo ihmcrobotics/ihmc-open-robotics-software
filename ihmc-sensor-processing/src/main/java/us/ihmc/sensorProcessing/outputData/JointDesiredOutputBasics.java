@@ -4,8 +4,6 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
 {
    void clear();
 
-   boolean isEmpty();
-
    default void set(JointDesiredOutputReadOnly other)
    {
       setControlMode(other.getControlMode());
