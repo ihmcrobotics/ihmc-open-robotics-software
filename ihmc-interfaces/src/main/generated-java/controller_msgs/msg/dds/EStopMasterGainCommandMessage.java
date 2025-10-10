@@ -6,8 +6,19 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainScaleControllerCommandMessage> implements Settable<MasterGainScaleControllerCommandMessage>, EpsilonComparable<MasterGainScaleControllerCommandMessage>
+/**
+       * A message for operating the e-stop and master gain controller variables
+       */
+public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommandMessage> implements Settable<EStopMasterGainCommandMessage>, EpsilonComparable<EStopMasterGainCommandMessage>
 {
+   /**
+            * SOFT-E-STOP to set
+            */
+   public boolean estop_;
+   /**
+            * AvatarLowLevelOutputProcessor masterGain variable to set
+            */
+   public double master_gain_;
    /**
             * True if this is a request to servo the robot
             * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
@@ -15,33 +26,65 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
    public boolean servo_robot_;
    /**
             * True is this is a request to immediately zero the gains which can be violent and dangerous
-            * This will also turn off the HPU
             */
    public boolean unservo_immediately_;
    /**
             * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
-            * This will also turn off the HPU at the end
             */
    public boolean unservo_slowly_;
 
-   public MasterGainScaleControllerCommandMessage()
+   public EStopMasterGainCommandMessage()
    {
    }
 
-   public MasterGainScaleControllerCommandMessage(MasterGainScaleControllerCommandMessage other)
+   public EStopMasterGainCommandMessage(EStopMasterGainCommandMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(MasterGainScaleControllerCommandMessage other)
+   public void set(EStopMasterGainCommandMessage other)
    {
+      estop_ = other.estop_;
+
+      master_gain_ = other.master_gain_;
+
       servo_robot_ = other.servo_robot_;
 
       unservo_immediately_ = other.unservo_immediately_;
 
       unservo_slowly_ = other.unservo_slowly_;
 
+   }
+
+   /**
+            * SOFT-E-STOP to set
+            */
+   public void setEstop(boolean estop)
+   {
+      estop_ = estop;
+   }
+   /**
+            * SOFT-E-STOP to set
+            */
+   public boolean getEstop()
+   {
+      return estop_;
+   }
+
+   /**
+            * AvatarLowLevelOutputProcessor masterGain variable to set
+            */
+   public void setMasterGain(double master_gain)
+   {
+      master_gain_ = master_gain;
+   }
+   /**
+            * AvatarLowLevelOutputProcessor masterGain variable to set
+            */
+   public double getMasterGain()
+   {
+      return master_gain_;
    }
 
    /**
@@ -63,7 +106,6 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
 
    /**
             * True is this is a request to immediately zero the gains which can be violent and dangerous
-            * This will also turn off the HPU
             */
    public void setUnservoImmediately(boolean unservo_immediately)
    {
@@ -71,7 +113,6 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
    }
    /**
             * True is this is a request to immediately zero the gains which can be violent and dangerous
-            * This will also turn off the HPU
             */
    public boolean getUnservoImmediately()
    {
@@ -80,7 +121,6 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
 
    /**
             * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
-            * This will also turn off the HPU at the end
             */
    public void setUnservoSlowly(boolean unservo_slowly)
    {
@@ -88,7 +128,6 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
    }
    /**
             * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
-            * This will also turn off the HPU at the end
             */
    public boolean getUnservoSlowly()
    {
@@ -96,22 +135,26 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
    }
 
 
-   public static Supplier<MasterGainScaleControllerCommandMessagePubSubType> getPubSubType()
+   public static Supplier<EStopMasterGainCommandMessagePubSubType> getPubSubType()
    {
-      return MasterGainScaleControllerCommandMessagePubSubType::new;
+      return EStopMasterGainCommandMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return MasterGainScaleControllerCommandMessagePubSubType::new;
+      return EStopMasterGainCommandMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(MasterGainScaleControllerCommandMessage other, double epsilon)
+   public boolean epsilonEquals(EStopMasterGainCommandMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.estop_, other.estop_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.master_gain_, other.master_gain_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.servo_robot_, other.servo_robot_, epsilon)) return false;
 
@@ -128,9 +171,13 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof MasterGainScaleControllerCommandMessage)) return false;
+      if(!(other instanceof EStopMasterGainCommandMessage)) return false;
 
-      MasterGainScaleControllerCommandMessage otherMyClass = (MasterGainScaleControllerCommandMessage) other;
+      EStopMasterGainCommandMessage otherMyClass = (EStopMasterGainCommandMessage) other;
+
+      if(this.estop_ != otherMyClass.estop_) return false;
+
+      if(this.master_gain_ != otherMyClass.master_gain_) return false;
 
       if(this.servo_robot_ != otherMyClass.servo_robot_) return false;
 
@@ -147,7 +194,11 @@ public class MasterGainScaleControllerCommandMessage extends Packet<MasterGainSc
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("MasterGainScaleControllerCommandMessage {");
+      builder.append("EStopMasterGainCommandMessage {");
+      builder.append("estop=");
+      builder.append(this.estop_);      builder.append(", ");
+      builder.append("master_gain=");
+      builder.append(this.master_gain_);      builder.append(", ");
       builder.append("servo_robot=");
       builder.append(this.servo_robot_);      builder.append(", ");
       builder.append("unservo_immediately=");
