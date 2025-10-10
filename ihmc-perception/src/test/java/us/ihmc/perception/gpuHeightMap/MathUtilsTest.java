@@ -33,7 +33,7 @@ public class MathUtilsTest
    @Test
    public void testDotProductCUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/MathUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
@@ -87,7 +87,7 @@ public class MathUtilsTest
    {
       Random random = new Random(32900);
 
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/MathUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
@@ -177,7 +177,7 @@ public class MathUtilsTest
       float minValue = 1;
       float maxValue = 5;
 
-      URL programFile = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL programFile = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/MathUtilsTest.cu");
       URL headerFile = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
@@ -227,7 +227,7 @@ public class MathUtilsTest
 
    private float[] runTransformPoint3d32_2OnCUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/MathUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();
@@ -274,7 +274,7 @@ public class MathUtilsTest
    @Test
    public void testTransformPoint2CUDA() throws Exception
    {
-      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuHeightMap/MathUtilsTest.cu");
+      URL programPath = getClass().getClassLoader().getResource("us/ihmc/perception/gpuMapping/MathUtilsTest.cu");
       URL headerPath = getClass().getClassLoader().getResource("us/ihmc/perception/cuda/MathUtils.cuh");
 
       CUstream_st stream = CUDAStreamManager.getStream();

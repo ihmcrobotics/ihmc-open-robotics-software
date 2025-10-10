@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
@@ -15,7 +14,6 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +150,6 @@ public abstract class FootstepPlannerDataSetTest
       request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
       request.setPlanBodyPath(getPlanBodyPath());
       request.setPerformAStarSearch(getPerformAStarSearch());
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(dataset.getPlanarRegionsList())));
       request.setMaximumIterations(300);
       request.setTimeout(Double.MAX_VALUE);
       request.setHorizonLength(Double.MAX_VALUE);

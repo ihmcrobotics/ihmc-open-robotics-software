@@ -78,32 +78,32 @@ __device__ float3 cross3(const float3 &a, const float3 &b)
  * Returns a 9 element array that is the inverse of a 9 element argument. The data is expected to be row major,
  * or [row1, row2, row3];
  **/
-__device__ float* invert3x3Matrix(float* matrix, float* result)
+__device__ void invert3x3Matrix(double* matrix, double* result)
 {
-    float m00 = matrix[0];
-    float m01 = matrix[1];
-    float m02 = matrix[2];
-    float m10 = matrix[3];
-    float m11 = matrix[4];
-    float m12 = matrix[5];
-    float m20 = matrix[6];
-    float m21 = matrix[7];
-    float m22 = matrix[8];
+    double m00 = matrix[0];
+    double m01 = matrix[1];
+    double m02 = matrix[2];
+    double m10 = matrix[3];
+    double m11 = matrix[4];
+    double m12 = matrix[5];
+    double m20 = matrix[6];
+    double m21 = matrix[7];
+    double m22 = matrix[8];
 
     // compute the determinant
-   float det = m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
+   double det = m00 * m11 * m22 + m01 * m12 * m20 + m02 * m10 * m21 - m02 * m11 * m20 - m01 * m10 * m22 - m00 * m12 * m21;
 
-   float detMinor00 = m11 * m22 - m12 * m21;
-   float detMinor01 = m10 * m22 - m12 * m20;
-   float detMinor02 = m10 * m21 - m11 * m20;
+   double detMinor00 = m11 * m22 - m12 * m21;
+   double detMinor01 = m10 * m22 - m12 * m20;
+   double detMinor02 = m10 * m21 - m11 * m20;
 
-   float detMinor10 = m01 * m22 - m02 * m21;
-   float detMinor11 = m00 * m22 - m02 * m20;
-   float detMinor12 = m00 * m21 - m01 * m20;
+   double detMinor10 = m01 * m22 - m02 * m21;
+   double detMinor11 = m00 * m22 - m02 * m20;
+   double detMinor12 = m00 * m21 - m01 * m20;
 
-   float detMinor20 = m01 * m12 - m02 * m11;
-   float detMinor21 = m00 * m12 - m02 * m10;
-   float detMinor22 = m00 * m11 - m01 * m10;
+   double detMinor20 = m01 * m12 - m02 * m11;
+   double detMinor21 = m00 * m12 - m02 * m10;
+   double detMinor22 = m00 * m11 - m01 * m10;
 
    result[0] = detMinor00 / det;
    result[1] = -detMinor10 / det;
@@ -118,10 +118,10 @@ __device__ float* invert3x3Matrix(float* matrix, float* result)
    result[8] = detMinor22 / det;
 }
 
-__device__ float solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector, float zz, float* coefficients)
+__device__ double solveForPlaneCoefficients(double* covariance_matrix, double* z_variance_vector, double zz, double* coefficients)
 {
     // Invert the 3x3 covariance matrix (this should be done on the device as well)
-    float inverse_covariance_matrix[9];
+    double inverse_covariance_matrix[9];
     invert3x3Matrix(covariance_matrix, inverse_covariance_matrix);  // Assuming this is a device function
 
     // Simple matrix multiplication: coefficients = inverse_covariance_matrix * z_variance_vector
@@ -135,22 +135,22 @@ __device__ float solveForPlaneCoefficients(float* covariance_matrix, float* z_va
     }
 
     // Compute squared error, from LeastSquaresPlaneFitter#fitPlaneToPoints
-    float A = coefficients[0];
-    float B = coefficients[1];
-    float C = coefficients[2];
+    double A = coefficients[0];
+    double B = coefficients[1];
+    double C = coefficients[2];
 
-    float xx = covariance_matrix[0];
-    float xy = covariance_matrix[1];
-    float x = covariance_matrix[2];
-    float yy = covariance_matrix[4];
-    float y = covariance_matrix[5];
-    float n = covariance_matrix[8];
+    double xx = covariance_matrix[0];
+    double xy = covariance_matrix[1];
+    double x = covariance_matrix[2];
+    double yy = covariance_matrix[4];
+    double y = covariance_matrix[5];
+    double n = covariance_matrix[8];
 
-    float xz = -z_variance_vector[0];
-    float yz = -z_variance_vector[1];
-    float z = -z_variance_vector[2];
+    double xz = -z_variance_vector[0];
+    double yz = -z_variance_vector[1];
+    double z = -z_variance_vector[2];
 
-    float squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
+    double squared_error = A*A * xx + 2 * A*B*xy + 2*A*xz + 2*A*C*x + B*B*yy + 2*B*yz + 2*B*C*y + zz + 2* C*z + n*C*C;
     return squared_error / n;
 }
 

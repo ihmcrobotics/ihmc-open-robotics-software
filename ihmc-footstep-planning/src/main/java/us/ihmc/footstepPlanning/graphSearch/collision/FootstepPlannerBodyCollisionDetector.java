@@ -8,7 +8,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.HeightMapCollisionDetector;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 import java.util.HashMap;
 import java.util.function.DoubleSupplier;
@@ -18,7 +18,7 @@ public class FootstepPlannerBodyCollisionDetector
    private final BoundingBoxCollisionDetector collisionDetector = new BoundingBoxCollisionDetector();
    private final HashMap<LatticePoint, EuclidShape3DCollisionResult> collisionDataHolder = new HashMap<>();
 
-   private HeightMapData heightMapData;
+   private TerrainMapData heightMapData;
    private final FrameBox3D bodyBox = new FrameBox3D();
 
    private final DoubleSupplier bodyBoxDepth;
@@ -54,9 +54,9 @@ public class FootstepPlannerBodyCollisionDetector
       this.bodyBoxBaseZ = bodyBoxBaseZ;
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapData;
+      this.heightMapData = terrainMapData;
       collisionDataHolder.clear();
    }
 

@@ -18,7 +18,6 @@ import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.rdx.visualizers.RDXFrustumGraphic;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.nio.ByteBuffer;
 

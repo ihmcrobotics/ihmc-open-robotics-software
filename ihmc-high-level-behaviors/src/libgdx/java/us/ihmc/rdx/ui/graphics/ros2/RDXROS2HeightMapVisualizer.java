@@ -16,12 +16,11 @@ import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -73,7 +72,7 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    {
       this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_MESSAGE, this::acceptHeightMapMessage);
-      ros2.subscribeViaCallback(ContinuousHikingAPI.TERRAIN_MAP, this::acceptTerrainMapMessage);
+      ros2.subscribeViaCallback(PerceptionAPI.TERRAIN_MAP_MESSAGE, this::acceptTerrainMapMessage);
    }
 
    public void setupForChunkMessage(ROS2PublishSubscribeAPI ros2)
@@ -97,14 +96,11 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
       if (!isActive())
          return;
 
-      if (!colorBasedOnTraversability.get())
-      {
-         executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
-                                                 processHeightMapData(heightMapData);
-                                              });
-      }
+      executorService.clearQueueAndExecute(() ->
+                                           {
+                                              HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+                                              processHeightMapData(heightMapData);
+                                           });
 
       getFrequency(PerceptionAPI.HEIGHT_MAP_MESSAGE).ping();
    }
@@ -163,7 +159,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
    private void processTerrainMapData(TerrainMapMessage terrainMapMessage)
    {
       latestTerrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
-      processHeightMapData(latestTerrainMapData.getHeightMapData());
 
       if (traversabilityScore == null)
       {
@@ -235,7 +230,13 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
             double heightMapCenterY = latestHeightMapData.getGridCenter().getY();
             double cellSize = latestHeightMapData.getCellSize();
             int centerIndex = HeightMapTools.computeCenterIndex(latestHeightMapData.getMapSize(), cellSize);
-            heightMapRenderer.update(heightMap, traversabilityScore, colorBasedOnTraversability.get(), (float) heightMapCenterX, (float) heightMapCenterY, centerIndex, (float) cellSize);
+            heightMapRenderer.update(heightMap,
+                                     traversabilityScore,
+                                     colorBasedOnTraversability.get(),
+                                     (float) heightMapCenterX,
+                                     (float) heightMapCenterY,
+                                     centerIndex,
+                                     (float) cellSize);
          }
       }
 

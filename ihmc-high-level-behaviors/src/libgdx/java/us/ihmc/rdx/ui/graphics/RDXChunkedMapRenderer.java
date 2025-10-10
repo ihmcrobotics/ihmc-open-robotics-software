@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
-import us.ihmc.perception.gpuHeightMap.worldModel.Chunk;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
+import us.ihmc.perception.gpuMapping.worldModel.Chunk;
+import us.ihmc.perception.gpuMapping.HeightMapMessageTools;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
