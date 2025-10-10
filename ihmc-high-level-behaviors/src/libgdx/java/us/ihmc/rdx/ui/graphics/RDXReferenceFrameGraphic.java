@@ -58,7 +58,7 @@ public class RDXReferenceFrameGraphic extends RDXModelInstance
    public void updateFromTransform(RigidBodyTransform transformToWorld)
    {
       rigidBodyTransform.set(transformToWorld);
-      updateFromFramePose();
+      LibGDXTools.toLibGDX(rigidBodyTransform, transform);
    }
 
    public void dispose()

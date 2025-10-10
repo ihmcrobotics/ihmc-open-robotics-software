@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -64,7 +65,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
    private final RigidBodyTransform cameraOdometryTransform = new RigidBodyTransform();
-   private final RDXReferenceFrameGraphic cameraOdometryGraphics = new RDXReferenceFrameGraphic(0.1, Color.FOREST);
+   private RDXReferenceFrameGraphic cameraOdometryGraphics;
    private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
    public RDXROS2RobotVisualizer(ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
@@ -114,6 +115,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
          if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
             completedFootstepThreadBarrier.add(new MinimalFootstep(footstepStatusMessage));
       });
+
+      cameraOdometryGraphics = new RDXReferenceFrameGraphic(1.0, Color.FOREST);
 
       ros2.subscribeViaVolatileCallback(StateEstimatorAPI.getTopic(StampedOdometryPacket.class, syncedRobot.getRobotModel().getSimpleRobotName()), odometryPacket ->
             cameraOdometryTransform.set(odometryPacket.getPose()));
@@ -180,6 +183,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
 
       if (showCameraOdometry.get())
       {
+         LogTools.info(cameraOdometryTransform);
          cameraOdometryGraphics.updateFromTransform(cameraOdometryTransform);
       }
    }
