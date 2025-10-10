@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
@@ -110,11 +108,6 @@ public class DirectionalControlModule extends ToolboxModule
       {
          if (steppingController != null)
             steppingController.updateFootstepStatusMessage(s.takeNextData());
-      });
-      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class), s ->
-      {
-         if (steppingController != null)
-            steppingController.updatePlanarRegionsListMessage(s.takeNextData());
       });
       ros2Node.createSubscription(controllerPubGenerator.withTypeName(WalkingControllerFailureStatusMessage.class), s ->
       {

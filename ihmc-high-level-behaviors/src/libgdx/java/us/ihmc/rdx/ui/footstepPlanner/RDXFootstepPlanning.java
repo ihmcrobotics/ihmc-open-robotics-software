@@ -26,10 +26,10 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.commons.thread.Throttler;
@@ -50,7 +50,7 @@ public class RDXFootstepPlanning
    private final ResettableExceptionHandlingExecutorService executor;
    private final Throttler planningThrottler = new Throttler().setFrequency(5.0);
    private final TypedNotification<Pose3DReadOnly> planningRequestNotification = new TypedNotification<>();
-   private volatile HeightMapData heightMapData = null;
+   private volatile TerrainMapData terrainMapData = null;
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final FramePose3D startPose = new FramePose3D();
    /**
@@ -97,7 +97,7 @@ public class RDXFootstepPlanning
          if (planningRequestNotification.poll())
          {
             Pose3DReadOnly goalPoseInWorld = planningRequestNotification.read();
-            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, heightMapData));
+            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, terrainMapData));
          }
       }
    }
@@ -112,7 +112,7 @@ public class RDXFootstepPlanning
       planningRequestNotification.set(new Pose3D(goalPoseInWorld));
    }
 
-   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, HeightMapData heightMapData)
+   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, TerrainMapData terrainMapData)
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
@@ -162,10 +162,10 @@ public class RDXFootstepPlanning
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
       {
-         if (heightMapData != null)
+         if (terrainMapData != null)
          {
             assumeFlatGround = false;
-            footstepPlannerRequest.setHeightMapData(heightMapData);
+            footstepPlannerRequest.setTerrainMapData(terrainMapData);
          }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
@@ -242,9 +242,9 @@ public class RDXFootstepPlanning
       }
    }
 
-   public void setHeightMapData(HeightMapData heightMapMessage)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapMessage;
+      this.terrainMapData = terrainMapData;
    }
 
    public TypedNotification<FootstepPlannerOutput> getPlannerOutputNotification()

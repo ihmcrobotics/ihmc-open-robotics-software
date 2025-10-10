@@ -9,9 +9,9 @@ import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -62,28 +62,28 @@ public class SwingPlanningModule
       return registry;
    }
 
-   public void computeSwingWaypoints(HeightMapData heightMapData,
+   public void computeSwingWaypoints(TerrainMapData terrainMapData,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
    {
       swingTrajectories.clear();
 
-      if (heightMapData == null)
+      if (terrainMapData == null)
       {
          return;
       }
 
       if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
       {
-         adaptiveSwingTrajectoryCalculator.setHeightMapData(heightMapData);
+         adaptiveSwingTrajectoryCalculator.setTerrainMapData(terrainMapData);
          adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
             swingTrajectories.add(null);
       }
       else if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
       {
-         collisionFreeSwingCalculator.setHeightMapData(heightMapData);
+         collisionFreeSwingCalculator.setTerrainMapData(terrainMapData);
          collisionFreeSwingCalculator.computeSwingTrajectories(startFootPoses, footstepPlan);
          swingTrajectories.addAll(collisionFreeSwingCalculator.getSwingTrajectories());
       }

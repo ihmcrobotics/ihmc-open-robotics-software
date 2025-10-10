@@ -1,9 +1,7 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -15,18 +13,12 @@ import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class HeightMapPolygonSnapper
 {
-   private final List<Point3DBasics> footPointsInEnvironment = new ArrayList<>();
-   private final Plane3D bestFitPlane = new Plane3D();
-   private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private final ConvexPolygon2D snappedPolygon = new ConvexPolygon2D();
    private double snapAreaResolution = 0.2;
 
@@ -35,70 +27,24 @@ public class HeightMapPolygonSnapper
       this.snapAreaResolution = snapAreaResolution;
    }
 
-   public FootstepSnapData computeSnapData(DiscreteFootstep footstep,
-                                           ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           EnvironmentHandler environmentHandler,
-                                           double snapHeightThreshold,
-                                           double minSurfaceIncline)
+   public FootstepSnapData computeSnapData(DiscreteFootstep footstep, ConvexPolygon2DReadOnly polygonInStepFrame, EnvironmentHandler environmentHandler)
    {
-      return computeSnapData(footstep.getX(),
-                             footstep.getY(),
-                             footstep.getYaw(),
-                             polygonInStepFrame,
-                             environmentHandler,
-                             snapHeightThreshold,
-                             minSurfaceIncline,
-                             -Double.MAX_VALUE);
+      return computeSnapData(footstep.getX(), footstep.getY(), footstep.getYaw(), polygonInStepFrame, environmentHandler);
    }
 
    public FootstepSnapData computeSnapData(double stepX,
                                            double stepY,
                                            double stepYaw,
                                            ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           EnvironmentHandler environmentHandler,
-                                           double snapHeightThreshold,
-                                           double minSurfaceIncline)
-   {
-      return computeSnapData(stepX, stepY, stepYaw, polygonInStepFrame, environmentHandler, snapHeightThreshold, minSurfaceIncline, -Double.MAX_VALUE);
-   }
-
-   public FootstepSnapData computeSnapData(DiscreteFootstep footstep,
-                                           ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           EnvironmentHandler environmentHandler,
-                                           double snapHeightThreshold,
-                                           double minSurfaceIncline,
-                                           double minimumHeightToConsider)
-   {
-      return computeSnapData(footstep.getX(),
-                             footstep.getY(),
-                             footstep.getYaw(),
-                             polygonInStepFrame,
-                             environmentHandler,
-                             snapHeightThreshold,
-                             minSurfaceIncline,
-                             minimumHeightToConsider);
-   }
-
-   public FootstepSnapData computeSnapData(double stepX,
-                                           double stepY,
-                                           double yaw,
-                                           ConvexPolygon2DReadOnly polygonInStepFrame,
-                                           EnvironmentHandler environmentHandler,
-                                           double snapHeightThreshold,
-                                           double minSurfaceIncline,
-                                           double minimumHeightToConsider)
+                                           EnvironmentHandler environmentHandler)
    {
       RigidBodyTransform footstepTransform = new RigidBodyTransform();
-      DiscreteFootstepTools.getStepTransform(stepX, stepY, yaw, footstepTransform);
+      DiscreteFootstepTools.getStepTransform(stepX, stepY, stepYaw, footstepTransform);
 
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(polygonInStepFrame);
       footPolygonInWorld.applyTransform(footstepTransform);
 
-      RigidBodyTransform snapTransform = snapPolygonToHeightMap(footPolygonInWorld,
-                                                                environmentHandler,
-                                                                snapHeightThreshold,
-                                                                minSurfaceIncline,
-                                                                minimumHeightToConsider);
+      RigidBodyTransform snapTransform = snapPolygonToHeightMap(footPolygonInWorld, environmentHandler);
 
       if (snapTransform == null)
       {
@@ -117,24 +63,21 @@ public class HeightMapPolygonSnapper
       }
    }
 
+   /**
+    * Snaps the given polygon to the height map by a least-squares plane fit.
+    * <p>
+    * - Any cells with heights below minimumHeightToConsider are ignored.
+    * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
+    */
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, EnvironmentHandler environmentHandler)
    {
-      return snapPolygonToHeightMap(polygonToSnap, environmentHandler, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
-   }
+      RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
-                                                    EnvironmentHandler environmentHandler,
-                                                    double snapHeightThreshold,
-                                                    double minSurfaceIncline)
-   {
-      return snapPolygonToHeightMap(polygonToSnap, environmentHandler, snapHeightThreshold, minSurfaceIncline, -Double.MAX_VALUE);
-   }
+      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
 
-   private RigidBodyTransform computeSnapFromTerrainMap(ConvexPolygon2DReadOnly polygonToSnap, TerrainMapData terrainMapData)
-   {
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
 
-      double height = terrainMapData.getHeightInWorld(centroid.getX(), centroid.getY());
+      double height = terrainMapData.getHeight(centroid.getX(), centroid.getY());
       UnitVector3DReadOnly normal = terrainMapData.getNormal(centroid.getX(), centroid.getY());
 
       // The surface normal must point up. If it does not, recreate it so that it does.
@@ -145,7 +88,6 @@ public class HeightMapPolygonSnapper
          normal = tempNormal;
       }
 
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();
       PolygonSnapperTools.constructRotationToMatchSurfaceNormal(normal, transformToReturn.getRotation());
       PolygonSnapperTools.setTranslationToAchieveZAndPreserveXAndY(centroid, 0.0, height, transformToReturn.getRotation(), transformToReturn.getTranslation());
 
@@ -155,38 +97,7 @@ public class HeightMapPolygonSnapper
       return transformToReturn;
    }
 
-   private RigidBodyTransform computeSnapFromHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
-                                                       HeightMapData heightMapData,
-                                                       TerrainMapData terrainMapData,
-                                                       double snapHeightThreshold,
-                                                       double minSurfaceIncline,
-                                                       double minimumHeightToConsider)
-   {
-
-      if (!computeFootPointsInTheEnvironment(polygonToSnap, heightMapData, terrainMapData, snapHeightThreshold, minSurfaceIncline, minimumHeightToConsider, footPointsInEnvironment))
-      {
-         return null;
-      }
-
-      bestFitPlane.setToNaN();
-
-      snappedPolygon.set(Vertex3DSupplier.asVertex3DSupplier(footPointsInEnvironment));
-      planeFitter.fitPlaneToPoints(footPointsInEnvironment, bestFitPlane);
-
-      // get the point that is the center of the plane.
-      Point2DReadOnly centroid = polygonToSnap.getCentroid();
-      double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
-
-      // compute the actual snap transform.
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      PolygonSnapperTools.constructRotationToMatchSurfaceNormal(bestFitPlane.getNormal(), transformToReturn.getRotation());
-      PolygonSnapperTools.setTranslationToAchieveZAndPreserveXAndY(centroid, 0.0, height, transformToReturn.getRotation(), transformToReturn.getTranslation());
-
-      return transformToReturn;
-   }
-
    public boolean computeFootPointsInTheEnvironment(ConvexPolygon2DReadOnly polygonToSnap,
-                                                    HeightMapData heightMapData,
                                                     TerrainMapData terrainMapData,
                                                     double snapHeightThreshold,
                                                     double minSurfaceIncline,
@@ -221,11 +132,9 @@ public class HeightMapPolygonSnapper
          {
             footPointToSnap.interpolate(pointOnEdge1, pointOnEdge2, interiorAlpha);
 
-            double height;
+            double height = Double.NaN;
             if (terrainMapData != null)
-               height = terrainMapData.getHeightInWorld(footPointToSnap.getX(), footPointToSnap.getY());
-            else
-               height = heightMapData.getHeight(footPointToSnap.getX(), footPointToSnap.getY());
+               height = terrainMapData.getHeight(footPointToSnap.getX(), footPointToSnap.getY());
 
             if (Double.isNaN(height) || height < minimumHeightToConsider)
             {
@@ -243,56 +152,12 @@ public class HeightMapPolygonSnapper
       double minZ = maxPoint.getZ() - snapHeightThreshold;
       double slope = Math.tan(minSurfaceIncline);
       footPointsInEnvironmentToPack.removeIf(point ->
-                                       {
-                                          double distance = point.distanceXY(maxPoint);
-                                          double extraHeight = distance * slope;
-                                          return point.getZ() < minZ - extraHeight;
-                                       });
+                                             {
+                                                double distance = point.distanceXY(maxPoint);
+                                                double extraHeight = distance * slope;
+                                                return point.getZ() < minZ - extraHeight;
+                                             });
 
       return footPointsInEnvironmentToPack.size() >= 3;
-   }
-
-   /**
-    * Snaps the given polygon to the height map by a least-squares plane fit.
-    * <p>
-    * - Any cells with heights below minimumHeightToConsider are ignored.
-    * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
-    */
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap,
-                                                    EnvironmentHandler environmentHandler,
-                                                    double snapHeightThreshold,
-                                                    double minSurfaceIncline,
-                                                    double minimumHeightToConsider)
-   {
-      RigidBodyTransform transformToReturn;
-
-      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
-      HeightMapData heightMapData = environmentHandler.getHeightMapData();
-
-      if (environmentHandler.hasTerrainMapData())
-      {
-         transformToReturn = computeSnapFromTerrainMap(polygonToSnap, terrainMapData);
-      }
-      else
-      {
-         transformToReturn = computeSnapFromHeightMap(polygonToSnap,
-                                                      heightMapData,
-                                                      terrainMapData,
-                                                      snapHeightThreshold,
-                                                      minSurfaceIncline,
-                                                      minimumHeightToConsider);
-      }
-
-      return transformToReturn;
-   }
-
-   public Plane3D getBestFitPlane()
-   {
-      return bestFitPlane;
-   }
-
-   public ConvexPolygon2DReadOnly getSnappedPolygonInWorld()
-   {
-      return snappedPolygon;
    }
 }

@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -29,7 +29,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -133,8 +132,7 @@ public class FootstepSnapAndWigglerTest
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage));
+      TerrainMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-5;
@@ -190,8 +188,7 @@ public class FootstepSnapAndWigglerTest
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters, environmentHandler);
 
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage));
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-5;
@@ -269,7 +266,6 @@ public class FootstepSnapAndWigglerTest
    {
       double flatGroundHeight = 0.7;
       snapAndWiggler.setFlatGroundHeight(flatGroundHeight);
-      environmentHandler.setHeightMapData(null);
 
       DiscreteFootstep footstep = new DiscreteFootstep(3, -2, 5, RobotSide.LEFT);
       FootstepSnapData snapData = snapAndWiggler.snapFootstep(footstep);
@@ -291,8 +287,7 @@ public class FootstepSnapAndWigglerTest
 
       snapAndWiggler.initialize();
 
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      environmentHandler.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage));
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
 
       DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
       DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);

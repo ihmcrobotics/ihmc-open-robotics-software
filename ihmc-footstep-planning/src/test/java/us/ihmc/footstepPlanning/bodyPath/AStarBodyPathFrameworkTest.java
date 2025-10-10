@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
 import org.junit.jupiter.api.*;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -31,13 +31,13 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -222,14 +222,14 @@ public class AStarBodyPathFrameworkTest
       String datasetName = dataset.getName();
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
-      HeightMapMessage heightMap = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMap);
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
 
       PlannerInput plannerInput = dataset.getPlannerInput();
       Point3D start = plannerInput.getStartPosition();
       Point3D goal = plannerInput.getGoalPosition();
 
-      String errorMessages = calculateAndTestAStarBodyPath(datasetName, start, goal, planarRegionsList, heightMapData);
+      String errorMessages = calculateAndTestAStarBodyPath(datasetName, start, goal, planarRegionsList, terrainMapData);
 
       return addPrefixToErrorMessages(datasetName, errorMessages);
    }
@@ -239,8 +239,8 @@ public class AStarBodyPathFrameworkTest
       String datasetName = dataset.getName();
 
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList, heightMapResolution);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
       HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
          pointsInRegions.put(planarRegion, new ArrayList<>());
@@ -262,7 +262,7 @@ public class AStarBodyPathFrameworkTest
       while (!walkerPosition.geometricallyEquals(goal, 1.0e-2))
       {
          long startTime = System.currentTimeMillis();
-         errorMessages += calculateAndTestAStarBodyPath(datasetName, walkerPosition, goal, planarRegionsList, heightMapData);
+         errorMessages += calculateAndTestAStarBodyPath(datasetName, walkerPosition, goal, planarRegionsList, terrainMapData);
          long endTime = System.currentTimeMillis();
          if (ENABLE_TIMERS)
          {
@@ -337,10 +337,10 @@ public class AStarBodyPathFrameworkTest
                                                 Point3D start,
                                                 Point3D goal,
                                                 PlanarRegionsList planarRegionsList,
-                                                HeightMapData heightMapData)
+                                                TerrainMapData terrainMapData)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
-      request.setHeightMapData(heightMapData);
+      request.setTerrainMapData(terrainMapData);
       request.setPlanBodyPath(true);
       request.setPlanFootsteps(false);
       request.setAssumeFlatGround(false);

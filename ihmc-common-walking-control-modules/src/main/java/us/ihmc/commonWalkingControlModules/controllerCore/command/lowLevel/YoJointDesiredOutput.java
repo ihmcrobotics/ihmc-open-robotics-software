@@ -89,6 +89,31 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    }
 
    @Override
+   public boolean isEmpty()
+   {
+      //@formatter:off
+      return controlMode.getEnumValue() == null &&
+             loadMode.getEnumValue() == null &&
+             Double.isNaN(desiredTorque.getDoubleValue()) &&
+             Double.isNaN(desiredPosition.getDoubleValue()) &&
+             Double.isNaN(desiredVelocity.getDoubleValue()) &&
+             Double.isNaN(desiredAcceleration.getDoubleValue()) &&
+             !resetIntegrators.getBooleanValue() &&
+             Double.isNaN(stiffness.getDoubleValue()) &&
+             Double.isNaN(damping.getDoubleValue()) &&
+             Double.isNaN(masterGain.getDoubleValue()) &&
+             Double.isNaN(velocityScaling.getDoubleValue()) &&
+             Double.isNaN(velocityIntegrationBreakFrequency.getDoubleValue()) &&
+             Double.isNaN(positionIntegrationBreakFrequency.getDoubleValue()) &&
+             Double.isNaN(positionIntegrationMaxError.getDoubleValue()) &&
+             Double.isNaN(velocityIntegrationMaxError.getDoubleValue()) &&
+             Double.isNaN(positionFeedbackMaxError.getDoubleValue()) &&
+             Double.isNaN(velocityFeedbackMaxError.getDoubleValue()) &&
+             Double.isNaN(maxTorque.getDoubleValue());
+      //@formatter:on
+   }
+
+   @Override
    public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode.set(controlMode);

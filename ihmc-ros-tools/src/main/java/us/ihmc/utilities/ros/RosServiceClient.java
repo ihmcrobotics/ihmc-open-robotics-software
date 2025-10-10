@@ -1,8 +1,8 @@
 package us.ihmc.utilities.ros;
 
 import org.ros.exception.RemoteException;
-import org.ros.exception.RosRuntimeException;
-import org.ros.exception.ServiceNotFoundException;
+//import org.ros.exception.RosRuntimeException;
+//import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.node.ConnectedNode;
 import org.ros.node.service.ServiceClient;
@@ -60,28 +60,28 @@ public class RosServiceClient<T extends Message, S extends Message>
       checkInitialized();
   
 
-      if (!client.isConnected() || client == null)
-      {
-         if (client != null)
-            client.shutdown();
-
-         //locate URI
-         System.err.println("re-connecting to service " + attachedServiceName);
-
-         try
-         {
-            client = connectedNode.newServiceClient(attachedServiceName, getRequestType());
-         }
-         catch (ServiceNotFoundException e)
-         {
-            System.err.println("rennection failed. Service not found");
-            throw new RosRuntimeException(e);
-         }
-         
-         System.err.println("service re-connected, making call");
-      }
-
-      client.call(request, response);
+//      if (!client.isConnected() || client == null)
+//      {
+//         if (client != null)
+//            client.shutdown();
+//
+//         //locate URI
+//         System.err.println("re-connecting to service " + attachedServiceName);
+//
+//         try
+//         {
+//            client = connectedNode.newServiceClient(attachedServiceName, getRequestType());
+//         }
+//         catch (ServiceNotFoundException e)
+//         {
+//            System.err.println("rennection failed. Service not found");
+//            throw new RosRuntimeException(e);
+//         }
+//
+//         System.err.println("service re-connected, making call");
+//      }
+//
+//      client.call(request, response);
 
    }
    

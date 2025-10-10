@@ -6,12 +6,11 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -82,7 +81,7 @@ public class AStarBodyPathSmoother
       }
    }
 
-   public List<Pose3D> doSmoothing(List<Point3D> bodyPath, HeightMapData heightMapData)
+   public List<Pose3D> doSmoothing(List<Point3D> bodyPath, TerrainMapData terrainMapData)
    {
       LogTools.info("Starting waypoint optimization");
       pathSize = bodyPath.size();
@@ -111,7 +110,7 @@ public class AStarBodyPathSmoother
 
       for (int i = 0; i < maxPoints; i++)
       {
-         waypoints[i].initialize(bodyPath, heightMapData);
+         waypoints[i].initialize(bodyPath, terrainMapData);
       }
 
       for (int i = 1; i < bodyPath.size() - 1; i++)
@@ -137,7 +136,7 @@ public class AStarBodyPathSmoother
 //            gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
          }
 
-         if (heightMapData != null)
+         if (terrainMapData != null)
          {
             for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
             {

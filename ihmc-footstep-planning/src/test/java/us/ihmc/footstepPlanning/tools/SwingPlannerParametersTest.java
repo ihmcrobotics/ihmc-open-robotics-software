@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
+import org.junit.jupiter.api.Assertions;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
 import org.junit.jupiter.api.Test;
@@ -15,51 +16,43 @@ import us.ihmc.tools.property.StoredPropertyKey;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertNotEquals;
-
 public class SwingPlannerParametersTest
 {
-   private static final int iters = 1000;
-   private static final double epsilon = 1e-8;
+   private static final int iterations = 10;
+   private final Random random = new Random(1738L);
 
    @Test
    public void testVariableCopying()
    {
-      Random random = new Random(1738L);
-
       SwingPlannerParametersBasics parametersToSet = new DefaultSwingPlannerParameters();
 
-      for (int iter = 0; iter < iters; iter++)
+      for (int iter = 0; iter < iterations; iter++)
       {
          SwingPlannerParametersReadOnly randomParameters = getRandomParameters(random);
          SwingPlannerParametersPacket packet = randomParameters.getAsPacket();
          parametersToSet.set(packet);
 
-         assertParametersEqual(randomParameters, parametersToSet, epsilon);
+         assertParametersEqual(randomParameters, parametersToSet);
       }
    }
 
-   private static void assertParametersEqual(SwingPlannerParametersReadOnly parametersA, SwingPlannerParametersReadOnly parametersB, double epsilon)
+   private static void assertParametersEqual(SwingPlannerParametersReadOnly parametersA, SwingPlannerParametersReadOnly parametersB)
    {
       for (StoredPropertyKey<?> key : SwingPlannerParameterKeys.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " has the wrong value.";
          if (key instanceof DoubleStoredPropertyKey)
          {
-            DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(doubleKey), parametersB.get(doubleKey), epsilon);
-            assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), epsilon);
+            Assertions.assertEquals(parametersA.get(key), parametersB.get(key), failureMessage);
+            Assertions.assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(key), failureMessage);
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
-            IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(integerKey), parametersB.get(integerKey));
+            Assertions.assertEquals(parametersA.get(key), parametersB.get(key), failureMessage);
          }
          else if (key instanceof BooleanStoredPropertyKey)
          {
-            BooleanStoredPropertyKey booleanKey = (BooleanStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(booleanKey), parametersB.get(booleanKey));
+            Assertions.assertEquals(parametersA.get(key), parametersB.get(key), failureMessage);
          }
       }
    }

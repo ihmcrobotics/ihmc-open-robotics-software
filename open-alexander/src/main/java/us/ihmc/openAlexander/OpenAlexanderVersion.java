@@ -41,13 +41,13 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public Collection<String> getModelPath()
+   public Collection<String> getURDFDescriptionResources()
    {
       return urdfModelPath;
    }
 
    @Override
-   public Collection<String> getHardwareMapResources()
+   public Collection<String> getXMLDescriptionResources()
    {
       return hardwareMapResources;
    }
@@ -65,6 +65,18 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
 
    @Override
    public boolean hasCycloidForearms()
+   {
+      switch (this)
+      {
+         case V1_FULL_ROBOT:
+            return true;
+         default:
+            return false;
+      }
+   }
+
+   @Override
+   public boolean hasCycloidForearm(RobotSide side)
    {
       switch (this)
       {
@@ -204,7 +216,7 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    }
 
    @Override
-   public HumanoidURDFParameterInterface getURDFParameters()
+   public OpenAlexanderURDFParameters getURDFParameters()
    {
       if (urdfParameters != null)
          return urdfParameters;

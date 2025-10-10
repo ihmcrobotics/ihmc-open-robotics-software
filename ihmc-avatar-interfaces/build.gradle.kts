@@ -19,12 +19,11 @@ mainDependencies {
    api("com.jerolba:carpet-record:0.3.0") // Used for huggingface data exports
 
    api("us.ihmc:mecano-graphviz:17-0.19.2")
-   api("us.ihmc:scs2-bullet-simulation:17-0.31.2")
+   api("us.ihmc:scs2-bullet-simulation:17-0.31.3")
    api("us.ihmc:ihmc_hands_ros2:0.0.3")
 
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-manipulation-planning:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")

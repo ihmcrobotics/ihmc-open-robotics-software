@@ -37,8 +37,7 @@ public class HeightMapSnapWiggler
    private final double[] gradientMagnitudes = new double[searchPoints];
    private final double[] offsetCosts = new double[searchPoints];
 
-   public HeightMapSnapWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                               WiggleParameters wiggleParameters)
+   public HeightMapSnapWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, WiggleParameters wiggleParameters)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.heightMapSnapper = new HeightMapPolygonSnapper();
@@ -47,11 +46,7 @@ public class HeightMapSnapWiggler
       this.heightMapSnapper.setSnapAreaResolution(0.05);
    }
 
-   public void computeWiggleTransform(DiscreteFootstep footstepToWiggle,
-                                      EnvironmentHandler environmentHandler,
-                                      FootstepSnapData snapData,
-                                      double snapHeightThreshold,
-                                      double minSurfaceInclineRadians)
+   public void computeWiggleTransform(DiscreteFootstep footstepToWiggle, EnvironmentHandler environmentHandler, FootstepSnapData snapData)
    {
       RobotSide robotSide = footstepToWiggle.getRobotSide();
 
@@ -67,14 +62,14 @@ public class HeightMapSnapWiggler
             Point2D offsetPosition = new Point2D(currentPosition);
             offsetPosition.add(offsets[wiggleIndex]);
 
-            FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
+            FootstepSnapData footstepSnapData = computeSnapData(offsetPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler);
 
             double areaFraction = footstepSnapData.getSnapAreaFraction();
             wiggleAreas[wiggleIndex] = Double.isNaN(areaFraction) ? 0.0 : Math.min(areaFraction, 1.0);
             wiggleRMSErrors[wiggleIndex] = Double.isNaN(footstepSnapData.getSnapRMSError()) ? 1.0 : footstepSnapData.getSnapRMSError();
          }
 
-         FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
+         FootstepSnapData currentSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler);
 
          double normalizedArea = Math.min(currentSnapData.getSnapAreaFraction(), 1.0);
          computeGradientMagnitudes(normalizedArea, currentSnapData.getSnapRMSError());
@@ -99,7 +94,7 @@ public class HeightMapSnapWiggler
          }
       }
 
-      FootstepSnapData wiggledSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler, snapHeightThreshold, minSurfaceInclineRadians);
+      FootstepSnapData wiggledSnapData = computeSnapData(currentPosition, footstepToWiggle.getYaw(), robotSide, environmentHandler);
 
       FramePose3D snappedPose = new FramePose3D();
       snappedPose.getPosition().set(originalPosition);
@@ -112,7 +107,6 @@ public class HeightMapSnapWiggler
       wiggledPose.applyTransform(wiggledSnapData.getSnapTransform());
 
       wiggledPose.changeFrame(originalFrame);
-
 
       // TODO need to do a wiggle rotation
       snapData.getWiggleTransformInWorld().getTranslation().set(wiggledPose.getPosition());
@@ -133,20 +127,9 @@ public class HeightMapSnapWiggler
       }
    }
 
-   private FootstepSnapData computeSnapData(Point2DReadOnly position,
-                                            double yaw,
-                                            RobotSide robotSide,
-                                            EnvironmentHandler environmentHandler,
-                                            double snapHeightThreshold,
-                                            double minSurfaceInclineRadians)
+   private FootstepSnapData computeSnapData(Point2DReadOnly position, double yaw, RobotSide robotSide, EnvironmentHandler environmentHandler)
    {
-      return heightMapSnapper.computeSnapData(position.getX(),
-                                              position.getY(),
-                                              yaw,
-                                              footPolygonsInSoleFrame.get(robotSide),
-                                              environmentHandler,
-                                              snapHeightThreshold,
-                                              minSurfaceInclineRadians);
+      return heightMapSnapper.computeSnapData(position.getX(), position.getY(), yaw, footPolygonsInSoleFrame.get(robotSide), environmentHandler);
    }
 
    private Vector2D computeWiggleGradient()

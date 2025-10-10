@@ -5,10 +5,10 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 
 public class MonteCarloFootstepPlannerRequest
 {
@@ -207,11 +207,6 @@ public class MonteCarloFootstepPlannerRequest
    public void setEnvironmentHandler(EnvironmentHandler environmentHandler)
    {
       this.environmentHandler = environmentHandler;
-   }
-
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      environmentHandler.setHeightMapData(heightMapData);
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)

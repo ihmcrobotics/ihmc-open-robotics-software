@@ -23,7 +23,7 @@ import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -204,7 +204,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
          action.scale(1 / 50.0f);
          spherePosition.add(action);
 
-         double height = terrainMapData.getHeightInWorld(spherePosition.getX(), spherePosition.getY());
+         double height = terrainMapData.getHeight(spherePosition.getX(), spherePosition.getY());
          spherePosition.setZ(height + 0.01);
 
          if (side == RobotSide.LEFT && leftIndex < expansionSpheres.get(side).size())

@@ -4,6 +4,7 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
 import us.ihmc.sensors.realsense.RealSenseImageSensor;
@@ -42,8 +43,8 @@ public class ROS2ImageSensors
       realsenseDemandNode.addDependents(realsensePublishDemandNode);
 
       realsensePublishThread = new ImageSensorPublishThread(ros2Node, realsenseSensor);
-      realsensePublishThread.addTopic(PerceptionAPI.SRT_REALSENSE_COLOR_STREAM_STATUS, RealSenseImageSensor.COLOR_IMAGE_KEY);
       realsensePublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      realsensePublishThread.addTopic(PerceptionAPI.D455_COLOR_IMAGE, RealSenseImageSensor.COLOR_IMAGE_KEY);
       setupCallbackForDemandNode(realsensePublishThread, realsensePublishDemandNode);
    }
 
@@ -55,9 +56,9 @@ public class ROS2ImageSensors
       zedSensor.run(true); // Always start ZED, do not wait for any demand node
 
       zedPublishThread = new ImageSensorPublishThread(ros2Node, zedSensor);
-      zedPublishThread.addTopic(PerceptionAPI.SRT_ZED_LEFT_COLOR_STREAM_STATUS, ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
-      zedPublishThread.addTopic(PerceptionAPI.SRT_ZED_RIGHT_COLOR_STREAM_STATUS, ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
       zedPublishThread.addTopic(PerceptionAPI.ZED_DEPTH, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      zedPublishThread.addTopic(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT), ZEDImageSensor.LEFT_COLOR_IMAGE_KEY);
+      zedPublishThread.addTopic(PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.RIGHT), ZEDImageSensor.RIGHT_COLOR_IMAGE_KEY);
       setupCallbackForDemandNode(zedPublishThread, zedPublishDemandNode);
    }
 

@@ -7,8 +7,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 
 public class HeightMapSnapWigglerTest
 {
@@ -18,13 +18,13 @@ public class HeightMapSnapWigglerTest
       double gridResolution = 0.05;
       double gridSizeXY = 0.3;
       double gridCenterXY = 0.0;
-      HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
+      TerrainMapData terrainmapData = new TerrainMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
 
       for (double x = -0.10; x <= 0.15; x += gridResolution)
       {
          for (double y = -0.20; y <= 0.2; y += gridResolution)
          {
-            heightMapData.setHeight(x, y, 0.2);
+            terrainmapData.setHeight(x, y, 0.2);
          }
       }
 
@@ -42,16 +42,14 @@ public class HeightMapSnapWigglerTest
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
       HeightMapSnapWiggler wiggler = new HeightMapSnapWiggler(footPolygons, new WiggleParameters());
-      environmentHandler.setHeightMapData(heightMapData);
+      environmentHandler.setTerrainMapData(terrainmapData);
 
       FootstepSnapData snapData = new FootstepSnapData();
       DiscreteFootstep footstep = new DiscreteFootstep(0.0, 0.0);
 
-      double snapHeightThreshold = 0.05;
-      double minInclineAngle = Math.toRadians(45.0);
-      snapData.getSnapTransform().set(snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler, snapHeightThreshold, minInclineAngle));
+      snapData.getSnapTransform().set(snapper.snapPolygonToHeightMap(polygonToSnap, environmentHandler));
 
-      wiggler.computeWiggleTransform(footstep, environmentHandler, snapData, snapHeightThreshold, minInclineAngle);
+      wiggler.computeWiggleTransform(footstep, environmentHandler, snapData);
 
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasRotation());
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasTranslation());
@@ -59,7 +57,7 @@ public class HeightMapSnapWigglerTest
       // make the foot overhang by a fair bit
       footstep = new DiscreteFootstep(-0.03, 0.0);
 
-      wiggler.computeWiggleTransform(footstep, environmentHandler, snapData, snapHeightThreshold, minInclineAngle);
+      wiggler.computeWiggleTransform(footstep, environmentHandler, snapData);
 
       Assertions.assertFalse(snapData.getWiggleTransformInWorld().hasRotation());
       Assertions.assertTrue(snapData.getWiggleTransformInWorld().hasTranslation());

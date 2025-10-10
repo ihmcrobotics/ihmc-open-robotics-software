@@ -18,8 +18,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -38,7 +38,7 @@ public class AStarBodyPathSmootherWaypoint
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
 
-   private HeightMapData heightMapData;
+   private TerrainMapData terrainMapData;
    private final int waypointIndex;
    private final YoFramePoint3D initialWaypoint;
    private final YoFramePoseUsingYawPitchRoll waypoint;
@@ -157,14 +157,13 @@ public class AStarBodyPathSmootherWaypoint
       }
    }
 
-   public void initialize(List<Point3D> bodyPath,
-                          HeightMapData heightMapData)
+   public void initialize(List<Point3D> bodyPath, TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapData;
+      this.terrainMapData = terrainMapData;
       this.pathSize = bodyPath.size();
 
       isTurnPoint.set(false);
-      AStarBodyPathPlanner.packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
+      AStarBodyPathPlanner.packRadialOffsets(terrainMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 
       if (visualize)
       {
@@ -233,8 +232,8 @@ public class AStarBodyPathSmootherWaypoint
 
    public Vector2D computeCollisionGradient()
    {
-      int maxOffset = (int) Math.round(0.5 * EuclidCoreTools.norm(plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY())
-                                       / heightMapData.getCellSize());
+      int maxOffset = (int) Math.round(
+            0.5 * EuclidCoreTools.norm(plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY()) / terrainMapData.getCellSize());
 
       double waypointX = waypoint.getX();
       double waypointY = waypoint.getY();
@@ -245,13 +244,13 @@ public class AStarBodyPathSmootherWaypoint
       double cH = Math.cos(heading);
 
       int indexX = HeightMapTools.coordinateToIndex(waypointX,
-                                                    heightMapData.getGridCenter().getX(),
-                                                    heightMapData.getCellSize(),
-                                                    heightMapData.getCenterIndex());
+                                                    terrainMapData.getGridCenterX(),
+                                                    terrainMapData.getCellSize(),
+                                                    terrainMapData.getCenterIndex());
       int indexY = HeightMapTools.coordinateToIndex(waypointY,
-                                                    heightMapData.getGridCenter().getY(),
-                                                    heightMapData.getCellSize(),
-                                                    heightMapData.getCenterIndex());
+                                                    terrainMapData.getGridCenterY(),
+                                                    terrainMapData.getCellSize(),
+                                                    terrainMapData.getCenterIndex());
 
       Vector2D gradient = new Vector2D();
       int numCollisions = 0;
@@ -265,19 +264,19 @@ public class AStarBodyPathSmootherWaypoint
             int indexXI = indexX + xi;
             int indexYI = indexY + yi;
 
-            if (indexXI < 0 || indexXI >= heightMapData.getCellsPerAxis() || indexYI < 0 || indexYI >= heightMapData.getCellsPerAxis())
+            if (indexXI < 0 || indexXI >= terrainMapData.getCellsPerAxis() || indexYI < 0 || indexYI >= terrainMapData.getCellsPerAxis())
             {
                continue;
             }
 
             double px = HeightMapTools.indexToCoordinate(indexXI,
-                                                         heightMapData.getGridCenter().getX(),
-                                                         heightMapData.getCellSize(),
-                                                         heightMapData.getCenterIndex());
+                                                         terrainMapData.getGridCenterX(),
+                                                         terrainMapData.getGridCenterY(),
+                                                         terrainMapData.getCenterIndex());
             double py = HeightMapTools.indexToCoordinate(indexYI,
-                                                         heightMapData.getGridCenter().getY(),
-                                                         heightMapData.getCellSize(),
-                                                         heightMapData.getCenterIndex());
+                                                         terrainMapData.getGridCenterY(),
+                                                         terrainMapData.getCellSize(),
+                                                         terrainMapData.getCenterIndex());
 
             double dx = px - waypointX;
             double dy = py - waypointY;
@@ -290,7 +289,7 @@ public class AStarBodyPathSmootherWaypoint
                continue;
             }
 
-            double height = heightMapData.getHeight(indexXI, indexYI);
+            double height = terrainMapData.getHeight(indexXI, indexYI);
             if (height < heightThreshold)
             {
                continue;
@@ -318,26 +317,15 @@ public class AStarBodyPathSmootherWaypoint
       return gradient;
    }
 
-   private static double max(double... x)
-   {
-      double max = -Double.MAX_VALUE;
-      for (int i = 0; i < x.length; i++)
-      {
-         if (x[i] > max)
-            max = x[i];
-      }
-      return max;
-   }
-
    public void update(boolean firstTick)
    {
       // Cell key
       int currentKey = HeightMapTools.coordinateToKey(waypoint.getX(),
                                                       waypoint.getY(),
-                                                      heightMapData.getGridCenter().getX(),
-                                                      heightMapData.getGridCenter().getY(),
-                                                      heightMapData.getCellSize(),
-                                                      heightMapData.getCenterIndex());
+                                                      terrainMapData.getGridCenterX(),
+                                                      terrainMapData.getGridCenterY(),
+                                                      terrainMapData.getCellSize(),
+                                                      terrainMapData.getCenterIndex());
       previousCellKey = cellKey;
       cellKey = currentKey;
 
@@ -373,9 +361,9 @@ public class AStarBodyPathSmootherWaypoint
 
    private void computeHeight()
    {
-      int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getCellSize(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getCellSize(), centerIndex);
+      int centerIndex = terrainMapData.getCenterIndex();
+      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), terrainMapData.getGridCenterX(), terrainMapData.getCellSize(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), terrainMapData.getGridCenterY(), terrainMapData.getCellSize(), centerIndex);
 
       double previousHeight = waypoint.getZ();
       double heightSampleDelta = plannerParameters.getMinSnapHeightThreshold();
@@ -389,7 +377,7 @@ public class AStarBodyPathSmootherWaypoint
       {
          int xQuery = xIndex + xSnapOffsets.get(i);
          int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeight(xQuery, yQuery);
+         double heightQuery = terrainMapData.getHeight(xQuery, yQuery);
 
          if (!Double.isNaN(heightQuery) && MathTools.intervalContains(heightQuery, minHeight, maxHeight))
          {

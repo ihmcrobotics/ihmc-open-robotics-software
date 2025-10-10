@@ -10,8 +10,6 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
-import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
-import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.sensors.SimCameraSensor;
@@ -90,11 +88,6 @@ public class AvatarSimulationToolsSCS2
 
       boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE);
       boolean startREAUI = modulesToStart.contains(Modules.REA_UI);
-
-      if (startREAModule && startREAUI)
-         new JavaProcessSpawner(true, true).spawn(LidarBasedREAStandaloneLauncher.class);
-      else if (startREAUI)
-         new JavaProcessSpawner(true, true).spawn(RemoteLidarBasedREAUILauncher.class);
 
       return avatarSimulationEnvironment;
    }

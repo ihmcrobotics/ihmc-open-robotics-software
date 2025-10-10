@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -21,7 +22,7 @@ import java.util.function.Predicate;
 public class AlexanderModelFactory
 {
    private final String[] resourceModelsToBeLogged;
-   private final HumanoidURDFParameterInterface urdfParameters;
+   private final OpenAlexanderURDFParameters urdfParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private RobotDefinition simulationRobotDefinition;
    private final AlexanderVersionInterface alexanderVersion;
@@ -77,6 +78,7 @@ public class AlexanderModelFactory
          // The URDF loading doesn't work because the 4-bar creates duplicate children
          URDFTools.URDFParserProperties parserProperties = new URDFTools.URDFParserProperties();
          parserProperties.setTransformToZUp(false);
+         parserProperties.setHandleImplicitJointDefinitions(false);
          simulationRobotDefinition = RobotDefinitionLoader.loadURDFModel(urdfParameters.getURDFAsInputStream(),
                                                                          Arrays.asList(urdfParameters.getResourceDirectories()),
                                                                          getClass().getClassLoader(),

@@ -8,6 +8,7 @@ import imgui.internal.ImGui;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -19,7 +20,8 @@ import java.util.TreeSet;
 
 public class RDXPlanarRegionEnvironmentPanel implements RenderableProvider
 {
-   private final String windowName = ImGuiTools.uniqueLabel("Planar Region Data Sets");
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final String windowName = labels.get("Planar Region Data Sets");
    private final HashMap<String, RDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
    private final TreeSet<Path> pathPlanningDataSetPaths = new TreeSet<>(this::alphabetizePlanarRegionFolders);
    private final TreeSet<Path> reaDataSetPaths = new TreeSet<>(this::alphabetizePlanarRegionFolders);
@@ -32,7 +34,7 @@ public class RDXPlanarRegionEnvironmentPanel implements RenderableProvider
        * Folders:
        * ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets/20001201_205030_SingleSquare
        */
-      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex datasets"));
+      boolean reindexClicked = ImGui.button(labels.get("Reindex datasets"));
       if (!loadedDatasetsOnce || reindexClicked)
       {
          loadedDatasetsOnce = true;
@@ -88,7 +90,7 @@ public class RDXPlanarRegionEnvironmentPanel implements RenderableProvider
             dataSetName = dataSetPath.getParent().getFileName().toString();
          }
          RDXPlanarRegionsGraphic graphic = planarRegionGraphics.get(dataSetName);
-         if (ImGui.checkbox(ImGuiTools.uniqueLabel(this, dataSetName), graphic != null))
+         if (ImGui.checkbox(labels.get(dataSetName), graphic != null))
          {
             if (graphic == null)
             {

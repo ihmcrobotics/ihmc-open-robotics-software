@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
+import org.junit.jupiter.api.Assertions;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import org.junit.jupiter.api.Test;
@@ -18,24 +19,25 @@ import us.ihmc.tools.property.StoredPropertyKey;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertNotEquals;
-
 public class FootstepPlannerMessageToolsTest
 {
-   private static final int iters = 1000;
+   /**
+    * The larger this value gets the more that gets printed to the terminal.
+    * We don't really need to check this more then a few times.
+    */
+   private static final int iterations = 10;
+
+   private static final Random RANDOM = new Random(1738L);
 
    @Test
    public void testVariableCopying()
    {
-      Random random = new Random(1738L);
-
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
       DefaultFootstepPlannerParametersBasics parametersToSet = new DefaultFootstepPlannerParameters();
 
-      for (int iter = 0; iter < iters; iter++)
+      for (int i = 0; i < iterations; i++)
       {
-         DefaultFootstepPlannerParametersReadOnly randomParameters = getRandomParameters(random);
+         DefaultFootstepPlannerParametersReadOnly randomParameters = getRandomParameters();
          FootstepPlannerMessageTools.copyParametersToPacket(packet, randomParameters);
          parametersToSet.set(packet);
 
@@ -60,14 +62,14 @@ public class FootstepPlannerMessageToolsTest
    {
       VisibilityGraphsParametersBasics parametersToSet = new DefaultVisibilityGraphParameters();
       VisibilityGraphsParametersPacket packet = new VisibilityGraphsParametersPacket();
-      Random random = new Random(1738L);
-      for (int i = 0; i < 1000; i++)
+
+      for (int i = 0; i < iterations; i++)
       {
-         VisibilityGraphsParametersReadOnly randomParameters = getRandomVisibilityGraphParameters(random);
+         VisibilityGraphsParametersReadOnly randomParameters = getRandomVisibilityGraphParameters();
          FootstepPlannerMessageTools.copyParametersToPacket(packet, randomParameters);
          parametersToSet.set(packet);
 
-         assertParametersEqual(randomParameters, parametersToSet, 1e-5);
+         assertParametersEqual(randomParameters, parametersToSet);
       }
    }
 
@@ -88,59 +90,54 @@ public class FootstepPlannerMessageToolsTest
       for (StoredPropertyKey<?> key : DefaultFootstepPlannerParameters.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " has the wrong value.";
-         if (key instanceof DoubleStoredPropertyKey)
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
          {
-            DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(doubleKey), parametersB.get(doubleKey), 1e-5);
-            assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), 1e-5);
+
+            Assertions.assertEquals(parametersA.get(doubleKey), parametersB.get(doubleKey), failureMessage);
+            Assertions.assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), failureMessage);
          }
-         else if (key instanceof IntegerStoredPropertyKey)
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
          {
-            IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(integerKey), parametersB.get(integerKey));
+            Assertions.assertEquals(parametersA.get(integerKey), parametersB.get(integerKey), failureMessage);
          }
-         else if (key instanceof BooleanStoredPropertyKey)
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            BooleanStoredPropertyKey booleanKey = (BooleanStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(booleanKey), parametersB.get(booleanKey));
+            Assertions.assertEquals(parametersA.get(booleanKey), parametersB.get(booleanKey), failureMessage);
          }
       }
    }
 
-   private static void assertParametersEqual(VisibilityGraphsParametersReadOnly parametersA, VisibilityGraphsParametersReadOnly parametersB, double epsilon)
+   private static void assertParametersEqual(VisibilityGraphsParametersReadOnly parametersA, VisibilityGraphsParametersReadOnly parametersB)
    {
       for (StoredPropertyKey<?> key : VisibilityGraphParametersKeys.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " has the wrong value.";
-         if (key instanceof DoubleStoredPropertyKey)
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
          {
-            DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(doubleKey), parametersB.get(doubleKey), epsilon);
-            assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), epsilon);
+            Assertions.assertEquals(parametersA.get(doubleKey), parametersB.get(doubleKey), failureMessage);
+            Assertions.assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), failureMessage);
          }
-         else if (key instanceof IntegerStoredPropertyKey)
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
          {
-            IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(integerKey), parametersB.get(integerKey));
+            Assertions.assertEquals(parametersA.get(integerKey), parametersB.get(integerKey), failureMessage);
          }
-         else if (key instanceof BooleanStoredPropertyKey)
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
          {
-            BooleanStoredPropertyKey booleanKey = (BooleanStoredPropertyKey) key;
-            assertEquals(failureMessage, parametersA.get(booleanKey), parametersB.get(booleanKey));
+            Assertions.assertEquals(parametersA.get(booleanKey), parametersB.get(booleanKey), failureMessage);
          }
       }
    }
 
-   private static void assertDoubleParametersDontContainNoValue(DefaultFootstepPlannerParametersReadOnly parametersA, DefaultFootstepPlannerParametersReadOnly parametersB)
+   private static void assertDoubleParametersDontContainNoValue(DefaultFootstepPlannerParametersReadOnly parametersA,
+                                                                DefaultFootstepPlannerParametersReadOnly parametersB)
    {
       for (StoredPropertyKey<?> key : DefaultFootstepPlannerParameters.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " contains a no value.";
-         if (key instanceof DoubleStoredPropertyKey)
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
          {
-            DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
-            assertNotEquals(failureMessage, FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), 1e-5);
-            assertNotEquals(failureMessage, FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersA.get(doubleKey), 1e-5);
+            Assertions.assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersA.get(doubleKey), failureMessage);
+            Assertions.assertNotEquals(FootstepPlannerParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), failureMessage);
          }
       }
    }
@@ -150,17 +147,15 @@ public class FootstepPlannerMessageToolsTest
       for (StoredPropertyKey<?> key : VisibilityGraphParametersKeys.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " contains a no value.";
-         if (key instanceof DoubleStoredPropertyKey)
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
          {
-            DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
-            assertNotEquals(failureMessage, VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), 1e-5);
-            assertNotEquals(failureMessage, VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE, parametersA.get(doubleKey), 1e-5);
+            Assertions.assertNotEquals(VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE, parametersA.get(doubleKey), failureMessage);
+            Assertions.assertNotEquals(VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE, parametersB.get(doubleKey), failureMessage);
          }
       }
    }
 
-
-   private static DefaultFootstepPlannerParametersReadOnly getRandomParameters(Random random)
+   private static DefaultFootstepPlannerParametersReadOnly getRandomParameters()
    {
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
@@ -168,17 +163,17 @@ public class FootstepPlannerMessageToolsTest
       {
          if (key instanceof DoubleStoredPropertyKey)
          {
-            double randomValue = RandomNumbers.nextDouble(random, -10.0, 10.0);
+            double randomValue = RandomNumbers.nextDouble(FootstepPlannerMessageToolsTest.RANDOM, -10.0, 10.0);
             footstepPlannerParameters.set(((DoubleStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
-            int randomValue = RandomNumbers.nextInt(random, 1, 10);
+            int randomValue = RandomNumbers.nextInt(FootstepPlannerMessageToolsTest.RANDOM, 1, 10);
             footstepPlannerParameters.set(((IntegerStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof BooleanStoredPropertyKey)
          {
-            boolean randomValue = RandomNumbers.nextBoolean(random, 0.5);
+            boolean randomValue = RandomNumbers.nextBoolean(FootstepPlannerMessageToolsTest.RANDOM, 0.5);
             footstepPlannerParameters.set(((BooleanStoredPropertyKey) key), randomValue);
          }
       }
@@ -186,7 +181,7 @@ public class FootstepPlannerMessageToolsTest
       return footstepPlannerParameters;
    }
 
-   private static VisibilityGraphsParametersReadOnly getRandomVisibilityGraphParameters(Random random)
+   private static VisibilityGraphsParametersReadOnly getRandomVisibilityGraphParameters()
    {
       DefaultVisibilityGraphParameters visibilityGraph = new DefaultVisibilityGraphParameters();
 
@@ -194,17 +189,17 @@ public class FootstepPlannerMessageToolsTest
       {
          if (key instanceof DoubleStoredPropertyKey)
          {
-            double randomValue = RandomNumbers.nextDouble(random, -10.0, 10.0);
+            double randomValue = RandomNumbers.nextDouble(FootstepPlannerMessageToolsTest.RANDOM, -10.0, 10.0);
             visibilityGraph.set(((DoubleStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
-            int randomValue = RandomNumbers.nextInt(random, 1, 10);
+            int randomValue = RandomNumbers.nextInt(FootstepPlannerMessageToolsTest.RANDOM, 1, 10);
             visibilityGraph.set(((IntegerStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof BooleanStoredPropertyKey)
          {
-            boolean randomValue = RandomNumbers.nextBoolean(random, 0.5);
+            boolean randomValue = RandomNumbers.nextBoolean(FootstepPlannerMessageToolsTest.RANDOM, 0.5);
             visibilityGraph.set(((BooleanStoredPropertyKey) key), randomValue);
          }
       }

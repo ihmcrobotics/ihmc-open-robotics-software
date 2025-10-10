@@ -675,12 +675,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          controllerFailureListenersToAttach.add(listener);
    }
 
-   public boolean detachControllerFailureListener(ControllerFailureListener listener)
+   public void detachControllerFailureListener(ControllerFailureListener listener)
    {
       if (controllerToolbox != null)
-         return controllerToolbox.detachControllerFailureListener(listener);
+         controllerToolbox.detachControllerFailureListener(listener);
       else
-         return controllerFailureListenersToAttach.remove(listener);
+         controllerFailureListenersToAttach.remove(listener);
    }
 
    public void attachControllerStateChangedListeners(List<ControllerStateChangedListener> listeners)
