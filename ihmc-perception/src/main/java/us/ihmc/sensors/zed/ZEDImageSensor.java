@@ -16,6 +16,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.OdometrySensor;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
@@ -28,7 +29,7 @@ import java.time.Instant;
 
 import static us.ihmc.zed.global.zed.*;
 
-public class ZEDImageSensor extends ImageSensor
+public class ZEDImageSensor extends ImageSensor implements OdometrySensor
 {
    static
    {

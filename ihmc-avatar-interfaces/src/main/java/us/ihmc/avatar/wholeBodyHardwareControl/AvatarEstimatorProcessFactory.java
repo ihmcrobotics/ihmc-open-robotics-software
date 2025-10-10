@@ -61,7 +61,6 @@ public class AvatarEstimatorProcessFactory
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
 
    //  The external corrector
-   private final CameraOdometryListener cameraOdometryListener;
    private final PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
 
    // The remaining constructor arguments
@@ -112,11 +111,12 @@ public class AvatarEstimatorProcessFactory
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
 
-      cameraOdometryListener = new CameraOdometryListener(rootRegistry);
+      // Listen to camera odometry information and register to YoServer for debugging
       estimatorRealtimeROS2Node.createSubscription(
                   StateEstimatorAPI.getTopic(StampedOdometryPacket.class, robotModel.getSimpleRobotName().toLowerCase()),
-                  cameraOdometryListener);
+                  new CameraOdometryListener(rootRegistry));
 
+      // Setup the communication with the external pelvis corrector
       pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName().toLowerCase());
       estimatorRealtimeROS2Node.createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotModel.getSimpleRobotName().toLowerCase()),
                                           s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));

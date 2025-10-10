@@ -271,6 +271,12 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    }
 
    @Override
+   public String getExperimentalCameraParentFrameName()
+   {
+      return "head";
+   }
+
+   @Override
    public RigidBodyTransform getExperimentalCameraTransform()
    {
       return ZED_X_MINI_TO_HEAD_TRANSFORM;

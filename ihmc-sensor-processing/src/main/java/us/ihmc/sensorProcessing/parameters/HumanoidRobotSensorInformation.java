@@ -75,6 +75,11 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
       return referenceFrames.getChestFrame();
    }
 
+   public default String getExperimentalCameraParentFrameName()
+   {
+      return "chest";
+   }
+
    public default ReferenceFrame getExperimentalCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
       return ReferenceFrameTools.constructFrameWithChangingTransformToParent("experimentalCamera",
