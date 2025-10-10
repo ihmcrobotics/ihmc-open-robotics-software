@@ -1,18 +1,13 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
+import ihmc_common_msgs.msg.dds.Box3DMessage;
 import imgui.ImGui;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.communication.ros2.tf2.ROS2Frame;
-import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
@@ -25,36 +20,28 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
-import vision_msgs.msg.dds.Detection3D;
-import vision_msgs.msg.dds.Detection3DArray;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static us.ihmc.perception.demo.IsaacROSFoundationPoseDemo.*;
+import static us.ihmc.perception.demo.IsaacROSFoundationPoseDemo.RESULT_TOPIC;
 
 public class RDXIsaacROSFoundationPoseDemoUI
 {
-   private static final RotationMatrix FOUNDATIONPOSE_TO_IHMC_ROTATION = new RotationMatrix(new double[] {0, 0, 1,
-                                                                                                         -1, 0, 0,
-                                                                                                          0,-1, 0});
-
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
-   private final ROS2Publisher<Empty> trackingResetPublisher = ros2Node.createPublisher(TRACKING_RESET_TOPIC);
-   private final Set<Box3D> detectedBoundingBoxes = new HashSet<>();
+   private final ROS2Publisher<Empty> trackingResetPublisher = ros2Node.createPublisher(IsaacROSFoundationPoseObject.MUSTARD.topics.reset());
 
-   private final ROS2Frame zedFrame = new ROS2MutableFrame(ros2Node, "zed_frame", ReferenceFrame.getWorldFrame());
+   private final Box3D result = new Box3D();
+   private RDXReferenceFrameGraphic referenceFrameGraphic;
 
    public RDXIsaacROSFoundationPoseDemoUI()
    {
-      ros2Node.createSubscription2(TRACKING_RESULT_TOPIC, this::receiveOutput);
-      ros2Node.createSubscription2(REGISTRATION_RESULT_TOPIC, this::receiveOutput);
+      result.setToNaN();
+      ros2Node.createSubscription2(RESULT_TOPIC, this::receiveOutput);
 
       RDXBaseUI baseUI = new RDXBaseUI();
       RDXPerceptionVisualizersPanel visualizers = new RDXPerceptionVisualizersPanel();
-      Set<RDXBoxVisualizer> boxVisualizers = new HashSet<>();
-      Set<RDXReferenceFrameGraphic> referenceFrameGraphics = new HashSet<>();
+      RDXBoxVisualizer boxVisualizer = new RDXBoxVisualizer();
+      boxVisualizer.setColor(Color.RED);
+      boxVisualizer.setLineWidth(0.01);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -70,6 +57,12 @@ public class RDXIsaacROSFoundationPoseDemoUI
             visualizers.addVisualizer(new RDXROS2YOLOv8Visualizer("YOLO", ros2Node, peerClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE));
             visualizers.create(baseUI);
 
+            referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
+            baseUI.getPrimaryScene().addRenderableProvider(boxVisualizer);
+            baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic);
+
+            baseUI.getImGuiPanelManager().addPanel("Setting", this::renderSettings);
+
             baseUI.create();
          }
 
@@ -80,7 +73,6 @@ public class RDXIsaacROSFoundationPoseDemoUI
             updateBoundingBoxes();
 
             baseUI.renderBeforeOnScreenUI();
-            renderSettings();
             baseUI.renderEnd();
          }
 
@@ -94,38 +86,13 @@ public class RDXIsaacROSFoundationPoseDemoUI
 
          private void updateBoundingBoxes()
          {
-            for (RDXBoxVisualizer boxVisualizer : boxVisualizers)
+            synchronized (result)
             {
-               baseUI.getPrimaryScene().removeRenderable(boxVisualizer);
-               boxVisualizer.dispose();
-            }
-            boxVisualizers.clear();
+               boxVisualizer.generateMesh(result);
+               boxVisualizer.update();
 
-            for (RDXReferenceFrameGraphic referenceFrameGraphic : referenceFrameGraphics)
-            {
-               baseUI.getPrimaryScene().removeRenderable(referenceFrameGraphic);
-               referenceFrameGraphic.dispose();
-            }
-            referenceFrameGraphics.clear();
-
-            synchronized (detectedBoundingBoxes)
-            {
-               for (Box3D boundingBox : detectedBoundingBoxes)
-               {
-                  RDXBoxVisualizer boxVisualizer = new RDXBoxVisualizer();
-                  boxVisualizer.setLineWidth(0.01);
-                  boxVisualizer.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
-                  boxVisualizer.generateMesh(boundingBox);
-                  boxVisualizer.update();
-                  boxVisualizers.add(boxVisualizer);
-                  baseUI.getPrimaryScene().addRenderableProvider(boxVisualizer, boxVisualizer);
-
-                  RDXReferenceFrameGraphic referenceFrameGraphic = new RDXReferenceFrameGraphic(0.1);
-                  referenceFrameGraphic.getFramePose3D().set(boundingBox.getPose());
-                  referenceFrameGraphic.updateFromFramePose();
-                  referenceFrameGraphics.add(referenceFrameGraphic);
-                  baseUI.getPrimaryScene().addRenderableProvider(referenceFrameGraphic, referenceFrameGraphic);
-               }
+               referenceFrameGraphic.getFramePose3D().set(result.getPose());
+               referenceFrameGraphic.updateFromFramePose();
             }
          }
 
@@ -141,25 +108,12 @@ public class RDXIsaacROSFoundationPoseDemoUI
       });
    }
 
-   private void receiveOutput(Detection3DArray output)
+   private void receiveOutput(Box3DMessage output)
    {
-      IDLSequence.Object<Detection3D> detections = output.getDetections();
-
-      zedFrame.update();
-
-      synchronized (detectedBoundingBoxes)
+      synchronized (result)
       {
-         detectedBoundingBoxes.clear();
-
-         for (int i = 0; i < detections.size(); ++i)
-         {
-            Detection3D detection = detections.get(i);
-            Vector3D size = detection.getBbox().getSize();
-            FramePose3D pose = new FramePose3D(zedFrame, detection.getBbox().getCenter());
-            pose.prependRotation(FOUNDATIONPOSE_TO_IHMC_ROTATION);
-            pose.changeFrame(ReferenceFrame.getWorldFrame());
-            detectedBoundingBoxes.add(new Box3D(pose, size));
-         }
+         result.getPose().set(output.getPose());
+         result.getSize().set(output.getSize());
       }
    }
 
