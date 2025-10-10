@@ -18,7 +18,7 @@ public class CameraOdometryPublisherThread extends RepeatingTaskThread
 {
    private final OdometrySensor sensor;
    private final ROS2Publisher<StampedOdometryPacket> odometryInfoPublisher; // used for debugging
-   private final ROS2Publisher<StampedPosePacket> odometryCorrectionPublisher; // used for state estimation correction
+   private final ROS2Publisher<StampedPosePacket> pelvisCorrectionPublisher; // used for state estimation correction
    private final ROS2SyncedRobotModel syncedRobot;
    private boolean computeOdometry = false;
    private final String parentCameraName;
@@ -33,7 +33,7 @@ public class CameraOdometryPublisherThread extends RepeatingTaskThread
       this.sensor = sensor;
       this.syncedRobot = syncedRobot;
       this.odometryInfoPublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedOdometryPacket.class, robotName.toLowerCase()));
-      this.odometryCorrectionPublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName.toLowerCase()));
+      this.pelvisCorrectionPublisher = ros2Node.createPublisher(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName.toLowerCase()));
       ros2Node.createSubscription2(getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
 
       parentCameraName = syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraParentFrameName();
@@ -109,16 +109,17 @@ public class CameraOdometryPublisherThread extends RepeatingTaskThread
          pelvisInWorldEstimated.multiply(parentInCamera);
          pelvisInWorldEstimated.multiply(pelvisInParent);
 
-         StampedPosePacket newestStampedPosePacket = new StampedPosePacket();
-         newestStampedPosePacket.getPose().set(pelvisInWorldEstimated);
-         newestStampedPosePacket.setTimestamp(syncedRobot.getTimestamp());
-         odometryCorrectionPublisher.publish(newestStampedPosePacket);
+         StampedPosePacket newStampedPosePacket = new StampedPosePacket();
+         newStampedPosePacket.getPose().set(pelvisInWorldEstimated);
+         newStampedPosePacket.setTimestamp(syncedRobot.getTimestamp());
+         newStampedPosePacket.setConfidenceFactor(0.9);
+         pelvisCorrectionPublisher.publish(newStampedPosePacket);
 
-         StampedOdometryPacket newestStampedOdometryPacket = new StampedOdometryPacket();
-         newestStampedOdometryPacket.getPose().set(pelvisInWorldEstimated);
-         newestStampedOdometryPacket.setTimestamp(sensor.getLastGrabTimestamp());
-         newestStampedOdometryPacket.getImuOrientation().set(sensor.getImuOrientation());
-         odometryInfoPublisher.publish(newestStampedOdometryPacket);
+         StampedOdometryPacket newStampedOdometryPacket = new StampedOdometryPacket();
+         newStampedOdometryPacket.getPose().set(correctedCameraInWorld);
+         newStampedOdometryPacket.setTimestamp(sensor.getLastGrabTimestamp());
+         newStampedOdometryPacket.getImuOrientation().set(sensor.getImuOrientation());
+         odometryInfoPublisher.publish(newStampedOdometryPacket);
       }
    }
 
