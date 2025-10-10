@@ -45,17 +45,6 @@ public class JointDesiredOutputList implements JointDesiredOutputListBasics
    }
 
    @Override
-   public boolean isEmpty()
-   {
-      for (int i = 0; i < jointsData.length; i++)
-      {
-         if (!jointsData[i].isEmpty())
-            return false;
-      }
-      return true;
-   }
-
-   @Override
    public JointDesiredOutput getJointDesiredOutput(int index)
    {
       return jointsData[index];

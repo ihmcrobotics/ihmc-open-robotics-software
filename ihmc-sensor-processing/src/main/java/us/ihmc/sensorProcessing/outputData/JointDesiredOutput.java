@@ -24,7 +24,7 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
    private double positionFeedbackMaxError = Double.NaN;
    private double velocityFeedbackMaxError = Double.NaN;
-   
+
    private double maxTorque = Double.NaN;
 
    public JointDesiredOutput()
@@ -56,33 +56,8 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
       positionFeedbackMaxError = Double.NaN;
       velocityFeedbackMaxError = Double.NaN;
-      
-      maxTorque = Double.NaN;
-   }
 
-   @Override
-   public boolean isEmpty()
-   {
-      //@formatter:off
-      return controlMode == null &&
-             loadMode == null &&
-             Double.isNaN(desiredTorque) &&
-             Double.isNaN(desiredPosition) &&
-             Double.isNaN(desiredVelocity) &&
-             Double.isNaN(desiredAcceleration) &&
-             !resetIntegrators &&
-             Double.isNaN(stiffness) &&
-             Double.isNaN(damping) &&
-             Double.isNaN(masterGain) &&
-             Double.isNaN(velocityScaling) &&
-             Double.isNaN(velocityIntegrationBreakFrequency) &&
-             Double.isNaN(positionIntegrationBreakFrequency) &&
-             Double.isNaN(positionIntegrationMaxError) &&
-             Double.isNaN(velocityIntegrationMaxError) &&
-             Double.isNaN(positionFeedbackMaxError) &&
-             Double.isNaN(velocityFeedbackMaxError) &&
-             Double.isNaN(maxTorque);
-      //@formatter:on
+      maxTorque = Double.NaN;
    }
 
    @Override
@@ -169,7 +144,6 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
       boolean resetIntegrators = this.resetIntegrators;
       this.resetIntegrators = false;
       return resetIntegrators;
-
    }
 
    @Override
