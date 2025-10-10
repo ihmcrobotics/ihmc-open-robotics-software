@@ -164,8 +164,13 @@ public class AvatarLowLevelOutputProcessor
       return processedDesireds;
    }
 
-   public YoDouble getMasterGain()
+   public DoubleProvider getMasterGain()
    {
       return masterGain;
+   }
+
+   public void setMasterGain(double masterGain)
+   {
+      this.masterGain.set(masterGain);
    }
 }
