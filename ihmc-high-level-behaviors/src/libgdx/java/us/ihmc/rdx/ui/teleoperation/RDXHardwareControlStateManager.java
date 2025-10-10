@@ -61,6 +61,11 @@ public class RDXHardwareControlStateManager
          ImGui.sameLine();
          ImGui.setNextItemWidth(ImGui.getColumnWidth());
          changed |= ImGuiTools.sliderDouble(labels.getHidden("Master Gain"), masterGain, 0.0, 1.0, "Master Gain: %.2f");
+         boolean servoRobot = ImGui.button(labels.get("Servo Robot"));
+         changed |= servoRobot;
+         ImGui.sameLine();
+         boolean unservoSlowly = ImGui.button(labels.get("Unservo Slowly"));
+         changed |= unservoSlowly;
          ImGui.popStyleColor(2);
 
          if (changed)
@@ -68,6 +73,8 @@ public class RDXHardwareControlStateManager
             EStopMasterGainCommandMessage message = new EStopMasterGainCommandMessage();
             message.setEstop(estop.get());
             message.setMasterGain(masterGain.get());
+            message.setServoRobot(servoRobot);
+            message.setUnservoSlowly(unservoSlowly);
             communicationHelper.publishToController(message);
          }
       }

@@ -19,6 +19,19 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
             * AvatarLowLevelOutputProcessor masterGain variable to set
             */
    public double master_gain_;
+   /**
+            * True if this is a request to servo the robot
+            * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+            */
+   public boolean servo_robot_;
+   /**
+            * True is this is a request to immediately zero the gains which can be violent and dangerous
+            */
+   public boolean unservo_immediately_;
+   /**
+            * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+            */
+   public boolean unservo_slowly_;
 
    public EStopMasterGainCommandMessage()
    {
@@ -35,6 +48,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
       estop_ = other.estop_;
 
       master_gain_ = other.master_gain_;
+
+      servo_robot_ = other.servo_robot_;
+
+      unservo_immediately_ = other.unservo_immediately_;
+
+      unservo_slowly_ = other.unservo_slowly_;
 
    }
 
@@ -68,6 +87,53 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
       return master_gain_;
    }
 
+   /**
+            * True if this is a request to servo the robot
+            * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+            */
+   public void setServoRobot(boolean servo_robot)
+   {
+      servo_robot_ = servo_robot;
+   }
+   /**
+            * True if this is a request to servo the robot
+            * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+            */
+   public boolean getServoRobot()
+   {
+      return servo_robot_;
+   }
+
+   /**
+            * True is this is a request to immediately zero the gains which can be violent and dangerous
+            */
+   public void setUnservoImmediately(boolean unservo_immediately)
+   {
+      unservo_immediately_ = unservo_immediately;
+   }
+   /**
+            * True is this is a request to immediately zero the gains which can be violent and dangerous
+            */
+   public boolean getUnservoImmediately()
+   {
+      return unservo_immediately_;
+   }
+
+   /**
+            * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+            */
+   public void setUnservoSlowly(boolean unservo_slowly)
+   {
+      unservo_slowly_ = unservo_slowly;
+   }
+   /**
+            * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+            */
+   public boolean getUnservoSlowly()
+   {
+      return unservo_slowly_;
+   }
+
 
    public static Supplier<EStopMasterGainCommandMessagePubSubType> getPubSubType()
    {
@@ -90,6 +156,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.master_gain_, other.master_gain_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.servo_robot_, other.servo_robot_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unservo_immediately_, other.unservo_immediately_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unservo_slowly_, other.unservo_slowly_, epsilon)) return false;
+
 
       return true;
    }
@@ -107,6 +179,12 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
       if(this.master_gain_ != otherMyClass.master_gain_) return false;
 
+      if(this.servo_robot_ != otherMyClass.servo_robot_) return false;
+
+      if(this.unservo_immediately_ != otherMyClass.unservo_immediately_) return false;
+
+      if(this.unservo_slowly_ != otherMyClass.unservo_slowly_) return false;
+
 
       return true;
    }
@@ -120,7 +198,13 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
       builder.append("estop=");
       builder.append(this.estop_);      builder.append(", ");
       builder.append("master_gain=");
-      builder.append(this.master_gain_);
+      builder.append(this.master_gain_);      builder.append(", ");
+      builder.append("servo_robot=");
+      builder.append(this.servo_robot_);      builder.append(", ");
+      builder.append("unservo_immediately=");
+      builder.append(this.unservo_immediately_);      builder.append(", ");
+      builder.append("unservo_slowly=");
+      builder.append(this.unservo_slowly_);
       builder.append("}");
       return builder.toString();
    }

@@ -15,7 +15,7 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a22bd78569d35fba585d40740501993cb2eaa7766a7e81a142c540b12121c31d";
+   		return "015e409798e94594578840584dc2ca8d95ae0e2f661047b3ae73886b668852f7";
    }
    
    @Override
@@ -56,6 +56,12 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -75,6 +81,15 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +100,12 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getMasterGain());
 
+      cdr.write_type_7(data.getServoRobot());
+
+      cdr.write_type_7(data.getUnservoImmediately());
+
+      cdr.write_type_7(data.getUnservoSlowly());
+
    }
 
    public static void read(controller_msgs.msg.dds.EStopMasterGainCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -92,6 +113,12 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setEstop(cdr.read_type_7());
       	
       data.setMasterGain(cdr.read_type_6());
+      	
+      data.setServoRobot(cdr.read_type_7());
+      	
+      data.setUnservoImmediately(cdr.read_type_7());
+      	
+      data.setUnservoSlowly(cdr.read_type_7());
       	
 
    }
@@ -101,6 +128,9 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_7("estop", data.getEstop());
       ser.write_type_6("master_gain", data.getMasterGain());
+      ser.write_type_7("servo_robot", data.getServoRobot());
+      ser.write_type_7("unservo_immediately", data.getUnservoImmediately());
+      ser.write_type_7("unservo_slowly", data.getUnservoSlowly());
    }
 
    @Override
@@ -108,6 +138,9 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setEstop(ser.read_type_7("estop"));
       data.setMasterGain(ser.read_type_6("master_gain"));
+      data.setServoRobot(ser.read_type_7("servo_robot"));
+      data.setUnservoImmediately(ser.read_type_7("unservo_immediately"));
+      data.setUnservoSlowly(ser.read_type_7("unservo_slowly"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.EStopMasterGainCommandMessage src, controller_msgs.msg.dds.EStopMasterGainCommandMessage dest)
