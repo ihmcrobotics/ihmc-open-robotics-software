@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -14,7 +13,7 @@ import us.ihmc.sensors.OdometrySensor;
 
 import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
-public class CameraOdometryPublisherThread extends RepeatingTaskThread
+public class ROS2CameraOdometryPublisher
 {
    private final OdometrySensor sensor;
    private final ROS2Publisher<StampedOdometryPacket> odometryInfoPublisher; // used for debugging
@@ -25,9 +24,8 @@ public class CameraOdometryPublisherThread extends RepeatingTaskThread
    private final RigidBodyTransform cameraInParent;
    private final RigidBodyTransform initialCameraWorldOffset = new RigidBodyTransform();
    
-   public CameraOdometryPublisherThread(ROS2Node ros2Node, OdometrySensor sensor, ROS2SyncedRobotModel syncedRobot)
+   public ROS2CameraOdometryPublisher(ROS2Node ros2Node, OdometrySensor sensor, ROS2SyncedRobotModel syncedRobot)
    {
-      super(sensor.getSensorName() + "OdometryPublishThread");
       String robotName = syncedRobot.getRobotModel().getSimpleRobotName();
 
       this.sensor = sensor;
@@ -65,18 +63,17 @@ public class CameraOdometryPublisherThread extends RepeatingTaskThread
             // Step 3: Camera transform in world from sensor
             RigidBodyTransform cameraInWorldFromSensor = sensor.getTrackedSensorFrame().getTransformToRoot();
 
-            // Step 4: Register initial offset: cameraInWorldFromRobot.inverse() * cameraInWorldFromSensor
-            RigidBodyTransform cameraInWorldFromRobotInv = new RigidBodyTransform(cameraInWorldFromRobot);
-            cameraInWorldFromRobotInv.invert();
-            initialCameraWorldOffset.set(cameraInWorldFromRobotInv);
-            initialCameraWorldOffset.multiply(cameraInWorldFromSensor);
+            // Step 4: Register initial offset: cameraInWorldFromSensor.inverse() * cameraInWorldFromRobot
+            RigidBodyTransform cameraInWorldFromSensorInv = new RigidBodyTransform(cameraInWorldFromSensor);
+            cameraInWorldFromSensorInv.invert();
+            initialCameraWorldOffset.set(cameraInWorldFromSensorInv);
+            initialCameraWorldOffset.multiply(cameraInWorldFromRobot);
          }
          computeOdometry = newComputeOdometry;
       }
    }
 
-   @Override
-   protected void runTask()
+   public void update()
    {
       if (computeOdometry)
       {
@@ -121,12 +118,5 @@ public class CameraOdometryPublisherThread extends RepeatingTaskThread
          newStampedOdometryPacket.getImuOrientation().set(sensor.getImuOrientation());
          odometryInfoPublisher.publish(newStampedOdometryPacket);
       }
-   }
-
-   @Override
-   public void kill()
-   {
-      super.kill();
-      interrupt();
    }
 }
