@@ -8,7 +8,6 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import us.ihmc.avatar.MultiRobotTestInterface;
