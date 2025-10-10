@@ -165,6 +165,26 @@ public class AvatarMultiThreadingFactory
                                                            freezeStateFactory);
    }
 
+   public void servoRobot()
+   {
+      lowLevelOutputProcessor.servoRobot();
+   }
+
+   public void setServoDuration(double duration)
+   {
+      lowLevelOutputProcessor.setServoDuration(duration);
+   }
+
+   public void setSoftEStop(boolean softEStop)
+   {
+      hardwareCommunicationInterface.setSoftEStop(softEStop);
+   }
+
+   public void setListenToBlockCondition(boolean listenToBlockCondition)
+   {
+      threadingManager.get().setListenToBlockingCondition(listenToBlockCondition);
+   }
+
    public void start()
    {
       estimatorRealtimeROS2Node.spin();
@@ -174,6 +194,16 @@ public class AvatarMultiThreadingFactory
 
       hardwareCommunicationInterface.start();
       threadingManager.get().start();
+   }
+
+   public void pause()
+   {
+      threadingManager.get().pause();
+   }
+
+   public void resume()
+   {
+      threadingManager.get().resume();
    }
 
    public void join()
@@ -281,6 +311,9 @@ public class AvatarMultiThreadingFactory
                                                            useMultiThreading,
                                                            yoVariableServer,
                                                            rootRegistry));
+
+      // Set up the block to prevent execution whenever there is no new state message.
+      threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
       return threadingManager.get();
    }

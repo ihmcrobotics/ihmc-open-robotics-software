@@ -22,6 +22,7 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,6 +47,8 @@ public class AvatarMultiThreadingManager
    private final YoVariableServer yoVariableServer;
 
    private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
+   private final YoBoolean listenToBlockingCondition = new YoBoolean("listenToBlockingCondition", registry);
+   private BooleanProvider blockingProvider;
 
    private final double masterThreadDt;
 
@@ -302,6 +305,16 @@ public class AvatarMultiThreadingManager
       return ikStreamingTask;
    }
 
+   public void setListenToBlockingCondition(boolean listenToBlockingCondition)
+   {
+      this.listenToBlockingCondition.set(listenToBlockingCondition);
+   }
+
+   public void setBlockingProvider(BooleanProvider blockingProvider)
+   {
+      this.blockingProvider = blockingProvider;
+   }
+
    public void start()
    {
       if (useRealtimeThreads)
@@ -385,6 +398,13 @@ public class AvatarMultiThreadingManager
    {
       if (isPaused.getBooleanValue())
          return;
+
+      if (blockingProvider != null && listenToBlockingCondition.getBooleanValue() && blockingProvider.getValue())
+      {
+         // publish the older control state.
+         hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
+         return;
+      }
 
       // Calculate update rate of master thread
       masterThreadFrequencyCalculator.ping();
