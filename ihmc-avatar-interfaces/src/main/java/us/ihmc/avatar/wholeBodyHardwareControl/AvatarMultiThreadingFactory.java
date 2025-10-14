@@ -81,7 +81,6 @@ public class AvatarMultiThreadingFactory
    public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
    private final RealtimeROS2Node estimatorRealtimeROS2Node;
    private final RealtimeROS2Node controllerRealtimeROS2Node;
-   private final OptionalFactoryField<RealtimeROS2Node> ikStreamingRealtimeROS2Node = new OptionalFactoryField<>("AvatarIKStreamingROS2Node");
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // The thread factories
@@ -185,67 +184,6 @@ public class AvatarMultiThreadingFactory
       threadingManager.get().setListenToBlockingCondition(listenToBlockCondition);
    }
 
-   public void start()
-   {
-      estimatorRealtimeROS2Node.spin();
-      controllerRealtimeROS2Node.spin();
-      if (ikStreamingRealtimeROS2Node.hasValue())
-         ikStreamingRealtimeROS2Node.get().spin();
-
-      hardwareCommunicationInterface.start();
-      threadingManager.get().start();
-   }
-
-   public void pause()
-   {
-      threadingManager.get().pause();
-   }
-
-   public void resume()
-   {
-      threadingManager.get().resume();
-   }
-
-   public void join()
-   {
-      threadingManager.get().join();
-   }
-
-   public void stop()
-   {
-      System.out.println("Calling stop in the multi-threading factory");
-      estimatorRealtimeROS2Node.stopSpinning();
-      controllerRealtimeROS2Node.stopSpinning();
-      if (ikStreamingRealtimeROS2Node.hasValue())
-         ikStreamingRealtimeROS2Node.get().stopSpinning();
-
-      hardwareCommunicationInterface.stop();
-      threadingManager.get().stop();
-   }
-
-   public void destroy()
-   {
-      this.stop();
-      System.out.println("Calling destroy in the multi-threading factory");
-
-      estimatorRealtimeROS2Node.destroy();
-      System.out.println("Estimator node has been destroyed");
-
-      controllerRealtimeROS2Node.destroy();
-      System.out.println("Controller node has been destroyed");
-
-      if (ikStreamingRealtimeROS2Node.hasValue())
-      {
-         ikStreamingRealtimeROS2Node.get().destroy();
-         System.out.println("IK Streaming node has been destroyed");
-      }
-
-      hardwareCommunicationInterface.destroy();
-      System.out.println("Hardware communication node has been destroyed");
-
-      threadingManager.get().destroy();
-   }
-
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
       // Create estimator thread
@@ -295,6 +233,8 @@ public class AvatarMultiThreadingFactory
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
+                                                           estimatorRealtimeROS2Node,
+                                                           controllerRealtimeROS2Node,
                                                            estimatorThread.get().getHumanoidRobotContextData(),
                                                            estimatorThread.get().getFullRobotModel(),
                                                            hardwareCommunicationInterface,
@@ -511,10 +451,8 @@ public class AvatarMultiThreadingFactory
 
    public void addIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
-      ikStreamingRealtimeROS2Node.set(new ROS2NodeBuilder().buildRealtime(IHMC_ROS_IKSTREAMING_NODE_NAME, ros2ThreadFactory));
-
       ikStreamingThread.set(new IKStreamingRTPluginFactory().createRTThread(robotModel.getSimpleRobotName(),
-                                                                            ikStreamingRealtimeROS2Node.get(),
+                                                                            estimatorRealtimeROS2Node,
                                                                             controllerFactory.getCommandInputManager(),
                                                                             controllerFactory.getStatusOutputManager(),
                                                                             robotModel,

@@ -21,6 +21,7 @@ import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -86,6 +87,9 @@ public class AvatarMultiThreadingManager
 
    private final AvatarAffinityInterface affinity;
 
+   private final RealtimeROS2Node estimatorROS2Node;
+   private final RealtimeROS2Node controllerROS2Node;
+
    private final HumanoidRobotContextData masterContext;
 
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
@@ -100,6 +104,8 @@ public class AvatarMultiThreadingManager
 
    public AvatarMultiThreadingManager(String prefix,
                                       DRCRobotModel robotModel,
+                                      RealtimeROS2Node estimatorROS2Node,
+                                      RealtimeROS2Node controllerROS2Node,
                                       HumanoidRobotContextData masterContext,
                                       FullHumanoidRobotModel masterFullRobotModel,
                                       HardwareCommunicationInterface hardwareCommunicationInterface,
@@ -117,6 +123,8 @@ public class AvatarMultiThreadingManager
                                       YoVariableServer yoVariableServer,
                                       YoRegistry rootRegistry)
    {
+      this.estimatorROS2Node = estimatorROS2Node;
+      this.controllerROS2Node = controllerROS2Node;
       this.masterContext = masterContext;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
       this.lowLevelOutputProcessor = lowLevelOutputProcessor;
@@ -317,6 +325,9 @@ public class AvatarMultiThreadingManager
 
    public void start()
    {
+      estimatorROS2Node.spin();
+      controllerROS2Node.spin();
+      hardwareCommunicationInterface.start();
       if (useRealtimeThreads)
       {
          running = true;
@@ -339,11 +350,19 @@ public class AvatarMultiThreadingManager
 
    public void stop()
    {
+      estimatorROS2Node.stopSpinning();
+      controllerROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
    }
 
    public void destroy()
    {
+      estimatorROS2Node.destroy();
+      System.out.println("Estimator node has been destroyed");
+
+      controllerROS2Node.destroy();
+      System.out.println("Controller node has been destroyed");
+
       hardwareCommunicationInterface.destroy();
 
       ThreadTools.sleep(500L);
@@ -444,6 +463,16 @@ public class AvatarMultiThreadingManager
 
       // Update YoVariable server
       updateYoVariableServer();
+   }
+
+   public RealtimeROS2Node getEstimatorROS2Node()
+   {
+      return estimatorROS2Node;
+   }
+
+   public RealtimeROS2Node getControllerROS2Node()
+   {
+      return controllerROS2Node;
    }
 
    public void addPreEstimatorThreadRunnable(Runnable runnable)
