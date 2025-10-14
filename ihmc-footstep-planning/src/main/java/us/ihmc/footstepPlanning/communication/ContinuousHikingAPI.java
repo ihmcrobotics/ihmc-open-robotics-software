@@ -33,9 +33,6 @@ public class ContinuousHikingAPI
    public static final ROS2Topic<PoseListMessage> MONTE_CARLO_TREE_NODES = IHMC_ROOT.withModule(moduleName).withType(PoseListMessage.class).withSuffix("monte_carlo_tree_nodes");
    public static final ROS2Topic<FootstepDataListMessage> MONTE_CARLO_FOOTSTEP_PLAN = IHMC_ROOT.withModule(moduleName).withType(FootstepDataListMessage.class).withSuffix("monte_carlo_footstep_plan");
 
-   // Message for Terrain Environment
-   public static final ROS2Topic<TerrainMapMessage> TERRAIN_MAP = IHMC_ROOT.withModule(moduleName).withType(TerrainMapMessage.class).withSuffix("terrain_map");
-
    // Parameters that get synced between the remote process and the user
    public static final StoredPropertySetROS2TopicPair CONTINUOUS_HIKING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"continuous_hiking_parameters");

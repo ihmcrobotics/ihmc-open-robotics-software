@@ -3,8 +3,23 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint64 sequence_id
 
-# Height map message
-perception_msgs/HeightMapMessage height_map
+# X coordinate of the center of the height map
+float64 grid_center_x
+
+# Y coordinate of the center of the height map
+float64 grid_center_y
+
+# Width of the height map in meters
+float64 width_in_meters
+
+# Cell size in meters of an individual cell
+float64 cell_size_in_meters
+
+# Cells per axis
+int32 cells_per_axis
+
+# Height map in metric values
+float32[] height_map
 
 # Traversability score, on a 0 to 1 scale
 float32[] traversability_score

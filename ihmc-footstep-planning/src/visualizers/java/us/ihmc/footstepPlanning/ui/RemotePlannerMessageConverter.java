@@ -116,8 +116,7 @@ public class RemotePlannerMessageConverter
       double timeout = packet.getTimeout();
       double horizonLength = packet.getHorizonLength();
 
-      this.heightMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, regions));
-      this.terrainMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.TerrainMapData, regions));
+      this.terrainMapData.ifPresent(regions -> messager.submitMessage(FootstepPlannerMessagerAPI.terrainMapMessage, regions));
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, packet.getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, packet.getStartRightFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, packet.getGoalLeftFootPose());
@@ -137,14 +136,6 @@ public class RemotePlannerMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
-   }
-
-   private void processIncomingHeightMapMessage(HeightMapMessage packet)
-   {
-      this.heightMapData = Optional.of(packet);
-
-      if (acceptNewPlanarRegionsReference.get())
-         messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, packet);
    }
 
    private void publishResultingPlan()

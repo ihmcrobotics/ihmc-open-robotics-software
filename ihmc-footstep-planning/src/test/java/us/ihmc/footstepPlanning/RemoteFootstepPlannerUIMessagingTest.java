@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
@@ -28,6 +28,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -42,6 +43,8 @@ import us.ihmc.messager.javafx.SharedMemoryJavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,8 +53,6 @@ import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,8 +200,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanningRequestTestFromUI()
    {
       Random random = new Random(1738L);
-      localNode.createSubscription(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                      .withInput().withTypeName(FootstepPlanningRequestPacket.class), s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      localNode.createSubscription(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class),
+                                   s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
 
       double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
@@ -217,8 +218,8 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
       int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
 
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startLeftFootPose);
@@ -229,7 +230,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, performAStarSearch);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
-      messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, heightMapMessage);
+      messager.submitMessage(FootstepPlannerMessagerAPI.terrainMapMessage, terrainMapMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.InitialSupportSide, robotSide);
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
       messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, random.nextBoolean());
@@ -262,13 +263,14 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(plannerRequestId, packet.getPlannerRequestId(), epsilon, "Planner Request Ids aren't equal.");
       assertEquals(horizonLength, packet.getHorizonLength(), epsilon, "Planner horizon lengths aren't equal.");
 
-      checkHeightMapDataAreEqual(heightMapData, HeightMapMessageTools.unpackMessageToHeightMapData(packet.getHeightMapMessage()));
+      checkHeightMapDataAreEqual(terrainMapData, TerrainMapMessageTools.unpackMessage(packet.getTerrainMapMessage()));
    }
 
    private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
-      ROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class));
+      ROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(
+            robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class));
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -292,7 +294,7 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
       PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
@@ -310,7 +312,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       packet.setPlannerRequestId(plannerRequestId);
       packet.setSequenceId(sequenceId);
       packet.setHorizonLength(horizonLength);
-      packet.getHeightMapMessage().set(heightMapMessage);
+      packet.getTerrainMapMessage().set(terrainMapMessage);
 
       footstepPlanningRequestPublisher.publish(packet);
 
@@ -342,12 +344,10 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanObjectivePackets()
    {
       Random random = new Random(1738L);
-      ROS2Topic<?> topicName1 = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
-                                         .withInput();
+      ROS2Topic<?> topicName1 = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       localNode.createSubscription(topicName1.withTypeName(FootstepPlannerParametersPacket.class),
                                    s1 -> processFootstepPlannerParametersPacket(s1.takeNextData()));
-      ROS2Topic<?> topicName = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                  .withInput();
+      ROS2Topic<?> topicName = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       localNode.createSubscription(topicName.withTypeName(VisibilityGraphsParametersPacket.class),
                                    s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
@@ -375,7 +375,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, planBodyPath);
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, performAStarSearch);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
-      messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations,maxIterations);
+      messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
       messager.submitMessage(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails, random.nextBoolean());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
@@ -403,12 +403,11 @@ public class RemoteFootstepPlannerUIMessagingTest
       checkVisibilityGraphsParameters(randomVisibilityGraphParameters, visibilityGraphsPacket);
    }
 
-
-
    private void runOutputStatusToUI()
    {
       Random random = new Random(1738L);
-      ROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput().withTypeName(FootstepPlanningToolboxOutputStatus.class));
+      ROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(
+            robotName).withOutput().withTypeName(FootstepPlanningToolboxOutputStatus.class));
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
@@ -421,8 +420,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       Pose2D goalPose = new Pose2D();
       goalPose.getPosition().set(EuclidCoreRandomTools.nextPoint2D(random));
       goalPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
       FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
       int sequenceId = RandomNumbers.nextInt(random, 0, 100);
       int planId = RandomNumbers.nextInt(random, 0, 100);
@@ -440,7 +437,6 @@ public class RemoteFootstepPlannerUIMessagingTest
 
       FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
       outputPacket.getGoalPose().set(goalPose);
-      outputPacket.getHeightMapMessage().set(heightMapMessage);
       outputPacket.getFootstepDataList().set(footstepDataListMessage);
       outputPacket.setPlanId(planId);
       outputPacket.setSequenceId(sequenceId);
@@ -463,8 +459,14 @@ public class RemoteFootstepPlannerUIMessagingTest
       checkFootstepPlansAreEqual(footstepDataListMessage, footstepPlanReference.getAndSet(null));
       assertEquals(planId, receivedPlanIdReference.getAndSet(null), epsilon, "Planner Ids aren't equal.");
       assertEquals(result, plannerResultReference.getAndSet(null), "Planner results aren't equal.");
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
-      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.",
+                                                           lowLevelGoalPosition,
+                                                           lowLevelPositionGoalReference.getAndSet(null),
+                                                           epsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Low level goal orientation results aren't equal.",
+                                                                 lowLevelGoalOrientation,
+                                                                 lowLevelOrientationGoalReference.getAndSet(null),
+                                                                 epsilon);
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
@@ -551,8 +553,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       return next;
    }
 
-
-
    private static VisibilityGraphsParametersReadOnly createRandomVisibilityGraphsParameters(Random random)
    {
       double maxInterRegionConnectionLength = RandomNumbers.nextDouble(random, 0.01, 5.0);
@@ -583,12 +583,14 @@ public class RemoteFootstepPlannerUIMessagingTest
       return parameters;
    }
 
-   private static void checkHeightMapDataAreEqual(HeightMapData dataA, HeightMapData dataB)
+   private static void checkHeightMapDataAreEqual(TerrainMapData dataA, TerrainMapData dataB)
    {
       assertEquals(dataA.getCenterIndex(), dataB.getCenterIndex());
       assertEquals(dataA.getCellSize(), dataB.getCellSize(), epsilon);
       assertEquals(dataA.getMapSize(), dataB.getMapSize(), epsilon);
-      EuclidCoreTestTools.assertEquals(dataA.getGridCenter(), dataB.getGridCenter(), epsilon);
+      EuclidCoreTestTools.assertEquals(new Point2D(dataA.getGridCenterX(), dataA.getGridCenterY()),
+                                       new Point2D(dataB.getGridCenterX(), dataB.getGridCenterY()),
+                                       epsilon);
 
       int cellsPerSide = 2 * dataA.getCenterIndex() + 1;
       for (int x = 0; x < cellsPerSide; x++)
@@ -635,7 +637,10 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(parameters.getMaxZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(), epsilon, "Max Z penetration isn't equal.");
       assertEquals(parameters.getMaxStepWidth(), packet.getMaxStepWidth(), epsilon, "Max step width isn't equal.");
       assertEquals(parameters.getCliffBottomHeightToAvoid(), packet.getCliffBottomHeightToAvoid(), epsilon, "Cliff base height to avoid isn't equal.");
-      assertEquals(parameters.getMinDistanceFromCliffBottoms(), packet.getMinDistanceFromCliffBottoms(), epsilon, "Minimum distance from cliff bottoms isn't equal.");
+      assertEquals(parameters.getMinDistanceFromCliffBottoms(),
+                   packet.getMinDistanceFromCliffBottoms(),
+                   epsilon,
+                   "Minimum distance from cliff bottoms isn't equal.");
       assertEquals(parameters.getCliffTopHeightToAvoid(), packet.getCliffTopHeightToAvoid(), epsilon, "Cliff top height to avoid isn't equal.");
       assertEquals(parameters.getMinDistanceFromCliffTops(), packet.getMinDistanceFromCliffTops(), epsilon, "Minimum distance from cliff tops isn't equal.");
       assertEquals(parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon, "Body box heigth isn't equal.");

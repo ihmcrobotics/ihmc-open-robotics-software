@@ -215,7 +215,15 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
          lastSequenceNumber = image.getSequenceNumber();
          publishFuture = publishExecutor.submit(() ->
          {
-            publisher.publishImage(topic, image, sensorFrame);
+            try
+            {
+               publisher.publishImage(topic, image, sensorFrame);
+            }
+            catch (Exception e)
+            {
+               LogTools.error(e);
+            }
+
             image.release();
          });
       }

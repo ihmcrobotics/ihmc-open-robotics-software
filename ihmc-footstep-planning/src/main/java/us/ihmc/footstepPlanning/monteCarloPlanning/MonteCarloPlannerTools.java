@@ -22,7 +22,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -328,7 +328,6 @@ public class MonteCarloPlannerTools
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
       EnvironmentHandler environmentHandler = new EnvironmentHandler();
-      environmentHandler.setHeightMapData(request.getEnvironmentHandler().getHeightMapData());
       environmentHandler.setTerrainMapData(request.getEnvironmentHandler().getTerrainMapData());
 
       FootstepPlan footstepPlan = new FootstepPlan();
@@ -338,7 +337,7 @@ public class MonteCarloPlannerTools
 
          float nodeX = (float) (footstepNode.getState().getX32() / parameters.getNodesPerMeter());
          float nodeY = (float) (footstepNode.getState().getY32() / parameters.getNodesPerMeter());
-         float nodeZ = (float) request.getEnvironmentHandler().getTerrainMapData().getHeightInWorld(nodeX, nodeY);
+         float nodeZ = (float) request.getEnvironmentHandler().getTerrainMapData().getHeight(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
          ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
@@ -357,7 +356,7 @@ public class MonteCarloPlannerTools
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler, 0.1, Math.toRadians(45));
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler);
 
       double minTraversability = 0.2;
       if (snapTransform != null && (terrainMapData.getTraversabilityScore(footPolygonInWorld.getCentroid().getX(), footPolygonInWorld.getCentroid().getY()) > minTraversability))

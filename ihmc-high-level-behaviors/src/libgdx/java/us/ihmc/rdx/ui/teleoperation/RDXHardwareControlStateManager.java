@@ -1,14 +1,15 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.EnableHPUCommandMessage;
-import controller_msgs.msg.dds.EnableHPUStatusMessage;
+import controller_msgs.msg.dds.EStopMasterGainCommandMessage;
+import controller_msgs.msg.dds.EStopMasterGainStatusMessage;
 import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.MasterGainScaleControllerCommandMessage;
-import controller_msgs.msg.dds.MasterGainScaleControllerStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
+import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXArmManager;
@@ -28,24 +30,20 @@ public class RDXHardwareControlStateManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
-   private final Timer hpuConnectedTimer = new Timer();
-   private final Timer robotServoedConnectedTimer = new Timer();
-   private boolean isRobotServoed = false;
+   private final Timer estopMasterGainStatusTimer = new Timer();
+   private final ImBoolean estop = new ImBoolean();
+   private final ImDouble masterGain = new ImDouble();
    private HighLevelControllerName currentHighLevelState = null;
 
    public RDXHardwareControlStateManager(CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
 
-      communicationHelper.subscribeToControllerViaVolatileCallback(MasterGainScaleControllerStatusMessage.class, message ->
+      communicationHelper.subscribeToControllerViaVolatileCallback(EStopMasterGainStatusMessage.class, message ->
       {
-         robotServoedConnectedTimer.reset();
-         isRobotServoed = message.getIsRobotServoed();
-      });
-      communicationHelper.subscribeToControllerViaVolatileCallback(MasterGainScaleControllerStatusMessage.class, message ->
-      {
-         robotServoedConnectedTimer.reset();
-         isRobotServoed = message.getIsRobotServoed();
+         estopMasterGainStatusTimer.reset();
+         estop.set(message.getEstop());
+         masterGain.set(message.getMasterGain());
       });
       communicationHelper.subscribeToControllerViaVolatileCallback(HighLevelStateChangeStatusMessage.class, message ->
       {  // TODO: Create a HighLevelStateStatusMessage that is periodically published, so we can always know current state
@@ -55,25 +53,29 @@ public class RDXHardwareControlStateManager
 
    public void renderImGuiWidgets(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
    {
-      if (robotServoedConnectedTimer.isRunning(1.0))
+      if (estopMasterGainStatusTimer.isRunning(1.0))
       {
-         if (isRobotServoed)
+         ImGui.pushStyleColor(ImGuiCol.CheckMark, ImGuiTools.DARK_RED);
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
+         boolean changed = ImGui.checkbox(labels.get("SOFT-E-STOP"), estop);
+         ImGui.sameLine();
+         ImGui.setNextItemWidth(ImGui.getColumnWidth());
+         changed |= ImGuiTools.sliderDouble(labels.getHidden("Master Gain"), masterGain, 0.0, 1.0, "Master Gain: %.2f");
+         boolean servoRobot = ImGui.button(labels.get("Servo Robot"));
+         changed |= servoRobot;
+         ImGui.sameLine();
+         boolean unservoSlowly = ImGui.button(labels.get("Unservo Slowly"));
+         changed |= unservoSlowly;
+         ImGui.popStyleColor(2);
+
+         if (changed)
          {
-            if (ImGui.button(labels.get("Unservo Slowly")))
-            {
-               MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
-               masterGainScaleControllerCommandMessage.setUnservoSlowly(true);
-               communicationHelper.publishToController(masterGainScaleControllerCommandMessage);
-            }
-         }
-         else
-         {
-            if (ImGui.button(labels.get("Servo Robot")))
-            {
-               MasterGainScaleControllerCommandMessage masterGainScaleControllerCommandMessage = new MasterGainScaleControllerCommandMessage();
-               masterGainScaleControllerCommandMessage.setServoRobot(true);
-               communicationHelper.publishToController(masterGainScaleControllerCommandMessage);
-            }
+            EStopMasterGainCommandMessage message = new EStopMasterGainCommandMessage();
+            message.setEstop(estop.get());
+            message.setMasterGain(masterGain.get());
+            message.setServoRobot(servoRobot);
+            message.setUnservoSlowly(unservoSlowly);
+            communicationHelper.publishToController(message);
          }
       }
 

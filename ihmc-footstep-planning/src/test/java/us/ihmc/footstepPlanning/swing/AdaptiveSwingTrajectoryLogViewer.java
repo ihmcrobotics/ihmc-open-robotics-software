@@ -10,9 +10,9 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.javafx.IdMappedColorFunction;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -41,7 +41,7 @@ public class AdaptiveSwingTrajectoryLogViewer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(log.getRequestPacket().getHeightMapMessage());
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(log.getRequestPacket().getTerrainMapMessage());
 
       Graphics3DObject regionsGraphic = new Graphics3DObject();
       IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;
@@ -68,7 +68,7 @@ public class AdaptiveSwingTrajectoryLogViewer
       FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(log.getStatusPacket().getFootstepDataList());
       SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
 
-      adaptiveSwingTrajectoryCalculator.setHeightMapData(heightMapData);
+      adaptiveSwingTrajectoryCalculator.setTerrainMapData(terrainMapData);
       adaptiveSwingTrajectoryCalculator.setSwingParameters(initialFootPoses, footstepPlan);
       scs.cropBuffer();
    }

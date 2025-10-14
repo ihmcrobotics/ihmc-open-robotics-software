@@ -47,7 +47,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
                                  DefaultFootstepPlannerParametersReadOnly parameters,
                                  EnvironmentHandler environmentHandler)
    {
-      this(footPolygonsInSoleFrame, parameters, null, environmentHandler,null, null);
+      this(footPolygonsInSoleFrame, parameters, null, environmentHandler, null, null);
    }
 
    // Call this constructor only for testing
@@ -138,11 +138,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected FootstepSnapData computeSnapTransform(DiscreteFootstep footstepToSnap, DiscreteFootstep stanceStep)
    {
-      return heightMapSnapper.computeSnapData(footstepToSnap,
-                                              footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()),
-                                              environmentHandler,
-                                              parameters.getHeightMapSnapThreshold(),
-                                              parameters.getMinSurfaceIncline());
+      return heightMapSnapper.computeSnapData(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), environmentHandler);
    }
 
    /**
@@ -157,11 +153,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
-      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle,
-                                                  environmentHandler,
-                                                  snapData,
-                                                  parameters.getHeightMapSnapThreshold(),
-                                                  parameters.getMinSurfaceIncline());
+      heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle, environmentHandler, snapData);
 
       if (stanceStep != null && stanceStep.hasSnapData())
       {
@@ -207,7 +199,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snappedFootPolygonInWorld.applyTransform(transformToFootPose, false);
 
       heightMapSnapper.computeFootPointsInTheEnvironment(snappedFootPolygonInWorld,
-                                                         environmentHandler.getHeightMapData(),
                                                          environmentHandler.getTerrainMapData(),
                                                          parameters.getHeightMapSnapThreshold(),
                                                          parameters.getMinSurfaceIncline(),
@@ -215,11 +206,11 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
                                                          footPointsInEnvironment);
 
       List<Point2D> footPointsInFoot = footPointsInEnvironment.stream().map(point ->
-            {
-               Point3D transformedPoint = new Point3D(point);
-               transformedPoint.applyInverseTransform(transformToFootPose);
-               return new Point2D(transformedPoint);
-            }).toList();
+                                                                            {
+                                                                               Point3D transformedPoint = new Point3D(point);
+                                                                               transformedPoint.applyInverseTransform(transformToFootPose);
+                                                                               return new Point2D(transformedPoint);
+                                                                            }).toList();
 
       ConvexPolygon2D croppedFoothold = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPointsInFoot));
 
@@ -257,7 +248,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       else
          snapData.getCroppedFoothold().clear();
    }
-
 
    private final RigidBodyTransform transform1 = new RigidBodyTransform();
    private final RigidBodyTransform transform2 = new RigidBodyTransform();
@@ -349,7 +339,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       points.add(new Point2D(-0.06449968883916736, -0.04399883876767927)); //34
       points.add(new Point2D(-0.10749957332893317, -0.04749840769087523)); //35
 
-      ConvexPolygon2D polygon2D  = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
+      ConvexPolygon2D polygon2D = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
 
       for (Point2D point : points)
       {
