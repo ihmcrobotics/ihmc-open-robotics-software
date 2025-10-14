@@ -11,6 +11,8 @@ import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.ROS2ImageSensors;
 import us.ihmc.perception.GpuMappingThread;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
@@ -34,6 +36,7 @@ public class ContinuousHikingProcess
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final GpuMappingThread gpuMappingThread;
+   private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
@@ -57,20 +60,23 @@ public class ContinuousHikingProcess
                                                                                                                    .getSteppingCameraTransform());
 
       // This is for the height map, it expects the queue of images that we get from the sensors
-      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      ros2ImageSensors.registerImageQueueForRealsense(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      ros2ImageSensors.registerImageQueueForZED(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+      BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+      ros2ImageSensors.registerImageQueueForRealsense(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      ros2ImageSensors.registerImageQueueForZED(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       // Class's that perform the real work of the process... the good stuff
       {
          gpuMappingThread = new GpuMappingThread(ros2Node,
-                                                         ros2SyncedRobot,
-                                                         robotCollisionModel,
-                                                         rawImageCollection,
-                                                         controllerFootstepQueueMonitor,
-                                                         activeMappingParameterToolBox.getHeightMapParameters(),
-                                                         activeMappingParameterToolBox.getTerrainMapParameters(),
-                                                         activeMappingParameterToolBox.getDepthImageFilteringParameters());
+                                                 ros2SyncedRobot,
+                                                 robotCollisionModel,
+                                                 rawImageCollectionRealsnese,
+                                                 controllerFootstepQueueMonitor,
+                                                 activeMappingParameterToolBox.getHeightMapParameters(),
+                                                 activeMappingParameterToolBox.getTerrainMapParameters(),
+                                                 activeMappingParameterToolBox.getDepthImageFilteringParameters());
+
+         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
@@ -82,6 +88,7 @@ public class ContinuousHikingProcess
 
       // Custom thread getting started
       gpuMappingThread.startRepeating();
+      rapidPlanarRegionsExtractionThread.startRepeating();
 
       // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
       ThreadFactory threadFactorySyncedRobot = new ThreadFactoryBuilder().setNameFormat(SYNCED_ROBOT_THREAD).build();
@@ -109,6 +116,7 @@ public class ContinuousHikingProcess
    public void destroy()
    {
       gpuMappingThread.blockingKill();
+      rapidPlanarRegionsExtractionThread.kill();
       continuousPlanningStateMachine.destroy();
    }
 }
