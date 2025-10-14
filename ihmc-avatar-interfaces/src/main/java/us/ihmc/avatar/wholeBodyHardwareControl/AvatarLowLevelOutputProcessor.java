@@ -168,4 +168,9 @@ public class AvatarLowLevelOutputProcessor
    {
       return masterGain;
    }
+
+   public void setMasterGain(double masterGain)
+   {
+      this.masterGain.set(masterGain);
+   }
 }
