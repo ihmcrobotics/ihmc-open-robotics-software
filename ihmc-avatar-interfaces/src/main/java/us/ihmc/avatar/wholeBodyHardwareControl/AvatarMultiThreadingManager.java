@@ -463,4 +463,9 @@ public class AvatarMultiThreadingManager
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), rootRegistry);
    }
+
+   public AvatarLowLevelOutputProcessor getLowLevelOutputProcessor()
+   {
+      return lowLevelOutputProcessor;
+   }
 }
