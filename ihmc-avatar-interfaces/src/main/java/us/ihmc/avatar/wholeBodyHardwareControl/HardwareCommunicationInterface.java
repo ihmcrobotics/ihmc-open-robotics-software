@@ -31,7 +31,9 @@ public interface HardwareCommunicationInterface
    {
    }
 
-   void setSoftEStop(boolean softEStop);
+   default void setSoftEStop(boolean softEStop)
+   {
+   }
 
    boolean hasRobotFaulted();
 
