@@ -20,7 +20,6 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequ
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloTreeNode;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.gpuMapping.HeatMapGenerator;
 import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,9 +51,6 @@ public class TerrainPlanningDebugger
                                                                        heightMapColorImage.rows(),
                                                                        contactHeatMapColorImage.cols(),
                                                                        contactHeatMapColorImage.rows()));
-
-//   private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
-   private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
    private ROS2Publisher<FootstepDataListMessage> plannedFootstesPublisherForUI;
    private ROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
