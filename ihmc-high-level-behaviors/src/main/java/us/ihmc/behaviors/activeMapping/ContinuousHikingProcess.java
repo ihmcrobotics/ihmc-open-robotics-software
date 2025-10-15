@@ -80,7 +80,7 @@ public class ContinuousHikingProcess
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
-         if (!openCLAvailable)
+         if (openCLAvailable)
             rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
@@ -93,7 +93,7 @@ public class ContinuousHikingProcess
 
       // Custom thread getting started
       gpuMappingThread.startRepeating();
-      if (!openCLAvailable)
+      if (openCLAvailable)
          rapidPlanarRegionsExtractionThread.startRepeating();
 
       // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
@@ -122,7 +122,7 @@ public class ContinuousHikingProcess
    public void destroy()
    {
       gpuMappingThread.blockingKill();
-      if (!openCLAvailable)
+      if (openCLAvailable)
          rapidPlanarRegionsExtractionThread.kill();
       continuousPlanningStateMachine.destroy();
    }
