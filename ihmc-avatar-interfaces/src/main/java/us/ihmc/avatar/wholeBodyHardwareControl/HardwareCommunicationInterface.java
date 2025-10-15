@@ -24,9 +24,7 @@ public interface HardwareCommunicationInterface
    void destroy();
 
    boolean hasReceivedFirstState();
-   
-   /** Allows to set master gain. TODO: Review this. Maybe a Consumer<Double> instead? */
-   void setLowLevelOutputProcessor(AvatarLowLevelOutputProcessor lowLevelOutputProcessor);
+
 
    boolean hasNewStateMessage();
 
