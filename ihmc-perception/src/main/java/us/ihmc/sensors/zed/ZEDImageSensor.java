@@ -16,6 +16,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.sensors.ImageSensor;
+import us.ihmc.sensors.OdometrySensor;
 import us.ihmc.zed.SL_CalibrationParameters;
 import us.ihmc.zed.SL_InitParameters;
 import us.ihmc.zed.SL_PositionalTrackingParameters;
@@ -28,7 +29,7 @@ import java.time.Instant;
 
 import static us.ihmc.zed.global.zed.*;
 
-public class ZEDImageSensor extends ImageSensor
+public class ZEDImageSensor extends ImageSensor implements OdometrySensor
 {
    static
    {
@@ -77,9 +78,11 @@ public class ZEDImageSensor extends ImageSensor
    protected final SL_InitParameters zedInitParameters = new SL_InitParameters();
    protected final SL_RuntimeParameters zedRuntimeParameters = new SL_RuntimeParameters();
 
-   private boolean positionalTrackingEnabled = false;
+   private boolean positionalTrackingEnabled = true;
    private final MutableReferenceFrame trackedSensorFrame;
+   private final Quaternion euclidImuRotation = new Quaternion();
    private final SL_Quaternion sensorRotation = new SL_Quaternion();
+   private final SL_Quaternion imuRotation = new SL_Quaternion();
    private final SL_Vector3 sensorTranslation = new SL_Vector3();
 
    public ZEDImageSensor(int cameraID, ZEDModelData zedModel, int slInputType, int slDepthMode)
@@ -307,11 +310,13 @@ public class ZEDImageSensor extends ImageSensor
          if (positionalTrackingEnabled)
          {
             sl_get_position(cameraID, sensorRotation, sensorTranslation, SL_REFERENCE_FRAME_WORLD);
-
             Quaternion euclidRotation = new Quaternion(sensorRotation.x(), sensorRotation.y(), sensorRotation.z(), sensorRotation.w());
             Vector3D euclidTranslation = new Vector3D(sensorTranslation.x(), sensorTranslation.y(), sensorTranslation.z());
             if (!euclidRotation.containsNaN() && !euclidTranslation.containsNaN())
                trackedSensorFrame.update(transformToWorld -> transformToWorld.set(euclidRotation, euclidTranslation));
+
+            sl_get_imu_orientation(cameraID, imuRotation, SL_REFERENCE_FRAME_WORLD);
+            euclidImuRotation.set(imuRotation.x(), imuRotation.y(), imuRotation.z(), imuRotation.w());
          }
 
          // Retrieve the grabbed depth image
@@ -420,6 +425,11 @@ public class ZEDImageSensor extends ImageSensor
    public ReferenceFrame getTrackedSensorFrame()
    {
       return trackedSensorFrame.getReferenceFrame();
+   }
+
+   public Quaternion getImuOrientation()
+   {
+      return euclidImuRotation;
    }
 
    public int getCameraID()

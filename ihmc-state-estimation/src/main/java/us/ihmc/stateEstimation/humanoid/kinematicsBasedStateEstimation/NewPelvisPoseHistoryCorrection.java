@@ -268,7 +268,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             tempRotation.set(tempTransform.getRotation());
 
             // If we are in the deadband just return
-
             if (offsetErrorInterpolator.isWithinDeadband(tempTranslation, tempRotation))
             {
                return;

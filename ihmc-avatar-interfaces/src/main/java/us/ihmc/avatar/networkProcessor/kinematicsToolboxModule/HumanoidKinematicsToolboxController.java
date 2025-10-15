@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.StabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.ConcurrentCopier;
@@ -260,10 +259,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
          isHandInSupport.put(robotSide, new YoBoolean("is" + side + "HandInSupport", registry));
          initialHandPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandInitial", worldFrame, registry));
+         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
+         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -421,8 +420,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
-      getSolution().setLeftFootInContact(true);
-      getSolution().setRightFootInContact(true);
+      getSolution().getLeftFootStatus().setFootInContact(true);
+      getSolution().getRightFootStatus().setFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -533,9 +532,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       super.updateInternal();
+
+      // Update anchor base (chest) pose - only needed for status message
+      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
+      getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
+      getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
+
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
-         // update actuation limits based on current configuration
+         // Update actuation limits based on current configuration
          wholeBodyContactState.updateActuationConstraintVector();
          wholeBodyContactState.updateActuationConstraintMatrix();
          multiContactRegionCalculator.updateContactState(wholeBodyContactState);
@@ -871,8 +876,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
          isFootInSupport.get(side).set(value);
-         getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
-         getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+         getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+         getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());

@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -15,6 +16,7 @@ import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.RDXFocusBasedCamera;
@@ -27,6 +29,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -45,6 +48,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final ImBoolean showHistory = new ImBoolean(false);
+   private final ImBoolean showCameraOdometry = new ImBoolean(false);
    private RDXFocusBasedCamera cameraForTracking = null;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
@@ -59,6 +63,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
    private final ConcurrentLinkedQueue<MinimalFootstep> completedFootstepThreadBarrier = new ConcurrentLinkedQueue<>();
    private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
+   private final RigidBodyTransform cameraOdometryTransform = new RigidBodyTransform();
+   private RDXReferenceFrameGraphic cameraOdometryGraphics;
    private final ArrayList<RDXInteractableFrameModel> interactableFrameModels = new ArrayList<>();
 
    public RDXROS2RobotVisualizer(ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
@@ -108,6 +114,10 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
          if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
             completedFootstepThreadBarrier.add(new MinimalFootstep(footstepStatusMessage));
       });
+
+      cameraOdometryGraphics = new RDXReferenceFrameGraphic(0.5, Color.FOREST);
+      ros2.subscribeViaVolatileCallback(StateEstimatorAPI.getTopic(StampedOdometryPacket.class, syncedRobot.getRobotModel().getSimpleRobotName()), odometryPacket ->
+            cameraOdometryTransform.set(odometryPacket.getPose()));
    }
 
    @Override
@@ -168,6 +178,11 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       }
 
       footstepHistoryGraphic.update();
+
+      if (showCameraOdometry.get())
+      {
+         cameraOdometryGraphics.updateFromTransform(cameraOdometryTransform);
+      }
    }
 
    @Override
@@ -215,6 +230,8 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
          footstepHistory.clear();
          footstepHistoryGraphic.clear();
       }
+
+      ImGui.checkbox(labels.get("Show Camera Odometry"), showCameraOdometry);
    }
 
    @Override
@@ -229,6 +246,11 @@ public class RDXROS2RobotVisualizer extends RDXROS2SingleTopicVisualizer<RobotCo
       {
          pelvisPoseHistoryGraphic.getRenderables(renderables, pool);
          footstepHistoryGraphic.getRenderables(renderables, pool);
+      }
+
+      if (showCameraOdometry.get())
+      {
+         cameraOdometryGraphics.getRenderables(renderables, pool);
       }
    }
 

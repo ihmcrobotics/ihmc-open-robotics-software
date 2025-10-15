@@ -1,5 +1,7 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
+import ihmc_common_msgs.msg.dds.StampedOdometryPacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
@@ -18,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Joyst
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -25,6 +28,9 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
+import us.ihmc.humanoidRobotics.communication.subscribers.CameraOdometryListener;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
+import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
@@ -98,6 +104,9 @@ public class AvatarMultiThreadingFactory
    // Output processor
    private final AvatarLowLevelOutputProcessor lowLevelOutputProcessor;
 
+   // The external estimator corrector
+   private final PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
+
    // The remaining constructor arguments
    private final MonotonicTime period;
    private final double masterThreadDt;
@@ -148,6 +157,16 @@ public class AvatarMultiThreadingFactory
 
       estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
       controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
+
+      // Listen to camera odometry information and register to YoServer for debugging
+      estimatorRealtimeROS2Node.createSubscription(
+            StateEstimatorAPI.getTopic(StampedOdometryPacket.class, robotModel.getSimpleRobotName().toLowerCase()),
+            new CameraOdometryListener(rootRegistry));
+
+      // Setup the communication with the external pelvis corrector
+      pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(estimatorRealtimeROS2Node, robotModel.getSimpleRobotName().toLowerCase());
+      estimatorRealtimeROS2Node.createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotModel.getSimpleRobotName().toLowerCase()),
+                                                   s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
 
       // Set up low-level output processor
       lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), masterThreadDt, registry);
@@ -253,6 +272,7 @@ public class AvatarMultiThreadingFactory
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
 //      avatarEstimatorThreadFactory.setYoGraphicsListRegistry(sensorReaderFactory.getYoGraphicsListRegistry()); //TODO do we need this?
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(estimatorContextDataFactory);
+      avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
       avatarEstimatorThreadFactory.setGravity(GRAVITY);
       //      if (secondaryEstimatorFactory != null)
       //         avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryEstimatorFactory);
