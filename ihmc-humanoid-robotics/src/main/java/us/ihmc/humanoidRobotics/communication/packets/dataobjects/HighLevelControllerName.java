@@ -34,14 +34,10 @@ public enum HighLevelControllerName
    @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC fast walking algorithms")
    QUICKSTER,
    EXTERNAL_TRANSITION_STATE,
-   @RosEnumValueDocumentation(documentation = "RL control state")
+   EXTERNAL,
    RL_CONTROL,
-   @RosEnumValueDocumentation(documentation = "Smooth transition state from RL to either freeze or stand prep.")
    EXIT_RL,
-   @RosEnumValueDocumentation(documentation = "Smooth transition state from stand prep to RL.")
-   RL_TRANSITION_STATE,
-   EXTERNAL;
-
+   RL_TRANSITION_STATE;
 
    public static final HighLevelControllerName[] values = values();
 
