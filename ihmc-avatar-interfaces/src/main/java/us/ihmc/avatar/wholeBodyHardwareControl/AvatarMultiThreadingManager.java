@@ -22,6 +22,7 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -465,9 +466,14 @@ public class AvatarMultiThreadingManager
       updateYoVariableServer();
    }
 
-   public AvatarEstimatorThread getEstimatorThread()
+   public YoRegistry getEstimatorRegistry()
    {
-      return estimatorThread;
+      return estimatorThread.getYoRegistry();
+   }
+
+   public YoGraphicGroupDefinition getEstimatorYoGraphics()
+   {
+      return estimatorThread.getSCS2YoGraphics();
    }
 
    public RealtimeROS2Node getEstimatorROS2Node()
