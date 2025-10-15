@@ -53,7 +53,7 @@ public class TerrainPlanningDebugger
                                                                        contactHeatMapColorImage.cols(),
                                                                        contactHeatMapColorImage.rows()));
 
-   private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
+//   private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
    private ROS2Publisher<FootstepDataListMessage> plannedFootstesPublisherForUI;

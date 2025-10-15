@@ -36,7 +36,7 @@ public class ContinuousHikingProcess
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final GpuMappingThread gpuMappingThread;
-   private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
+//   private final RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
@@ -76,7 +76,7 @@ public class ContinuousHikingProcess
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
-         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
+//         rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
@@ -88,7 +88,7 @@ public class ContinuousHikingProcess
 
       // Custom thread getting started
       gpuMappingThread.startRepeating();
-      rapidPlanarRegionsExtractionThread.startRepeating();
+//      rapidPlanarRegionsExtractionThread.startRepeating();
 
       // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
       ThreadFactory threadFactorySyncedRobot = new ThreadFactoryBuilder().setNameFormat(SYNCED_ROBOT_THREAD).build();
@@ -116,7 +116,7 @@ public class ContinuousHikingProcess
    public void destroy()
    {
       gpuMappingThread.blockingKill();
-      rapidPlanarRegionsExtractionThread.kill();
+//      rapidPlanarRegionsExtractionThread.kill();
       continuousPlanningStateMachine.destroy();
    }
 }
