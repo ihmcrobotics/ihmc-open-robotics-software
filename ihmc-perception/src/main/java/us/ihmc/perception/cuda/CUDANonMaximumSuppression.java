@@ -231,6 +231,8 @@ public class CUDANonMaximumSuppression implements AutoCloseable
            IntPointer includedCount = new IntPointer())
       {
          CUDATools.checkCUDAError(cudaMallocHost(includedCount, 1));
+         includedCount.put(0);
+
          CUDATools.mallocAsync(includedIndices, boxCount, stream);
 
          fastReductionKernel.withPointer(inclusionMatrix)
@@ -260,6 +262,8 @@ public class CUDANonMaximumSuppression implements AutoCloseable
            IntPointer includedCount = new IntPointer())
       {
          CUDATools.checkCUDAError(cudaMallocHost(includedCount, 1));
+         includedCount.put(0);
+
          CUDATools.mallocAsync(includedIndices, boxCount, stream);
 
          slowReductionKernel.withPointer(inclusionMatrix)
