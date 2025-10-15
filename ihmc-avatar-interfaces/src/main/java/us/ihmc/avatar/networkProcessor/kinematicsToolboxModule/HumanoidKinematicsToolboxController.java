@@ -3,7 +3,6 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxFootStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -48,7 +47,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -105,9 +103,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * reachable.
     */
    private final SideDependentList<YoFramePose3D> initialFootPoses = new SideDependentList<>();
-   private final SideDependentList<ReferenceFrame> initialFootFrame = new SideDependentList<>();
-   private final ReferenceFrame referencePelvisFrame;
-   private final RigidBodyTransform referencePelvisPose = new RigidBodyTransform();
    /**
     * Updated during the initialization phase with {@link CapturabilityBasedStatus}, this set of two
     * {@link YoBoolean}s is used to know which hand is currently used for support in the walking controller.
@@ -268,10 +263,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          initialHandPositions.put(robotSide, new YoFramePoint3D(sidePrefix + "HandInitial", worldFrame, registry));
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
-         initialFootFrame.put(robotSide, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                initialFootPoses.get(robotSide)));
       }
-      referencePelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), referencePelvisPose);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -601,13 +593,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       double initialFootHeight = initialFootPoses.get(robotSide).getTranslationZ();
       initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       initialFootPoses.get(robotSide).getTranslation().setZ(initialFootHeight);
-      initialFootFrame.get(robotSide).update();
-   }
-
-   public void updateInitialPelvisPose()
-   {
-      referencePelvisPose.set(desiredFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToRoot());
-      referencePelvisFrame.update();
    }
 
    private final Point3D tempMidFeet = new Point3D();
@@ -890,9 +875,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
-         isFootInSupport.get(side).set(value);
-         getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
-         getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+      isFootInSupport.get(side).set(value);
+      getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+      getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());
