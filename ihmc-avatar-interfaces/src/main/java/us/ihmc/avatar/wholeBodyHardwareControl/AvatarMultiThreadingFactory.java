@@ -38,7 +38,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -162,26 +161,6 @@ public class AvatarMultiThreadingFactory
                                                            lowLevelOutputProcessor,
                                                            standPrepStateFactory,
                                                            freezeStateFactory);
-   }
-
-   public void servoRobot()
-   {
-      lowLevelOutputProcessor.servoRobot();
-   }
-
-   public void setServoDuration(double duration)
-   {
-      lowLevelOutputProcessor.setServoDuration(duration);
-   }
-
-   public void setSoftEStop(boolean softEStop)
-   {
-      hardwareCommunicationInterface.setSoftEStop(softEStop);
-   }
-
-   public void setListenToBlockCondition(boolean listenToBlockCondition)
-   {
-      threadingManager.get().setListenToBlockingCondition(listenToBlockCondition);
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
@@ -533,40 +512,5 @@ public class AvatarMultiThreadingFactory
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
-   }
-
-   public YoRegistry getEstimatorRegistry()
-   {
-      return estimatorThread.get().getYoRegistry();
-   }
-
-   public YoGraphicGroupDefinition getEstimatorYoGraphics()
-   {
-      return estimatorThread.get().getSCS2YoGraphics();
-   }
-
-   public YoRegistry getControllerRegistry()
-   {
-      return controllerThread.get().getYoVariableRegistry();
-   }
-
-   public YoGraphicGroupDefinition getControllerYoGraphics()
-   {
-      return controllerThread.get().getSCS2YoGraphics();
-   }
-
-   public YoRegistry getStepGeneratorRegistry()
-   {
-      return stepGeneratorThread.get().getYoVariableRegistry();
-   }
-
-   public YoGraphicGroupDefinition getStepGeneratorYoGraphics()
-   {
-      return stepGeneratorThread.get().getSCS2YoGraphics();
-   }
-
-   public AvatarMultiThreadingManager getThreadingManager()
-   {
-      return threadingManager.get();
    }
 }

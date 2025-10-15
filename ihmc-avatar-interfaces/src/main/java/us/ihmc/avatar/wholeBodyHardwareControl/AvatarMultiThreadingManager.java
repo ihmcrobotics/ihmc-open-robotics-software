@@ -465,6 +465,11 @@ public class AvatarMultiThreadingManager
       updateYoVariableServer();
    }
 
+   public AvatarEstimatorThread getEstimatorThread()
+   {
+      return estimatorThread;
+   }
+
    public RealtimeROS2Node getEstimatorROS2Node()
    {
       return estimatorROS2Node;
@@ -511,6 +516,11 @@ public class AvatarMultiThreadingManager
          return;
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), rootRegistry);
+   }
+
+   public HardwareCommunicationInterface getHardwareCommunicationInterface()
+   {
+      return hardwareCommunicationInterface;
    }
 
    public AvatarLowLevelOutputProcessor getLowLevelOutputProcessor()
