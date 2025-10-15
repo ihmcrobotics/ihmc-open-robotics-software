@@ -25,7 +25,13 @@ public interface HardwareCommunicationInterface
 
    boolean hasReceivedFirstState();
 
+   boolean hasNewStateMessage();
+
    default void addSoftEStopListener(YoVariableChangedListener listener)
+   {
+   }
+
+   default void setSoftEStop(boolean softEStop)
    {
    }
 
