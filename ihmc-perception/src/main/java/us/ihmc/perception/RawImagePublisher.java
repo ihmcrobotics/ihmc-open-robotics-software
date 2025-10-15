@@ -2,19 +2,19 @@ package us.ihmc.perception;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 import perception_msgs.msg.dds.ImageMessage;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.perception.tools.RawImageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -26,6 +26,7 @@ public class RawImagePublisher implements AutoCloseable
    private final ImageMessage imageMessage;
    private final Image ros2Image;
 
+   private double publishScale = 1.0;
    private boolean destroyed = false;
 
    public RawImagePublisher(ROS2Node ros2Node)
@@ -33,6 +34,18 @@ public class RawImagePublisher implements AutoCloseable
       ros2Helper = new ROS2Helper(ros2Node);
       imageMessage = new ImageMessage();
       ros2Image = new Image();
+   }
+
+   public RawImagePublisher(ROS2Node ros2Node, double publishScale)
+   {
+      this(ros2Node);
+
+      this.publishScale = publishScale;
+   }
+
+   public void setPublishScale(double publishScale)
+   {
+      this.publishScale = publishScale;
    }
 
    public void publishImage(ROS2Topic<? extends Packet<?>> imageTopic, RawImage imageToPublish)
@@ -66,21 +79,29 @@ public class RawImagePublisher implements AutoCloseable
    private void publishAsImageMessage(ROS2Topic<ImageMessage> imageTopic, RawImage imageToPublish)
    {
       RawImage imageToCompress = imageToPublish;
+      RawImage scaledImage = null;
+      RawImage colorConvertedImage = null;
+
+      if (publishScale != 1.0)
+      {
+         scaledImage = RawImageTools.scale(imageToCompress, publishScale, opencv_imgproc.INTER_NEAREST);
+         imageToCompress = scaledImage;
+      }
+
       BytePointer compressedImage;
       CompressionType compressionType;
 
-      switch (imageToPublish.getPixelFormat())
+      switch (imageToCompress.getPixelFormat())
       {
          case GRAY16:
             compressedImage = new BytePointer();
-            OpenCVTools.compressImagePNG(imageToPublish.getCpuImageMat(), compressedImage);
+            OpenCVTools.compressImagePNG(imageToCompress.getCpuImageMat(), compressedImage);
             compressionType = PNG;
             break;
 
          case BGRA8: // Convert to BGR8 first
-            GpuMat bgr8Image = new GpuMat();
-            opencv_cudaimgproc.cvtColor(imageToCompress.getGpuImageMat(), bgr8Image, opencv_imgproc.COLOR_BGRA2BGR);
-            imageToCompress = imageToPublish.replaceImage(bgr8Image, PixelFormat.BGR8);
+            colorConvertedImage = RawImageTools.convertColor(imageToCompress, PixelFormat.BGR8);
+            imageToCompress = colorConvertedImage;
          case BGR8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             OpenCVTools.compressImagePNG(imageToCompress.getCpuImageMat(), compressedImage);
@@ -88,9 +109,8 @@ public class RawImagePublisher implements AutoCloseable
             break;
 
          case RGBA8: // Convert to RGB8 first
-            GpuMat rgb8Image = new GpuMat();
-            opencv_cudaimgproc.cvtColor(imageToCompress.getGpuImageMat(), rgb8Image, opencv_imgproc.COLOR_RGBA2RGB);
-            imageToCompress = imageToPublish.replaceImage(rgb8Image, PixelFormat.RGB8);
+            colorConvertedImage = RawImageTools.convertColor(imageToCompress, PixelFormat.RGB8);
+            imageToCompress = colorConvertedImage;
          case RGB8:
             compressedImage = new BytePointer(OpenCVTools.dataSize(imageToCompress.getGpuImageMat()));
             OpenCVTools.compressImagePNG(imageToCompress.getCpuImageMat(), compressedImage);
@@ -112,8 +132,10 @@ public class RawImagePublisher implements AutoCloseable
 
       // Close stuff
       compressedImage.close();
-      if (imageToCompress != imageToPublish) // Only release the imageToCompress if it's a newly created RawImage
-         imageToCompress.release();
+      if (scaledImage != null)
+         scaledImage.release();
+      if (colorConvertedImage != null)
+         colorConvertedImage.release();
    }
 
    private void publishAsROS2Image(ROS2Topic<Image> imageTopic, RawImage imageToPublish, ReferenceFrame sensorFrame)
@@ -121,11 +143,24 @@ public class RawImagePublisher implements AutoCloseable
       if (sensorFrame == null)
          throw new IllegalArgumentException("A sensor frame must be provided to publish ROS 2 Image messages");
 
+      RawImage scaledImage = null;
+
+      // Scale the image if needed
+      if (publishScale != 1.0)
+      {
+         scaledImage = RawImageTools.scale(imageToPublish, publishScale);
+         imageToPublish = scaledImage;
+      }
+
       // Pack the Image message
       PerceptionMessageTools.packImageMessage(imageToPublish, sensorFrame.getName(), ros2Image);
 
       // Publish the image
       ros2Helper.publish(imageTopic, ros2Image);
+
+      // Close stuff
+      if (scaledImage != null)
+         scaledImage.release();
    }
 
    private void publishCameraInfo(ROS2Topic<CameraInfo> cameraInfoTopic, RawImage image, ReferenceFrame sensorFrame)
@@ -133,9 +168,14 @@ public class RawImagePublisher implements AutoCloseable
       if (sensorFrame == null)
          throw new IllegalArgumentException("A sensor frame must be provided to publish ROS 2 CameraInfo messages");
 
+      // Get the correct intrinsics
+      CameraIntrinsics intrinsics = image.getIntrinsicsCopy();
+      if (publishScale != 1.0)
+         intrinsics = RawImageTools.scale(intrinsics, publishScale);
+
       // Create and pack a CameraInfo message
       CameraInfo cameraInfo = new CameraInfo();
-      PerceptionMessageTools.packCameraInfo(image, sensorFrame.getName(), cameraInfo);
+      PerceptionMessageTools.packCameraInfo(image.getAcquisitionTime(), intrinsics, image.getTransformToWorld(), sensorFrame.getName(), cameraInfo);
 
       // Publish the message
       ros2Helper.publish(cameraInfoTopic, cameraInfo);

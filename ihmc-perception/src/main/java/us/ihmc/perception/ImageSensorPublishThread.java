@@ -55,7 +55,12 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
 
    public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey)
    {
-      publisherMap.put(new AsyncImagePublisher(ros2Node, topicToPublishOn), imageKey);
+      addTopic(topicToPublishOn, imageKey, 1.0);
+   }
+
+   public void addTopic(ROS2Topic<? extends Packet<?>> topicToPublishOn, int imageKey, double scale)
+   {
+      publisherMap.put(new AsyncImagePublisher(ros2Node, topicToPublishOn, scale), imageKey);
    }
 
    @Override
@@ -198,10 +203,10 @@ public class ImageSensorPublishThread extends RepeatingTaskThread
       private final ExecutorService publishExecutor;
       private Future<?> publishFuture;
 
-      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends Packet<?>> topic)
+      private AsyncImagePublisher(ROS2Node ros2Node, ROS2Topic<? extends Packet<?>> topic, double scale)
       {
          this.topic = topic;
-         publisher = new RawImagePublisher(ros2Node);
+         publisher = new RawImagePublisher(ros2Node, scale);
          publishExecutor = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(topic.getName() + getClass().getSimpleName()));
       }
 
