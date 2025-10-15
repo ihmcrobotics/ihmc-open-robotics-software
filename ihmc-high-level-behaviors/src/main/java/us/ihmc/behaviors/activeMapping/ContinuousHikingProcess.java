@@ -37,7 +37,7 @@ public class ContinuousHikingProcess
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
    private final GpuMappingThread gpuMappingThread;
 
-   private final boolean runningOnHardware; // Should be false on robot
+   private final boolean openCLAvailable; // Should be false on robot
    private RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread = null;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
@@ -45,9 +45,9 @@ public class ContinuousHikingProcess
                                   ROS2Node ros2Node,
                                   ROS2ImageSensors ros2ImageSensors,
                                   ROS2SyncedRobotModel ros2SyncedRobot,
-                                  boolean runningOnHardware)
+                                  boolean openCLAvailable)
    {
-      this.runningOnHardware = runningOnHardware;
+      this.openCLAvailable = openCLAvailable;
       // Create a bunch of overhead for the ROS2 communication and the robot
       ros2SyncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
@@ -80,7 +80,7 @@ public class ContinuousHikingProcess
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
-         if (!runningOnHardware)
+         if (!openCLAvailable)
             rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
 
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
@@ -93,7 +93,7 @@ public class ContinuousHikingProcess
 
       // Custom thread getting started
       gpuMappingThread.startRepeating();
-      if (!runningOnHardware)
+      if (!openCLAvailable)
          rapidPlanarRegionsExtractionThread.startRepeating();
 
       // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
@@ -122,7 +122,7 @@ public class ContinuousHikingProcess
    public void destroy()
    {
       gpuMappingThread.blockingKill();
-      if (!runningOnHardware)
+      if (!openCLAvailable)
          rapidPlanarRegionsExtractionThread.kill();
       continuousPlanningStateMachine.destroy();
    }
