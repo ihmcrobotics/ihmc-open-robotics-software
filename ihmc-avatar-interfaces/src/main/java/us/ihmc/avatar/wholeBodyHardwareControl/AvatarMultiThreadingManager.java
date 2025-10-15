@@ -22,7 +22,9 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,6 +49,8 @@ public class AvatarMultiThreadingManager
    private final YoVariableServer yoVariableServer;
 
    private final YoBoolean isPaused = new YoBoolean("isPaused", registry);
+   private final YoBoolean listenToBlockingCondition = new YoBoolean("listenToBlockingCondition", registry);
+   private BooleanProvider blockingProvider;
 
    private final double masterThreadDt;
 
@@ -310,6 +314,16 @@ public class AvatarMultiThreadingManager
       return ikStreamingTask;
    }
 
+   public void setListenToBlockingCondition(boolean listenToBlockingCondition)
+   {
+      this.listenToBlockingCondition.set(listenToBlockingCondition);
+   }
+
+   public void setBlockingProvider(BooleanProvider blockingProvider)
+   {
+      this.blockingProvider = blockingProvider;
+   }
+
    public void start()
    {
       estimatorROS2Node.spin();
@@ -405,6 +419,13 @@ public class AvatarMultiThreadingManager
       if (isPaused.getBooleanValue())
          return;
 
+      if (blockingProvider != null && listenToBlockingCondition.getBooleanValue() && blockingProvider.getValue())
+      {
+         // publish the older control state.
+         hardwareCommunicationInterface.write(lowLevelOutputProcessor.getProcessedDesiredOutput(), lowLevelOutputProcessor.getMasterGain().getValue());
+         return;
+      }
+
       // Calculate update rate of master thread
       masterThreadFrequencyCalculator.ping();
       masterThreadUpdateRate.set(masterThreadFrequencyCalculator.getFrequency());
@@ -443,6 +464,16 @@ public class AvatarMultiThreadingManager
 
       // Update YoVariable server
       updateYoVariableServer();
+   }
+
+   public YoRegistry getEstimatorRegistry()
+   {
+      return estimatorThread.getYoRegistry();
+   }
+
+   public YoGraphicGroupDefinition getEstimatorYoGraphics()
+   {
+      return estimatorThread.getSCS2YoGraphics();
    }
 
    public RealtimeROS2Node getEstimatorROS2Node()
@@ -491,6 +522,11 @@ public class AvatarMultiThreadingManager
          return;
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), rootRegistry);
+   }
+
+   public HardwareCommunicationInterface getHardwareCommunicationInterface()
+   {
+      return hardwareCommunicationInterface;
    }
 
    public AvatarLowLevelOutputProcessor getLowLevelOutputProcessor()

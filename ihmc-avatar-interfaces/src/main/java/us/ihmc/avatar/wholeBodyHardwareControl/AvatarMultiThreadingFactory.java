@@ -38,7 +38,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -233,6 +232,9 @@ public class AvatarMultiThreadingFactory
                                                            rootRegistry));
 
       hardwareCommunicationInterface.setLowLevelOutputProcessor(lowLevelOutputProcessor);
+
+      // Set up the block to prevent execution whenever there is no new state message.
+      threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
       return threadingManager.get();
    }
@@ -431,7 +433,7 @@ public class AvatarMultiThreadingFactory
    public void addIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
       ikStreamingThread.set(new IKStreamingRTPluginFactory().createRTThread(robotModel.getSimpleRobotName(),
-                                                                            estimatorRealtimeROS2Node, // TODO: Confirm this is okay
+                                                                            estimatorRealtimeROS2Node,
                                                                             controllerFactory.getCommandInputManager(),
                                                                             controllerFactory.getStatusOutputManager(),
                                                                             robotModel,
@@ -512,40 +514,5 @@ public class AvatarMultiThreadingFactory
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
-   }
-
-   public YoRegistry getEstimatorRegistry()
-   {
-      return estimatorThread.get().getYoRegistry();
-   }
-
-   public YoGraphicGroupDefinition getEstimatorYoGraphics()
-   {
-      return estimatorThread.get().getSCS2YoGraphics();
-   }
-
-   public YoRegistry getControllerRegistry()
-   {
-      return controllerThread.get().getYoVariableRegistry();
-   }
-
-   public YoGraphicGroupDefinition getControllerYoGraphics()
-   {
-      return controllerThread.get().getSCS2YoGraphics();
-   }
-
-   public YoRegistry getStepGeneratorRegistry()
-   {
-      return stepGeneratorThread.get().getYoVariableRegistry();
-   }
-
-   public YoGraphicGroupDefinition getStepGeneratorYoGraphics()
-   {
-      return stepGeneratorThread.get().getSCS2YoGraphics();
-   }
-
-   public AvatarMultiThreadingManager getThreadingManager()
-   {
-      return threadingManager.get();
    }
 }

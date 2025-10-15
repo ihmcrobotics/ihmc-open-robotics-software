@@ -132,6 +132,11 @@ public class AvatarLowLevelOutputProcessor
       }
    }
 
+   public void setServoDuration(double duration)
+   {
+      servoDuration.set(duration);
+   }
+
    public void servoRobot()
    {
       servo.set(true);
