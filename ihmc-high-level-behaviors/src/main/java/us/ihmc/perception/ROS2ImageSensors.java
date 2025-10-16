@@ -43,8 +43,8 @@ public class ROS2ImageSensors
       realsenseDemandNode.addDependents(realsensePublishDemandNode);
 
       realsensePublishThread = new ImageSensorPublishThread(ros2Node, realsenseSensor);
-      realsensePublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      realsensePublishThread.addTopic(PerceptionAPI.D455_COLOR_IMAGE, RealSenseImageSensor.COLOR_IMAGE_KEY);
+      realsensePublishThread.addTopic(PerceptionAPI.D455_DEPTH_IMAGE, RealSenseImageSensor.DEPTH_IMAGE_KEY, 0.25);
+      realsensePublishThread.addTopic(PerceptionAPI.D455_COLOR_IMAGE, RealSenseImageSensor.COLOR_IMAGE_KEY, 0.25);
       setupCallbackForDemandNode(realsensePublishThread, realsensePublishDemandNode);
    }
 
