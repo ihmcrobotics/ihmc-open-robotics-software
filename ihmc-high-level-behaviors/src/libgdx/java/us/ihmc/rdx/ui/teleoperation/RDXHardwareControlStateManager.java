@@ -42,8 +42,8 @@ public class RDXHardwareControlStateManager
       communicationHelper.subscribeToControllerViaVolatileCallback(EStopMasterGainStatusMessage.class, message ->
       {
          estopMasterGainStatusTimer.reset();
-         estop.set(message.getEstop());
-         masterGain.set(message.getMasterGain());
+         estop.set(message.getIsEstopped());
+         masterGain.set(message.getCurrentMasterGain());
       });
       communicationHelper.subscribeToControllerViaVolatileCallback(HighLevelStateChangeStatusMessage.class, message ->
       {  // TODO: Create a HighLevelStateStatusMessage that is periodically published, so we can always know current state
@@ -64,17 +64,17 @@ public class RDXHardwareControlStateManager
          boolean servoRobot = ImGui.button(labels.get("Servo Robot"));
          changed |= servoRobot;
          ImGui.sameLine();
-         boolean unservoSlowly = ImGui.button(labels.get("Unservo Slowly"));
-         changed |= unservoSlowly;
+         boolean unservoQuickly = ImGui.button(labels.get("Unservo Quickly"));
+         changed |= unservoQuickly;
          ImGui.popStyleColor(2);
 
          if (changed)
          {
             EStopMasterGainCommandMessage message = new EStopMasterGainCommandMessage();
             message.setEstop(estop.get());
-            message.setMasterGain(masterGain.get());
+            message.setDesiredMasterGain(masterGain.get());
             message.setServoRobot(servoRobot);
-            message.setUnservoSlowly(unservoSlowly);
+            message.setUnservoQuickly(unservoQuickly);
             communicationHelper.publishToController(message);
          }
       }

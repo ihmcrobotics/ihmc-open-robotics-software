@@ -9,7 +9,7 @@ module controller_msgs
     {
 
       /**
-       * A message for operating the e-stop and master gain controller variables
+       * A message for sending necessary startup, shutdown, and high-level operational command variables to the robot
        */
       @TypeCode(type="controller_msgs::msg::dds_::EStopMasterGainCommandMessage_")
       struct EStopMasterGainCommandMessage
@@ -21,20 +21,36 @@ module controller_msgs
         /**
          * AvatarLowLevelOutputProcessor masterGain variable to set
          */
-        double master_gain;
+        double desired_master_gain;
+        /**
+         * Whether to actually set the desired master gain being sent
+         */
+        boolean set_master_gain;
         /**
          * True if this is a request to servo the robot
-         * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+         * This is used to enable and ramp up/down the robot's controller gains, to go into freeze or stand prep
          */
         boolean servo_robot;
         /**
-         * True is this is a request to immediately zero the gains which can be violent and dangerous
+         * True if this is a request to immediately zero the gains which can be violent and dangerous
          */
-        boolean unservo_immediately;
+        boolean unservo_quickly;
         /**
-         * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+         * Enable publishing of ROS commands to the robot
          */
-        boolean unservo_slowly;
+        boolean enable_publishing_to_robot;
+        /**
+         * Clear robot faults
+         */
+        boolean clear_faults;
+        /**
+         * Calibrate robot
+         */
+        boolean calibrate_robot;
+        /**
+         * Enable all actuators
+         */
+        boolean enable_actuators;
       };
     };
   };

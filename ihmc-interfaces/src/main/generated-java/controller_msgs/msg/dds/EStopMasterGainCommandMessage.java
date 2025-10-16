@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * A message for operating the e-stop and master gain controller variables
+       * A message for sending necessary startup, shutdown, and high-level operational command variables to the robot
        */
 public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommandMessage> implements Settable<EStopMasterGainCommandMessage>, EpsilonComparable<EStopMasterGainCommandMessage>
 {
@@ -18,20 +18,36 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
    /**
             * AvatarLowLevelOutputProcessor masterGain variable to set
             */
-   public double master_gain_;
+   public double desired_master_gain_;
+   /**
+            * Whether to actually set the desired master gain being sent
+            */
+   public boolean set_master_gain_;
    /**
             * True if this is a request to servo the robot
-            * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+            * This is used to enable and ramp up/down the robot's controller gains, to go into freeze or stand prep
             */
    public boolean servo_robot_;
    /**
-            * True is this is a request to immediately zero the gains which can be violent and dangerous
+            * True if this is a request to immediately zero the gains which can be violent and dangerous
             */
-   public boolean unservo_immediately_;
+   public boolean unservo_quickly_;
    /**
-            * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+            * Enable publishing of ROS commands to the robot
             */
-   public boolean unservo_slowly_;
+   public boolean enable_publishing_to_robot_;
+   /**
+            * Clear robot faults
+            */
+   public boolean clear_faults_;
+   /**
+            * Calibrate robot
+            */
+   public boolean calibrate_robot_;
+   /**
+            * Enable all actuators
+            */
+   public boolean enable_actuators_;
 
    public EStopMasterGainCommandMessage()
    {
@@ -47,13 +63,21 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
    {
       estop_ = other.estop_;
 
-      master_gain_ = other.master_gain_;
+      desired_master_gain_ = other.desired_master_gain_;
+
+      set_master_gain_ = other.set_master_gain_;
 
       servo_robot_ = other.servo_robot_;
 
-      unservo_immediately_ = other.unservo_immediately_;
+      unservo_quickly_ = other.unservo_quickly_;
 
-      unservo_slowly_ = other.unservo_slowly_;
+      enable_publishing_to_robot_ = other.enable_publishing_to_robot_;
+
+      clear_faults_ = other.clear_faults_;
+
+      calibrate_robot_ = other.calibrate_robot_;
+
+      enable_actuators_ = other.enable_actuators_;
 
    }
 
@@ -75,21 +99,36 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
    /**
             * AvatarLowLevelOutputProcessor masterGain variable to set
             */
-   public void setMasterGain(double master_gain)
+   public void setDesiredMasterGain(double desired_master_gain)
    {
-      master_gain_ = master_gain;
+      desired_master_gain_ = desired_master_gain;
    }
    /**
             * AvatarLowLevelOutputProcessor masterGain variable to set
             */
-   public double getMasterGain()
+   public double getDesiredMasterGain()
    {
-      return master_gain_;
+      return desired_master_gain_;
+   }
+
+   /**
+            * Whether to actually set the desired master gain being sent
+            */
+   public void setSetMasterGain(boolean set_master_gain)
+   {
+      set_master_gain_ = set_master_gain;
+   }
+   /**
+            * Whether to actually set the desired master gain being sent
+            */
+   public boolean getSetMasterGain()
+   {
+      return set_master_gain_;
    }
 
    /**
             * True if this is a request to servo the robot
-            * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+            * This is used to enable and ramp up/down the robot's controller gains, to go into freeze or stand prep
             */
    public void setServoRobot(boolean servo_robot)
    {
@@ -97,7 +136,7 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
    }
    /**
             * True if this is a request to servo the robot
-            * This is used to enable and ramp up the robot's controller gains, to go into freeze or stand prep
+            * This is used to enable and ramp up/down the robot's controller gains, to go into freeze or stand prep
             */
    public boolean getServoRobot()
    {
@@ -105,33 +144,78 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
    }
 
    /**
-            * True is this is a request to immediately zero the gains which can be violent and dangerous
+            * True if this is a request to immediately zero the gains which can be violent and dangerous
             */
-   public void setUnservoImmediately(boolean unservo_immediately)
+   public void setUnservoQuickly(boolean unservo_quickly)
    {
-      unservo_immediately_ = unservo_immediately;
+      unservo_quickly_ = unservo_quickly;
    }
    /**
-            * True is this is a request to immediately zero the gains which can be violent and dangerous
+            * True if this is a request to immediately zero the gains which can be violent and dangerous
             */
-   public boolean getUnservoImmediately()
+   public boolean getUnservoQuickly()
    {
-      return unservo_immediately_;
+      return unservo_quickly_;
    }
 
    /**
-            * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+            * Enable publishing of ROS commands to the robot
             */
-   public void setUnservoSlowly(boolean unservo_slowly)
+   public void setEnablePublishingToRobot(boolean enable_publishing_to_robot)
    {
-      unservo_slowly_ = unservo_slowly;
+      enable_publishing_to_robot_ = enable_publishing_to_robot;
    }
    /**
-            * True if this is a request to slowly ramp down the robot's controller gains to zero, in prepration for robot shutdown
+            * Enable publishing of ROS commands to the robot
             */
-   public boolean getUnservoSlowly()
+   public boolean getEnablePublishingToRobot()
    {
-      return unservo_slowly_;
+      return enable_publishing_to_robot_;
+   }
+
+   /**
+            * Clear robot faults
+            */
+   public void setClearFaults(boolean clear_faults)
+   {
+      clear_faults_ = clear_faults;
+   }
+   /**
+            * Clear robot faults
+            */
+   public boolean getClearFaults()
+   {
+      return clear_faults_;
+   }
+
+   /**
+            * Calibrate robot
+            */
+   public void setCalibrateRobot(boolean calibrate_robot)
+   {
+      calibrate_robot_ = calibrate_robot;
+   }
+   /**
+            * Calibrate robot
+            */
+   public boolean getCalibrateRobot()
+   {
+      return calibrate_robot_;
+   }
+
+   /**
+            * Enable all actuators
+            */
+   public void setEnableActuators(boolean enable_actuators)
+   {
+      enable_actuators_ = enable_actuators;
+   }
+   /**
+            * Enable all actuators
+            */
+   public boolean getEnableActuators()
+   {
+      return enable_actuators_;
    }
 
 
@@ -154,13 +238,21 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.estop_, other.estop_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.master_gain_, other.master_gain_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_master_gain_, other.desired_master_gain_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.set_master_gain_, other.set_master_gain_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.servo_robot_, other.servo_robot_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unservo_immediately_, other.unservo_immediately_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unservo_quickly_, other.unservo_quickly_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unservo_slowly_, other.unservo_slowly_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_publishing_to_robot_, other.enable_publishing_to_robot_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.clear_faults_, other.clear_faults_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calibrate_robot_, other.calibrate_robot_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_actuators_, other.enable_actuators_, epsilon)) return false;
 
 
       return true;
@@ -177,13 +269,21 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
 
       if(this.estop_ != otherMyClass.estop_) return false;
 
-      if(this.master_gain_ != otherMyClass.master_gain_) return false;
+      if(this.desired_master_gain_ != otherMyClass.desired_master_gain_) return false;
+
+      if(this.set_master_gain_ != otherMyClass.set_master_gain_) return false;
 
       if(this.servo_robot_ != otherMyClass.servo_robot_) return false;
 
-      if(this.unservo_immediately_ != otherMyClass.unservo_immediately_) return false;
+      if(this.unservo_quickly_ != otherMyClass.unservo_quickly_) return false;
 
-      if(this.unservo_slowly_ != otherMyClass.unservo_slowly_) return false;
+      if(this.enable_publishing_to_robot_ != otherMyClass.enable_publishing_to_robot_) return false;
+
+      if(this.clear_faults_ != otherMyClass.clear_faults_) return false;
+
+      if(this.calibrate_robot_ != otherMyClass.calibrate_robot_) return false;
+
+      if(this.enable_actuators_ != otherMyClass.enable_actuators_) return false;
 
 
       return true;
@@ -197,14 +297,22 @@ public class EStopMasterGainCommandMessage extends Packet<EStopMasterGainCommand
       builder.append("EStopMasterGainCommandMessage {");
       builder.append("estop=");
       builder.append(this.estop_);      builder.append(", ");
-      builder.append("master_gain=");
-      builder.append(this.master_gain_);      builder.append(", ");
+      builder.append("desired_master_gain=");
+      builder.append(this.desired_master_gain_);      builder.append(", ");
+      builder.append("set_master_gain=");
+      builder.append(this.set_master_gain_);      builder.append(", ");
       builder.append("servo_robot=");
       builder.append(this.servo_robot_);      builder.append(", ");
-      builder.append("unservo_immediately=");
-      builder.append(this.unservo_immediately_);      builder.append(", ");
-      builder.append("unservo_slowly=");
-      builder.append(this.unservo_slowly_);
+      builder.append("unservo_quickly=");
+      builder.append(this.unservo_quickly_);      builder.append(", ");
+      builder.append("enable_publishing_to_robot=");
+      builder.append(this.enable_publishing_to_robot_);      builder.append(", ");
+      builder.append("clear_faults=");
+      builder.append(this.clear_faults_);      builder.append(", ");
+      builder.append("calibrate_robot=");
+      builder.append(this.calibrate_robot_);      builder.append(", ");
+      builder.append("enable_actuators=");
+      builder.append(this.enable_actuators_);
       builder.append("}");
       return builder.toString();
    }
