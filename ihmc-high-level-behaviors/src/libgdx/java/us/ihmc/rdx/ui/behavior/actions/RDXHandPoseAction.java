@@ -33,7 +33,7 @@ import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
-import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
+import us.ihmc.rdx.ui.widgets.ImGuiArmIconWidget;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -57,7 +57,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 {
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiHandWidget handIconWidget = new ImGuiHandWidget();
+   private final ImGuiArmIconWidget armIconWidget = new ImGuiArmIconWidget();
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
    private final SideDependentList<RigidBodyTransformReadOnly> handGraphicToControlFrameTransforms = new SideDependentList<>();
@@ -324,7 +324,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       super.renderTreeViewIconArea();
 
       boolean gizmoWasSelected = poseGizmo.getSelected().get();
-      if (handIconWidget.render(definition.getSide(), ImGui.getFrameHeight(), gizmoWasSelected))
+      if (armIconWidget.render(definition.getSide(), gizmoWasSelected))
       {
          poseGizmo.setSelected(!gizmoWasSelected);
       }
@@ -465,7 +465,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       if (state.getPalmFrame().isChildOfWorld())
       {
-         if (!definition.getUsePredefinedJointAngles() && (getSelected() || poseGizmo.isSelected() || handIconWidget.getIsHovered()))
+         if (!definition.getUsePredefinedJointAngles() && (getSelected() || poseGizmo.isSelected() || armIconWidget.getIsHovered()))
             highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
