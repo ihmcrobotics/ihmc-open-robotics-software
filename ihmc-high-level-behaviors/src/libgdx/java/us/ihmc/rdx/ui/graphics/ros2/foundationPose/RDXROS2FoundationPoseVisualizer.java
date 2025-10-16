@@ -6,9 +6,14 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import ihmc_common_msgs.msg.dds.Box3DMessage;
-import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import imgui.ImGui;
+import imgui.ImGuiStyle;
+import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.ImGuiTableFlags;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
@@ -25,15 +30,15 @@ import java.util.Set;
 
 public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
 {
-   private final ROS2Node ros2Node;
+   private static final int TABLE_COLUMN_COUNT = 5;
 
+   private final ROS2Node ros2Node;
    private final List<ROS2Topic<?>> resultTopics;
 
    private final Map<IsaacROSFoundationPoseObject, RDXROS2FoundationPoseSettings> settingsMap;
-
    private final Map<IsaacROSFoundationPoseObject, RDXFoundationPoseResultVisualizer> resultVisualizers;
 
-   public RDXROS2FoundationPoseVisualizer(String title, ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator)
+   public RDXROS2FoundationPoseVisualizer(String title, ROS2Node ros2Node, CRDTInfo crdtInfo)
    {
       super(title);
 
@@ -46,7 +51,7 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
          resultTopics.add(object.topics.ihmcResult());
-         settingsMap.put(object, new RDXROS2FoundationPoseSettings(ros2Node, peerClockOffsetEstimator, object));
+         settingsMap.put(object, new RDXROS2FoundationPoseSettings(ros2Node, crdtInfo, object));
       }
 
       setSceneLevels(RDXSceneLevel.VIRTUAL);
@@ -56,10 +61,9 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
    public void create()
    {
       super.create();
-
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
-         resultVisualizers.put(object, new RDXFoundationPoseResultVisualizer(ros2Node, object));
+         resultVisualizers.put(object, new RDXFoundationPoseResultVisualizer(ros2Node, object, getFrequency(object.topics.ihmcResult())));
       }
    }
 
@@ -76,29 +80,58 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
 
       for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
          settings.update();
+
+      for (RDXFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
+         visualizer.update();
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
-         settings.renderImGuiWidgets();
+      final ImGuiStyle style = new ImGuiStyle();
+      int tableFlags = ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.NoKeepColumnsVisible | ImGuiTableFlags.RowBg;
+
+      if (ImGui.beginTable(labels.getHidden("Settings Table"), TABLE_COLUMN_COUNT, tableFlags))
+      {
+         float widgetWidth = ImGui.calcTextSize("Reset").x + (2.0f * style.getItemInnerSpacingX()) + 1.0f;
+         ImGui.tableSetupColumn(labels.get("Enable"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
+         ImGui.tableSetupColumn(labels.get("Object"), ImGuiTableColumnFlags.WidthStretch);
+         ImGui.tableSetupColumn(labels.get("Reset"), ImGuiTableColumnFlags.WidthFixed, widgetWidth);
+         ImGui.tableSetupColumn(labels.get("Enable Auto Reset"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoHeaderWidth);
+         ImGui.tableSetupColumn(labels.get("Auto Reset Distance"), ImGuiTableColumnFlags.WidthFixed, widgetWidth);
+
+         // Render header
+         ImGui.tableHeadersRow();
+         ImGui.setItemAllowOverlap();
+
+         // Render settings
+         for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
+            settings.renderAsTableRow();
+
+         ImGui.endTable();
+      }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      for (RDXFoundationPoseResultVisualizer resultVisualizer : resultVisualizers.values())
+      for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
-         if (sceneLevelCheck(sceneLevels))
-            resultVisualizer.getRenderables(renderables, pool);
+         if (settingsMap.get(object).getParameters().getEnabled().getValue() && sceneLevelCheck(sceneLevels))
+         {
+            resultVisualizers.get(object).getRenderables(renderables, pool);
+         }
       }
    }
 
+   @Override
    public void destroy()
    {
       for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
          settings.destroy();
+
+      for (RDXFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
+         visualizer.dispose();
    }
 
    private static class RDXFoundationPoseResultVisualizer implements RenderableProvider
@@ -108,7 +141,7 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
       private final RDXBoxVisualizer boxVisualizer;
       private final RDXReferenceFrameGraphic referenceFrameGraphic;
 
-      public RDXFoundationPoseResultVisualizer(ROS2Node ros2Node, IsaacROSFoundationPoseObject object)
+      public RDXFoundationPoseResultVisualizer(ROS2Node ros2Node, IsaacROSFoundationPoseObject object, ImGuiAveragedFrequencyText frequencyText)
       {
          latestResult = new Box3D();
          latestResult.setToNaN();
@@ -121,18 +154,24 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
 
          resultSubscription = ros2Node.createSubscription2(object.topics.ihmcResult(), message ->
          {
+            frequencyText.ping();
+
             latestResult.getPose().set(message.getPose());
             latestResult.getSize().set(message.getSize());
             boxVisualizer.generateMesh(latestResult);
             referenceFrameGraphic.getFramePose3D().set(message.getPose());
-            referenceFrameGraphic.updateFromFramePose();
          });
+      }
+
+      public void update()
+      {
+         boxVisualizer.update();
+         referenceFrameGraphic.updateFromFramePose();
       }
 
       @Override
       public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
       {
-         boxVisualizer.update();
          boxVisualizer.getRenderables(renderables, pool);
          referenceFrameGraphic.getRenderables(renderables, pool);
       }

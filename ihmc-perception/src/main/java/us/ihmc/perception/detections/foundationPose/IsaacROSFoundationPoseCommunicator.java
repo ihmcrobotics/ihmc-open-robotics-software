@@ -41,7 +41,6 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
                                                                                                            0,-1, 0});
 
    private final ROS2Node ros2Node;
-   private final ROS2PeerClockOffsetEstimator clockOffsetEstimator;
    private final RawImagePublisher imagePublisher;
    private final ROS2Publisher<Empty> resetRequestPublisher;
    private final ROS2Publisher<Box3DMessage> resultPublisher;
@@ -59,7 +58,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    private final ReadWriteLock resultLock;
    private final List<Consumer<Box3D>> resultCallbacks;
 
-   public IsaacROSFoundationPoseCommunicator(IsaacROSFoundationPoseObject objectToTrack)
+   public IsaacROSFoundationPoseCommunicator(IsaacROSFoundationPoseObject objectToTrack, CRDTInfo crdtInfo)
    {
       this.objectToTrack = objectToTrack;
 
@@ -72,14 +71,13 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       resultCallbacks = new ArrayList<>();
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "Node");
-      clockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
       imagePublisher = new RawImagePublisher(ros2Node, 0.5);
       resetRequestPublisher = ros2Node.createPublisher(objectToTrack.topics.reset());
       resultPublisher = ros2Node.createPublisher(objectToTrack.topics.ihmcResult());
       poseEstimationResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.poseEstimationOutput(), this::updateLatestResult);
       trackingResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.trackingOutput(), this::updateLatestResult);
 
-      parameters = new SyncedFoundationPoseParameters(ros2Node, new CRDTInfo(ROS2ActorDesignation.ROBOT, clockOffsetEstimator), objectToTrack);
+      parameters = new SyncedFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);
 
       sensorFrame = new ROS2MutableFrame(ros2Node, objectToTrack.meshName + "_ImageFrame", ReferenceFrame.getWorldFrame());
    }
@@ -277,7 +275,6 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       resetRequestPublisher.remove();
       resultPublisher.remove();
       imagePublisher.close();
-      clockOffsetEstimator.destroy();
       ros2Node.destroy();
    }
 }

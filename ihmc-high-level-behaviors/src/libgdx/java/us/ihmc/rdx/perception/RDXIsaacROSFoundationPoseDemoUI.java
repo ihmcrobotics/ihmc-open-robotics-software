@@ -1,6 +1,8 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -17,6 +19,7 @@ public class RDXIsaacROSFoundationPoseDemoUI
 {
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
+   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, peerClockOffsetEstimator);
 
    public RDXIsaacROSFoundationPoseDemoUI()
    {
@@ -35,9 +38,10 @@ public class RDXIsaacROSFoundationPoseDemoUI
             visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Color", ros2Node, PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT)));
             visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Depth", ros2Node, PerceptionAPI.ZED_DEPTH));
             visualizers.addVisualizer(new RDXROS2YOLOv8Visualizer("YOLO", ros2Node, peerClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE));
-            visualizers.addVisualizer(new RDXROS2FoundationPoseVisualizer("FoundationPose", ros2Node, peerClockOffsetEstimator));
+            visualizers.addVisualizer(new RDXROS2FoundationPoseVisualizer("FoundationPose", ros2Node, crdtInfo));
             visualizers.create(baseUI);
 
+            baseUI.getPrimaryScene().addRenderableProvider(visualizers);
             baseUI.create();
          }
 

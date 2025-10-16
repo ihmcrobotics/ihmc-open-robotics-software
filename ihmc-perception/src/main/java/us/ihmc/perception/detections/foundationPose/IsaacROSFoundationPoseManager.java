@@ -1,5 +1,6 @@
 package us.ihmc.perception.detections.foundationPose;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.InstantDetection;
 
 import java.util.EnumMap;
@@ -11,12 +12,12 @@ public class IsaacROSFoundationPoseManager implements AutoCloseable
 {
    private final Map<IsaacROSFoundationPoseObject, IsaacROSFoundationPoseCommunicator> communicators;
 
-   public IsaacROSFoundationPoseManager()
+   public IsaacROSFoundationPoseManager(CRDTInfo crdtInfo)
    {
       communicators = new EnumMap<>(IsaacROSFoundationPoseObject.class);
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
-         communicators.put(object, new IsaacROSFoundationPoseCommunicator(object));
+         communicators.put(object, new IsaacROSFoundationPoseCommunicator(object, crdtInfo));
       }
    }
 
