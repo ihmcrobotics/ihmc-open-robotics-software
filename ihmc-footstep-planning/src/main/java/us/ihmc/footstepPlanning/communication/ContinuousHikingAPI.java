@@ -34,6 +34,10 @@ public class ContinuousHikingAPI
    public static final ROS2Topic<FootstepDataListMessage> MONTE_CARLO_FOOTSTEP_PLAN = IHMC_ROOT.withModule(moduleName).withType(FootstepDataListMessage.class).withSuffix("monte_carlo_footstep_plan");
 
    // Parameters that get synced between the remote process and the user
+   public static final StoredPropertySetROS2TopicPair PROCESS_PARAMETERS
+         = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"process_parameters");
+
+   // Parameters that get synced between the remote process and the user
    public static final StoredPropertySetROS2TopicPair CONTINUOUS_HIKING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"continuous_hiking_parameters");
 

@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,6 +26,7 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
+   private final ActiveMappingProcessParameters processParameters;
    private final HeightMapLogger heightMapLogger;
 
    private final ReferenceFrame heightMapCenter;
@@ -49,6 +51,7 @@ public class GpuMappingManager
    private final HeightMapMessage heightMapMessage;
    private final TerrainMapMessage terrainMapMessage;
    private long sequenceId = 0;
+   private final Throttler heightMapPublishThrottler;
 
    public GpuMappingManager(String robotName,
                             ROS2Node ros2Node,
@@ -56,10 +59,12 @@ public class GpuMappingManager
                             ReferenceFrame rightFootSoleFrame,
                             ReferenceFrame heightMapCenter,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                            ActiveMappingProcessParameters processParameters,
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
       this.heightMapCenter = heightMapCenter;
+      this.processParameters = processParameters;
       this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.add(leftFootSoleFrame);
@@ -74,6 +79,7 @@ public class GpuMappingManager
       heightMapMessage = new HeightMapMessage();
       terrainMapMessage = new TerrainMapMessage();
       heightMapLogger = new HeightMapLogger(heightMapParameters);
+      heightMapPublishThrottler = new Throttler().setFrequency(10.0);
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
@@ -117,8 +123,11 @@ public class GpuMappingManager
       GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      publishHeightMap(heightMapExtractor.getHeightMapData());
-      publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
+      if (processParameters.getPublishHeightMap() && heightMapPublishThrottler.run())
+         publishHeightMap(heightMapExtractor.getHeightMapData());
+
+      if (processParameters.getPublishTerrainMap())
+         publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
 
       if (heightMapParameters.getEnableChunkedMap())
       {
@@ -175,17 +184,21 @@ public class GpuMappingManager
          driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
       }
 
-      // Perform update, this actually creates the height map
-      heightMapExtractor.update(latestDepthImage,
-                                depthIntrinsicsCopy,
-                                sensorToWorld,
-                                sensorToGround,
-                                groundToWorld,
-                                driftOffsetInZ,
-                                heightMapCenterOrigin,
-                                computeFootHeight());
+      if (processParameters.getRunHeightMap())
+      {
+         // Perform update, this actually creates the height map
+         heightMapExtractor.update(latestDepthImage,
+                                   depthIntrinsicsCopy,
+                                   sensorToWorld,
+                                   sensorToGround,
+                                   groundToWorld,
+                                   driftOffsetInZ,
+                                   heightMapCenterOrigin,
+                                   computeFootHeight());
+      }
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
+      if (processParameters.getRunTerrainMap() && processParameters.getRunHeightMap())
+         terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
