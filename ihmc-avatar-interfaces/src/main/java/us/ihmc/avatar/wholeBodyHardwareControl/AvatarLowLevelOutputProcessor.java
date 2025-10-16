@@ -132,6 +132,11 @@ public class AvatarLowLevelOutputProcessor
       }
    }
 
+   public boolean getIsRobotServod()
+   {
+      return isServod.getBooleanValue();
+   }
+
    public void setServoDuration(double duration)
    {
       servoDuration.set(duration);
