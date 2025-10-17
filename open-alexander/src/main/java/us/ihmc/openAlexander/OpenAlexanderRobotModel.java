@@ -72,7 +72,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
    private static final double DEFAULT_SIMULATE_DT = 0.0001;
    private static final double DEFAULT_ESTIMATE_DT = 0.001;
-   private static final double DEFAULT_CONTROL_DT = 0.02;
+   private static final double DEFAULT_CONTROL_DT = 0.003;
    private static final double DEFAULT_FEEDBACK_CONTROLLER_DT = 0.002;
    private static final double DEFAULT_PERCEPTION_DT = 0.003;
    private static final double ETHERCAT_DT = 0.001;
