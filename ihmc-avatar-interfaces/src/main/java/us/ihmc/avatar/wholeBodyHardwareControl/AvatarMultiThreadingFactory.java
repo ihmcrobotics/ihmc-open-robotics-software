@@ -349,7 +349,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory, feetForceSensorNames));
+         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory, feetForceSensorNames, !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
          HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
@@ -447,7 +447,8 @@ public class AvatarMultiThreadingFactory
     */
    private static ControllerStateTransitionFactory<HighLevelControllerName> createStandTransitionState(HighLevelControllerName transitionStateName,
                                                                                                        HighLevelHumanoidControllerFactory controllerFactory,
-                                                                                                       SideDependentList<String> feetForceSensorNames)
+                                                                                                       SideDependentList<String> feetForceSensorNames,
+                                                                                                       boolean waitForRequestToTransition)
    {
       return new ControllerStateTransitionFactory<>()
       {
@@ -472,6 +473,7 @@ public class AvatarMultiThreadingFactory
 
             StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(transitionStateName,
                                                                                                    requestedState,
+                                                                                                   waitForRequestToTransition,
                                                                                                    forceSensorDataHolder,
                                                                                                    feetForceSensorNames,
                                                                                                    controlDT,
@@ -522,7 +524,7 @@ public class AvatarMultiThreadingFactory
 
    public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, robotModel.getSensorInformation().getFeetForceSensorNames()));
+      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, robotModel.getSensorInformation().getFeetForceSensorNames(), true));
    }
 
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)
