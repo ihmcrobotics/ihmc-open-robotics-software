@@ -67,7 +67,7 @@ public class ContinuousHikingProcess
       BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
       ros2ImageSensors.registerImageQueueForRealsense(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-//      ros2ImageSensors.registerImageQueueForZED(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      ros2ImageSensors.registerImageQueueForZED(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       // Class's that perform the real work of the process... the good stuff
       {

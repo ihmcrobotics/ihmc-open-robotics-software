@@ -37,7 +37,6 @@ public class ContinuousHikingAPI
    public static final StoredPropertySetROS2TopicPair PROCESS_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"process_parameters");
 
-   // Parameters that get synced between the remote process and the user
    public static final StoredPropertySetROS2TopicPair CONTINUOUS_HIKING_PARAMETERS
          = new StoredPropertySetROS2TopicPair(ACTIVE_MODULE_NAME,"continuous_hiking_parameters");
 

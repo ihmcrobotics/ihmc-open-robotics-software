@@ -206,8 +206,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void update(TerrainMapData terrainMapData)
    {
-      updateRos2StoredPropertySets();
-
       if (latestFootstepPlan != null)
       {
          terrainPlanningDebugger.generateSwingGraphics(latestFootstepPlan, swingTrajectories);
@@ -222,7 +220,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * These are all the parameters that are getting synced back and forth between the remote process and the local process.
     * There are three situations that can occur when trying to use Continuous Hiking.
     */
-   private void updateRos2StoredPropertySets()
+   public void updateRos2StoredPropertySets()
    {
       hostStoredPropertySets.setPropertyChanged();
    }
