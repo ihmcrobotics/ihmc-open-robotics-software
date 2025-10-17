@@ -6,7 +6,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -51,7 +50,6 @@ public class GpuMappingManager
    private final HeightMapMessage heightMapMessage;
    private final TerrainMapMessage terrainMapMessage;
    private long sequenceId = 0;
-   private final Throttler heightMapPublishThrottler;
 
    public GpuMappingManager(String robotName,
                             ROS2Node ros2Node,
@@ -79,7 +77,6 @@ public class GpuMappingManager
       heightMapMessage = new HeightMapMessage();
       terrainMapMessage = new TerrainMapMessage();
       heightMapLogger = new HeightMapLogger(heightMapParameters);
-      heightMapPublishThrottler = new Throttler().setFrequency(10.0);
 
       // We use a notification to only call resetting the height map in one place
       heightMapMessagePublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_MESSAGE);
@@ -123,7 +120,7 @@ public class GpuMappingManager
       GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      if (processParameters.getPublishHeightMap() && heightMapPublishThrottler.run())
+      if (processParameters.getPublishHeightMap())
          publishHeightMap(heightMapExtractor.getHeightMapData());
 
       if (processParameters.getPublishTerrainMap())
@@ -246,8 +243,10 @@ public class GpuMappingManager
    {
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
-      heightMapExtractor.destroy();
-      terrainMapExtractor.destroy();
+      if (processParameters.getPublishHeightMap())
+         heightMapExtractor.destroy();
+      if (processParameters.getPublishTerrainMap())
+         terrainMapExtractor.destroy();
       chunkedMapManager.destroy();
    }
 }
