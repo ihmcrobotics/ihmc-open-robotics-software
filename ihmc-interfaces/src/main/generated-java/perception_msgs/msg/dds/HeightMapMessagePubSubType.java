@@ -15,7 +15,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fb1283f0de076f172fe57235cee0b7af36ce73781c1fbef51a6f5d7ae6333444";
+   		return "055fbac97c9992f7d1b678998153a4828d70e8d8d4e0d538159d4a4397237b13";
    }
    
    @Override
@@ -64,7 +64,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (255000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -98,7 +98,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHeights().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
