@@ -29,11 +29,11 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
 
-      lastTimeFeetWereUnloaded = new YoDouble("lastTimeFeetWereUnloaded", registry);
-      minimumTimeInState = new YoDouble("minimumTimeLoadingFeet", registry);
+      lastTimeFeetWereUnloaded = new YoDouble("lastTimeFeetWereUnloaded_" + nextStateEnum.toString(), registry);
+      minimumTimeInState = new YoDouble("minimumTimeLoadingFeet_" + nextStateEnum.toString(), registry);
       minimumTimeInState.set(highLevelControllerParameters.getMinimumTimeInStandReady());
 
-      this.waitForRequest = new YoBoolean("waitForRequestToTransitionToWalking", registry);
+      this.waitForRequest = new YoBoolean("waitForRequestToTransitionToWalking_" + nextStateEnum.toString(), registry);
       this.waitForRequest.set(waitForRequestToTransition);
    }
 
