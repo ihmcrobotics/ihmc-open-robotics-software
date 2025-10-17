@@ -66,11 +66,13 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             * Support region used by the toolbox
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_torso_position_;
+   public us.ihmc.euclid.tuple4D.Quaternion desired_torso_orientation_;
    /**
             * Legged robot-specific contact information (false if not a legged robot)
             */
-   public boolean left_foot_in_contact_;
-   public boolean right_foot_in_contact_;
+   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus left_foot_status_;
+   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus right_foot_status_;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
@@ -84,6 +86,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       desired_root_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       desired_root_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (32, new geometry_msgs.msg.dds.PointPubSubType());
+      desired_torso_position_ = new us.ihmc.euclid.tuple3D.Point3D();
+      desired_torso_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      left_foot_status_ = new toolbox_msgs.msg.dds.KinematicsToolboxFootStatus();
+      right_foot_status_ = new toolbox_msgs.msg.dds.KinematicsToolboxFootStatus();
 
    }
 
@@ -108,10 +114,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
       support_region_.set(other.support_region_);
-      left_foot_in_contact_ = other.left_foot_in_contact_;
-
-      right_foot_in_contact_ = other.right_foot_in_contact_;
-
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_torso_position_, desired_torso_position_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_torso_orientation_, desired_torso_orientation_);
+      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.staticCopy(other.left_foot_status_, left_foot_status_);
+      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.staticCopy(other.right_foot_status_, right_foot_status_);
       solution_quality_ = other.solution_quality_;
 
    }
@@ -218,28 +224,31 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return support_region_;
    }
 
-   /**
-            * Legged robot-specific contact information (false if not a legged robot)
-            */
-   public void setLeftFootInContact(boolean left_foot_in_contact)
+
+   public us.ihmc.euclid.tuple3D.Point3D getDesiredTorsoPosition()
    {
-      left_foot_in_contact_ = left_foot_in_contact;
-   }
-   /**
-            * Legged robot-specific contact information (false if not a legged robot)
-            */
-   public boolean getLeftFootInContact()
-   {
-      return left_foot_in_contact_;
+      return desired_torso_position_;
    }
 
-   public void setRightFootInContact(boolean right_foot_in_contact)
+
+   public us.ihmc.euclid.tuple4D.Quaternion getDesiredTorsoOrientation()
    {
-      right_foot_in_contact_ = right_foot_in_contact;
+      return desired_torso_orientation_;
    }
-   public boolean getRightFootInContact()
+
+
+   /**
+            * Legged robot-specific contact information (false if not a legged robot)
+            */
+   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus getLeftFootStatus()
    {
-      return right_foot_in_contact_;
+      return left_foot_status_;
+   }
+
+
+   public toolbox_msgs.msg.dds.KinematicsToolboxFootStatus getRightFootStatus()
+   {
+      return right_foot_status_;
    }
 
    public void setSolutionQuality(double solution_quality)
@@ -290,10 +299,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
          {  if (!this.support_region_.get(i).epsilonEquals(other.support_region_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.left_foot_in_contact_, other.left_foot_in_contact_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.right_foot_in_contact_, other.right_foot_in_contact_, epsilon)) return false;
-
+      if (!this.desired_torso_position_.epsilonEquals(other.desired_torso_position_, epsilon)) return false;
+      if (!this.desired_torso_orientation_.epsilonEquals(other.desired_torso_orientation_, epsilon)) return false;
+      if (!this.left_foot_status_.epsilonEquals(other.left_foot_status_, epsilon)) return false;
+      if (!this.right_foot_status_.epsilonEquals(other.right_foot_status_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -322,10 +331,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
       if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
-      if(this.left_foot_in_contact_ != otherMyClass.left_foot_in_contact_) return false;
-
-      if(this.right_foot_in_contact_ != otherMyClass.right_foot_in_contact_) return false;
-
+      if (!this.desired_torso_position_.equals(otherMyClass.desired_torso_position_)) return false;
+      if (!this.desired_torso_orientation_.equals(otherMyClass.desired_torso_orientation_)) return false;
+      if (!this.left_foot_status_.equals(otherMyClass.left_foot_status_)) return false;
+      if (!this.right_foot_status_.equals(otherMyClass.right_foot_status_)) return false;
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
 
@@ -358,10 +367,14 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_root_angular_velocity_);      builder.append(", ");
       builder.append("support_region=");
       builder.append(this.support_region_);      builder.append(", ");
-      builder.append("left_foot_in_contact=");
-      builder.append(this.left_foot_in_contact_);      builder.append(", ");
-      builder.append("right_foot_in_contact=");
-      builder.append(this.right_foot_in_contact_);      builder.append(", ");
+      builder.append("desired_torso_position=");
+      builder.append(this.desired_torso_position_);      builder.append(", ");
+      builder.append("desired_torso_orientation=");
+      builder.append(this.desired_torso_orientation_);      builder.append(", ");
+      builder.append("left_foot_status=");
+      builder.append(this.left_foot_status_);      builder.append(", ");
+      builder.append("right_foot_status=");
+      builder.append(this.right_foot_status_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");

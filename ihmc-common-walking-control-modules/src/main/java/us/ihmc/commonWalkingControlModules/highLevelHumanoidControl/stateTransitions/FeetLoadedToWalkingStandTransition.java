@@ -19,7 +19,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 
    private final YoDouble minimumTimeInState;
 
-   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState,
+   public FeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState, boolean waitForRequestToTransition,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors, double controlDT,
                                              double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
                                              YoRegistry parentRegistry)
@@ -29,12 +29,12 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
 
-      lastTimeFeetWereUnloaded = new YoDouble("lastTimeFeetWereUnloaded", registry);
-      minimumTimeInState = new YoDouble("minimumTimeLoadingFeet", registry);
+      lastTimeFeetWereUnloaded = new YoDouble("lastTimeFeetWereUnloaded_" + nextStateEnum.toString(), registry);
+      minimumTimeInState = new YoDouble("minimumTimeLoadingFeet_" + nextStateEnum.toString(), registry);
       minimumTimeInState.set(highLevelControllerParameters.getMinimumTimeInStandReady());
 
-      this.waitForRequest = new YoBoolean("waitForRequestToTransitionToWalking", registry);
-      this.waitForRequest.set(!highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady());
+      this.waitForRequest = new YoBoolean("waitForRequestToTransitionToWalking_" + nextStateEnum.toString(), registry);
+      this.waitForRequest.set(waitForRequestToTransition);
    }
 
    @Override
