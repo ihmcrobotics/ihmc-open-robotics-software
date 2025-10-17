@@ -57,7 +57,7 @@ public class ImGuiFallbackWidget
          bottomPolygon[i] = new ImVec2();
    }
 
-   public boolean render(boolean renderCollapsedArrow)
+   public boolean render()
    {
       float lineHeight = ImGui.getFrameHeight();
       float fontSize = ImGui.getFontSize();
@@ -146,17 +146,6 @@ public class ImGuiFallbackWidget
          ImGui.getWindowDrawList().addLine(topPolygon[i].x, topPolygon[i].y, topPolygon[i + 1].x, topPolygon[i + 1].y, lineColor);
       for (int i = 0; i < bottomPolygon.length - 1; i++)
          ImGui.getWindowDrawList().addLine(bottomPolygon[i].x, bottomPolygon[i].y, bottomPolygon[i + 1].x, bottomPolygon[i + 1].y, lineColor);
-
-      if (renderCollapsedArrow) // collapsed arrow
-      {
-         float offsetX = ImGui.getCursorScreenPosX() - scale * 0.6f;
-         float offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.2f;
-         float width = ImGui.getFontSize() / 2.5f;
-         float height = ImGui.getFrameHeight() * 0.5f;
-         int color = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text);
-         ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY + height, color);
-         ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY, color);
-      }
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 0.8f) + 0.1f * ImGui.getStyle().getItemSpacingX());
 

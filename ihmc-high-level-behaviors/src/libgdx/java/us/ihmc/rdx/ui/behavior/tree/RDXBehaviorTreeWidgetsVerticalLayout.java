@@ -32,12 +32,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    {
       ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.getStyle().getItemSpacingX(), 0.0f);
 
-      node.renderGeneralRowBeginWidgets();
-      node.renderTreeViewIconArea();
-
-//      if (node.getParent() != null)
-//         node.getParent().getChildrenDescriptionAligner().align();
-      node.renderNodeName();
+      node.renderTreeViewRow();
 
       ImGui.popStyleVar();
 
@@ -115,7 +110,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
 
       if (node.getTreeWidgetExpanded())
       {
-         float indentAmount = ImGui.getFontSize() * 0.5f;
+         float indentAmount = ImGui.getFontSize() * 0.7f;
          ImGui.indent(indentAmount);
 
          for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())

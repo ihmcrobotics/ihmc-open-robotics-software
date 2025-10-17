@@ -10,7 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
  */
 public class ImGuiRootIconWidget
 {
-   public boolean render(boolean renderCollapsedArrow)
+   public boolean render()
    {
       float lineHeight = ImGui.getFrameHeight();
       float fontSize = ImGui.getFontSize();
@@ -48,17 +48,6 @@ public class ImGuiRootIconWidget
       ImGui.getWindowDrawList().addCircle(offsetX, offsetY, circleSize * scale, lineColor);
       ImGui.getWindowDrawList().addCircle((-wide * scale) + offsetX, (down * scale) + offsetY, circleSize * scale, lineColor);
       ImGui.getWindowDrawList().addCircle((wide * scale) + offsetX, (down * scale) + offsetY, circleSize * scale, lineColor);
-
-      if (renderCollapsedArrow) // collapsed arrow
-      {
-         offsetX = ImGui.getCursorScreenPosX();
-         offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.2f;
-         float width = ImGui.getFontSize() / 2.5f;
-         float height = ImGui.getFrameHeight() * 0.5f;
-         int color = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text);
-         ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY + height, color);
-         ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY, color);
-      }
 
       ImGui.setCursorPosX(ImGui.getCursorPosX() + itemWidth);
       ImGui.newLine();

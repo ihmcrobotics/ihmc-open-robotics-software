@@ -85,16 +85,14 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
 
-      if (rootIconWidget.render(!getChildren().isEmpty() && !getTreeWidgetExpanded()))
-      {
-         setSpecificWidgetOnRowClicked();
-         setTreeWidgetExpanded(!getTreeWidgetExpanded());
-      }
+      rootIconWidget.render();
+
       ImGui.sameLine();
+      super.renderEditableName();
    }
 
    @Override

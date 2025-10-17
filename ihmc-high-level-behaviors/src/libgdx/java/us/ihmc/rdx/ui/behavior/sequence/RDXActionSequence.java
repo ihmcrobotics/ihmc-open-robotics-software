@@ -4,14 +4,12 @@ import imgui.ImGui;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.widgets.ImGuiSequenceIconWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, ActionSequenceDefinition>
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiSequenceIconWidget sequenceIconWidget = new ImGuiSequenceIconWidget();
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -26,16 +24,14 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
 
-      if (sequenceIconWidget.render(!getChildren().isEmpty() && !getTreeWidgetExpanded()))
-      {
-         setSpecificWidgetOnRowClicked();
-         setTreeWidgetExpanded(!getTreeWidgetExpanded());
-      }
+      sequenceIconWidget.render();
+
       ImGui.sameLine();
+      super.renderEditableName();
    }
 
    @Override

@@ -35,12 +35,13 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
+      super.renderEditableName();
 
-      gotoNodeWidget.render();
       ImGui.sameLine();
+      gotoNodeWidget.render();
    }
 
    @Override

@@ -33,12 +33,13 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
+      super.renderEditableName();
 
-      conditionIconWidget.render();
       ImGui.sameLine();
+      conditionIconWidget.render();
    }
 
    @Override

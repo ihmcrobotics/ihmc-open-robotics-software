@@ -18,12 +18,13 @@ public class RDXCheckPointNode extends RDXLeafNode<CheckPointNodeState, CheckPoi
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
+      super.renderEditableName();
 
-      checkpointNodeWidget.render();
       ImGui.sameLine();
+      checkpointNodeWidget.render();
    }
 
    @Override

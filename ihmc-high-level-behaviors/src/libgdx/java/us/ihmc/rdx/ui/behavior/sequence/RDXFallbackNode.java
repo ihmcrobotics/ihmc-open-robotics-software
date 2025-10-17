@@ -4,14 +4,12 @@ import imgui.ImGui;
 import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.FallbackNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.widgets.ImGuiFallbackWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, FallbackNodeDefinition>
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFallbackWidget fallbackWidget = new ImGuiFallbackWidget();
 
    public RDXFallbackNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -26,16 +24,14 @@ public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, Fall
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
 
-      if (fallbackWidget.render(!getChildren().isEmpty() && !getTreeWidgetExpanded()))
-      {
-         setSpecificWidgetOnRowClicked();
-         setTreeWidgetExpanded(!getTreeWidgetExpanded());
-      }
+      fallbackWidget.render();
+
       ImGui.sameLine();
+      super.renderEditableName();
    }
 
    @Override

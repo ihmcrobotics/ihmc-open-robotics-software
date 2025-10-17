@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.LeafNodeDefinition;
 import us.ihmc.behaviors.sequence.LeafNodeState;
-import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -49,32 +48,37 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderRowBeginning()
    {
+      super.renderRowBeginning();
+
       RDXBehaviorTreeRootNode actionSequence = RDXBehaviorTreeTools.findRootNode(this);
       if (actionSequence != null)
       {
          // Give the arrow a little space to the left, like the other icons
          ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
 
-         // Not displaying this now until we calculate it correctly. @dcalvert
-         if (state.getConcurrencyRank() != 1)
-         {
-            ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-            String text = state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank());
-            ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiTools.calcTextSizeX(text) - ImGui.getStyle().getItemSpacingX());
-            ImGui.text(text);
-            ImGui.popStyleColor();
-            ImGui.sameLine();
-         }
-
          boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
          int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
          if (hollowArrowRenderer.render(colorArrow, arrowColor, ImGui.getFrameHeight()))
          {
-            setSpecificWidgetOnRowClicked();
+            anySpecificWidgetOnLineClicked = true;
             actionSequence.getState().setExecutionNextIndex(state.getLeafIndex());
          }
+         ImGui.sameLine();
+      }
+   }
+
+   public void renderConcurrencyRank()
+   {
+      // Probably better to display some parallel bars like a Git log view maybe. @dcalvert
+      if (state.getConcurrencyRank() != 1)
+      {
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+         String text = state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank());
+         ImGui.setCursorPosX(ImGui.getCursorPosX() - ImGuiTools.calcTextSizeX(text) - ImGui.getStyle().getItemSpacingX());
+         ImGui.text(text);
+         ImGui.popStyleColor();
          ImGui.sameLine();
       }
    }

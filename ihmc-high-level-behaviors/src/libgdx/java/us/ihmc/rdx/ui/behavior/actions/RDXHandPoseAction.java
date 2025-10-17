@@ -319,17 +319,18 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
+      super.renderEditableName();
 
+      ImGui.sameLine();
       boolean gizmoWasSelected = poseGizmo.getSelected().get();
       if (armIconWidget.render(definition.getSide(), gizmoWasSelected))
       {
          poseGizmo.setSelected(!gizmoWasSelected);
       }
 
-      ImGui.sameLine();
    }
 
    @Override
