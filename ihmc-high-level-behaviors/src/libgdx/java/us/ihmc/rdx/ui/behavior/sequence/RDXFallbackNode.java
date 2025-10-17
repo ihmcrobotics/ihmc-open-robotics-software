@@ -30,14 +30,12 @@ public class RDXFallbackNode extends RDXBehaviorTreeNode<FallbackNodeState, Fall
    {
       super.renderTreeViewIconArea();
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
       if (fallbackWidget.render(!getChildren().isEmpty() && !getTreeWidgetExpanded()))
       {
          setSpecificWidgetOnRowClicked();
          setTreeWidgetExpanded(!getTreeWidgetExpanded());
       }
       ImGui.sameLine();
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
    }
 
    @Override

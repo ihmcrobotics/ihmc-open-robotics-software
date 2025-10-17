@@ -87,8 +87,11 @@ public class ImGuiFallbackWidget
          xMax = Math.max(xMax, bottomPolygon[i].x);
       }
 
-      float itemWidth = xMax - xMin;
+      float spacing = 1.5f * ImGui.getStyle().getItemSpacingX();
+      float itemWidth = xMax - xMin + spacing + scale * 0.3f;
       boolean isHovered = ImGuiTools.isItemHovered(itemWidth, lineHeight);
+
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + spacing);
 
       float cursorScreenPosX = ImGui.getCursorScreenPosX();
       float cursorScreenPosY = ImGui.getCursorScreenPosY();
@@ -155,7 +158,7 @@ public class ImGuiFallbackWidget
          ImGui.getWindowDrawList().addLine(offsetX, offsetY + height / 2.0f, offsetX - width, offsetY, color);
       }
 
-      ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 0.8f));
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + (itemWidth * 0.8f) + 0.1f * ImGui.getStyle().getItemSpacingX());
 
       ImGui.newLine();
       return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
