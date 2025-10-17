@@ -412,6 +412,7 @@ public class RDXTeleoperationManager extends RDXPanel
       abortToolbarButton.setTooltipText("Abort");
       abortToolbarButton.setOnPressed(locomotionManager::sendAbortWalkingMessage);
 
+      clearInteractablesAndLocomotionGraphics();
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
 
