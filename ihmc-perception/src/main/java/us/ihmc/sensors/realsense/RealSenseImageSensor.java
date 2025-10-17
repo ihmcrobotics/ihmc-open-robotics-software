@@ -20,8 +20,6 @@ public class RealSenseImageSensor extends ImageSensor
    public static final int DEPTH_IMAGE_KEY = 1;
    public static final int OUTPUT_IMAGE_COUNT = 2;
 
-   private static final double OUTPUT_FREQUENCY = 30.0;
-
    private final RealSenseConfiguration realsenseConfiguration;
    private final RealSenseDeviceManager realsenseManager = new RealSenseDeviceManager();
    private RealSenseDevice realsense = null;
@@ -34,13 +32,15 @@ public class RealSenseImageSensor extends ImageSensor
    private ReferenceFrame colorFrame;
    private final Notification resetFrames = new Notification();
 
-   private final Throttler grabThrottler = new Throttler().setFrequency(OUTPUT_FREQUENCY);
+   private final Throttler grabThrottler;
 
    public RealSenseImageSensor(RealSenseConfiguration realsenseConfiguration)
    {
       super(realsenseConfiguration.name().split("_")[0]);
 
       this.realsenseConfiguration = realsenseConfiguration;
+
+      grabThrottler = new Throttler().setFrequency(realsenseConfiguration.getDepthFPS());
       resetFrames.set();
    }
 
@@ -83,7 +83,7 @@ public class RealSenseImageSensor extends ImageSensor
    @Override
    public boolean isSensorRunning()
    {
-      return realsense != null && realsense.getDevice() != null && grabFailureCount < OUTPUT_FREQUENCY;
+      return realsense != null && realsense.getDevice() != null && grabFailureCount < realsenseConfiguration.getDepthFPS();
    }
 
    @Override
