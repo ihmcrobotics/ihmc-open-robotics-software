@@ -89,7 +89,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       super.renderTreeViewIconArea();
 
-      if (rootIconWidget.render())
+      if (rootIconWidget.render(!getChildren().isEmpty() && !getTreeWidgetExpanded()))
       {
          setSpecificWidgetOnRowClicked();
          setTreeWidgetExpanded(!getTreeWidgetExpanded());

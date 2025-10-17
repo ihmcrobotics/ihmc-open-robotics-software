@@ -30,7 +30,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       super.renderTreeViewIconArea();
 
-      if (sequenceIconWidget.render())
+      if (sequenceIconWidget.render(!getChildren().isEmpty() && !getTreeWidgetExpanded()))
       {
          setSpecificWidgetOnRowClicked();
          setTreeWidgetExpanded(!getTreeWidgetExpanded());
