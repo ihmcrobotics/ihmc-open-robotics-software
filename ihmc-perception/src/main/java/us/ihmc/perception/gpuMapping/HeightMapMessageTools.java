@@ -8,6 +8,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ChunkMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.IDLSequence;
 
 import java.nio.FloatBuffer;
 
@@ -61,16 +62,17 @@ public class HeightMapMessageTools
       // This is done for speed optimization
       float[] heightsArray = new float[totalCells];
       floatBuffer.get(heightsArray);
-//      Float heights = messageToPack.getHeights();
-//
-//      // No overhead for this loop, it's as fast as possible (according to AI) with the current message
-//      for (int i = 0; i < totalCells; ++i)
-//      {
-//         if (i < heights.size())
-//            heights.set(i, heightsArray[i]);
-//         else
-//            heights.add(heightsArray[i]);
-//      }
+
+      IDLSequence.Float heights = messageToPack.getHeights();
+
+      // No overhead for this loop, it's as fast as possible (according to AI) with the current message
+      for (int i = 0; i < totalCells; ++i)
+      {
+         if (i < heights.size())
+            heights.set(i, heightsArray[i]);
+         else
+            heights.add(heightsArray[i]);
+      }
    }
 
    /**
@@ -133,7 +135,7 @@ public class HeightMapMessageTools
 
       // Compress the data using PNG
       BytePointer compressedData = new BytePointer();
-      opencv_imgcodecs.imencode(".png",  heightMapMat16U, compressedData);
+      opencv_imgcodecs.imencode(".png", heightMapMat16U, compressedData);
 
       // Pack the compressed data into the message
       int compressedDataSize = (int) compressedData.limit();
@@ -155,6 +157,6 @@ public class HeightMapMessageTools
       messageToClear.setGridCenterX(-1.0);
       messageToClear.setGridCenterY(-1.0);
 
-      //      messageToClear.getHeights().clear();
+      messageToClear.getHeights().resetQuick();
    }
 }
