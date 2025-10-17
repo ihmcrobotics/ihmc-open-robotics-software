@@ -24,7 +24,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
                                              double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
                                              YoRegistry parentRegistry)
    {
-      super(forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);
+      super(nextStateEnum.toString(), forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);
 
       this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;

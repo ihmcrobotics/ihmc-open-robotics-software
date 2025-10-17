@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetLoadedTransition implements StateTransitionCondition
 {
-   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry;
 
    private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 6.0;
    private static final double TIME_WINDOW = 3.0;
@@ -34,20 +34,39 @@ public class FeetLoadedTransition implements StateTransitionCondition
                                double totalMass,
                                YoRegistry parentRegistry)
    {
+      this("",
+           forceSensorDataHolder,
+           feetForceSensors,
+           controlDT,
+           gravityZ,
+           totalMass,
+           parentRegistry);
+   }
+
+   public FeetLoadedTransition(String suffix,
+                               ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                               SideDependentList<String> feetForceSensors,
+                               double controlDT,
+                               double gravityZ,
+                               double totalMass,
+                               YoRegistry parentRegistry)
+   {
+      registry = new YoRegistry(getClass().getSimpleName() + suffix);
+
       for (RobotSide robotSide : RobotSide.values)
          footSensors.put(robotSide, forceSensorDataHolder.getData(feetForceSensors.get(robotSide)));
 
       int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
 
-      areFeetLoaded = new YoBoolean("areFeetLoaded", registry);
-      weightPerFootForLoaded = new YoDouble("weightPerFootForLoaded", registry);
+      areFeetLoaded = new YoBoolean("areFeetLoaded_" + suffix, registry);
+      weightPerFootForLoaded = new YoDouble("weightPerFootForLoaded_" + suffix, registry);
       weightPerFootForLoaded.set(gravityZ * totalMass * MINIMUM_WEIGHT_FRACTION);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoDouble prepFootFz = new YoDouble("prep" + robotSide.getCamelCaseName() + "FootFz", registry);
+         YoDouble prepFootFz = new YoDouble("prep" + robotSide.getCamelCaseName() + "FootFz_" + suffix, registry);
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prep" + robotSide.getCamelCaseName()
-                                                                                                             + "FootFzAverage",
+                                                                                                             + "FootFzAverage_" + suffix,
                                                                                                              windowSize,
                                                                                                              prepFootFz,
                                                                                                              registry);
