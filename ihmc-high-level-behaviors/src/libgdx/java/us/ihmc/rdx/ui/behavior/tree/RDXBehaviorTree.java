@@ -22,6 +22,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -155,6 +156,32 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    {
       ImGui.beginMenuBar();
       fileMenu.renderFileMenu(rootNode, nodeCreationMenu);
+      if (ImGui.beginMenu(labels.get("View")))
+      {
+         if (rootNode != null)
+         {
+            ImGui.text("Progress Widgets:");
+
+            RDXActionProgressWidgetsManager manager = rootNode.getProgressWidgetsManager();
+            if (ImGui.menuItem(labels.get("Time Only"), null, manager.getTimeOnly()))
+            {
+               manager.setTimeOnly(true);
+            }
+            boolean renderAsPlots = manager.getRenderAsPlots();
+            if (ImGui.menuItem(labels.get("Progress Bars"), null, !manager.getTimeOnly() && !renderAsPlots))
+            {
+               manager.setTimeOnly(false);
+               manager.setRenderAsPlots(false);
+            }
+            if (ImGui.menuItem(labels.get("Scrolling Plots"), null, !manager.getTimeOnly() && renderAsPlots))
+            {
+               manager.setTimeOnly(false);
+               manager.setRenderAsPlots(true);
+            }
+         }
+
+         ImGui.endMenu();
+      }
    }
 
    protected void renderImGuiWidgetsPost()

@@ -13,13 +13,19 @@ import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * Renders action execution status tracking UI elements.
+ *
+ * TODO: Add even more compressed representation. Radial plots.
+ */
 public class RDXActionProgressWidgetsManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final SortedSet<RDXActionNode<?, ?>> sortedActionNodesToRender = new TreeSet<>(Comparator.comparingInt(node -> node.getState().getLeafIndex()));
    private final ArrayList<RDXActionNode<?, ?>> actionNodesToRender = new ArrayList<>();
-   private boolean renderAsPlots = true;
+   private boolean renderAsPlots = true; // TODO: Save to JSON
+   private boolean timeOnly = false;
    private int emptyPlotIndex;
    private int numberOfLines;
 
@@ -52,6 +58,7 @@ public class RDXActionProgressWidgetsManager
       }
       boolean showPosePlots = containsFootsteps || containsHandMovements;
 
+      ImGui.spacing();
       widgetAligner.text("Expected time remaining:");
       float dividedBarWidth = computeDividedBarWidth(); // Must be computed after above text
       handleRenderingBlankBar(false);
@@ -63,95 +70,98 @@ public class RDXActionProgressWidgetsManager
       ++numberOfLines;
       ImGui.spacing();
 
-      if (containsFootsteps)
+      if (!timeOnly)
       {
-         widgetAligner.text("Footstep completion:");
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
+         if (containsFootsteps)
          {
-            actionNodesToRender.get(i).getProgressWidgets().renderFootstepCompletion(dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
+            widgetAligner.text("Footstep completion:");
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               actionNodesToRender.get(i).getProgressWidgets().renderFootstepCompletion(dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
          }
-         ++numberOfLines;
-         ImGui.spacing();
+
+         if (showPosePlots)
+         {
+            widgetAligner.text("Position error (m):");
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+                  actionNodesToRender.get(i).getProgressWidgets().renderFootPositions(dividedBarWidth, renderAsPlots);
+               else
+                  actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
+
+            widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
+                  actionNodesToRender.get(i).getProgressWidgets().renderFootOrientations(dividedBarWidth, renderAsPlots);
+               else
+                  actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
+         }
+
+         if (containsHandMovements)
+         {
+            widgetAligner.text("Hand force (N):");
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               actionNodesToRender.get(i).getProgressWidgets().renderHandForce(dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
+
+            widgetAligner.text("Hand torque (Nm):");
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               actionNodesToRender.get(i).getProgressWidgets().renderHandTorque(dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
+         }
+
+         if (containsHandConfiguration)
+         {
+            widgetAligner.text("Knuckle X1 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(0, dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
+
+            widgetAligner.text("Knuckle X2 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
+            handleRenderingBlankBar(true);
+            for (int i = 0; i < actionNodesToRender.size(); i++)
+            {
+               actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(1, dividedBarWidth, renderAsPlots);
+               sameLineExceptLast(i);
+            }
+            ++numberOfLines;
+            ImGui.spacing();
+         }
       }
 
-      if (showPosePlots)
-      {
-         widgetAligner.text("Position error (m):");
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
-         {
-            if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
-               actionNodesToRender.get(i).getProgressWidgets().renderFootPositions(dividedBarWidth, renderAsPlots);
-            else
-               actionNodesToRender.get(i).getProgressWidgets().renderPositionError(dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
-         }
-         ++numberOfLines;
-         ImGui.spacing();
-
-         widgetAligner.text("Orientation error (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
-         {
-            if (actionNodesToRender.get(i) instanceof RDXFootstepPlanAction)
-               actionNodesToRender.get(i).getProgressWidgets().renderFootOrientations(dividedBarWidth, renderAsPlots);
-            else
-               actionNodesToRender.get(i).getProgressWidgets().renderOrientationError(dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
-         }
-         ++numberOfLines;
-         ImGui.spacing();
-      }
-
-      if (containsHandMovements)
-      {
-         widgetAligner.text("Hand force (N):");
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
-         {
-            actionNodesToRender.get(i).getProgressWidgets().renderHandForce(dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
-         }
-         ++numberOfLines;
-         ImGui.spacing();
-
-         widgetAligner.text("Hand torque (Nm):");
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
-         {
-            actionNodesToRender.get(i).getProgressWidgets().renderHandTorque(dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
-         }
-         ++numberOfLines;
-         ImGui.spacing();
-      }
-
-      if (containsHandConfiguration)
-      {
-         widgetAligner.text("Knuckle X1 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
-         {
-            actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(0, dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
-         }
-         ++numberOfLines;
-         ImGui.spacing();
-
-         widgetAligner.text("Knuckle X2 (%s):".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL));
-         handleRenderingBlankBar(true);
-         for (int i = 0; i < actionNodesToRender.size(); i++)
-         {
-            actionNodesToRender.get(i).getProgressWidgets().renderJointspacePositionError(1, dividedBarWidth, renderAsPlots);
-            sameLineExceptLast(i);
-         }
-         ++numberOfLines;
-         ImGui.spacing();
-      }
-
-      while (numberOfLines < 5)
+      while (numberOfLines < (timeOnly ? 1 : 5))
       {
          widgetAligner.text("");
          renderBlankBar(true);
@@ -191,6 +201,16 @@ public class RDXActionProgressWidgetsManager
    private void renderBlankBar(boolean supportsPlots)
    {
       RDXActionProgressWidgets.renderBlankProgress(labels.get("Empty Plot", emptyPlotIndex++), ImGui.getColumnWidth(), renderAsPlots, supportsPlots);
+   }
+
+   public boolean getTimeOnly()
+   {
+      return timeOnly;
+   }
+
+   public void setTimeOnly(boolean timeOnly)
+   {
+      this.timeOnly = timeOnly;
    }
 
    public boolean getRenderAsPlots()

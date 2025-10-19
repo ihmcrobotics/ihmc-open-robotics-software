@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.flag.ImGuiCond;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.commons.thread.ThreadTools;
@@ -25,7 +25,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RDXActionProgressWidgets
 {
-   public static final float PROGRESS_BAR_HEIGHT = 18.0f;
    public static final float PLOT_HEIGHT = 40.0f;
    public static final int MAX_WAYPOINTS = 500;
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -152,7 +151,7 @@ public class RDXActionProgressWidgets
       double nominalDuration = action.getState().getNominalExecutionDuration();
       double percentComplete = elapsedExecutionTime / nominalDuration;
       double percentLeft = 1.0 - percentComplete;
-      ImGui.progressBar((float) percentLeft, dividedBarWidth, PROGRESS_BAR_HEIGHT, "%.2f / %.2f".formatted(elapsedExecutionTime, nominalDuration));
+      ImGui.progressBar((float) percentLeft, dividedBarWidth, progressBarHeight(), "%.2f / %.2f".formatted(elapsedExecutionTime, nominalDuration));
    }
 
    public void renderPositionError(float dividedBarWidth, boolean renderAsPlots)
@@ -198,7 +197,7 @@ public class RDXActionProgressWidgets
             double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
             double toleranceMarkPercent = tolerance / barEndValue;
             double percentLeft = currentToEnd / barEndValue;
-            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+            ImGuiTools.markedProgressBar(progressBarHeight(),
                                          dividedBarWidth,
                                          dataColor,
                                          percentLeft,
@@ -255,7 +254,7 @@ public class RDXActionProgressWidgets
             double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
             double toleranceMarkPercent = tolerance / barEndValue;
             double percentLeft = currentToEnd / barEndValue;
-            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+            ImGuiTools.markedProgressBar(progressBarHeight(),
                                          dividedBarWidth,
                                          dataColor,
                                          percentLeft,
@@ -312,7 +311,7 @@ public class RDXActionProgressWidgets
             double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
             double toleranceMarkPercent = tolerance / barEndValue;
             double percentLeft = currentToEnd / barEndValue;
-            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+            ImGuiTools.markedProgressBar(progressBarHeight(),
                                          dividedBarWidth,
                                          dataColor,
                                          percentLeft,
@@ -351,7 +350,7 @@ public class RDXActionProgressWidgets
          }
          else
          {
-            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, dividedBarWidth, dataColor, force / limit, 0.5, "%.2f".formatted(force));
+            ImGuiTools.markedProgressBar(progressBarHeight(), dividedBarWidth, dataColor, force / limit, 0.5, "%.2f".formatted(force));
          }
       }
       else
@@ -385,7 +384,7 @@ public class RDXActionProgressWidgets
          }
          else
          {
-            ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT, dividedBarWidth, dataColor, torque / limit, 0.5, "%.2f".formatted(torque));
+            ImGuiTools.markedProgressBar(progressBarHeight(), dividedBarWidth, dataColor, torque / limit, 0.5, "%.2f".formatted(torque));
          }
       }
       else
@@ -412,7 +411,7 @@ public class RDXActionProgressWidgets
          }
          else
          {
-            ImGui.progressBar((float) percentLeft, dividedBarWidth, PROGRESS_BAR_HEIGHT, overlay);
+            ImGui.progressBar((float) percentLeft, dividedBarWidth, progressBarHeight(), overlay);
          }
       }
       else
@@ -465,7 +464,7 @@ public class RDXActionProgressWidgets
                double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
                double toleranceMarkPercent = tolerance / barEndValue;
                double percentLeft = currentToEnd / barEndValue;
-               ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+               ImGuiTools.markedProgressBar(progressBarHeight(),
                                             halfDividedBarWidth,
                                             dataColor,
                                             percentLeft,
@@ -527,7 +526,7 @@ public class RDXActionProgressWidgets
                double barEndValue = Math.max(Math.min(initialToEnd, currentToEnd), 2.0 * tolerance);
                double toleranceMarkPercent = tolerance / barEndValue;
                double percentLeft = currentToEnd / barEndValue;
-               ImGuiTools.markedProgressBar(PROGRESS_BAR_HEIGHT,
+               ImGuiTools.markedProgressBar(progressBarHeight(),
                                             halfDividedBarWidth,
                                             dataColor,
                                             percentLeft,
@@ -554,11 +553,16 @@ public class RDXActionProgressWidgets
    {
       if (renderAsPlots && supportsPlots)
       {
-         ImPlotTools.renderEmptyPlotArea(emptyPlotLabel, width, RDXActionProgressWidgets.PLOT_HEIGHT);
+         ImPlotTools.renderEmptyPlotArea(emptyPlotLabel, width, PLOT_HEIGHT);
       }
       else
       {
-         ImGui.progressBar(Float.NaN, width, RDXActionProgressWidgets.PROGRESS_BAR_HEIGHT, "");
+         ImGui.progressBar(Float.NaN, width, progressBarHeight(), "");
       }
+   }
+
+   private static float progressBarHeight()
+   {
+      return 1.2f * ImGui.getTextLineHeight();
    }
 }
