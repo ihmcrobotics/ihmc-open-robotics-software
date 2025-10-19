@@ -132,7 +132,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       lineMin.y = indentMin.y;
       lineMax.set(indentMin.x + ImGui.getContentRegionAvailX(), lineMin.y + ImGui.getFrameHeight());
 
-      mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getFrameHeight());
+      boolean lineHovered = ImGui.isWindowHovered();
+      lineHovered &= ImGui.getMousePosX() > lineMin.x && ImGui.getMousePosX() <= lineMax.x;
+      lineHovered &= ImGui.getMousePosY() > lineMin.y && ImGui.getMousePosY() <= lineMax.y;
+
+      mouseHoveringNodeLine = lineHovered;
       if (mouseHoveringNodeLine)
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
 
