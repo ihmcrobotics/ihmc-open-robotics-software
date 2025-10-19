@@ -6,6 +6,7 @@ import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXSakeHandCommandAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
+import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTree;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;
@@ -20,12 +21,11 @@ import java.util.TreeSet;
  */
 public class RDXActionProgressWidgetsManager
 {
+   public enum Type { TIME_ONLY, PROGRESS_BARS, SCROLLING_PLOTS }
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final SortedSet<RDXActionNode<?, ?>> sortedActionNodesToRender = new TreeSet<>(Comparator.comparingInt(node -> node.getState().getLeafIndex()));
    private final ArrayList<RDXActionNode<?, ?>> actionNodesToRender = new ArrayList<>();
-   private boolean renderAsPlots = true; // TODO: Save to JSON
-   private boolean timeOnly = false;
    private int emptyPlotIndex;
    private int numberOfLines;
 
@@ -70,6 +70,8 @@ public class RDXActionProgressWidgetsManager
       ++numberOfLines;
       ImGui.spacing();
 
+      boolean timeOnly = RDXBehaviorTree.SETTINGS.getProgressWidgetsType() == Type.TIME_ONLY;
+      boolean renderAsPlots = RDXBehaviorTree.SETTINGS.getProgressWidgetsType() == Type.SCROLLING_PLOTS;
       if (!timeOnly)
       {
          if (containsFootsteps)
@@ -200,27 +202,8 @@ public class RDXActionProgressWidgetsManager
 
    private void renderBlankBar(boolean supportsPlots)
    {
+      boolean renderAsPlots = RDXBehaviorTree.SETTINGS.getProgressWidgetsType() == Type.SCROLLING_PLOTS;
       RDXActionProgressWidgets.renderBlankProgress(labels.get("Empty Plot", emptyPlotIndex++), ImGui.getColumnWidth(), renderAsPlots, supportsPlots);
-   }
-
-   public boolean getTimeOnly()
-   {
-      return timeOnly;
-   }
-
-   public void setTimeOnly(boolean timeOnly)
-   {
-      this.timeOnly = timeOnly;
-   }
-
-   public boolean getRenderAsPlots()
-   {
-      return renderAsPlots;
-   }
-
-   public void setRenderAsPlots(boolean renderAsPlots)
-   {
-      this.renderAsPlots = renderAsPlots;
    }
 
    public SortedSet<RDXActionNode<?, ?>> getActionNodesToRender()

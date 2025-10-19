@@ -22,7 +22,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -30,6 +30,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 {
+   public static final RDXBehaviorTreeSettings SETTINGS = new RDXBehaviorTreeSettings();
    private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -44,8 +45,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
-   /** 60% seems to be the desirable ratio for the visible area of the tree view vs the settings area */
-   private float treeExplorerPercentage = 0.6f;
    private boolean draggingDivider;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
@@ -161,23 +160,12 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
          if (rootNode != null)
          {
             ImGui.text("Progress Widgets:");
-
-            RDXActionProgressWidgetsManager manager = rootNode.getProgressWidgetsManager();
-            if (ImGui.menuItem(labels.get("Time Only"), null, manager.getTimeOnly()))
-            {
-               manager.setTimeOnly(true);
-            }
-            boolean renderAsPlots = manager.getRenderAsPlots();
-            if (ImGui.menuItem(labels.get("Progress Bars"), null, !manager.getTimeOnly() && !renderAsPlots))
-            {
-               manager.setTimeOnly(false);
-               manager.setRenderAsPlots(false);
-            }
-            if (ImGui.menuItem(labels.get("Scrolling Plots"), null, !manager.getTimeOnly() && renderAsPlots))
-            {
-               manager.setTimeOnly(false);
-               manager.setRenderAsPlots(true);
-            }
+            if (ImGui.menuItem(labels.get("Time Only"), null, SETTINGS.getProgressWidgetsType() == Type.TIME_ONLY))
+               SETTINGS.setProgressWidgetsType(Type.TIME_ONLY);
+            if (ImGui.menuItem(labels.get("Progress Bars"), null, SETTINGS.getProgressWidgetsType() == Type.PROGRESS_BARS))
+               SETTINGS.setProgressWidgetsType(Type.PROGRESS_BARS);
+            if (ImGui.menuItem(labels.get("Scrolling Plots"), null, SETTINGS.getProgressWidgetsType() == Type.SCROLLING_PLOTS))
+               SETTINGS.setProgressWidgetsType(Type.SCROLLING_PLOTS);
          }
 
          ImGui.endMenu();
@@ -199,6 +187,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
          });
 
          float remainingHeight = ImGui.getContentRegionAvailY();
+         float treeExplorerPercentage = SETTINGS.getTreeExplorerHeightPercentage();
          float treeExplorerHeight = anyNodeSelected ? remainingHeight * treeExplorerPercentage : remainingHeight;
 
          ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
@@ -216,6 +205,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
                   {
                      treeExplorerPercentage += ImGui.getIO().getMouseDeltaY() / remainingHeight;
                      treeExplorerPercentage = (float) MathTools.clamp(treeExplorerPercentage, 0.05f, 0.95f);
+                     SETTINGS.setTreeExplorerHeightPercentage(treeExplorerPercentage);
                      draggingDivider = true;
                   }
                }
