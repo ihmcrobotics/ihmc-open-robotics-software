@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
@@ -10,6 +11,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
@@ -20,6 +22,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    private BehaviorTreeNodeInsertionType insertionType = null;
    private RDXBehaviorTreeNode<?, ?> modalPopupNode;
    private final TypedNotification<Runnable> queuePopupModal = new TypedNotification<>();
+   private RDXBehaviorTreeNode<?, ?> draggedNode = null;
 
    public RDXBehaviorTreeWidgetsVerticalLayout(RDXBehaviorTree behaviorTree)
    {
@@ -28,11 +31,35 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
       topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
    }
 
-   public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
+   public void renderImGuiWidgets()
+   {
+      renderImGuiWidgets(behaviorTree.getRootNode());
+
+      if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+         draggedNode = null;
+   }
+
+   private void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> node)
    {
       ImGui.pushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.getStyle().getItemSpacingX(), 0.0f);
 
+      node.setDraggedNode(draggedNode);
       node.renderTreeViewRow();
+
+      if (draggedNode == null && node.getDragging())
+         draggedNode = node;
+      if (node.getDragReleasedBefore())
+      {
+         RDXBaseUI.pushNotification("Moved %s to before %s".formatted(draggedNode.getDefinition().getName(), node.getDefinition().getName()));
+         topologyOperationQueue.queueMoveChildModify(draggedNode.getParent(), node.getParent(), draggedNode, node, BehaviorTreeNodeInsertionType.INSERT_BEFORE);
+         draggedNode = null;
+      }
+      else if (node.getDragReleasedAfter())
+      {
+         RDXBaseUI.pushNotification("Moved %s to after %s".formatted(draggedNode.getDefinition().getName(), node.getDefinition().getName()));
+         topologyOperationQueue.queueMoveChildModify(draggedNode.getParent(), node.getParent(), draggedNode, node, BehaviorTreeNodeInsertionType.INSERT_AFTER);
+         draggedNode = null;
+      }
 
       ImGui.popStyleVar();
 

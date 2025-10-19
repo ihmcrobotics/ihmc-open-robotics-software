@@ -57,6 +57,10 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private final ImGuiScrollableLogArea logArea = new ImGuiScrollableLogArea();
+   private RDXBehaviorTreeNode<?, ?> draggedNode = null;
+   private boolean dragging = false;
+   private boolean dragReleasedBefore = false;
+   private boolean dragReleasedAfter = false;
 
    /** For extending types. */
    public RDXBehaviorTreeNode(S state)
@@ -132,13 +136,43 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       lineMin.y = indentMin.y;
       lineMax.set(indentMin.x + ImGui.getContentRegionAvailX(), lineMin.y + ImGui.getFrameHeight());
 
-      boolean lineHovered = ImGui.isWindowHovered();
-      lineHovered &= ImGui.getMousePosX() > lineMin.x && ImGui.getMousePosX() <= lineMax.x;
-      lineHovered &= ImGui.getMousePosY() > lineMin.y && ImGui.getMousePosY() <= lineMax.y;
-
-      mouseHoveringNodeLine = lineHovered;
+      mouseHoveringNodeLine = ImGui.isWindowHovered();
+      mouseHoveringNodeLine &= ImGui.getMousePosX() > lineMin.x && ImGui.getMousePosX() <= lineMax.x;
+      mouseHoveringNodeLine &= ImGui.getMousePosY() > lineMin.y && ImGui.getMousePosY() <= lineMax.y;
+      dragging = false;
+      dragReleasedBefore = false;
+      dragReleasedAfter = false;
       if (mouseHoveringNodeLine)
+      {
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
+
+         if (!isRootNode())
+         {
+            if (ImGui.isMouseDragging(ImGuiMouseButton.Left))
+            {
+               float dragStartX = ImGui.getMousePosX() - ImGui.getMouseDragDeltaX();
+               float dragStartY = ImGui.getMousePosY() - ImGui.getMouseDragDeltaY();
+               if (dragStartX > lineMin.x && dragStartX <= lineMax.x && dragStartY > lineMin.y && dragStartY <= lineMax.y)
+                  dragging = true;
+            }
+            if (draggedNode != null && draggedNode != this)
+            {
+               float height = lineMax.y - lineMin.y;
+               if (ImGui.getMousePosY() - lineMin.y <= 0.5f * height)
+               {
+                  ImGui.getWindowDrawList().addRectFilled(indentMin.x, lineMin.y, lineMax.x, lineMin.y + 0.15f * height, ImGui.getColorU32(ImGuiCol.CheckMark));
+                  if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+                     dragReleasedBefore = true;
+               }
+               else
+               {
+                  ImGui.getWindowDrawList().addRectFilled(indentMin.x, lineMin.y + 0.85f * height, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.CheckMark));
+                  if (!ImGui.isMouseDown(ImGuiMouseButton.Left))
+                     dragReleasedAfter = true;
+               }
+            }
+         }
+      }
 
       float itemWidth = ImGui.getFontSize() * 1.0f;
       if (!getChildren().isEmpty()) // expand/collapse arrow
@@ -151,19 +185,15 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          {
             float offsetX = ImGui.getCursorScreenPosX() + ImGui.getFontSize() * 0.2f;
             float offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.4f;
-            ImGui.getWindowDrawList().addLine(offsetX, offsetY,
-                                              offsetX + halfHeight, offsetY + width, color);
-            ImGui.getWindowDrawList().addLine(offsetX + halfHeight, offsetY + width,
-                                              offsetX + halfHeight * 2.0f, offsetY, color);
+            ImGui.getWindowDrawList().addLine(offsetX, offsetY, offsetX + halfHeight, offsetY + width, color);
+            ImGui.getWindowDrawList().addLine(offsetX + halfHeight, offsetY + width, offsetX + halfHeight * 2.0f, offsetY, color);
          }
          else
          {
             float offsetX = ImGui.getCursorScreenPosX() + width;
             float offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.2f;
-            ImGui.getWindowDrawList().addLine(offsetX + width, offsetY + halfHeight,
-                                              offsetX, offsetY + halfHeight * 2.0f, color);
-            ImGui.getWindowDrawList().addLine(offsetX + width, offsetY + halfHeight,
-                                              offsetX, offsetY, color);
+            ImGui.getWindowDrawList().addLine(offsetX + width, offsetY + halfHeight, offsetX, offsetY + halfHeight * 2.0f, color);
+            ImGui.getWindowDrawList().addLine(offsetX + width, offsetY + halfHeight, offsetX, offsetY, color);
          }
          if (isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
@@ -347,6 +377,26 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public String getModalPopupID()
    {
       return modalPopupID;
+   }
+
+   public void setDraggedNode(RDXBehaviorTreeNode<?, ?> draggedNode)
+   {
+      this.draggedNode = draggedNode;
+   }
+
+   public boolean getDragging()
+   {
+      return dragging;
+   }
+
+   public boolean getDragReleasedBefore()
+   {
+      return dragReleasedBefore;
+   }
+
+   public boolean getDragReleasedAfter()
+   {
+      return dragReleasedAfter;
    }
 
    public List<RDXBehaviorTreeNode<?, ?>> getChildren()

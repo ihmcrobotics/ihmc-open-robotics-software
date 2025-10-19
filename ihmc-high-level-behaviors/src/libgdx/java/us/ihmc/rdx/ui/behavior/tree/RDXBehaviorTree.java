@@ -191,7 +191,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
          float treeExplorerHeight = anyNodeSelected ? remainingHeight * treeExplorerPercentage : remainingHeight;
 
          ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
-         treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
+         treeWidgetsVerticalLayout.renderImGuiWidgets();
          ImGui.endChild();
 
          if (rootNode != null && anyNodeSelected) // It can become null above
