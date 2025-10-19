@@ -6,10 +6,13 @@ import com.badlogic.gdx.utils.Pool;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiMouseCursor;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -42,6 +45,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    /** 60% seems to be the desirable ratio for the visible area of the tree view vs the settings area */
    private float treeExplorerPercentage = 0.6f;
+   private boolean draggingDivider;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -160,30 +164,38 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
          rootNode.renderExecutionControlAndProgressWidgets();
 
          anyNodeSelected = false;
-         RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node -> anyNodeSelected |= node.getSelected());
+         RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
+         {
+            anyNodeSelected |= node.getSelected();
+            if (node.getSelected())
+               selectedNode = node;
+         });
 
          float remainingHeight = ImGui.getContentRegionAvailY();
-         float treeExplorerHeight = remainingHeight * treeExplorerPercentage;
-         float nodeSettingsHeight = remainingHeight * (1.0f - treeExplorerPercentage);
+         float treeExplorerHeight = anyNodeSelected ? remainingHeight * treeExplorerPercentage : remainingHeight;
 
          ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
          ImGui.endChild();
 
-         if (rootNode != null) // It can become null above
+         if (rootNode != null && anyNodeSelected) // It can become null above
          {
-            anyNodeSelected = false;
-            RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
+            if (ImGuiTools.isItemHovered(ImGui.getColumnWidth(), ImGui.getTextLineHeight()) || draggingDivider)
             {
-               anyNodeSelected |= node.getSelected();
-               if (node.getSelected())
-                  selectedNode = node;
-            });
-
-            if (anyNodeSelected)
-               ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
-            else
-               ImGuiTools.separatorText("Node Settings");
+               if (!draggingDivider || ImGui.isMouseDown(ImGuiMouseButton.Left))
+               {
+                  ImGui.setMouseCursor(ImGuiMouseCursor.ResizeNS);
+                  if (ImGui.isMouseDragging(ImGuiMouseButton.Left, 0.1f)) // default threshold 0.3f is too much
+                  {
+                     treeExplorerPercentage += ImGui.getIO().getMouseDeltaY() / remainingHeight;
+                     treeExplorerPercentage = (float) MathTools.clamp(treeExplorerPercentage, 0.05f, 0.95f);
+                     draggingDivider = true;
+                  }
+               }
+               else
+                  draggingDivider = false;
+            }
+            ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
 
             ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());
             renderSelectedNodeSettingsWidgets(rootNode);
