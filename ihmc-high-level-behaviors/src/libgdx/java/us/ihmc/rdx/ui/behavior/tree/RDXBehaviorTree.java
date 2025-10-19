@@ -12,7 +12,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -41,7 +40,8 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
-   private boolean enableChildScrollableAreas;
+   /** 60% seems to be the desirable ratio for the visible area of the tree view vs the settings area */
+   private float treeExplorerPercentage = 0.6f;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -159,56 +159,16 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
       {
          rootNode.renderExecutionControlAndProgressWidgets();
 
-         float cursorYAfterControlWidgets = ImGui.getCursorPosY();
-
          anyNodeSelected = false;
          RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node -> anyNodeSelected |= node.getSelected());
 
-         float titleHeight = ImGui.getFrameHeightWithSpacing();
-         float menuBarHeight = ImGui.getFrameHeightWithSpacing();
-         float windowHeight = ImGui.getWindowHeight();
-         float availableHeight = windowHeight - titleHeight - menuBarHeight - cursorYAfterControlWidgets;
-         // There are ~9 rows of stuff in the screw primitive action settings,
-         // which is the tallest one currently. We could think of ways to improve on this.
-         float tallestNodeSettings = 9 * ImGui.getFrameHeightWithSpacing();
+         float remainingHeight = ImGui.getContentRegionAvailY();
+         float treeExplorerHeight = remainingHeight * treeExplorerPercentage;
+         float nodeSettingsHeight = remainingHeight * (1.0f - treeExplorerPercentage);
 
-         // 60% seems to be the desirable ratio for the visible area
-         // of the tree view vs the settings area
-         float treeExplorerPercentage = 0.6f;
-         float treeExplorerHeight = availableHeight * treeExplorerPercentage;
-         float nodeSettingsHeight = availableHeight * (1.0f - treeExplorerPercentage);
-
-         float treeContentStartY = ImGui.getCursorPosY();
-
-         if (enableChildScrollableAreas)
-            ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
-
+         ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
          treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
-
-         boolean updatedEnableChildScrollableAreas;
-         float treeContentHeight;
-         if (enableChildScrollableAreas)
-         {
-            float scrollMaxY = ImGui.getScrollMaxY();
-            float childWindowHeight = ImGui.getWindowHeight();
-            if (scrollMaxY == 0.0)
-               treeContentHeight = ImGui.getCursorPosY();
-            else
-               treeContentHeight = childWindowHeight + scrollMaxY;
-         }
-         else
-         {
-            treeContentHeight = ImGui.getCursorPosY() - treeContentStartY;
-         }
-         updatedEnableChildScrollableAreas = windowHeight - treeContentStartY - treeContentHeight < tallestNodeSettings;
-
-         if (enableChildScrollableAreas)
-            ImGui.endChild();
-
-         enableChildScrollableAreas = updatedEnableChildScrollableAreas;
-
-         ImGui.spacing();
-         ImGui.spacing();
+         ImGui.endChild();
 
          if (rootNode != null) // It can become null above
          {
@@ -225,13 +185,9 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
             else
                ImGuiTools.separatorText("Node Settings");
 
-            if (enableChildScrollableAreas)
-               ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, nodeSettingsHeight);
-
+            ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());
             renderSelectedNodeSettingsWidgets(rootNode);
-
-            if (enableChildScrollableAreas)
-               ImGui.endChild();
+            ImGui.endChild();
 
             if (ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S'))
             {
