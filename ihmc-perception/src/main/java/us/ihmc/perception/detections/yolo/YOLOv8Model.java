@@ -355,6 +355,9 @@ public class YOLOv8Model
                                                   cudaMemcpyDefault,
                                                   cudaStream));
 
+         // Ensure filtered detection count begins at 0
+         filteredDetectionCountPointer.put(0);
+
          // Calculate kernel launch dimensions
          blockDims.x(BLOCK_SIZE_1D);
          gridDims.x((unfilteredDetectionCount + BLOCK_SIZE_1D - 1) / BLOCK_SIZE_1D);

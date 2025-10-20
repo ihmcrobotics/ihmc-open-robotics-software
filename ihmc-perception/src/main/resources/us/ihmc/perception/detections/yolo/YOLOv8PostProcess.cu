@@ -37,9 +37,8 @@ __global__ void filterDetections(float* unfilteredDetection,
                                  float* filteredDetections,
                                  int* filteredDetectionCount)
 {
-    if (Utils::getThreadCoordX() == 0)
-        *filteredDetectionCount = 0;
-    __syncthreads();
+    // Filtered detection count should begin at 0
+    assert(*filteredDetectionCount == 0);
 
     int start = Utils::getThreadCoordX();
     int stride = Utils::getStrideX();
