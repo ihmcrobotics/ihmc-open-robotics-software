@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -15,6 +16,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -158,6 +161,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
+
+   // Status message output manager (handles publishing of CSG status info)
+   private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages());
+   private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
    // All things QFP
    private final YoEnum<ContinuousStepGeneratorMode> currentCSGMode = new YoEnum<>("currentCSGMode", registry, ContinuousStepGeneratorMode.class);
@@ -506,8 +513,46 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          }
       }
 
+      updateCSGStatusMessage();
+
       walkPreviousValue.set(walk.getValue());
       stepGeneratorTimer.stopMeasurement();
+   }
+
+   private void updateCSGStatusMessage()
+   {
+      //
+      csgStatusMessage.setIsWalking(isWalking.getBooleanValue());
+      csgStatusMessage.setIsInUnitVelocities(desiredVelocityProvider.isUnitVelocity());
+
+      // Current walking speed values
+      csgStatusMessage.setCurrentForwardVelocity(desiredVelocityProvider.getDesiredVelocity().getX());
+      csgStatusMessage.setCurrentLateralVelocity(desiredVelocityProvider.getDesiredVelocity().getY());
+      csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocityProvider.getTurningVelocity());
+
+      // Current swing parameter values
+      if (!footsteps.isEmpty())
+      {
+         csgStatusMessage.setCurrentSwingHeight(footsteps.get(0).getSwingHeight());
+         csgStatusMessage.setCurrentSwingDuration(footsteps.get(0).getSwingDuration());
+         csgStatusMessage.setCurrentTransferDuration(footsteps.get(0).getTransferDuration());
+      }
+      else
+      {
+         csgStatusMessage.setCurrentSwingHeight(parameters.getSwingHeight());
+         csgStatusMessage.setCurrentSwingDuration(parameters.getSwingDuration());
+         csgStatusMessage.setCurrentTransferDuration(parameters.getTransferDuration());
+      }
+
+      // Current step limit values
+      csgStatusMessage.setCurrentMaxStepLength(parameters.getMaxStepLength());
+      csgStatusMessage.setCurrentMaxStepWidth(parameters.getMaxStepWidth());
+      csgStatusMessage.setCurrentMinStepWidth(parameters.getMinStepWidth());
+      csgStatusMessage.setCurrentDefaultStepWidth(parameters.getDefaultStepWidth());
+      csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
+      csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
+
+      statusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
    private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,

@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -26,6 +27,7 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    private final ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory;
    private final VelocityBasedSteppingPluginFactory velocityPluginFactory;
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
+   private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages());
    private final List<Updatable> updatables = new ArrayList<>();
    private final List<Consumer<HeightMapCommand>> heightMapCommandConsumers = new ArrayList<>();
 
@@ -70,6 +72,12 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
       return commandInputManager;
+   }
+
+   @Override
+   public StatusMessageOutputManager getStepGeneratorStatusMessageOutputManager()
+   {
+      return statusMessageOutputManager;
    }
 
    @Override

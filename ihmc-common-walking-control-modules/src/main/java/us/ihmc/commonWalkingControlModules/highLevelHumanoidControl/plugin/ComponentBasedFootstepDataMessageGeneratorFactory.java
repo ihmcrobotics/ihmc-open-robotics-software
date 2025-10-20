@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,6 +31,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScriptField = new OptionalFactoryField<>("useHeadingAndVelocityScript", false);
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParametersField = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
+   private final OptionalFactoryField<StatusMessageOutputManager> csgStatusMessageOutputManagerField = new OptionalFactoryField<>("csgStatusMessageOutputManagerField");
    private final OptionalFactoryField<Boolean> createSupportFootBasedFootstepAdjustment = new OptionalFactoryField<>("csgCreateSupportFootBasedFootstepAdjustment");
    /** This is used only when the support foot based footstep adjustment is created. */
    private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
@@ -114,6 +116,15 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
          return csgCommandInputManagerField.get();
       else
          return setStepGeneratorCommandInputManager();
+   }
+
+   @Override
+   public StatusMessageOutputManager getStepGeneratorStatusMessageOutputManager()
+   {
+      if (!csgStatusMessageOutputManagerField.hasValue())
+         csgStatusMessageOutputManagerField.set(new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages()));
+
+      return csgStatusMessageOutputManagerField.get();
    }
 
    @Override
