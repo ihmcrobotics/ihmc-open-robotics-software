@@ -15,7 +15,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2c2e648db9eb1f37646487b193ba30d127ca92c8be6045b76d3c234fb4b30a6b";
+   		return "fb7486a794826198bfa1078ad6cf8f496ff71fae65aa6be845725372f07553e8";
    }
    
    @Override

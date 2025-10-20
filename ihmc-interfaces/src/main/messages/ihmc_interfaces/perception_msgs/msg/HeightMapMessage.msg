@@ -19,4 +19,4 @@ float64 cell_size_in_meters
 int32 cells_per_axis
 
 # List of heights, which correspond to the list of keys
-float32[<=255000] heights
+byte[<=255000] heights
