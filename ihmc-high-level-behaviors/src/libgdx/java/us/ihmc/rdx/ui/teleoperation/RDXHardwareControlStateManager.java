@@ -220,4 +220,18 @@ public class RDXHardwareControlStateManager
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
       communicationHelper.publishToController(highLevelStateMessage);
    }
+
+   public void sendDoNothingRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendExitWalkingRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_WALKING.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
+   }
 }

@@ -21,6 +21,8 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
                                  OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null),
    V1_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
 
+   private static final String V1_RESOURCE_DIRECTORY = "alexander_V1_description/";
+
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
    private final Collection<String> hardwareMapResources;
@@ -38,6 +40,12 @@ public enum OpenAlexanderVersion implements AlexanderVersionInterface
    {
       this.urdfModelPath = urdfModelPath;
       this.hardwareMapResources = hardwareMapResources;
+   }
+
+   @Override
+   public String getRobotModelResourceDirectory()
+   {
+      return V1_RESOURCE_DIRECTORY;
    }
 
    @Override

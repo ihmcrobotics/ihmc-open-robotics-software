@@ -84,6 +84,14 @@ public class AvatarLowLevelOutputProcessor
                                     }
                                  });
 
+      masterGain.addListener(value ->
+                             {
+                                if (masterGain.getDoubleValue() < 1.0)
+                                   isServod.set(false);
+                                else
+                                   isServod.set(true);
+                             });
+
       parentRegistry.addChild(registry);
    }
 
