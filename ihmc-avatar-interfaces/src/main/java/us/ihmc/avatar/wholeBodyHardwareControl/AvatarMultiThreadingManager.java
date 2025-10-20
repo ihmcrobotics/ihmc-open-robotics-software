@@ -494,6 +494,7 @@ public class AvatarMultiThreadingManager
    public void addPostEstimatorThreadRunnable(Runnable runnable)
    {
       postEstimatorThreadRunnables.add(runnable);
+      System.out.println("Added!! 7777777777777777777777777777777777777777777777777777");
    }
 
    public void addPreControllerThreadRunnable(Runnable runnable)

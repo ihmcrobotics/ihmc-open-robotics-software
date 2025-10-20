@@ -110,7 +110,7 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
-   private final IntraprocessYoVariableLogger intraprocessYoVariableLogger;
+   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -167,27 +167,6 @@ public class AvatarMultiThreadingFactory
                                                            lowLevelOutputProcessor,
                                                            standPrepStateFactory,
                                                            freezeStateFactory);
-
-      ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-      builders.add(new RegistrySendBufferBuilder(estimatorThreadFactory.getEstimatorRegistry(),
-                                                 estimatorThreadFactory.getEstimatorFullRobotModel().getElevator(),
-                                                 null));
-      builders.add(new RegistrySendBufferBuilder(controllerFactory.getHighLevelHumanoidControllerToolbox().getYoVariableRegistry(),
-                                                 null,
-                                                 (YoGraphicGroupDefinition) controllerFactory.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics()));
-      builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
-      builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
-
-      // Setup logger
-      intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
-      intraprocessYoVariableLogger.start();
-
-      threadingManager.get()
-                      .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
-                                                                                                               .getHumanoidRobotContextData()
-                                                                                                               .getTimestamp()));
-
-
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
@@ -260,6 +239,27 @@ public class AvatarMultiThreadingFactory
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
+
+      ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+      builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
+//      builders.add(new RegistrySendBufferBuilder(estimatorThread.get().getYoRegistry(), estimatorThread.get().getFullRobotModel().getElevator(), null));
+      builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
+      builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+//      builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+
+      // Setup logger
+      intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
+      intraprocessYoVariableLogger.start();
+
+      threadingManager.get().addPostEstimatorThreadRunnable(() ->
+                                                            {
+                                                               System.out.println("runing...");
+
+                                                               intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                                  .getHumanoidRobotContextData()
+                                                                                                                  .getTimestamp());
+                                                            });
+
 
       return threadingManager.get();
    }
