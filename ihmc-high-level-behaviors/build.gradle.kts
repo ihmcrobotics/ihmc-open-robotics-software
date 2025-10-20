@@ -19,6 +19,7 @@ mainDependencies {
    }
    api("us.ihmc:promp-java:1.0.2")
    api("us.ihmc:llama.cpp-javacpp:b4829-1")
+   api("org.msgpack:msgpack-core:0.9.10") // openpi client
 }
 
 libgdxDependencies {
