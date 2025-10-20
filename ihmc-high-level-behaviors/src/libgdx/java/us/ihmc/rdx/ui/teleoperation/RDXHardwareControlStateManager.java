@@ -73,8 +73,8 @@ public class RDXHardwareControlStateManager
          boolean servoRobot = ImGui.button(labels.get("Servo Robot"));
          changed |= servoRobot;
          ImGui.sameLine();
-         boolean unservoQuickly = ImGui.button(labels.get("Unservo Quickly"));
-         changed |= unservoQuickly;
+         boolean unservoSlowly = ImGui.button(labels.get("Unservo Slowly"));
+         changed |= unservoSlowly;
          ImGui.popStyleColor(2);
 
          boolean eStopChanged = ImGui.button(labels.get("SOFT-E-STOP"));
@@ -85,7 +85,7 @@ public class RDXHardwareControlStateManager
             hardwareCommandMessage.setEstop(estop.get());
             hardwareCommandMessage.setDesiredMasterGain(desiredMasterGain.get());
             hardwareCommandMessage.setServoRobot(servoRobot);
-            hardwareCommandMessage.setUnservoQuickly(unservoQuickly);
+            hardwareCommandMessage.setUnservoQuickly(unservoSlowly);
             communicationHelper.publishToController(hardwareCommandMessage);
          }
       }
