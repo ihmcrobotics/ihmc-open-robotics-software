@@ -55,7 +55,6 @@ public class GpuMappingThread extends RepeatingTaskThread
                            DepthImageFilteringParameters depthImageFilteringParameters)
    {
       super(GpuMappingThread.class.getSimpleName());
-      super.setFrequencyLimit(60.0);
       this.rawImageCollection = rawImageCollection;
       this.heightMapParameters = heightMapParameters;
 
