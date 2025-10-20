@@ -141,6 +141,7 @@ public class TerrainMapExtractor
 
       // This has to be done because we start to download to the CPU, so the data on the GPU needs to be finalized
       error = cudaStreamSynchronize(stream);
+      terrainKernelGridDim.close();
       CUDATools.checkCUDAError(error);
 
       // --------------------------- Download all the data from the GPU and set the terrain data object ----------------------------
@@ -205,7 +206,6 @@ public class TerrainMapExtractor
    {
       terrainMapProgram.close();
       terrainMapKernel.close();
-      terrainKernelGridDim.close();
       blockSize.close();
 
       normalXMat.close();

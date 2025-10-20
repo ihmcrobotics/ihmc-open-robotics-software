@@ -243,10 +243,8 @@ public class GpuMappingManager
    {
       compressedHeightMapPointer.close();
       heightMapMessagePublisher.remove();
-      if (processParameters.getPublishHeightMap())
-         heightMapExtractor.destroy();
-      if (processParameters.getPublishTerrainMap())
-         terrainMapExtractor.destroy();
+      heightMapExtractor.destroy();
+      terrainMapExtractor.destroy();
       chunkedMapManager.destroy();
    }
 }
