@@ -158,8 +158,10 @@ public class RDXTeleoperationManager extends RDXPanel
                                   YoVariableClientHelper yoVariableClientHelper)
    {
       super("Teleoperation");
-
       setRenderMethod(this::renderImGuiWidgets);
+
+      this.syncedRobot = syncedRobot;
+
       addChild(teleoperationParametersTuner);
       robotModel = communicationHelper.getRobotModel();
       hasHead = robotModel.getRobotVersion().hasHead();
@@ -174,8 +176,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
-
-      this.syncedRobot = syncedRobot;
 
       hardwareControlStateManager = new RDXHardwareControlStateManager(communicationHelper);
 
@@ -413,7 +413,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
    public void update()
    {
-      syncedRobot.update();
       desiredRobot.update();
       dofsWidgets.getDesiredRobot().update();
 
