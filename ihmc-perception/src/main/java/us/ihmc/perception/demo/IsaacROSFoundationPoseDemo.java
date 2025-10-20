@@ -7,7 +7,6 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
-import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseManager;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -15,6 +14,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
+import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
 public class IsaacROSFoundationPoseDemo
@@ -23,13 +23,11 @@ public class IsaacROSFoundationPoseDemo
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
-   private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT,  peerClockOffsetEstimator);
 
    private final RawImagePublisher imagePublisher = new RawImagePublisher(ros2Node, 0.5);
 
    private final ZEDImageSensor zedImageSensor;
 
-   private final DetectionManager detectionManager;
    private final IsaacROSFoundationPoseManager foundationPoseManager;
    private final YOLOv8DetectionExecutor yoloExecutor;
 
@@ -37,18 +35,17 @@ public class IsaacROSFoundationPoseDemo
 
    private IsaacROSFoundationPoseDemo()
    {
-//      zedImageSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
-      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
+      zedImageSensor = new ZEDSVOPlaybackSensor(0, ZEDModelData.ZED_2I, zed.SL_DEPTH_MODE_NEURAL_LIGHT, SVO_FILE);
+//      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_X_MINI, zed.SL_INPUT_TYPE_GMSL, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_SVGA, 15);
 //      zedImageSensor = new ZEDImageSensor(0, ZEDModelData.ZED_2, zed.SL_INPUT_TYPE_USB, zed.SL_DEPTH_MODE_NEURAL, zed.SL_RESOLUTION_HD720, 15);
       zedImageSensor.enablePositionalTracking(true);
       zedImageSensor.setSensorFrame(zedImageSensor.getTrackedSensorFrame());
       zedImageSensor.run(true);
 
-      detectionManager = new DetectionManager(ros2Node);
+      CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator);
       foundationPoseManager = new IsaacROSFoundationPoseManager(crdtInfo);
 
       yoloExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator), () -> true);
-      yoloExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
       yoloExecutor.addDetectionConsumerCallback(foundationPoseManager::updateDetections);
       yoloExecutor.disableAllModels();
 
@@ -75,9 +72,6 @@ public class IsaacROSFoundationPoseDemo
 
          // Run YOLO using the color image
          yoloExecutor.runNextEnabledModel(color, depth);
-
-         // Update the detection manager
-         detectionManager.updateDetections();
 
          // Update FoundationPose manager
          foundationPoseManager.update();
