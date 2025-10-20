@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -60,6 +61,8 @@ public class TerrainPlanningDebugger
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
 
+   private final Throttler visualizationThrottler = new Throttler();
+
    private Mat contactHeatMapImage;
 
    public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
@@ -67,6 +70,8 @@ public class TerrainPlanningDebugger
       this.parameters = parameters;
       if (ros2Node != null)
       {
+         visualizationThrottler.setFrequency(10.0);
+
          plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.PLANNED_FOOTSTEPS);
          statusPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_WALKING_STATUS);
          monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousHikingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
@@ -240,12 +245,15 @@ public class TerrainPlanningDebugger
 
    public void resetVisualizationForUIPublisher()
    {
-      PoseListMessage poseListMessage = new PoseListMessage();
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      if (visualizationThrottler.run())
+      {
+         PoseListMessage poseListMessage = new PoseListMessage();
+         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
-      startAndGoalPublisherForUI.publish(poseListMessage);
-      monteCarloNodesPublisherForUI.publish(poseListMessage);
-      plannedFootstesPublisherForUI.publish(footstepDataListMessage);
+         startAndGoalPublisherForUI.publish(poseListMessage);
+         monteCarloNodesPublisherForUI.publish(poseListMessage);
+         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
+      }
    }
 
    public void publishStartAndGoalForVisualization(SideDependentList<FramePose3D> startPoses, SideDependentList<FramePose3D> goalPoses)
