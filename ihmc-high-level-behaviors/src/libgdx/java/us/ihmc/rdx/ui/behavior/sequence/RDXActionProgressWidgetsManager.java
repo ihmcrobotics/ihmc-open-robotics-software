@@ -21,7 +21,15 @@ import java.util.TreeSet;
  */
 public class RDXActionProgressWidgetsManager
 {
-   public enum Type { TIME_ONLY, PROGRESS_BARS, SCROLLING_PLOTS }
+   public enum Type
+   {
+      /** Show only the estimated time remaining as a progress bar.. */
+      TIME_ONLY,
+      /** Show progress bars which are more compact than full plots. */
+      PROGRESS_BARS,
+      /** Show full side scrolling plots which show more information about execution but take up more space. */
+      SCROLLING_PLOTS
+   }
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final SortedSet<RDXActionNode<?, ?>> sortedActionNodesToRender = new TreeSet<>(Comparator.comparingInt(node -> node.getState().getLeafIndex()));
