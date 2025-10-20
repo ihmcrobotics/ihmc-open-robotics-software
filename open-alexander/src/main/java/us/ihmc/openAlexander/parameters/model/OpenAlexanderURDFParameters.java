@@ -35,13 +35,40 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
    public static final String URDF_LEFT_ARM_NUB_FOREARM = "alexander_v0.leftArmFixedForearm.urdf";
    public static final String URDF_RIGHT_ARM_NUB_FOREARM = "alexander_v0.rightArmFixedForearm.urdf";
 
-   // Model paths are represented as Strings because resource paths should always be separated with "/" -- this is not platform dependent
-   private final Collection<String> urdfModelPath;
+   private final String[] robotModelResourceDirectory = new String[1];
+   private final String[] urdfResourceDirectories;
+   private final String[] urdfResourcesWithPath;
+
+   private final URDFTools.URDFParserProperties urdfParserProperties = new URDFTools.URDFParserProperties();
 
    public OpenAlexanderURDFParameters(AlexanderVersionInterface alexanderVersion)
    {
-      urdfModelPath = alexanderVersion.getURDFDescriptionResources();
-   }
+      urdfParserProperties.setHandleImplicitJointDefinitions(false);
+
+      // Directory containing all robot model resources for the given robot version
+      robotModelResourceDirectory[0] = alexanderVersion.getRobotModelResourceDirectory();
+
+      // List of directories containing robot model URDF resources for the given robot version
+      List<String> urdfResourceDirectoriesList = new ArrayList<>();
+      urdfResourceDirectoriesList.add(alexanderVersion.getRobotModelResourceDirectory());
+      urdfResourceDirectoriesList.add(alexanderVersion.getRobotModelResourceDirectory() + "urdf" + '/');
+      urdfResourceDirectoriesList.add(alexanderVersion.getRobotModelResourceDirectory() + "meshes" + '/');
+      urdfResourceDirectories = urdfResourceDirectoriesList.toArray(new String[0]);
+
+      // List of urdf files and their path within the robot model resource directory for the given robot version
+      List<String> urdfResourcesWithPathList = new ArrayList<>();
+      for(String file : alexanderVersion.getURDFDescriptionResources())
+      {
+         String urdfResource;
+         if (file.contains("ezGripper/") || file.contains("abilityHand/"))
+            urdfResource = file;
+         else
+            urdfResource = alexanderVersion.getRobotModelResourceDirectory() + "urdf" + '/' + file;
+
+         urdfResourcesWithPathList.add(urdfResource);
+      }
+
+      urdfResourcesWithPath = urdfResourcesWithPathList.toArray(new String[0]);   }
 
    @Override
    public String getURDFModelName()
@@ -68,7 +95,7 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
       InputStream inputStream;
 
       // Add all the input streams to a list
-      for (String path : urdfModelPath)
+      for (String path : urdfResourcesWithPath)
       {
          InputStream is = getClass().getClassLoader().getResourceAsStream(path);
          inputStreamList.add(is);
@@ -82,7 +109,7 @@ public class OpenAlexanderURDFParameters implements HumanoidURDFParameterInterfa
       // Load a URDFModel and convert that back into one single InputStream to send over the network
       try
       {
-         URDFModel model = URDFTools.loadURDFModel(inputStreamList, Arrays.asList(RESOURCE_DIRECTORIES), getClass().getClassLoader());
+         URDFModel model = URDFTools.loadURDFModel(inputStreamList, Arrays.asList(urdfResourceDirectories), getClass().getClassLoader(), urdfParserProperties);
          ByteArrayOutputStream bos = new ByteArrayOutputStream();
          URDFTools.saveURDFModel(bos, model);
          inputStream = new ByteArrayInputStream(bos.toByteArray());
