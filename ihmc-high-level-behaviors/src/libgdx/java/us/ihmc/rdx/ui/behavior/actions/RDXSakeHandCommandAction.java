@@ -83,12 +83,13 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
+      super.renderEditableName();
 
-      gripperWidget.render(definition.getSide(), ImGui.getFrameHeight());
       ImGui.sameLine();
+      gripperWidget.render(definition.getSide(), ImGui.getFrameHeight());
    }
 
    @Override
