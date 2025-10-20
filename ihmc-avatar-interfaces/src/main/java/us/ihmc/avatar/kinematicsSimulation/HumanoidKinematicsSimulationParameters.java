@@ -2,6 +2,10 @@ package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.ros2.ROS2NodeBuilder;
+import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * To be used with {@link HumanoidKinematicsSimulation}.
@@ -21,6 +25,7 @@ public class HumanoidKinematicsSimulationParameters
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
    private ROS2NodeBuilder ros2NodeBuilder = null;
+   private final List<YoRegistry> registriesToInclude = new ArrayList<>();
 
    public double getInitialGroundHeight()
    {
@@ -150,5 +155,10 @@ public class HumanoidKinematicsSimulationParameters
    public ROS2NodeBuilder getRos2NodeBuilder()
    {
       return ros2NodeBuilder;
+   }
+
+   public List<YoRegistry> getRegistriesToInclude()
+   {
+      return registriesToInclude;
    }
 }
