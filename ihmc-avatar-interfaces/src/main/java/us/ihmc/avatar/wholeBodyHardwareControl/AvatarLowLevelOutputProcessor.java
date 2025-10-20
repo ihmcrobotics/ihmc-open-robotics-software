@@ -84,6 +84,14 @@ public class AvatarLowLevelOutputProcessor
                                     }
                                  });
 
+      masterGain.addListener(value ->
+                             {
+                                if (masterGain.getDoubleValue() < 1.0)
+                                   isServod.set(false);
+                                else
+                                   isServod.set(true);
+                             });
+
       parentRegistry.addChild(registry);
    }
 
@@ -130,6 +138,11 @@ public class AvatarLowLevelOutputProcessor
          isUnservoing.set(false);
          servoTime.set(0.0);
       }
+   }
+
+   public boolean getIsRobotServod()
+   {
+      return isServod.getBooleanValue();
    }
 
    public void setServoDuration(double duration)

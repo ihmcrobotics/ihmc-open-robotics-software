@@ -157,7 +157,20 @@ public class RDXTeleoperationManager extends RDXPanel
                                   RobotCollisionModel robotSelectionCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
    {
+      this(syncedRobot, communicationHelper, robotSelfCollisionModel, robotSelectionCollisionModel, yoVariableClientHelper, new RDXHardwareControlStateManager(communicationHelper));
+   }
+
+   public RDXTeleoperationManager(ROS2SyncedRobotModel syncedRobot,
+                                  CommunicationHelper communicationHelper,
+                                  RobotCollisionModel robotSelfCollisionModel,
+                                  RobotCollisionModel robotSelectionCollisionModel,
+                                  YoVariableClientHelper yoVariableClientHelper,
+                                  RDXHardwareControlStateManager hardwareControlStateManager)
+   {
       super("Teleoperation");
+
+      this.hardwareControlStateManager = hardwareControlStateManager;
+
       setRenderMethod(this::renderImGuiWidgets);
 
       this.syncedRobot = syncedRobot;
@@ -176,8 +189,6 @@ public class RDXTeleoperationManager extends RDXPanel
 
       teleoperationParameters = new RDXTeleoperationParameters(robotModel.getSimpleRobotName());
       teleoperationParameters.load();
-
-      hardwareControlStateManager = new RDXHardwareControlStateManager(communicationHelper);
 
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);

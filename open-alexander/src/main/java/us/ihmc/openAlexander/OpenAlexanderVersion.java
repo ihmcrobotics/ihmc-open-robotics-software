@@ -4,7 +4,6 @@ import us.ihmc.handsros2.HandType;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalPropertiesV0;
 import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
-import us.ihmc.openAlexander.parameters.model.HumanoidURDFParameterInterface;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -14,42 +13,53 @@ import java.util.Collection;
 
 public enum OpenAlexanderVersion implements AlexanderVersionInterface
 {
-   V1_FULL_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_FULL_BODY), null),
-   V1_NUB_FOREARMS(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
-                                 OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
-                                 OpenAlexanderURDFParameters.URDF_HEAD,
-                                 OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM), null),
-   V1_LEGS_ROBOT(Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
+   V1_FULL_ROBOT(OpenAlexanderVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_FULL_BODY), null), V1_NUB_FOREARMS(
+      OpenAlexanderVersion.V1_RESOURCE_DIRECTORY,
+      Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY,
+                    OpenAlexanderURDFParameters.URDF_LEFT_ARM_NUB_FOREARM,
+                    OpenAlexanderURDFParameters.URDF_HEAD,
+                    OpenAlexanderURDFParameters.URDF_RIGHT_ARM_NUB_FOREARM),
+      null), V1_LEGS_ROBOT(OpenAlexanderVersion.V1_RESOURCE_DIRECTORY, Arrays.asList(OpenAlexanderURDFParameters.URDF_LOWER_BODY_ONLY), null);
 
-   private static String[] resourceDirectories;
+   private static final String V1_RESOURCE_DIRECTORY = "alexander_V1_description/";
+
+   private final String robotModelResourceDirectory;
+
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();
-   private final Collection<String> hardwareMapResources;
+   private final Collection<String> xmlResources;
 
    public static final boolean SHORT_NUBS = false;
 
-   private final Collection<String> urdfModelPath;
+   private final Collection<String> urdfResources;
 
    private AlexanderJointMap jointMap;
    private AlexanderPhysicalProperties physicalProperties;
    private AlexanderSensorInformation sensorInformation;
    private OpenAlexanderURDFParameters urdfParameters;
 
-   OpenAlexanderVersion(Collection<String> urdfModelPath, Collection<String> hardwareMapResources)
+   OpenAlexanderVersion(String robotModelResourceDirectory, Collection<String> urdfResources, Collection<String> xmlResources)
    {
-      this.urdfModelPath = urdfModelPath;
-      this.hardwareMapResources = hardwareMapResources;
+      this.robotModelResourceDirectory = robotModelResourceDirectory;
+      this.urdfResources = urdfResources;
+      this.xmlResources = xmlResources;
+   }
+
+   @Override
+   public String getRobotModelResourceDirectory()
+   {
+      return robotModelResourceDirectory;
    }
 
    @Override
    public Collection<String> getURDFDescriptionResources()
    {
-      return urdfModelPath;
+      return urdfResources;
    }
 
    @Override
    public Collection<String> getXMLDescriptionResources()
    {
-      return hardwareMapResources;
+      return xmlResources;
    }
 
    public boolean hasArms(RobotSide side)
