@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
@@ -10,11 +9,10 @@ import javax.annotation.Nullable;
 public class RDXBehaviorTreeFileMenu
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final Notification menuShouldClose = new Notification();
 
    public void renderFileMenu(@Nullable RDXBehaviorTreeNode<?, ?> rootNode, RDXBehaviorTreeNodeCreationMenu nodeCreationMenu)
    {
-      if (ImGui.beginMenu(labels.get("File"), !menuShouldClose.poll()))
+      if (ImGui.beginMenu(labels.get("File")))
       {
          if (rootNode != null)
          {
