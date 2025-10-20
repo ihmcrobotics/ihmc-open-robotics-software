@@ -1,9 +1,10 @@
-package us.ihmc.rdx.imgui;
+package us.ihmc.rdx.ui.widgets;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.rdx.imgui.ImGuiTools;
 
 public class ImGuiHollowArrowRenderer
 {

@@ -278,12 +278,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    }
 
    @Override
-   public void renderTreeViewIconArea()
+   public void renderTreeViewRow()
    {
-      super.renderTreeViewIconArea();
+      super.renderRowBeginning();
+      super.renderEditableName();
 
-      footstepsWidget.render(ImGui.getFrameHeight());
       ImGui.sameLine();
+      footstepsWidget.render(ImGui.getFrameHeight());
    }
 
    @Override

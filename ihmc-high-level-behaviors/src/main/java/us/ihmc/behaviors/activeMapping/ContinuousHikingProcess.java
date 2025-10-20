@@ -76,6 +76,7 @@ public class ContinuousHikingProcess
                                                  robotCollisionModel,
                                                  rawImageCollectionRealsnese,
                                                  controllerFootstepQueueMonitor,
+                                                 activeMappingParameterToolBox.getProcessParameters(),
                                                  activeMappingParameterToolBox.getHeightMapParameters(),
                                                  activeMappingParameterToolBox.getTerrainMapParameters(),
                                                  activeMappingParameterToolBox.getDepthImageFilteringParameters());
