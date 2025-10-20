@@ -13,7 +13,6 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 import org.msgpack.core.MessageUnpacker;
-import us.ihmc.avatar.logProcessor.leRobot.LeRobotDataset;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,25 +28,28 @@ public class OpenpiClient
 {
    private final String host;
    private final int port = 8000;
+   private final int stateSize;
    private EventLoopGroup group;
    private Channel channel;
    private OpenpiNettyWebSocketHandler handler;
    private final MessageBufferPacker packer = MessagePack.newDefaultBufferPacker();
-   private static final int STATE_SIZE = LeRobotDataset.STATE_SIZE;
-   private final ByteBuffer state = ByteBuffer.allocate(STATE_SIZE * Float.BYTES);
+   private final ByteBuffer state;
    private final SideDependentList<ByteBuffer> images = new SideDependentList<>(ByteBuffer.allocate(3 * 224 * 224), // uint8 rgb Channel - Height - Width
                                                                                 ByteBuffer.allocate(3 * 224 * 224));
-   private final ByteBuffer actions = ByteBuffer.allocate(50 * STATE_SIZE * Double.BYTES);
+   private final ByteBuffer actions;
    private float policyTimingMs;
    private float serverTimingMs;
 
-   public OpenpiClient(String host)
+   public OpenpiClient(String host, int stateSize)
    {
       this.host = host;
+      this.stateSize = stateSize;
 
+      state = ByteBuffer.allocate(stateSize * Float.BYTES);
       state.order(ByteOrder.nativeOrder());
       for (RobotSide side : RobotSide.values)
          images.get(side).order(ByteOrder.nativeOrder());
+      actions = ByteBuffer.allocate(50 * stateSize * Double.BYTES);
       actions.order(ByteOrder.nativeOrder());
    }
 
@@ -103,7 +105,7 @@ public class OpenpiClient
                packer.packString("__ndarray__").packBoolean(true);
                packer.packString("data").packBinaryHeader(state.array().length).writePayload(state.array());
                packer.packString("dtype").packString("float32");
-               packer.packString("shape").packArrayHeader(1).packInt(STATE_SIZE);
+               packer.packString("shape").packArrayHeader(1).packInt(stateSize);
             packer.packString("prompt").packString("touch door handle"); // TODO
 
          return handler.sendAndAwaitResponse(packer.toByteArray());
@@ -202,7 +204,8 @@ public class OpenpiClient
 
    public static void main(String[] args)
    {
-      OpenpiClient client = new OpenpiClient("10.6.192.65");
+      int stateSize = 3;
+      OpenpiClient client = new OpenpiClient("10.6.192.65", 3);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -212,8 +215,8 @@ public class OpenpiClient
       }
 
       ByteBuffer stateData = client.getState();
-      for (int i = 0; i < STATE_SIZE; i++)
-         stateData.putFloat((float) (i % STATE_SIZE));
+      for (int i = 0; i < stateSize; i++)
+         stateData.putFloat((float) (i % stateSize));
 
       CompletableFuture<byte[]> request = client.request();
       client.unpack(request);
