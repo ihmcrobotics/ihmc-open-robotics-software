@@ -2,6 +2,7 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -29,6 +30,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,6 +40,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -107,6 +110,7 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
+   private final IntraprocessYoVariableLogger intraprocessYoVariableLogger;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -155,12 +159,35 @@ public class AvatarMultiThreadingFactory
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
 
+      estimatorThreadFactory.getYoGraphicsListRegistry();
+
       // Setup state controller factory
       controllerFactory = createHighLevelControllerFactory(robotModel,
                                                            controllerRealtimeROS2Node,
                                                            lowLevelOutputProcessor,
                                                            standPrepStateFactory,
                                                            freezeStateFactory);
+
+      ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+      builders.add(new RegistrySendBufferBuilder(estimatorThreadFactory.getEstimatorRegistry(),
+                                                 estimatorThreadFactory.getEstimatorFullRobotModel().getElevator(),
+                                                 null));
+      builders.add(new RegistrySendBufferBuilder(controllerFactory.getHighLevelHumanoidControllerToolbox().getYoVariableRegistry(),
+                                                 null,
+                                                 (YoGraphicGroupDefinition) controllerFactory.getHighLevelHumanoidControllerToolbox().getSCS2YoGraphics()));
+      builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+      builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+
+      // Setup logger
+      intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
+      intraprocessYoVariableLogger.start();
+
+      threadingManager.get()
+                      .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                               .getHumanoidRobotContextData()
+                                                                                                               .getTimestamp()));
+
+
    }
 
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
