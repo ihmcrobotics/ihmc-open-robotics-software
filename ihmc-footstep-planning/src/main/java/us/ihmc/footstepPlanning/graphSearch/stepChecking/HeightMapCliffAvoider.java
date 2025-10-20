@@ -15,7 +15,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

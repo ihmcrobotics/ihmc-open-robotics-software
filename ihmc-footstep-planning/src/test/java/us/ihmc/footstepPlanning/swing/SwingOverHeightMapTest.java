@@ -10,7 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -50,6 +50,8 @@ import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
@@ -66,8 +68,6 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicBox3DDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -78,7 +78,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingOverHeightMapTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
    private static final double heightMapResolution = 0.03;
 
    private SimulationConstructionSet2 scs;
@@ -411,8 +411,8 @@ public class SwingOverHeightMapTest
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
       ConvexPolygon2D foot = getFootPolygon();
 
-      HeightMapMessage heightMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      TerrainMapMessage terrainMapMessage = PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
       SwingPlannerParametersBasics swingPlannerParameters = getParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -482,8 +482,7 @@ public class SwingOverHeightMapTest
 
       request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
       request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
-      request.setHeightMapData(HeightMapMessageTools.unpackMessageToHeightMapData(PlanarRegionToHeightMapConverter.convertFromPlanarRegionsToHeightMap(planarRegionsList)));
-      request.setHeightMapData(heightMapData);
+      request.setTerrainMapData(terrainMapData);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
@@ -519,7 +518,7 @@ public class SwingOverHeightMapTest
 //         scs.startSimulationThread();
       }
 
-      expander.setHeightMapData(heightMapData);
+      expander.setTerrainMapData(terrainMapData);
 //      expander.setPlanarRegionsList(planarRegionsList);
       expander.computeSwingTrajectories(request.getStartFootPoses(), footstepPlan);
 
@@ -606,7 +605,7 @@ public class SwingOverHeightMapTest
       };
       swingPlannerParameters.set(originalSwingPlannerParameters);
 
-      HeightMapData heightMapData = request.getEnvironmentHandler().getHeightMapData();
+      TerrainMapData terrainMapData = request.getEnvironmentHandler().getTerrainMapData();
 
       for (double time = 0.0; time <= 1.0; time += dt)
       {
@@ -658,7 +657,7 @@ public class SwingOverHeightMapTest
             }
          }
 
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, terrainMapData);
          if (collisionResult.getSignedDistance() < closestDistance)
          {
             closestDistance = collisionResult.getSignedDistance();

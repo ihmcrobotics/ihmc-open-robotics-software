@@ -1,22 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 public class EnvironmentHandler
 {
-   private HeightMapData heightMap;
    private TerrainMapData terrainMapData;
 
    public void clear()
    {
-      heightMap = null;
       terrainMapData = null;
-   }
-
-   public void setHeightMapData(HeightMapData heightMap)
-   {
-      this.heightMap = heightMap;
    }
 
    public void setTerrainMapData(TerrainMapData terrainMapData)
@@ -26,23 +18,12 @@ public class EnvironmentHandler
 
    public boolean flatGroundMode()
    {
-      return !hasHeightMap() && !hasTerrainMapData();
-   }
-
-   public boolean hasHeightMap()
-   {
-      return heightMap != null;
+      return !hasTerrainMapData();
    }
 
    public boolean hasTerrainMapData()
    {
-      // TODO any more going in here?
       return terrainMapData != null;
-   }
-
-   public HeightMapData getHeightMapData()
-   {
-      return heightMap;
    }
 
    public TerrainMapData getTerrainMapData()

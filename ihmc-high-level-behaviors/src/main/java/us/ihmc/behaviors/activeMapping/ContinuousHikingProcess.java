@@ -6,12 +6,13 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2TunedRigidBodyTransform;
-import us.ihmc.footstepPlanning.SnappingTerrainManager;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.perception.ROS2ImageSensors;
-import us.ihmc.perception.RapidHeightMapThread;
+import us.ihmc.perception.GpuMappingThread;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractionThread;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ImageSensor;
@@ -34,16 +35,19 @@ public class ContinuousHikingProcess
    private final EnvironmentHandler environmentHandler = new EnvironmentHandler();
    private final ActiveMappingParameterToolBox activeMappingParameterToolBox;
    private final ContinuousPlanningStateMachine continuousPlanningStateMachine;
-   private final SnappingTerrainManager snappingTerrainManager;
-   private final RapidHeightMapThread rapidHeightMapThread;
-   //   private final SteppableRegionsManager steppableRegionsManager;
+   private final GpuMappingThread gpuMappingThread;
+
+   private final boolean openCLAvailable; // Should be false on robot
+   private RapidPlanarRegionsExtractionThread rapidPlanarRegionsExtractionThread = null;
 
    public ContinuousHikingProcess(DRCRobotModel robotModel,
                                   RobotCollisionModel robotCollisionModel,
                                   ROS2Node ros2Node,
                                   ROS2ImageSensors ros2ImageSensors,
-                                  ROS2SyncedRobotModel ros2SyncedRobot)
+                                  ROS2SyncedRobotModel ros2SyncedRobot,
+                                  boolean openCLAvailable)
    {
+      this.openCLAvailable = openCLAvailable;
       // Create a bunch of overhead for the ROS2 communication and the robot
       ros2SyncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
@@ -60,24 +64,25 @@ public class ContinuousHikingProcess
                                                                                                                    .getSteppingCameraTransform());
 
       // This is for the height map, it expects the queue of images that we get from the sensors
-      BlockingQueue<RawImage> rawImageCollection = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
-      ros2ImageSensors.registerImageQueueForRealsense(rawImageCollection, RealSenseImageSensor.DEPTH_IMAGE_KEY);
-      ros2ImageSensors.registerImageQueueForZED(rawImageCollection, ZEDImageSensor.DEPTH_IMAGE_KEY);
+      BlockingQueue<RawImage> rawImageCollectionRealsnese = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+      BlockingQueue<RawImage> rawImageCollectionZED = new LinkedBlockingQueue<>(ImageSensor.DEFAULT_IMAGE_QUEUE_CAPACITY);
+      ros2ImageSensors.registerImageQueueForRealsense(rawImageCollectionRealsnese, RealSenseImageSensor.DEPTH_IMAGE_KEY);
+      ros2ImageSensors.registerImageQueueForZED(rawImageCollectionZED, ZEDImageSensor.DEPTH_IMAGE_KEY);
 
       // Class's that perform the real work of the process... the good stuff
       {
-         rapidHeightMapThread = new RapidHeightMapThread(ros2Node,
-                                                         ros2SyncedRobot,
-                                                         robotCollisionModel,
-                                                         rawImageCollection,
-                                                         controllerFootstepQueueMonitor,
-                                                         activeMappingParameterToolBox.getHeightMapParameters(),
-                                                         activeMappingParameterToolBox.getDepthImageFilteringParameters());
+         gpuMappingThread = new GpuMappingThread(ros2Node,
+                                                 ros2SyncedRobot,
+                                                 robotCollisionModel,
+                                                 rawImageCollectionRealsnese,
+                                                 controllerFootstepQueueMonitor,
+                                                 activeMappingParameterToolBox.getHeightMapParameters(),
+                                                 activeMappingParameterToolBox.getTerrainMapParameters(),
+                                                 activeMappingParameterToolBox.getDepthImageFilteringParameters());
 
-         snappingTerrainManager = new SnappingTerrainManager(ros2Node,
-                                                             activeMappingParameterToolBox.getHeightMapParameters(),
-                                                             activeMappingParameterToolBox.getSteppableRegionCalculatorParameters());
-         //         steppableRegionsManager = new SteppableRegionsManager(ros2Node);
+         if (openCLAvailable)
+            rapidPlanarRegionsExtractionThread = new RapidPlanarRegionsExtractionThread(ros2Node, new OpenCLManager(), rawImageCollectionZED);
+
          continuousPlanningStateMachine = new ContinuousPlanningStateMachine(robotModel,
                                                                              ros2Node,
                                                                              ros2SyncedRobot,
@@ -87,7 +92,9 @@ public class ContinuousHikingProcess
       }
 
       // Custom thread getting started
-      rapidHeightMapThread.startRepeating();
+      gpuMappingThread.startRepeating();
+      if (openCLAvailable)
+         rapidPlanarRegionsExtractionThread.startRepeating();
 
       // We create ThreadFactory's here so that when profiling the thread, we have user-friendly names to identify the threads with
       ThreadFactory threadFactorySyncedRobot = new ThreadFactoryBuilder().setNameFormat(SYNCED_ROBOT_THREAD).build();
@@ -108,18 +115,15 @@ public class ContinuousHikingProcess
       activeMappingParameterToolBox.update();
 
       // Update environment
-      environmentHandler.setHeightMapData(rapidHeightMapThread.getLatestHeightMapData());
-      snappingTerrainManager.updateAndPublish(environmentHandler.getHeightMapData());
-      environmentHandler.setTerrainMapData(snappingTerrainManager.getTerrainMapData());
-      //      steppableRegionsManager.update(environmentHandler.getTerrainMapData());
+      environmentHandler.setTerrainMapData(gpuMappingThread.getlatestTerrainMapData());
       continuousPlanningStateMachine.setLatestEnvironmentHandler(environmentHandler);
    }
 
    public void destroy()
    {
-      rapidHeightMapThread.blockingKill();
+      gpuMappingThread.blockingKill();
+      if (openCLAvailable)
+         rapidPlanarRegionsExtractionThread.kill();
       continuousPlanningStateMachine.destroy();
-      snappingTerrainManager.close();
-      //      steppableRegionsManager.destroy();
    }
 }

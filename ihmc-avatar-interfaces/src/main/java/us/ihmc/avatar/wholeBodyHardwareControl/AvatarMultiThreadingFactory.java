@@ -38,7 +38,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -81,7 +80,6 @@ public class AvatarMultiThreadingFactory
    public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
    private final RealtimeROS2Node estimatorRealtimeROS2Node;
    private final RealtimeROS2Node controllerRealtimeROS2Node;
-   private final OptionalFactoryField<RealtimeROS2Node> ikStreamingRealtimeROS2Node = new OptionalFactoryField<>("AvatarIKStreamingROS2Node");
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // The thread factories
@@ -165,57 +163,6 @@ public class AvatarMultiThreadingFactory
                                                            freezeStateFactory);
    }
 
-   public void start()
-   {
-      estimatorRealtimeROS2Node.spin();
-      controllerRealtimeROS2Node.spin();
-      if (ikStreamingRealtimeROS2Node.hasValue())
-         ikStreamingRealtimeROS2Node.get().spin();
-
-      hardwareCommunicationInterface.start();
-      threadingManager.get().start();
-   }
-
-   public void join()
-   {
-      threadingManager.get().join();
-   }
-
-   public void stop()
-   {
-      System.out.println("Calling stop in the multi-threading factory");
-      estimatorRealtimeROS2Node.stopSpinning();
-      controllerRealtimeROS2Node.stopSpinning();
-      if (ikStreamingRealtimeROS2Node.hasValue())
-         ikStreamingRealtimeROS2Node.get().stopSpinning();
-
-      hardwareCommunicationInterface.stop();
-      threadingManager.get().stop();
-   }
-
-   public void destroy()
-   {
-      this.stop();
-      System.out.println("Calling destroy in the multi-threading factory");
-
-      estimatorRealtimeROS2Node.destroy();
-      System.out.println("Estimator node has been destroyed");
-
-      controllerRealtimeROS2Node.destroy();
-      System.out.println("Controller node has been destroyed");
-
-      if (ikStreamingRealtimeROS2Node.hasValue())
-      {
-         ikStreamingRealtimeROS2Node.get().destroy();
-         System.out.println("IK Streaming node has been destroyed");
-      }
-
-      hardwareCommunicationInterface.destroy();
-      System.out.println("Hardware communication node has been destroyed");
-
-      threadingManager.get().destroy();
-   }
-
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
       // Create estimator thread
@@ -265,6 +212,8 @@ public class AvatarMultiThreadingFactory
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
+                                                           estimatorRealtimeROS2Node,
+                                                           controllerRealtimeROS2Node,
                                                            estimatorThread.get().getHumanoidRobotContextData(),
                                                            estimatorThread.get().getFullRobotModel(),
                                                            hardwareCommunicationInterface,
@@ -281,6 +230,9 @@ public class AvatarMultiThreadingFactory
                                                            useMultiThreading,
                                                            yoVariableServer,
                                                            rootRegistry));
+
+      // Set up the block to prevent execution whenever there is no new state message.
+      threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
       return threadingManager.get();
    }
@@ -397,7 +349,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(controllerFactory, feetForceSensorNames));
+         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory, feetForceSensorNames, !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
          HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
@@ -478,10 +430,8 @@ public class AvatarMultiThreadingFactory
 
    public void addIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
-      ikStreamingRealtimeROS2Node.set(new ROS2NodeBuilder().buildRealtime(IHMC_ROS_IKSTREAMING_NODE_NAME, ros2ThreadFactory));
-
       ikStreamingThread.set(new IKStreamingRTPluginFactory().createRTThread(robotModel.getSimpleRobotName(),
-                                                                            ikStreamingRealtimeROS2Node.get(),
+                                                                            estimatorRealtimeROS2Node,
                                                                             controllerFactory.getCommandInputManager(),
                                                                             controllerFactory.getStatusOutputManager(),
                                                                             robotModel,
@@ -495,8 +445,10 @@ public class AvatarMultiThreadingFactory
     * the ramp up ratio is at 1, AND 2- the feet loaded transition is satisfied is requested via the
     * YoEnum.
     */
-   private static ControllerStateTransitionFactory<HighLevelControllerName> createStandTransitionState(HighLevelHumanoidControllerFactory controllerFactory,
-                                                                                                       SideDependentList<String> feetForceSensorNames)
+   private static ControllerStateTransitionFactory<HighLevelControllerName> createStandTransitionState(HighLevelControllerName transitionStateName,
+                                                                                                       HighLevelHumanoidControllerFactory controllerFactory,
+                                                                                                       SideDependentList<String> feetForceSensorNames,
+                                                                                                       boolean waitForRequestToTransition)
    {
       return new ControllerStateTransitionFactory<>()
       {
@@ -519,8 +471,9 @@ public class AvatarMultiThreadingFactory
             ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
-            StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(STAND_TRANSITION_STATE,
+            StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(transitionStateName,
                                                                                                    requestedState,
+                                                                                                   waitForRequestToTransition,
                                                                                                    forceSensorDataHolder,
                                                                                                    feetForceSensorNames,
                                                                                                    controlDT,
@@ -549,7 +502,7 @@ public class AvatarMultiThreadingFactory
                }
             };
 
-            return new StateTransition<HighLevelControllerName>(STAND_TRANSITION_STATE, condition);
+            return new StateTransition<HighLevelControllerName>(transitionStateName, condition);
          }
       };
    }
@@ -564,38 +517,23 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
-   public YoRegistry getEstimatorRegistry()
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      return estimatorThread.get().getYoRegistry();
+      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
-   public YoGraphicGroupDefinition getEstimatorYoGraphics()
+   public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      return estimatorThread.get().getSCS2YoGraphics();
+      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, robotModel.getSensorInformation().getFeetForceSensorNames(), true));
    }
 
-   public YoRegistry getControllerRegistry()
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)
    {
-      return controllerThread.get().getYoVariableRegistry();
+      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry);
    }
 
-   public YoGraphicGroupDefinition getControllerYoGraphics()
+   public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      return controllerThread.get().getSCS2YoGraphics();
-   }
-
-   public YoRegistry getStepGeneratorRegistry()
-   {
-      return stepGeneratorThread.get().getYoVariableRegistry();
-   }
-
-   public YoGraphicGroupDefinition getStepGeneratorYoGraphics()
-   {
-      return stepGeneratorThread.get().getSCS2YoGraphics();
-   }
-
-   public AvatarMultiThreadingManager getThreadingManager()
-   {
-      return threadingManager.get();
+      controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 }

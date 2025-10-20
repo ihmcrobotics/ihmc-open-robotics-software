@@ -13,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final List<RDXLeafNode<?, ?>> nextForExecutionLeaves = new ArrayList<>();
    private final List<RDXLeafNode<?, ?>> currentlyExecutingLeaves = new ArrayList<>();
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
+   private final ImGuiRootIconWidget rootIconWidget = new ImGuiRootIconWidget();
 
    public RDXBehaviorTreeRootNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -80,6 +82,17 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
          updateSubtree(child);
       }
+   }
+
+   @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+
+      rootIconWidget.render();
+
+      ImGui.sameLine();
+      super.renderEditableName();
    }
 
    @Override

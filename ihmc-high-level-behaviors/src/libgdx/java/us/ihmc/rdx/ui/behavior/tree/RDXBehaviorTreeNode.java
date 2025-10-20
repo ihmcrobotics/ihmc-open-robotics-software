@@ -12,10 +12,8 @@ import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImGuiVerticalAligner;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
@@ -47,18 +45,17 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean selected = new ImBoolean();
    private transient final ImVec2 lineMin = new ImVec2();
+   private transient final ImVec2 indentMin = new ImVec2();
    private transient final ImVec2 lineMax = new ImVec2();
-   private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
    private boolean mouseHoveringNodeLine;
-   private boolean anySpecificWidgetOnLineClicked = false;
-   private boolean treeWidgetExpanded = false;
+   protected boolean anySpecificWidgetOnLineClicked = false;
+   protected boolean treeWidgetExpanded = false;
    private int previousNumberOfChildren = 0;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
    private transient final ImString notesText = new ImString(1500);
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
-   private final ImGuiVerticalAligner childrenDescriptionAligner = new ImGuiVerticalAligner();
    private final ImGuiScrollableLogArea logArea = new ImGuiScrollableLogArea();
 
    /** For extending types. */
@@ -115,63 +112,81 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    }
 
-   public void renderGeneralRowBeginWidgets()
+   /** Override to add node specific stuff */
+   public void renderTreeViewRow()
+   {
+      renderRowBeginning();
+      renderEditableName();
+   }
+
+   public void renderRowBeginning()
    {
       anySpecificWidgetOnLineClicked = false;
 
       ImGui.dummy(0.0f, ImGui.getFrameHeight()); // Make the lines as tall as when they have and input box
       ImGui.sameLine(0.0f, 0.0f);
-
       ImGui.alignTextToFramePadding(); // Centers the node descriptions vertically in the frame height area
 
-      ImGui.getCursorScreenPos(lineMin);
-      lineMax.set(lineMin.x + ImGui.getContentRegionAvailX(), lineMin.y + ImGui.getFrameHeightWithSpacing());
+      ImGui.getCursorScreenPos(indentMin);
+      lineMin.x = ImGui.getWindowContentRegionMin().x + ImGui.getWindowPosX();
+      lineMin.y = indentMin.y;
+      lineMax.set(indentMin.x + ImGui.getContentRegionAvailX(), lineMin.y + ImGui.getFrameHeight());
 
       mouseHoveringNodeLine = ImGuiTools.isItemHovered(ImGui.getContentRegionAvailX(), ImGui.getFrameHeight());
       if (mouseHoveringNodeLine)
-      {
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.MenuBarBg));
-      }
 
-      if (!getChildren().isEmpty())
+      float itemWidth = ImGui.getFontSize() * 1.0f;
+      if (!getChildren().isEmpty()) // expand/collapse arrow
       {
-         if (expandCollapseRenderer.render(treeWidgetExpanded, false, ImGui.getFrameHeight()))
+         float width = ImGui.getFontSize() / 2.5f;
+         float halfHeight = ImGui.getFrameHeight() * 0.5f / 2.0f;
+         boolean isHovered = ImGuiTools.isItemHovered(itemWidth, ImGui.getFrameHeight());
+         int color = isHovered ? ImGui.getColorU32(ImGuiCol.ButtonHovered) : ImGui.getColorU32(ImGuiCol.Text);
+         if (treeWidgetExpanded)
+         {
+            float offsetX = ImGui.getCursorScreenPosX() + ImGui.getFontSize() * 0.2f;
+            float offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.4f;
+            ImGui.getWindowDrawList().addLine(offsetX, offsetY,
+                                              offsetX + halfHeight, offsetY + width, color);
+            ImGui.getWindowDrawList().addLine(offsetX + halfHeight, offsetY + width,
+                                              offsetX + halfHeight * 2.0f, offsetY, color);
+         }
+         else
+         {
+            float offsetX = ImGui.getCursorScreenPosX() + width;
+            float offsetY = ImGui.getCursorScreenPosY() + ImGui.getFrameHeight() * 0.2f;
+            ImGui.getWindowDrawList().addLine(offsetX + width, offsetY + halfHeight,
+                                              offsetX, offsetY + halfHeight * 2.0f, color);
+            ImGui.getWindowDrawList().addLine(offsetX + width, offsetY + halfHeight,
+                                              offsetX, offsetY, color);
+         }
+         if (isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
             anySpecificWidgetOnLineClicked = true;
             treeWidgetExpanded = !treeWidgetExpanded;
          }
-         ImGui.sameLine();
       }
-      else
-      {
-         // Add spacing to make up for expand collapse not being there
-         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiExpandCollapseRenderer.getPlaceholderWidth());
-         treeWidgetExpanded = false;
-      }
+      ImGui.setCursorScreenPos(indentMin.x + itemWidth, indentMin.y); // Leave space for the expand/collapse arrow regardless
    }
 
-   public void renderTreeViewIconArea()
-   {
-
-   }
-
-   public void renderNodeName()
+   public void renderEditableName()
    {
       String nameText = definition.getName();
 
       if (definition.hasChanges())
          nameText += "*";
 
+      ImGui.setCursorScreenPos(indentMin.x + ImGui.getFontSize() * 3.0f, indentMin.y);
+
       boolean textHovered = ImGuiTools.isItemHovered(ImGuiTools.calcTextSizeX(nameText), ImGui.getFrameHeight());
 
       if (selected.get())
-      {
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.Header));
-      }
 
       if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
-         setSpecificWidgetOnRowClicked();
+         anySpecificWidgetOnLineClicked = true;
          RDXBehaviorTreeTools.clearOtherNodeSelections(this);
          selected.set(true);
          isNameBeingEdited = true;
@@ -221,6 +236,14 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
          ImGui.separator();
       }
+      else
+      {
+         if (ImGui.menuItem(labels.get("Expand all nodes"))) // TODO: Maybe render the icon too
+            expandCollapseAll(true, this);
+         if (ImGui.menuItem(labels.get("Collapse all nodes")))
+            expandCollapseAll(false, this);
+         ImGui.separator();
+      }
 
       if (definition.isJSONRoot())
       {
@@ -245,6 +268,16 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (ImGui.menuItem(labels.get("Draw to SVG")))
       {
          state.drawToSVG();
+      }
+   }
+
+   private void expandCollapseAll(boolean expandOrCollapse, RDXBehaviorTreeNode<?, ?> node)
+   {
+      node.setTreeWidgetExpanded(expandOrCollapse);
+
+      for (RDXBehaviorTreeNode<?, ?> child : node.getChildren())
+      {
+         expandCollapseAll(expandOrCollapse, child);
       }
    }
 
@@ -277,19 +310,9 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       return selected.get();
    }
 
-   protected void setSpecificWidgetOnRowClicked()
-   {
-      anySpecificWidgetOnLineClicked = true;
-   }
-
    public void setNameBeingEdited(boolean nameBeingEdited)
    {
       isNameBeingEdited = nameBeingEdited;
-   }
-
-   public boolean getNameBeingEdited()
-   {
-      return isNameBeingEdited;
    }
 
    public int getNameColor()
@@ -305,11 +328,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public boolean getTreeWidgetExpanded()
    {
       return treeWidgetExpanded;
-   }
-
-   public ImGuiVerticalAligner getChildrenDescriptionAligner()
-   {
-      return childrenDescriptionAligner;
    }
 
    public String getNodePopupID()

@@ -132,6 +132,11 @@ public class AvatarLowLevelOutputProcessor
       }
    }
 
+   public void setServoDuration(double duration)
+   {
+      servoDuration.set(duration);
+   }
+
    public void servoRobot()
    {
       servo.set(true);
@@ -167,5 +172,10 @@ public class AvatarLowLevelOutputProcessor
    public DoubleProvider getMasterGain()
    {
       return masterGain;
+   }
+
+   public void setMasterGain(double masterGain)
+   {
+      this.masterGain.set(masterGain);
    }
 }

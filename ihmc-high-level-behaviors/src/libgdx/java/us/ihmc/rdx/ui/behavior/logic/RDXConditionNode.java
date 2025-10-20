@@ -10,12 +10,14 @@ import us.ihmc.rdx.ui.behavior.logic.condition.RDXCounterCondition;
 import us.ihmc.rdx.ui.behavior.logic.condition.RDXLLMCondition;
 import us.ihmc.rdx.ui.behavior.logic.condition.RDXProximityCondition;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.rdx.ui.widgets.ImGuiConditionNodeWidget;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiConditionNodeWidget conditionIconWidget = new ImGuiConditionNodeWidget();
 
    private final RDXCounterCondition counter;
    private final RDXLLMCondition llm;
@@ -28,6 +30,16 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
       counter = new RDXCounterCondition(state);
       llm = new RDXLLMCondition(state);
       proximityCheck = new RDXProximityCondition(state, referenceFrameLibrary);
+   }
+
+   @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+
+      ImGui.sameLine();
+      conditionIconWidget.render();
    }
 
    @Override

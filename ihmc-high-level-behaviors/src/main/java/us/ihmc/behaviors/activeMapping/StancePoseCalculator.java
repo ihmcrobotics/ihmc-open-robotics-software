@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.EnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
-import us.ihmc.footstepPlanning.steppableRegions.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -148,8 +148,8 @@ public class StancePoseCalculator
       leftPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
-      double heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
+      double heightLeft = terrainMap.getHeight(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
+      double heightRight = terrainMap.getHeight(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
       leftPose.setZ(heightLeft);
       rightPose.setZ(heightRight);
 
@@ -193,7 +193,7 @@ public class StancePoseCalculator
       ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
       footPolygon.applyTransform(poseToSnap);
 
-      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.05, Math.toRadians(45.0));
+      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler);
 
       if (snapTransform != null)
       {

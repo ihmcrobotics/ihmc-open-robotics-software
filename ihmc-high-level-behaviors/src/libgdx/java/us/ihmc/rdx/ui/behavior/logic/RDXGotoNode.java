@@ -9,11 +9,13 @@ import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.rdx.ui.widgets.ImGuiGotoNodeWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiGotoNodeWidget gotoNodeWidget = new ImGuiGotoNodeWidget();
 
    public RDXGotoNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -30,6 +32,16 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
    public void renderContextMenuItems()
    {
       super.renderContextMenuItems();
+   }
+
+   @Override
+   public void renderTreeViewRow()
+   {
+      super.renderRowBeginning();
+      super.renderEditableName();
+
+      ImGui.sameLine();
+      gotoNodeWidget.render();
    }
 
    @Override

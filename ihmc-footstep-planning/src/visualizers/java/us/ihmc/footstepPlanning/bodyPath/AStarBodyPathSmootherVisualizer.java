@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
+import perception_msgs.msg.dds.TerrainMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,9 +17,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.perception.heightMap.HeightMapData;
-import us.ihmc.perception.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuMapping.HeightMapTools;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapMessageTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -35,15 +35,15 @@ public class AStarBodyPathSmootherVisualizer
    private AStarBodyPathSmoother smoother;
    private SimulationConstructionSet scs;
 
-   public void setup(HeightMapData heightMapData)
+   public void setup(TerrainMapData terrainMapData)
    {
       scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters(), scs, graphicsListRegistry, scs.getRootRegistry());
 
-      if (heightMapData != null)
+      if (terrainMapData != null)
       {
-         scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData));
+         scs.addStaticLinkGraphics(buildHeightMapGraphics(terrainMapData));
          scs.setGroundVisible(false);
       }
 
@@ -78,7 +78,7 @@ public class AStarBodyPathSmootherVisualizer
       double heightMapGridCenterX = 0.0;
       double heightMapGridCenterY = 0.0;
 
-      HeightMapData heightMapData = new HeightMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
+      TerrainMapData terrainMapData = new TerrainMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
 
       double obstacleHeight = 0.5;
       double obstacleMinY = 0.25;
@@ -91,13 +91,13 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (double y = obstacleMinY; y < obstacleMinY + obstacleWidth; y += heightMapGridResolution)
          {
-            heightMapData.setHeight(x, y, obstacleHeight);
+            terrainMapData.setHeight(x, y, obstacleHeight);
          }
       }
 
-      setup(heightMapData);
+      setup(terrainMapData);
       List<Point3D> bodyPath = bodyPathLatticePoints.stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList());
-      smoother.doSmoothing(bodyPath, heightMapData);
+      smoother.doSmoothing(bodyPath, terrainMapData);
       scs.cropBuffer();
    }
 
@@ -114,7 +114,7 @@ public class AStarBodyPathSmootherVisualizer
       double heightMapGridCenterY = 0.0;
 
       double estimatedGroundPlane = 0.0;
-      HeightMapData heightMapData = new HeightMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
+      TerrainMapData terrainMapData = new TerrainMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
 
       double obstacleHeight = 0.5;
       double obstacleMinX = 0.25;
@@ -127,13 +127,13 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (double y = minY; y < minY + obstacleThickness; y += heightMapGridResolution)
          {
-            heightMapData.setHeight(x, y, obstacleHeight);
+            terrainMapData.setHeight(x, y, obstacleHeight);
          }
       }
 
-      setup(heightMapData);
+      setup(terrainMapData);
       List<Point3D> bodyPath = bodyPathLatticePoints.stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList());
-      smoother.doSmoothing(bodyPath, heightMapData);
+      smoother.doSmoothing(bodyPath, terrainMapData);
       scs.cropBuffer();
    }
 
@@ -150,7 +150,7 @@ public class AStarBodyPathSmootherVisualizer
       double heightMapGridCenterY = 0.0;
 
       double estimatedGroundPlane = 0.0;
-      HeightMapData heightMapData = new HeightMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
+      TerrainMapData terrainMapData = new TerrainMapData(heightMapGridResolution, 5.0, heightMapGridCenterX, heightMapGridCenterY);
 
       double obstacleHeight = 0.5;
       double obstacleMinX = bodyPathLatticePoints.get(5).getX() + 0.2;
@@ -163,13 +163,13 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (double y = minY; y < minY + obstacleThickness; y += heightMapGridResolution)
          {
-            heightMapData.setHeight(x, y, obstacleHeight);
+            terrainMapData.setHeight(x, y, obstacleHeight);
          }
       }
 
-      setup(heightMapData);
+      setup(terrainMapData);
       List<Point3D> bodyPath = bodyPathLatticePoints.stream().map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList());
-      smoother.doSmoothing(bodyPath, heightMapData);
+      smoother.doSmoothing(bodyPath, terrainMapData);
       scs.cropBuffer();
    }
 
@@ -243,15 +243,15 @@ public class AStarBodyPathSmootherVisualizer
 
       FootstepPlanningToolboxOutputStatus statusPacket = log.getStatusPacket();
       List<Pose3D> bodyPathPoseWaypoints = statusPacket.getBodyPath();
-      HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
+      TerrainMapMessage terrainMapMessage = log.getRequestPacket().getTerrainMapMessage();
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessageToHeightMapData(heightMapMessage);
+      TerrainMapData terrainMapData = TerrainMapMessageTools.unpackMessage(terrainMapMessage);
       List<Point3D> bodyPath = bodyPathPoseWaypoints.stream().map(Pose3D::getPosition).collect(Collectors.toList());
 
       try
       {
-         setup(heightMapData);
-         smoother.doSmoothing(bodyPath, heightMapData);
+         setup(terrainMapData);
+         smoother.doSmoothing(bodyPath, terrainMapData);
       }
       catch (Exception e)
       {
@@ -265,7 +265,7 @@ public class AStarBodyPathSmootherVisualizer
    {
       HeightMapDataSetName[] datasets = new HeightMapDataSetName[]{Obstacle_Course};
       FootstepPlannerRequest[] requests = new FootstepPlannerRequest[datasets.length];
-      HeightMapData[] heightMapData = new HeightMapData[datasets.length];
+      TerrainMapData[] terrainMapData = new TerrainMapData[datasets.length];
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 
       AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new AStarBodyPathPlannerParameters());
@@ -279,7 +279,7 @@ public class AStarBodyPathSmootherVisualizer
          request.setGoalFootPoses(0.15, datasets[i].getGoal());
          requests[i] = request;
 
-         heightMapData[i] = datasets[i].getHeightMapData();
+         terrainMapData[i] = datasets[i].getTerrainMapData();
       }
 
       int warmupIterations = 2;
@@ -287,9 +287,9 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (int j = 0; j < datasets.length; j++)
          {
-            planner.setHeightMapData(heightMapData[j]);
+            planner.setTerrainMapData(terrainMapData[j]);
             planner.handleRequest(requests[j], output);
-            smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), heightMapData[j]);
+            smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), terrainMapData[j]);
          }
       }
 
@@ -301,11 +301,11 @@ public class AStarBodyPathSmootherVisualizer
       {
          for (int j = 0; j < datasets.length; j++)
          {
-            planner.setHeightMapData(heightMapData[j]);
+            planner.setTerrainMapData(terrainMapData[j]);
             long t0 = System.currentTimeMillis();
             planner.handleRequest(requests[j], output);
             long t1 = System.currentTimeMillis();
-            smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), heightMapData[j]);
+            smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), terrainMapData[j]);
             long t2 = System.currentTimeMillis();
 
             initialPlanTime += (t1 - t0);
@@ -322,30 +322,30 @@ public class AStarBodyPathSmootherVisualizer
       LogTools.info("Time per total:   " + Conversions.millisecondsToSeconds(timePerTotalMillis) + " sec");
    }
 
-   private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData)
+   private static Graphics3DObject buildHeightMapGraphics(TerrainMapData terrainMapData)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
 
       double groundPlaneThickness = 0.01;
-      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getMinHeight());
+      graphics3DObject.translate(terrainMapData.getGridCenterX(), terrainMapData.getGridCenterY(), terrainMapData.getMinHeight());
       graphics3DObject.translate(0.0, 0.0, - groundPlaneThickness);
-      graphics3DObject.addCube(heightMapData.getMapSize(), heightMapData.getMapSize(), groundPlaneThickness, YoAppearance.Blue());
+      graphics3DObject.addCube(terrainMapData.getMapSize(), terrainMapData.getMapSize(), groundPlaneThickness, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
-      double groundPlaneHeight = heightMapData.getMinHeight();
+      double groundPlaneHeight = terrainMapData.getMinHeight();
 
-      int gridWidth = 2 * heightMapData.getCenterIndex() + 1;
+      int gridWidth = 2 * terrainMapData.getCenterIndex() + 1;
       for (int key = 0; key < gridWidth * gridWidth; key++)
       {
          Point2D cellPosition = new Point2D(HeightMapTools.keyToXCoordinate(key,
-                                                                            heightMapData.getGridCenter().getX(),
-                                                                            heightMapData.getCellSize(),
-                                                                            heightMapData.getCenterIndex()),
+                                                                            terrainMapData.getGridCenterX(),
+                                                                            terrainMapData.getCellSize(),
+                                                                            terrainMapData.getCenterIndex()),
                                             HeightMapTools.keyToYCoordinate(key,
-                                                                            heightMapData.getGridCenter().getY(),
-                                                                            heightMapData.getCellSize(),
-                                                                            heightMapData.getCenterIndex()));
-         double height = heightMapData.getHeight(HeightMapTools.keyToXIndex(key, heightMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex()));
+                                                                            terrainMapData.getGridCenterY(),
+                                                                            terrainMapData.getCellSize(),
+                                                                            terrainMapData.getCenterIndex()));
+         double height = terrainMapData.getHeight(HeightMapTools.keyToXIndex(key, terrainMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, terrainMapData.getCenterIndex()));
 
          double renderedHeight = height - groundPlaneHeight;
          graphics3DObject.identity();
@@ -354,7 +354,7 @@ public class AStarBodyPathSmootherVisualizer
          if (height > groundPlaneHeight + 1e-5)
          {
             AppearanceDefinition color = YoAppearance.Olive();
-            graphics3DObject.addCube(heightMapData.getCellSize(), heightMapData.getCellSize(), renderedHeight, true, color);
+            graphics3DObject.addCube(terrainMapData.getCellSize(), terrainMapData.getCellSize(), renderedHeight, true, color);
          }
       }
 

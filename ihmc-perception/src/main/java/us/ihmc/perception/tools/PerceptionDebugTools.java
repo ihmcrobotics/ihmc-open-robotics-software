@@ -16,7 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.HeightMapData;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
