@@ -4,7 +4,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.reasoning.BehaviorTreeLLMEncoding;
+import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;

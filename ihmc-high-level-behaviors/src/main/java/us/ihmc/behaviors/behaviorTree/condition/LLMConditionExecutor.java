@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
-import us.ihmc.behaviors.reasoning.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

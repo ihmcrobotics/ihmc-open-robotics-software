@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.reasoning;
+package us.ihmc.behaviors.behaviorTree.condition;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
