@@ -1,17 +1,17 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
-import us.ihmc.behaviors.ai2r.AI2RNodeState;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
-import us.ihmc.behaviors.door.DoorTraversalState;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
-import us.ihmc.behaviors.logic.ConditionNodeState;
-import us.ihmc.behaviors.logic.GotoNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.behaviors.sequence.FallbackNodeState;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 

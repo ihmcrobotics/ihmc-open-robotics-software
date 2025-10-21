@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionDefinition;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.*;
+import static us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition.*;
 import static us.ihmc.robotics.robotSide.RobotSide.getSideFromString;
 
 public class RDXAffordanceTemplateFileManager
