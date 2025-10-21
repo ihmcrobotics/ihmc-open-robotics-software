@@ -19,7 +19,7 @@ import us.ihmc.zed.global.zed;
 
 public class IsaacROSFoundationPoseDemo
 {
-   private static final String SVO_FILE = "/home/robotlab/Downloads/20240715_103234_ZEDRecording_NewONRCourseWalk.svo2";
+   private static final String SVO_FILE = "/home/robotlab/Downloads/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
    private final ROS2Node ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName().toLowerCase());
    private final ROS2PeerClockOffsetEstimator peerClockOffsetEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
