@@ -9,7 +9,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefiniti
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;

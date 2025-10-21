@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.door;
+package us.ihmc.behaviors.behaviorTree.control.door;
 
 import behavior_msgs.msg.dds.DoorTraversalDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;

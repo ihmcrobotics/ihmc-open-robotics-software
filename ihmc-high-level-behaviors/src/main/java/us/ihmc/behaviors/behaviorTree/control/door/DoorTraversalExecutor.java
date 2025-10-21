@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.door;
+package us.ihmc.behaviors.behaviorTree.control.door;
 
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;

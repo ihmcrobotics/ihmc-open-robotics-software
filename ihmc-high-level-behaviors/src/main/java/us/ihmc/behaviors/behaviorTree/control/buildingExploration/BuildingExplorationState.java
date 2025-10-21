@@ -2,7 +2,7 @@ package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
 import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.door.DoorTraversalState;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

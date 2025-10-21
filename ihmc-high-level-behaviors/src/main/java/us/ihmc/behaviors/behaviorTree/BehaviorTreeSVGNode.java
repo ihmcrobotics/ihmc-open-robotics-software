@@ -2,7 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import org.apache.commons.text.WordUtils;
 import org.jfree.svg.SVGGraphics2D;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;

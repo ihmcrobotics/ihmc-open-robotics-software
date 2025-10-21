@@ -5,7 +5,7 @@ import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
-import us.ihmc.behaviors.door.DoorTraversalState;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.logic.GotoNodeState;
