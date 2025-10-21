@@ -12,7 +12,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager;
-import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 

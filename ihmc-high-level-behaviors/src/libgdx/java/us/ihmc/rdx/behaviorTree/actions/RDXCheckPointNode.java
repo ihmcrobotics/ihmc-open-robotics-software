@@ -4,7 +4,7 @@ import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.rdx.behaviorTree.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiCheckpointNodeWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 

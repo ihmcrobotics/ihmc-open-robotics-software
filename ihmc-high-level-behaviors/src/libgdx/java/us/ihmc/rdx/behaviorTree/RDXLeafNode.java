@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.sequence;
+package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
@@ -11,9 +11,6 @@ import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
-import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
-import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeTools;
 import us.ihmc.rdx.ui.widgets.ImGuiHollowArrowRenderer;
 
 /**

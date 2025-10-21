@@ -6,7 +6,7 @@ import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.Type;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.rdx.behaviorTree.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiConditionNodeWidget;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

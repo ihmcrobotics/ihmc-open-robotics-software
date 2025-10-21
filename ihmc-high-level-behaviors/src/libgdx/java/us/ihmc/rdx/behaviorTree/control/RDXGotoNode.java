@@ -8,7 +8,7 @@ import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
 import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
+import us.ihmc.rdx.behaviorTree.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiGotoNodeWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
