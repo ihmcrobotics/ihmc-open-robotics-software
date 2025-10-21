@@ -2,10 +2,10 @@ package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.ImGui;
 import us.ihmc.rdx.imgui.*;
-import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXSakeHandCommandAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXFootstepPlanAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXHandPoseAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXSakeHandCommandAction;
+import us.ihmc.rdx.behaviorTree.actions.RDXScrewPrimitiveAction;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTree;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 

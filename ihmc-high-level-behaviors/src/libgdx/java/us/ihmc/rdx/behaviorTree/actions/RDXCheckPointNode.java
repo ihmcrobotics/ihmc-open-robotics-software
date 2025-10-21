@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.actions;
+package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;

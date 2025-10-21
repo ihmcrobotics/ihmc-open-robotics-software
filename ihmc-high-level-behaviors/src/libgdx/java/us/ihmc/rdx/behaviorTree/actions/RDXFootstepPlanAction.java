@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.actions;
+package us.ihmc.rdx.behaviorTree.actions;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;

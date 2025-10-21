@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.actions;
+package us.ihmc.rdx.behaviorTree.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -27,18 +27,20 @@ import us.ihmc.robotics.interaction.MouseCollidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.collision.Collidable;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPoseActionDefinition>
+public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImDoubleWrapper yawWidget;
+   private final ImDoubleWrapper pitchWidget;
+   private final ImDoubleWrapper rollWidget;
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
@@ -47,44 +49,51 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    private boolean isMouseHovering = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
-   private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
+   private final RDXInteractableHighlightModel highlightModel;
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXFootPoseAction(long id,
-                            CRDTInfo crdtInfo,
-                            WorkspaceResourceDirectory saveFileDirectory,
-                            RDX3DPanel panel3D,
-                            DRCRobotModel robotModel,
-                            FullHumanoidRobotModel syncedFullRobotModel,
-                            RobotCollisionModel selectionCollisionModel,
-                            ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXChestOrientationAction(long id,
+                                    CRDTInfo crdtInfo,
+                                    WorkspaceResourceDirectory saveFileDirectory,
+                                    RDX3DPanel panel3D,
+                                    DRCRobotModel robotModel,
+                                    FullHumanoidRobotModel syncedFullRobotModel,
+                                    RobotCollisionModel selectionCollisionModel,
+                                    ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(new FootPoseActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
+      super(new ChestOrientationActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
 
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
+      // TODO: Can all this be condensed?
+      holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
+                                                         definition::setHoldPoseInWorldLater,
+                                                         imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
                                                                 definition::getParentFrameName,
-                                                                state.getFootFrame()::changeFrame);
+                                                                state.getChestFrame()::changeFrame);
+      yawWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getYaw, definition::setYaw,
+                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
+      pitchWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getPitch, definition::setPitch,
+                                        imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
+      rollWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getRoll, definition::setRoll,
+                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
 
-      for (RobotSide side : RobotSide.values)
+      String chestBodyName = syncedFullRobotModel.getChest().getName();
+      String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(chestBodyName));
+      highlightModel = new RDXInteractableHighlightModel(modelFileName);
+
+      MultiBodySystemBasics chestOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getChest());
+      List<Collidable> chestCollidables = selectionCollisionModel.getRobotCollidables(chestOnlySystem);
+
+      for (Collidable chestCollidable : chestCollidables)
       {
-         String footBodyName = syncedFullRobotModel.getFoot(side).getName();
-         String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
-         highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
-
-         MultiBodySystemBasics footOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getFoot(side));
-         List<Collidable> footCollidables = selectionCollisionModel.getRobotCollidables(footOnlySystem);
-
-         for (Collidable footCollidable : footCollidables)
-         {
-            mouseCollidables.add(new MouseCollidable(footCollidable));
-         }
+         mouseCollidables.add(new MouseCollidable(chestCollidable));
       }
 
       tooltip = new RDX3DPanelTooltip(panel3D);
@@ -96,25 +105,31 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    {
       super.update();
 
-      if (state.getFootFrame().isChildOfWorld())
+      if (state.getChestFrame().isChildOfWorld())
       {
-         if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getFootFrame().getReferenceFrame())
+         if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getChestFrame().getReferenceFrame())
          {
-            poseGizmo.getPoseGizmo().setGizmoFrame(state.getFootFrame().getReferenceFrame());
-            graphicFrame.setParentFrame(state.getFootFrame().getReferenceFrame());
-            collisionShapeFrame.setParentFrame(state.getFootFrame().getReferenceFrame());
+            poseGizmo.getPoseGizmo().setGizmoFrame(state.getChestFrame().getReferenceFrame());
+            graphicFrame.setParentFrame(state.getChestFrame().getReferenceFrame());
+            collisionShapeFrame.setParentFrame(state.getChestFrame().getReferenceFrame());
          }
 
-         RDXCRDTTools.syncGizmoWithBidirectionalField(poseGizmo.getPoseGizmo(), definition.getFootToParentTransform(), definition);
+         if (!getSelected())
+            poseGizmo.setSelected(false);
 
-         highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
-         if (poseGizmo.isSelected() || isMouseHovering)
+         RDXCRDTTools.syncGizmoWithBidirectionalField(poseGizmo.getPoseGizmo(), definition.getChestToParentTransform(), definition);
+
+         if (state.getIsNextForExecution() || getSelected())
          {
-            highlightModels.get(definition.getSide()).setTransparency(0.7);
-         }
-         else
-         {
-            highlightModels.get(definition.getSide()).setTransparency(0.5);
+            highlightModel.setPose(graphicFrame.getReferenceFrame());
+            if (poseGizmo.isSelected() || isMouseHovering)
+            {
+               highlightModel.setTransparency(0.7);
+            }
+            else
+            {
+               highlightModel.setTransparency(0.5);
+            }
          }
       }
    }
@@ -123,8 +138,14 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
+      holdPoseInWorldLaterWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
+      yawWidget.renderImGuiWidget();
+      ImGui.sameLine();
+      pitchWidget.renderImGuiWidget();
+      ImGui.sameLine();
+      rollWidget.renderImGuiWidget();
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
    }
@@ -172,9 +193,9 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (state.getFootFrame().isChildOfWorld())
+      if (state.getChestFrame().isChildOfWorld() && (state.getIsNextForExecution() || getSelected()))
       {
-         highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
+         highlightModel.getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
       }
    }
@@ -187,6 +208,6 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    @Override
    public String getLeafTypeTitle()
    {
-      return definition.getSide().getPascalCaseName() + " Foot Pose";
+      return "Chest Orientation";
    }
 }
