@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.logic;
+package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.GotoNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;

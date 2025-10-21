@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.logic;
+package us.ihmc.behaviors.behaviorTree.control;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.LeafNodeExecutor;
