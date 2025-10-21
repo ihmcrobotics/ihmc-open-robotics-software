@@ -420,9 +420,9 @@ public class ImGuiTools
       float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
       float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
 
-      boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
+      boolean isHovered = mousePosXInWidgetFrame > ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
-      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
+      isHovered &= mousePosYInWidgetFrame > ImGui.getCursorPosY();
       isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + lineHeight;
       isHovered &= ImGui.isWindowHovered();
 

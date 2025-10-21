@@ -10,6 +10,8 @@ import java.util.Collection;
 
 public interface AlexanderVersionInterface extends RobotVersion
 {
+   public String getRobotModelResourceDirectory();
+
    Collection<String> getURDFDescriptionResources();
 
    Collection<String> getXMLDescriptionResources();

@@ -15,7 +15,7 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "015e409798e94594578840584dc2ca8d95ae0e2f661047b3ae73886b668852f7";
+   		return "fd8b21b2edd236245629837baa09bf5372ef641ace2e0b4387619263bc622611";
    }
    
    @Override
@@ -54,7 +54,29 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -78,7 +100,40 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -98,13 +153,35 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       cdr.write_type_7(data.getEstop());
 
-      cdr.write_type_6(data.getMasterGain());
+      cdr.write_type_7(data.getExecuteEstop());
+
+      cdr.write_type_6(data.getDesiredMasterGain());
+
+      cdr.write_type_7(data.getExecuteMasterGain());
 
       cdr.write_type_7(data.getServoRobot());
 
-      cdr.write_type_7(data.getUnservoImmediately());
+      cdr.write_type_7(data.getExecuteServoRobot());
 
-      cdr.write_type_7(data.getUnservoSlowly());
+      cdr.write_type_7(data.getUnservoQuickly());
+
+      cdr.write_type_7(data.getExecuteUnservoQuickly());
+
+      cdr.write_type_7(data.getEnablePublishingToRobot());
+
+      cdr.write_type_7(data.getExecuteEnablePublishingToRobot());
+
+      cdr.write_type_7(data.getClearFaults());
+
+      cdr.write_type_7(data.getExecuteClearFaults());
+
+      cdr.write_type_7(data.getCalibrateRobot());
+
+      cdr.write_type_7(data.getExecuteCalibrateRobot());
+
+      cdr.write_type_7(data.getEnableActuators());
+
+      cdr.write_type_7(data.getExecuteEnableActuators());
 
    }
 
@@ -112,13 +189,35 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setEstop(cdr.read_type_7());
       	
-      data.setMasterGain(cdr.read_type_6());
+      data.setExecuteEstop(cdr.read_type_7());
+      	
+      data.setDesiredMasterGain(cdr.read_type_6());
+      	
+      data.setExecuteMasterGain(cdr.read_type_7());
       	
       data.setServoRobot(cdr.read_type_7());
       	
-      data.setUnservoImmediately(cdr.read_type_7());
+      data.setExecuteServoRobot(cdr.read_type_7());
       	
-      data.setUnservoSlowly(cdr.read_type_7());
+      data.setUnservoQuickly(cdr.read_type_7());
+      	
+      data.setExecuteUnservoQuickly(cdr.read_type_7());
+      	
+      data.setEnablePublishingToRobot(cdr.read_type_7());
+      	
+      data.setExecuteEnablePublishingToRobot(cdr.read_type_7());
+      	
+      data.setClearFaults(cdr.read_type_7());
+      	
+      data.setExecuteClearFaults(cdr.read_type_7());
+      	
+      data.setCalibrateRobot(cdr.read_type_7());
+      	
+      data.setExecuteCalibrateRobot(cdr.read_type_7());
+      	
+      data.setEnableActuators(cdr.read_type_7());
+      	
+      data.setExecuteEnableActuators(cdr.read_type_7());
       	
 
    }
@@ -127,20 +226,42 @@ public class EStopMasterGainCommandMessagePubSubType implements us.ihmc.pubsub.T
    public final void serialize(controller_msgs.msg.dds.EStopMasterGainCommandMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_7("estop", data.getEstop());
-      ser.write_type_6("master_gain", data.getMasterGain());
+      ser.write_type_7("execute_estop", data.getExecuteEstop());
+      ser.write_type_6("desired_master_gain", data.getDesiredMasterGain());
+      ser.write_type_7("execute_master_gain", data.getExecuteMasterGain());
       ser.write_type_7("servo_robot", data.getServoRobot());
-      ser.write_type_7("unservo_immediately", data.getUnservoImmediately());
-      ser.write_type_7("unservo_slowly", data.getUnservoSlowly());
+      ser.write_type_7("execute_servo_robot", data.getExecuteServoRobot());
+      ser.write_type_7("unservo_quickly", data.getUnservoQuickly());
+      ser.write_type_7("execute_unservo_quickly", data.getExecuteUnservoQuickly());
+      ser.write_type_7("enable_publishing_to_robot", data.getEnablePublishingToRobot());
+      ser.write_type_7("execute_enable_publishing_to_robot", data.getExecuteEnablePublishingToRobot());
+      ser.write_type_7("clear_faults", data.getClearFaults());
+      ser.write_type_7("execute_clear_faults", data.getExecuteClearFaults());
+      ser.write_type_7("calibrate_robot", data.getCalibrateRobot());
+      ser.write_type_7("execute_calibrate_robot", data.getExecuteCalibrateRobot());
+      ser.write_type_7("enable_actuators", data.getEnableActuators());
+      ser.write_type_7("execute_enable_actuators", data.getExecuteEnableActuators());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.EStopMasterGainCommandMessage data)
    {
       data.setEstop(ser.read_type_7("estop"));
-      data.setMasterGain(ser.read_type_6("master_gain"));
+      data.setExecuteEstop(ser.read_type_7("execute_estop"));
+      data.setDesiredMasterGain(ser.read_type_6("desired_master_gain"));
+      data.setExecuteMasterGain(ser.read_type_7("execute_master_gain"));
       data.setServoRobot(ser.read_type_7("servo_robot"));
-      data.setUnservoImmediately(ser.read_type_7("unservo_immediately"));
-      data.setUnservoSlowly(ser.read_type_7("unservo_slowly"));
+      data.setExecuteServoRobot(ser.read_type_7("execute_servo_robot"));
+      data.setUnservoQuickly(ser.read_type_7("unservo_quickly"));
+      data.setExecuteUnservoQuickly(ser.read_type_7("execute_unservo_quickly"));
+      data.setEnablePublishingToRobot(ser.read_type_7("enable_publishing_to_robot"));
+      data.setExecuteEnablePublishingToRobot(ser.read_type_7("execute_enable_publishing_to_robot"));
+      data.setClearFaults(ser.read_type_7("clear_faults"));
+      data.setExecuteClearFaults(ser.read_type_7("execute_clear_faults"));
+      data.setCalibrateRobot(ser.read_type_7("calibrate_robot"));
+      data.setExecuteCalibrateRobot(ser.read_type_7("execute_calibrate_robot"));
+      data.setEnableActuators(ser.read_type_7("enable_actuators"));
+      data.setExecuteEnableActuators(ser.read_type_7("execute_enable_actuators"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.EStopMasterGainCommandMessage src, controller_msgs.msg.dds.EStopMasterGainCommandMessage dest)

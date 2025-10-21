@@ -28,12 +28,14 @@ import us.ihmc.tools.Timer;
 
 public class RDXHardwareControlStateManager
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final CommunicationHelper communicationHelper;
-   private final Timer estopMasterGainStatusTimer = new Timer();
-   private final ImBoolean estop = new ImBoolean();
-   private final ImDouble masterGain = new ImDouble();
-   private HighLevelControllerName currentHighLevelState = null;
+   protected final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   protected final CommunicationHelper communicationHelper;
+   protected final Timer estopMasterGainStatusTimer = new Timer();
+   protected final ImBoolean estop = new ImBoolean();
+   protected final ImDouble desiredMasterGain = new ImDouble();
+   protected final EStopMasterGainCommandMessage hardwareCommandMessage = new EStopMasterGainCommandMessage();
+   protected final EStopMasterGainStatusMessage hardwareStatusMessage = new EStopMasterGainStatusMessage();
+   protected HighLevelControllerName currentHighLevelState = null;
 
    public RDXHardwareControlStateManager(CommunicationHelper communicationHelper)
    {
@@ -41,14 +43,21 @@ public class RDXHardwareControlStateManager
 
       communicationHelper.subscribeToControllerViaVolatileCallback(EStopMasterGainStatusMessage.class, message ->
       {
+         hardwareStatusMessage.set(message);
+         consumeHardwareStatusMessage(hardwareStatusMessage);
+
          estopMasterGainStatusTimer.reset();
-         estop.set(message.getEstop());
-         masterGain.set(message.getMasterGain());
       });
       communicationHelper.subscribeToControllerViaVolatileCallback(HighLevelStateChangeStatusMessage.class, message ->
       {  // TODO: Create a HighLevelStateStatusMessage that is periodically published, so we can always know current state
          currentHighLevelState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
       });
+   }
+
+   protected void consumeHardwareStatusMessage(EStopMasterGainStatusMessage hardwareStatusMessage)
+   {
+      estop.set(hardwareStatusMessage.getIsEstopped());
+      desiredMasterGain.set(hardwareStatusMessage.getCurrentMasterGain());
    }
 
    public void renderImGuiWidgets(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
@@ -60,7 +69,7 @@ public class RDXHardwareControlStateManager
          boolean changed = ImGui.checkbox(labels.get("SOFT-E-STOP"), estop);
          ImGui.sameLine();
          ImGui.setNextItemWidth(ImGui.getColumnWidth());
-         changed |= ImGuiTools.sliderDouble(labels.getHidden("Master Gain"), masterGain, 0.0, 1.0, "Master Gain: %.2f");
+         changed |= ImGuiTools.sliderDouble(labels.getHidden("Master Gain"), desiredMasterGain, 0.0, 1.0, "Master Gain: %.2f");
          boolean servoRobot = ImGui.button(labels.get("Servo Robot"));
          changed |= servoRobot;
          ImGui.sameLine();
@@ -68,14 +77,16 @@ public class RDXHardwareControlStateManager
          changed |= unservoSlowly;
          ImGui.popStyleColor(2);
 
+         boolean eStopChanged = ImGui.button(labels.get("SOFT-E-STOP"));
+
+
          if (changed)
          {
-            EStopMasterGainCommandMessage message = new EStopMasterGainCommandMessage();
-            message.setEstop(estop.get());
-            message.setMasterGain(masterGain.get());
-            message.setServoRobot(servoRobot);
-            message.setUnservoSlowly(unservoSlowly);
-            communicationHelper.publishToController(message);
+            hardwareCommandMessage.setEstop(estop.get());
+            hardwareCommandMessage.setDesiredMasterGain(desiredMasterGain.get());
+            hardwareCommandMessage.setServoRobot(servoRobot);
+            hardwareCommandMessage.setUnservoQuickly(unservoSlowly);
+            communicationHelper.publishToController(hardwareCommandMessage);
          }
       }
 
@@ -156,7 +167,7 @@ public class RDXHardwareControlStateManager
       }
    }
 
-   private void goNPose(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
+   protected void goNPose(DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, RDXArmManager armManager, double maxPelvisHeight)
    {
       double trajectoryTime = 3.0;
 
@@ -207,6 +218,20 @@ public class RDXHardwareControlStateManager
    {
       HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
       highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.FREEZE_STATE.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendDoNothingRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
+      communicationHelper.publishToController(highLevelStateMessage);
+   }
+
+   public void sendExitWalkingRequest()
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_WALKING.toByte());
       communicationHelper.publishToController(highLevelStateMessage);
    }
 }

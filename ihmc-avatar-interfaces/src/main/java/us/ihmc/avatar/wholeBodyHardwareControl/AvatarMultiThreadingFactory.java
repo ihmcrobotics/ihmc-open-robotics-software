@@ -118,6 +118,7 @@ public class AvatarMultiThreadingFactory
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
                                       HardwareCommunicationInterface hardwareCommunicationInterface,
+                                      AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
                                       SensorReaderFactory sensorReaderFactory,
                                       HighLevelControllerStateFactory standPrepStateFactory,
                                       HighLevelControllerStateFactory freezeStateFactory,
@@ -136,6 +137,7 @@ public class AvatarMultiThreadingFactory
       this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
+      this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.affinity = affinity;
       this.createStepGeneratorThread = createStepGeneratorThread;
       this.useRealtimeThreads = useRealtimeThreads;
@@ -155,9 +157,6 @@ public class AvatarMultiThreadingFactory
 
       estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
       controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
-
-      // Set up low-level output processor
-      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), masterThreadDt, registry);
 
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);

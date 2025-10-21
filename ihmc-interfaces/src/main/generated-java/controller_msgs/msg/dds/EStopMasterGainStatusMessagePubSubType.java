@@ -15,7 +15,7 @@ public class EStopMasterGainStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4ea3b33a261e3747c0ce86a506b02ddd29be3658945dadfcd67af1e492b6e744";
+   		return "625441146c889e4268a47efc7ceac534dba72fa10667c000133b21a0547c45a3";
    }
    
    @Override
@@ -54,6 +54,16 @@ public class EStopMasterGainStatusMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -72,6 +82,21 @@ public class EStopMasterGainStatusMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -81,17 +106,37 @@ public class EStopMasterGainStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.EStopMasterGainStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      cdr.write_type_7(data.getEstop());
+      cdr.write_type_7(data.getIsEstopped());
 
-      cdr.write_type_6(data.getMasterGain());
+      cdr.write_type_7(data.getRobotIsFaulted());
+
+      cdr.write_type_7(data.getRobotIsServod());
+
+      cdr.write_type_7(data.getRobotIsCalibrated());
+
+      cdr.write_type_7(data.getPublishingToRobotIsEnabled());
+
+      cdr.write_type_7(data.getActuatorsAreEnabled());
+
+      cdr.write_type_6(data.getCurrentMasterGain());
 
    }
 
    public static void read(controller_msgs.msg.dds.EStopMasterGainStatusMessage data, us.ihmc.idl.CDR cdr)
    {
-      data.setEstop(cdr.read_type_7());
+      data.setIsEstopped(cdr.read_type_7());
       	
-      data.setMasterGain(cdr.read_type_6());
+      data.setRobotIsFaulted(cdr.read_type_7());
+      	
+      data.setRobotIsServod(cdr.read_type_7());
+      	
+      data.setRobotIsCalibrated(cdr.read_type_7());
+      	
+      data.setPublishingToRobotIsEnabled(cdr.read_type_7());
+      	
+      data.setActuatorsAreEnabled(cdr.read_type_7());
+      	
+      data.setCurrentMasterGain(cdr.read_type_6());
       	
 
    }
@@ -99,15 +144,25 @@ public class EStopMasterGainStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.EStopMasterGainStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("estop", data.getEstop());
-      ser.write_type_6("master_gain", data.getMasterGain());
+      ser.write_type_7("is_estopped", data.getIsEstopped());
+      ser.write_type_7("robot_is_faulted", data.getRobotIsFaulted());
+      ser.write_type_7("robot_is_servod", data.getRobotIsServod());
+      ser.write_type_7("robot_is_calibrated", data.getRobotIsCalibrated());
+      ser.write_type_7("publishing_to_robot_is_enabled", data.getPublishingToRobotIsEnabled());
+      ser.write_type_7("actuators_are_enabled", data.getActuatorsAreEnabled());
+      ser.write_type_6("current_master_gain", data.getCurrentMasterGain());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.EStopMasterGainStatusMessage data)
    {
-      data.setEstop(ser.read_type_7("estop"));
-      data.setMasterGain(ser.read_type_6("master_gain"));
+      data.setIsEstopped(ser.read_type_7("is_estopped"));
+      data.setRobotIsFaulted(ser.read_type_7("robot_is_faulted"));
+      data.setRobotIsServod(ser.read_type_7("robot_is_servod"));
+      data.setRobotIsCalibrated(ser.read_type_7("robot_is_calibrated"));
+      data.setPublishingToRobotIsEnabled(ser.read_type_7("publishing_to_robot_is_enabled"));
+      data.setActuatorsAreEnabled(ser.read_type_7("actuators_are_enabled"));
+      data.setCurrentMasterGain(ser.read_type_6("current_master_gain"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.EStopMasterGainStatusMessage src, controller_msgs.msg.dds.EStopMasterGainStatusMessage dest)
