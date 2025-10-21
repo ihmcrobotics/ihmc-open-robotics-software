@@ -141,15 +141,15 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-//   public default SimulatedHandSensorReader createSimulatedHandSensorReader(OneDegreeOfFreedomJointHolder robot, List<String> fingerJointNames)
-//   {
-//      return new DefaultSimulatedHandSensorReader(robot, fingerJointNames);
-//   }
+   public default SimulatedHandSensorReader createSimulatedHandSensorReader(OneDegreeOfFreedomJointHolder robot, List<String> fingerJointNames)
+   {
+      return new DefaultSimulatedHandSensorReader(robot, fingerJointNames);
+   }
 
-//   public default SimulatedHandOutputWriter createSimulatedHandOutputWriter(OneDegreeOfFreedomJointHolder robot)
-//   {
-//      return new DefaultSimulatedHandOutputWriter(robot);
-//   }
+   public default SimulatedHandOutputWriter createSimulatedHandOutputWriter(OneDegreeOfFreedomJointHolder robot)
+   {
+      return new DefaultSimulatedHandOutputWriter(robot);
+   }
 
    public abstract DataServerSettings getLogSettings();
 
