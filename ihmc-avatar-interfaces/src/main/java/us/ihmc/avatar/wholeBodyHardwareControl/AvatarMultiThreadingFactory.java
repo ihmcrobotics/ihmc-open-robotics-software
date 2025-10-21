@@ -78,7 +78,7 @@ public class AvatarMultiThreadingFactory
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
 
    // Logger stuff
-   private boolean logLocally;
+   private boolean logLocally = false;
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
@@ -113,7 +113,6 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
-   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -247,23 +246,23 @@ public class AvatarMultiThreadingFactory
          builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
-         {
             builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
-         }
          if (ikStreamingThread.hasValue())
-         {
             builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
-         }
 
          // Logging locally on the robot
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
+                                                                                                      robotModel.getLogModelProvider(),
+                                                                                                      builders,
+                                                                                                      100000,
+                                                                                                      0.01);
          intraprocessYoVariableLogger.start();
 
          threadingManager.get()
                          .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
                                                                                                                   .getHumanoidRobotContextData()
                                                                                                                   .getTimestamp()));
-         System.out.println("Logging Status: data is being logged LOCALLY");
+         System.out.println("Logging Status: data is being logged locally");
       }
 
       return threadingManager.get();
@@ -569,7 +568,7 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 
-   public void setLocalLogging(boolean logLocally)
+   public void setLogLocally(boolean logLocally)
    {
       this.logLocally = logLocally;
    }
