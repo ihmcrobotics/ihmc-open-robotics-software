@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.tools;
+package us.ihmc.rdx.behaviorTree;
 
 import us.ihmc.communication.crdt.CRDTBidirectionalPoint3D;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;

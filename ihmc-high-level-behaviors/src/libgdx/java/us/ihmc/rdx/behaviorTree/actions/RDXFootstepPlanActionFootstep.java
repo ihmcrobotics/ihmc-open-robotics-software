@@ -9,7 +9,7 @@ import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepS
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFootstep;
-import us.ihmc.rdx.ui.behavior.tools.RDXCRDTTools;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 
