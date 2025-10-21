@@ -2,6 +2,7 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -29,6 +30,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -50,6 +52,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
 import java.util.*;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
@@ -73,6 +76,9 @@ public class AvatarMultiThreadingFactory
 
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
+
+   // Logger stuff
+   private boolean logLocally = false;
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
@@ -240,6 +246,32 @@ public class AvatarMultiThreadingFactory
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
+
+      if (logLocally)
+      {
+         // Setup logger
+         ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+         builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
+         if (stepGeneratorThread.hasValue())
+            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+         if (ikStreamingThread.hasValue())
+            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+
+         // Logging locally on the robot
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
+                                                                                                      robotModel.getLogModelProvider(),
+                                                                                                      builders,
+                                                                                                      100000,
+                                                                                                      0.01);
+         intraprocessYoVariableLogger.start();
+
+         threadingManager.get()
+                         .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                                  .getHumanoidRobotContextData()
+                                                                                                                  .getTimestamp()));
+         System.out.println("Logging Status: data is being logged locally");
+      }
 
       return threadingManager.get();
    }
@@ -542,6 +574,11 @@ public class AvatarMultiThreadingFactory
    public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
+   }
+
+   public void setLogLocally(boolean logLocally)
+   {
+      this.logLocally = logLocally;
    }
 
    public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
