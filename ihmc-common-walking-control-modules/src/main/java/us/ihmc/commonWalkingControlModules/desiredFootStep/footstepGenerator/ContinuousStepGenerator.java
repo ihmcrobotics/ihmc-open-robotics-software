@@ -16,8 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.quicksterFootstepProvider.QuicksterFootstepProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -163,7 +161,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
 
    // Status message output manager (handles publishing of CSG status info)
-   private final StatusMessageOutputManager statusMessageOutputManager;
+   private final StatusMessageOutputManager csgStatusMessageOutputManager;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
    // All things QFP
@@ -189,9 +187,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       this(null, parentRegistry);
    }
 
-   public ContinuousStepGenerator(StatusMessageOutputManager statusMessageOutputManager, YoRegistry parentRegistry)
+   public ContinuousStepGenerator(StatusMessageOutputManager csgStatusMessageOutputManager, YoRegistry parentRegistry)
    {
-      this.statusMessageOutputManager = statusMessageOutputManager;
+      this.csgStatusMessageOutputManager = csgStatusMessageOutputManager;
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -559,8 +557,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
 
-      if (statusMessageOutputManager != null)
-         statusMessageOutputManager.reportStatusMessage(csgStatusMessage);
+      if (csgStatusMessageOutputManager != null)
+         csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
    private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
@@ -760,14 +758,14 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     * {@link #notifyFootstepCompleted(RobotSide)}.
     * </p>
     *
-    * @param statusMessageOutputManager the output API of the controller.
+    * @param controllerStatusMessageOutputManager the output API of the controller.
     */
-   public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
+   public void setFootstepStatusListener(StatusMessageOutputManager controllerStatusMessageOutputManager)
    {
-      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
+      controllerStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
 
       if (quicksterFootstepProvider.hasValue())
-         quicksterFootstepProvider.get().setFootstepStatusListener(statusMessageOutputManager);
+         quicksterFootstepProvider.get().setFootstepStatusListener(controllerStatusMessageOutputManager);
    }
 
    /**
