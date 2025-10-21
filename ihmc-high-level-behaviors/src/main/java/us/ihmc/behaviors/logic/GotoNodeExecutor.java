@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.logic;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
-import us.ihmc.behaviors.sequence.LeafNodeExecutor;
-import us.ihmc.behaviors.sequence.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 

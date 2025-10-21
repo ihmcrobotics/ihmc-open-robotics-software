@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;
 import us.ihmc.rdx.ui.widgets.ImGuiCheckpointNodeWidget;

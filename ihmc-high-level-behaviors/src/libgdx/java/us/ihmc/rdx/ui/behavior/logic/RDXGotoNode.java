@@ -5,7 +5,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeState;
-import us.ihmc.behaviors.sequence.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXLeafNode;

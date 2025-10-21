@@ -6,12 +6,12 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.logic.GotoNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 

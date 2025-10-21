@@ -3,7 +3,7 @@ package us.ihmc.behaviors.logic;
 import behavior_msgs.msg.dds.GotoNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.sequence.LeafNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

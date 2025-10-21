@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;

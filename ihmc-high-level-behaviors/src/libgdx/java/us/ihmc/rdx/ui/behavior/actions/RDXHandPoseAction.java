@@ -10,8 +10,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
+import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
@@ -51,7 +51,7 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
+import static us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
 
 public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
 {

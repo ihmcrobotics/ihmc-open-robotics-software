@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.ConditionNodeStateMessage;
 import us.ihmc.behaviors.logic.condition.CounterConditionState;
 import us.ihmc.behaviors.logic.condition.LLMConditionState;
 import us.ihmc.behaviors.logic.condition.ProximityConditionState;
-import us.ihmc.behaviors.sequence.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;

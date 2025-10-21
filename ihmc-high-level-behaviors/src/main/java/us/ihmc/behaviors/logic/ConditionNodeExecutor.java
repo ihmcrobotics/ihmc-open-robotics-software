@@ -3,7 +3,7 @@ package us.ihmc.behaviors.logic;
 import us.ihmc.behaviors.logic.condition.CounterConditionExecutor;
 import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
 import us.ihmc.behaviors.logic.condition.ProximityConditionExecutor;
-import us.ihmc.behaviors.sequence.LeafNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

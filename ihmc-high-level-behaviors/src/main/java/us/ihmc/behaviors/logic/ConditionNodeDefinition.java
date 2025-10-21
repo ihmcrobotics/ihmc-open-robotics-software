@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.logic.condition.CounterConditionDefinition;
 import us.ihmc.behaviors.logic.condition.LLMConditionDefinition;
 import us.ihmc.behaviors.logic.condition.ProximityConditionDefinition;
-import us.ihmc.behaviors.sequence.LeafNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

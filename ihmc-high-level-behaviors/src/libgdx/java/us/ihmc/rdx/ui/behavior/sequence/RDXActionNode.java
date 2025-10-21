@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 
 /**
  * The UI representation of a robot behavior action. It provides a base
