@@ -20,6 +20,7 @@ public class BipedStep
    private FixedFramePose3DBasics goalPose = new FramePose3D(worldFrame);
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(6, Point2D.class);
    private double swingHeight = 0.0;
+   private long sequenceID = -1;
 
    public BipedStep()
    {
@@ -63,12 +64,18 @@ public class BipedStep
       return predictedContactPoints;
    }
 
+   public long getSequenceID()
+   {
+      return sequenceID;
+   }
+
    public void set(BipedStep other)
    {
       setRobotSide(other.getRobotSide());
       setGoalPose(other.getGoalPose());
       setSwingHeight(other.getSwingHeight());
       setPredictedContactPoints(other.getPredictedContactPoints());
+      setSequenceID(getSequenceID());
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -105,6 +112,11 @@ public class BipedStep
          Point2DReadOnly point = contactPointList.get(i);
          this.predictedContactPoints.add().set(point);
       }
+   }
+
+   public void setSequenceID(long sequenceID)
+   {
+      this.sequenceID = sequenceID;
    }
 
    @Override
