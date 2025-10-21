@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;

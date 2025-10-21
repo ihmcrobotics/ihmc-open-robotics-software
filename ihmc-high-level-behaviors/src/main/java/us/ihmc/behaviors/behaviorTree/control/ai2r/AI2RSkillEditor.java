@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.ai2r;
+package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;

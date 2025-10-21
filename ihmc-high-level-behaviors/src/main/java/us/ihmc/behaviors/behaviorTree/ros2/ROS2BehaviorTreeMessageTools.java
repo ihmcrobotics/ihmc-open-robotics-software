@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
-import us.ihmc.behaviors.ai2r.AI2RNodeState;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;

@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeBuilder;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;

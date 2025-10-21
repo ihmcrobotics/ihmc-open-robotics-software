@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
