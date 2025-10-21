@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.CheckPointNodeStateMessage;
-import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 

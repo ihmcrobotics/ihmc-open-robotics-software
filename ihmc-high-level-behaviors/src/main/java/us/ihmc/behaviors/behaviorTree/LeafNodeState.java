@@ -1,8 +1,6 @@
-package us.ihmc.behaviors.behaviorTree.action;
+package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.LeafNodeStateMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.crdt.CRDTStatusInteger;

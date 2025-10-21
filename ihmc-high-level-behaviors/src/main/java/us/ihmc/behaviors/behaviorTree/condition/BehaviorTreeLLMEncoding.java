@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree.condition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
-import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.log.LogTools;
 
 public class BehaviorTreeLLMEncoding

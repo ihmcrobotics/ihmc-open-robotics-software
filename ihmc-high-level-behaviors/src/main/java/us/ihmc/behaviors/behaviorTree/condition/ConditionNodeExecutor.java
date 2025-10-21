@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import us.ihmc.behaviors.behaviorTree.action.LeafNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

@@ -10,7 +10,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;

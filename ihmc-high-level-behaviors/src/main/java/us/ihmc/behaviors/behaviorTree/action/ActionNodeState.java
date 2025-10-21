@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.action;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;

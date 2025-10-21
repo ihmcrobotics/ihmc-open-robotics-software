@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
-import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;

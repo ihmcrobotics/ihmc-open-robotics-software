@@ -1,6 +1,4 @@
-package us.ihmc.behaviors.behaviorTree.action;
-
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+package us.ihmc.behaviors.behaviorTree;
 
 public class LeafNodeExecutor<S extends LeafNodeState<D>,
                               D extends LeafNodeDefinition>
