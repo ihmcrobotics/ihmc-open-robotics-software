@@ -96,6 +96,7 @@ public class AvatarMultiThreadingFactory
    private final RequiredFactoryField<AvatarEstimatorThread> estimatorThread = new RequiredFactoryField<>("AvatarEstimatorThread");
    private final RequiredFactoryField<AvatarControllerThread> controllerThread = new RequiredFactoryField<>("AvatarControllerThread");
    private final OptionalFactoryField<AvatarStepGeneratorThread> stepGeneratorThread = new OptionalFactoryField<>("AvatarStepGeneratorThread");
+   private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> ikStreamingThread = new OptionalFactoryField<>("AvatarIKStreamingThread");
 
    // Multi-threading manager
@@ -174,12 +175,19 @@ public class AvatarMultiThreadingFactory
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
 
       // Create controller thread
-      HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
-      Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
-      stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
-      stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
-      stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
-      estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
+      if (estimatorModeMapReference.hasValue())
+      {
+         estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, estimatorModeMapReference.get());
+      }
+      else
+      {
+         HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
+         Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
+         stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
+         stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
+         stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
+         estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
+      }
 
       controllerThread.set(new AvatarControllerThread(robotModel.getSimpleRobotName().toLowerCase(),
                                                       robotModel,
@@ -571,5 +579,10 @@ public class AvatarMultiThreadingFactory
    public void setLogLocally(boolean logLocally)
    {
       this.logLocally = logLocally;
+   }
+
+   public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
+   {
+      estimatorModeMapReference.set(estimatorModeMap);
    }
 }

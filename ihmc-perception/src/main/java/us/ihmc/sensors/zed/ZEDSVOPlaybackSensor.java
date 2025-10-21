@@ -22,14 +22,20 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
          throw new RuntimeException("SVO file does not exist");
    }
 
+   @Override
+   public boolean startSensor()
+   {
+      return super.startSensor();
+   }
+
    public void play()
    {
-      getGrabThread().startRepeating();
+      run(true);
    }
 
    public void pause()
    {
-      getGrabThread().stopRepeating();
+      run(false);
    }
 
    public void useTrackedPose(boolean useTrackedPose)
