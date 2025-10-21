@@ -1,9 +1,6 @@
-package us.ihmc.behaviors.logic;
+package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
-import us.ihmc.behaviors.logic.condition.CounterConditionState;
-import us.ihmc.behaviors.logic.condition.LLMConditionState;
-import us.ihmc.behaviors.logic.condition.ProximityConditionState;
 import us.ihmc.behaviors.behaviorTree.action.LeafNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;

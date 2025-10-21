@@ -1,7 +1,6 @@
-package us.ihmc.behaviors.logic.condition;
+package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 
 public class CounterConditionState

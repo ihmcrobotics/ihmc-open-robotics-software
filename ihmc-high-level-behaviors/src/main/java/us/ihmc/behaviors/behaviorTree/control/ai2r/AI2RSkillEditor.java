@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.AI2RCommandMessage;
 import behavior_msgs.msg.dds.AI2RNavigationMessage;
 import behavior_msgs.msg.dds.AI2RPickUpObjectMessage;
 import behavior_msgs.msg.dds.AI2RReceiveObjectMessage;
-import us.ihmc.behaviors.logic.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;

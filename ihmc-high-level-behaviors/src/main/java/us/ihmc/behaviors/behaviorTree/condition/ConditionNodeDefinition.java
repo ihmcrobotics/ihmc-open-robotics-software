@@ -1,11 +1,8 @@
-package us.ihmc.behaviors.logic;
+package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.behaviors.logic.condition.CounterConditionDefinition;
-import us.ihmc.behaviors.logic.condition.LLMConditionDefinition;
-import us.ihmc.behaviors.logic.condition.ProximityConditionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTInfo;

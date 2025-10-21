@@ -7,7 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
-import us.ihmc.behaviors.logic.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.logic.GotoNodeState;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;

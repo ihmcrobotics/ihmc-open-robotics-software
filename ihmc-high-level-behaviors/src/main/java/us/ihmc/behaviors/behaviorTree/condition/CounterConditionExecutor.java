@@ -1,7 +1,5 @@
-package us.ihmc.behaviors.logic.condition;
+package us.ihmc.behaviors.behaviorTree.condition;
 
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 
 public class CounterConditionExecutor

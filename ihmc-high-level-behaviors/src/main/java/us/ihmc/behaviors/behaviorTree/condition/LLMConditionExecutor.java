@@ -1,8 +1,6 @@
-package us.ihmc.behaviors.logic.condition;
+package us.ihmc.behaviors.behaviorTree.condition;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.reasoning.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;

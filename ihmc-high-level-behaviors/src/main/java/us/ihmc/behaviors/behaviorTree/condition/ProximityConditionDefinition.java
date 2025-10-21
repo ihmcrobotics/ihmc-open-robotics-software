@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.logic.condition;
+package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.behavior.logic.condition;
 
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;

@@ -1,11 +1,8 @@
-package us.ihmc.behaviors.logic.condition;
+package us.ihmc.behaviors.behaviorTree.condition;
 
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class ProximityConditionExecutor

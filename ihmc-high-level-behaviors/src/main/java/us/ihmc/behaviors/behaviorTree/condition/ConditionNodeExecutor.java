@@ -1,8 +1,5 @@
-package us.ihmc.behaviors.logic;
+package us.ihmc.behaviors.behaviorTree.condition;
 
-import us.ihmc.behaviors.logic.condition.CounterConditionExecutor;
-import us.ihmc.behaviors.logic.condition.LLMConditionExecutor;
-import us.ihmc.behaviors.logic.condition.ProximityConditionExecutor;
 import us.ihmc.behaviors.behaviorTree.action.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;

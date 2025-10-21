@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui.behavior.logic.condition;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeState;
-import us.ihmc.behaviors.logic.condition.ProximityConditionDefinition.DistanceType;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.condition.ProximityConditionDefinition.DistanceType;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
