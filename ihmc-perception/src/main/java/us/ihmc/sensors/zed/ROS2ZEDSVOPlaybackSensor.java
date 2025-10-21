@@ -34,7 +34,7 @@ public class ROS2ZEDSVOPlaybackSensor extends ZEDSVOPlaybackSensor
    }
 
    @Override
-   protected boolean startSensor()
+   public boolean startSensor()
    {
       if (super.startSensor())
       {
