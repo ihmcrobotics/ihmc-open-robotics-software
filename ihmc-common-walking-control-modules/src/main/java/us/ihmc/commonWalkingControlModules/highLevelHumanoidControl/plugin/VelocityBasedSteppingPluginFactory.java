@@ -60,6 +60,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       this.csgCommandInputManagerField.set(commandInputManager);
    }
 
+   public void setStepGeneratorStatusMessageOutputManager(StatusMessageOutputManager statusMessageOutputManager)
+   {
+      this.csgStatusMessageOutputManagerField.set(statusMessageOutputManager);
+   }
+
    @Override
    public void setFootStepAdjustment(FootstepAdjustment footstepAdjustment)
    {

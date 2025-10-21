@@ -109,6 +109,11 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       this.csgCommandInputManagerField.set(commandInputManager);
    }
 
+   public void setStepGeneratorStatusMessageOutputManager(StatusMessageOutputManager statusMessageOutputManager)
+   {
+      this.csgStatusMessageOutputManagerField.set(statusMessageOutputManager);
+   }
+
    @Override
    public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
@@ -143,7 +148,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registryField.get());
+      ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(getStepGeneratorStatusMessageOutputManager(), registryField.get());
       continuousStepGenerator.setQuicksterFootstepProvider(new QuicksterFootstepProvider(robotModel,
                                                                                          referenceFrames,
                                                                                          updateDT,

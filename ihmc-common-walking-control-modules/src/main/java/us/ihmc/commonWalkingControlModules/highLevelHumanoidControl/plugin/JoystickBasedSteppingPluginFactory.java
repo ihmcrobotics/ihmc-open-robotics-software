@@ -35,6 +35,12 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    {
       this.csgPluginFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
       this.velocityPluginFactory = new VelocityBasedSteppingPluginFactory();
+
+      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
+      csgPluginFactory.setStepGeneratorStatusMessageOutputManager(statusMessageOutputManager);
+
+      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
+      velocityPluginFactory.setStepGeneratorStatusMessageOutputManager(statusMessageOutputManager);
    }
 
    public void setVelocitySteppingInputParameters(VelocityBasedSteppingParameters parameters)

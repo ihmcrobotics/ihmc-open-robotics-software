@@ -163,7 +163,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
 
    // Status message output manager (handles publishing of CSG status info)
-   private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(StepGeneratorAPIDefinition.getStepGeneratorSupportedStatusMessages());
+   private final StatusMessageOutputManager statusMessageOutputManager;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
    // All things QFP
@@ -186,6 +186,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     */
    public ContinuousStepGenerator(YoRegistry parentRegistry)
    {
+      this(null, parentRegistry);
+   }
+
+   public ContinuousStepGenerator(StatusMessageOutputManager statusMessageOutputManager, YoRegistry parentRegistry)
+   {
+      this.statusMessageOutputManager = statusMessageOutputManager;
+
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
 
@@ -552,7 +559,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
       csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
 
-      statusMessageOutputManager.reportStatusMessage(csgStatusMessage);
+      if (statusMessageOutputManager != null)
+         statusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
    private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
