@@ -102,9 +102,6 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       if (ImGui.menuItem(labels.get("Print LLM Encoding")))
          LogTools.info("LLM Encoding:%n%s".formatted(BehaviorTreeLLMEncoding.encode(state)));
-
-      if (ImGui.menuItem(labels.get("Render Progress Using Plots"), null, progressWidgetsManager.getRenderAsPlots()))
-         progressWidgetsManager.setRenderAsPlots(!progressWidgetsManager.getRenderAsPlots());
    }
 
    public void renderExecutionControlAndProgressWidgets()
@@ -207,5 +204,10 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public TLongObjectHashMap<RDXBehaviorTreeNode<?, ?>> getIDToNodeMap()
    {
       return idToNodeMap;
+   }
+
+   public RDXActionProgressWidgetsManager getProgressWidgetsManager()
+   {
+      return progressWidgetsManager;
    }
 }

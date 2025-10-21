@@ -6,13 +6,15 @@ import com.badlogic.gdx.utils.Pool;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiMouseCursor;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -20,6 +22,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -27,6 +30,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 {
+   public static final RDXBehaviorTreeSettings SETTINGS = new RDXBehaviorTreeSettings();
    private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -41,7 +45,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
-   private boolean enableChildScrollableAreas;
+   private boolean draggingDivider;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -151,6 +155,21 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    {
       ImGui.beginMenuBar();
       fileMenu.renderFileMenu(rootNode, nodeCreationMenu);
+      if (ImGui.beginMenu(labels.get("View")))
+      {
+         if (rootNode != null)
+         {
+            ImGui.text("Progress Widgets:");
+            if (ImGui.menuItem(labels.get("Time Only"), null, SETTINGS.getProgressWidgetsType() == Type.TIME_ONLY))
+               SETTINGS.setProgressWidgetsType(Type.TIME_ONLY);
+            if (ImGui.menuItem(labels.get("Progress Bars"), null, SETTINGS.getProgressWidgetsType() == Type.PROGRESS_BARS))
+               SETTINGS.setProgressWidgetsType(Type.PROGRESS_BARS);
+            if (ImGui.menuItem(labels.get("Scrolling Plots"), null, SETTINGS.getProgressWidgetsType() == Type.SCROLLING_PLOTS))
+               SETTINGS.setProgressWidgetsType(Type.SCROLLING_PLOTS);
+         }
+
+         ImGui.endMenu();
+      }
    }
 
    protected void renderImGuiWidgetsPost()
@@ -159,79 +178,45 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
       {
          rootNode.renderExecutionControlAndProgressWidgets();
 
-         float cursorYAfterControlWidgets = ImGui.getCursorPosY();
-
          anyNodeSelected = false;
-         RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node -> anyNodeSelected |= node.getSelected());
-
-         float titleHeight = ImGui.getFrameHeightWithSpacing();
-         float menuBarHeight = ImGui.getFrameHeightWithSpacing();
-         float windowHeight = ImGui.getWindowHeight();
-         float availableHeight = windowHeight - titleHeight - menuBarHeight - cursorYAfterControlWidgets;
-         // There are ~9 rows of stuff in the screw primitive action settings,
-         // which is the tallest one currently. We could think of ways to improve on this.
-         float tallestNodeSettings = 9 * ImGui.getFrameHeightWithSpacing();
-
-         // 60% seems to be the desirable ratio for the visible area
-         // of the tree view vs the settings area
-         float treeExplorerPercentage = 0.6f;
-         float treeExplorerHeight = availableHeight * treeExplorerPercentage;
-         float nodeSettingsHeight = availableHeight * (1.0f - treeExplorerPercentage);
-
-         float treeContentStartY = ImGui.getCursorPosY();
-
-         if (enableChildScrollableAreas)
-            ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
-
-         treeWidgetsVerticalLayout.renderImGuiWidgets(rootNode);
-
-         boolean updatedEnableChildScrollableAreas;
-         float treeContentHeight;
-         if (enableChildScrollableAreas)
+         RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
          {
-            float scrollMaxY = ImGui.getScrollMaxY();
-            float childWindowHeight = ImGui.getWindowHeight();
-            if (scrollMaxY == 0.0)
-               treeContentHeight = ImGui.getCursorPosY();
-            else
-               treeContentHeight = childWindowHeight + scrollMaxY;
-         }
-         else
+            anyNodeSelected |= node.getSelected();
+            if (node.getSelected())
+               selectedNode = node;
+         });
+
+         float remainingHeight = ImGui.getContentRegionAvailY();
+         float treeExplorerPercentage = SETTINGS.getTreeExplorerHeightPercentage();
+         float treeExplorerHeight = anyNodeSelected ? remainingHeight * treeExplorerPercentage : remainingHeight;
+
+         ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
+         treeWidgetsVerticalLayout.renderImGuiWidgets();
+         ImGui.endChild();
+
+         if (rootNode != null && anyNodeSelected) // It can become null above
          {
-            treeContentHeight = ImGui.getCursorPosY() - treeContentStartY;
-         }
-         updatedEnableChildScrollableAreas = windowHeight - treeContentStartY - treeContentHeight < tallestNodeSettings;
-
-         if (enableChildScrollableAreas)
-            ImGui.endChild();
-
-         enableChildScrollableAreas = updatedEnableChildScrollableAreas;
-
-         ImGui.spacing();
-         ImGui.spacing();
-
-         if (rootNode != null) // It can become null above
-         {
-            anyNodeSelected = false;
-            RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node ->
+            if (ImGuiTools.isItemHovered(ImGui.getColumnWidth(), ImGui.getTextLineHeight()) || draggingDivider)
             {
-               anyNodeSelected |= node.getSelected();
-               if (node.getSelected())
-                  selectedNode = node;
-            });
+               if (!draggingDivider || ImGui.isMouseDown(ImGuiMouseButton.Left))
+               {
+                  ImGui.setMouseCursor(ImGuiMouseCursor.ResizeNS);
+                  if (ImGui.isMouseDragging(ImGuiMouseButton.Left, 0.1f)) // default threshold 0.3f is too much
+                  {
+                     treeExplorerPercentage += ImGui.getIO().getMouseDeltaY() / remainingHeight;
+                     treeExplorerPercentage = (float) MathTools.clamp(treeExplorerPercentage, 0.05f, 0.95f);
+                     SETTINGS.setTreeExplorerHeightPercentage(treeExplorerPercentage);
+                     draggingDivider = true;
+                  }
+               }
+               else
+                  draggingDivider = false;
+            }
+            ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
 
-            if (anyNodeSelected)
-               ImGuiTools.separatorText("Node Settings > \"%s\"".formatted(selectedNode.getDefinition().getName()));
-            else
-               ImGuiTools.separatorText("Node Settings");
-
-            if (enableChildScrollableAreas)
-               ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, nodeSettingsHeight);
-
+            ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());
             renderSelectedNodeSettingsWidgets(rootNode);
-
-            if (enableChildScrollableAreas)
-               ImGui.endChild();
+            ImGui.endChild();
 
             if (ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S'))
             {
