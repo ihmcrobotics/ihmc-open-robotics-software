@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.sequence;
+package us.ihmc.rdx.behaviorTree.control;
 
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
