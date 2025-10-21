@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.behaviors;
+package us.ihmc.rdx.behaviorTree.control;
 
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
