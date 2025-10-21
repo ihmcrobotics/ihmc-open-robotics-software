@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, HandWrenchActionDefinition>

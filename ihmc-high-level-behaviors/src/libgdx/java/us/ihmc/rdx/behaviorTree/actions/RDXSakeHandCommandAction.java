@@ -11,7 +11,6 @@ import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;

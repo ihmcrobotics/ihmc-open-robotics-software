@@ -24,7 +24,7 @@ import us.ihmc.rdx.behaviorTree.control.RDXDoorTraversal;
 import us.ihmc.rdx.behaviorTree.control.RDXBuildingExploration;
 import us.ihmc.rdx.behaviorTree.condition.RDXConditionNode;
 import us.ihmc.rdx.behaviorTree.control.RDXGotoNode;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.behaviorTree.control.RDXActionSequence;
 import us.ihmc.rdx.behaviorTree.control.RDXFallbackNode;
 import us.ihmc.robotics.physics.RobotCollisionModel;

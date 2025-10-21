@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState, WaitDurationActionDefinition>

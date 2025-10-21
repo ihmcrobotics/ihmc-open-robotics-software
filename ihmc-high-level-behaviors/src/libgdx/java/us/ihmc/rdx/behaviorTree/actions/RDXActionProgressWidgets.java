@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.sequence;
+package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.flag.ImPlotFlags;
@@ -12,9 +12,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.rdx.imgui.*;
-import us.ihmc.rdx.behaviorTree.actions.RDXFootstepPlanAction;
-import us.ihmc.rdx.behaviorTree.actions.RDXHandPoseAction;
-import us.ihmc.rdx.behaviorTree.actions.RDXScrewPrimitiveAction;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;

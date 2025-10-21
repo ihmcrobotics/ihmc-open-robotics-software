@@ -12,7 +12,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 
 public class RDXBehaviorTreeWidgetsVerticalLayout
 {

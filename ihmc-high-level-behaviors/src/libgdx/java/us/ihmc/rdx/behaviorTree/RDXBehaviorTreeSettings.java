@@ -1,7 +1,7 @@
 package us.ihmc.rdx.behaviorTree;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionProgressWidgetsManager.Type;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;

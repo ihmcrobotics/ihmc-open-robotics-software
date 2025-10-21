@@ -18,7 +18,7 @@ import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
