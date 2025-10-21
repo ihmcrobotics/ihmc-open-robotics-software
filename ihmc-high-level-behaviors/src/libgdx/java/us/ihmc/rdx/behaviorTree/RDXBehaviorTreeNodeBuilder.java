@@ -22,7 +22,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.behaviorTree.control.RDXAI2RNode;
 import us.ihmc.rdx.behaviorTree.control.RDXDoorTraversal;
 import us.ihmc.rdx.behaviorTree.control.RDXBuildingExploration;
-import us.ihmc.rdx.ui.behavior.logic.RDXConditionNode;
+import us.ihmc.rdx.behaviorTree.condition.RDXConditionNode;
 import us.ihmc.rdx.behaviorTree.control.RDXGotoNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.logic.condition;
+package us.ihmc.rdx.behaviorTree.condition;
 
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
