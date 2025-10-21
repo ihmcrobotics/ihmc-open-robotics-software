@@ -39,6 +39,7 @@ public class BipedTimedStep extends BipedStep implements TimeIntervalProvider
       setGoalPose(command.getGoalPose());
       setRobotSide(command.getRobotSide());
       setSwingHeight(command.getSwingHeight());
+      setSequenceID(command.getSequenceId());
    }
 
    @Override
