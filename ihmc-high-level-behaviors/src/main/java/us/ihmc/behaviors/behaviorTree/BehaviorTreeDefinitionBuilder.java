@@ -6,8 +6,8 @@ import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplor
 import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
 import us.ihmc.behaviors.logic.ConditionNodeDefinition;
 import us.ihmc.behaviors.logic.GotoNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;

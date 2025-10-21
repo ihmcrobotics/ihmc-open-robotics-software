@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Level;
 import us.ihmc.behaviors.logic.ConditionNodeState;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.sequence.LeafNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;

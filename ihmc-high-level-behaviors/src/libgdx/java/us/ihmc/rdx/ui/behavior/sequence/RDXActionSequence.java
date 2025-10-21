@@ -1,8 +1,8 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.widgets.ImGuiSequenceIconWidget;

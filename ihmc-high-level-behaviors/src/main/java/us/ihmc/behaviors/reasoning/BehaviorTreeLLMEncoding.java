@@ -2,7 +2,7 @@ package us.ihmc.behaviors.reasoning;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
 import us.ihmc.behaviors.sequence.LeafNodeState;
 import us.ihmc.log.LogTools;
 

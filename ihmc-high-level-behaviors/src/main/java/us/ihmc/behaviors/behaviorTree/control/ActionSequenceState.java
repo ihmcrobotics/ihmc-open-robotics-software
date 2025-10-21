@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.sequence;
+package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;

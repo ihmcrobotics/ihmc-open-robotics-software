@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import org.jfree.svg.SVGGraphics2D;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;

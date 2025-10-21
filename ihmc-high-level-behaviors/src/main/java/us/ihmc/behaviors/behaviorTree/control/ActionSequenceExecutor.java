@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.sequence;
+package us.ihmc.behaviors.behaviorTree.control;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;

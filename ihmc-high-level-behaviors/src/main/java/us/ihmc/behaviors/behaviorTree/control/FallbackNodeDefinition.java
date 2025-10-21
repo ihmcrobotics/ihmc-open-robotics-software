@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.sequence;
+package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.FallbackNodeDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
