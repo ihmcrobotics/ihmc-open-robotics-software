@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.tree;
+package us.ihmc.rdx.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;

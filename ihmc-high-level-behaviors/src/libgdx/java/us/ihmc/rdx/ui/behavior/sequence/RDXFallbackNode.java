@@ -4,7 +4,7 @@ import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.widgets.ImGuiFallbackWidget;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 

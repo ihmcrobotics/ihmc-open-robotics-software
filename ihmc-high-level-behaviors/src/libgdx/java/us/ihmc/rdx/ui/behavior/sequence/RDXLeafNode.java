@@ -11,9 +11,9 @@ import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeRootNode;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeTools;
 import us.ihmc.rdx.ui.widgets.ImGuiHollowArrowRenderer;
 
 /**

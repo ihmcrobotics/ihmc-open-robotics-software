@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.tree;
+package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;

@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBuildingExploration extends RDXBehaviorTreeNode<BuildingExplorationState, BuildingExplorationDefinition>

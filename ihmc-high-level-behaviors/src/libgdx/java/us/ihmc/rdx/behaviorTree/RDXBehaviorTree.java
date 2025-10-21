@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.tree;
+package us.ihmc.rdx.behaviorTree;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.tree;
+package us.ihmc.rdx.behaviorTree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;

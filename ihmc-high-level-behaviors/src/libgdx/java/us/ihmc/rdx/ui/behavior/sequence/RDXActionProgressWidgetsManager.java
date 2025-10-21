@@ -6,7 +6,7 @@ import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXSakeHandCommandAction;
 import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTree;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTree;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;

@@ -13,7 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
