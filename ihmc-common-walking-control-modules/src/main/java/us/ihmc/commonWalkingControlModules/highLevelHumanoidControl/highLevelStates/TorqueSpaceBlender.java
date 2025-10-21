@@ -80,14 +80,4 @@ public class TorqueSpaceBlender implements CommandBlender
          outputToPack.set(from);
       }
    }
-
-//   public DataServerSettings getDataServerSettings()
-   //   {
-   //      return dataServerSettings;
-   //   }
-   //
-   //   public YoVariableServer getYoVariableServer()
-   //   {
-   //      return yoVariableServer;
-   //   }
 }

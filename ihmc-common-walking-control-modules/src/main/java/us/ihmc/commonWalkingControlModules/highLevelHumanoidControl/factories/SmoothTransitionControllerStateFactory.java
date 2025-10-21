@@ -25,11 +25,7 @@ public class SmoothTransitionControllerStateFactory implements HighLevelControll
                                                  HighLevelControllerName startState,
                                                  HighLevelControllerName endState)
    {
-      this.transitionName = transitionName;
-      this.transitionStateEnum = transitionStateEnum;
-      this.startState = startState;
-      this.endState = endState;
-      this.commandBlenderFactory = new JointControlBlenderFactory();
+      this(transitionName, transitionStateEnum, startState, endState, new JointControlBlenderFactory());
    }
 
    public SmoothTransitionControllerStateFactory(String transitionName,
