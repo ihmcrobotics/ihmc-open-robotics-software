@@ -40,7 +40,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -53,6 +52,9 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.*;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
@@ -67,6 +69,9 @@ public class AvatarMultiThreadingFactory
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final int ROS2_PRIORITY = 25;
+
+   // Override automatic logging
+   private static final boolean OVERRIDE_AUTOMATIC_LOGGING = false;
 
    private final YoRegistry rootRegistry;
 
@@ -242,27 +247,56 @@ public class AvatarMultiThreadingFactory
 
       ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
       builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
-//      builders.add(new RegistrySendBufferBuilder(estimatorThread.get().getYoRegistry(), estimatorThread.get().getFullRobotModel().getElevator(), null));
       builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
       builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
-//      builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+      // TODO need to check if IK Streaming is started, would need to add this then
+      //      builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
 
       // Setup logger
-      intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
-      intraprocessYoVariableLogger.start();
+      if (isEthernet0Connected())
+      {
+         // Do nothing, logging on of board logger
+         System.out.println("Logging Status: data is being logged LOCALLY");
+      }
+      else
+      {
+         // Logging locally on the robot
+         System.out.println("Logging Status: data is being logged REMOTELY");
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
+         intraprocessYoVariableLogger.start();
 
-      threadingManager.get().addPostEstimatorThreadRunnable(() ->
-                                                            {
-                                                               System.out.println("runing...");
-
-                                                               intraprocessYoVariableLogger.update(estimatorThread.get()
+         threadingManager.get()
+                         .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
                                                                                                                   .getHumanoidRobotContextData()
-                                                                                                                  .getTimestamp());
-                                                            });
-
+                                                                                                                  .getTimestamp()));
+      }
 
       return threadingManager.get();
    }
+
+   public static boolean isEthernet0Connected()
+   {
+      // Since this is a new feature, I've added an override to force a given situation
+      if (OVERRIDE_AUTOMATIC_LOGGING)
+      {
+         //return true;
+         //return false;
+      }
+
+      try
+      {
+         NetworkInterface ni = NetworkInterface.getByName("ethernet0");
+         if (ni == null)
+            return false;
+         return ni.isUp() && !ni.isLoopback() && !ni.isVirtual();
+      }
+      catch (SocketException e)
+      {
+         return false;
+      }
+   }
+
+
 
    /**
     * Create Estimator Factory
