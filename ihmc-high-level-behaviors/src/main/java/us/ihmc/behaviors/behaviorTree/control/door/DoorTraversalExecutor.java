@@ -48,17 +48,17 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (shouldClearStaticHandles)
       {
-         for (String nodeName : sceneGraph.getNodeNameList())
-         {
-            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
-            {
-               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
-               {
-                  staticHandleNode.clearOffset();
-                  staticHandleNode.freeze();
-               }
-            }
-         }
+//         for (String nodeName : sceneGraph.getNodeNameList())
+//         {
+//            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
+//            {
+//               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
+//               {
+//                  staticHandleNode.clearOffset();
+//                  staticHandleNode.freeze();
+//               }
+//            }
+//         }
       }
 
       if (state.arePullRetryNodesPresent())

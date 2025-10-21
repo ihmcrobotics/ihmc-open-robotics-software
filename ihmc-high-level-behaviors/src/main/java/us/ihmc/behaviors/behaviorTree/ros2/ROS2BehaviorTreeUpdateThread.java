@@ -7,7 +7,6 @@ import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -22,7 +21,6 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
    public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node,
                                        ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
                                        DRCRobotModel robotModel,
-                                       SceneGraph sceneGraph,
                                        DetectionManager detectionManager)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
@@ -34,7 +32,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
       referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
-      referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection());
+      // referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection()); TODO Replace with detection manager?
       for (RobotSide side: RobotSide.values)
       {
          if (robotModel.getRobotVersion().hasArm(side))
@@ -46,7 +44,6 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
                                               syncedRobot,
                                               peerClockOffsetEstimator,
                                               referenceFrameLibrary,
-                                              sceneGraph,
                                               detectionManager);
    }
 

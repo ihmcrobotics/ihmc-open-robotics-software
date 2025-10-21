@@ -8,7 +8,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -23,10 +22,9 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
                                    ROS2SyncedRobotModel syncedRobot,
                                    ROS2PeerClockOffsetEstimator peerClockEstimator,
                                    ReferenceFrameLibrary referenceFrameLibrary,
-                                   SceneGraph sceneGraph,
                                    DetectionManager detectionManager)
    {
-      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
+      super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, detectionManager, ros2ControllerHelper);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper); // FIXME
    }

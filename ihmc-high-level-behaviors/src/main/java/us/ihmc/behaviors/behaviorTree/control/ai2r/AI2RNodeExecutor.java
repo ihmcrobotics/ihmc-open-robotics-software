@@ -131,22 +131,22 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    {
       statusMessage.getObjects().clear();
       boolean isRoot = true;
-      for (String nodeName : sceneGraph.getNodeNameList())
-      {
-         if (isRoot)
-         {
-            isRoot = false;
-            continue;
-         }
-         if (sceneGraph.getNamesToNodesMap().get(nodeName) != null)
-         {
-            AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
-            objectMessage.setObjectName(nodeName);
-            ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
-            objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
-            objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
-         }
-      }
+//      for (String nodeName : sceneGraph.getNodeNameList())
+//      {
+//         if (isRoot)
+//         {
+//            isRoot = false;
+//            continue;
+//         }
+//         if (sceneGraph.getNamesToNodesMap().get(nodeName) != null)
+//         {
+//            AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
+//            objectMessage.setObjectName(nodeName);
+//            ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
+//            objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
+//            objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
+//         }
+//      }
    }
 
    private void setAvailableBehaviors()
@@ -277,8 +277,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                RobotSide graspSide = skillEditor.getGraspSide();
                statusMessage.setObjectGrasped(objectGrasped);
                statusMessage.setGraspSide(graspSide.toByte());
-               statusMessage.getTransformGraspedObjectHand().set(sceneGraph.getNamesToNodesMap().get(objectGrasped).getNodeFrame()
-                                                                           .getTransformToDesiredFrame(syncedRobot.getFullRobotModel().getHandControlFrame(graspSide)));
+//               statusMessage.getTransformGraspedObjectHand().set(sceneGraph.getNamesToNodesMap().get(objectGrasped).getNodeFrame()
+//                                                                           .getTransformToDesiredFrame(syncedRobot.getFullRobotModel().getHandControlFrame(graspSide)));
             }
          }
 
