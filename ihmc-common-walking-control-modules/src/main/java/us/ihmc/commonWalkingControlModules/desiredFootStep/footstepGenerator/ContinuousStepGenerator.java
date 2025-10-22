@@ -1061,6 +1061,11 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       return registry;
    }
 
+   public YoContinuousStepGeneratorParameters getCSGParameters()
+   {
+      return parameters;
+   }
+
    private boolean isStepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
       for (int i = 0; i < footstepValidityIndicators.size(); i++)

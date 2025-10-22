@@ -424,6 +424,8 @@ public class AvatarMultiThreadingFactory
 
       HumanoidSteppingPluginEnvironmentalConstraints environmentalConstraints = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.getContactPointParameters(),
                                                                                                                                    robotModel.getWalkingControllerParameters().getSteppingParameters());
+      environmentalConstraints.setSnapToHeightMap(true);
+
       controllerFactory.setListenToHighLevelStatePackets(true);
 
       JoystickBasedSteppingPluginFactory pluginFactory = new JoystickBasedSteppingPluginFactory();
