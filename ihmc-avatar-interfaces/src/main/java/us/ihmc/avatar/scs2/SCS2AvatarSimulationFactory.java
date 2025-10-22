@@ -116,8 +116,7 @@ public class SCS2AvatarSimulationFactory
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               getDefaultOutputWriterFactory());
-   protected final OptionalFactoryField<SimulationThreadOutputWriterFactory> simulationThreadOutputWriterFactory = new OptionalFactoryField<>("simulationThreadOutputWriterFactory",
-                                                                                                                              getDefaultSimulationThreadOutputWriterFactory());
+   protected final OptionalFactoryField<SimulationThreadOutputWriterFactory> simulationThreadOutputWriterFactory = new OptionalFactoryField<>("simulationThreadOutputWriterFactory");
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
@@ -349,17 +348,6 @@ public class SCS2AvatarSimulationFactory
             return new SCS2KinematicsSimulationOutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
          else
             return new SCS2OutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
-      };
-   }
-
-   private SimulationThreadOutputWriterFactory getDefaultSimulationThreadOutputWriterFactory()
-   {
-      return (controllerInput, controllerOutput) ->
-      {
-         if (kinematicsSimulation.get())
-            return null;
-         else
-            return new SimulationPDOutputWriter(controllerInput, controllerOutput);
       };
    }
 
