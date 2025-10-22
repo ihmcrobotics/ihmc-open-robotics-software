@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import sensor_msgs.msg.dds.CameraInfo;
 import sensor_msgs.msg.dds.Image;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.tf2.ROS2MutableFrame;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
 import us.ihmc.perception.detections.InstantDetection;
@@ -53,6 +55,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
 
    private final IsaacROSFoundationPoseObject objectToTrack;
    private final Point3D targetPoint;
+   private final TypedNotification<Point3DReadOnly> newTargetPoint;
 
    private volatile IsaacROSFoundationPoseInstantDetection latestResult;
    private final List<Consumer<IsaacROSFoundationPoseInstantDetection>> resultCallbacks;
@@ -62,6 +65,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       this.objectToTrack = objectToTrack;
 
       targetPoint = new Point3D();
+      newTargetPoint = new TypedNotification<>();
 
       ros2Node = new ROS2NodeBuilder().build(getClass().getSimpleName() + "Node");
       imagePublisher = new RawImagePublisher(ros2Node, 0.5);
@@ -117,21 +121,31 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       if (!parameters.getEnabled().getValue())
          return;
 
-      // Get a copy of the target point so we don't synchronize too long
-      final Point3D targetPointCopy;
-      synchronized (targetPoint)
-      {
-         targetPointCopy = new Point3D(targetPoint);
-      }
+      // Update the target point
+      if (newTargetPoint.poll())
+         targetPoint.set(newTargetPoint.read());
+      else if (latestResult != null)
+         targetPoint.set(latestResult.getPose().getPosition());
+      else
+         targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
 
       // Find the YOLO detection that's closest to the target point
       Optional<InstantDetection> closestYOLODetection
             = detections.stream()
-                        .filter(detection -> detection instanceof YOLOv8InstantDetection)
-                        .min(Comparator.comparingDouble(detection -> detection.getPose().getPosition().distanceSquared(targetPointCopy)));
+                        .filter(detection -> detection instanceof YOLOv8InstantDetection && detection.getDetectedObjectClass().equals(objectToTrack.yoloClass))
+                        .min(Comparator.comparingDouble(detection -> detection.getPose().getPosition().distanceSquared(targetPoint)));
 
-      // Update pose estimation is a YOLO detection was found
-      closestYOLODetection.ifPresent(detection -> updatePoseEstimation((YOLOv8InstantDetection) detection));
+      if (closestYOLODetection.isPresent())
+      {
+         YOLOv8InstantDetection detection = (YOLOv8InstantDetection) closestYOLODetection.get();
+
+         double resetDistance = parameters.getResetDistance().getValue();
+         if (parameters.getAutoResetEnabled().getValue() && latestResult != null
+             && detection.getPose().getPosition().distanceSquared(latestResult.getPose().getPosition()) > resetDistance * resetDistance)
+            resetTracking();
+
+         updatePoseEstimation(detection);
+      }
    }
 
    public void updatePoseEstimation(YOLOv8InstantDetection yoloDetection)
@@ -226,12 +240,9 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       parameters.getResetDistance().setValue(meters);
    }
 
-   public void setTargetPoint(Point3D targetPoint)
+   public void setTargetPoint(Point3DReadOnly targetPoint)
    {
-      synchronized (this.targetPoint)
-      {
-         this.targetPoint.set(targetPoint);
-      }
+      newTargetPoint.set(targetPoint);
    }
 
    @Override
