@@ -8,7 +8,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JointControlBlender
+public class JointControlBlender implements CommandBlender
 {
    /** This is for hardware debug purposes only. */
    private static final boolean ENABLE_TAU_SCALE = false;
