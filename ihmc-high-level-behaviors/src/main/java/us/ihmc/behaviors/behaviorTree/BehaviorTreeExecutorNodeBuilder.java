@@ -89,7 +89,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                               controllerStatusTracker,
                                               syncedRobot,
                                               referenceFrameLibrary,
-                                              sceneGraph,
                                               detectionManager);
    }
 

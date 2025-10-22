@@ -8,8 +8,6 @@ import us.ihmc.behaviors.behaviorTree.condition.LLMConditionExecutor;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -18,14 +16,12 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
-                               ReferenceFrameLibrary referenceFrameLibrary,
-                               DetectionManager detectionManager,
                                ROS2ControllerHelper ros2ControllerHelper)
    {
       super(ROS2ActorDesignation.ROBOT,
             peerClockEstimator,
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
-            new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, detectionManager));
+            new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot));
    }
 
    public void update()
