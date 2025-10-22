@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -15,12 +16,12 @@ import java.util.Queue;
  *
  * @param <T> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?, ?>>
+public class BehaviorTreeTopologyOperationQueue<R extends BehaviorTreeRootNode<T>, T extends BehaviorTreeNode<T, ?, ?>>
 {
-   private final BehaviorTree<T> behaviorTree;
+   private final BehaviorTree<R, T> behaviorTree;
    private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();
 
-   public BehaviorTreeTopologyOperationQueue(BehaviorTree<T> behaviorTree)
+   public BehaviorTreeTopologyOperationQueue(BehaviorTree<R, T> behaviorTree)
    {
       this.behaviorTree = behaviorTree;
    }
@@ -53,7 +54,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
       }
    }
 
-   public void queueSetRootNode(T rootNode)
+   public void queueSetRootNode(R rootNode)
    {
       topologyOperationQueue.add(() ->
       {
@@ -61,7 +62,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
       });
    }
 
-   public void queueSetRootNodeModify(T rootNode)
+   public void queueSetRootNodeModify(R rootNode)
    {
       topologyOperationQueue.add(() ->
       {
@@ -74,11 +75,11 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       topologyOperationQueue.add(() ->
       {
-         T rootNode = behaviorTree.getRootNode();
+         R rootNode = behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          behaviorTree.getRootReferenceModification().modify();
          if (rootNode != null)
-            BehaviorTreeTopologyOperations.destroySubtreeModify(rootNode);
+            BehaviorTreeTopologyOperations.destroySubtreeModify((T) rootNode); // TODO Works ??
       });
    }
 
@@ -86,7 +87,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       topologyOperationQueue.add(() ->
       {
-         T rootNode = behaviorTree.getRootNode();
+         T rootNode = (T) behaviorTree.getRootNode(); // TODO Works ??
          behaviorTree.setRootNode(null);
          if (rootNode != null)
             BehaviorTreeTopologyOperations.destroySubtree(rootNode);

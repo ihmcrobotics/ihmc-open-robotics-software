@@ -28,10 +28,9 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
+public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>
 {
    public static final RDXBehaviorTreeSettings SETTINGS = new RDXBehaviorTreeSettings();
-   private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -79,6 +78,12 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+   }
+
+   @Override
+   public RDXBehaviorTreeRootNode createRootNode(long id)
+   {
+      return new RDXBehaviorTreeRootNode(id, crdtInfo, saveFileDirectory);
    }
 
    public void update()
@@ -300,18 +305,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
       RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewPickCalculator(this);
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
-   }
-
-   @Override
-   public void setRootNode(RDXBehaviorTreeNode<?, ?> rootNode)
-   {
-      this.rootNode = (RDXBehaviorTreeRootNode) rootNode;
-   }
-
-   @Override
-   public RDXBehaviorTreeRootNode getRootNode()
-   {
-      return rootNode;
    }
 
    public RDXBehaviorTreeNodeCreationMenu getNodeCreationMenu()

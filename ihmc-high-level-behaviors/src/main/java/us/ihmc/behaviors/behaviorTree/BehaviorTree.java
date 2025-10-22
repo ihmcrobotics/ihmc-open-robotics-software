@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import org.apache.commons.lang3.mutable.MutableLong;
+import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeMessageTools;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -14,24 +15,26 @@ import java.util.function.Consumer;
 /**
  * Common code for managing the tree between node implementations. i.e. RDX or Executor.
  *
+ * @param <R> The type of root node: RDX or Executor
  * @param <T> The generic type of this node: RDX or Executor
  */
-public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
+public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends BehaviorTreeNode<T, ?, ?>>
 {
-   private int numberOfNodes = 0;
-   private final CRDTInfo crdtInfo;
+   protected int numberOfNodes = 0;
+   protected final CRDTInfo crdtInfo;
    private final MutableLong nextID = new MutableLong(0);
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
-   private final WorkspaceResourceDirectory saveFileDirectory;
+   protected final WorkspaceResourceDirectory saveFileDirectory;
    private final BehaviorTreeFileLoader<T> fileLoader;
-   private final BehaviorTreeNodeBuilder<T> nodeBuilder;
-   private final BehaviorTreeTopologyOperationQueue<T> topologyChangeQueue;
+   private final BehaviorTreeNodeBuilder<R, T> nodeBuilder;
+   private final BehaviorTreeTopologyOperationQueue<R, T> topologyChangeQueue;
+   protected R rootNode;
 
    public BehaviorTree(ROS2ActorDesignation actor,
                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                        WorkspaceResourceDirectory saveFileDirectory,
-                       BehaviorTreeNodeBuilder<T> nodeBuilder)
+                       BehaviorTreeNodeBuilder<R, T> nodeBuilder)
    {
       this.nodeBuilder = nodeBuilder;
       this.saveFileDirectory = saveFileDirectory;
@@ -45,6 +48,8 @@ public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
       topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>(this);
    }
 
+   public abstract R createRootNode(long id);
+
    /** Used only when modifying tree topology. */
    private void update()
    {
@@ -52,13 +57,13 @@ public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
       update(getRootNode());
    }
 
-   private void update(T node)
+   private void update(TreeNode<?> node)
    {
       if (node != null)
       {
          ++numberOfNodes;
 
-         for (T child : node.getChildren())
+         for (TreeNode<?> child : node.getChildren())
          {
             update(child);
          }
@@ -96,6 +101,18 @@ public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
       message.setNextId(nextID.longValue());
       rootReferenceModification.toMessage(message.getLatestModificationToRootReference());
       dataModification.toMessage(message.getLatestModificationToData());
+      ROS2BehaviorTreeMessageTools.clearLists(message);
+      if (rootNode != null)
+         toMessage(message, rootNode.getState());
+   }
+
+   private void toMessage(BehaviorTreeStateMessage message, BehaviorTreeNodeState<?> behaviorTreeNode)
+   {
+      ROS2BehaviorTreeMessageTools.packMessage(crdtInfo, behaviorTreeNode, message);
+      for (BehaviorTreeNodeState<?> child : behaviorTreeNode.getChildren())
+      {
+         toMessage(message, child);
+      }
    }
 
    public void fromMessage(BehaviorTreeStateMessage message)
@@ -107,9 +124,15 @@ public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
          nextID.setValue(message.getNextId());
    }
 
-   public abstract void setRootNode(T rootNode);
+   public void setRootNode(R rootNode)
+   {
+      this.rootNode = rootNode;
+   }
 
-   public abstract T getRootNode();
+   public R getRootNode()
+   {
+      return rootNode;
+   }
 
    public int getNumberOfNodes()
    {
@@ -152,7 +175,7 @@ public abstract class BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
       return fileLoader;
    }
 
-   public BehaviorTreeNodeBuilder<T> getNodeBuilder()
+   public BehaviorTreeNodeBuilder<R, T> getNodeBuilder()
    {
       return nodeBuilder;
    }

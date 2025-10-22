@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
+      implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();

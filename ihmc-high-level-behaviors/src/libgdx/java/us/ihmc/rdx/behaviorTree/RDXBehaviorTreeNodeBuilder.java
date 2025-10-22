@@ -15,7 +15,6 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeInitialization;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.behaviorTree.actions.*;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -34,7 +33,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 
-public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
+public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>
 {
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -59,7 +58,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    }
 
    @Override
-   public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, RDXBehaviorTreeRootNode rootNode, WorkspaceResourceDirectory saveFileDirectory)
    {
       // Control nodes:
       if (nodeType == BehaviorTreeRootNodeDefinition.class)

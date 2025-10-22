@@ -49,17 +49,7 @@ public class BehaviorTreeTools
       }
    }
 
-   public static <LT extends TreeNode<LT>> void runForSubtreeNodes(LT node, Consumer<LT> operation)
-   {
-      operation.accept(node);
-
-      for (LT child : node.getChildren())
-      {
-         runForSubtreeNodes(child, operation);
-      }
-   }
-
-   public static <T extends BehaviorTreeNode<T, ?, ?>> void runForSubtreeNodes(T node, Consumer<T> operation)
+   public static <T extends TreeNode<T>> void runForSubtreeNodes(T node, Consumer<T> operation)
    {
       operation.accept(node);
 
@@ -69,9 +59,14 @@ public class BehaviorTreeTools
       }
    }
 
-   public static void runForEntireTree(BehaviorTreeNodeDefinition anyNode, Consumer<BehaviorTreeNodeDefinition> operation)
+   public static  void runForSubtreeNodes(BehaviorTreeNode<?, ?, ?> node, Consumer<BehaviorTreeNode<?, ?, ?>> operation)
    {
-      runForSubtreeNodes(findRootNode(anyNode), operation);
+      operation.accept(node);
+
+      for (BehaviorTreeNode<?, ?, ?> child : node.getChildren())
+      {
+         runForSubtreeNodes(child, operation);
+      }
    }
 
    public static List<ActionNodeDefinition> buildListOfActionDefinitions(BehaviorTreeNodeDefinition rootNode)

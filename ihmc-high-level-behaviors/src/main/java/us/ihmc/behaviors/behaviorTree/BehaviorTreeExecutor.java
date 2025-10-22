@@ -14,10 +14,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<?, ?>>
+public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
-   private BehaviorTreeRootNodeExecutor rootNode;
-
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
@@ -30,6 +28,12 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
             peerClockEstimator,
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
             new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager));
+   }
+
+   @Override
+   public BehaviorTreeRootNodeExecutor createRootNode(long id)
+   {
+      return new BehaviorTreeRootNodeExecutor(id, crdtInfo, saveFileDirectory);
    }
 
    public void update()
@@ -58,18 +62,6 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
    {
       modifyTreeTopology(BehaviorTreeTopologyOperationQueue::queueDestroyEntireTree);
       LLMConditionExecutor.destroy();
-   }
-
-   @Override
-   public void setRootNode(BehaviorTreeNodeExecutor<?, ?> rootNode)
-   {
-      this.rootNode = (BehaviorTreeRootNodeExecutor) rootNode;
-   }
-
-   @Override
-   public BehaviorTreeRootNodeExecutor getRootNode()
-   {
-      return rootNode;
    }
 
    public void loadBehavior(String jsonFileName)

@@ -2,6 +2,7 @@ package us.ihmc.rdx.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
+   implements BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper automaticExecutionCheckbox;

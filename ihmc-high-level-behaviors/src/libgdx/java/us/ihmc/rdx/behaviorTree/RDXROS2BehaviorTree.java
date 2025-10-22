@@ -70,8 +70,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       float rightMargin = 20.0f;
 
       ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
-      int numberOfLocalNodes = ros2BehaviorTree.getBehaviorTree().getNumberOfNodes();
-      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTree.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
+      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfNodes, ros2BehaviorTree.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
 
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
