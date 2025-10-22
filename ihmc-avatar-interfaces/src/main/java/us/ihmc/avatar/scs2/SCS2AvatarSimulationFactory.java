@@ -64,6 +64,7 @@ import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEng
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
+import us.ihmc.sensorProcessing.outputData.SimulationThreadOutputWriter;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SCS2SensorReaderFactory;
@@ -113,8 +114,11 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
+   protected final OptionalFactoryField<Boolean> runOutputWriterOnSimulationThread = new OptionalFactoryField<>("runOutputWriterOnSimulationThread", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               getDefaultOutputWriterFactory());
+   protected final OptionalFactoryField<SimulationThreadOutputWriterFactory> simulationThreadOutputWriterFactory = new OptionalFactoryField<>("simulationThreadOutputWriterFactory",
+                                                                                                                              getDefaultSimulationThreadOutputWriterFactory());
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
@@ -149,6 +153,7 @@ public class SCS2AvatarSimulationFactory
    protected IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    protected SimulationConstructionSet2 simulationConstructionSet;
    protected JointDesiredOutputWriter simulationOutputWriter;
+   protected SimulationThreadOutputWriter simulationThreadOutputWriter;
    protected HumanoidRobotContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
@@ -172,7 +177,10 @@ public class SCS2AvatarSimulationFactory
 
       setupSimulationConstructionSet();
       setupYoVariableServer();
-      setupSimulationOutputWriter();
+      if (!runOutputWriterOnSimulationThread.get())
+         setupSimulationOutputWriter();
+      else
+         setupSimulationThreadOutputWriter();
       setupStateEstimationThread();
       setupControllerThread();
       setupStepGeneratorThread();
@@ -195,7 +203,6 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
       avatarSimulation.setIKStreamingRTThread(ikStreamingRTThread);
-      avatarSimulation.setOutputWriter(simulationOutputWriter);
       avatarSimulation.setRobotController(robotController);
       avatarSimulation.setRobot(robot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
@@ -333,6 +340,11 @@ public class SCS2AvatarSimulationFactory
       }
    }
 
+   public void setRunOutputWriterOnSimulationThread(boolean runOutputWriterOnSimulationThread)
+   {
+      this.runOutputWriterOnSimulationThread.set(runOutputWriterOnSimulationThread);
+   }
+
    private SCS2JointDesiredOutputWriterFactory getDefaultOutputWriterFactory()
    {
       return (controllerInput, controllerOutput) ->
@@ -345,11 +357,28 @@ public class SCS2AvatarSimulationFactory
       };
    }
 
+   private SimulationThreadOutputWriterFactory getDefaultSimulationThreadOutputWriterFactory()
+   {
+      return (controllerInput, controllerOutput) ->
+      {
+         if (kinematicsSimulation.get())
+            return null;
+         else
+            return new SimulationPDOutputWriter(controllerInput, controllerOutput);
+      };
+   }
+
    private void setupSimulationOutputWriter()
    {
       simulationOutputWriter = outputWriterFactory.get()
                                                   .build(robot.getControllerManager().getControllerInput(),
                                                          robot.getControllerManager().getControllerOutput());
+   }
+
+   private void setupSimulationThreadOutputWriter()
+   {
+      simulationThreadOutputWriter = simulationThreadOutputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
+                                                                                     robot.getControllerManager().getControllerOutput());
    }
 
    private void setupKinematicsSimulationOutputWriter()
@@ -401,7 +430,8 @@ public class SCS2AvatarSimulationFactory
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
       avatarEstimatorThreadFactory.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
-      avatarEstimatorThreadFactory.setJointDesiredOutputWriter(simulationOutputWriter);
+      if (simulationOutputWriter != null)
+         avatarEstimatorThreadFactory.setJointDesiredOutputWriter(simulationOutputWriter);
       avatarEstimatorThreadFactory.setGravity(gravity.get());
       if (secondaryStateEstimatorFactory.hasBeenSet())
          avatarEstimatorThreadFactory.addSecondaryStateEstimatorFactory(secondaryStateEstimatorFactory.get());
@@ -579,6 +609,11 @@ public class SCS2AvatarSimulationFactory
                                                        if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
                                                           simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
                                                     });
+      }
+      if (simulationThreadOutputWriter != null)
+      {
+         simulationThreadOutputWriter.setJointDesiredOutputList(estimatorThread.getHumanoidRobotContextData().getJointDesiredOutputList());
+         robot.getControllerManager().addController(simulationThreadOutputWriter);
       }
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<>();
@@ -949,6 +984,11 @@ public class SCS2AvatarSimulationFactory
    public void setOutputWriterFactory(SCS2JointDesiredOutputWriterFactory outputWriterFactory)
    {
       this.outputWriterFactory.set(outputWriterFactory);
+   }
+
+   public void setSimulationThreadOutputWriterFactory(SimulationThreadOutputWriterFactory outputWriterFactory)
+   {
+      this.simulationThreadOutputWriterFactory.set(outputWriterFactory);
    }
 
    public void setRunMultiThreaded(boolean runMultiThreaded)
