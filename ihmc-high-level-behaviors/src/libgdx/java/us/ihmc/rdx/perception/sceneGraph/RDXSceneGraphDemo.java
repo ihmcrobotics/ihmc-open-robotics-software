@@ -60,7 +60,7 @@ import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 public class RDXSceneGraphDemo
 {
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE_NAME = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
@@ -237,7 +237,7 @@ public class RDXSceneGraphDemo
 
                // TODO: finish
                onRobotSceneGraph.updateSubscription();
-               onRobotSceneGraph.updateDetections(detectionManager);
+//               onRobotSceneGraph.updateDetections(detectionManager);
 
                if (newPlanarRegions.poll())
                   for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())
