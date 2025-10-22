@@ -53,7 +53,7 @@ public class XBoxOneCSGPlugin
       ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
       csgInputCommand = new ContinuousStepGeneratorInputMessage();
       csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
-      csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage .class, robotModel.getSimpleRobotName()), 10);
+      csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
 
       xboxJoystickMessager = new SharedMemoryMessager(XBoxOneJavaFXController.XBoxOneControllerAPI);
       xboxController = new XBoxOneJavaFXController(xboxJoystickMessager);
