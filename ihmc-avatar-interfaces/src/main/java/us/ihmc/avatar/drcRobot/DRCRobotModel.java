@@ -2,7 +2,6 @@ package us.ihmc.avatar.drcRobot;
 
 import com.jme3.math.Transform;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
@@ -188,7 +187,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
                                                                            HumanoidRobotContextData contextData)
    {
-      return new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true);
+      return null;
    }
 
    /**

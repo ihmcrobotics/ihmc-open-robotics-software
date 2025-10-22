@@ -25,6 +25,7 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
+   private final ActiveMappingProcessParameters processParameters;
    private final HeightMapLogger heightMapLogger;
 
    private final ReferenceFrame heightMapCenter;
@@ -56,10 +57,12 @@ public class GpuMappingManager
                             ReferenceFrame rightFootSoleFrame,
                             ReferenceFrame heightMapCenter,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
+                            ActiveMappingProcessParameters processParameters,
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
       this.heightMapCenter = heightMapCenter;
+      this.processParameters = processParameters;
       this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.add(leftFootSoleFrame);
@@ -117,8 +120,11 @@ public class GpuMappingManager
       GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
       deviceGlobalHeightMap.download(hostGlobalHeightMap);
 
-      publishHeightMap(heightMapExtractor.getHeightMapData());
-      publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
+      if (processParameters.getPublishHeightMap())
+         publishHeightMap(heightMapExtractor.getHeightMapData());
+
+      if (processParameters.getPublishTerrainMap())
+         publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
 
       if (heightMapParameters.getEnableChunkedMap())
       {
@@ -175,17 +181,21 @@ public class GpuMappingManager
          driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
       }
 
-      // Perform update, this actually creates the height map
-      heightMapExtractor.update(latestDepthImage,
-                                depthIntrinsicsCopy,
-                                sensorToWorld,
-                                sensorToGround,
-                                groundToWorld,
-                                driftOffsetInZ,
-                                heightMapCenterOrigin,
-                                computeFootHeight());
+      if (processParameters.getRunHeightMap())
+      {
+         // Perform update, this actually creates the height map
+         heightMapExtractor.update(latestDepthImage,
+                                   depthIntrinsicsCopy,
+                                   sensorToWorld,
+                                   sensorToGround,
+                                   groundToWorld,
+                                   driftOffsetInZ,
+                                   heightMapCenterOrigin,
+                                   computeFootHeight());
+      }
 
-      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
+      if (processParameters.getRunTerrainMap() && processParameters.getRunHeightMap())
+         terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center

@@ -9,7 +9,7 @@ module controller_msgs
     {
 
       /**
-       * A message for allowing operator to observe estop and master gain values
+       * A message for allowing operator to observe the status of various startup/shutdown variables often required for robot operation
        */
       @TypeCode(type="controller_msgs::msg::dds_::EStopMasterGainStatusMessage_")
       struct EStopMasterGainStatusMessage
@@ -17,11 +17,31 @@ module controller_msgs
         /**
          * Current SOFT-E-STOP value
          */
-        boolean estop;
+        boolean is_estopped;
         /**
-         * Current masterGain value
+         * Is robot faulted
          */
-        double master_gain;
+        boolean robot_is_faulted;
+        /**
+         * Is robot servod
+         */
+        boolean robot_is_servod;
+        /**
+         * Is robot calibrated
+         */
+        boolean robot_is_calibrated;
+        /**
+         * Is publishing ROS commands to robot enabled
+         */
+        boolean publishing_to_robot_is_enabled;
+        /**
+         * Are the actuators enabled
+         */
+        boolean actuators_are_enabled;
+        /**
+         * The current master gain
+         */
+        double current_master_gain;
       };
     };
   };

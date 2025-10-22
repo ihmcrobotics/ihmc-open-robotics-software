@@ -18,6 +18,7 @@ import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
@@ -154,6 +155,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
+      ActiveMappingProcessParameters processParameters = new ActiveMappingProcessParameters();
+      RDXStoredPropertySetTuner processParametersPanel = new RDXStoredPropertySetTuner("Process Parameters Panel (CH)");
+      createParametersPanel(processParameters,
+                            processParametersPanel,
+                            hostStoredPropertySets,
+                            ContinuousHikingAPI.PROCESS_PARAMETERS);
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -199,8 +206,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void update(TerrainMapData terrainMapData)
    {
-      updateRos2StoredPropertySets();
-
       if (latestFootstepPlan != null)
       {
          terrainPlanningDebugger.generateSwingGraphics(latestFootstepPlan, swingTrajectories);
@@ -215,7 +220,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * These are all the parameters that are getting synced back and forth between the remote process and the local process.
     * There are three situations that can occur when trying to use Continuous Hiking.
     */
-   private void updateRos2StoredPropertySets()
+   public void updateRos2StoredPropertySets()
    {
       hostStoredPropertySets.setPropertyChanged();
    }

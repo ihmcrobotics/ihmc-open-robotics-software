@@ -339,9 +339,11 @@ public class HumanoidKinematicsSimulation
          throw new RuntimeException("Need to load a default height.");
       }
 
+      for (YoRegistry yoRegistry : kinematicsSimulationParameters.getRegistriesToInclude())
+         registry.addChild(yoRegistry);
+
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         Path incomingLogsDirectory;
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
