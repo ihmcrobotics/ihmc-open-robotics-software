@@ -587,8 +587,16 @@ public class AvatarMultiThreadingFactory
       estimatorModeMapReference.set(estimatorModeMap);
    }
 
-   public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, CommandBlenderFactory commandBlenderFactory)
+   public void addSmoothTransitionState(String transitionName,
+                                        HighLevelControllerName transitionStateEnum,
+                                        HighLevelControllerName currentControlStateEnum,
+                                        HighLevelControllerName nextControlStateEnum,
+                                        CommandBlenderFactory commandBlenderFactory)
    {
-      controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
+      controllerFactory.addCustomSmoothTransitionControlState(transitionName,
+                                                              transitionStateEnum,
+                                                              currentControlStateEnum,
+                                                              nextControlStateEnum,
+                                                              commandBlenderFactory);
    }
 }
