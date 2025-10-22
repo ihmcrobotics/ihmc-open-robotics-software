@@ -46,7 +46,7 @@ public class IsaacROSFoundationPoseDemo
       foundationPoseManager = new IsaacROSFoundationPoseManager(crdtInfo);
 
       yoloExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator), () -> true);
-      yoloExecutor.addDetectionConsumerCallback(foundationPoseManager::updateDetections);
+      yoloExecutor.addDetectionConsumerCallback(foundationPoseManager::updatePoseEstimations);
       yoloExecutor.disableAllModels();
 
       taskThread = new RepeatingTaskThread(getClass().getSimpleName() + "Thread", this::task);

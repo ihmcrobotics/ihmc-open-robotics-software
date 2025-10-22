@@ -1,17 +1,33 @@
 package us.ihmc.perception.detections.foundationPose;
 
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 
 import java.time.Instant;
 
 public class IsaacROSFoundationPoseInstantDetection extends InstantDetection
 {
-   public IsaacROSFoundationPoseInstantDetection(String detectedObjectClass,
-                                                 double confidence,
-                                                 Pose3DReadOnly pose,
+   private final IsaacROSFoundationPoseObject trackedObject;
+   private final Box3DReadOnly boundingBox;
+
+   public IsaacROSFoundationPoseInstantDetection(IsaacROSFoundationPoseObject trackedObject,
+                                                 Box3DReadOnly boundingBox,
                                                  Instant detectionTime)
    {
-      super(detectedObjectClass, confidence, pose, detectionTime);
+      super(trackedObject.meshName, 1.0, new Pose3D(boundingBox.getPose()), detectionTime);
+
+      this.trackedObject = trackedObject;
+      this.boundingBox = boundingBox;
+   }
+
+   public IsaacROSFoundationPoseObject getObject()
+   {
+      return trackedObject;
+   }
+
+   public Box3DReadOnly getBoundingBox()
+   {
+      return boundingBox;
    }
 }

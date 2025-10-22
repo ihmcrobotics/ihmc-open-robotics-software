@@ -32,10 +32,10 @@ public class IsaacROSFoundationPoseManager implements AutoCloseable
          communicator.update();
    }
 
-   public void updateDetections(List<InstantDetection> latestDetections)
+   public void updatePoseEstimations(List<InstantDetection> latestDetections)
    {
       for (IsaacROSFoundationPoseCommunicator communicator : communicators.values())
-         communicator.updateDetections(latestDetections);
+         communicator.updatePoseEstimation(latestDetections);
    }
 
    @Override
