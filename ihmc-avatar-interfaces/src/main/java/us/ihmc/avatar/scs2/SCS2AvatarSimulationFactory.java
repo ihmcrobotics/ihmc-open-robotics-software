@@ -114,7 +114,6 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
-   protected final OptionalFactoryField<Boolean> runOutputWriterOnSimulationThread = new OptionalFactoryField<>("runOutputWriterOnSimulationThread", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               getDefaultOutputWriterFactory());
    protected final OptionalFactoryField<SimulationThreadOutputWriterFactory> simulationThreadOutputWriterFactory = new OptionalFactoryField<>("simulationThreadOutputWriterFactory",
@@ -177,10 +176,11 @@ public class SCS2AvatarSimulationFactory
 
       setupSimulationConstructionSet();
       setupYoVariableServer();
-      if (!runOutputWriterOnSimulationThread.get())
-         setupSimulationOutputWriter();
+      if (simulationThreadOutputWriterFactory.hasValue())
+         setupOutputWriterOnSimulatorThread();
       else
-         setupSimulationThreadOutputWriter();
+         setupOutputWriterOnEstimatorThread();
+
       setupStateEstimationThread();
       setupControllerThread();
       setupStepGeneratorThread();
@@ -340,11 +340,6 @@ public class SCS2AvatarSimulationFactory
       }
    }
 
-   public void setRunOutputWriterOnSimulationThread(boolean runOutputWriterOnSimulationThread)
-   {
-      this.runOutputWriterOnSimulationThread.set(runOutputWriterOnSimulationThread);
-   }
-
    private SCS2JointDesiredOutputWriterFactory getDefaultOutputWriterFactory()
    {
       return (controllerInput, controllerOutput) ->
@@ -368,14 +363,14 @@ public class SCS2AvatarSimulationFactory
       };
    }
 
-   private void setupSimulationOutputWriter()
+   private void setupOutputWriterOnEstimatorThread()
    {
       simulationOutputWriter = outputWriterFactory.get()
                                                   .build(robot.getControllerManager().getControllerInput(),
                                                          robot.getControllerManager().getControllerOutput());
    }
 
-   private void setupSimulationThreadOutputWriter()
+   private void setupOutputWriterOnSimulatorThread()
    {
       simulationThreadOutputWriter = simulationThreadOutputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
                                                                                      robot.getControllerManager().getControllerOutput());
