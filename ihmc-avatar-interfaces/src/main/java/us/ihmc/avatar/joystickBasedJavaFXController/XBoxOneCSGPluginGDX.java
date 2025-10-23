@@ -13,10 +13,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.log.LogTools;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 
 /**
  * Plugin for using an xbox controller to send commands and receive status info to/from the
@@ -48,12 +46,12 @@ public class XBoxOneCSGPluginGDX
    private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
-   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node) throws JoystickNotFoundException
+   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch) throws JoystickNotFoundException
+   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
    {
       this.parameterIncrement = parameterIncrement;
       this.useDeadmanSwitch = useDeadmanSwitch;
