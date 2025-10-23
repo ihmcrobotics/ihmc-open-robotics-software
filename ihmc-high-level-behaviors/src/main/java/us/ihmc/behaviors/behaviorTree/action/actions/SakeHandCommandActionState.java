@@ -1,15 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionState extends ActionNodeState<SakeHandCommandActionDefinition>
 {
-   public SakeHandCommandActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public SakeHandCommandActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new SakeHandCommandActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new SakeHandCommandActionDefinition(rootNode.getDefinition()), rootNode);
    }
 
    public void toMessage(SakeHandCommandActionStateMessage message)

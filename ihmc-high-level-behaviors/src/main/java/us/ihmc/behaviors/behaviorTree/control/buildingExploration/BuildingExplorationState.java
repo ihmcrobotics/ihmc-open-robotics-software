@@ -2,24 +2,24 @@ package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
 import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 import java.util.Stack;
 
-public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExplorationDefinition>
+public class BuildingExplorationState extends BehaviorTreeNonRootNodeState<BuildingExplorationDefinition>
 {
    @Nullable
    private DoorTraversalState doorTraversalState;
    private final Stack<DoorNode> traversedDoorNodes = new Stack<>();
    private DoorNode nextDoorNode;
 
-   public BuildingExplorationState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BuildingExplorationState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new BuildingExplorationDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new BuildingExplorationDefinition(rootNode.getDefinition()), rootNode);
    }
 
    @Override

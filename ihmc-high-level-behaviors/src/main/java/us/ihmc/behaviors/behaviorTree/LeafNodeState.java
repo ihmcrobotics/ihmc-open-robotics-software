@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.LeafNodeStateMessage;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -9,7 +8,7 @@ import us.ihmc.log.LogTools;
 
 import java.util.List;
 
-public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNodeState<D>
+public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNonRootNodeState<D>
 {
    private final CRDTStatusBoolean isNextForExecution;
    private final CRDTStatusInteger concurrencyRank;
@@ -20,9 +19,9 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int leafIndex = -1;
 
-   public LeafNodeState(long id, D definition, CRDTInfo crdtInfo)
+   public LeafNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, definition, crdtInfo);
+      super(id, definition, rootNode);
 
       isNextForExecution = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       concurrencyRank = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);

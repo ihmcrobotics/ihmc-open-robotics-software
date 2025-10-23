@@ -1,15 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 
-public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
+public class ActionSequenceState extends BehaviorTreeNonRootNodeState<ActionSequenceDefinition>
 {
-   public ActionSequenceState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ActionSequenceState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new ActionSequenceDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new ActionSequenceDefinition(rootNode.getDefinition()), rootNode);
    }
 
    @Override

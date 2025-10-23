@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 
 import javax.annotation.Nullable;
@@ -40,12 +39,12 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
 
    private final BehaviorTreeNodeMessageLogger logger;
 
-   public BehaviorTreeNodeState(long id, D definition, CRDTInfo crdtInfo)
+   public BehaviorTreeNodeState(long id, D definition)
    {
       this.id = id;
       this.definition = definition;
 
-      logger = new BehaviorTreeNodeMessageLogger(crdtInfo);
+      logger = new BehaviorTreeNodeMessageLogger(definition.getCRDTInfo());
    }
 
    /** Used to determine if the node's full data needs to be sent. */

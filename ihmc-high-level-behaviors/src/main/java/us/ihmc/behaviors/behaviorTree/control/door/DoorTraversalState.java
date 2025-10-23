@@ -2,22 +2,21 @@ package us.ihmc.behaviors.behaviorTree.control.door;
 
 import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
+public class DoorTraversalState extends BehaviorTreeNonRootNodeState<DoorTraversalDefinition>
 {
    public static final String SET_STATIC_FOR_APPROACH = "Set static for approach";
    public static final String SET_STATIC_FOR_GRASP = "Set static for grasp";
@@ -40,9 +39,9 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private final CRDTStatusDouble doorHingeJointAngle;
    private final CRDTStatusDouble doorHandleDistanceFromStart;
 
-   public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public DoorTraversalState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new DoorTraversalDefinition(rootNode.getDefinition()), rootNode);
 
       doorHingeJointAngle = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       doorHandleDistanceFromStart = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
