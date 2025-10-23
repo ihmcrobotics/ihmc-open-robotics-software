@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
@@ -61,6 +62,8 @@ public class XBoxOneCSGPluginGDX
       csgInputCommand = new ContinuousStepGeneratorInputMessage();
       csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
       csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
+
+      configureCSGParameters(csgParametersCommand, robotModel.getWalkingControllerParameters());
 
       controllerListener = new ControllerListener()
       {
@@ -119,8 +122,6 @@ public class XBoxOneCSGPluginGDX
             return false;
          }
       };
-
-      configureCSGParameters(csgParametersCommand, robotModel.getWalkingControllerParameters());
    }
 
    public void update()
@@ -151,7 +152,7 @@ public class XBoxOneCSGPluginGDX
       // CSG input values we get from the xbox controller
       if (currentControllerConnected)
       {
-         requestWalking = currentController.getButton(currentController.getMapping().buttonL1);
+         requestWalking = currentController.getAxis(4) == 1.0; // This is the left trigger value (1.0 = pressed in)
          forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
          lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
          turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
