@@ -11,9 +11,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
+import us.ihmc.commons.DeadbandTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
@@ -28,7 +27,7 @@ import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
  *
  * @author Stefan Fasano
  */
-public class XBoxOneLibGDXCSGPlugin
+public class XBoxOneCSGPluginGDX
 {
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
@@ -42,24 +41,24 @@ public class XBoxOneLibGDXCSGPlugin
    private boolean controllerListenerHasBeenAdded = false;
 
    private final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
-   private final ContinuousStepGeneratorInputCommand csgInputCommand;
+   private final ContinuousStepGeneratorInputMessage csgInputCommand;
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
 
    private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
-   public XBoxOneLibGDXCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node) throws JoystickNotFoundException
+   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node) throws JoystickNotFoundException
    {
       this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public XBoxOneLibGDXCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch) throws JoystickNotFoundException
+   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch) throws JoystickNotFoundException
    {
       this.parameterIncrement = parameterIncrement;
       this.useDeadmanSwitch = useDeadmanSwitch;
 
       ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
-      csgInputCommand = new ContinuousStepGeneratorInputCommand();
+      csgInputCommand = new ContinuousStepGeneratorInputMessage();
       csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
       csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
 
@@ -93,9 +92,9 @@ public class XBoxOneLibGDXCSGPlugin
                else if (buttonCode == controller.getMapping().buttonDpadRight)
                   csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration() + parameterIncrement);
 
-               else if (buttonCode == controller.getMapping().buttonL1)
+               else if (buttonCode == controller.getMapping().buttonX)
                   csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() - parameterIncrement);
-               else if (buttonCode == controller.getMapping().buttonR1)
+               else if (buttonCode == controller.getMapping().buttonB)
                   csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() + parameterIncrement);
 
                else if (buttonCode == controller.getMapping().buttonDpadDown)
@@ -147,14 +146,15 @@ public class XBoxOneLibGDXCSGPlugin
       double forwardJoystickValue = 0.0;
       double lateralJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
+      double deadband = 0.09;
 
-      // CSG input values we get from the controller
+      // CSG input values we get from the xbox controller
       if (currentControllerConnected)
       {
-         requestWalking = currentController.getButton(currentController.getMapping().buttonL2);
-         forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
-         lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
-         turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
+         requestWalking = currentController.getButton(currentController.getMapping().buttonL1);
+         forwardJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY));
+         lateralJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX));
+         turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
       }
 
       csgInputCommand.setWalk(requestWalking);
