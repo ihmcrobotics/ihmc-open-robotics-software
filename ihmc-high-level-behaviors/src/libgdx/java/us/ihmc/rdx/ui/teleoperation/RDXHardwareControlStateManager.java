@@ -77,9 +77,6 @@ public class RDXHardwareControlStateManager
          changed |= unservoSlowly;
          ImGui.popStyleColor(2);
 
-         boolean eStopChanged = ImGui.button(labels.get("SOFT-E-STOP"));
-
-
          if (changed)
          {
             hardwareCommandMessage.setEstop(estop.get());
