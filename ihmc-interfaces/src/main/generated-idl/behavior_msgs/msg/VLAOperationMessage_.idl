@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__VisuomotorOperationMessage__idl__
-#define __behavior_msgs__msg__VisuomotorOperationMessage__idl__
+#ifndef __behavior_msgs__msg__VLAOperationMessage__idl__
+#define __behavior_msgs__msg__VLAOperationMessage__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
@@ -11,10 +11,10 @@ module behavior_msgs
     {
 
       /**
-       * A message for remotely operating the visuomotor policies
+       * A message for remotely operating the VLA policies
        */
-      @TypeCode(type="behavior_msgs::msg::dds_::VisuomotorOperationMessage_")
-      struct VisuomotorOperationMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::VLAOperationMessage_")
+      struct VLAOperationMessage
       {
         ihmc_common_msgs::msg::dds::LatestModificationMessage latest_timestamp_modifiable;
         /**
@@ -38,17 +38,9 @@ module behavior_msgs
          */
         geometry_msgs::msg::dds::Pose action_forearm_poses[2];
         /**
-         * Frequency of status from python side
+         * Status message from robot thread to show to the operator
          */
-        double python_status_frequency;
-        /**
-         * Message received from python
-         */
-        string python_status_message;
-        /**
-         * Number of output actions received from policy
-         */
-        unsigned long received_actions;
+        string status_message;
       };
     };
   };
