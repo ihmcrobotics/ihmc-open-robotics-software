@@ -49,7 +49,8 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
 
-   public SyncedFoundationPoseParameters parameters;
+   private final SyncedFoundationPoseParameters parameters;
+   private boolean wasEnabled;
 
    private final ROS2MutableFrame sensorFrame;
 
@@ -59,6 +60,9 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
 
    private volatile IsaacROSFoundationPoseInstantDetection latestResult;
    private final List<Consumer<IsaacROSFoundationPoseInstantDetection>> resultCallbacks;
+
+   //   private volatile Instant enabledInstant;
+   //   private volatile Instant lastMessageSentInstant;
 
    public IsaacROSFoundationPoseCommunicator(IsaacROSFoundationPoseObject objectToTrack, CRDTInfo crdtInfo)
    {
@@ -75,6 +79,8 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       trackingResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.trackingOutput(), this::updateLatestResult);
 
       parameters = new SyncedFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);
+      parameters.getEnabled().setValue(false);
+      wasEnabled = false;
 
       sensorFrame = new ROS2MutableFrame(ros2Node, objectToTrack.meshName + "_ImageFrame", ReferenceFrame.getWorldFrame());
 
@@ -88,6 +94,17 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
 
    private void updateLatestResult(Detection3DArray results)
    {
+      //      if (lastMessageSentInstant != null && enabledInstant == null)
+      //      {
+      //         LogTools.info("Tracking time: " + Conversions.millisecondsToSeconds(lastMessageSentInstant.until(Instant.now(), ChronoUnit.MILLIS)));
+      //      }
+      //
+      //      if (enabledInstant != null)
+      //      {
+      //         LogTools.info("Time from enabling to receiving pose: " + Conversions.millisecondsToSeconds(enabledInstant.until(Instant.now(), ChronoUnit.MILLIS)));
+      //         enabledInstant = null;
+      //      }
+
       // Ensure the result message has a result
       Detection3D result = results.getDetections().getFirst();
       if (result == null)
@@ -118,34 +135,46 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    public void updatePoseEstimation(List<InstantDetection> detections)
    {
       // Do nothing if pose estimation is not enabled
-      if (!parameters.getEnabled().getValue())
-         return;
-
-      // Update the target point
-      if (newTargetPoint.poll())
-         targetPoint.set(newTargetPoint.read());
-      else if (latestResult != null)
-         targetPoint.set(latestResult.getPose().getPosition());
-      else
-         targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
-
-      // Find the YOLO detection that's closest to the target point
-      Optional<InstantDetection> closestYOLODetection
-            = detections.stream()
-                        .filter(detection -> detection instanceof YOLOv8InstantDetection && detection.getDetectedObjectClass().equals(objectToTrack.yoloClass))
-                        .min(Comparator.comparingDouble(detection -> detection.getPose().getPosition().distanceSquared(targetPoint)));
-
-      if (closestYOLODetection.isPresent())
+      boolean enabled = parameters.getEnabled().getValue();
+      if (enabled)
       {
-         YOLOv8InstantDetection detection = (YOLOv8InstantDetection) closestYOLODetection.get();
-
-         double resetDistance = parameters.getResetDistance().getValue();
-         if (parameters.getAutoResetEnabled().getValue() && latestResult != null
-             && detection.getPose().getPosition().distanceSquared(latestResult.getPose().getPosition()) > resetDistance * resetDistance)
+         // If it just got enabled reset the tracking
+         if (!wasEnabled)
+         {
             resetTracking();
+            //            enabledInstant = Instant.now();
+         }
 
-         updatePoseEstimation(detection);
+         // Update the target point
+         if (newTargetPoint.poll())
+            targetPoint.set(newTargetPoint.read());
+         else if (latestResult != null)
+            targetPoint.set(latestResult.getPose().getPosition());
+         else
+            targetPoint.set(sensorFrame.getTransformToRoot().getTranslation());
+
+         // Find the YOLO detection that's closest to the target point
+         Optional<InstantDetection> closestYOLODetection
+               = detections.stream()
+                           .filter(detection -> detection instanceof YOLOv8InstantDetection
+                                                && detection.getDetectedObjectClass().equals(objectToTrack.yoloClass))
+                           .min(Comparator.comparingDouble(detection -> detection.getPose().getPosition().distanceSquared(targetPoint)));
+
+         if (closestYOLODetection.isPresent())
+         {
+            YOLOv8InstantDetection detection = (YOLOv8InstantDetection) closestYOLODetection.get();
+
+            double resetDistance = parameters.getResetDistance().getValue();
+            if (parameters.getAutoResetEnabled().getValue() && latestResult != null
+                && detection.getPose().getPosition().distanceSquared(latestResult.getPose().getPosition()) > resetDistance * resetDistance)
+               resetTracking();
+
+            updatePoseEstimation(detection);
+            //            lastMessageSentInstant = Instant.now();
+         }
       }
+
+      wasEnabled = enabled;
    }
 
    public void updatePoseEstimation(YOLOv8InstantDetection yoloDetection)
