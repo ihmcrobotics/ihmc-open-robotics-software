@@ -59,16 +59,6 @@ public class BehaviorTreeTools
       }
    }
 
-   public static <T extends BehaviorTreeNode<T, ?, ?>> void runForEntireTree(BehaviorTreeRootNode<T> node, Consumer<T> operation)
-   {
-      operation.accept((T) node);
-
-      for (T child : node.getChildren())
-      {
-         runForSubtreeNodes(child, operation);
-      }
-   }
-
    public static <T extends BehaviorTreeNode<T, ?, ?>> void runForSubtreeNodes(T node, Consumer<T> operation)
    {
       operation.accept(node);

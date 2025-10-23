@@ -47,7 +47,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-//         queueSetRootNodeModify(insertionDefinition.getNodeToInsert()); TODO
+         queueSetRootNodeModify((BehaviorTreeRootNode<T>) insertionDefinition.getNodeToInsert()); // TODO: Trying to get rid of
       }
       else
       {

@@ -98,8 +98,8 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
          // 3. Any nodes remaining in the map afterwards get destroyed
          idToLocalNodesMap.clear();
          if (behaviorTree.getRootNode() != null)
-            BehaviorTreeTools.runForEntireTree(behaviorTree.getRootNode(),
-                                               node -> idToLocalNodesMap.put(node.getState().getID(), node));
+            BehaviorTreeTools.runForSubtreeNodes((T) behaviorTree.getRootNode(),
+                                                 node -> idToLocalNodesMap.put(node.getState().getID(), node));
 
          behaviorTree.modifyTreeTopology(topologyOperationQueue ->
          {
@@ -122,7 +122,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
                retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (T) rootNode, topologyOperationQueue);
 
             // These nodes were removed from the tree
-            for (BehaviorTreeNode<?, ?, ?> value : idToLocalNodesMap.values())
+            for (T value : idToLocalNodesMap.values())
                value.destroy();
             idToLocalNodesMap.clear();
          });
