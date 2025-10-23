@@ -19,11 +19,11 @@ import java.util.HashMap;
 /**
  * Handles the ROS 2 tree subscription which handles the CRDT sychronization with other UIs and the robot.
  */
-public class ROS2BehaviorTreeSubscription
+public class ROS2BehaviorTreeSubscription<R extends BehaviorTreeRootNode<T>, T extends BehaviorTreeNode<T, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
-   private final BehaviorTree<?, ?> behaviorTree;
+   private final BehaviorTree<R, T> behaviorTree;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
@@ -33,9 +33,9 @@ public class ROS2BehaviorTreeSubscription
    private final ROS2BehaviorTreeSubscriptionNode subscriptionRootNode = new ROS2BehaviorTreeSubscriptionNode();
    private final HashMap<Long, ROS2BehaviorTreeSubscriptionNode> idToSubscriptionNodesMap = new HashMap<>();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
-   private final HashMap<Long, BehaviorTreeNode<?, ? ,?>> idToLocalNodesMap = new HashMap<>();
+   private final HashMap<Long, T> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<?, ?> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<R, T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 
@@ -109,7 +109,7 @@ public class ROS2BehaviorTreeSubscription
             if (rootReferenceModificationIncoming)
             {
                // TODO: Specifically build rootNode type R
-               rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming);
+               rootNode = subscriptionRootIsNull ? null : retrieveOrReplicateLocalRootNode(subscriptionRootNode, rootReferenceModificationIncoming);
                topologyOperationQueue.queueSetRootNode(rootNode);
             }
 
@@ -216,10 +216,10 @@ public class ROS2BehaviorTreeSubscription
       return localNode;
    }
 
-   private R retrieveOrReplicateLocalRootNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
+   private BehaviorTreeRootNode<?> retrieveOrReplicateLocalRootNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication)
    {
       long nodeID = subscriptionNode.getBehaviorTreeNodeStateMessage().getId();
-      R localNode = idToLocalNodesMap.get(nodeID);
+      BehaviorTreeRootNode<?> localNode = idToLocalNodesMap.get(nodeID);
       if (localNode == null && allowReplication) // New node that wasn't in the local tree; duplicate of one on the other side
       {
          LogTools.info("%s: Seq # %d Replicating node: %s:%d Packed as: %s Definition: %s Actor: %s".formatted(
