@@ -11,6 +11,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.ros2.QueuedROS2Subscription;
@@ -35,13 +36,13 @@ public class XBoxOneLibGDXCSGPlugin
    private final double parameterIncrement;
    private final boolean useDeadmanSwitch;
 
-   private final SharedMemoryMessager xboxJoystickMessager;
-   private final XBoxOneJavaFXController xboxController;
-
    private Controller currentController;
+   private final ControllerListener controllerListener;
+   private boolean currentControllerConnected = false;
+   private boolean controllerListenerHasBeenAdded = false;
 
    private final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
-   private final ContinuousStepGeneratorInputMessage csgInputCommand;
+   private final ContinuousStepGeneratorInputCommand csgInputCommand;
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
 
    private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
@@ -58,75 +59,102 @@ public class XBoxOneLibGDXCSGPlugin
       this.useDeadmanSwitch = useDeadmanSwitch;
 
       ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
-      csgInputCommand = new ContinuousStepGeneratorInputMessage();
+      csgInputCommand = new ContinuousStepGeneratorInputCommand();
       csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
       csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
 
-      xboxJoystickMessager = new SharedMemoryMessager(XBoxOneJavaFXController.XBoxOneControllerAPI);
-      xboxController = new XBoxOneJavaFXController(xboxJoystickMessager);
+      controllerListener = new ControllerListener()
+      {
+         @Override
+         public void connected(Controller controller)
+         {
+         }
+
+         @Override
+         public void disconnected(Controller controller)
+         {
+            currentControllerConnected = false;
+
+            csgInputCommand.setWalk(false);
+            csgInputCommand.setForwardVelocity(0.0);
+            csgInputCommand.setLateralVelocity(0.0);
+            csgInputCommand.setTurnVelocity(0.0);
+
+            ros2ControllerPublisherMap.publish(csgInputCommand);
+         }
+
+         @Override
+         public boolean buttonDown(Controller controller, int buttonCode)
+         {
+            if (controller != null)
+            {
+               if (buttonCode == controller.getMapping().buttonDpadLeft)
+                  csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration() - parameterIncrement);
+               else if (buttonCode == controller.getMapping().buttonDpadRight)
+                  csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration() + parameterIncrement);
+
+               else if (buttonCode == controller.getMapping().buttonL1)
+                  csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() - parameterIncrement);
+               else if (buttonCode == controller.getMapping().buttonR1)
+                  csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() + parameterIncrement);
+
+               else if (buttonCode == controller.getMapping().buttonDpadDown)
+                  csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() - parameterIncrement);
+               else if (buttonCode == controller.getMapping().buttonDpadUp)
+                  csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
+
+               ros2ControllerPublisherMap.publish(csgParametersCommand);
+            }
+            return false;
+         }
+
+         @Override
+         public boolean buttonUp(Controller controller, int buttonCode)
+         {
+            return false;
+         }
+
+         @Override
+         public boolean axisMoved(Controller controller, int axisCode, float value)
+         {
+            return false;
+         }
+      };
 
       configureCSGParameters(csgParametersCommand, robotModel.getWalkingControllerParameters());
-      setupXboxJoystickControls();
    }
-
-   private boolean currentControllerConnected = false;
 
    public void update()
    {
       if (csgStatusSubscription.flushAndGetLatest(csgStatusMessage))
          setCSGCommandsToCurrentValues(csgStatusMessage);
 
-      currentController = Controllers.getCurrent();
-      boolean currentControllerConnected = currentController != null;
+      boolean newControllerConnected = false;
+      if (currentController != null && currentController != Controllers.getCurrent())
+         newControllerConnected = true;
 
+      currentController = Controllers.getCurrent();
+      currentControllerConnected = currentController != null;
+
+      if ((!controllerListenerHasBeenAdded || newControllerConnected) && currentControllerConnected)
+      {
+         currentController.addListener(controllerListener);
+         controllerListenerHasBeenAdded = true;
+      }
+
+      // Default CSG input values
       boolean requestWalking = false;
       double forwardJoystickValue = 0.0;
       double lateralJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
 
-//      double desiredSwingDuration;
-//      double desiredSwingDuration;
-//      double desiredSwingDuration;
-
+      // CSG input values we get from the controller
       if (currentControllerConnected)
       {
          requestWalking = currentController.getButton(currentController.getMapping().buttonL2);
          forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
          lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
          turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
-
-         currentController.addListener(new ControllerListener()
-         {
-            @Override
-            public void connected(Controller controller)
-            {
-
-            }
-
-            @Override
-            public void disconnected(Controller controller)
-            {
-
-            }
-
-            @Override
-            public boolean buttonDown(Controller controller, int buttonCode)
-            {
-               return false;
-            }
-
-            @Override
-            public boolean buttonUp(Controller controller, int buttonCode)
-            {
-               return false;
-            }
-
-            @Override
-            public boolean axisMoved(Controller controller, int axisCode, float value)
-            {
-               return false;
-            }
-         });
       }
 
       csgInputCommand.setWalk(requestWalking);
@@ -134,119 +162,17 @@ public class XBoxOneLibGDXCSGPlugin
       csgInputCommand.setForwardVelocity(forwardJoystickValue);
       csgInputCommand.setLateralVelocity(lateralJoystickValue);
       csgInputCommand.setTurnVelocity(turningJoystickValue);
-   }
-
-   public void startUpXboxJoystick()
-   {
-      if (xboxJoystickMessager != null)
-         xboxJoystickMessager.startMessager();
-
-      if (xboxController != null)
-         xboxController.reconnectJoystick();
+      ros2ControllerPublisherMap.publish(csgInputCommand);
    }
 
    public void shutDownXboxJoystick()
    {
-      if (xboxJoystickMessager != null)
-         xboxJoystickMessager.closeMessager();
+      csgInputCommand.setWalk(false);
+      csgInputCommand.setForwardVelocity(0.0);
+      csgInputCommand.setLateralVelocity(0.0);
+      csgInputCommand.setTurnVelocity(0.0);
 
-      if (xboxController != null)
-         xboxController.stop();
-   }
-
-   private void setupXboxJoystickControls()
-   {
-      // Toggles between walking and standing
-      if (useDeadmanSwitch)
-      {
-         xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, state ->
-         {
-            if (state == -1.0)
-               csgInputCommand.setWalk(true);
-            else
-               csgInputCommand.setWalk(false);
-
-            ros2ControllerPublisherMap.publish(csgInputCommand);
-         });
-      }
-      else
-      {
-         xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.ButtonAState, state ->
-         {
-            if (state == ButtonState.PRESSED)
-               csgInputCommand.setWalk(!csgStatusMessage.getIsWalking());
-
-            ros2ControllerPublisherMap.publish(csgInputCommand);
-         });
-      }
-
-      // Controls forwards walking
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftStickYAxis, state ->
-      {
-         csgInputCommand.setForwardVelocity(state);
-         csgInputCommand.setUnitVelocities(false);
-         ros2ControllerPublisherMap.publish(csgInputCommand);
-      });
-
-      // Controls lateral walking
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftStickXAxis, state ->
-      {
-         csgInputCommand.setLateralVelocity(state);
-         csgInputCommand.setUnitVelocities(false);
-         ros2ControllerPublisherMap.publish(csgInputCommand);
-      });
-
-      // Controls turning
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.RightStickXAxis, state ->
-      {
-         csgInputCommand.setTurnVelocity(state);
-         csgInputCommand.setUnitVelocities(false);
-         ros2ControllerPublisherMap.publish(csgInputCommand);
-      });
-
-      // Decreases swing height
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.DPadDownState, state ->
-      {
-         csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() - parameterIncrement);
-         ros2ControllerPublisherMap.publish(csgParametersCommand);
-      });
-
-      // Increases swing height
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.DPadUpState, state ->
-      {
-         csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
-         ros2ControllerPublisherMap.publish(csgParametersCommand);
-      });
-
-      // Decreases swing duration
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.DPadLeftState, state ->
-      {
-         csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration() - parameterIncrement);
-         ros2ControllerPublisherMap.publish(csgParametersCommand);
-      });
-
-      // Increases swing duration
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.DPadRightState, state ->
-      {
-         csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration() + parameterIncrement);
-         ros2ControllerPublisherMap.publish(csgParametersCommand);
-      });
-
-      // Decreases transfer duration
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.ButtonLeftBumperState, state ->
-      {
-         csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() - parameterIncrement);
-         ros2ControllerPublisherMap.publish(csgParametersCommand);
-      });
-
-      // Increases transfer duration
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.ButtonRightBumperState, state ->
-      {
-         csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration() + parameterIncrement);
-         ros2ControllerPublisherMap.publish(csgParametersCommand);
-      });
-
-      startUpXboxJoystick();
+      ros2ControllerPublisherMap.publish(csgInputCommand);
    }
 
    private void setCSGCommandsToCurrentValues(ContinuousStepGeneratorStatusMessage csgStatusMessage)
