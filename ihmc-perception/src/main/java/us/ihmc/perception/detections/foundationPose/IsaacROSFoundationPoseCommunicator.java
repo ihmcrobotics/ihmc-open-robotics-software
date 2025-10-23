@@ -87,6 +87,9 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       resultCallbacks = new ArrayList<>();
    }
 
+   /**
+    * A general update method.
+    */
    public void update()
    {
       parameters.update();
@@ -132,6 +135,20 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
          resultCallback.accept(latestResult);
    }
 
+   /**
+    * Publishes the required input to the Isaac ROS FoundationPose process to run pose estimation or tracking.
+    * <p>
+    * This method respects the settable parameters of this class.
+    * If enabled is {@code false}, no input will be sent to FoundationPose.
+    * If auto reset is enabled, tracking will be reset when the last result's position is outside the reset distance from the closest detection's position.
+    * <p>
+    * This method is designed to work in conjunction with
+    * {@link us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor#addDetectionConsumerCallback(Consumer)}.
+    *
+    * @param detections List of detections which may contain the object of interest.
+    *                   If the list contains multiple detections matching the type of the object of interest,
+    *                   the detection closest to the target point will be used.
+    */
    public void updatePoseEstimation(List<InstantDetection> detections)
    {
       // Do nothing if pose estimation is not enabled
@@ -177,11 +194,27 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       wasEnabled = enabled;
    }
 
+   /**
+    * Publishes the required input to the Isaac ROS FoundationPose process to run pose estimation or tracking.
+    * <p>
+    * This method does not query any settable parameters of this class.
+    *
+    * @param yoloDetection A YOLO detection of the obejct of interest.
+    */
    public void updatePoseEstimation(YOLOv8InstantDetection yoloDetection)
    {
       updatePoseEstimation(yoloDetection.getColorImage(), yoloDetection.getDepthImage(), yoloDetection.getObjectMask());
    }
 
+   /**
+    * Publishes the required input to the Isaac ROS FoundationPose process to run pose estimation or tracking.
+    * <p>
+    * This method does not query any settable parameters of this class.
+    *
+    * @param colorImage   A color image aligned to the depth image. Must be same size as the depth image. Will be converted to RGB internally.
+    * @param depthImage   A depth image. Will be converted to 32FC1 internally.
+    * @param segmentation A mask of the object of interest. Will be resized to match the depth image size internally.
+    */
    public void updatePoseEstimation(RawImage colorImage, RawImage depthImage, RawImage segmentation)
    {
       colorImage.get();
@@ -192,7 +225,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       RawImage rgbImage = RawImageTools.convertColor(colorImage, PixelFormat.RGB8);
 
       GpuMat depth32Mat = new GpuMat();
-      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, 0.001);
+      depthImage.getGpuImageMat().convertTo(depth32Mat, opencv_core.CV_32FC1, depthImage.getDepthDiscretization());
       RawImage depth32FImage = depthImage.replaceImage(depth32Mat, PixelFormat.GRAY_F32);
 
       RawImage resizedSegmentation = RawImageTools.resize(segmentation, depth32FImage.getWidth(), depth32FImage.getHeight());
