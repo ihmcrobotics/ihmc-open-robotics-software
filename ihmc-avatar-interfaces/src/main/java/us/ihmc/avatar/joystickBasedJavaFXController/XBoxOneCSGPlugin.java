@@ -27,9 +27,11 @@ import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
  */
 public class XBoxOneCSGPlugin
 {
-   private static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
+   public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
+   private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
    private final double parameterIncrement;
+   private final boolean useDeadmanSwitch;
 
    private final SharedMemoryMessager xboxJoystickMessager;
    private final XBoxOneJavaFXController xboxController;
@@ -43,12 +45,13 @@ public class XBoxOneCSGPlugin
 
    public XBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node) throws JoystickNotFoundException
    {
-      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT);
+      this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public XBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement) throws JoystickNotFoundException
+   public XBoxOneCSGPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch) throws JoystickNotFoundException
    {
       this.parameterIncrement = parameterIncrement;
+      this.useDeadmanSwitch = useDeadmanSwitch;
 
       ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
       csgInputCommand = new ContinuousStepGeneratorInputMessage();
@@ -65,7 +68,7 @@ public class XBoxOneCSGPlugin
    public void update()
    {
       if (csgStatusSubscription.flushAndGetLatest(csgStatusMessage))
-         LogTools.info("Received csg Status message!!!"); // TODO remove once finished debugging
+         setCSGCommandsToCurrentValues(csgStatusMessage);
    }
 
    public void startUpXboxJoystick()
@@ -89,19 +92,32 @@ public class XBoxOneCSGPlugin
    private void setupXboxJoystickControls()
    {
       // Toggles between walking and standing
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.ButtonAState, state ->
+      if (useDeadmanSwitch)
       {
-         if (state == ButtonState.PRESSED)
-            csgInputCommand.setWalk(!csgStatusMessage.getIsWalking());
+         csgInputCommand.setWalk(false);
+
+         xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, state ->
+         {
+            LogTools.info("LEFT TRIGGER VALUE: " + state);
+            if (state == -1.0)
+            {
+               csgInputCommand.setWalk(true);
+               ros2ControllerPublisherMap.publish(csgInputCommand);
+            }
+         });
 
          ros2ControllerPublisherMap.publish(csgInputCommand);
-      });
-
-      // This is just a test for the deadman switch for now
-      xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.RightTriggerAxis, state ->
+      }
+      else
       {
-         LogTools.info("RIGHT TRIGGER VALUE: " + state); // TODO remove once finished debugging
-      });
+         xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.ButtonAState, state ->
+         {
+            if (state == ButtonState.PRESSED)
+               csgInputCommand.setWalk(!csgStatusMessage.getIsWalking());
+
+            ros2ControllerPublisherMap.publish(csgInputCommand);
+         });
+      }
 
       // Controls forwards walking
       xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftStickYAxis, state ->
@@ -170,6 +186,20 @@ public class XBoxOneCSGPlugin
       });
 
       startUpXboxJoystick();
+   }
+
+   private void setCSGCommandsToCurrentValues(ContinuousStepGeneratorStatusMessage csgStatusMessage)
+   {
+      csgParametersCommand.setSwingDuration(csgStatusMessage.getCurrentSwingDuration());
+      csgParametersCommand.setTransferDuration(csgStatusMessage.getCurrentTransferDuration());
+
+      csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight());
+      csgParametersCommand.setMaxStepLength(csgStatusMessage.getCurrentMaxStepLength());
+      csgParametersCommand.setDefaultStepWidth(csgStatusMessage.getCurrentDefaultStepWidth());
+      csgParametersCommand.setMinStepWidth(csgStatusMessage.getCurrentMinStepWidth());
+      csgParametersCommand.setMaxStepWidth(csgStatusMessage.getCurrentMaxStepWidth());
+      csgParametersCommand.setTurnMaxAngleInward(csgStatusMessage.getCurrentTurnMaxAngleInward());
+      csgParametersCommand.setTurnMaxAngleOutward(csgStatusMessage.getCurrentTurnMaxAngleOutward());
    }
 
    private void configureCSGParameters(ContinuousStepGeneratorParametersMessage csgParametersCommand, WalkingControllerParameters walkingControllerParameters)

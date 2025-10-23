@@ -243,6 +243,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          }
 
          walkPreviousValue.set(false);
+
+         updateCSGStatusMessage();
+
          return;
       }
       else if (startWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
@@ -526,7 +529,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
    private void updateCSGStatusMessage()
    {
-      //
+      // Some general CSG params
       csgStatusMessage.setIsWalking(isWalking.getBooleanValue());
       csgStatusMessage.setIsInUnitVelocities(desiredVelocityProvider.isUnitVelocity());
 
@@ -536,18 +539,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocityProvider.getTurningVelocity());
 
       // Current swing parameter values
-      if (!footsteps.isEmpty())
-      {
-         csgStatusMessage.setCurrentSwingHeight(footsteps.get(0).getSwingHeight());
-         csgStatusMessage.setCurrentSwingDuration(footsteps.get(0).getSwingDuration());
-         csgStatusMessage.setCurrentTransferDuration(footsteps.get(0).getTransferDuration());
-      }
-      else
-      {
-         csgStatusMessage.setCurrentSwingHeight(parameters.getSwingHeight());
-         csgStatusMessage.setCurrentSwingDuration(parameters.getSwingDuration());
-         csgStatusMessage.setCurrentTransferDuration(parameters.getTransferDuration());
-      }
+      csgStatusMessage.setCurrentSwingHeight(parameters.getSwingHeight());
+      csgStatusMessage.setCurrentSwingDuration(parameters.getSwingDuration());
+      csgStatusMessage.setCurrentTransferDuration(parameters.getTransferDuration());
 
       // Current step limit values
       csgStatusMessage.setCurrentMaxStepLength(parameters.getMaxStepLength());
