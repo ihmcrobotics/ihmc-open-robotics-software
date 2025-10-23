@@ -3,10 +3,9 @@ package us.ihmc.behaviors.behaviorTree.control;
 import behavior_msgs.msg.dds.GotoNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class GotoNodeDefinition extends LeafNodeDefinition
 {
@@ -21,9 +20,9 @@ public class GotoNodeDefinition extends LeafNodeDefinition
    // On disk fields
    private String onDiskNodeToGotoName;
 
-   public GotoNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public GotoNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       nodeToGotoID = new CRDTBidirectionalLong(this, GOTO_NEXT_ID);
    }

@@ -18,7 +18,7 @@ public class BehaviorTreeDefinitionRegistry
 {
    private static final DefinitionMapping[] DEFINITIONS = new DefinitionMapping[]
    {
-      new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
+      new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE), // ??
       new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
       new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),

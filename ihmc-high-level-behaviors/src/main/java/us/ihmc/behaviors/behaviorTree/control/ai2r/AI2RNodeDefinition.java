@@ -1,15 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RNodeDefinitionMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 
-public class AI2RNodeDefinition extends BehaviorTreeNodeDefinition
+public class AI2RNodeDefinition extends BehaviorTreeNonRootNodeDefinition
 {
-   public AI2RNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public AI2RNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
    }
 
    public void toMessage(AI2RNodeDefinitionMessage message)

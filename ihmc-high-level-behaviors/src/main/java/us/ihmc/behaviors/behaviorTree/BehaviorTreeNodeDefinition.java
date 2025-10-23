@@ -7,10 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.JSONFileTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -39,18 +35,15 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
    private transient BehaviorTreeNodeDefinition parent;
-   private final WorkspaceResourceDirectory saveFileDirectory;
 
    // Used to compare with saved version and provide unsaved status (*) to the operator
    private String onDiskName;
    private String onDiskNotes;
    private final List<String> onDiskChildrenNames = new ArrayList<>();
 
-   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo)
    {
       super(crdtInfo);
-
-      this.saveFileDirectory = saveFileDirectory;
 
       childrenModification = new LatestTimestampModifiable(crdtInfo);
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
@@ -63,20 +56,6 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    {
       setModifierName(name.getValue());
       childrenModification.setModifierName(name.getValue() + " children");
-   }
-
-   /** Save as JSON file root node. */
-   public void saveToFile()
-   {
-      if (!isJSONRoot())
-         LogTools.error("Cannot save. Can only be called for JSON roots.");
-
-      WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, name.getValue());
-      LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
-      if (JSONFileTools.save(saveFile, this::saveToFile)) // Success
-      {
-         BehaviorTreeTools.runForSubtreeNodes(this, BehaviorTreeNodeDefinition::setOnDiskFields);
-      }
    }
 
    /**
@@ -95,7 +74,7 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
          if (child.isJSONRoot())
          {
             childJsonNode.put("file", child.getName());
-            child.saveToFile();
+            ((BehaviorTreeNonRootNodeDefinition) child).saveToFile();
          }
          else
          {

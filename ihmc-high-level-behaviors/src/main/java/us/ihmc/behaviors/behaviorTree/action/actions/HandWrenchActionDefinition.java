@@ -3,13 +3,12 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionDefinition extends ActionNodeDefinition implements SidedObject
 {
@@ -22,9 +21,9 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    private double onDiskTrajectoryDuration;
    private double onDiskForce;
 
-   public HandWrenchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public HandWrenchActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
       trajectoryDuration = new CRDTBidirectionalDouble(this, 1000.0);

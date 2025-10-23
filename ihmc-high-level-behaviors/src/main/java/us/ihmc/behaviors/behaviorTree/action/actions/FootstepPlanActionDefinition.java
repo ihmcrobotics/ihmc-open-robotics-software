@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.behaviors.tools.BehaviorStoredPropertySetDefinition;
 import us.ihmc.commons.MathTools;
@@ -21,7 +22,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
@@ -57,11 +57,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private boolean onDiskPlannerPerformAStarSearch;
    private boolean onDiskPlannerWalkWithGoalOrientation;
 
-   public FootstepPlanActionDefinition(CRDTInfo crdtInfo,
-                                       WorkspaceResourceDirectory saveFileDirectory,
-                                       DefaultFootstepPlannerParametersBasics initialPlannerParameters)
+   public FootstepPlanActionDefinition(BehaviorTreeRootNodeDefinition rootNode, DefaultFootstepPlannerParametersBasics initialPlannerParameters)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       swingDuration = new CRDTBidirectionalDouble(this, 1.2);
       transferDuration = new CRDTBidirectionalDouble(this, 0.8);
