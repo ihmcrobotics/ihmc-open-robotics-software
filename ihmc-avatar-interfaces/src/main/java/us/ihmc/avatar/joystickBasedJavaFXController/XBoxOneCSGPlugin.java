@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
@@ -94,19 +93,15 @@ public class XBoxOneCSGPlugin
       // Toggles between walking and standing
       if (useDeadmanSwitch)
       {
-         csgInputCommand.setWalk(false);
-
          xboxJoystickMessager.addTopicListener(XBoxOneJavaFXController.LeftTriggerAxis, state ->
          {
-            LogTools.info("LEFT TRIGGER VALUE: " + state);
             if (state == -1.0)
-            {
                csgInputCommand.setWalk(true);
-               ros2ControllerPublisherMap.publish(csgInputCommand);
-            }
-         });
+            else
+               csgInputCommand.setWalk(false);
 
-         ros2ControllerPublisherMap.publish(csgInputCommand);
+            ros2ControllerPublisherMap.publish(csgInputCommand);
+         });
       }
       else
       {
