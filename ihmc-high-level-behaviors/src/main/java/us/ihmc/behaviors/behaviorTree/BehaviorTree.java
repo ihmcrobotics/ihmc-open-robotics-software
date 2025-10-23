@@ -48,8 +48,6 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
       topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>((BehaviorTree<BehaviorTreeRootNode<T>, T>) this); // FIXME: Unchecked cast
    }
 
-   public abstract BehaviorTreeRootNode<T> createRootNode(long id);
-
    /** Used only when modifying tree topology. */
    private void update()
    {

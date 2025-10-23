@@ -20,8 +20,8 @@ import java.util.List;
 
 public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTreeRootNodeDefinition>
 {
-   protected final ReferenceFrameLibrary referenceFrameLibrary;
-   protected final DRCRobotModel robotModel;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final DRCRobotModel robotModel;
 
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;

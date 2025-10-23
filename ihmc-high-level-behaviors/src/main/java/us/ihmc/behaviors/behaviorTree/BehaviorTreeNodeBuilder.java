@@ -9,5 +9,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
  */
 public interface BehaviorTreeNodeBuilder<T extends BehaviorTreeNode<T, ? ,?>>
 {
+   BehaviorTreeRootNode<T> createRootNode(long id);
+
    T createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<T> rootNode, WorkspaceResourceDirectory saveFileDirectory);
 }

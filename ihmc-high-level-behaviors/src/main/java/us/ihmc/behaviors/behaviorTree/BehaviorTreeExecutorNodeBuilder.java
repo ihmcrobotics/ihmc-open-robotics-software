@@ -41,6 +41,7 @@ import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -48,6 +49,8 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
+   private final CRDTInfo crdtInfo;
+   private final WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
@@ -59,13 +62,17 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
 
-   public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
+   public BehaviorTreeExecutorNodeBuilder(CRDTInfo crdtInfo,
+                                          WorkspaceResourceDirectory saveFileDirectory,
+                                          DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           SceneGraph sceneGraph,
                                           DetectionManager detectionManager)
    {
+      this.crdtInfo = crdtInfo;
+      this.saveFileDirectory = saveFileDirectory;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
@@ -79,6 +86,20 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    }
 
    @Override
+   public BehaviorTreeRootNodeExecutor createRootNode(long id)
+   {
+      return new BehaviorTreeRootNodeExecutor(id,
+                                              crdtInfo,
+                                              saveFileDirectory,
+                                              robotModel,
+                                              ros2ControllerHelper,
+                                              syncedRobot,
+                                              referenceFrameLibrary,
+                                              sceneGraph,
+                                              detectionManager);
+   }
+
+   @Override
    public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType,
                                                     long id,
                                                     BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>> rootNodeType,
@@ -86,85 +107,85 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    {
       BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) rootNodeType;
 
-//      if (nodeType == BehaviorTreeNodeDefinition.class)
-//      {
-//         return new BehaviorTreeNodeExecutor<>(id, crdtInfo, saveFileDirectory);
-//      }
-//      if (nodeType == AI2RNodeDefinition.class)
-//      {
-//         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
-//      }
-//      if (nodeType == ActionSequenceDefinition.class)
-//      {
-//         return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
-//      }
-//      if (nodeType == FallbackNodeDefinition.class)
-//      {
-//         return new FallbackNodeExecutor(id, crdtInfo, saveFileDirectory);
-//      }
-//      if (nodeType == ConditionNodeDefinition.class)
-//      {
-//         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
-//      }
-//      if (nodeType == GotoNodeDefinition.class)
-//      {
-//         return new GotoNodeExecutor(id, crdtInfo, saveFileDirectory);
-//      }
-//      if (nodeType == CheckPointNodeDefinition.class)
-//      {
-//         return new CheckPointNodeExecutor(id, crdtInfo, saveFileDirectory);
-//      }
-//      if (nodeType == DoorTraversalDefinition.class)
-//      {
-//         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
-//      }
-//      if (nodeType == BuildingExplorationDefinition.class)
-//      {
-//         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
-//      }
-//      if (nodeType == ChestOrientationActionDefinition.class)
-//      {
-//         return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
-//      }
-//      if (nodeType == FootstepPlanActionDefinition.class)
-//      {
-//         return new FootstepPlanActionExecutor(id,
-//                                               crdtInfo,
-//                                               saveFileDirectory,
-//                                               ros2ControllerHelper,
-//                                               syncedRobot,
-//                                               controllerStatusTracker,
-//                                               referenceFrameLibrary,
-//                                               walkingControllerParameters);
-//      }
-//      if (nodeType == HandPoseActionDefinition.class)
-//      {
-//         return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
-//      }
-//      if (nodeType == HandWrenchActionDefinition.class)
-//      {
-//         return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
-//      }
-//      if (nodeType == ScrewPrimitiveActionDefinition.class)
-//      {
-//         return new ScrewPrimitiveActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
-//      }
-//      if (nodeType == PelvisHeightOrientationActionDefinition.class)
-//      {
-//         return new PelvisHeightOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
-//      }
-//      if (nodeType == SakeHandCommandActionDefinition.class)
-//      {
-//         return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
-//      }
-//      if (nodeType == WaitDurationActionDefinition.class)
-//      {
-//         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
-//      }
-//      if (nodeType == FootPoseActionDefinition.class)
-//      {
-//         return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
-//      }
+      if (nodeType == BehaviorTreeNodeDefinition.class) // TODO: Should not exist???
+      {
+         return new BehaviorTreeNodeExecutor<>(id, crdtInfo);
+      }
+      if (nodeType == AI2RNodeDefinition.class)
+      {
+         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
+      }
+      if (nodeType == ActionSequenceDefinition.class)
+      {
+         return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == FallbackNodeDefinition.class)
+      {
+         return new FallbackNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == ConditionNodeDefinition.class)
+      {
+         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
+      }
+      if (nodeType == GotoNodeDefinition.class)
+      {
+         return new GotoNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == CheckPointNodeDefinition.class)
+      {
+         return new CheckPointNodeExecutor(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == DoorTraversalDefinition.class)
+      {
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
+      }
+      if (nodeType == BuildingExplorationDefinition.class)
+      {
+         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
+      }
+      if (nodeType == ChestOrientationActionDefinition.class)
+      {
+         return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+      }
+      if (nodeType == FootstepPlanActionDefinition.class)
+      {
+         return new FootstepPlanActionExecutor(id,
+                                               crdtInfo,
+                                               saveFileDirectory,
+                                               ros2ControllerHelper,
+                                               syncedRobot,
+                                               controllerStatusTracker,
+                                               referenceFrameLibrary,
+                                               walkingControllerParameters);
+      }
+      if (nodeType == HandPoseActionDefinition.class)
+      {
+         return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
+      }
+      if (nodeType == HandWrenchActionDefinition.class)
+      {
+         return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
+      }
+      if (nodeType == ScrewPrimitiveActionDefinition.class)
+      {
+         return new ScrewPrimitiveActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
+      }
+      if (nodeType == PelvisHeightOrientationActionDefinition.class)
+      {
+         return new PelvisHeightOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+      }
+      if (nodeType == SakeHandCommandActionDefinition.class)
+      {
+         return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
+      }
+      if (nodeType == WaitDurationActionDefinition.class)
+      {
+         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
+      if (nodeType == FootPoseActionDefinition.class)
+      {
+         return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+      }
 
       return null;
    }

@@ -2,12 +2,18 @@ package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -25,7 +31,15 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> failedLeavesWithoutFallback = new ArrayList<>();
 
-   public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeRootNodeExecutor(long id,
+                                       CRDTInfo crdtInfo,
+                                       WorkspaceResourceDirectory saveFileDirectory,
+                                       DRCRobotModel robotModel,
+                                       ROS2ControllerHelper ros2ControllerHelper,
+                                       ROS2SyncedRobotModel syncedRobot,
+                                       ReferenceFrameLibrary referenceFrameLibrary,
+                                       SceneGraph sceneGraph,
+                                       DetectionManager detectionManager)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
    }

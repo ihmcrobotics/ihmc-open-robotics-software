@@ -33,7 +33,15 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
-      return new BehaviorTreeRootNodeExecutor(id, crdtInfo, saveFileDirectory);
+      return new BehaviorTreeRootNodeExecutor(id,
+                                              crdtInfo,
+                                              saveFileDirectory,
+                                              robotModel,
+                                              ros2ControllerHelper,
+                                              syncedRobot,
+                                              referenceFrameLibrary,
+                                              sceneGraph,
+                                              detectionManager);
    }
 
    public void update()

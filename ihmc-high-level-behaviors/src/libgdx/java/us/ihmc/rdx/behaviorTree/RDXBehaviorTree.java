@@ -80,12 +80,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
-   @Override
-   public RDXBehaviorTreeRootNode createRootNode(long id)
-   {
-      return new RDXBehaviorTreeRootNode(id, crdtInfo, saveFileDirectory);
-   }
-
    public void update()
    {
       idToNodeMap.clear();

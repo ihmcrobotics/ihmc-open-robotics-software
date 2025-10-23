@@ -203,7 +203,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
          if (isRootNode)
-            localNode = (T) behaviorTree.createRootNode(nodeID); // FIXME: Unchecked cast; but this is hard af
+            localNode = (T) behaviorTree.getNodeBuilder().createRootNode(nodeID); // FIXME: Unchecked cast; but this is hard af
          else
             localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                                  nodeID,

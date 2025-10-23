@@ -74,7 +74,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public RDXBehaviorTreeNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
-      state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
+      state = (S) new BehaviorTreeNodeState<D>(id, definition);
    }
 
    @Override
