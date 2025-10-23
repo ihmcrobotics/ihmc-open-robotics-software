@@ -90,7 +90,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
                }
                else // Add the loaded node as a child of the root node
                {
-                  topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+                  topologyOperationQueue.queueAppendChildModify((BehaviorTreeNodeExecutor<?, ?>) rootNode, loadedNode);
                }
             }
          });

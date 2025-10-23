@@ -18,11 +18,11 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   private final BehaviorTree<T> behaviorTree;
+   private final BehaviorTree<?, T> behaviorTree;
    private final BehaviorTreeNodeBuilder<T> nodeBuilder;
    private final WorkspaceResourceDirectory treeFilesDirectory;
 
-   public BehaviorTreeFileLoader(BehaviorTree<T> behaviorTree,
+   public BehaviorTreeFileLoader(BehaviorTree<?, T> behaviorTree,
                                  BehaviorTreeNodeBuilder<T> nodeBuilder,
                                  WorkspaceResourceDirectory treeFilesDirectory)
    {
@@ -77,9 +77,9 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
          String typeName = jsonNode.get("type").textValue();
 
          T node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
-                                           behaviorTree.getAndIncrementNextID(),
-                                           behaviorTree.getRootNode(),
-                                           behaviorTree.getSaveFileDirectory());
+                                         behaviorTree.getAndIncrementNextID(),
+                                         behaviorTree.getRootNode(),
+                                         behaviorTree.getSaveFileDirectory());
          node.getDefinition().modify();
          node.getDefinition().loadFromFile(jsonNode);
 

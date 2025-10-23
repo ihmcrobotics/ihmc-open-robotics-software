@@ -27,14 +27,14 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
    private final LatestTimestampModifiable dataModification;
    protected final WorkspaceResourceDirectory saveFileDirectory;
    private final BehaviorTreeFileLoader<T> fileLoader;
-   private final BehaviorTreeNodeBuilder<R, T> nodeBuilder;
-   private final BehaviorTreeTopologyOperationQueue<R, T> topologyChangeQueue;
+   private final BehaviorTreeNodeBuilder<T> nodeBuilder;
+   private final BehaviorTreeTopologyOperationQueue<T> topologyChangeQueue;
    protected R rootNode;
 
    public BehaviorTree(ROS2ActorDesignation actor,
                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                        WorkspaceResourceDirectory saveFileDirectory,
-                       BehaviorTreeNodeBuilder<R, T> nodeBuilder)
+                       BehaviorTreeNodeBuilder<T> nodeBuilder)
    {
       this.nodeBuilder = nodeBuilder;
       this.saveFileDirectory = saveFileDirectory;
@@ -45,10 +45,10 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
       dataModification = new LatestTimestampModifiable(crdtInfo);
       dataModification.setModifierName("Tree data");
       fileLoader = new BehaviorTreeFileLoader<>(this, nodeBuilder, saveFileDirectory);
-      topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>(this);
+      topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>((BehaviorTree<BehaviorTreeRootNode<T>, T>) this); // FIXME: Unchecked cast
    }
 
-   public abstract R createRootNode(long id);
+   public abstract BehaviorTreeRootNode<T> createRootNode(long id);
 
    /** Used only when modifying tree topology. */
    private void update()
@@ -175,7 +175,7 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
       return fileLoader;
    }
 
-   public BehaviorTreeNodeBuilder<R, T> getNodeBuilder()
+   public BehaviorTreeNodeBuilder<T> getNodeBuilder()
    {
       return nodeBuilder;
    }

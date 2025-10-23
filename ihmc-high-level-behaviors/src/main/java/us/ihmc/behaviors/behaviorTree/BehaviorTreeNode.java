@@ -12,7 +12,7 @@ import us.ihmc.tools.Destroyable;
  * @param <S> The type of this node's state instance.
  * @param <D> The type of this node's definition instance.
  */
-public interface BehaviorTreeNode<T extends BehaviorTreeNode<T, ?, ?>,
+public interface BehaviorTreeNode<T extends BehaviorTreeNode<T, ? extends BehaviorTreeNodeState<?>, ? extends BehaviorTreeNodeDefinition>, // TODO Check
                                   S extends BehaviorTreeNodeState<D>,
                                   D extends BehaviorTreeNodeDefinition>
       extends TreeNode<T>, Destroyable
