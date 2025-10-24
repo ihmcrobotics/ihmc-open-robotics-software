@@ -50,7 +50,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
    private CRDTInfo crdtInfo; // TODO: Make final somehow
-   private final WorkspaceResourceDirectory saveFileDirectory;
+   private WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
@@ -62,15 +62,13 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
 
-   public BehaviorTreeExecutorNodeBuilder(WorkspaceResourceDirectory saveFileDirectory,
-                                          DRCRobotModel robotModel,
+   public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           SceneGraph sceneGraph,
                                           DetectionManager detectionManager)
    {
-      this.saveFileDirectory = saveFileDirectory;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
@@ -84,9 +82,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    }
 
    @Override
-   public void initialize(CRDTInfo crdtInfo)
+   public void initialize(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       this.crdtInfo = crdtInfo;
+      this.saveFileDirectory = saveFileDirectory;
    }
 
    @Override
@@ -110,7 +109,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
 
       if (nodeType == BehaviorTreeNodeDefinition.class) // TODO: Should not exist???
       {
-         return new BehaviorTreeNodeExecutor<>(id, crdtInfo);
+         return new BehaviorTreeNodeExecutor<>(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == AI2RNodeDefinition.class)
       {

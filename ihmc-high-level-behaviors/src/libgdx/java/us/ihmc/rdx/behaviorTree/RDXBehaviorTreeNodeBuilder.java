@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
 {
    private CRDTInfo crdtInfo; // TODO: Make final somehow
-   private final WorkspaceResourceDirectory saveFileDirectory;
+   private WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RobotCollisionModel selectionCollisionModel;
@@ -45,15 +45,13 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    private final RDX3DPanel panel3D;
    private final ReferenceFrameLibrary referenceFrameLibrary;
 
-   public RDXBehaviorTreeNodeBuilder(WorkspaceResourceDirectory saveFileDirectory,
-                                     DRCRobotModel robotModel,
+   public RDXBehaviorTreeNodeBuilder(DRCRobotModel robotModel,
                                      ROS2SyncedRobotModel syncedRobot,
                                      RobotCollisionModel selectionCollisionModel,
                                      RDXBaseUI baseUI,
                                      RDX3DPanel panel3D,
                                      ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.saveFileDirectory = saveFileDirectory;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
@@ -63,9 +61,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    }
 
    @Override
-   public void initialize(CRDTInfo crdtInfo)
+   public void initialize(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       this.crdtInfo = crdtInfo;
+      this.saveFileDirectory = saveFileDirectory;
    }
 
    @Override

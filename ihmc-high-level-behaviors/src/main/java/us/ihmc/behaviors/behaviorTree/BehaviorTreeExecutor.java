@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.condition.LLMConditionExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.log.LogTools;
@@ -17,8 +16,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
-   public BehaviorTreeExecutor(WorkspaceResourceDirectory saveFileDirectory,
-                               DRCRobotModel robotModel,
+   public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
                                ReferenceFrameLibrary referenceFrameLibrary,
@@ -29,7 +27,7 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       super(ROS2ActorDesignation.ROBOT,
             peerClockEstimator,
             new WorkspaceResourceDirectory(BehaviorTreeExecutor.class, "/behaviorTrees"),
-            new BehaviorTreeExecutorNodeBuilder(saveFileDirectory, robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager));
+            new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph, detectionManager));
    }
 
    public void update()

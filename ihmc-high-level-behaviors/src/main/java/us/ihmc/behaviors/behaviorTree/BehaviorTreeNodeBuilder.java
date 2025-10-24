@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
  * A builder interface used for common code in building nodes in the UI and on the robot.
@@ -9,7 +10,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
  */
 public interface BehaviorTreeNodeBuilder<T extends BehaviorTreeNode<T, ? ,?>>
 {
-   void initialize(CRDTInfo crdtInfo); // TODO: Maybe can simplify this
+   void initialize(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory); // TODO: Maybe can simplify this
 
    BehaviorTreeRootNode<T> createRootNode(long id);
 

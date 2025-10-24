@@ -103,10 +103,16 @@ public class BehaviorTreeJSONSanitizer
 
          Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
 
-         BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType,
-                                                                                    crdtInfo,
-                                                                                    treeFilesDirectory,
-                                                                                    defaultFootstepPlannerParameters);
+         BehaviorTreeNodeDefinition node;
+         if (parentNode == null)
+         {
+            node = BehaviorTreeDefinitionBuilder.createRootNode();
+         }
+         else
+         {
+            BehaviorTreeRootNodeDefinition rootNode = BehaviorTreeTools.findRootNode(parentNode);
+            node = BehaviorTreeDefinitionBuilder.createNode(definitionType, rootNode);
+         }
 
          node.loadFromFile(jsonNode);
 

@@ -41,7 +41,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        SceneGraph sceneGraph,
                                        DetectionManager detectionManager)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
    }
 
    @Override
