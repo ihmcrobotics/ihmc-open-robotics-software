@@ -15,6 +15,7 @@ import us.ihmc.behaviors.behaviorTree.action.ActionNodeInitialization;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.behaviorTree.actions.*;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -35,6 +36,8 @@ import javax.annotation.Nullable;
 
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
 {
+   private CRDTInfo crdtInfo; // TODO: Make final somehow
+   private final WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final RobotCollisionModel selectionCollisionModel;
@@ -42,13 +45,15 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    private final RDX3DPanel panel3D;
    private final ReferenceFrameLibrary referenceFrameLibrary;
 
-   public RDXBehaviorTreeNodeBuilder(DRCRobotModel robotModel,
+   public RDXBehaviorTreeNodeBuilder(WorkspaceResourceDirectory saveFileDirectory,
+                                     DRCRobotModel robotModel,
                                      ROS2SyncedRobotModel syncedRobot,
                                      RobotCollisionModel selectionCollisionModel,
                                      RDXBaseUI baseUI,
                                      RDX3DPanel panel3D,
                                      ReferenceFrameLibrary referenceFrameLibrary)
    {
+      this.saveFileDirectory = saveFileDirectory;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
@@ -58,16 +63,19 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    }
 
    @Override
+   public void initialize(CRDTInfo crdtInfo)
+   {
+      this.crdtInfo = crdtInfo;
+   }
+
+   @Override
    public BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> createRootNode(long id)
    {
       return new RDXBehaviorTreeRootNode(id, crdtInfo, saveFileDirectory);
    }
 
    @Override
-   public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType,
-                                               long id,
-                                               BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> rootNodeType,
-                                               WorkspaceResourceDirectory saveFileDirectory)
+   public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> rootNodeType)
    {
       RDXBehaviorTreeRootNode rootNode = (RDXBehaviorTreeRootNode) rootNodeType;
 

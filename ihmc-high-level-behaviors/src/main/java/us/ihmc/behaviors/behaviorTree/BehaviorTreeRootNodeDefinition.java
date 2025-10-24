@@ -6,13 +6,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeRootNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   private final WorkspaceResourceDirectory saveFileDirectory;
-
    public BehaviorTreeRootNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(crdtInfo);
-
-      this.saveFileDirectory = saveFileDirectory;
+      super(crdtInfo, saveFileDirectory);
    }
 
    public void toMessage(BehaviorTreeRootNodeDefinitionMessage message)
@@ -23,10 +19,5 @@ public class BehaviorTreeRootNodeDefinition extends BehaviorTreeNodeDefinition
    public void fromMessage(BehaviorTreeRootNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
-   }
-
-   public WorkspaceResourceDirectory getSaveFileDirectory()
-   {
-      return saveFileDirectory;
    }
 }

@@ -41,7 +41,9 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
             referenceFrameLibrary.addAll(Collections.singleton(syncedRobot.getReferenceFrames().getHandZUpFrame(side)));
       }
 
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
+      executor = new ROS2BehaviorTreeExecutor(crdtInfo,
+                                              saveFileDirectory,
+                                              ros2ControllerHelper,
                                               robotModel,
                                               syncedRobot,
                                               peerClockOffsetEstimator,

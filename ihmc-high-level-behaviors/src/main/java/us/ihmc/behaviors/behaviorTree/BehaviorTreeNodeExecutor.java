@@ -34,9 +34,9 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
 
    /** For creating a basic node. */ // TODO: Should not exist???
    @SuppressWarnings("unchecked")
-   public BehaviorTreeNodeExecutor(long id, CRDTInfo crdtInfo)
+   public BehaviorTreeNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo);
+      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
       this.state = (S) new BehaviorTreeNodeState<D>(id, definition);
    }
 

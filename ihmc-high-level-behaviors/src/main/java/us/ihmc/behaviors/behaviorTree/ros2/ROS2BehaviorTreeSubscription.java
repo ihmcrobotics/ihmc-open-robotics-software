@@ -207,8 +207,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
          else
             localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                                  nodeID,
-                                                                 behaviorTree.getRootNode(),
-                                                                 behaviorTree.getSaveFileDirectory());
+                                                                 behaviorTree.getRootNode());
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
             LogTools.debug("Cannot replicate node fully from partial data!");

@@ -40,6 +40,7 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
       this.saveFileDirectory = saveFileDirectory;
 
       crdtInfo = new CRDTInfo(actor, peerClockEstimator);
+      nodeBuilder.initialize(crdtInfo);
       rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
       rootReferenceModification.setModifierName("Root reference");
       dataModification = new LatestTimestampModifiable(crdtInfo);

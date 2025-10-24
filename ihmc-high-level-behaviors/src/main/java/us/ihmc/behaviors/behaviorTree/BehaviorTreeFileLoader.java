@@ -78,8 +78,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
 
          T node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
                                          behaviorTree.getAndIncrementNextID(),
-                                         behaviorTree.getRootNode(),
-                                         behaviorTree.getSaveFileDirectory());
+                                         behaviorTree.getRootNode());
          node.getDefinition().modify();
          node.getDefinition().loadFromFile(jsonNode);
 

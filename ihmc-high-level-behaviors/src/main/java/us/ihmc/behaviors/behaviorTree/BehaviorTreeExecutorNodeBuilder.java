@@ -49,7 +49,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
-   private final CRDTInfo crdtInfo;
+   private CRDTInfo crdtInfo; // TODO: Make final somehow
    private final WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -62,8 +62,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
 
-   public BehaviorTreeExecutorNodeBuilder(CRDTInfo crdtInfo,
-                                          WorkspaceResourceDirectory saveFileDirectory,
+   public BehaviorTreeExecutorNodeBuilder(WorkspaceResourceDirectory saveFileDirectory,
                                           DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
@@ -71,7 +70,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                           SceneGraph sceneGraph,
                                           DetectionManager detectionManager)
    {
-      this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -83,6 +81,12 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
       walkingControllerParameters = robotModel.getWalkingControllerParameters();
+   }
+
+   @Override
+   public void initialize(CRDTInfo crdtInfo)
+   {
+      this.crdtInfo = crdtInfo;
    }
 
    @Override
@@ -100,10 +104,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    }
 
    @Override
-   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType,
-                                                    long id,
-                                                    BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>> rootNodeType,
-                                                    WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>> rootNodeType)
    {
       BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) rootNodeType;
 
