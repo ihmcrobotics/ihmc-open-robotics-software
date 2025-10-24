@@ -47,10 +47,16 @@ geometry_msgs/Point desired_torso_position
 
 geometry_msgs/Quaternion desired_torso_orientation
 
-# Legged robot-specific contact information (false if not a legged robot)
-toolbox_msgs/KinematicsToolboxFootStatus left_foot_status
+string[] rigid_body_names
 
-toolbox_msgs/KinematicsToolboxFootStatus right_foot_status
+geometry_msgs/Point[] rigid_body_positions
+
+geometry_msgs/Quaternion[] rigid_body_orientations
+
+# Legged robot-specific contact information (false if not a legged robot)
+bool left_foot_in_contact
+
+bool right_foot_in_contact
 
 # Field default value -1.0
 float64 solution_quality

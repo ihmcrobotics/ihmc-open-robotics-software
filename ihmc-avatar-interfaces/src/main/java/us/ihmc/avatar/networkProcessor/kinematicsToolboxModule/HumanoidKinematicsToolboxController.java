@@ -43,6 +43,7 @@ import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -177,6 +178,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private StabilityMarginKinematicsCostCalculator stabilityCostCalculator;
    private final FramePoint3D tempContactPoint = new FramePoint3D();
    private final FrameVector3D tempContactNormal = new FrameVector3D();
+   private final List<RigidBodyBasics> rigidBodiesList = new ArrayList<>();
 
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
@@ -272,6 +274,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       }
 
       populateDefaultJointLimitReductionFactors();
+
+      RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(desiredFullRobotModel.getElevator());
+      for (RigidBodyBasics rigidBody : rootBody.subtreeIterable())
+      {
+         rigidBodiesList.add(rigidBody);
+         getSolution().getRigidBodyNames().add(rigidBody.getName());
+      }
    }
 
    /**
@@ -420,8 +429,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       enableAutoSupportPolygon.set(true);
       holdCenterOfMassXYPosition.set(true);
       enableJointLimitReduction.set(true);
-      getSolution().getLeftFootStatus().setFootInContact(true);
-      getSolution().getRightFootStatus().setFootInContact(true);
+      getSolution().setLeftFootInContact(true);
+      getSolution().setRightFootInContact(true);
 
       status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL);
       reportMessage(status);
@@ -537,6 +546,17 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
       getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
       getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
+      
+      // Update rigid body pose - only needed for status message
+      for (int i = 0; i < rigidBodiesList.size(); i++)
+      {
+         RigidBodyTransform transform = rigidBodiesList.get(i).getParentJoint()
+                                                       .getFrameAfterJoint()
+                                                       .getTransformToRoot();
+
+         getSolution().getRigidBodyPositions().get(i).set(transform.getTranslation());
+         getSolution().getRigidBodyOrientations().get(i).set(transform.getRotation());
+      }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
       {
@@ -876,8 +896,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setIsFootInSupport(RobotSide side, boolean value)
    {
       isFootInSupport.get(side).set(value);
-      getSolution().getLeftFootStatus().setFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
-      getSolution().getRightFootStatus().setFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
+      getSolution().setLeftFootInContact(isFootInSupport.get(RobotSide.LEFT).getValue());
+      getSolution().setRightFootInContact(isFootInSupport.get(RobotSide.RIGHT).getValue());
    }
 
    private final PoseReferenceFrame desiredFootFrame = new PoseReferenceFrame("desiredFootFrame", ReferenceFrame.getWorldFrame());

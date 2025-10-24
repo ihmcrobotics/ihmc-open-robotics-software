@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2036dea11927e100d6b6f6c81425d5f2d188a4b25af60ee56aa2e3417cec2828";
+   		return "0335e5c6be7144224d40f61aaa360a7811c306d0482d34bfea9ee4f5c7955127";
    }
    
    @Override
@@ -77,9 +77,19 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+        current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -130,9 +140,26 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredTorsoOrientation(), current_alignment);
 
-      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getCdrSerializedSize(data.getLeftFootStatus(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRigidBodyNames().size(); ++i0)
+      {
+          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getRigidBodyNames().get(i0).length() + 1;
+      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRigidBodyPositions().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRigidBodyPositions().get(i0), current_alignment);}
 
-      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.getCdrSerializedSize(data.getRightFootStatus(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRigidBodyOrientations().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRigidBodyOrientations().get(i0), current_alignment);}
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -167,8 +194,22 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredTorsoPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredTorsoOrientation(), cdr);
-      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.write(data.getLeftFootStatus(), cdr);
-      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.write(data.getRightFootStatus(), cdr);
+      if(data.getRigidBodyNames().size() <= 100)
+      cdr.write_type_e(data.getRigidBodyNames());else
+          throw new RuntimeException("rigid_body_names field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyNames().size(), 100));
+
+      if(data.getRigidBodyPositions().size() <= 100)
+      cdr.write_type_e(data.getRigidBodyPositions());else
+          throw new RuntimeException("rigid_body_positions field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyPositions().size(), 100));
+
+      if(data.getRigidBodyOrientations().size() <= 100)
+      cdr.write_type_e(data.getRigidBodyOrientations());else
+          throw new RuntimeException("rigid_body_orientations field exceeds the maximum length: %d > %d".formatted(data.getRigidBodyOrientations().size(), 100));
+
+      cdr.write_type_7(data.getLeftFootInContact());
+
+      cdr.write_type_7(data.getRightFootInContact());
+
       cdr.write_type_6(data.getSolutionQuality());
 
    }
@@ -190,8 +231,13 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.read_type_e(data.getSupportRegion());	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredTorsoPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredTorsoOrientation(), cdr);	
-      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.read(data.getLeftFootStatus(), cdr);	
-      toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType.read(data.getRightFootStatus(), cdr);	
+      cdr.read_type_e(data.getRigidBodyNames());	
+      cdr.read_type_e(data.getRigidBodyPositions());	
+      cdr.read_type_e(data.getRigidBodyOrientations());	
+      data.setLeftFootInContact(cdr.read_type_7());
+      	
+      data.setRightFootInContact(cdr.read_type_7());
+      	
       data.setSolutionQuality(cdr.read_type_6());
       	
 
@@ -218,10 +264,11 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("desired_torso_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredTorsoOrientation());
 
-      ser.write_type_a("left_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getLeftFootStatus());
-
-      ser.write_type_a("right_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getRightFootStatus());
-
+      ser.write_type_e("rigid_body_names", data.getRigidBodyNames());
+      ser.write_type_e("rigid_body_positions", data.getRigidBodyPositions());
+      ser.write_type_e("rigid_body_orientations", data.getRigidBodyOrientations());
+      ser.write_type_7("left_foot_in_contact", data.getLeftFootInContact());
+      ser.write_type_7("right_foot_in_contact", data.getRightFootInContact());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
    }
 
@@ -246,10 +293,11 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_a("desired_torso_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredTorsoOrientation());
 
-      ser.read_type_a("left_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getLeftFootStatus());
-
-      ser.read_type_a("right_foot_status", new toolbox_msgs.msg.dds.KinematicsToolboxFootStatusPubSubType(), data.getRightFootStatus());
-
+      ser.read_type_e("rigid_body_names", data.getRigidBodyNames());
+      ser.read_type_e("rigid_body_positions", data.getRigidBodyPositions());
+      ser.read_type_e("rigid_body_orientations", data.getRigidBodyOrientations());
+      data.setLeftFootInContact(ser.read_type_7("left_foot_in_contact"));
+      data.setRightFootInContact(ser.read_type_7("right_foot_in_contact"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
    }
 
