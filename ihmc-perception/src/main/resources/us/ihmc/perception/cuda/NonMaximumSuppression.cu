@@ -79,8 +79,6 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
 extern "C"
 __global__ void reduceFast(bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
 {
-    // Included box count should be initialized to 0 before running the kernel
-    assert(*includedBoxCount == 0);
     // Each box must have a dedicated thread to itself
     assert(boxCount <= blockDim.x);
     // Each box must have a dedicated block to itself
@@ -114,9 +112,6 @@ __global__ void reduceFast(bool* inclusionMatrix, int boxCount, int* includedInd
 extern "C"
 __global__ void reduceSlow(bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
 {
-    // Included box count should be initialized to 0 before running the kernel
-    assert(*includedBoxCount == 0);
-
     int row = Utils::getThreadCoordX();
 
     // Bounds check

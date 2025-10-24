@@ -32,6 +32,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
+import us.ihmc.robotDataVisualizer.logger.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -115,6 +116,7 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
+   private JVMStatisticsGenerator jvmStatisticsGenerator;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -258,6 +260,8 @@ public class AvatarMultiThreadingFactory
             builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
          if (ikStreamingThread.hasValue())
             builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+         if (jvmStatisticsGenerator != null)
+            builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
          IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
@@ -577,6 +581,11 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 
+   public void addJVMStatisticsForLoggingLocally(JVMStatisticsGenerator jvmStatisticsGenerator)
+   {
+      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
+   }
+
    public void setLogLocally(boolean logLocally)
    {
       this.logLocally = logLocally;
@@ -587,8 +596,16 @@ public class AvatarMultiThreadingFactory
       estimatorModeMapReference.set(estimatorModeMap);
    }
 
-   public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, CommandBlenderFactory commandBlenderFactory)
+   public void addSmoothTransitionState(String transitionName,
+                                        HighLevelControllerName transitionStateEnum,
+                                        HighLevelControllerName currentControlStateEnum,
+                                        HighLevelControllerName nextControlStateEnum,
+                                        CommandBlenderFactory commandBlenderFactory)
    {
-      controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
+      controllerFactory.addCustomSmoothTransitionControlState(transitionName,
+                                                              transitionStateEnum,
+                                                              currentControlStateEnum,
+                                                              nextControlStateEnum,
+                                                              commandBlenderFactory);
    }
 }

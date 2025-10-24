@@ -27,6 +27,8 @@ mainDependencies {
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
+
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.3") // for CSG plugin
 }
 
 testDependencies {
