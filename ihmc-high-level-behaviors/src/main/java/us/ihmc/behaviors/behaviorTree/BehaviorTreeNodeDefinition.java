@@ -81,14 +81,21 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    /** Save as JSON file root node. */
    public void saveToFile()
    {
-      if (!isJSONRoot())
-         LogTools.error("Cannot save. Can only be called for JSON roots.");
-
-      WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, getName());
-      LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
-      if (JSONFileTools.save(saveFile, this::saveToFile)) // Success
+      if (isJSONRoot())
       {
-         BehaviorTreeTools.runForSubtreeNodes(this, BehaviorTreeNodeDefinition::setOnDiskFields);
+         WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, getName());
+         LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
+         if (JSONFileTools.save(saveFile, this::saveToFile)) // Success
+         {
+            BehaviorTreeTools.runForSubtreeNodes(this, BehaviorTreeNodeDefinition::setOnDiskFields);
+         }
+      }
+      else
+      {
+         for (BehaviorTreeNodeDefinition child : children)
+         {
+            child.saveToFile();
+         }
       }
    }
 
