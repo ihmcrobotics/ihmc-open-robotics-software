@@ -551,18 +551,21 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       MovingReferenceFrame chestFrame = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
       getSolution().getDesiredTorsoPosition().set(chestFrame.getTransformToRoot().getTranslation());
       getSolution().getDesiredTorsoOrientation().set(chestFrame.getTransformToRoot().getRotation());
-      getSolution().getDesiredTorsoLinearVelocity().set(chestFrame.getTwistOfFrame().getLinearPart());
-      getSolution().getDesiredTorsoAngularVelocity().set(chestFrame.getTwistOfFrame().getAngularPart());
+      MovingReferenceFrame chestFrameCoM = desiredFullRobotModel.getChest().getBodyFixedFrame();
+      getSolution().getDesiredTorsoLinearVelocity().set(chestFrameCoM.getTwistOfFrame().getLinearPart());
+      getSolution().getDesiredTorsoAngularVelocity().set(chestFrameCoM.getTwistOfFrame().getAngularPart());
       
       // Update rigid body pose - only needed for status message
       for (int i = 0; i < rigidBodiesList.size(); i++)
       {
          if (!rigidBodiesList.get(i).equals(rootBody))
          {
-            RigidBodyTransform transform = rigidBodiesList.get(i).getParentJoint().getFrameAfterJoint().getTransformToRoot();
-
-            getSolution().getRigidBodyPositions().get(i).set(transform.getTranslation());
-            getSolution().getRigidBodyOrientations().get(i).set(transform.getRotation());
+            MovingReferenceFrame bodyFrame = rigidBodiesList.get(i).getParentJoint().getFrameAfterJoint();
+            getSolution().getRigidBodyPositions().get(i).set(bodyFrame.getTransformToRoot().getTranslation());
+            getSolution().getRigidBodyOrientations().get(i).set(bodyFrame.getTransformToRoot().getRotation());
+            MovingReferenceFrame bodyFrameCoM = rigidBodiesList.get(i).getBodyFixedFrame();
+            getSolution().getRigidBodyLinearVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getLinearPart());
+            getSolution().getRigidBodyAngularVelocities().get(i).set(bodyFrameCoM.getTwistOfFrame().getAngularPart());
          }
       }
 
