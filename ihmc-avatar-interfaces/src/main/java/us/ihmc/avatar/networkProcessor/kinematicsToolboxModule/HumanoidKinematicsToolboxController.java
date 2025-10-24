@@ -35,6 +35,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -280,6 +281,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          rigidBodiesList.add(rigidBody);
          getSolution().getRigidBodyNames().add(rigidBody.getName());
+         getSolution().getRigidBodyPositions().add().set(new Point3D());
+         getSolution().getRigidBodyOrientations().add().set(new Quaternion());
       }
    }
 
@@ -550,12 +553,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       // Update rigid body pose - only needed for status message
       for (int i = 0; i < rigidBodiesList.size(); i++)
       {
-         RigidBodyTransform transform = rigidBodiesList.get(i).getParentJoint()
-                                                       .getFrameAfterJoint()
-                                                       .getTransformToRoot();
+         if (!rigidBodiesList.get(i).equals(rootBody))
+         {
+            RigidBodyTransform transform = rigidBodiesList.get(i).getParentJoint().getFrameAfterJoint().getTransformToRoot();
 
-         getSolution().getRigidBodyPositions().get(i).set(transform.getTranslation());
-         getSolution().getRigidBodyOrientations().get(i).set(transform.getRotation());
+            getSolution().getRigidBodyPositions().get(i).set(transform.getTranslation());
+            getSolution().getRigidBodyOrientations().get(i).set(transform.getRotation());
+         }
       }
 
       if (!isUserProvidingSupportPolygon() && isUpperBodyLoadBearing.getValue())
