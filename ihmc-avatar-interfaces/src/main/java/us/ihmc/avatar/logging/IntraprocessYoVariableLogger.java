@@ -135,7 +135,7 @@ public class IntraprocessYoVariableLogger
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
-      logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);
+      logFolder = incomingLogsFolder.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
       deleteOldLogs(incomingLogsFolder, 10);
 
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
