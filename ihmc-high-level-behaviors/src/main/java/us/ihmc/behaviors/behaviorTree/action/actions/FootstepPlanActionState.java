@@ -36,7 +36,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public FootstepPlanActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new FootstepPlanActionDefinition(rootNode.getDefinition(), rootNode.getRobotModel().getFootstepPlannerParameters()), rootNode);
+      super(id, new FootstepPlanActionDefinition(rootNode.getDefinition()), rootNode);
 
       goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());

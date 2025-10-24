@@ -1,10 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.FallbackNodeDefinitionMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 
-public class FallbackNodeDefinition extends BehaviorTreeNonRootNodeDefinition
+public class FallbackNodeDefinition extends BehaviorTreeNodeDefinition
 {
    public FallbackNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {

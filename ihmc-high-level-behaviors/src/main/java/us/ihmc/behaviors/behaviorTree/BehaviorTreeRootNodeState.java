@@ -20,9 +20,6 @@ import java.util.List;
 
 public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTreeRootNodeDefinition>
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final DRCRobotModel robotModel;
-
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTBidirectionalNotification manualExecutionRequested;
@@ -37,13 +34,10 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public BehaviorTreeRootNodeState(long id,
                                     CRDTInfo crdtInfo,
                                     WorkspaceResourceDirectory saveFileDirectory,
-                                    ReferenceFrameLibrary referenceFrameLibrary,
-                                    DRCRobotModel robotModel)
+                                    DRCRobotModel robotModel,
+                                    ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory));
-
-      this.referenceFrameLibrary = referenceFrameLibrary;
-      this.robotModel = robotModel;
+      super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory, robotModel), null, referenceFrameLibrary);
 
       automaticExecution = new CRDTBidirectionalBoolean(definition, false);
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
@@ -217,13 +211,10 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       return orderedActions;
    }
 
+   // Getters are in here so there's not getters in base node for root stuff
+
    public ReferenceFrameLibrary getReferenceFrameLibrary()
    {
       return referenceFrameLibrary;
-   }
-
-   public DRCRobotModel getRobotModel()
-   {
-      return robotModel;
    }
 }

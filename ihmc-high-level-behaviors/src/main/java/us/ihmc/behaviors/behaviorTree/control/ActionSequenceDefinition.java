@@ -1,10 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.ActionSequenceDefinitionMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 
-public class ActionSequenceDefinition extends BehaviorTreeNonRootNodeDefinition
+public class ActionSequenceDefinition extends BehaviorTreeNodeDefinition
 {
    // Seems to be nothing special here so far TODO Does that mean we delete it?
 

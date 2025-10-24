@@ -1,10 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.ActionSequenceStateMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 
-public class ActionSequenceState extends BehaviorTreeNonRootNodeState<ActionSequenceDefinition>
+public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDefinition>
 {
    public ActionSequenceState(long id, BehaviorTreeRootNodeState rootNode)
    {

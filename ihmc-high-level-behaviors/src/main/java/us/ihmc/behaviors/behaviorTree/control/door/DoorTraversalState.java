@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree.control.door;
 
 import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
@@ -16,7 +15,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DoorTraversalState extends BehaviorTreeNonRootNodeState<DoorTraversalDefinition>
+public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
    public static final String SET_STATIC_FOR_APPROACH = "Set static for approach";
    public static final String SET_STATIC_FOR_GRASP = "Set static for grasp";

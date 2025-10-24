@@ -8,7 +8,7 @@ import us.ihmc.log.LogTools;
 
 import java.util.List;
 
-public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNonRootNodeState<D>
+public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNodeState<D>
 {
    private final CRDTStatusBoolean isNextForExecution;
    private final CRDTStatusInteger concurrencyRank;

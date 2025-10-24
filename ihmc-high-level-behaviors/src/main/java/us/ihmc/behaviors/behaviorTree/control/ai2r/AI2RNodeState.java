@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 
 import behavior_msgs.msg.dds.AI2RNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
@@ -10,7 +9,7 @@ import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AI2RNodeState extends BehaviorTreeNonRootNodeState<AI2RNodeDefinition>
+public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 {
    private BehaviorTreeRootNodeState actionSequence;
    private final List<CheckPointNodeState> checkPoints = new ArrayList<>();

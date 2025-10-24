@@ -22,7 +22,7 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
 {
    protected int numberOfNodes = 0;
    protected final CRDTInfo crdtInfo;
-   private final MutableLong nextID = new MutableLong(0);
+   private final MutableLong nextID = new MutableLong(0); // TODO: Could be moved inside root node?
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
    protected final WorkspaceResourceDirectory saveFileDirectory;

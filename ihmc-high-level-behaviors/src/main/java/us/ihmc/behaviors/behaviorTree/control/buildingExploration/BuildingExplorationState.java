@@ -2,7 +2,6 @@ package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
 import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -10,7 +9,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import javax.annotation.Nullable;
 import java.util.Stack;
 
-public class BuildingExplorationState extends BehaviorTreeNonRootNodeState<BuildingExplorationDefinition>
+public class BuildingExplorationState extends BehaviorTreeNodeState<BuildingExplorationDefinition>
 {
    @Nullable
    private DoorTraversalState doorTraversalState;

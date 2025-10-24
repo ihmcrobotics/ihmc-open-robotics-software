@@ -10,7 +10,7 @@ import us.ihmc.communication.crdt.CRDTBidirectionalLong;
  *
  * This is used for action, condition, and goto nodes.
  */
-public class LeafNodeDefinition extends BehaviorTreeNonRootNodeDefinition
+public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
 {
    public static final long EXECUTE_AFTER_INVALID_ID = LeafNodeDefinitionMessage.INVALID;
    public static final long EXECUTE_AFTER_PREVIOUS_ID = LeafNodeDefinitionMessage.EXECUTE_AFTER_PREVIOUS;

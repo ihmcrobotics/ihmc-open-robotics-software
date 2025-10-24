@@ -57,7 +57,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private boolean onDiskPlannerPerformAStarSearch;
    private boolean onDiskPlannerWalkWithGoalOrientation;
 
-   public FootstepPlanActionDefinition(BehaviorTreeRootNodeDefinition rootNode, DefaultFootstepPlannerParametersBasics initialPlannerParameters)
+   public FootstepPlanActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
@@ -75,7 +75,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       plannerInitialStanceSide = new CRDTBidirectionalImmutableField<>(this, InitialStanceSide.AUTO);
       plannerPerformAStarSearch = new CRDTBidirectionalBoolean(this, false);
       plannerWalkWithGoalOrientation = new CRDTBidirectionalBoolean(this, true);
-      plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", initialPlannerParameters);
+      plannerParameters = new BehaviorStoredPropertySetDefinition(this, "plannerParameters", robotModel.getFootstepPlannerParameters());
    }
 
    @Override

@@ -1,7 +1,12 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -23,21 +28,56 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
    protected final D definition;
    private final List<BehaviorTreeNodeExecutor<?, ?>> children = new ArrayList<>();
+   protected final BehaviorTreeRootNodeExecutor rootNode;
    private transient BehaviorTreeNodeExecutor<?, ?> parent;
 
-   /** For extending types. */
-   public BehaviorTreeNodeExecutor(S state)
-   {
-      this.state = state;
-      definition = state.getDefinition();
-   }
+   protected final DRCRobotModel robotModel;
+   protected final ReferenceFrameLibrary referenceFrameLibrary;
+   protected final ROS2ControllerHelper ros2ControllerHelper;
+   protected final ROS2SyncedRobotModel syncedRobot;
+   protected final ControllerStatusTracker controllerStatusTracker;
+   protected final SceneGraph sceneGraph;
+   protected final DetectionManager detectionManager;
 
    /** For creating a basic node. */ // TODO: Should not exist???
-   @SuppressWarnings("unchecked")
-   public BehaviorTreeNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
-      this.state = (S) new BehaviorTreeNodeState<D>(id, definition);
+      this((S) new BehaviorTreeNodeState<D>(id, (D) new BehaviorTreeNodeDefinition(rootNode.getDefinition()), rootNode.getState()), rootNode);
+   }
+
+   /** For extending types. */
+   public BehaviorTreeNodeExecutor(S state, BehaviorTreeRootNodeExecutor rootNode)
+   {
+      definition = state.getDefinition();
+      this.state = state;
+      this.rootNode = rootNode;
+      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.referenceFrameLibrary = rootNode.getState().getReferenceFrameLibrary();
+      this.ros2ControllerHelper = rootNode.getRos2ControllerHelper();
+      this.syncedRobot = rootNode.getSyncedRobot();
+      this.controllerStatusTracker = rootNode.getControllerStatusTracker();
+      this.sceneGraph = rootNode.getSceneGraph();
+      this.detectionManager = rootNode.getDetectionManager();
+   }
+
+   /** Root node constructor. */
+   public BehaviorTreeNodeExecutor(S state,
+                                   ROS2ControllerHelper ros2ControllerHelper,
+                                   ROS2SyncedRobotModel syncedRobot,
+                                   ControllerStatusTracker controllerStatusTracker,
+                                   SceneGraph sceneGraph,
+                                   DetectionManager detectionManager)
+   {
+      this.definition = state.getDefinition();
+      this.state = state;
+      this.rootNode = (BehaviorTreeRootNodeExecutor) this;
+      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.referenceFrameLibrary = rootNode.getState().getReferenceFrameLibrary();
+      this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
+      this.controllerStatusTracker = controllerStatusTracker;
+      this.sceneGraph = sceneGraph;
+      this.detectionManager = detectionManager;
    }
 
    /**
@@ -62,6 +102,11 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    public List<BehaviorTreeNodeExecutor<?, ?>> getChildren()
    {
       return children;
+   }
+
+   public BehaviorTreeRootNodeExecutor getRootNode()
+   {
+      return rootNode;
    }
 
    @Override

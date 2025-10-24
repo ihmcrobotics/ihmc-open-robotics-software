@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
 
 /**
@@ -9,9 +10,9 @@ public abstract class ActionNodeExecutor<S extends ActionNodeState<D>,
                                          D extends ActionNodeDefinition>
       extends LeafNodeExecutor<S, D>
 {
-   public ActionNodeExecutor(S state)
+   public ActionNodeExecutor(S state, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(state);
+      super(state, rootNode);
    }
 
    /** Trigger the action to begin executing. Called once per execution. */

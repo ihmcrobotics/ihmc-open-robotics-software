@@ -4,9 +4,9 @@ public class LeafNodeExecutor<S extends LeafNodeState<D>,
                               D extends LeafNodeDefinition>
       extends BehaviorTreeNodeExecutor<S, D>
 {
-   public LeafNodeExecutor(S state)
+   public LeafNodeExecutor(S state, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(state);
+      super(state, rootNode);
    }
 
    /** Message to print when {@link LeafNodeState#getCanExecute()} is false, to communicate the problem to the operator. */

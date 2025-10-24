@@ -2,10 +2,10 @@ package us.ihmc.behaviors.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
@@ -25,13 +25,13 @@ import java.nio.file.Path;
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters;
    private final CRDTInfo crdtInfo;
    private final WorkspaceResourceDirectory treeFilesDirectory;
+   private final DRCRobotModel robotModel;
 
-   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory, DefaultFootstepPlannerParametersReadOnly defaultFootstepPlannerParameters)
+   public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory, DRCRobotModel robotModel)
    {
-      this.defaultFootstepPlannerParameters = defaultFootstepPlannerParameters;
+      this.robotModel = robotModel;
 
       ROS2Node ros2Node = new ROS2NodeBuilder().specialTransportMode(SpecialTransportMode.INTRAPROCESS_ONLY).build("json_sanitizer");
       ROS2PeerClockOffsetEstimator peerClockEstimator = new ROS2PeerClockOffsetEstimator(ros2Node);
@@ -106,7 +106,7 @@ public class BehaviorTreeJSONSanitizer
          BehaviorTreeNodeDefinition node;
          if (parentNode == null)
          {
-            node = BehaviorTreeDefinitionBuilder.createRootNode();
+            node = BehaviorTreeDefinitionBuilder.createRootNode(crdtInfo, treeFilesDirectory, robotModel);
          }
          else
          {

@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.behaviorTree.control.door;
 
 import behavior_msgs.msg.dds.DoorTraversalDefinitionMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 
-public class DoorTraversalDefinition extends BehaviorTreeNonRootNodeDefinition
+public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
 {
    private final CRDTBidirectionalDouble lostGraspDetectionHandOpenAngle;
    private final CRDTBidirectionalDouble openedDoorHandleDistanceFromStart;

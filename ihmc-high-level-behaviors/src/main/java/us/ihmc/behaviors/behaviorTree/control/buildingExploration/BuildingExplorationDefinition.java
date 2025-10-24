@@ -1,10 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
 import behavior_msgs.msg.dds.BuildingExplorationDefinitionMessage;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeNonRootNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 
-public class BuildingExplorationDefinition extends BehaviorTreeNonRootNodeDefinition
+public class BuildingExplorationDefinition extends BehaviorTreeNodeDefinition
 {
    public BuildingExplorationDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {

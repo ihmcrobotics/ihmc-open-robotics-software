@@ -1,22 +1,22 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -34,16 +34,12 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredHandControlPose = new FramePose3D();
    private final FramePose3D syncedHandControlPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
@@ -75,18 +71,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private double axialVelocity;
    private double rotationalVelocity;
 
-   public ScrewPrimitiveActionExecutor(long id,
-                                       CRDTInfo crdtInfo,
-                                       WorkspaceResourceDirectory saveFileDirectory,
-                                       ROS2ControllerHelper ros2ControllerHelper,
-                                       ReferenceFrameLibrary referenceFrameLibrary,
-                                       DRCRobotModel robotModel,
-                                       ROS2SyncedRobotModel syncedRobot)
+   public ScrewPrimitiveActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
+      super(new ScrewPrimitiveActionState(id, rootNode.getState()), rootNode);
 
       for (RobotSide side : RobotSide.values)
       {

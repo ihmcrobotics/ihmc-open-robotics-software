@@ -1,8 +1,11 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -35,14 +38,30 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
     * The state's children. They can be any type that is a BehaviorTreeNodeState.
     */
    private final List<BehaviorTreeNodeState<?>> children = new ArrayList<>();
+   protected final BehaviorTreeRootNodeState rootNode;
    private transient BehaviorTreeNodeState<?> parent;
 
    private final BehaviorTreeNodeMessageLogger logger;
+   protected final CRDTInfo crdtInfo; // convenient to have readily available
+   protected final ReferenceFrameLibrary referenceFrameLibrary;
+   protected final DRCRobotModel robotModel;
 
-   public BehaviorTreeNodeState(long id, D definition)
+   public BehaviorTreeNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode)
+   {
+      this(id, definition, rootNode, rootNode.getReferenceFrameLibrary());
+   }
+
+   public BehaviorTreeNodeState(long id,
+                                D definition,
+                                BehaviorTreeRootNodeState rootNode,
+                                ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.id = id;
       this.definition = definition;
+      this.rootNode = rootNode == null ? (BehaviorTreeRootNodeState) this : rootNode;
+      this.crdtInfo = rootNode.getDefinition().getCRDTInfo();
+      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       logger = new BehaviorTreeNodeMessageLogger(definition.getCRDTInfo());
    }

@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -38,19 +39,31 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    private final CRDTBidirectionalString notes;
    /** Behavior tree children node definitions. */
    private final List<BehaviorTreeNodeDefinition> children = new ArrayList<>();
+   protected final BehaviorTreeRootNodeDefinition rootNode;
    private transient BehaviorTreeNodeDefinition parent;
    protected final WorkspaceResourceDirectory saveFileDirectory;
+   protected final DRCRobotModel robotModel;
 
    // Used to compare with saved version and provide unsaved status (*) to the operator
    private String onDiskName;
    private String onDiskNotes;
    private final List<String> onDiskChildrenNames = new ArrayList<>();
 
-   public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
+   {
+      this(rootNode, rootNode.getCRDTInfo(), rootNode.getSaveFileDirectory(), rootNode.getRobotModel());
+   }
+
+   public BehaviorTreeNodeDefinition(BehaviorTreeRootNodeDefinition rootNode,
+                                     CRDTInfo crdtInfo,
+                                     WorkspaceResourceDirectory saveFileDirectory,
+                                     DRCRobotModel robotModel)
    {
       super(crdtInfo);
 
+      this.rootNode = rootNode == null ? (BehaviorTreeRootNodeDefinition) this : rootNode;
       this.saveFileDirectory = saveFileDirectory;
+      this.robotModel = robotModel;
 
       childrenModification = new LatestTimestampModifiable(crdtInfo);
       name = new CRDTBidirectionalString(this, BehaviorTreeDefinitionRegistry.getInitialName(getClass()));
@@ -95,7 +108,7 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
          if (child.isJSONRoot())
          {
             childJsonNode.put("file", child.getName());
-            ((BehaviorTreeNonRootNodeDefinition) child).saveToFile();
+            child.saveToFile();
          }
          else
          {
@@ -241,10 +254,5 @@ public class BehaviorTreeNodeDefinition extends LatestTimestampModifiable implem
    public BehaviorTreeNodeDefinition getParent()
    {
       return parent;
-   }
-
-   public WorkspaceResourceDirectory getSaveFileDirectory()
-   {
-      return saveFileDirectory;
    }
 }

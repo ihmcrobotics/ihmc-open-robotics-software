@@ -3,44 +3,14 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationExecutor;
-import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.control.GotoNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
-import us.ihmc.behaviors.behaviorTree.control.ActionSequenceExecutor;
-import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionExecutor;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionDefinition;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionExecutor;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
+import us.ihmc.behaviors.behaviorTree.condition.*;
+import us.ihmc.behaviors.behaviorTree.control.*;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
+import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
+import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -49,16 +19,14 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
+   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private CRDTInfo crdtInfo; // TODO: Make final somehow
    private WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
-   private final ControllerStatusTracker controllerStatusTracker;
-   private final WalkingFootstepTracker footstepTracker;
-   private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ControllerStatusTracker controllerStatusTracker;
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
 
@@ -76,9 +44,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.detectionManager = detectionManager;
 
+      // TODO: Probably create this in the BehaviorTree
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
-      footstepTracker = controllerStatusTracker.getFootstepTracker();
-      walkingControllerParameters = robotModel.getWalkingControllerParameters();
    }
 
    @Override
@@ -96,6 +63,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                               saveFileDirectory,
                                               robotModel,
                                               ros2ControllerHelper,
+                                              controllerStatusTracker,
                                               syncedRobot,
                                               referenceFrameLibrary,
                                               sceneGraph,
@@ -108,84 +76,41 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) rootNodeType;
 
       if (nodeType == BehaviorTreeNodeDefinition.class) // TODO: Should not exist???
-      {
-         return new BehaviorTreeNodeExecutor<>(id, crdtInfo, saveFileDirectory);
-      }
+         return new BehaviorTreeNodeExecutor<>(id, rootNode);
       if (nodeType == AI2RNodeDefinition.class)
-      {
-         return new AI2RNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
-      }
+         return new AI2RNodeExecutor(id, rootNode);
       if (nodeType == ActionSequenceDefinition.class)
-      {
-         return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
-      }
+         return new ActionSequenceExecutor(id, rootNode);
       if (nodeType == FallbackNodeDefinition.class)
-      {
-         return new FallbackNodeExecutor(id, crdtInfo, saveFileDirectory);
-      }
+         return new FallbackNodeExecutor(id, rootNode);
       if (nodeType == ConditionNodeDefinition.class)
-      {
-         return new ConditionNodeExecutor(id, crdtInfo, saveFileDirectory, referenceFrameLibrary);
-      }
+         return new ConditionNodeExecutor(id, rootNode);
       if (nodeType == GotoNodeDefinition.class)
-      {
-         return new GotoNodeExecutor(id, crdtInfo, saveFileDirectory);
-      }
+         return new GotoNodeExecutor(id, rootNode);
       if (nodeType == CheckPointNodeDefinition.class)
-      {
-         return new CheckPointNodeExecutor(id, crdtInfo, saveFileDirectory);
-      }
+         return new CheckPointNodeExecutor(id, rootNode);
       if (nodeType == DoorTraversalDefinition.class)
-      {
-         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
-      }
+         return new DoorTraversalExecutor(id, rootNode);
       if (nodeType == BuildingExplorationDefinition.class)
-      {
-         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
-      }
+         return new BuildingExplorationExecutor(id, rootNode);
       if (nodeType == ChestOrientationActionDefinition.class)
-      {
-         return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
-      }
+         return new ChestOrientationActionExecutor(id, rootNode);
       if (nodeType == FootstepPlanActionDefinition.class)
-      {
-         return new FootstepPlanActionExecutor(id,
-                                               crdtInfo,
-                                               saveFileDirectory,
-                                               ros2ControllerHelper,
-                                               syncedRobot,
-                                               controllerStatusTracker,
-                                               referenceFrameLibrary,
-                                               walkingControllerParameters);
-      }
+         return new FootstepPlanActionExecutor(id, rootNode);
       if (nodeType == HandPoseActionDefinition.class)
-      {
-         return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
-      }
+         return new HandPoseActionExecutor(id, rootNode);
       if (nodeType == HandWrenchActionDefinition.class)
-      {
-         return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
-      }
+         return new HandWrenchActionExecutor(id, rootNode);
       if (nodeType == ScrewPrimitiveActionDefinition.class)
-      {
-         return new ScrewPrimitiveActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
-      }
+         return new ScrewPrimitiveActionExecutor(id, rootNode);
       if (nodeType == PelvisHeightOrientationActionDefinition.class)
-      {
-         return new PelvisHeightOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
-      }
+         return new PelvisHeightOrientationActionExecutor(id, rootNode);
       if (nodeType == SakeHandCommandActionDefinition.class)
-      {
-         return new SakeHandCommandActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
-      }
+         return new SakeHandCommandActionExecutor(id, rootNode);
       if (nodeType == WaitDurationActionDefinition.class)
-      {
-         return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
-      }
+         return new WaitDurationActionExecutor(id, rootNode);
       if (nodeType == FootPoseActionDefinition.class)
-      {
-         return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
-      }
+         return new FootPoseActionExecutor(id, rootNode);
 
       return null;
    }
