@@ -109,7 +109,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
             if (rootReferenceModificationIncoming)
             {
                rootNode = subscriptionRootIsNull ? null :
-                                (BehaviorTreeRootNode<T>) retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming, true);
+                                (BehaviorTreeRootNode<T>) retrieveOrReplicateLocalNode(subscriptionRootNode, rootReferenceModificationIncoming, null);
                topologyOperationQueue.queueSetRootNode(rootNode);
             }
 
@@ -119,7 +119,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
             // We need to traverse the tree even if there are no remote nodes to match,
             // because we might have the most up to date version
             if (rootNode != null)
-               retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (T) rootNode, topologyOperationQueue);
+               retrieveOrReplicateSubreeFromSubscription(subscriptionRootNode, (T) rootNode, rootNode, topologyOperationQueue);
 
             // These nodes were removed from the tree
             for (T value : idToLocalNodesMap.values())
@@ -133,6 +133,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
    private void retrieveOrReplicateSubreeFromSubscription(ROS2BehaviorTreeSubscriptionNode subscriptionNode,
                                                           T localNode,
+                                                          BehaviorTreeRootNode<T> rootNode,
                                                           BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
       boolean existsMatchingSubscriptionNode = subscriptionNode != null && subscriptionNode.getDefinitionClass() != null;
@@ -168,11 +169,11 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
          topologyOperationQueue.queueClearImmediateChildren(localNode);
          for (ROS2BehaviorTreeSubscriptionNode subscriptionChild : subscriptionNode.getChildren())
          {
-            T localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true, false);
+            T localChildNode = retrieveOrReplicateLocalNode(subscriptionChild, true, rootNode);
             if (localChildNode != null)
             {
                topologyOperationQueue.queueAppendChild(localNode, localChildNode);
-               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+               retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, rootNode, topologyOperationQueue);
                idToLocalNodesMap.remove(localChildNode.getState().getID());
             }
          }
@@ -182,13 +183,13 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
          for (T localChildNode : localNode.getChildren())
          {
             ROS2BehaviorTreeSubscriptionNode subscriptionChild = idToSubscriptionNodesMap.get(localChildNode.getState().getID());
-            retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, topologyOperationQueue);
+            retrieveOrReplicateSubreeFromSubscription(subscriptionChild, localChildNode, rootNode, topologyOperationQueue);
             idToLocalNodesMap.remove(localChildNode.getState().getID());
          }
       }
    }
 
-   private T retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication, boolean isRootNode)
+   private T retrieveOrReplicateLocalNode(ROS2BehaviorTreeSubscriptionNode subscriptionNode, boolean allowReplication, BehaviorTreeRootNode<T> rootNode)
    {
       long nodeID = subscriptionNode.getBehaviorTreeNodeStateMessage().getId();
       T localNode = idToLocalNodesMap.get(nodeID);
@@ -202,12 +203,12 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
                subscriptionNode.getPackedType(),
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
-         if (isRootNode)
+         if (rootNode == null)
             localNode = (T) behaviorTree.getNodeBuilder().createRootNode(nodeID); // FIXME: Unchecked cast; but this is hard af
          else
             localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                                  nodeID,
-                                                                 behaviorTree.getRootNode());
+                                                                 rootNode);
          if (subscriptionNode.getPackedType() == BehaviorTreeStateMessage.PARTIAL_DATA)
          {
             LogTools.debug("Cannot replicate node fully from partial data!");
