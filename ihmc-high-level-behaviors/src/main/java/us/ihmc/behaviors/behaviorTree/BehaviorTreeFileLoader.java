@@ -31,12 +31,16 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
       this.treeFilesDirectory = treeFilesDirectory;
    }
 
-   public T loadFromFile(WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
+   public T loadFromFile(BehaviorTreeRootNode<T> rootNode, WorkspaceResourceFile file, BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
-      return loadFromFile(file, null, null, topologyOperationQueue);
+      return loadFromFile(rootNode, file, null, null, topologyOperationQueue);
    }
 
-   private T loadFromFile(WorkspaceResourceFile file, JsonNode jsonNode, T parentNode, BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
+   private T loadFromFile(BehaviorTreeRootNode<T> rootNode,
+                          WorkspaceResourceFile file,
+                          JsonNode jsonNode,
+                          T parentNode,
+                          BehaviorTreeTopologyOperationQueue<T> topologyOperationQueue)
    {
       MutableObject<T> loadedNode = new MutableObject<>();
 
@@ -50,7 +54,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
             {
                LogTools.info("Loading from file: {}", filesystemFile);
                JSONFileTools.load(file, childJsonNode ->
-                     loadedNode.setValue(loadFromFile(file, childJsonNode, parentNode, topologyOperationQueue)));
+                     loadedNode.setValue(loadFromFile(rootNode, file, childJsonNode, parentNode, topologyOperationQueue)));
             }
             else
             {
@@ -59,7 +63,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
                {
                   LogTools.info("Loading from resource: {}", classpathResource);
                   JSONFileTools.load(classpathResource, childJsonNode ->
-                        loadedNode.setValue(loadFromFile(file, childJsonNode, parentNode, topologyOperationQueue)));
+                        loadedNode.setValue(loadFromFile(rootNode, file, childJsonNode, parentNode, topologyOperationQueue)));
                }
             }
          }
@@ -78,7 +82,7 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
 
          T node = nodeBuilder.createNode(BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName),
                                          behaviorTree.getAndIncrementNextID(),
-                                         behaviorTree.getRootNode());
+                                         rootNode);
          node.getDefinition().modify();
          node.getDefinition().loadFromFile(jsonNode);
 
@@ -118,11 +122,11 @@ public class BehaviorTreeFileLoader<T extends BehaviorTreeNode<T, ? ,?>>
             if (childJsonNode.has("file"))
             {
                WorkspaceResourceFile childFile = new WorkspaceResourceFile(treeFilesDirectory, childJsonNode.get("file").asText());
-               loadFromFile(childFile, null, node, topologyOperationQueue);
+               loadFromFile(rootNode, childFile, null, node, topologyOperationQueue);
             }
             else
             {
-               loadFromFile(file, childJsonNode, node, topologyOperationQueue);
+               loadFromFile(rootNode, file, childJsonNode, node, topologyOperationQueue);
             }
          });
 

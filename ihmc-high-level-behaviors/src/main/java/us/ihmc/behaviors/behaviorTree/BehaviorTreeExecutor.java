@@ -65,25 +65,17 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(file, topologyOperationQueue);
+            if (this.rootNode == null)
+               topologyOperationQueue.queueDestroyEntireTree();
+
+            BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
+            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
 
             if (loadedNode != null)
             {
-               if (loadedNode instanceof BehaviorTreeRootNodeExecutor loadedRootNode) // If we loaded a root node, replace the existing one
-               {
-                  topologyOperationQueue.queueSetRootNodeModify(loadedRootNode);
-               }
-               else if (rootNode == null) // Automatically add a root node if there isn't one
-               {
-                  BehaviorTreeRootNodeExecutor newRootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
-                  newRootNode.getDefinition().modify();
-                  topologyOperationQueue.queueAppendChildModify(newRootNode, loadedNode);
-                  topologyOperationQueue.queueSetRootNodeModify(newRootNode);
-               }
-               else // Add the loaded node as a child of the root node
-               {
-                  topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
-               }
+               rootNode.getDefinition().modify();
+               topologyOperationQueue.queueSetRootNodeModify(rootNode);
+               topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
             }
          });
       }

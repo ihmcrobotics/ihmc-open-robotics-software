@@ -53,7 +53,7 @@ public class RDXBehaviorTreeNodeCreationMenu
     */
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
-      if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+      if (relativeNode == null)
       {
          ImGui.pushFont(ImGuiTools.getSmallBoldFont());
          ImGui.text("Start from scratch:");

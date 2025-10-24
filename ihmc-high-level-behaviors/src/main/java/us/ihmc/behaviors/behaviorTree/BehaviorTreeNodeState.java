@@ -58,9 +58,17 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    {
       this.id = id;
       this.definition = definition;
-      this.rootNode = rootNode == null ? (BehaviorTreeRootNodeState) this : rootNode;
-      this.crdtInfo = rootNode.getDefinition().getCRDTInfo();
-      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.crdtInfo = definition.getCRDTInfo();
+      if (rootNode == null)
+      {
+         this.rootNode = (BehaviorTreeRootNodeState) this;
+         this.robotModel = ((BehaviorTreeRootNodeDefinition) definition).getRobotModel();
+      }
+      else
+      {
+         this.rootNode = rootNode;
+         this.robotModel = rootNode.getDefinition().getRobotModel();
+      }
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       logger = new BehaviorTreeNodeMessageLogger(definition.getCRDTInfo());
