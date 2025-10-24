@@ -5,7 +5,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.SakeHandCommandActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
@@ -13,7 +13,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
@@ -25,9 +24,9 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    private final ImGuiSliderDoubleWrapper fingertipGripForceSlider;
    private final ImGuiGripperWidget gripperWidget = new ImGuiGripperWidget();
 
-   public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXSakeHandCommandAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
+      super(new SakeHandCommandActionState(id, rootNode.getState()), rootNode);
 
       sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();

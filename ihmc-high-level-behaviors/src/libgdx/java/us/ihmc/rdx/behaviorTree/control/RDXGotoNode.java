@@ -3,23 +3,22 @@ package us.ihmc.rdx.behaviorTree.control;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
-import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.widgets.ImGuiGotoNodeWidget;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiGotoNodeWidget gotoNodeWidget = new ImGuiGotoNodeWidget();
 
-   public RDXGotoNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXGotoNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new GotoNodeState(id, crdtInfo, saveFileDirectory));
+      super(new GotoNodeState(id, rootNode.getState()), rootNode);
    }
 
    @Override

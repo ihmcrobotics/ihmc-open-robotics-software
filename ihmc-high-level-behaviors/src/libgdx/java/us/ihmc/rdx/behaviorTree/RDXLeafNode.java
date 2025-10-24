@@ -27,9 +27,9 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    /** Used to trigger a UI notification when the action goes from !failed -> failed. */
    private boolean wasFailed = false;
 
-   public RDXLeafNode(S state)
+   public RDXLeafNode(S state, RDXBehaviorTreeRootNode rootNode)
    {
-      super(state);
+      super(state, rootNode);
    }
 
    @Override

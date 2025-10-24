@@ -146,11 +146,11 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder()
-                                                            .createNode(nodeType,
-                                                                        behaviorTree.getAndIncrementNextID(),
-                                                                        behaviorTree.getRootNode(),
-                                                                        behaviorTree.getSaveFileDirectory());
+            RDXBehaviorTreeNode<?, ?> newNode;
+            if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+               newNode = (RDXBehaviorTreeNode<?, ?>) behaviorTree.getNodeBuilder().createRootNode(behaviorTree.getAndIncrementNextID());
+            else
+               newNode = behaviorTree.getNodeBuilder().createNode(nodeType, behaviorTree.getAndIncrementNextID(), behaviorTree.getRootNode());
             newNode.getDefinition().modify();
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                   = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);

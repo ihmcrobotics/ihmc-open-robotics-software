@@ -23,10 +23,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private CRDTInfo crdtInfo; // TODO: Make final somehow
    private WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private final SceneGraph sceneGraph;
    private final DetectionManager detectionManager;
 

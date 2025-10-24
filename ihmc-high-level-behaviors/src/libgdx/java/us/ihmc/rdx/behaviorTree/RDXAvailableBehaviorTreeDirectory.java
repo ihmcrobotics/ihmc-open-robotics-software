@@ -133,9 +133,7 @@ public class RDXAvailableBehaviorTreeDirectory
 
                      if (behaviorTree.getRootNode() == null) // Automatically add a root node if there isn't one
                      {
-                        nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
-                                                                   behaviorTree.getCRDTInfo(),
-                                                                   behaviorTree.getSaveFileDirectory());
+                        nodeToInsert = (RDXBehaviorTreeNode<?, ?>) behaviorTree.getNodeBuilder().createRootNode(behaviorTree.getAndIncrementNextID());
                         nodeToInsert.getDefinition().modify();
                         topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
                      }
