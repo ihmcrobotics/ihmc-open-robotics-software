@@ -285,6 +285,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          getSolution().getRigidBodyNames().add(rigidBody.getName());
          getSolution().getRigidBodyPositions().add().set(new Point3D());
          getSolution().getRigidBodyOrientations().add().set(new Quaternion());
+         getSolution().getRigidBodyLinearVelocities().add().set(new Vector3D());
+         getSolution().getRigidBodyAngularVelocities().add().set(new Vector3D());
       }
    }
 
