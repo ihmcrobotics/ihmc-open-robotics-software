@@ -42,8 +42,10 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -546,9 +548,11 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       super.updateInternal();
 
       // Update anchor base (chest) pose - only needed for status message
-      RigidBodyTransform chestTransformToWorld = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToRoot();
-      getSolution().getDesiredTorsoPosition().set(chestTransformToWorld.getTranslation());
-      getSolution().getDesiredTorsoOrientation().set(chestTransformToWorld.getRotation());
+      MovingReferenceFrame chestFrame = desiredFullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
+      getSolution().getDesiredTorsoPosition().set(chestFrame.getTransformToRoot().getTranslation());
+      getSolution().getDesiredTorsoOrientation().set(chestFrame.getTransformToRoot().getRotation());
+      getSolution().getDesiredTorsoLinearVelocity().set(chestFrame.getTwistOfFrame().getLinearPart());
+      getSolution().getDesiredTorsoAngularVelocity().set(chestFrame.getTwistOfFrame().getAngularPart());
       
       // Update rigid body pose - only needed for status message
       for (int i = 0; i < rigidBodiesList.size(); i++)
