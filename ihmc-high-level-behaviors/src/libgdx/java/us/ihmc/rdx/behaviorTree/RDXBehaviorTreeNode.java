@@ -297,7 +297,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          if (ImGui.menuItem(labels.get("Rename...")))
          {
-            RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
+            RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node -> node.setNameBeingEdited(false));
             isNameBeingEdited = true;
             imNodeNameText.set(definition.getName());
          }

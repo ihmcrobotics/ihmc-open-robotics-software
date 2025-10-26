@@ -247,7 +247,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
    }
 
-   public void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
+   private void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 

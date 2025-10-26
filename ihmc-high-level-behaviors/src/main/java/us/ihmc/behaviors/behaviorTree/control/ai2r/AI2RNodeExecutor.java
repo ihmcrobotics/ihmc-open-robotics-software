@@ -6,6 +6,7 @@ import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
@@ -38,6 +39,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
 
    private static final boolean CHECK_COLLISION_WITH_OBJECTS = false;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
+   private final BehaviorTreeRootNodeState actionSequence;
    private boolean navigationFailureForObstacle = false;
    private String navigationFailureObstacleName;
    private boolean actionFailureMissingFrame = false;
@@ -46,6 +48,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    public AI2RNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
       super(new AI2RNodeState(id, rootNode.getState()), rootNode);
+
+      actionSequence = rootNode.getState();
 
       resetStatusMessage();
 
@@ -79,8 +83,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             failedLeaves.clear();
             actionFailureMissingFrame = false;
             navigationFailureForObstacle = false;
-            state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
-            state.getActionSequence().setAutomaticExecution(true);
+            actionSequence.setExecutionNextIndex(commandedBehaviorIndex);
+            actionSequence.setAutomaticExecution(true);
 
             resetStatusMessage();
             LogTools.warn("Automatic execution");
@@ -159,9 +163,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void setFailedBehaviors()
    {
       statusMessage.setFailedBehavior("-");
-      for (var leaf : state.getActionSequence().getOrderedLeaves())
+      for (var leaf : actionSequence.getOrderedLeaves())
       {
-         if (leaf.getFailed() && !state.getActionSequence().getAutomaticExecution())
+         if (leaf.getFailed() && !actionSequence.getAutomaticExecution())
          {
             // Find the previous checkpoint by iterating backwards through the checkpoints
             for (int i = state.getCheckPoints().size() - 1; i >= 0; i--)
@@ -250,7 +254,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    {
       boolean trackingObjectsInProgress = false;
       leavesLoop:
-      for (var leaf : state.getActionSequence().getOrderedLeaves())
+      for (var leaf : actionSequence.getOrderedLeaves())
       {
          // Check if actions can't execute because of missing frames
          if (leaf.getIsNextForExecution())
@@ -345,7 +349,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             statusMessage.setBehaviorInProgress("-");
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
-            state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
+            actionSequence.setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
          }
       }
    }

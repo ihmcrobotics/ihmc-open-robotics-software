@@ -10,7 +10,6 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
@@ -62,36 +61,32 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          ChestOrientationActionState concurrentChestOrientationAction = null;
          PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
-         BehaviorTreeRootNodeExecutor rootExecutor = BehaviorTreeTools.findRootNode(this);
-         if (rootExecutor != null)
+         if (state.getIsToBeExecutedConcurrently())
          {
-            if (state.getIsToBeExecutedConcurrently())
-            {
-               List<LeafNodeState<?>> orderedLeaves = rootExecutor.getState().getOrderedLeaves();
+            List<LeafNodeState<?>> orderedLeaves = rootNode.getState().getOrderedLeaves();
 
-               for (int i = state.getLeafIndex() - 1; i >= 0 && orderedLeaves.get(i + 1).getIsToBeExecutedConcurrently(); i--)
-               {
-                  if (orderedLeaves.get(i) instanceof ChestOrientationActionState chestOrientationAction)
-                  {
-                     concurrentChestOrientationAction = chestOrientationAction;
-                  }
-                  if (orderedLeaves.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
-                  {
-                     concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
-                  }
-               }
-            }
-
-            for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : rootExecutor.getCurrentlyExecutingLeaves())
+            for (int i = state.getLeafIndex() - 1; i >= 0 && orderedLeaves.get(i + 1).getIsToBeExecutedConcurrently(); i--)
             {
-               if (currentlyExecutingLeaf.getState() instanceof ChestOrientationActionState chestOrientationAction)
+               if (orderedLeaves.get(i) instanceof ChestOrientationActionState chestOrientationAction)
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingLeaf.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+               if (orderedLeaves.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
+            }
+         }
+
+         for (LeafNodeExecutor<?, ?> currentlyExecutingLeaf : rootNode.getCurrentlyExecutingLeaves())
+         {
+            if (currentlyExecutingLeaf.getState() instanceof ChestOrientationActionState chestOrientationAction)
+            {
+               concurrentChestOrientationAction = chestOrientationAction;
+            }
+            if (currentlyExecutingLeaf.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
+            {
+               concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
             }
          }
 

@@ -187,7 +187,7 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
    /** @return the leaf to execute after as part of the concurrency system */
    public LeafNodeState<?> getExecuteAfterLeaf()
    {
-      if (BehaviorTreeTools.findRootNode(this).getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof LeafNodeState<?> executeAfterNode)
+      if (rootNode.getIDToNodeMap().get(definition.getExecuteAfterNodeID()) instanceof LeafNodeState<?> executeAfterNode)
       {
          return executeAfterNode;
       }

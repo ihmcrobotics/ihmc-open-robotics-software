@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.control.door;
 import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
@@ -27,7 +26,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    @Nullable
    private DoorNode doorNode;
 
-   private BehaviorTreeRootNodeState actionSequence;
+   private final BehaviorTreeRootNodeState actionSequence;
    private final List<WaitDurationActionState> setStaticForApproachActions = new ArrayList<>();
    private final List<WaitDurationActionState> setStaticForGraspActions = new ArrayList<>();
    private WaitDurationActionState waitToOpenRightHandAction;
@@ -42,6 +41,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    {
       super(id, new DoorTraversalDefinition(rootNode.getDefinition()), rootNode);
 
+      actionSequence = rootNode;
+
       doorHingeJointAngle = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       doorHandleDistanceFromStart = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
    }
@@ -50,8 +51,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public void update()
    {
       super.update();
-
-      actionSequence = BehaviorTreeTools.findRootNode(this);
 
       updateSubtree(this);
    }

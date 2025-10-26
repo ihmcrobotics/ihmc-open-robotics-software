@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree.control;
 import behavior_msgs.msg.dds.GotoNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.log.LogTools;
 
@@ -70,8 +69,7 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
 
    public LeafNodeState<?> findNodeToGoto()
    {
-      BehaviorTreeRootNodeState rootState = BehaviorTreeTools.findRootNode(this);
-      BehaviorTreeNodeState<?> nodeToGoto = rootState.getIDToNodeMap().get(definition.getNodeToGotoID());
+      BehaviorTreeNodeState<?> nodeToGoto = rootNode.getIDToNodeMap().get(definition.getNodeToGotoID());
       if (nodeToGoto instanceof LeafNodeState<?> leafState)
       {
          return leafState;

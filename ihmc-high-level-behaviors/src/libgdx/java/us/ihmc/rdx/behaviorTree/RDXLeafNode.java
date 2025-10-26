@@ -2,8 +2,6 @@ package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
@@ -49,21 +47,17 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    {
       super.renderRowBeginning();
 
-      RDXBehaviorTreeRootNode actionSequence = RDXBehaviorTreeTools.findRootNode(this);
-      if (actionSequence != null)
-      {
-         // Give the arrow a little space to the left, like the other icons
-         ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
+      // Give the arrow a little space to the left, like the other icons
+      ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGui.getStyle().getItemSpacingX());
 
-         boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
-         int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
-         if (hollowArrowRenderer.render(colorArrow, arrowColor, ImGui.getFrameHeight()))
-         {
-            anySpecificWidgetOnLineClicked = true;
-            actionSequence.getState().setExecutionNextIndex(state.getLeafIndex());
-         }
-         ImGui.sameLine();
+      boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
+      int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
+      if (hollowArrowRenderer.render(colorArrow, arrowColor, ImGui.getFrameHeight()))
+      {
+         anySpecificWidgetOnLineClicked = true;
+         rootNode.getState().setExecutionNextIndex(state.getLeafIndex());
       }
+      ImGui.sameLine();
    }
 
    public void renderConcurrencyRank()
@@ -85,38 +79,33 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    {
       ImGui.text("Type: %s   Index: %d".formatted(getLeafTypeTitle(), state.getLeafIndex()));
 
-      BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
+      // Validate state in case something earlier in this UI tick messed with things.
+      // This happens with the Undo non-topological changes button.
+      state.validateFields(rootNode.getState().getOrderedLeaves());
 
-      if (actionSequence != null)
+      if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
       {
-         // Validate state in case something earlier in this UI tick messed with things.
-         // This happens with the Undo non-topological changes button.
-         state.validateFields(actionSequence.getOrderedLeaves());
-
-         if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterLeafName()))
+         if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
          {
-            if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
-            {
-               definition.setExecuteAfterPrevious();
-            }
-            if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
-            {
-               definition.setExecuteAfterBeginning();
-            }
+            definition.setExecuteAfterPrevious();
+         }
+         if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
+         {
+            definition.setExecuteAfterBeginning();
+         }
 
-            for (LeafNodeState<?> leafNode : actionSequence.getOrderedLeaves())
+         for (LeafNodeState<?> leafNode : rootNode.getState().getOrderedLeaves())
+         {
+            if (leafNode.getLeafIndex() < state.getLeafIndex())
             {
-               if (leafNode.getLeafIndex() < state.getLeafIndex())
+               if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID() == leafNode.getID()))
                {
-                  if (ImGui.selectable(labels.get(leafNode.getDefinition().getName()), definition.getExecuteAfterNodeID() == leafNode.getID()))
-                  {
-                     definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
-                  }
+                  definition.setExecuteAfterLeaf(leafNode.getID(), leafNode.getDefinition().getName());
                }
             }
-
-            ImGui.endCombo();
          }
+
+         ImGui.endCombo();
       }
 
       renderImGuiWidgetsInternal();

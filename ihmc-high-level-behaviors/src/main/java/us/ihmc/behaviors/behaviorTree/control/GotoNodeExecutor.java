@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 
@@ -18,7 +17,7 @@ public class GotoNodeExecutor extends LeafNodeExecutor<GotoNodeState, GotoNodeDe
       if (!definition.getGotoNextNode())
       {
          LeafNodeState<?> nodeToGoto = state.findNodeToGoto();
-         BehaviorTreeTools.findRootNode(this).getState().setExecutionNextIndex(nodeToGoto.getLeafIndex());
+         rootNode.getState().setExecutionNextIndex(nodeToGoto.getLeafIndex());
       }
 
       state.setIsExecuting(false); // Completes immediately

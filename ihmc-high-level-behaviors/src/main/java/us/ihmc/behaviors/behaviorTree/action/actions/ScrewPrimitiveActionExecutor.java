@@ -12,7 +12,6 @@ import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
@@ -92,132 +91,129 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
-         if (actionSequence != null)
+         BehaviorTreeRootNodeState actionSequence = rootNode.getState();
+         if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
          {
-            if (actionSequence.getExecutionNextIndex() <= state.getLeafIndex())
+            ReferenceFrame initialHandFrame = null;
+
+            if (state.getIsNextForExecution())
             {
-               ReferenceFrame initialHandFrame = null;
+               initialHandFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
+            }
+            else
+            {
+               HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class,
+                                                                                          state.getLeafIndex(),
+                                                                                          definition.getSide());
+               if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
+               {
+                  initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
+               }
+            }
+
+            if (initialHandFrame != null)
+            {
+               RecyclingArrayList<Pose3D> trajectoryPoses = state.getPreviewTrajectory().accessValue();
+               trajectoryPoses.clear();
+               Pose3D firstPose = trajectoryPoses.add();
+               workPose.setToZero(initialHandFrame);
+               workPose.changeFrame(ReferenceFrame.getWorldFrame());
+               firstPose.set(workPose);
+
+               // These contants could be adjusted
+               double rotationPerPoint = Math.toRadians(10);
+               double translationPerPoint = 0.05;
+               int segments = (int) Math.ceil(Math.abs(definition.getRotation()) / rotationPerPoint
+                                            + Math.abs(definition.getTranslation()) / translationPerPoint);
+
+               double rotationPerSegment = definition.getRotation() / segments;
+               double translationPerSegment = definition.getTranslation() / segments;
+
+               if (segments > ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1)
+               {
+                  segments = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1; // We have to fit within the message size limit
+               }
+
+               // Generate the trajectory poses
+               for (int i = 0; i < segments; i++)
+               {
+                  Pose3D previousPose = trajectoryPoses.getLast();
+                  Pose3D currentPose = trajectoryPoses.add();
+
+                  workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), previousPose);
+                  workPose.changeFrame(state.getScrewFrame().getReferenceFrame());
+
+                  workPose.prependRollRotation(rotationPerSegment);
+                  workPose.prependTranslation(translationPerSegment, 0.0, 0.0);
+
+                  workPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  currentPose.set(workPose);
+               }
+
+               numberOfPoints = state.getPreviewTrajectory().getSize();
+
+               syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
+               syncedHandControlPose.changeFrame(state.getScrewFrame().getReferenceFrame());
+               // This is always the radial distance.
+               rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
+               syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+               signedTotalRotation = definition.getRotation();
+               signedTotalTranslation = definition.getTranslation();
+               // This is the distance the hand must travel along the screw portion
+               signedRadialDistance = signedTotalRotation * rotationRadius;
+               totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
+
+               // Computing the movement duration, which is clamped by the max movement speed
+               durationForRotation = Math.abs(signedTotalRotation) / definition.getMaxAngularVelocity();
+               durationForTranslation = totalLinearDistanceOfHand / definition.getMaxLinearVelocity();
+               movementDuration = Math.max(durationForRotation, durationForTranslation);
+               segmentDuration = movementDuration / (numberOfPoints - 1);
+
+               // The way the screw frame is defined, x is always the axis of rotation and translation.
+               // This means that the tangential velocity is normal to the x axis and the vector yz
+               tangentialVelocity = signedRadialDistance / movementDuration;
+               axialVelocity = signedTotalTranslation / movementDuration;
+               rotationalVelocity = signedTotalRotation / movementDuration;
+
+               movementDuration += 2.0 * segmentDuration;
+
+               state.getPreviewTrajectoryDuration().setValue(movementDuration);
+               state.getPreviewTrajectoryLinearVelocity().setValue(totalLinearDistanceOfHand / movementDuration);
+               state.getPreviewTrajectoryAngularVelocity().setValue(rotationalVelocity);
 
                if (state.getIsNextForExecution())
                {
-                  initialHandFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
-               }
-               else
-               {
-                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousLeaf(HandPoseActionState.class,
-                                                                                             state.getLeafIndex(),
-                                                                                             definition.getSide());
-                  if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
+                  // These calculations are used for both preview and execution
+                  calculateTrajectoryTimesAndVelocities();
+
+                  // Calculate preview for operator
+                  ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
+                  armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
+
+                  poseTrajectoryGenerator.clear(ReferenceFrame.getWorldFrame());
+                  for (int i = 0; i < numberOfPoints; i++)
                   {
-                     initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
-                  }
-               }
-
-               if (initialHandFrame != null)
-               {
-                  RecyclingArrayList<Pose3D> trajectoryPoses = state.getPreviewTrajectory().accessValue();
-                  trajectoryPoses.clear();
-                  Pose3D firstPose = trajectoryPoses.add();
-                  workPose.setToZero(initialHandFrame);
-                  workPose.changeFrame(ReferenceFrame.getWorldFrame());
-                  firstPose.set(workPose);
-
-                  // These contants could be adjusted
-                  double rotationPerPoint = Math.toRadians(10);
-                  double translationPerPoint = 0.05;
-                  int segments = (int) Math.ceil(Math.abs(definition.getRotation()) / rotationPerPoint
-                                               + Math.abs(definition.getTranslation()) / translationPerPoint);
-
-                  double rotationPerSegment = definition.getRotation() / segments;
-                  double translationPerSegment = definition.getTranslation() / segments;
-
-                  if (segments > ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1)
-                  {
-                     segments = ScrewPrimitiveActionState.TRAJECTORY_SIZE_LIMIT - 1; // We have to fit within the message size limit
+                     currentPose.set(state.getPreviewTrajectory().getValueReadOnly(i));
+                     poseTrajectoryGenerator.appendPoseWaypoint(trajectoryTimes.get(i), currentPose, linearVelocities.get(i), angularVelocities.get(i));
                   }
 
-                  // Generate the trajectory poses
-                  for (int i = 0; i < segments; i++)
+                  poseTrajectoryGenerator.initialize();
+                  poseTrajectoryGenerator.compute(movementDuration * state.getPreviewRequestedTime().getValue());
+
+                  currentPoseFrame.getTransformToParent().set(poseTrajectoryGenerator.getPose());
+                  currentPoseFrame.getReferenceFrame().update();
+                  linearVelocity.set(poseTrajectoryGenerator.getVelocity());
+                  angularVelocity.set(poseTrajectoryGenerator.getAngularVelocity());
+
+                  armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
+                  armIKSolver.solve(angularVelocity, linearVelocity);
+
+                  // Send the solution back to the UI so the user knows what's gonna happen with the arm.
+                  state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
+                  for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
                   {
-                     Pose3D previousPose = trajectoryPoses.getLast();
-                     Pose3D currentPose = trajectoryPoses.add();
-
-                     workPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), previousPose);
-                     workPose.changeFrame(state.getScrewFrame().getReferenceFrame());
-
-                     workPose.prependRollRotation(rotationPerSegment);
-                     workPose.prependTranslation(translationPerSegment, 0.0, 0.0);
-
-                     workPose.changeFrame(ReferenceFrame.getWorldFrame());
-                     currentPose.set(workPose);
-                  }
-
-                  numberOfPoints = state.getPreviewTrajectory().getSize();
-
-                  syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));
-                  syncedHandControlPose.changeFrame(state.getScrewFrame().getReferenceFrame());
-                  // This is always the radial distance.
-                  rotationRadius = EuclidCoreTools.norm(syncedHandControlPose.getY(), syncedHandControlPose.getZ());
-                  syncedHandControlPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-                  signedTotalRotation = definition.getRotation();
-                  signedTotalTranslation = definition.getTranslation();
-                  // This is the distance the hand must travel along the screw portion
-                  signedRadialDistance = signedTotalRotation * rotationRadius;
-                  totalLinearDistanceOfHand = EuclidCoreTools.norm(signedRadialDistance, signedTotalTranslation);
-
-                  // Computing the movement duration, which is clamped by the max movement speed
-                  durationForRotation = Math.abs(signedTotalRotation) / definition.getMaxAngularVelocity();
-                  durationForTranslation = totalLinearDistanceOfHand / definition.getMaxLinearVelocity();
-                  movementDuration = Math.max(durationForRotation, durationForTranslation);
-                  segmentDuration = movementDuration / (numberOfPoints - 1);
-
-                  // The way the screw frame is defined, x is always the axis of rotation and translation.
-                  // This means that the tangential velocity is normal to the x axis and the vector yz
-                  tangentialVelocity = signedRadialDistance / movementDuration;
-                  axialVelocity = signedTotalTranslation / movementDuration;
-                  rotationalVelocity = signedTotalRotation / movementDuration;
-
-                  movementDuration += 2.0 * segmentDuration;
-
-                  state.getPreviewTrajectoryDuration().setValue(movementDuration);
-                  state.getPreviewTrajectoryLinearVelocity().setValue(totalLinearDistanceOfHand / movementDuration);
-                  state.getPreviewTrajectoryAngularVelocity().setValue(rotationalVelocity);
-
-                  if (state.getIsNextForExecution())
-                  {
-                     // These calculations are used for both preview and execution
-                     calculateTrajectoryTimesAndVelocities();
-
-                     // Calculate preview for operator
-                     ArmIKSolver armIKSolver = armIKSolvers.get(definition.getSide());
-                     armIKSolver.copySourceToWork(); // Initialize the command, since we're not going to be far.
-
-                     poseTrajectoryGenerator.clear(ReferenceFrame.getWorldFrame());
-                     for (int i = 0; i < numberOfPoints; i++)
-                     {
-                        currentPose.set(state.getPreviewTrajectory().getValueReadOnly(i));
-                        poseTrajectoryGenerator.appendPoseWaypoint(trajectoryTimes.get(i), currentPose, linearVelocities.get(i), angularVelocities.get(i));
-                     }
-
-                     poseTrajectoryGenerator.initialize();
-                     poseTrajectoryGenerator.compute(movementDuration * state.getPreviewRequestedTime().getValue());
-
-                     currentPoseFrame.getTransformToParent().set(poseTrajectoryGenerator.getPose());
-                     currentPoseFrame.getReferenceFrame().update();
-                     linearVelocity.set(poseTrajectoryGenerator.getVelocity());
-                     angularVelocity.set(poseTrajectoryGenerator.getAngularVelocity());
-
-                     armIKSolver.update(syncedRobot.getReferenceFrames().getChestFrame(), currentPoseFrame.getReferenceFrame());
-                     armIKSolver.solve(angularVelocity, linearVelocity);
-
-                     // Send the solution back to the UI so the user knows what's gonna happen with the arm.
-                     state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
-                     for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
-                     {
-                        state.getPreviewJointAngles().setValue(i, armIKSolver.getSolutionOneDoFJoints()[i].getQ());
-                     }
+                     state.getPreviewJointAngles().setValue(i, armIKSolver.getSolutionOneDoFJoints()[i].getQ());
                   }
                }
             }
