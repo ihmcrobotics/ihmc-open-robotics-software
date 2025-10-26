@@ -15,13 +15,16 @@ import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObject;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.Throttler;
 
@@ -130,23 +133,14 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void setSceneInfo()
    {
       statusMessage.getObjects().clear();
-      boolean isRoot = true;
-//      for (String nodeName : sceneGraph.getNodeNameList())
-//      {
-//         if (isRoot)
-//         {
-//            isRoot = false;
-//            continue;
-//         }
-//         if (sceneGraph.getNamesToNodesMap().get(nodeName) != null)
-//         {
-//            AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
-//            objectMessage.setObjectName(nodeName);
-//            ReferenceFrame nodeFrame = sceneGraph.getNamesToNodesMap().get(nodeName).getNodeFrame();
-//            objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
-//            objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
-//         }
-//      }
+      for (BehaviorTreeSceneObject object : scene.getObjects())
+      {
+         AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
+         objectMessage.setObjectName(object.getName());
+         ReferenceFrame nodeFrame = object.getReferenceFrame();
+         objectMessage.getObjectPoseInWorld().set(nodeFrame.getTransformToWorldFrame());
+         objectMessage.getObjectPoseInRobotFrame().set(nodeFrame.getTransformToDesiredFrame(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame()));
+      }
    }
 
    private void setAvailableBehaviors()
@@ -277,8 +271,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                RobotSide graspSide = skillEditor.getGraspSide();
                statusMessage.setObjectGrasped(objectGrasped);
                statusMessage.setGraspSide(graspSide.toByte());
-//               statusMessage.getTransformGraspedObjectHand().set(sceneGraph.getNamesToNodesMap().get(objectGrasped).getNodeFrame()
-//                                                                           .getTransformToDesiredFrame(syncedRobot.getFullRobotModel().getHandControlFrame(graspSide)));
+               MovingReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(graspSide);
+               RigidBodyTransform objectPoseInHandFrame = scene.getObject(objectGrasped).getReferenceFrame().getTransformToDesiredFrame(handControlFrame);
+               statusMessage.getTransformGraspedObjectHand().set(objectPoseInHandFrame);
             }
          }
 
