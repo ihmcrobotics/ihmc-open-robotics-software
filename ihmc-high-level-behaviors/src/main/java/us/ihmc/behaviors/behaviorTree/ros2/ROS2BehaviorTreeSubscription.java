@@ -23,7 +23,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 {
    private final ROS2Topic<BehaviorTreeStateMessage> topic;
    private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
-   private final BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree;
+   private final BehaviorTree<?, T> behaviorTree;
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
@@ -35,7 +35,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
    private final HashMap<Long, T> idToLocalNodesMap = new HashMap<>();
 
-   public ROS2BehaviorTreeSubscription(BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
+   public ROS2BehaviorTreeSubscription(BehaviorTree<?, T> behaviorTree, ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
       this.behaviorTree = behaviorTree;
 
@@ -204,7 +204,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
                subscriptionNode.getDefinitionClass().getSimpleName(),
                behaviorTree.getCRDTInfo().getActorDesignation().name()));
          if (rootNode == null)
-            localNode = (T) behaviorTree.getNodeBuilder().createRootNode(nodeID); // FIXME: Unchecked cast; but this is hard af
+            localNode = (T) behaviorTree.getNodeBuilder().createRootNode(nodeID);
          else
             localNode = behaviorTree.getNodeBuilder().createNode(subscriptionNode.getDefinitionClass(),
                                                                  nodeID,

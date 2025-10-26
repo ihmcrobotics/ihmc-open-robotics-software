@@ -21,7 +21,7 @@ public class ROS2BehaviorTree<T extends BehaviorTreeNode<T, ? ,?>>
     */
    public static final double SYNC_FREQUENCY = SceneGraph.UPDATE_FREQUENCY / 2.0;
 
-   private final BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree;
+   private final BehaviorTree<?, ?> behaviorTree;
    private final ROS2PublishSubscribeAPI ros2;
 
    private final ROS2Topic<BehaviorTreeStateMessage> publishTopic;

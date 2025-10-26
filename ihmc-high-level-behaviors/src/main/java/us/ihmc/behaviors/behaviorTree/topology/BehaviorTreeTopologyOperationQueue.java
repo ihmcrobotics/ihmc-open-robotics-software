@@ -78,7 +78,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       topologyOperationQueue.add(() ->
       {
-         T rootNode = (T) behaviorTree.getRootNode(); // FIXME: Unchecked cast; but this is hard af
+         T rootNode = (T) behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          behaviorTree.getRootReferenceModification().modify();
          if (rootNode != null)
@@ -90,7 +90,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       topologyOperationQueue.add(() ->
       {
-         T rootNode = (T) behaviorTree.getRootNode(); // FIXME: Unchecked cast; but this is hard af
+         T rootNode = (T) behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          if (rootNode != null)
             destroySubtree(rootNode);
