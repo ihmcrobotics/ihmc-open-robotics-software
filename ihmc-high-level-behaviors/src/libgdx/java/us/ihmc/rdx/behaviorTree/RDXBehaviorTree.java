@@ -45,6 +45,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    private boolean draggingDivider;
+   private boolean shouldSave = false;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                           DRCRobotModel robotModel,
@@ -147,6 +148,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    protected void renderImGuiWidgetsPre()
    {
+      shouldSave = false;
       ImGui.beginMenuBar();
       fileMenu.renderFileMenu(rootNode, nodeCreationMenu);
       if (ImGui.beginMenu(labels.get("View")))
@@ -180,12 +182,15 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
                selectedNode = node;
          });
 
+         shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
+
          float remainingHeight = ImGui.getContentRegionAvailY();
          float treeExplorerPercentage = SETTINGS.getTreeExplorerHeightPercentage();
          float treeExplorerHeight = anyNodeSelected ? remainingHeight * treeExplorerPercentage : remainingHeight;
 
          ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
          treeWidgetsVerticalLayout.renderImGuiWidgets();
+         shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
          ImGui.endChild();
 
          if (rootNode != null && anyNodeSelected) // It can become null above
@@ -210,13 +215,8 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
             ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());
             renderSelectedNodeSettingsWidgets(rootNode);
+            shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
             ImGui.endChild();
-
-            if (ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S'))
-            {
-               RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
-               rootNode.getDefinition().saveToFile();
-            }
          }
       }
       else
@@ -226,6 +226,12 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
       // Perform any modifications that were made via user interaction.
       modifyTreeTopology();
+
+      if (shouldSave)
+      {
+         RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
+         rootNode.getDefinition().saveToFile();
+      }
    }
 
    private void renderSelectedNodeSettingsWidgets(RDXBehaviorTreeNode<?, ?> node)

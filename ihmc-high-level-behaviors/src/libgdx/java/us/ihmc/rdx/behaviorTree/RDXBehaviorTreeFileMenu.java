@@ -16,7 +16,7 @@ public class RDXBehaviorTreeFileMenu
       {
          if (rootNode != null)
          {
-            if (ImGui.menuItem(labels.get("Save"), "Ctrl + S"))
+            if (ImGui.menuItem(labels.get("Save All"), "Ctrl + S"))
             {
                RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
                rootNode.getDefinition().saveToFile();

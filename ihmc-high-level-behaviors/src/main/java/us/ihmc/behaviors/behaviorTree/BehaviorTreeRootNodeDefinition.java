@@ -12,6 +12,12 @@ public class BehaviorTreeRootNodeDefinition extends BehaviorTreeNodeDefinition
       super(null, crdtInfo, saveFileDirectory, robotModel);
    }
 
+   @Override
+   public boolean hasChanges()
+   {
+      return false; // Root node cannot be saved
+   }
+
    public void toMessage(BehaviorTreeRootNodeDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
