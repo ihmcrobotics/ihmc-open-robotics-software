@@ -17,8 +17,35 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
+   private static final Map<Class<?>, BiFunction<Long, BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>> MAP = new HashMap<>();
+   static
+   {
+      MAP.put(BehaviorTreeNodeDefinition.class, BehaviorTreeNodeExecutor::new);
+      MAP.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
+      MAP.put(ActionSequenceDefinition.class, ActionSequenceExecutor::new);
+      MAP.put(FallbackNodeDefinition.class, FallbackNodeExecutor::new);
+      MAP.put(ConditionNodeDefinition.class, ConditionNodeExecutor::new);
+      MAP.put(GotoNodeDefinition.class, GotoNodeExecutor::new);
+      MAP.put(CheckPointNodeDefinition.class, CheckPointNodeExecutor::new);
+      MAP.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
+      MAP.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
+      MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
+      MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
+      MAP.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
+      MAP.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
+      MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
+      MAP.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionExecutor::new);
+      MAP.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
+      MAP.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
+      MAP.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
+   }
+
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private CRDTInfo crdtInfo; // TODO: Make final somehow
    private WorkspaceResourceDirectory saveFileDirectory;
@@ -71,46 +98,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    }
 
    @Override
-   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>> rootNodeType)
+   public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>> rootNode)
    {
-      BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) rootNodeType;
-
-      if (nodeType == BehaviorTreeNodeDefinition.class) // TODO: Should not exist???
-         return new BehaviorTreeNodeExecutor<>(id, rootNode);
-      if (nodeType == AI2RNodeDefinition.class)
-         return new AI2RNodeExecutor(id, rootNode);
-      if (nodeType == ActionSequenceDefinition.class)
-         return new ActionSequenceExecutor(id, rootNode);
-      if (nodeType == FallbackNodeDefinition.class)
-         return new FallbackNodeExecutor(id, rootNode);
-      if (nodeType == ConditionNodeDefinition.class)
-         return new ConditionNodeExecutor(id, rootNode);
-      if (nodeType == GotoNodeDefinition.class)
-         return new GotoNodeExecutor(id, rootNode);
-      if (nodeType == CheckPointNodeDefinition.class)
-         return new CheckPointNodeExecutor(id, rootNode);
-      if (nodeType == DoorTraversalDefinition.class)
-         return new DoorTraversalExecutor(id, rootNode);
-      if (nodeType == BuildingExplorationDefinition.class)
-         return new BuildingExplorationExecutor(id, rootNode);
-      if (nodeType == ChestOrientationActionDefinition.class)
-         return new ChestOrientationActionExecutor(id, rootNode);
-      if (nodeType == FootstepPlanActionDefinition.class)
-         return new FootstepPlanActionExecutor(id, rootNode);
-      if (nodeType == HandPoseActionDefinition.class)
-         return new HandPoseActionExecutor(id, rootNode);
-      if (nodeType == HandWrenchActionDefinition.class)
-         return new HandWrenchActionExecutor(id, rootNode);
-      if (nodeType == ScrewPrimitiveActionDefinition.class)
-         return new ScrewPrimitiveActionExecutor(id, rootNode);
-      if (nodeType == PelvisHeightOrientationActionDefinition.class)
-         return new PelvisHeightOrientationActionExecutor(id, rootNode);
-      if (nodeType == SakeHandCommandActionDefinition.class)
-         return new SakeHandCommandActionExecutor(id, rootNode);
-      if (nodeType == WaitDurationActionDefinition.class)
-         return new WaitDurationActionExecutor(id, rootNode);
-      if (nodeType == FootPoseActionDefinition.class)
-         return new FootPoseActionExecutor(id, rootNode);
+      if (MAP.containsKey(nodeType))
+         return MAP.get(nodeType).apply(id, (BehaviorTreeRootNodeExecutor) rootNode);
 
       return null;
    }

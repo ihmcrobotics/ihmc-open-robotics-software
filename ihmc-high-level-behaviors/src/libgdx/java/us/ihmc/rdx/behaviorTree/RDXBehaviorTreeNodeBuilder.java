@@ -22,9 +22,35 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
 {
+   private static final Map<Class<?>, BiFunction<Long, RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>> MAP = new HashMap<>();
+   static
+   {
+      MAP.put(BehaviorTreeNodeDefinition.class, RDXBehaviorTreeNode::new);
+      MAP.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
+      MAP.put(ActionSequenceDefinition.class, RDXActionSequence::new);
+      MAP.put(FallbackNodeDefinition.class, RDXFallbackNode::new);
+      MAP.put(ConditionNodeDefinition.class, RDXConditionNode::new);
+      MAP.put(GotoNodeDefinition.class, RDXGotoNode::new);
+      MAP.put(CheckPointNodeDefinition.class, RDXCheckPointNode::new);
+      MAP.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
+      MAP.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
+      MAP.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
+      MAP.put(FootstepPlanActionDefinition.class, RDXFootstepPlanAction::new);
+      MAP.put(HandPoseActionDefinition.class, RDXHandPoseAction::new);
+      MAP.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
+      MAP.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
+      MAP.put(PelvisHeightOrientationActionDefinition.class, RDXPelvisHeightOrientationAction::new);
+      MAP.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
+      MAP.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
+      MAP.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
+   }
+
    private CRDTInfo crdtInfo; // TODO: Make final somehow
    private WorkspaceResourceDirectory saveFileDirectory;
    private final DRCRobotModel robotModel;
@@ -73,44 +99,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    @Override
    public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> rootNodeType)
    {
-      RDXBehaviorTreeRootNode rootNode = (RDXBehaviorTreeRootNode) rootNodeType;
-
-      if (nodeType == BehaviorTreeNodeDefinition.class) // TODO: Should not exist???
-         return new RDXBehaviorTreeNode<>(id, rootNode);
-      if (nodeType == AI2RNodeDefinition.class)
-         return new RDXAI2RNode(id, rootNode);
-      if (nodeType == ActionSequenceDefinition.class)
-         return new RDXActionSequence(id, rootNode);
-      if (nodeType == FallbackNodeDefinition.class)
-         return new RDXFallbackNode(id, rootNode);
-      if (nodeType == ConditionNodeDefinition.class)
-         return new RDXConditionNode(id, rootNode);
-      if (nodeType == GotoNodeDefinition.class)
-         return new RDXGotoNode(id, rootNode);
-      if (nodeType == CheckPointNodeDefinition.class)
-         return new RDXCheckPointNode(id, rootNode);
-      if (nodeType == DoorTraversalDefinition.class)
-         return new RDXDoorTraversal(id, rootNode);
-      if (nodeType == BuildingExplorationDefinition.class)
-         return new RDXBuildingExploration(id, rootNode);
-      if (nodeType == ChestOrientationActionDefinition.class)
-         return new RDXChestOrientationAction(id, rootNode);
-      if (nodeType == FootstepPlanActionDefinition.class)
-         return new RDXFootstepPlanAction(id, rootNode);
-      if (nodeType == HandPoseActionDefinition.class)
-         return new RDXHandPoseAction(id, rootNode);
-      if (nodeType == HandWrenchActionDefinition.class)
-         return new RDXHandWrenchAction(id, rootNode);
-      if (nodeType == ScrewPrimitiveActionDefinition.class)
-         return new RDXScrewPrimitiveAction(id, rootNode);
-      if (nodeType == PelvisHeightOrientationActionDefinition.class)
-         return new RDXPelvisHeightOrientationAction(id, rootNode);
-      if (nodeType == SakeHandCommandActionDefinition.class)
-         return new RDXSakeHandCommandAction(id, rootNode);
-      if (nodeType == WaitDurationActionDefinition.class)
-         return new RDXWaitDurationAction(id, rootNode);
-      if (nodeType == FootPoseActionDefinition.class)
-         return new RDXFootPoseAction(id, rootNode);
+      if (MAP.containsKey(nodeType))
+         return MAP.get(nodeType).apply(id, (RDXBehaviorTreeRootNode) rootNodeType);
 
       return null;
    }

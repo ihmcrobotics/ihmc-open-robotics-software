@@ -10,8 +10,35 @@ import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 public class BehaviorTreeDefinitionBuilder
 {
+   private static final Map<Class<?>, Function<BehaviorTreeRootNodeDefinition, BehaviorTreeNodeDefinition>> MAP = new HashMap<>();
+   static
+   {
+      MAP.put(BehaviorTreeNodeDefinition.class, BehaviorTreeNodeDefinition::new);
+      MAP.put(AI2RNodeDefinition.class, AI2RNodeDefinition::new);
+      MAP.put(ActionSequenceDefinition.class, ActionSequenceDefinition::new);
+      MAP.put(FallbackNodeDefinition.class, FallbackNodeDefinition::new);
+      MAP.put(ConditionNodeDefinition.class, ConditionNodeDefinition::new);
+      MAP.put(GotoNodeDefinition.class, GotoNodeDefinition::new);
+      MAP.put(CheckPointNodeDefinition.class, CheckPointNodeDefinition::new);
+      MAP.put(DoorTraversalDefinition.class, DoorTraversalDefinition::new);
+      MAP.put(BuildingExplorationDefinition.class, BuildingExplorationDefinition::new);
+      MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionDefinition::new);
+      MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionDefinition::new);
+      MAP.put(HandPoseActionDefinition.class, HandPoseActionDefinition::new);
+      MAP.put(HandWrenchActionDefinition.class, HandWrenchActionDefinition::new);
+      MAP.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionDefinition::new);
+      MAP.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionDefinition::new);
+      MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionDefinition::new);
+      MAP.put(WaitDurationActionDefinition.class, WaitDurationActionDefinition::new);
+      MAP.put(FootPoseActionDefinition.class, FootPoseActionDefinition::new);
+   }
+
    public static BehaviorTreeRootNodeDefinition createRootNode(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
    {
       return new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory, robotModel);
@@ -19,42 +46,8 @@ public class BehaviorTreeDefinitionBuilder
 
    public static BehaviorTreeNodeDefinition createNode(Class<?> definitionType, BehaviorTreeRootNodeDefinition rootNode)
    {
-      if (definitionType == BehaviorTreeNodeDefinition.class)
-         return new BehaviorTreeNodeDefinition(rootNode);
-      if (definitionType == AI2RNodeDefinition.class)
-         return new AI2RNodeDefinition(rootNode);
-      if (definitionType == ActionSequenceDefinition.class)
-         return new ActionSequenceDefinition(rootNode);
-      if (definitionType == FallbackNodeDefinition.class)
-         return new FallbackNodeDefinition(rootNode);
-      if (definitionType == ConditionNodeDefinition.class)
-         return new ConditionNodeDefinition(rootNode);
-      if (definitionType == GotoNodeDefinition.class)
-         return new GotoNodeDefinition(rootNode);
-      if (definitionType == CheckPointNodeDefinition.class)
-         return new CheckPointNodeDefinition(rootNode);
-      if (definitionType == DoorTraversalDefinition.class)
-         return new DoorTraversalDefinition(rootNode);
-      if (definitionType == BuildingExplorationDefinition.class)
-         return new BuildingExplorationDefinition(rootNode);
-      if (definitionType == ChestOrientationActionDefinition.class)
-         return new ChestOrientationActionDefinition(rootNode);
-      if (definitionType == FootstepPlanActionDefinition.class)
-         return new FootstepPlanActionDefinition(rootNode);
-      if (definitionType == HandPoseActionDefinition.class)
-         return new HandPoseActionDefinition(rootNode);
-      if (definitionType == HandWrenchActionDefinition.class)
-         return new HandWrenchActionDefinition(rootNode);
-      if (definitionType == PelvisHeightOrientationActionDefinition.class)
-         return new PelvisHeightOrientationActionDefinition(rootNode);
-      if (definitionType == SakeHandCommandActionDefinition.class)
-         return new SakeHandCommandActionDefinition(rootNode);
-      if (definitionType == ScrewPrimitiveActionDefinition.class)
-         return new ScrewPrimitiveActionDefinition(rootNode);
-      if (definitionType == WaitDurationActionDefinition.class)
-         return new WaitDurationActionDefinition(rootNode);
-      if (definitionType == FootPoseActionDefinition.class)
-         return new FootPoseActionDefinition(rootNode);
+      if (MAP.containsKey(definitionType))
+         return MAP.get(definitionType).apply(rootNode);
 
       throw new RuntimeException("Node definition type not found: " + definitionType.getSimpleName());
    }
