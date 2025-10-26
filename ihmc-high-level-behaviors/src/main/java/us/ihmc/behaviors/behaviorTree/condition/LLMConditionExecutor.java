@@ -57,7 +57,7 @@ public class LLMConditionExecutor
    {
       this.state = state;
       this.rootNode = rootNode;
-      this.referenceFrameLibrary = rootNode.getState().getReferenceFrameLibrary();
+      this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
 
       definition = state.getDefinition();
 

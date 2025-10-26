@@ -10,6 +10,7 @@ import us.ihmc.behaviors.behaviorTree.control.*;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.behaviorTree.actions.*;
 import us.ihmc.rdx.behaviorTree.condition.*;
@@ -17,7 +18,6 @@ import us.ihmc.rdx.behaviorTree.control.*;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -51,35 +51,32 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
    }
 
-   private CRDTInfo crdtInfo; // TODO: Make final somehow
+   private CRDTInfo crdtInfo;
    private WorkspaceResourceDirectory saveFileDirectory;
-   private final DRCRobotModel robotModel;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final RobotCollisionModel selectionCollisionModel;
-   private final RDXBaseUI baseUI;
-   private final RDX3DPanel panel3D;
+   private DRCRobotModel robotModel;
+   private ROS2SyncedRobotModel syncedRobot;
+   private BehaviorTreeScene scene;
+   private RobotCollisionModel selectionCollisionModel;
+   private RDXBaseUI baseUI;
+   private RDX3DPanel panel3D;
 
-   public RDXBehaviorTreeNodeBuilder(DRCRobotModel robotModel,
-                                     ROS2SyncedRobotModel syncedRobot,
-                                     ReferenceFrameLibrary referenceFrameLibrary,
-                                     RobotCollisionModel selectionCollisionModel,
-                                     RDXBaseUI baseUI,
-                                     RDX3DPanel panel3D)
-   {
-      this.robotModel = robotModel;
-      this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
-      this.selectionCollisionModel = selectionCollisionModel;
-      this.baseUI = baseUI;
-      this.panel3D = panel3D;
-   }
-
-   @Override
-   public void initialize(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public void initialize(CRDTInfo crdtInfo,
+                          WorkspaceResourceDirectory saveFileDirectory,
+                          DRCRobotModel robotModel,
+                          ROS2SyncedRobotModel syncedRobot,
+                          BehaviorTreeScene scene,
+                          RobotCollisionModel selectionCollisionModel,
+                          RDXBaseUI baseUI,
+                          RDX3DPanel panel3D)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
+      this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
+      this.scene = scene;
+      this.selectionCollisionModel = selectionCollisionModel;
+      this.baseUI = baseUI;
+      this.panel3D = panel3D;
    }
 
    @Override
@@ -89,8 +86,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
                                          crdtInfo,
                                          saveFileDirectory,
                                          robotModel,
-                                         referenceFrameLibrary,
                                          syncedRobot,
+                                         scene,
                                          selectionCollisionModel,
                                          baseUI,
                                          panel3D);

@@ -5,23 +5,14 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-
-import java.util.Collections;
 
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
 {
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2BehaviorTreeExecutor executor;
 
-   public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node,
-                                       ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
-                                       DRCRobotModel robotModel,
-                                       DetectionManager detectionManager)
+   public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator, DRCRobotModel robotModel)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
       setFrequencyLimit(ROS2BehaviorTree.SYNC_FREQUENCY);
@@ -29,22 +20,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
-      ReferenceFrameLibrary referenceFrameLibrary = new ReferenceFrameLibrary();
-      referenceFrameLibrary.addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
-      referenceFrameLibrary.addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
-      // referenceFrameLibrary.addDynamicCollection(sceneGraph.asNewDynamicReferenceFrameCollection()); TODO Replace with detection manager?
-      for (RobotSide side: RobotSide.values)
-      {
-         if (robotModel.getRobotVersion().hasArm(side))
-            referenceFrameLibrary.addAll(Collections.singleton(syncedRobot.getReferenceFrames().getHandZUpFrame(side)));
-      }
-
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
-                                              robotModel,
-                                              syncedRobot,
-                                              peerClockOffsetEstimator,
-                                              referenceFrameLibrary,
-                                              detectionManager);
+      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, robotModel, syncedRobot, peerClockOffsetEstimator);
    }
 
    @Override

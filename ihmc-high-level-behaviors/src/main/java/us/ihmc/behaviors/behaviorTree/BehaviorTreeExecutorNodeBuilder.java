@@ -9,11 +9,9 @@ import us.ihmc.behaviors.behaviorTree.control.*;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
-import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -45,37 +43,29 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
    }
 
-   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private CRDTInfo crdtInfo; // TODO: Make final somehow
    private WorkspaceResourceDirectory saveFileDirectory;
-   private final DRCRobotModel robotModel;
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ControllerStatusTracker controllerStatusTracker;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
-   private final DetectionManager detectionManager;
+   private DRCRobotModel robotModel;
+   private ROS2ControllerHelper ros2ControllerHelper;
+   private ROS2SyncedRobotModel syncedRobot;
+   private ControllerStatusTracker controllerStatusTracker;
+   private BehaviorTreeScene scene;
 
-   public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
-                                          ROS2ControllerHelper ros2ControllerHelper,
-                                          ROS2SyncedRobotModel syncedRobot,
-                                          ReferenceFrameLibrary referenceFrameLibrary,
-                                          DetectionManager detectionManager)
-   {
-      this.robotModel = robotModel;
-      this.syncedRobot = syncedRobot;
-      this.referenceFrameLibrary = referenceFrameLibrary;
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.detectionManager = detectionManager;
-
-      // TODO: Probably create this in the BehaviorTree
-      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2Node(), robotModel.getSimpleRobotName());
-   }
-
-   @Override
-   public void initialize(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public void initialize(CRDTInfo crdtInfo,
+                          WorkspaceResourceDirectory saveFileDirectory,
+                          DRCRobotModel robotModel,
+                          ROS2ControllerHelper ros2ControllerHelper,
+                          ROS2SyncedRobotModel syncedRobot,
+                          ControllerStatusTracker controllerStatusTracker,
+                          BehaviorTreeScene scene)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
+      this.robotModel = robotModel;
+      this.ros2ControllerHelper = ros2ControllerHelper;
+      this.syncedRobot = syncedRobot;
+      this.controllerStatusTracker = controllerStatusTracker;
+      this.scene = scene;
    }
 
    @Override
@@ -86,10 +76,9 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                                               saveFileDirectory,
                                               robotModel,
                                               ros2ControllerHelper,
-                                              controllerStatusTracker,
                                               syncedRobot,
-                                              referenceFrameLibrary,
-                                              detectionManager);
+                                              controllerStatusTracker,
+                                              scene);
    }
 
    @Override

@@ -37,17 +37,17 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       updateSubtree(this);
 
-      DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
-      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
-
-      boolean shouldClearStaticHandles = false;
-      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
-         shouldClearStaticHandles |= action.getIsExecuting();
-      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
-         shouldClearStaticHandles |= action.getIsExecuting();
-
-      if (shouldClearStaticHandles)
-      {
+//      DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
+//      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
+//
+//      boolean shouldClearStaticHandles = false;
+//      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
+//         shouldClearStaticHandles |= action.getIsExecuting();
+//      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
+//         shouldClearStaticHandles |= action.getIsExecuting();
+//
+//      if (shouldClearStaticHandles)
+//      {
 //         for (String nodeName : sceneGraph.getNodeNameList())
 //         {
 //            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
@@ -59,62 +59,62 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 //               }
 //            }
 //         }
-      }
+//      }
 
-      if (state.arePullRetryNodesPresent())
-      {
-         // Check that it pulled the door far enough to consider it open and secured with other hand
-         if (!state.getPostPullDoorEvaluationAction().getIsExecuting())
-         { // Here we are preventing the below logic from triggering more than once at a time
-            waitForPullScrewToFinish = false;
-         }
-         if (!waitForPullScrewToFinish && state.getPostPullDoorEvaluationAction().getIsExecuting())
-         {
-            if (yoloDoorHandleNode != null)
-            {
-               double openedDoorHandleDistanceFromStart = definition.getOpenedDoorHandleDistanceFromStart().getValue();
-               double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransformReadOnly().getTranslation()
-                                                                  .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransformReadOnly().getTranslation());
-               state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);
-               if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
-               {
-                  state.getLogger().info("""
-                                         Retrying pull door. Distance door handle from start %.2f / %.2f [m].
-                                         Stopping all trajectories.
-                                         Going back to %s.
-                                         """.formatted(state.getDoorHandleDistanceFromStart().getValue(), openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
-                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-                  waitForPullScrewToFinish = true;
-                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
-               }
-            }
-         }
-
-         // Check that it grasped the door handle effectively, evaluate distance hand-handle at the end of grasp action
-         if (!state.getPostGraspEvaluationAction().getIsExecuting())
-         {
-            waitForGraspToFinish = false;
-         }
-         if (!waitForGraspToFinish && state.getPostGraspEvaluationAction().getIsExecuting())
-         {
-            if (staticHandleClosedDoor != null)
-            {
-               double handToHandleDistance = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT).
-                     getTransformToDesiredFrame(staticHandleClosedDoor.getNodeFrame()).getTranslation().norm();
-               if (handToHandleDistance > 0.19)
-               {
-                  state.getLogger().info("""
-                                      Retrying reach door handle. Distance hand to door handle %.2f / %.2f [m].
-                                      Stopping all trajectories.
-                                      Going back to %s.
-                                      """.formatted(handToHandleDistance, 0.19, state.getWaitToOpenRightHandAction().getDefinition().getName()));
-                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-                  waitForGraspToFinish = true;
-                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
-               }
-            }
-         }
-      }
+//      if (state.arePullRetryNodesPresent())
+//      {
+//         // Check that it pulled the door far enough to consider it open and secured with other hand
+//         if (!state.getPostPullDoorEvaluationAction().getIsExecuting())
+//         { // Here we are preventing the below logic from triggering more than once at a time
+//            waitForPullScrewToFinish = false;
+//         }
+//         if (!waitForPullScrewToFinish && state.getPostPullDoorEvaluationAction().getIsExecuting())
+//         {
+//            if (yoloDoorHandleNode != null)
+//            {
+//               double openedDoorHandleDistanceFromStart = definition.getOpenedDoorHandleDistanceFromStart().getValue();
+//               double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransformReadOnly().getTranslation()
+//                                                                  .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransformReadOnly().getTranslation());
+//               state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);
+//               if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
+//               {
+//                  state.getLogger().info("""
+//                                         Retrying pull door. Distance door handle from start %.2f / %.2f [m].
+//                                         Stopping all trajectories.
+//                                         Going back to %s.
+//                                         """.formatted(state.getDoorHandleDistanceFromStart().getValue(), openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+//                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+//                  waitForPullScrewToFinish = true;
+//                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
+//               }
+//            }
+//         }
+//
+//         // Check that it grasped the door handle effectively, evaluate distance hand-handle at the end of grasp action
+//         if (!state.getPostGraspEvaluationAction().getIsExecuting())
+//         {
+//            waitForGraspToFinish = false;
+//         }
+//         if (!waitForGraspToFinish && state.getPostGraspEvaluationAction().getIsExecuting())
+//         {
+//            if (staticHandleClosedDoor != null)
+//            {
+//               double handToHandleDistance = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT).
+//                     getTransformToDesiredFrame(staticHandleClosedDoor.getNodeFrame()).getTranslation().norm();
+//               if (handToHandleDistance > 0.19)
+//               {
+//                  state.getLogger().info("""
+//                                      Retrying reach door handle. Distance hand to door handle %.2f / %.2f [m].
+//                                      Stopping all trajectories.
+//                                      Going back to %s.
+//                                      """.formatted(handToHandleDistance, 0.19, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+//                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+//                  waitForGraspToFinish = true;
+//                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
+//               }
+//            }
+//         }
+//      }
    }
 
    public void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)

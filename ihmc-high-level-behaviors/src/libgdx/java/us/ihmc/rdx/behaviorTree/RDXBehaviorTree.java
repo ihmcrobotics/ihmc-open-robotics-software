@@ -55,10 +55,16 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
                           RDX3DPanel panel3D,
                           ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(ROS2ActorDesignation.OPERATOR,
-            peerClockEstimator,
-            treeFilesDirectory,
-            new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, referenceFrameLibrary, selectionCollisionModel, baseUI, panel3D));
+      super(robotModel, syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
+
+      ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+                                                                 saveFileDirectory,
+                                                                 robotModel,
+                                                                 syncedRobot,
+                                                                 scene,
+                                                                 selectionCollisionModel,
+                                                                 baseUI,
+                                                                 panel3D);
 
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);

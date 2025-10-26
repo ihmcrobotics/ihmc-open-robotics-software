@@ -86,7 +86,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       this.state = state;
       this.rootNode = rootNode;
       this.robotModel = rootNode.getDefinition().getRobotModel();
-      this.referenceFrameLibrary = rootNode.getState().getReferenceFrameLibrary();
+      this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
       this.syncedRobot = rootNode.getSyncedRobot();
       this.selectionCollisionModel = rootNode.getSelectionCollisionModel();
       this.baseUI = rootNode.getBaseUI();
@@ -104,7 +104,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       this.state = state;
       this.rootNode = (RDXBehaviorTreeRootNode) this;
       this.robotModel = rootNode.getDefinition().getRobotModel();
-      this.referenceFrameLibrary = rootNode.getState().getReferenceFrameLibrary();
+      this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
       this.baseUI = baseUI;

@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
@@ -19,7 +20,6 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -43,13 +43,13 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
                                   CRDTInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
                                   DRCRobotModel robotModel,
-                                  ReferenceFrameLibrary referenceFrameLibrary,
                                   ROS2SyncedRobotModel syncedRobot,
+                                  BehaviorTreeScene scene,
                                   RobotCollisionModel selectionCollisionModel,
                                   RDXBaseUI baseUI,
                                   RDX3DPanel panel3D)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, robotModel, referenceFrameLibrary),
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, robotModel, scene),
             syncedRobot,
             selectionCollisionModel,
             baseUI,
