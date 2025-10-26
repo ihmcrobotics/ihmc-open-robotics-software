@@ -5,7 +5,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeMessageTools;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
@@ -28,7 +27,6 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
    protected final WorkspaceResourceDirectory saveFileDirectory;
    protected final DRCRobotModel robotModel;
    protected final ROS2SyncedRobotModel syncedRobot;
-   protected final BehaviorTreeScene scene;
    private final MutableLong nextID = new MutableLong(0);
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
@@ -37,20 +35,18 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
    private final BehaviorTreeTopologyOperationQueue<T> topologyChangeQueue;
    protected R rootNode;
 
-   public BehaviorTree(DRCRobotModel robotModel,
-                       ROS2SyncedRobotModel syncedRobot,
+   public BehaviorTree(ROS2SyncedRobotModel syncedRobot,
                        ROS2ActorDesignation actor,
                        ROS2PeerClockOffsetEstimator peerClockEstimator,
                        WorkspaceResourceDirectory saveFileDirectory,
                        BehaviorTreeNodeBuilder<T> nodeBuilder)
    {
-      this.robotModel = robotModel;
+      this.robotModel = syncedRobot.getRobotModel();
       this.syncedRobot = syncedRobot;
       this.nodeBuilder = nodeBuilder;
       this.saveFileDirectory = saveFileDirectory;
 
       crdtInfo = new CRDTInfo(actor, peerClockEstimator);
-      scene = new BehaviorTreeScene(syncedRobot, null);
       rootReferenceModification = new LatestTimestampModifiable(crdtInfo);
       rootReferenceModification.setModifierName("Root reference");
       dataModification = new LatestTimestampModifiable(crdtInfo);

@@ -5,7 +5,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalNotification;
@@ -35,7 +35,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
                                     CRDTInfo crdtInfo,
                                     WorkspaceResourceDirectory saveFileDirectory,
                                     DRCRobotModel robotModel,
-                                    BehaviorTreeScene scene)
+                                    BehaviorTreeSceneState scene)
    {
       super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory, robotModel), null, scene);
 
@@ -213,7 +213,7 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
 
    // Getters are in here so there's not getters in base node for root stuff
 
-   public BehaviorTreeScene getScene()
+   public BehaviorTreeSceneState getScene()
    {
       return scene;
    }

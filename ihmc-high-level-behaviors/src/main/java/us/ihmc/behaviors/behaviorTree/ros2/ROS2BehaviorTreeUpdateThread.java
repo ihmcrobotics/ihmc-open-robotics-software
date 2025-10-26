@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.ros2.ROS2Node;
 
 public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
@@ -12,7 +13,10 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2BehaviorTreeExecutor executor;
 
-   public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node, ROS2PeerClockOffsetEstimator peerClockOffsetEstimator, DRCRobotModel robotModel)
+   public ROS2BehaviorTreeUpdateThread(ROS2Node ros2Node,
+                                       ROS2PeerClockOffsetEstimator peerClockOffsetEstimator,
+                                       DRCRobotModel robotModel,
+                                       YOLOv8DetectionExecutor yolo)
    {
       super(ROS2BehaviorTreeUpdateThread.class.getSimpleName());
       setFrequencyLimit(ROS2BehaviorTree.SYNC_FREQUENCY);
@@ -20,7 +24,7 @@ public class ROS2BehaviorTreeUpdateThread extends RepeatingTaskThread
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2Node());
 
-      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, robotModel, syncedRobot, peerClockOffsetEstimator);
+      executor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper, syncedRobot, yolo, peerClockOffsetEstimator);
    }
 
    @Override

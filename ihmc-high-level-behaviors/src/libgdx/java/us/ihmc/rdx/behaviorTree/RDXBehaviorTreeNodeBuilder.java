@@ -1,6 +1,5 @@
 package us.ihmc.rdx.behaviorTree;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.action.*;
@@ -10,11 +9,11 @@ import us.ihmc.behaviors.behaviorTree.control.*;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.behaviorTree.actions.*;
 import us.ihmc.rdx.behaviorTree.condition.*;
 import us.ihmc.rdx.behaviorTree.control.*;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -53,25 +52,22 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
 
    private CRDTInfo crdtInfo;
    private WorkspaceResourceDirectory saveFileDirectory;
-   private DRCRobotModel robotModel;
    private ROS2SyncedRobotModel syncedRobot;
-   private BehaviorTreeScene scene;
+   private RDXBehaviorTreeScene scene;
    private RobotCollisionModel selectionCollisionModel;
    private RDXBaseUI baseUI;
    private RDX3DPanel panel3D;
 
    public void initialize(CRDTInfo crdtInfo,
                           WorkspaceResourceDirectory saveFileDirectory,
-                          DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
-                          BehaviorTreeScene scene,
+                          RDXBehaviorTreeScene scene,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
-      this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.scene = scene;
       this.selectionCollisionModel = selectionCollisionModel;
@@ -85,7 +81,6 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       return new RDXBehaviorTreeRootNode(id,
                                          crdtInfo,
                                          saveFileDirectory,
-                                         robotModel,
                                          syncedRobot,
                                          scene,
                                          selectionCollisionModel,

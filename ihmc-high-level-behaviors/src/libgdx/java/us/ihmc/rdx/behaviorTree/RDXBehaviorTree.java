@@ -8,13 +8,13 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiMouseCursor;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -25,7 +25,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>
@@ -41,32 +40,31 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
+   private final RDXBehaviorTreeScene scene;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    private boolean draggingDivider;
    private boolean shouldSave = false;
 
-   public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
-                          DRCRobotModel robotModel,
-                          ROS2SyncedRobotModel syncedRobot,
+   public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,ROS2SyncedRobotModel syncedRobot,
                           ROS2PeerClockOffsetEstimator peerClockEstimator,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
-                          RDX3DPanel panel3D,
-                          ReferenceFrameLibrary referenceFrameLibrary)
+                          RDX3DPanel panel3D)
    {
-      super(robotModel, syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
+      super(syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
+
+      scene = new RDXBehaviorTreeScene();
 
       ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
                                                                  saveFileDirectory,
-                                                                 robotModel,
                                                                  syncedRobot,
                                                                  scene,
                                                                  selectionCollisionModel,
                                                                  baseUI,
                                                                  panel3D);
 
-      nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
+      nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, scene);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
       baseUI.getImGuiPanelManager().addPanel(panel);
    }

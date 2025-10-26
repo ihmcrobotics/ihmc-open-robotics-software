@@ -2,15 +2,14 @@ package us.ihmc.rdx.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -42,14 +41,13 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public RDXBehaviorTreeRootNode(long id,
                                   CRDTInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
-                                  DRCRobotModel robotModel,
                                   ROS2SyncedRobotModel syncedRobot,
-                                  BehaviorTreeScene scene,
+                                  RDXBehaviorTreeScene scene,
                                   RobotCollisionModel selectionCollisionModel,
                                   RDXBaseUI baseUI,
                                   RDX3DPanel panel3D)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, robotModel, scene),
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             syncedRobot,
             selectionCollisionModel,
             baseUI,

@@ -3,7 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
@@ -35,7 +35,7 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
    protected final ROS2ControllerHelper ros2ControllerHelper;
    protected final ROS2SyncedRobotModel syncedRobot;
    protected final ControllerStatusTracker controllerStatusTracker;
-   protected final BehaviorTreeScene scene;
+   protected final BehaviorTreeSceneExecutor scene;
 
    /** For creating a basic node. */ // TODO: Should not exist???
    public BehaviorTreeNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
@@ -62,12 +62,12 @@ public class BehaviorTreeNodeExecutor<S extends BehaviorTreeNodeState<D>,
                                    ROS2ControllerHelper ros2ControllerHelper,
                                    ROS2SyncedRobotModel syncedRobot,
                                    ControllerStatusTracker controllerStatusTracker,
-                                   BehaviorTreeScene scene)
+                                   BehaviorTreeSceneExecutor scene)
    {
       this.definition = state.getDefinition();
       this.state = state;
       this.rootNode = (BehaviorTreeRootNodeExecutor) this;
-      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.robotModel = syncedRobot.getRobotModel();
       this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;

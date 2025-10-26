@@ -1,12 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
 /**
  * Top level class for the robot's behavior tree.
@@ -16,11 +16,11 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    private final ROS2BehaviorTree<BehaviorTreeNodeExecutor<?, ?>> ros2BehaviorTree;
 
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
-                                   DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
+                                   YOLOv8DetectionExecutor yolo,
                                    ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
-      super(robotModel, syncedRobot, peerClockEstimator, ros2ControllerHelper);
+      super(syncedRobot, peerClockEstimator, ros2ControllerHelper, yolo);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper); // FIXME
    }

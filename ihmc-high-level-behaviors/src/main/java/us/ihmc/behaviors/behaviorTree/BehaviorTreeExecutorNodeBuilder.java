@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
@@ -9,7 +8,7 @@ import us.ihmc.behaviors.behaviorTree.control.*;
 import us.ihmc.behaviors.behaviorTree.control.ai2r.*;
 import us.ihmc.behaviors.behaviorTree.control.buildingExploration.*;
 import us.ihmc.behaviors.behaviorTree.control.door.*;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeScene;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -43,25 +42,22 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
    }
 
-   private CRDTInfo crdtInfo; // TODO: Make final somehow
+   private CRDTInfo crdtInfo;
    private WorkspaceResourceDirectory saveFileDirectory;
-   private DRCRobotModel robotModel;
    private ROS2ControllerHelper ros2ControllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
-   private BehaviorTreeScene scene;
+   private BehaviorTreeSceneExecutor scene;
 
    public void initialize(CRDTInfo crdtInfo,
                           WorkspaceResourceDirectory saveFileDirectory,
-                          DRCRobotModel robotModel,
                           ROS2ControllerHelper ros2ControllerHelper,
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
-                          BehaviorTreeScene scene)
+                          BehaviorTreeSceneExecutor scene)
    {
       this.crdtInfo = crdtInfo;
       this.saveFileDirectory = saveFileDirectory;
-      this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
@@ -71,14 +67,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
-      return new BehaviorTreeRootNodeExecutor(id,
-                                              crdtInfo,
-                                              saveFileDirectory,
-                                              robotModel,
-                                              ros2ControllerHelper,
-                                              syncedRobot,
-                                              controllerStatusTracker,
-                                              scene);
+      return new BehaviorTreeRootNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, controllerStatusTracker, scene);
    }
 
    @Override
