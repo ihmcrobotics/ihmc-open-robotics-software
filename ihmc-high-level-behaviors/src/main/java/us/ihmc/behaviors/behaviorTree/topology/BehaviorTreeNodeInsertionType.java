@@ -5,5 +5,5 @@ public enum BehaviorTreeNodeInsertionType
    INSERT_BEFORE,
    INSERT_AFTER,
    INSERT_AS_CHILD,
-   INSERT_ROOT, // TODO: Trying to get rid of
+   INSERT_ROOT,
 }

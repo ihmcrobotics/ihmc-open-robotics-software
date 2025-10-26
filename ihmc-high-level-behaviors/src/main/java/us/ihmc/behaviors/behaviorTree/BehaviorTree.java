@@ -22,7 +22,7 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
 {
    protected int numberOfNodes = 0;
    protected final CRDTInfo crdtInfo;
-   private final MutableLong nextID = new MutableLong(0); // TODO: Could be moved inside root node?
+   private final MutableLong nextID = new MutableLong(0);
    private final LatestTimestampModifiable rootReferenceModification;
    private final LatestTimestampModifiable dataModification;
    protected final WorkspaceResourceDirectory saveFileDirectory;
@@ -46,7 +46,7 @@ public abstract class BehaviorTree<R extends BehaviorTreeRootNode<T>, T extends 
       dataModification = new LatestTimestampModifiable(crdtInfo);
       dataModification.setModifierName("Tree data");
       fileLoader = new BehaviorTreeFileLoader<>(this, nodeBuilder, saveFileDirectory);
-      topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>((BehaviorTree<BehaviorTreeRootNode<T>, T>) this); // FIXME: Unchecked cast
+      topologyChangeQueue = new BehaviorTreeTopologyOperationQueue<>((BehaviorTree) this);
    }
 
    /** Used only when modifying tree topology. */

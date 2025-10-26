@@ -89,7 +89,6 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNode<T, ?, ?>>
 
          behaviorTree.fromMessage(behaviorTreeStateMessage);
 
-         // TODO Should root be in the map???
          // The algorithm to support added, removed, and moved nodes:
          // 1. Map the nodes by ID
          // 2. As we traverse the tree, remove the IDs from the map

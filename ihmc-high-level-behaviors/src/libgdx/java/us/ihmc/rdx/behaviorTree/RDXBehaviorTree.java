@@ -39,7 +39,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
    private boolean anyNodeSelected;
@@ -61,7 +60,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
             treeFilesDirectory,
             new RDXBehaviorTreeNodeBuilder(robotModel, syncedRobot, referenceFrameLibrary, selectionCollisionModel, baseUI, panel3D));
 
-      fileMenu = new RDXBehaviorTreeFileMenu();
       nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
       baseUI.getImGuiPanelManager().addPanel(panel);
@@ -150,7 +148,29 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    {
       shouldSave = false;
       ImGui.beginMenuBar();
-      fileMenu.renderFileMenu(rootNode, nodeCreationMenu);
+      if (ImGui.beginMenu(labels.get("File")))
+      {
+         if (rootNode == null)
+         {
+            if (ImGui.menuItem(labels.get("Refresh File List")))
+               nodeCreationMenu.reindexDirectory();
+         }
+         else
+         {
+            if (ImGui.menuItem(labels.get("Save All"), "Ctrl + S"))
+            {
+               RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
+               rootNode.getDefinition().saveToFile();
+            }
+            if (ImGui.menuItem(labels.get("Undo All Non-topological Changes")))
+            {
+               RDXBaseUI.pushNotification("Undoing all non-topological behavior tree changes");
+               rootNode.getDefinition().undoAllNontopologicalChanges();
+            }
+         }
+
+         ImGui.endMenu();
+      }
       if (ImGui.beginMenu(labels.get("View")))
       {
          if (rootNode != null)

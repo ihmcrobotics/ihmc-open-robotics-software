@@ -8,14 +8,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * This class allows you to queue multiple tree modifications and then execute them all at once via performAllQueuedOperations().
- * This ensures the tree structure remains consistent during complex operations.
- *
- * This interface just exists to provide a better name to what this is,
- * which gets passed down from BehaviorTree's modifyTreeTopology method and serves
- * to queue up tree modifications.
- * We are intentionally not checking the types in this class, because it gets
- * too complicated to use and doesn't add much value.
+ * This class allows to queue multiple tree modifications and then execute them
+ * all at once via performAllQueuedOperations(). This ensures the tree structure
+ * remains consistent during complex operations.
  *
  * @param <T> The generic type of this node: RDX or Executor
  */
@@ -49,7 +44,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-         queueSetRootNodeModify((BehaviorTreeRootNode<T>) insertionDefinition.getNodeToInsert()); // TODO: Trying to get rid of
+         queueSetRootNodeModify((BehaviorTreeRootNode<T>) insertionDefinition.getNodeToInsert());
       }
       else
       {
