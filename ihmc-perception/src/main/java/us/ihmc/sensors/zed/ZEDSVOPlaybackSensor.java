@@ -1,7 +1,5 @@
 package us.ihmc.sensors.zed;
 
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.Throttler;
 import us.ihmc.zed.SL_InitParameters;
 
 import java.nio.file.Files;
@@ -13,15 +11,12 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
 {
    private final int cameraID;
    private final String svoFileName;
-   private final Throttler throttler;
 
    public ZEDSVOPlaybackSensor(int cameraID, ZEDModelData zedModel, int slDepthMode, String svoFileName)
    {
       super(cameraID, zedModel, SL_INPUT_TYPE_SVO, slDepthMode);
       this.cameraID = cameraID;
       this.svoFileName = svoFileName;
-
-      throttler = new Throttler();
 
       if (!Files.exists(Path.of(svoFileName)))
          throw new RuntimeException("SVO file does not exist");
@@ -61,13 +56,6 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
    protected int openCamera()
    {
       return sl_open_camera(getCameraID(), zedInitParameters, 0, svoFileName, "", 0, "", "", "");
-   }
-
-   @Override
-   public boolean grab()
-   {
-      throttler.waitAndRun(Conversions.hertzToSeconds(getFps()));
-      return super.grab();
    }
 
    @Override

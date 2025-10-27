@@ -40,7 +40,6 @@ public class CUDATools
       }
       catch (Error libraryNotAvailable)
       {
-         LogTools.error(libraryNotAvailable);
          return false;
       }
    }
