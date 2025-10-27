@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "VisuomotorOperationMessage" defined in "VisuomotorOperationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "VLAOperationMessage" defined in "VLAOperationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from VisuomotorOperationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit VisuomotorOperationMessage_.idl instead.
+* This file was automatically generated from VLAOperationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit VLAOperationMessage_.idl instead.
 *
 */
-public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.VisuomotorOperationMessage>
+public class VLAOperationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.VLAOperationMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::VisuomotorOperationMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::VLAOperationMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "fcce36fba02a2ffbf8f1b7eabe17ebd5f7d56ad5533f1b3025893ca29b0f9a8c";
+   		return "29bf149b6e1534f795f1ed5020b9966e318d866205e08af5a38a8c377e8a6676";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.VLAOperationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.VisuomotorOperationMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.VLAOperationMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -66,21 +66,17 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
       for(int i0 = 0; i0 < (2); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.VisuomotorOperationMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.VLAOperationMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.VLAOperationMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -103,19 +99,13 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
       {
               current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getActionForearmPoses()[i0], current_alignment);
       }
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPythonStatusMessage().length() + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStatusMessage().length() + 1;
 
 
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.VLAOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestTimestampModifiable(), cdr);
       cdr.write_type_4(data.getSequenceId());
@@ -134,17 +124,13 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
         	geometry_msgs.msg.dds.PosePubSubType.write(data.getActionForearmPoses()[i0], cdr);		
       }
 
-      cdr.write_type_6(data.getPythonStatusFrequency());
-
-      if(data.getPythonStatusMessage().length() <= 255)
-      cdr.write_type_d(data.getPythonStatusMessage());else
-          throw new RuntimeException("python_status_message field exceeds the maximum length: %d > %d".formatted(data.getPythonStatusMessage().length(), 255));
-
-      cdr.write_type_4(data.getReceivedActions());
+      if(data.getStatusMessage().length() <= 255)
+      cdr.write_type_d(data.getStatusMessage());else
+          throw new RuntimeException("status_message field exceeds the maximum length: %d > %d".formatted(data.getStatusMessage().length(), 255));
 
    }
 
-   public static void read(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.VLAOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestTimestampModifiable(), cdr);	
       data.setSequenceId(cdr.read_type_4());
@@ -163,16 +149,12 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
         	geometry_msgs.msg.dds.PosePubSubType.read(data.getActionForearmPoses()[i0], cdr);	
       }
       	
-      data.setPythonStatusFrequency(cdr.read_type_6());
-      	
-      cdr.read_type_d(data.getPythonStatusMessage());	
-      data.setReceivedActions(cdr.read_type_4());
-      	
+      cdr.read_type_d(data.getStatusMessage());	
 
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.VLAOperationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -181,13 +163,11 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_7("control_robot", data.getControlRobot());
       ser.write_type_f("action_hand_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionHandPoses());
       ser.write_type_f("action_forearm_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionForearmPoses());
-      ser.write_type_6("python_status_frequency", data.getPythonStatusFrequency());
-      ser.write_type_d("python_status_message", data.getPythonStatusMessage());
-      ser.write_type_4("received_actions", data.getReceivedActions());
+      ser.write_type_d("status_message", data.getStatusMessage());
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.VisuomotorOperationMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.VLAOperationMessage data)
    {
       ser.read_type_a("latest_timestamp_modifiable", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestTimestampModifiable());
 
@@ -196,20 +176,18 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setControlRobot(ser.read_type_7("control_robot"));
       ser.read_type_f("action_hand_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionHandPoses());
       ser.read_type_f("action_forearm_poses", new geometry_msgs.msg.dds.PosePubSubType(), data.getActionForearmPoses());
-      data.setPythonStatusFrequency(ser.read_type_6("python_status_frequency"));
-      ser.read_type_d("python_status_message", data.getPythonStatusMessage());
-      data.setReceivedActions(ser.read_type_4("received_actions"));
+      ser.read_type_d("status_message", data.getStatusMessage());
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.VisuomotorOperationMessage src, behavior_msgs.msg.dds.VisuomotorOperationMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.VLAOperationMessage src, behavior_msgs.msg.dds.VLAOperationMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.VisuomotorOperationMessage createData()
+   public behavior_msgs.msg.dds.VLAOperationMessage createData()
    {
-      return new behavior_msgs.msg.dds.VisuomotorOperationMessage();
+      return new behavior_msgs.msg.dds.VLAOperationMessage();
    }
    @Override
    public int getTypeSize()
@@ -223,24 +201,24 @@ public class VisuomotorOperationMessagePubSubType implements us.ihmc.pubsub.Topi
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.VLAOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.VisuomotorOperationMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.VLAOperationMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.VisuomotorOperationMessage src, behavior_msgs.msg.dds.VisuomotorOperationMessage dest)
+   public void copy(behavior_msgs.msg.dds.VLAOperationMessage src, behavior_msgs.msg.dds.VLAOperationMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public VisuomotorOperationMessagePubSubType newInstance()
+   public VLAOperationMessagePubSubType newInstance()
    {
-      return new VisuomotorOperationMessagePubSubType();
+      return new VLAOperationMessagePubSubType();
    }
 }

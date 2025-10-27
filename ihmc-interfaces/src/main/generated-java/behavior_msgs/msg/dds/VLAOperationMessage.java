@@ -7,9 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * A message for remotely operating the visuomotor policies
+       * A message for remotely operating the VLA policies
        */
-public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessage> implements Settable<VisuomotorOperationMessage>, EpsilonComparable<VisuomotorOperationMessage>
+public class VLAOperationMessage extends Packet<VLAOperationMessage> implements Settable<VLAOperationMessage>, EpsilonComparable<VLAOperationMessage>
 {
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_timestamp_modifiable_;
    /**
@@ -33,19 +33,11 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
             */
    public us.ihmc.euclid.geometry.Pose3D[] action_forearm_poses_;
    /**
-            * Frequency of status from python side
+            * Status message from robot thread to show to the operator
             */
-   public double python_status_frequency_;
-   /**
-            * Message received from python
-            */
-   public java.lang.StringBuilder python_status_message_;
-   /**
-            * Number of output actions received from policy
-            */
-   public long received_actions_;
+   public java.lang.StringBuilder status_message_;
 
-   public VisuomotorOperationMessage()
+   public VLAOperationMessage()
    {
       latest_timestamp_modifiable_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       action_hand_poses_ = new us.ihmc.euclid.geometry.Pose3D[2];
@@ -60,16 +52,16 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
       {
           action_forearm_poses_[i3] = new us.ihmc.euclid.geometry.Pose3D();
       }
-      python_status_message_ = new java.lang.StringBuilder(255);
+      status_message_ = new java.lang.StringBuilder(255);
    }
 
-   public VisuomotorOperationMessage(VisuomotorOperationMessage other)
+   public VLAOperationMessage(VLAOperationMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(VisuomotorOperationMessage other)
+   public void set(VLAOperationMessage other)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_timestamp_modifiable_, latest_timestamp_modifiable_);
       sequence_id_ = other.sequence_id_;
@@ -86,12 +78,8 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
       {
             geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.action_forearm_poses_[i7], action_forearm_poses_[i7]);}
 
-      python_status_frequency_ = other.python_status_frequency_;
-
-      python_status_message_.setLength(0);
-      python_status_message_.append(other.python_status_message_);
-
-      received_actions_ = other.received_actions_;
+      status_message_.setLength(0);
+      status_message_.append(other.status_message_);
 
    }
 
@@ -165,73 +153,43 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
    }
 
    /**
-            * Frequency of status from python side
+            * Status message from robot thread to show to the operator
             */
-   public void setPythonStatusFrequency(double python_status_frequency)
+   public void setStatusMessage(java.lang.String status_message)
    {
-      python_status_frequency_ = python_status_frequency;
-   }
-   /**
-            * Frequency of status from python side
-            */
-   public double getPythonStatusFrequency()
-   {
-      return python_status_frequency_;
+      status_message_.setLength(0);
+      status_message_.append(status_message);
    }
 
    /**
-            * Message received from python
+            * Status message from robot thread to show to the operator
             */
-   public void setPythonStatusMessage(java.lang.String python_status_message)
+   public java.lang.String getStatusMessageAsString()
    {
-      python_status_message_.setLength(0);
-      python_status_message_.append(python_status_message);
-   }
-
-   /**
-            * Message received from python
-            */
-   public java.lang.String getPythonStatusMessageAsString()
-   {
-      return getPythonStatusMessage().toString();
+      return getStatusMessage().toString();
    }
    /**
-            * Message received from python
+            * Status message from robot thread to show to the operator
             */
-   public java.lang.StringBuilder getPythonStatusMessage()
+   public java.lang.StringBuilder getStatusMessage()
    {
-      return python_status_message_;
-   }
-
-   /**
-            * Number of output actions received from policy
-            */
-   public void setReceivedActions(long received_actions)
-   {
-      received_actions_ = received_actions;
-   }
-   /**
-            * Number of output actions received from policy
-            */
-   public long getReceivedActions()
-   {
-      return received_actions_;
+      return status_message_;
    }
 
 
-   public static Supplier<VisuomotorOperationMessagePubSubType> getPubSubType()
+   public static Supplier<VLAOperationMessagePubSubType> getPubSubType()
    {
-      return VisuomotorOperationMessagePubSubType::new;
+      return VLAOperationMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return VisuomotorOperationMessagePubSubType::new;
+      return VLAOperationMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(VisuomotorOperationMessage other, double epsilon)
+   public boolean epsilonEquals(VLAOperationMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -253,11 +211,7 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
               if (!this.action_forearm_poses_[i11].epsilonEquals(other.action_forearm_poses_[i11], epsilon)) return false;
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.python_status_frequency_, other.python_status_frequency_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.python_status_message_, other.python_status_message_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.received_actions_, other.received_actions_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.status_message_, other.status_message_, epsilon)) return false;
 
 
       return true;
@@ -268,9 +222,9 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof VisuomotorOperationMessage)) return false;
+      if(!(other instanceof VLAOperationMessage)) return false;
 
-      VisuomotorOperationMessage otherMyClass = (VisuomotorOperationMessage) other;
+      VLAOperationMessage otherMyClass = (VLAOperationMessage) other;
 
       if (!this.latest_timestamp_modifiable_.equals(otherMyClass.latest_timestamp_modifiable_)) return false;
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
@@ -287,11 +241,7 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
       {
                 if (!this.action_forearm_poses_[i15].equals(otherMyClass.action_forearm_poses_[i15])) return false;
       }
-      if(this.python_status_frequency_ != otherMyClass.python_status_frequency_) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.python_status_message_, otherMyClass.python_status_message_)) return false;
-
-      if(this.received_actions_ != otherMyClass.received_actions_) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.status_message_, otherMyClass.status_message_)) return false;
 
 
       return true;
@@ -302,7 +252,7 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("VisuomotorOperationMessage {");
+      builder.append("VLAOperationMessage {");
       builder.append("latest_timestamp_modifiable=");
       builder.append(this.latest_timestamp_modifiable_);      builder.append(", ");
       builder.append("sequence_id=");
@@ -315,12 +265,8 @@ public class VisuomotorOperationMessage extends Packet<VisuomotorOperationMessag
       builder.append(java.util.Arrays.toString(this.action_hand_poses_));      builder.append(", ");
       builder.append("action_forearm_poses=");
       builder.append(java.util.Arrays.toString(this.action_forearm_poses_));      builder.append(", ");
-      builder.append("python_status_frequency=");
-      builder.append(this.python_status_frequency_);      builder.append(", ");
-      builder.append("python_status_message=");
-      builder.append(this.python_status_message_);      builder.append(", ");
-      builder.append("received_actions=");
-      builder.append(this.received_actions_);
+      builder.append("status_message=");
+      builder.append(this.status_message_);
       builder.append("}");
       return builder.toString();
    }

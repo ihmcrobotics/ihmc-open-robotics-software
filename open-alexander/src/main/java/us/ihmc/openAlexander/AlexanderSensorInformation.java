@@ -39,8 +39,8 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final RigidBodyTransform D457_TO_CHEST_TRANSFORM = new RigidBodyTransform();
    static
    {
-      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.092,  0.051,  0.098 );
-      EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), 0.0, 28.0, 0.0);
+      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.081,  0.051,  0.097 );
+      EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), -0.5, 45.0, 0.0);
    }
 
    protected final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();

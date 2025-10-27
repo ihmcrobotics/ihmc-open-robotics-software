@@ -31,6 +31,8 @@ public class TorqueSpaceBlender implements CommandBlender
                                             double alpha)
    {
       outputToPack.clear();
+      outputToPack.setControlMode(from.getControlMode());
+      outputToPack.setLoadMode(from.getLoadMode());
 
       boolean validFrom = from.hasDesiredPosition() && from.hasStiffness() && from.hasDamping();
       boolean validTo = to.hasDesiredPosition() && to.hasStiffness() && to.hasDamping();

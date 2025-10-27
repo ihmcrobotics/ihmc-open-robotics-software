@@ -50,7 +50,6 @@ public class SCS2AvatarSimulation
    private AvatarControllerThread controllerThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
    private IKStreamingRTThread ikStreamingRTThread;
-   private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
@@ -442,16 +441,6 @@ public class SCS2AvatarSimulation
    public IKStreamingRTThread getIKStreamingRTThread()
    {
       return ikStreamingRTThread;
-   }
-
-   public void setOutputWriter(JointDesiredOutputWriter outputWriter)
-   {
-      this.outputWriter = outputWriter;
-   }
-
-   public JointDesiredOutputWriter getOutputWriter()
-   {
-      return outputWriter;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)
