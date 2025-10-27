@@ -112,13 +112,6 @@ public class AvatarLowLevelOutputProcessor
                                    isServod.set(true);
                              });
 
-      interpolateDesireds.addListener(s ->
-                                      {
-                                         if(interpolateDesireds.getBooleanValue())
-                                            interpolationTick.set(0);
-                                         interpolateDesireds.set(false, false);
-                                      });
-
       interpolateDuration.addListener(change ->
                                       {
                                          if(interpolateDuration.getIntegerValue() < 1)
@@ -132,7 +125,7 @@ public class AvatarLowLevelOutputProcessor
    {
       this.unprocessedDesireds.overwriteWith(unprocessedDesireds);
 
-      if (interpolationTick.getIntegerValue() < interpolateDuration.getIntegerValue())
+      if (interpolationTick.getIntegerValue() < interpolateDuration.getIntegerValue() && interpolateDesireds.getBooleanValue())
          interpolate();
       else
          processedDesireds.overwriteWith(unprocessedDesireds);
@@ -148,9 +141,14 @@ public class AvatarLowLevelOutputProcessor
          processedDesireds.getJointDesiredOutput(i).setMasterGain(masterGain.getDoubleValue());
    }
 
-   public void startDesiredsInterpolation(boolean interpolate)
+   public void enableInterpolation(boolean enable)
    {
-      interpolateDesireds.set(interpolate);
+      interpolateDesireds.set(enable);
+   }
+
+   public void startDesiredsInterpolation()
+   {
+      interpolationTick.set(0);
       previousDesireds.overwriteWith(processedDesireds);
    }
 

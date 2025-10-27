@@ -608,4 +608,9 @@ public class AvatarMultiThreadingFactory
                                                               nextControlStateEnum,
                                                               commandBlenderFactory);
    }
+
+   public HighLevelHumanoidControllerFactory getControllerFactory()
+   {
+      return controllerFactory;
+   }
 }
