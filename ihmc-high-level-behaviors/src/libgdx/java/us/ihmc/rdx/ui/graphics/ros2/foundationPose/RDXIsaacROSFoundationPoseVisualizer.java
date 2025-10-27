@@ -28,17 +28,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
+public class RDXIsaacROSFoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private static final int TABLE_COLUMN_COUNT = 5;
 
    private final ROS2Node ros2Node;
    private final List<ROS2Topic<?>> resultTopics;
 
-   private final Map<IsaacROSFoundationPoseObject, RDXROS2FoundationPoseSettings> settingsMap;
-   private final Map<IsaacROSFoundationPoseObject, RDXFoundationPoseResultVisualizer> resultVisualizers;
+   private final Map<IsaacROSFoundationPoseObject, RDXIsaacROSFoundationPoseSettings> settingsMap;
+   private final Map<IsaacROSFoundationPoseObject, RDXIsaacROSFoundationPoseResultVisualizer> resultVisualizers;
 
-   public RDXROS2FoundationPoseVisualizer(String title, ROS2Node ros2Node, CRDTInfo crdtInfo)
+   public RDXIsaacROSFoundationPoseVisualizer(String title, ROS2Node ros2Node, CRDTInfo crdtInfo)
    {
       super(title);
 
@@ -51,7 +51,7 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
          resultTopics.add(object.topics.ihmcResult());
-         settingsMap.put(object, new RDXROS2FoundationPoseSettings(ros2Node, crdtInfo, object));
+         settingsMap.put(object, new RDXIsaacROSFoundationPoseSettings(ros2Node, crdtInfo, object));
       }
 
       setSceneLevels(RDXSceneLevel.VIRTUAL);
@@ -63,7 +63,7 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
       super.create();
       for (IsaacROSFoundationPoseObject object : IsaacROSFoundationPoseObject.values())
       {
-         resultVisualizers.put(object, new RDXFoundationPoseResultVisualizer(ros2Node, object, getFrequency(object.topics.ihmcResult())));
+         resultVisualizers.put(object, new RDXIsaacROSFoundationPoseResultVisualizer(ros2Node, object, getFrequency(object.topics.ihmcResult())));
       }
    }
 
@@ -78,10 +78,10 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
    {
       super.update();
 
-      for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
+      for (RDXIsaacROSFoundationPoseSettings settings : settingsMap.values())
          settings.update();
 
-      for (RDXFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
+      for (RDXIsaacROSFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
          visualizer.update();
    }
 
@@ -105,7 +105,7 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
          ImGui.setItemAllowOverlap();
 
          // Render settings
-         for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
+         for (RDXIsaacROSFoundationPoseSettings settings : settingsMap.values())
             settings.renderAsTableRow();
 
          ImGui.endTable();
@@ -127,21 +127,21 @@ public class RDXROS2FoundationPoseVisualizer extends RDXROS2MultiTopicVisualizer
    @Override
    public void destroy()
    {
-      for (RDXROS2FoundationPoseSettings settings : settingsMap.values())
+      for (RDXIsaacROSFoundationPoseSettings settings : settingsMap.values())
          settings.destroy();
 
-      for (RDXFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
+      for (RDXIsaacROSFoundationPoseResultVisualizer visualizer : resultVisualizers.values())
          visualizer.dispose();
    }
 
-   private static class RDXFoundationPoseResultVisualizer implements RenderableProvider
+   private static class RDXIsaacROSFoundationPoseResultVisualizer implements RenderableProvider
    {
       private final ROS2Subscription<Box3DMessage> resultSubscription;
       private final Box3D latestResult;
       private final RDXBoxVisualizer boxVisualizer;
       private final RDXReferenceFrameGraphic referenceFrameGraphic;
 
-      public RDXFoundationPoseResultVisualizer(ROS2Node ros2Node, IsaacROSFoundationPoseObject object, ImGuiAveragedFrequencyText frequencyText)
+      public RDXIsaacROSFoundationPoseResultVisualizer(ROS2Node ros2Node, IsaacROSFoundationPoseObject object, ImGuiAveragedFrequencyText frequencyText)
       {
          latestResult = new Box3D();
          latestResult.setToNaN();

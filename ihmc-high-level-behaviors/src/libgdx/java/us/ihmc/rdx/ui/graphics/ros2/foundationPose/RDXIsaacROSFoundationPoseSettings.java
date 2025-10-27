@@ -4,7 +4,7 @@ import imgui.ImGui;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
-import us.ihmc.perception.detections.foundationPose.SyncedFoundationPoseParameters;
+import us.ihmc.perception.detections.foundationPose.SyncedIsaacROSFoundationPoseParameters;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -12,13 +12,13 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 
-public class RDXROS2FoundationPoseSettings
+public class RDXIsaacROSFoundationPoseSettings
 {
    private final IsaacROSFoundationPoseObject object;
 
    private final ROS2Publisher<Empty> resetRequestPublisher;
 
-   private final SyncedFoundationPoseParameters parameters;
+   private final SyncedIsaacROSFoundationPoseParameters parameters;
 
    private final ImGuiUniqueLabelMap labels;
 
@@ -26,13 +26,13 @@ public class RDXROS2FoundationPoseSettings
    private final ImBooleanWrapper autoResetEnabled;
    private final ImDoubleWrapper resetDistance;
 
-   public RDXROS2FoundationPoseSettings(ROS2Node ros2Node, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject object)
+   public RDXIsaacROSFoundationPoseSettings(ROS2Node ros2Node, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject object)
    {
       this.object = object;
 
       resetRequestPublisher = ros2Node.createPublisher(object.topics.reset());
 
-      parameters = new SyncedFoundationPoseParameters(ros2Node, crdtInfo, object);
+      parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node, crdtInfo, object);
 
       labels = new ImGuiUniqueLabelMap(getClass());
       enabled = new ImBooleanWrapper(parameters.getEnabled()::getValue,
@@ -46,7 +46,7 @@ public class RDXROS2FoundationPoseSettings
                                           imDouble -> ImGuiTools.volatileInputDouble(labels.getHidden("reset distance"), imDouble, 0.0, 0.0, "%05.2f"));
    }
 
-   public SyncedFoundationPoseParameters getParameters()
+   public SyncedIsaacROSFoundationPoseParameters getParameters()
    {
       return parameters;
    }

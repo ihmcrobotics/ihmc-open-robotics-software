@@ -9,7 +9,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
 import us.ihmc.ros2.ROS2Subscription;
 
-public class SyncedFoundationPoseParameters extends LatestTimestampModifiable
+public class SyncedIsaacROSFoundationPoseParameters extends LatestTimestampModifiable
 {
    private final FoundationPoseParameters message;
 
@@ -20,7 +20,7 @@ public class SyncedFoundationPoseParameters extends LatestTimestampModifiable
    private final CRDTBidirectionalBoolean autoResetEnabled; // Whether auto reset is enabled
    private final CRDTBidirectionalDouble resetDistance;     // Distance threshold for resetting pose estimation
 
-   public SyncedFoundationPoseParameters(ROS2Node ros2Node, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject object)
+   public SyncedIsaacROSFoundationPoseParameters(ROS2Node ros2Node, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject object)
    {
       super(crdtInfo);
       setModifierName("FoundationPose " + object.name() + " Parameters");

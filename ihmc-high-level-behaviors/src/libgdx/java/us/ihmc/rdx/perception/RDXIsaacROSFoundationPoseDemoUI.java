@@ -8,7 +8,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXROS2FoundationPoseVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.foundationPose.RDXIsaacROSFoundationPoseVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.yolo.RDXROS2YOLOv8Visualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -38,7 +38,7 @@ public class RDXIsaacROSFoundationPoseDemoUI
             visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Color", ros2Node, PerceptionAPI.ZED_COLOR_IMAGES.get(RobotSide.LEFT)));
             visualizers.addVisualizer(new RDXROS2ImageMessageVisualizer("ZED Depth", ros2Node, PerceptionAPI.ZED_DEPTH));
             visualizers.addVisualizer(new RDXROS2YOLOv8Visualizer("YOLO", ros2Node, peerClockOffsetEstimator, PerceptionAPI.YOLO_ANNOTATED_IMAGE));
-            visualizers.addVisualizer(new RDXROS2FoundationPoseVisualizer("FoundationPose", ros2Node, crdtInfo));
+            visualizers.addVisualizer(new RDXIsaacROSFoundationPoseVisualizer("FoundationPose", ros2Node, crdtInfo));
             visualizers.create(baseUI);
 
             baseUI.getPrimaryScene().addRenderableProvider(visualizers);

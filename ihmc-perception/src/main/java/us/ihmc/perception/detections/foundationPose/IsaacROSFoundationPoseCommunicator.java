@@ -49,7 +49,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
    private final ROS2Subscription<Detection3DArray> poseEstimationResultSubscription;
    private final ROS2Subscription<Detection3DArray> trackingResultSubscription;
 
-   private final SyncedFoundationPoseParameters parameters;
+   private final SyncedIsaacROSFoundationPoseParameters parameters;
    private boolean wasEnabled;
 
    private final ROS2MutableFrame sensorFrame;
@@ -60,9 +60,6 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
 
    private volatile IsaacROSFoundationPoseInstantDetection latestResult;
    private final List<Consumer<IsaacROSFoundationPoseInstantDetection>> resultCallbacks;
-
-   //   private volatile Instant enabledInstant;
-   //   private volatile Instant lastMessageSentInstant;
 
    public IsaacROSFoundationPoseCommunicator(IsaacROSFoundationPoseObject objectToTrack, CRDTInfo crdtInfo)
    {
@@ -78,7 +75,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       poseEstimationResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.poseEstimationOutput(), this::updateLatestResult);
       trackingResultSubscription = ros2Node.createSubscription2(objectToTrack.topics.trackingOutput(), this::updateLatestResult);
 
-      parameters = new SyncedFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);
+      parameters = new SyncedIsaacROSFoundationPoseParameters(ros2Node, crdtInfo, objectToTrack);
       parameters.getEnabled().setValue(false);
       wasEnabled = false;
 
@@ -97,17 +94,6 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
 
    private void updateLatestResult(Detection3DArray results)
    {
-      //      if (lastMessageSentInstant != null && enabledInstant == null)
-      //      {
-      //         LogTools.info("Tracking time: " + Conversions.millisecondsToSeconds(lastMessageSentInstant.until(Instant.now(), ChronoUnit.MILLIS)));
-      //      }
-      //
-      //      if (enabledInstant != null)
-      //      {
-      //         LogTools.info("Time from enabling to receiving pose: " + Conversions.millisecondsToSeconds(enabledInstant.until(Instant.now(), ChronoUnit.MILLIS)));
-      //         enabledInstant = null;
-      //      }
-
       // Ensure the result message has a result
       Detection3D result = results.getDetections().getFirst();
       if (result == null)
@@ -157,10 +143,7 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
       {
          // If it just got enabled reset the tracking
          if (!wasEnabled)
-         {
             resetTracking();
-            //            enabledInstant = Instant.now();
-         }
 
          // Update the target point
          if (newTargetPoint.poll())
@@ -187,7 +170,6 @@ public class IsaacROSFoundationPoseCommunicator implements AutoCloseable
                resetTracking();
 
             updatePoseEstimation(detection);
-            //            lastMessageSentInstant = Instant.now();
          }
       }
 

@@ -7,7 +7,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.RawImagePublisher;
-import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseManager;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -28,7 +28,7 @@ public class IsaacROSFoundationPoseDemo
 
    private final ZEDImageSensor zedImageSensor;
 
-   private final IsaacROSFoundationPoseManager foundationPoseManager;
+   private final IsaacROSFoundationPoseCommunicatorMap foundationPoseCommunicators;
    private final YOLOv8DetectionExecutor yoloExecutor;
 
    private final RepeatingTaskThread taskThread;
@@ -43,10 +43,10 @@ public class IsaacROSFoundationPoseDemo
       zedImageSensor.run(true);
 
       CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator);
-      foundationPoseManager = new IsaacROSFoundationPoseManager(crdtInfo);
+      foundationPoseCommunicators = new IsaacROSFoundationPoseCommunicatorMap(crdtInfo);
 
       yoloExecutor = new YOLOv8DetectionExecutor(new CRDTInfo(ROS2ActorDesignation.ROBOT, peerClockOffsetEstimator), () -> true);
-      yoloExecutor.addDetectionConsumerCallback(foundationPoseManager::updatePoseEstimations);
+      yoloExecutor.addDetectionConsumerCallback(foundationPoseCommunicators::updatePoseEstimations);
       yoloExecutor.disableAllModels();
 
       taskThread = new RepeatingTaskThread(getClass().getSimpleName() + "Thread", this::task);
@@ -74,7 +74,7 @@ public class IsaacROSFoundationPoseDemo
          yoloExecutor.runNextEnabledModel(color, depth);
 
          // Update FoundationPose manager
-         foundationPoseManager.update();
+         foundationPoseCommunicators.updateCommunicators();
 
          color.release();
          depth.release();
@@ -90,7 +90,7 @@ public class IsaacROSFoundationPoseDemo
       imagePublisher.close();
       zedImageSensor.close();
       yoloExecutor.destroy();
-      foundationPoseManager.close();
+      foundationPoseCommunicators.closeCommunicators();
       peerClockOffsetEstimator.destroy();
       ros2Node.destroy();
    }

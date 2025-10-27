@@ -8,11 +8,14 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.ros2.ROS2Topic;
 import vision_msgs.msg.dds.Detection3DArray;
 
-import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseTopics.*;
+import static us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseAPI.*;
 
 public enum IsaacROSFoundationPoseObject
 {
-   MUSTARD("mustard", "bottle"), TRAFFIC_BARRIER("barrier", "traffic_barrier"), EXPLOSIVE_CHARGE("charge", "charge"), DOOR_PANEL("door", "door_panel");
+   MUSTARD("mustard", "bottle"),
+   TRAFFIC_BARRIER("traffic_barrier", "traffic_barrier"),
+   EXPLOSIVE_CHARGE("charge", "charge"),
+   DOOR_PANEL("door_panel", "door_panel");
 
    public final String meshName;
    public final String yoloClass;
