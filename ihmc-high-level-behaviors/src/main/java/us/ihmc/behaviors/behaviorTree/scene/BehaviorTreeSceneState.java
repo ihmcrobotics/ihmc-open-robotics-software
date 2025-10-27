@@ -32,6 +32,6 @@ public class BehaviorTreeSceneState
 
    public ReferenceFrameLibrary getReferenceFrameLibrary()
    {
-      return null;
+      return referenceFrameLibrary;
    }
 }
