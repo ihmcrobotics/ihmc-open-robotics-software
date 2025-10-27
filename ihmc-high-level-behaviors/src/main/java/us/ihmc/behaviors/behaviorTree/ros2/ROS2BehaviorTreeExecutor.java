@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -27,7 +28,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    {
       super(robotModel, syncedRobot, peerClockEstimator, referenceFrameLibrary, sceneGraph, detectionManager, ros2ControllerHelper);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2ControllerHelper);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2ControllerHelper); // FIXME
    }
 
    /** Expected to be called at the {@link ROS2BehaviorTree#SYNC_FREQUENCY} */

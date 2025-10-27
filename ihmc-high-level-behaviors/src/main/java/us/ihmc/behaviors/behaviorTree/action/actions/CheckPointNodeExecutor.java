@@ -1,14 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class CheckPointNodeExecutor extends LeafNodeExecutor<CheckPointNodeState, CheckPointNodeDefinition>
 {
-   public CheckPointNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public CheckPointNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new CheckPointNodeState(id, crdtInfo, saveFileDirectory));
+      super(new CheckPointNodeState(id, rootNode.getState()), rootNode);
    }
 
    @Override

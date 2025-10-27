@@ -195,7 +195,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
    private void renderMoveRelativeItems(RDXBehaviorTreeNode<?, ?> nodeToMove, BehaviorTreeNodeInsertionType insertionType)
    {
       RDXBehaviorTreeNode<?, ?> rootNode = RDXBehaviorTreeTools.findRootNode(nodeToMove);
-      RDXBehaviorTreeTools.runForEntireTree(rootNode, relativeNode ->
+      RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, relativeNode ->
       {
          if (relativeNode != nodeToMove && relativeNode != rootNode)
          {

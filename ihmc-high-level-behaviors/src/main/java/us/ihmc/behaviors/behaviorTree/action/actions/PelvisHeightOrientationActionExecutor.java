@@ -1,40 +1,26 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
 
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
 
-   public PelvisHeightOrientationActionExecutor(long id,
-                                                CRDTInfo crdtInfo,
-                                                WorkspaceResourceDirectory saveFileDirectory,
-                                                ROS2ControllerHelper ros2ControllerHelper,
-                                                ReferenceFrameLibrary referenceFrameLibrary,
-                                                ROS2SyncedRobotModel syncedRobot)
+   public PelvisHeightOrientationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
+      super(new PelvisHeightOrientationActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override

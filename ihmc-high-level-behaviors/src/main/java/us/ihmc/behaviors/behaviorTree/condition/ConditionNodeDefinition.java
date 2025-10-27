@@ -3,10 +3,9 @@ package us.ihmc.behaviors.behaviorTree.condition;
 import behavior_msgs.msg.dds.ConditionNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
  * The first version of this node just implements a counter.
@@ -33,9 +32,9 @@ public class ConditionNodeDefinition extends LeafNodeDefinition
 
    private Type onDiskType;
 
-   public ConditionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ConditionNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       type = new CRDTBidirectionalEnumField<>(this, Type.COUNTER);
 

@@ -1,42 +1,25 @@
 package us.ihmc.behaviors.behaviorTree.control.door;
 
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final SceneGraph sceneGraph;
-
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
    private boolean waitForPullScrewToFinish = false;
    private boolean waitForGraspToFinish = false;
 
-   public DoorTraversalExecutor(long id,
-                                CRDTInfo crdtInfo,
-                                WorkspaceResourceDirectory saveFileDirectory,
-                                ROS2ControllerHelper ros2ControllerHelper,
-                                ROS2SyncedRobotModel syncedRobot,
-                                SceneGraph sceneGraph)
+   public DoorTraversalExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
-      this.sceneGraph = sceneGraph;
+      super(new DoorTraversalState(id, rootNode.getState()), rootNode);
    }
 
    @Override

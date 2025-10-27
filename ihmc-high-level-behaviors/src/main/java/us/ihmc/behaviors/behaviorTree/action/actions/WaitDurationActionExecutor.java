@@ -1,22 +1,17 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.NonWallTimer;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationActionState, WaitDurationActionDefinition>
 {
-   private final ROS2SyncedRobotModel syncedRobot;
    private final NonWallTimer executionTimer = new NonWallTimer();
 
-   public WaitDurationActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
+   public WaitDurationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new WaitDurationActionState(id, crdtInfo, saveFileDirectory));
-
-      this.syncedRobot = syncedRobot;
+      super(new WaitDurationActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override

@@ -2,14 +2,13 @@ package us.ihmc.behaviors.behaviorTree.control;
 
 import behavior_msgs.msg.dds.FallbackNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 
 public class FallbackNodeState extends BehaviorTreeNodeState<FallbackNodeDefinition>
 {
-   public FallbackNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public FallbackNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new FallbackNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new FallbackNodeDefinition(rootNode.getDefinition()), rootNode);
    }
 
    @Override

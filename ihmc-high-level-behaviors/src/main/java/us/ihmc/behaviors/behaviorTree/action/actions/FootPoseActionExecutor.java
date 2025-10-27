@@ -1,38 +1,24 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.FootTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionState, FootPoseActionDefinition>
 {
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredFootPose = new FramePose3D();
    private final FramePose3D syncedFootPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
 
-   public FootPoseActionExecutor(long id,
-                                 CRDTInfo crdtInfo,
-                                 WorkspaceResourceDirectory saveFileDirectory,
-                                 ROS2ControllerHelper ros2ControllerHelper,
-                                 ReferenceFrameLibrary referenceFrameLibrary,
-                                 ROS2SyncedRobotModel syncedRobot)
+   public FootPoseActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new FootPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
+      super(new FootPoseActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override
