@@ -2,19 +2,17 @@ package us.ihmc.behaviors.behaviorTree.control.door;
 
 import behavior_msgs.msg.dds.DoorTraversalDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
 {
    private final CRDTBidirectionalDouble lostGraspDetectionHandOpenAngle;
    private final CRDTBidirectionalDouble openedDoorHandleDistanceFromStart;
 
-   public DoorTraversalDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public DoorTraversalDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       lostGraspDetectionHandOpenAngle = new CRDTBidirectionalDouble(this, Math.toRadians(10.0));
       openedDoorHandleDistanceFromStart = new CRDTBidirectionalDouble(this, 0.12);

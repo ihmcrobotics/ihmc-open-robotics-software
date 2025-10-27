@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.action;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
@@ -23,9 +23,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Le
    private final CRDTStatusDouble positionDistanceToGoalTolerance;
    private final CRDTStatusDouble orientationDistanceToGoalTolerance;
 
-   public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
+   public ActionNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, definition, crdtInfo);
+      super(id, definition, rootNode);
 
       nominalExecutionDuration = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       elapsedExecutionTime = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);

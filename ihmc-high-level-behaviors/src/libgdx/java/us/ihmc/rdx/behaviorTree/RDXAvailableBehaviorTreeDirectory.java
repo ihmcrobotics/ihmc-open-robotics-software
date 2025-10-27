@@ -125,19 +125,27 @@ public class RDXAvailableBehaviorTreeDirectory
             {
                if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
                {
-                  RDXBehaviorTreeNode<?, ?> loadedNode = behaviorTree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
+                  RDXBehaviorTreeRootNode rootNode;
+                  if (relativeNode == null) // Automatically add a root node if there isn't one
+                     rootNode = (RDXBehaviorTreeRootNode) behaviorTree.getNodeBuilder().createRootNode(behaviorTree.getAndIncrementNextID());
+                  else
+                     rootNode = behaviorTree.getRootNode();
+
+                  RDXBehaviorTreeNode<?, ?> loadedNode
+                        = behaviorTree.getFileLoader().loadFromFile(rootNode, indexedTreeFile.getTreeFile(), topologyOperationQueue);
 
                   if (loadedNode != null)
                   {
-                     RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
-
-                     if (behaviorTree.getRootNode() == null) // Automatically add a root node if there isn't one
+                     RDXBehaviorTreeNode<?, ?> nodeToInsert;
+                     if (relativeNode == null) // Add as child of root node if we made one
                      {
-                        nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
-                                                                   behaviorTree.getCRDTInfo(),
-                                                                   behaviorTree.getSaveFileDirectory());
-                        nodeToInsert.getDefinition().modify();
-                        topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
+                        nodeToInsert = rootNode;
+                        rootNode.getDefinition().modify();
+                        topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+                     }
+                     else
+                     {
+                        nodeToInsert = loadedNode;
                      }
 
                      BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition

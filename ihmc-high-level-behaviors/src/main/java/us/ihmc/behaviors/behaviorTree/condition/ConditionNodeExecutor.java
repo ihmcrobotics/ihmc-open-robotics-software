@@ -1,9 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, ConditionNodeDefinition>
 {
@@ -11,9 +9,9 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
    private LLMConditionExecutor llm;
    private final ProximityConditionExecutor proximityCheck;
 
-   public ConditionNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public ConditionNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
+      super(new ConditionNodeState(id, rootNode.getState()), rootNode);
 
       counter = new CounterConditionExecutor(state);
       //      llm = new LLMConditionExecutor(state, referenceFrameLibrary);

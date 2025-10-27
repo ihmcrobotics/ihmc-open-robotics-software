@@ -1,15 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusRigidBodyTransform;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
@@ -22,9 +20,9 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    private final CRDTStatusRigidBodyTransform goalPelvisToWorldTransform;
    private final ReferenceFrame goalPelvisFrame;
 
-   public ChestOrientationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new ChestOrientationActionDefinition(rootNode.getDefinition()), rootNode);
 
       chestFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                     definition.getCRDTParentFrameName(),

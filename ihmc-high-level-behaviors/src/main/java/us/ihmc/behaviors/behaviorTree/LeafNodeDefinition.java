@@ -4,8 +4,6 @@ import behavior_msgs.msg.dds.LeafNodeDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTBidirectionalLong;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 /**
  * Definition of a leaf node which gets executed as part of the concurrency system.
@@ -27,9 +25,9 @@ public class LeafNodeDefinition extends BehaviorTreeNodeDefinition
    // On disk fields
    private String onDiskExecuteAfterLeafName;
 
-   public LeafNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public LeafNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       executeAfterNodeID = new CRDTBidirectionalLong(this, EXECUTE_AFTER_PREVIOUS_ID);
    }
