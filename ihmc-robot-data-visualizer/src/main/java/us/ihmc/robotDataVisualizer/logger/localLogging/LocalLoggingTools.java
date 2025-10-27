@@ -26,7 +26,7 @@ public final class LocalLoggingTools
          LogTools.warn("[Local logging] https://ihmcrobotics.atlassian.net/wiki/spaces/Alexander/pages/1118961761/On-board+logging+USB+flash+drive");
       }
 
-      LOGGING_LOCALLY = !debugNetworkInterfaceIsConnected && logDirectoryIsMountpoint;
+      LOGGING_LOCALLY =/*!debugNetworkInterfaceIsConnected &&*/ logDirectoryIsMountpoint;
    }
 
    private static boolean debugNetworkInterfaceIsConnected()
