@@ -17,6 +17,22 @@ import us.ihmc.sensors.zed.ZEDModelData;
 import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
 import us.ihmc.zed.global.zed;
 
+/**
+ * Demo for IHMC's usage of Isaac ROS FoundationPose. The code for launching Isaac ROS FoundationPose can be found
+ * <a href="https://github.com/ihmcrobotics/ihmc-isaac-ros/tree/main/src/ihmc_isaac_ros_foundationpose">here</a>
+ * <p>
+ * This demo is intended to run on a Jetson device. Run {@code gradle installDist} to generate the entrypoint
+ * of this class and use {@code rsync -r build/install/ihmc-perception user@jetson.address:~} to copy the
+ * required libraries and binaries to the Jetson device.
+ * <p>
+ * Once the files are on the Jetson, SSH into the Jetson and start the following processes:
+ * <ul>
+ *    <li>This demo, by running {@code ~/ihmc-perception/bin/IsaacROSFoundationPoseDemo}</li>
+ *    <li>Isaac ROS FoundationPose, by following instructions found
+ *    <a href="https://github.com/ihmcrobotics/ihmc-isaac-ros/blob/main/src/ihmc_isaac_ros_foundationpose/README.md">here</a></li>
+ * </ul>
+ * And run the RDXIsaacROSFoundationPoseDemoUI on any machine that can communicate with the Jetson.
+ */
 public class IsaacROSFoundationPoseDemo
 {
    private static final String SVO_FILE = "/home/robotlab/Downloads/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";

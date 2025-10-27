@@ -17,11 +17,9 @@ public class RDXIsaacROSFoundationPoseSettings
    private final IsaacROSFoundationPoseObject object;
 
    private final ROS2Publisher<Empty> resetRequestPublisher;
-
    private final SyncedIsaacROSFoundationPoseParameters parameters;
 
    private final ImGuiUniqueLabelMap labels;
-
    private final ImBooleanWrapper enabled;
    private final ImBooleanWrapper autoResetEnabled;
    private final ImDoubleWrapper resetDistance;
