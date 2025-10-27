@@ -28,27 +28,27 @@ import java.util.function.BiFunction;
 
 public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBehaviorTreeNode<?, ?>>
 {
-   private static final Map<Class<?>, BiFunction<Long, RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>> MAP = new HashMap<>();
+   private static final Map<Class<?>, BiFunction<Long, RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>> REGISTRY = new HashMap<>();
    static
    {
-      MAP.put(BehaviorTreeNodeDefinition.class, RDXBehaviorTreeNode::new);
-      MAP.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
-      MAP.put(ActionSequenceDefinition.class, RDXActionSequence::new);
-      MAP.put(FallbackNodeDefinition.class, RDXFallbackNode::new);
-      MAP.put(ConditionNodeDefinition.class, RDXConditionNode::new);
-      MAP.put(GotoNodeDefinition.class, RDXGotoNode::new);
-      MAP.put(CheckPointNodeDefinition.class, RDXCheckPointNode::new);
-      MAP.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
-      MAP.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
-      MAP.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
-      MAP.put(FootstepPlanActionDefinition.class, RDXFootstepPlanAction::new);
-      MAP.put(HandPoseActionDefinition.class, RDXHandPoseAction::new);
-      MAP.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
-      MAP.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
-      MAP.put(PelvisHeightOrientationActionDefinition.class, RDXPelvisHeightOrientationAction::new);
-      MAP.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
-      MAP.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
-      MAP.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
+      REGISTRY.put(BehaviorTreeNodeDefinition.class, RDXBehaviorTreeNode::new);
+      REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
+      REGISTRY.put(ActionSequenceDefinition.class, RDXActionSequence::new);
+      REGISTRY.put(FallbackNodeDefinition.class, RDXFallbackNode::new);
+      REGISTRY.put(ConditionNodeDefinition.class, RDXConditionNode::new);
+      REGISTRY.put(GotoNodeDefinition.class, RDXGotoNode::new);
+      REGISTRY.put(CheckPointNodeDefinition.class, RDXCheckPointNode::new);
+      REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
+      REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
+      REGISTRY.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
+      REGISTRY.put(FootstepPlanActionDefinition.class, RDXFootstepPlanAction::new);
+      REGISTRY.put(HandPoseActionDefinition.class, RDXHandPoseAction::new);
+      REGISTRY.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
+      REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
+      REGISTRY.put(PelvisHeightOrientationActionDefinition.class, RDXPelvisHeightOrientationAction::new);
+      REGISTRY.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
+      REGISTRY.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
+      REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
    }
 
    private CRDTInfo crdtInfo; // TODO: Make final somehow
@@ -99,8 +99,8 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    @Override
    public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>> rootNodeType)
    {
-      if (MAP.containsKey(nodeType))
-         return MAP.get(nodeType).apply(id, (RDXBehaviorTreeRootNode) rootNodeType);
+      if (REGISTRY.containsKey(nodeType))
+         return REGISTRY.get(nodeType).apply(id, (RDXBehaviorTreeRootNode) rootNodeType);
 
       return null;
    }

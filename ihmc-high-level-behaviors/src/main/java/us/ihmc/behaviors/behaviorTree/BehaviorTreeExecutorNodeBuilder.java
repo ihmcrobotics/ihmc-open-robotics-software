@@ -23,27 +23,27 @@ import java.util.function.BiFunction;
 
 public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<BehaviorTreeNodeExecutor<?, ?>>
 {
-   private static final Map<Class<?>, BiFunction<Long, BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>> MAP = new HashMap<>();
+   private static final Map<Class<?>, BiFunction<Long, BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>> REGISTRY = new HashMap<>();
    static
    {
-      MAP.put(BehaviorTreeNodeDefinition.class, BehaviorTreeNodeExecutor::new);
-      MAP.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
-      MAP.put(ActionSequenceDefinition.class, ActionSequenceExecutor::new);
-      MAP.put(FallbackNodeDefinition.class, FallbackNodeExecutor::new);
-      MAP.put(ConditionNodeDefinition.class, ConditionNodeExecutor::new);
-      MAP.put(GotoNodeDefinition.class, GotoNodeExecutor::new);
-      MAP.put(CheckPointNodeDefinition.class, CheckPointNodeExecutor::new);
-      MAP.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
-      MAP.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
-      MAP.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
-      MAP.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
-      MAP.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
-      MAP.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
-      MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
-      MAP.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionExecutor::new);
-      MAP.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
-      MAP.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
-      MAP.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
+      REGISTRY.put(BehaviorTreeNodeDefinition.class, BehaviorTreeNodeExecutor::new);
+      REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
+      REGISTRY.put(ActionSequenceDefinition.class, ActionSequenceExecutor::new);
+      REGISTRY.put(FallbackNodeDefinition.class, FallbackNodeExecutor::new);
+      REGISTRY.put(ConditionNodeDefinition.class, ConditionNodeExecutor::new);
+      REGISTRY.put(GotoNodeDefinition.class, GotoNodeExecutor::new);
+      REGISTRY.put(CheckPointNodeDefinition.class, CheckPointNodeExecutor::new);
+      REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
+      REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
+      REGISTRY.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
+      REGISTRY.put(FootstepPlanActionDefinition.class, FootstepPlanActionExecutor::new);
+      REGISTRY.put(HandPoseActionDefinition.class, HandPoseActionExecutor::new);
+      REGISTRY.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
+      REGISTRY.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
+      REGISTRY.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionExecutor::new);
+      REGISTRY.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
+      REGISTRY.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
+      REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
    }
 
    private final LogToolsLogger logToolsLogger = new LogToolsLogger();
@@ -100,8 +100,8 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    @Override
    public BehaviorTreeNodeExecutor<?, ?> createNode(Class<?> nodeType, long id, BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>> rootNode)
    {
-      if (MAP.containsKey(nodeType))
-         return MAP.get(nodeType).apply(id, (BehaviorTreeRootNodeExecutor) rootNode);
+      if (REGISTRY.containsKey(nodeType))
+         return REGISTRY.get(nodeType).apply(id, (BehaviorTreeRootNodeExecutor) rootNode);
 
       return null;
    }
