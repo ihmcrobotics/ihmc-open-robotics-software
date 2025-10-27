@@ -29,11 +29,11 @@
 using namespace PerceptionUtils;
 
 extern "C"
-__global__ void filterDetections(float* unfilteredDetection,
+__global__ void filterDetections(const float* unfilteredDetection,
                                  int classCount,
                                  int detectionCount,
-                                 float* confidenceThresholds,
-                                 bool* ignoredClasses,
+                                 const float* confidenceThresholds,
+                                 const bool* ignoredClasses,
                                  float* filteredDetections,
                                  int* filteredDetectionCount)
 {

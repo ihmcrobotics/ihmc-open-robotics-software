@@ -61,3 +61,4 @@ slamWrapperDependencies {
 }
 
 app.entrypoint("IsaacROSFoundationPoseDemo", "us.ihmc.perception.demo.IsaacROSFoundationPoseDemo")
+app.entrypoint("YOLOv8ModelTest", "us.ihmc.perception.detections.yolo.YOLOv8ModelTest")
