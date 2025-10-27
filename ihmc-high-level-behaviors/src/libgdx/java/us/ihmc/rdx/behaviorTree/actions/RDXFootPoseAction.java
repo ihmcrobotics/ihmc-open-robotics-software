@@ -54,7 +54,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 state.getFootFrame()::changeFrame);
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,

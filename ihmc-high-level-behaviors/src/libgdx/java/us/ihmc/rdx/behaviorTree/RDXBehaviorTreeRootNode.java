@@ -235,6 +235,11 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       return syncedRobot;
    }
 
+   public RDXBehaviorTreeScene getScene()
+   {
+      return scene;
+   }
+
    public RobotCollisionModel getSelectionCollisionModel()
    {
       return selectionCollisionModel;

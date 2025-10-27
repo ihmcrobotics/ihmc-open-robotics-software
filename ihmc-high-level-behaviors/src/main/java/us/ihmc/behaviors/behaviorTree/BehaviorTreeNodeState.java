@@ -6,7 +6,6 @@ import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,7 +44,6 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
    private final BehaviorTreeNodeMessageLogger logger;
    protected final CRDTInfo crdtInfo; // convenient to have readily available
    protected final BehaviorTreeSceneState scene;
-   protected final ReferenceFrameLibrary referenceFrameLibrary;
    protected final DRCRobotModel robotModel;
 
    public BehaviorTreeNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode)
@@ -69,7 +67,6 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
          this.robotModel = rootNode.getDefinition().getRobotModel();
       }
       this.scene = scene;
-      this.referenceFrameLibrary = scene.getReferenceFrameLibrary();
 
       logger = new BehaviorTreeNodeMessageLogger(definition.getCRDTInfo());
    }

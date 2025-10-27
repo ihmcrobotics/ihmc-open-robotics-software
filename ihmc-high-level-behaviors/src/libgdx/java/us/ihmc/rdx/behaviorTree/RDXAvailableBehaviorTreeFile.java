@@ -36,7 +36,7 @@ public class RDXAvailableBehaviorTreeFile
       referenceFramesInWorld.clear();
       for (String referenceFrameName : referenceFrameNames)
       {
-         ReferenceFrame frameByName = scene.getReferenceFrameLibrary().findFrameByName(referenceFrameName);
+         ReferenceFrame frameByName = scene.findFrameByName(referenceFrameName);
          if (frameByName != null && frameByName.getRootFrame() == ReferenceFrame.getWorldFrame())
          {
             referenceFramesInWorld.add(referenceFrameName);

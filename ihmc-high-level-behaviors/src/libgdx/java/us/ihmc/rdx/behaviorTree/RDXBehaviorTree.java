@@ -46,7 +46,8 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    private boolean draggingDivider;
    private boolean shouldSave = false;
 
-   public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,ROS2SyncedRobotModel syncedRobot,
+   public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
+                          ROS2SyncedRobotModel syncedRobot,
                           ROS2PeerClockOffsetEstimator peerClockEstimator,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
@@ -54,7 +55,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    {
       super(syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
 
-      scene = new RDXBehaviorTreeScene(panel);
+      scene = new RDXBehaviorTreeScene(syncedRobot, panel);
 
       ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
                                                                  saveFileDirectory,

@@ -55,7 +55,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 state.getPelvisFrame()::changeFrame);
       heightWidget = new ImDoubleWrapper(definition::getHeight,

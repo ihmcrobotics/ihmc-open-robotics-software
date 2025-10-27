@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.llama.Llama;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class LLMConditionExecutor
       }
    }
 
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final BehaviorTreeSceneState scene;
    private final BehaviorTreeRootNodeExecutor rootNode;
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
@@ -57,7 +57,7 @@ public class LLMConditionExecutor
    {
       this.state = state;
       this.rootNode = rootNode;
-      this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
+      scene = rootNode.getState().getScene();
 
       definition = state.getDefinition();
 
@@ -102,7 +102,7 @@ public class LLMConditionExecutor
       if (injectEnvironmentState.getValue())
       {
          ArrayList<String> frameNames = new ArrayList<>();
-         referenceFrameLibrary.getAllFrameNames(frameNames::add);
+         scene.getAllFrameNames(frameNames::add);
 
          if (frameNames.isEmpty())
             injectedText.append("There are no currently detected objects in the environment.");
@@ -111,7 +111,7 @@ public class LLMConditionExecutor
 
          for (String frameName : frameNames)
          {
-            ReferenceFrame frameByName = referenceFrameLibrary.findFrameByName(frameName);
+            ReferenceFrame frameByName = scene.findFrameByName(frameName);
             injectedText.append(frameByName.getName() + StringTools.tupleString(frameByName.getTransformToWorldFrame().getTranslation())).append("\n");
          }
       }

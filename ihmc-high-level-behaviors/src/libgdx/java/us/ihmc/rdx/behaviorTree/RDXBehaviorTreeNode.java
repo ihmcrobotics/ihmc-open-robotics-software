@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -21,7 +22,6 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean dragReleasedAfter = false;
 
    protected final DRCRobotModel robotModel;
-   protected final ReferenceFrameLibrary referenceFrameLibrary;
+   protected final RDXBehaviorTreeScene scene;
    protected final ROS2SyncedRobotModel syncedRobot;
    protected final RobotCollisionModel selectionCollisionModel;
    protected final RDXBaseUI baseUI;
@@ -86,7 +86,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       this.state = state;
       this.rootNode = rootNode;
       this.robotModel = rootNode.getDefinition().getRobotModel();
-      this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
+      this.scene = rootNode.getScene();
       this.syncedRobot = rootNode.getSyncedRobot();
       this.selectionCollisionModel = rootNode.getSelectionCollisionModel();
       this.baseUI = rootNode.getBaseUI();
@@ -104,7 +104,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       this.state = state;
       this.rootNode = (RDXBehaviorTreeRootNode) this;
       this.robotModel = rootNode.getDefinition().getRobotModel();
-      this.referenceFrameLibrary = rootNode.getState().getScene().getReferenceFrameLibrary();
+      this.scene = rootNode.getScene();
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
       this.baseUI = baseUI;
