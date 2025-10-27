@@ -20,6 +20,7 @@ import java.util.function.Consumer;
  */
 public class BehaviorTreeSceneState
 {
+   protected final ROS2SyncedRobotModel syncedRobot;
 
    private final ArrayList<ReferenceFrame> robotFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> robotFrameMap = new HashMap<>();
@@ -28,6 +29,8 @@ public class BehaviorTreeSceneState
 
    public BehaviorTreeSceneState(ROS2SyncedRobotModel syncedRobot)
    {
+      this.syncedRobot = syncedRobot;
+
       addAll(Collections.singleton(ReferenceFrame.getWorldFrame()));
       addAll(syncedRobot.getReferenceFrames().getCommonReferenceFrames());
       for (RobotSide side : RobotSide.values)

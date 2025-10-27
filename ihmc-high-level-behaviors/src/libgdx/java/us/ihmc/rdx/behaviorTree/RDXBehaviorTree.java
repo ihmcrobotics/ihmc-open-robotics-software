@@ -55,7 +55,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
    {
       super(syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
 
-      scene = new RDXBehaviorTreeScene(syncedRobot, panel);
+      scene = new RDXBehaviorTreeScene(syncedRobot, baseUI, panel);
 
       ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
                                                                  saveFileDirectory,
@@ -81,6 +81,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBe
 
    public void update()
    {
+      scene.update();
       idToNodeMap.clear();
 
       if (rootNode != null)
