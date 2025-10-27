@@ -1,5 +1,6 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
+import behavior_msgs.msg.dds.ContinuousHikingCommandMessage;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
@@ -13,8 +14,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParametersBasics;
 import us.ihmc.commons.DeadbandTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.footstepPlanning.communication.ContinuousHikingAPI;
 import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Publisher;
 
 /**
  * Plugin for using an xbox controller to send commands and receive status info to/from the
@@ -26,7 +29,7 @@ import us.ihmc.ros2.ROS2Node;
  *
  * @author Stefan Fasano
  */
-public class XBoxOneCSGPluginGDX
+public class XBoxOneJoystickWalkingPlugin
 {
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
@@ -46,23 +49,35 @@ public class XBoxOneCSGPluginGDX
    private final QueuedROS2Subscription<ContinuousStepGeneratorStatusMessage> csgStatusSubscription;
    private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
 
-   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node)
+   private final ROS2Publisher<ContinuousHikingCommandMessage> continuousHikingCommandPublisher;
+   private final ContinuousHikingCommandMessage continuousHikingCommand = new ContinuousHikingCommandMessage();
+
+   private boolean enableCSGPublishing = true;
+   private boolean enableContinuousHikingPublishing = false;
+
+   public XBoxOneJoystickWalkingPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
       this(robotModel, ros2Node, DEFAULT_PARAMETER_INCREMENT, DEFAULT_USE_DEADMAN_SWITCH);
    }
 
-   public XBoxOneCSGPluginGDX(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
+   public XBoxOneJoystickWalkingPlugin(DRCRobotModel robotModel, ROS2Node ros2Node, double parameterIncrement, boolean useDeadmanSwitch)
    {
       this.parameterIncrement = parameterIncrement;
       this.useDeadmanSwitch = useDeadmanSwitch;
 
+      // Set up CSG commands, publisher, and status subscriber
       ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
+      csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
       csgInputCommand = new ContinuousStepGeneratorInputMessage();
       csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
-      csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
 
-      configureCSGParameters(csgParametersCommand, robotModel.getWalkingControllerParameters());
+      //
+      continuousHikingCommandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
 
+      // Initialize CSG parameter command from default initial robot parameters
+      initializeCSGParametersCommand(csgParametersCommand, robotModel.getWalkingControllerParameters());
+
+      // Set up controller listener
       controllerListener = new ControllerListener()
       {
          @Override
@@ -124,9 +139,11 @@ public class XBoxOneCSGPluginGDX
 
    public void update()
    {
+      // Get latest CSG status message, and reset CSG parameters command from that
       if (csgStatusSubscription.flushAndGetLatest(csgStatusMessage))
          setCSGCommandsToCurrentValues(csgStatusMessage);
 
+      // Check if new joystick has been connected
       boolean newControllerConnected = false;
       if (currentController != null && currentController != Controllers.getCurrent())
          newControllerConnected = true;
@@ -134,12 +151,35 @@ public class XBoxOneCSGPluginGDX
       currentController = Controllers.getCurrent();
       currentControllerConnected = currentController != null;
 
+      // Check if controller listener has been added
       if ((!controllerListenerHasBeenAdded || newControllerConnected) && currentControllerConnected)
       {
          currentController.addListener(controllerListener);
          controllerListenerHasBeenAdded = true;
       }
 
+
+      // Assemble our command from joystick inputs and publish it
+      if (enableCSGPublishing)
+      {
+         // Assemble our CSG input command
+         configureCSGInputCommand();
+
+         // Publish our CSG input command
+         ros2ControllerPublisherMap.publish(csgInputCommand);
+      }
+      else if (enableContinuousHikingPublishing)
+      {
+         // Assemble our continuous hiking command
+         configureContinuousHikingCommand();
+
+         // Publish our continuous hiking command
+         continuousHikingCommandPublisher.publish(continuousHikingCommand);
+      }
+   }
+
+   private void configureCSGInputCommand()
+   {
       // Default CSG input values
       boolean requestWalking = false;
       double forwardJoystickValue = 0.0;
@@ -161,7 +201,37 @@ public class XBoxOneCSGPluginGDX
       csgInputCommand.setForwardVelocity(forwardJoystickValue);
       csgInputCommand.setLateralVelocity(lateralJoystickValue);
       csgInputCommand.setTurnVelocity(turningJoystickValue);
-      ros2ControllerPublisherMap.publish(csgInputCommand);
+   }
+
+   private void configureContinuousHikingCommand()
+   {
+      // Setup variables to be published in the message
+      boolean requestWalking = false;
+      boolean walkForwards = false;
+      boolean walkBackwards = false;
+      double forwardJoystickValue = 0.0;
+      double lateralJoystickValue = 0.0;
+      double turningJoystickValue = 0.0;
+      double deadband = 0.09;
+
+      // Continuous hiking input values we get from the xbox controller
+      if (currentControllerConnected)
+      {
+         requestWalking = currentController.getAxis(4) == 1.0; // This is the left trigger value (1.0 = pressed in)
+         forwardJoystickValue = requestWalking ? DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftY)) : 0.0;
+         lateralJoystickValue = requestWalking ? DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisLeftX)) : 0.0;
+         turningJoystickValue = requestWalking ? DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX)) : 0.0;
+         walkForwards = requestWalking && forwardJoystickValue > 0.0;
+         walkBackwards = requestWalking && forwardJoystickValue < 0.0;
+      }
+
+      continuousHikingCommand.setEnableContinuousHiking(true);
+      continuousHikingCommand.setUseJoystickController(true);
+      continuousHikingCommand.setWalkForwards(walkForwards);
+      continuousHikingCommand.setWalkBackwards(walkBackwards);
+      continuousHikingCommand.setForwardValue(forwardJoystickValue);
+      continuousHikingCommand.setLateralValue(lateralJoystickValue);
+      continuousHikingCommand.setTurningValue(turningJoystickValue);
    }
 
    public void shutDownXboxJoystick()
@@ -188,7 +258,7 @@ public class XBoxOneCSGPluginGDX
       csgParametersCommand.setTurnMaxAngleOutward(csgStatusMessage.getCurrentTurnMaxAngleOutward());
    }
 
-   private void configureCSGParameters(ContinuousStepGeneratorParametersMessage csgParametersCommand, WalkingControllerParameters walkingControllerParameters)
+   private void initializeCSGParametersCommand(ContinuousStepGeneratorParametersMessage csgParametersCommand, WalkingControllerParameters walkingControllerParameters)
    {
       csgParametersCommand.setNumberOfFootstepsToPlan(ContinuousStepGeneratorParametersBasics.DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN);
       csgParametersCommand.setNumberOfFixedFootsteps(ContinuousStepGeneratorParametersBasics.DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS);
@@ -203,5 +273,17 @@ public class XBoxOneCSGPluginGDX
       csgParametersCommand.setMaxStepWidth(steppingParameters.getMaxStepWidth());
       csgParametersCommand.setTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
       csgParametersCommand.setTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
+   }
+
+   public void enableCSGPublishing()
+   {
+      enableCSGPublishing = true;
+      enableContinuousHikingPublishing = false;
+   }
+
+   public void enableContinuousHikingPublishing()
+   {
+      enableCSGPublishing = false;
+      enableContinuousHikingPublishing = true;
    }
 }
