@@ -1,15 +1,21 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
+
+import javax.naming.ldap.Control;
 
 /**
  * This class is responsible for applying a master gain to all low-level desired outputs.
@@ -38,8 +44,14 @@ public class AvatarLowLevelOutputProcessor
    private final YoDouble servoDuration = new YoDouble("servoDuration", registry);
    private final YoDouble servoTime = new YoDouble("servoTime", registry);
    private final YoDouble masterGain = new YoDouble("masterGain", registry);
+   private final YoBoolean interpolateDesireds = new YoBoolean("interpolateDesireds", registry);
+   private final YoInteger interpolateDuration = new YoInteger("interpolateDuration", registry);
+   private final YoInteger interpolationTick = new YoInteger("interpolationTick", registry);
+
+   private final JointControlBlender[] jointControlBlenders;
 
    private final YoLowLevelOneDoFJointDesiredDataHolder unprocessedDesireds;
+   private final YoLowLevelOneDoFJointDesiredDataHolder previousDesireds;
    private final YoLowLevelOneDoFJointDesiredDataHolder processedDesireds;
 
    private double servoStartGain = 0.0;
@@ -50,7 +62,15 @@ public class AvatarLowLevelOutputProcessor
       this.updateDt = updateDt;
 
       unprocessedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName, controlledJoints, registry);
+      previousDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Previous", controlledJoints, registry);
       processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Processed", controlledJoints, registry);
+
+      jointControlBlenders = new JointControlBlender[controlledJoints.length];
+      interpolateDuration.set(1);
+      interpolationTick.set(1);
+
+      for (int i = 0; i < controlledJoints.length; i++)
+         jointControlBlenders[i] = new JointControlBlender("LowLevelOutputInterpolator", controlledJoints[i], registry);
 
       servoDuration.set(DEFAULT_SERVO_DURATION);
 
@@ -92,13 +112,31 @@ public class AvatarLowLevelOutputProcessor
                                    isServod.set(true);
                              });
 
+      interpolateDesireds.addListener(s ->
+                                      {
+                                         if(interpolateDesireds.getBooleanValue())
+                                            interpolationTick.set(0);
+                                         interpolateDesireds.set(false, false);
+                                      });
+
+      interpolateDuration.addListener(change ->
+                                      {
+                                         if(interpolateDuration.getIntegerValue() < 1)
+                                            interpolateDuration.set(1);
+                                      });
+
       parentRegistry.addChild(registry);
    }
 
    public void update(JointDesiredOutputListReadOnly unprocessedDesireds)
    {
       this.unprocessedDesireds.overwriteWith(unprocessedDesireds);
-      processedDesireds.overwriteWith(unprocessedDesireds);
+
+      if (interpolationTick.getIntegerValue() < interpolateDuration.getIntegerValue())
+         interpolate();
+      else
+         processedDesireds.overwriteWith(unprocessedDesireds);
+
 
       if (isServoing.getBooleanValue())
          computeMasterGainForServo();
@@ -108,6 +146,25 @@ public class AvatarLowLevelOutputProcessor
 
       for (int i = 0; i < processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
          processedDesireds.getJointDesiredOutput(i).setMasterGain(masterGain.getDoubleValue());
+   }
+
+   public void startDesiredsInterpolation(boolean interpolate)
+   {
+      interpolateDesireds.set(interpolate);
+      previousDesireds.overwriteWith(processedDesireds);
+   }
+
+   private void interpolate()
+   {
+      for (int i = 0; i <  processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         double ratio = interpolationTick.getValueAsDouble() / interpolateDuration.getValueAsDouble();
+         JointDesiredOutputReadOnly previousJointDesireds = previousDesireds.getJointDesiredOutput(i);
+         JointDesiredOutputReadOnly currentJointDesireds = unprocessedDesireds.getJointDesiredOutput(i);
+
+         jointControlBlenders[i].computeAndUpdateJointControl(processedDesireds.getJointDesiredOutput(i), previousJointDesireds, currentJointDesireds, ratio);
+      }
+      interpolationTick.increment();
    }
 
    private void computeMasterGainForServo()

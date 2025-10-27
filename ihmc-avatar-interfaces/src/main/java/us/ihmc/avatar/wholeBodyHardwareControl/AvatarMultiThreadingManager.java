@@ -204,6 +204,8 @@ public class AvatarMultiThreadingManager
          controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
 
+      controllerTask.addCallbackPostTask(() -> lowLevelOutputProcessor.startDesiredsInterpolation(true));
+
       controllerTask.addCallbackPostTask(()->
                                          {
                                             controllerThreadFrequencyCalculator.ping();
