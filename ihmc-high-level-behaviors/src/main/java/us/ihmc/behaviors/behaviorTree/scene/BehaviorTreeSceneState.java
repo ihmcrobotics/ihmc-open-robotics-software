@@ -59,13 +59,14 @@ public abstract class BehaviorTreeSceneState
 
    public boolean containsFrame(String referenceFrameName)
    {
-      for (ReferenceFrame frame : robotFrames)
-      {
-         if (referenceFrameName.equals(frame.getName()))
-            return true;
-      }
+      boolean contains = robotFrameMap.containsKey(referenceFrameName);
 
-      return false;
+      if (!contains)
+         for (BehaviorTreeSceneObjectState object : objects)
+            if (referenceFrameName.startsWith(object.getName())) // TODO Affordance frame
+               return true;
+
+      return contains;
    }
 
    @Nullable
@@ -73,10 +74,13 @@ public abstract class BehaviorTreeSceneState
    {
       // Check map first, then dynamic collections
       ReferenceFrame referenceFrame = robotFrameMap.get(referenceFrameName);
-      boolean frameFound = referenceFrame != null;
 
+      if (referenceFrame == null)
+         for (BehaviorTreeSceneObjectState object : objects)
+            if (referenceFrameName.startsWith(object.getName())) // TODO Affordance frame
+               return object.getReferenceFrame();
 
-      return frameFound ? referenceFrame : null;
+      return referenceFrame;
    }
 
    public void getAllFrameNames(Consumer<String> frameNameConsumer)
@@ -84,6 +88,11 @@ public abstract class BehaviorTreeSceneState
       for (ReferenceFrame frame : robotFrames)
       {
          frameNameConsumer.accept(frame.getName());
+      }
+
+      for (BehaviorTreeSceneObjectState object : objects)
+      {
+         frameNameConsumer.accept(object.getName());
       }
    }
 

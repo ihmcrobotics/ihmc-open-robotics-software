@@ -31,7 +31,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
 
    public String getName()
    {
-      return "";
+      return type;
    }
 
    public void clearOffset()
@@ -64,6 +64,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
          LogTools.error("Types should match! {} != {}", id, message.getId());
 
       transform.fromMessage(message.getTransformToWorld());
+      referenceFrame.update();
    }
 
    public void destroy()

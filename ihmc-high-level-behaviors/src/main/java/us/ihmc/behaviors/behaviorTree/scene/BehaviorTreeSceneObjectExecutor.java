@@ -18,7 +18,7 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
 
    public void update()
    {
-
+      persistentDetection = null;
    }
 
    public void destroy()

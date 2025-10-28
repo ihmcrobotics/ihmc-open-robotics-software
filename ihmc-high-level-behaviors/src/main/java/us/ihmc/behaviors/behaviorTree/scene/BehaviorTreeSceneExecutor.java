@@ -6,7 +6,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.LongSupplier;
 
@@ -15,7 +14,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    private final YOLOv8DetectionExecutor yolo;
    private final IsaacROSFoundationPoseCommunicatorMap foundationPose;
 
-   private final List<BehaviorTreeSceneObjectExecutor> trackers = new ArrayList<>();
+   private final List<BehaviorTreeSceneObjectExecutor> objects;
 
    public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
@@ -28,16 +27,21 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       this.yolo = yolo;
       this.foundationPose = foundationPose;
 
-
+      objects = (List) super.objects;
 
    }
 
    public void update()
    {
-      for (String availableModelName : yolo.getAvailableModelNames())
+      for (BehaviorTreeSceneObjectExecutor object : objects)
       {
-
+         object.update();
       }
+
+//      for (String availableModelName : yolo.getAvailableModelNames())
+//      {
+//
+//      }
 
 //      yolo.enableModel("door");
 

@@ -46,6 +46,8 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecu
 
    public void update()
    {
+      scene.update();
+
       if (rootNode != null)
       {
          rootNode.clock();
