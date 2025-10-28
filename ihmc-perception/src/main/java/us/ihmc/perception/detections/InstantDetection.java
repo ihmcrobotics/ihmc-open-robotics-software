@@ -14,7 +14,7 @@ import java.time.Instant;
  * The main subclasses are:
  * <ul>
  *    <li>{@link us.ihmc.perception.detections.yolo.YOLOv8InstantDetection}</li>
- *    <li>{@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}</li>
+ *    <li>{@link us.ihmc.perception.detections.foundationPose.FoundationPoseInstantDetection}</li>
  * </ul>
  */
 public class InstantDetection

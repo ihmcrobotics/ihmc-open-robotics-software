@@ -159,8 +159,21 @@ public class YOLOv8DetectionExecutor
 
    public void runNextEnabledModel(RawImage colorImage, RawImage depthImage)
    {
-      if (modelIterator == null || !modelIterator.hasNext())
-         modelIterator = availableModels.values().iterator();
+      for (int i = 0; i < availableModels.size(); ++i)
+      {
+         if (modelIterator == null || !modelIterator.hasNext())
+            modelIterator = availableModels.values().iterator();
+
+         YOLOv8Model model = modelIterator.next();
+
+         if (parameters.getModelsToRun().getValue().contains(model.getName()))
+         {
+            runYOLODetection(model, colorImage, depthImage);
+            return;
+         }
+
+         yoloDetectionResults.remove(model);
+      }
 
       while (modelIterator.hasNext())
       {
