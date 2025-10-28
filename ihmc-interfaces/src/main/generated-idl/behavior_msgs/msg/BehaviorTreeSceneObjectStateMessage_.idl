@@ -25,6 +25,10 @@ module behavior_msgs
          */
         unsigned long id;
         /**
+         * Object type
+         */
+        string type;
+        /**
          * Transform of the object frame to world frame
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;

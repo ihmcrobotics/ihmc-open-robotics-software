@@ -2,7 +2,9 @@ package us.ihmc.rdx.behaviorTree.scene;
 
 import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -18,14 +20,20 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    private final RDXModelInstance modelInstance;
    private final RDXRenderableAdapter modelRenderableAdapter;
 
-   // TODO: Instead give an object type with the object name stored centrally
-   public RDXBehaviorTreeSceneObject(String modelName, RDXBaseUI baseUI)
+   public RDXBehaviorTreeSceneObject(long id, CRDTInfo crdtInfo, String type, RDXBaseUI baseUI)
    {
-      this.baseUI = baseUI;
-      gizmo = new RDXSelectablePose3DGizmo(transform, ReferenceFrame.getWorldFrame());
+      super(id, crdtInfo, type);
 
+      this.baseUI = baseUI;
+
+      gizmo = new RDXSelectablePose3DGizmo();
       gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
       gizmo.setSelected(true);
+      gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
+
+      String modelName = "";
+      if (type.equals(IsaacROSFoundationPoseObject.MUSTARD.name()))
+         modelName = "environmentObjects/mustard/mustard.glb";
 
       model = RDXModelLoader.load(modelName);
       modelInstance = new RDXModelInstance(model);
@@ -34,7 +42,8 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 
    public void update()
    {
-      modelInstance.setTransformToWorldFrame(transform);
+      RDXCRDTTools.syncGizmoWithBidirectionalField(gizmo.getPoseGizmo(), transform, this);
+      modelInstance.setTransformToWorldFrame(transform.getValueUnsafe());
    }
 
    public void destroy()

@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b5d5fb3083f163be49c4245cb495cda717abea147ade5ae6567150f81b38322d";
+   		return "126edaa604c0bac281f413ef86c40ff1bee185175fc0558234b6410614ae162e";
    }
    
    @Override
@@ -56,6 +56,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -76,6 +77,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getType().length() + 1;
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
 
@@ -87,6 +90,10 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToData(), cdr);
       cdr.write_type_4(data.getId());
 
+      if(data.getType().length() <= 255)
+      cdr.write_type_d(data.getType());else
+          throw new RuntimeException("type field exceeds the maximum length: %d > %d".formatted(data.getType().length(), 255));
+
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
 
@@ -95,6 +102,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToData(), cdr);	
       data.setId(cdr.read_type_4());
       	
+      cdr.read_type_d(data.getType());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
 
    }
@@ -105,6 +113,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ser.write_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       ser.write_type_4("id", data.getId());
+      ser.write_type_d("type", data.getType());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }
@@ -115,6 +124,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ser.read_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       data.setId(ser.read_type_4("id"));
+      ser.read_type_d("type", data.getType());
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
    }

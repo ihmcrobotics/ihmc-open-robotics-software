@@ -6,6 +6,9 @@ ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 # The object's unique ID
 uint32 id
 
+# Object type
+string type
+
 # Transform of the object frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
 

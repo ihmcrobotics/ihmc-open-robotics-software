@@ -96,6 +96,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    /** Root node constructor. */
    public RDXBehaviorTreeNode(S state,
                               ROS2SyncedRobotModel syncedRobot,
+                              RDXBehaviorTreeScene scene,
                               RobotCollisionModel selectionCollisionModel,
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D)
@@ -104,7 +105,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       this.state = state;
       this.rootNode = (RDXBehaviorTreeRootNode) this;
       this.robotModel = rootNode.getDefinition().getRobotModel();
-      this.scene = rootNode.getScene();
+      this.scene = scene;
       this.syncedRobot = syncedRobot;
       this.selectionCollisionModel = selectionCollisionModel;
       this.baseUI = baseUI;

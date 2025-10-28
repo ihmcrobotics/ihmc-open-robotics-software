@@ -49,6 +49,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             syncedRobot,
+            scene,
             selectionCollisionModel,
             baseUI,
             panel3D);

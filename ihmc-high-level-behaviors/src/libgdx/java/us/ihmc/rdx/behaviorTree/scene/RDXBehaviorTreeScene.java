@@ -1,17 +1,21 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.LongSupplier;
 
 public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 {
@@ -20,16 +24,18 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private final RDXPanel panel = new RDXPanel("Scene", this::renderImGuiWidgets);
    private final ImBoolean mustard = new ImBoolean(false);
 
-   private final List<RDXBehaviorTreeSceneObject> objects = new ArrayList<>();
+   private final List<RDXBehaviorTreeSceneObject> objects;
 
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
 
-   public RDXBehaviorTreeScene(ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXPanel parentPanel)
+   public RDXBehaviorTreeScene(CRDTInfo crdtInfo, LongSupplier idSupplier, ROS2SyncedRobotModel syncedRobot, RDXBaseUI baseUI, RDXPanel parentPanel)
    {
-      super(syncedRobot);
+      super(crdtInfo, idSupplier, syncedRobot);
 
       this.baseUI = baseUI;
+
+      this.objects = (List) super.objects;
 
       parentPanel.addChild(panel);
 
@@ -56,14 +62,13 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void renderImGuiWidgets()
    {
-      // place mustard in scene?
-
       if (ImGui.checkbox(labels.get("Mustard"), mustard))
       {
          if (mustard.get())
          {
-            beingPlaced = new RDXBehaviorTreeSceneObject("environmentObjects/mustard/mustard.glb", baseUI);
+            beingPlaced = new RDXBehaviorTreeSceneObject(idSupplier.getAsLong(), crdtInfo, IsaacROSFoundationPoseObject.MUSTARD.name(), baseUI);
             objects.add(beingPlaced);
+            objectsModifiable.modify();
             needToInitializePlacementHeight = true;
          }
          else
@@ -71,10 +76,16 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
             if (!objects.isEmpty())
             {
                RDXBehaviorTreeSceneObject remove = objects.remove(0);
+               objectsModifiable.modify();
                remove.destroy();
             }
-            // TODO Remove mustard
          }
       }
+   }
+
+   @Override
+   protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
+   {
+      return new RDXBehaviorTreeSceneObject(message.getId(), crdtInfo, message.getTypeAsString(), baseUI);
    }
 }
