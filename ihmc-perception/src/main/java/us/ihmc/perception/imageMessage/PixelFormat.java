@@ -6,6 +6,7 @@ import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.lwjgl.opengl.GL12;
 import perception_msgs.msg.dds.ImageMessage;
 
 import static org.bytedeco.ffmpeg.global.avutil.*;
@@ -13,16 +14,17 @@ import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
 public enum PixelFormat
 {
-   BGR8(1, 3, COLOR_BGR2RGBA, COLOR_RGBA2BGR, AV_PIX_FMT_BGR24),     // 24 bits per pixel, in BGR order
-   BGRA8(1, 4, COLOR_BGRA2RGBA, COLOR_RGBA2BGRA, AV_PIX_FMT_BGRA),   // 32 bits per pixel, in BGRA order
-   RGB8(1, 3, COLOR_RGB2RGBA, COLOR_RGBA2RGB, AV_PIX_FMT_RGB24),     // 24 bits per pixel, in RGB order
-   RGBA8(1, 4, -1, -1, AV_PIX_FMT_RGBA),                             // 32 bits per pixel, in RGBA order
-   YUV_I420(1, 1, COLOR_YUV2RGBA_I420, COLOR_RGBA2YUV_I420, -1),     // YUV420 format
-   YUV444P(1, 3, COLOR_COLORCVT_MAX, COLOR_COLORCVT_MAX, AV_PIX_FMT_YUV444P),                        // 24 bits per pixel, planar YUV
-   YUV_444P16(2, 3, -1, -1, AV_PIX_FMT_YUV444P16),                   // 16 bit planar YUV444, 48 bits per pixel.
-   GRAY8(1, 1, COLOR_GRAY2RGBA, COLOR_RGBA2GRAY, AV_PIX_FMT_GRAY8),  // monochrome
-   GRAY16(2, 1, -1, -1, AV_PIX_FMT_GRAY16),                          // aka depth
-   UNKNOWN(-1, -1, -1, -1, -1);
+   BGR8(1, 3, COLOR_BGR2RGBA, COLOR_RGBA2BGR, AV_PIX_FMT_BGR24, GL12.GL_BGR),       // 24 bits per pixel, in BGR order
+   BGRA8(1, 4, COLOR_BGRA2RGBA, COLOR_RGBA2BGRA, AV_PIX_FMT_BGRA, GL12.GL_BGRA),    // 32 bits per pixel, in BGRA order
+   RGB8(1, 3, COLOR_RGB2RGBA, COLOR_RGBA2RGB, AV_PIX_FMT_RGB24, GL12.GL_RGB),       // 24 bits per pixel, in RGB order
+   RGBA8(1, 4, -1, -1, AV_PIX_FMT_RGBA, GL12.GL_RGBA),                              // 32 bits per pixel, in RGBA order
+   YUV_I420(1, 1, COLOR_YUV2RGBA_I420, COLOR_RGBA2YUV_I420, -1, -1),                // YUV420 format
+   YUV444P(1, 3, COLOR_COLORCVT_MAX, COLOR_COLORCVT_MAX, AV_PIX_FMT_YUV444P, -1),   // 24 bits per pixel, planar YUV
+   YUV_444P16(2, 3, -1, -1, AV_PIX_FMT_YUV444P16, -1),                              // 16 bit planar YUV444, 48 bits per pixel.
+   GRAY8(1, 1, COLOR_GRAY2RGBA, COLOR_RGBA2GRAY, AV_PIX_FMT_GRAY8, GL12.GL_RED),    // monochrome
+   GRAY16(2, 1, -1, -1, AV_PIX_FMT_GRAY16, GL12.GL_RED),                            // aka depth
+   GRAY_F32(4, 1, -1, -1, AV_PIX_FMT_GRAYF32, GL12.GL_RED),
+   UNKNOWN(-1, -1, -1, -1, -1, -1);
 
    /** Equivalent to {@code elemsize} of the corresponding OpenCV type */
    public final long bytesPerElement;
@@ -36,7 +38,15 @@ public enum PixelFormat
    private final int opencvFromRGBAConversion;
    /** One of {@code avutil.AV_PIX_FMT_*} that corresponds to this pixel format. -1 if there is no corresponding pixel format */
    private final int correspondingAvPixelFormat;
-   PixelFormat(int bytesPerElement, int elementsPerPixel, int opencvToRGBAConversion, int opencvFromRGBAConversion, int correspondingAvPixelFormat)
+   /** An OpenGL color format, such as {@link org.lwjgl.opengl.GL11#GL_RGBA}. -1 if there is no corresponding color format */
+   private final int correspondingGLColorFormat;
+
+   PixelFormat(int bytesPerElement,
+               int elementsPerPixel,
+               int opencvToRGBAConversion,
+               int opencvFromRGBAConversion,
+               int correspondingAvPixelFormat,
+               int correspondingGLColorFormat)
    {
       this.bytesPerElement = bytesPerElement;
       this.elementsPerPixel = elementsPerPixel;
@@ -44,6 +54,7 @@ public enum PixelFormat
       this.opencvToRGBAConversion = opencvToRGBAConversion;
       this.opencvFromRGBAConversion = opencvFromRGBAConversion;
       this.correspondingAvPixelFormat = correspondingAvPixelFormat;
+      this.correspondingGLColorFormat = correspondingGLColorFormat;
    }
 
    public byte toByte()
@@ -90,6 +101,11 @@ public enum PixelFormat
    public int toFFmpegPixelFormat()
    {
       return correspondingAvPixelFormat;
+   }
+
+   public int toOpenGLColorFormat()
+   {
+      return correspondingGLColorFormat;
    }
 
    /**

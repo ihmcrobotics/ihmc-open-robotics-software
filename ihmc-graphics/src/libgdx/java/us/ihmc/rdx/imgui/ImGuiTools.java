@@ -420,9 +420,9 @@ public class ImGuiTools
       float mousePosXInWidgetFrame = mousePosXInDesktopFrame - ImGui.getWindowPosX() + ImGui.getScrollX();
       float mousePosYInWidgetFrame = mousePosYInDesktopFrame - ImGui.getWindowPosY() + ImGui.getScrollY();
 
-      boolean isHovered = mousePosXInWidgetFrame >= ImGui.getCursorPosX();
+      boolean isHovered = mousePosXInWidgetFrame > ImGui.getCursorPosX();
       isHovered &= mousePosXInWidgetFrame <= ImGui.getCursorPosX() + itemWidth + ImGui.getStyle().getFramePaddingX();
-      isHovered &= mousePosYInWidgetFrame >= ImGui.getCursorPosY();
+      isHovered &= mousePosYInWidgetFrame > ImGui.getCursorPosY();
       isHovered &= mousePosYInWidgetFrame <= ImGui.getCursorPosY() + lineHeight;
       isHovered &= ImGui.isWindowHovered();
 
@@ -558,23 +558,6 @@ public class ImGuiTools
       ImGui.setCursorPos(start.x, start.y);
 
       return new ImVec2(end.x - start.x, end.y - start.y);
-   }
-
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueLabel(String label)
-   {
-      return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
-   }
-
-   public static String uniqueLabel(String id, String label)
-   {
-      return label + "###" + id + ":" + label;
-   }
-
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueLabel(Object thisObject, String label)
-   {
-      return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
    /**

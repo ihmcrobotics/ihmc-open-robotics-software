@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.robotDataVisualizer.logger.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Publisher;
@@ -70,11 +70,21 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                            boolean startYoVariableServer,
                                            YoRegistry childRegistry) // optional child registry to share the server
    {
+      this(robotModel, parameters, startYoVariableServer, childRegistry, null);
+   }
+
+   public KinematicsStreamingToolboxModule(DRCRobotModel robotModel,
+                                           KinematicsStreamingToolboxParameters parameters,
+                                           boolean startYoVariableServer,
+                                           YoRegistry childRegistry,  // optional child registry to share the server
+                                           ROS2Node ros2Node) // ros2 node to use instead of creating one
+   {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
             robotModel.getLogModelProvider(),
             startYoVariableServer,
-            (int) (parameters.getToolboxUpdatePeriod() * 1000));
+            (int) (parameters.getToolboxUpdatePeriod() * 1000),
+            ros2Node);
 
       setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,

@@ -14,9 +14,11 @@ import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.session.log.ZEDSVOScrubber;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.io.JSONFileTools;
 
 import java.io.File;
@@ -38,29 +40,37 @@ public class LeRobotDatasetEpisode
    private int episodeIndex;
    private String episodeName;
    private final String taskName;
+   private final HumanoidJointNameMap jointMap;
+   private final HumanoidRobotSensorInformation sensorInformation;
 
    private SCS2LogSessionWithVideo session;
    private long startVideoTimestamp;
    private long lastVideoTimestamp;
-   private double episodeFrameTimestampMicros;
+   private double episodeFrameTimestamp; // important: acrue using double precision
    private SideDependentList<LeRobotDatasetVideoWriter> ffmpegRecorders;
    private LeRobotDatasetDataVariables dataVariables;
    private LeRobotDatasetEpisodeStatistics statistics;
    private final List<LeRobotEpisodeRecord> records = new ArrayList<>();
 
    /** Load from existing dataset JSON. */
-   public LeRobotDatasetEpisode(LeRobotDataset dataset, JsonNode lineRoot)
+   public LeRobotDatasetEpisode(LeRobotDataset dataset, JsonNode lineRoot, HumanoidJointNameMap jointMap, HumanoidRobotSensorInformation sensorInformation)
    {
-      this(dataset, lineRoot.get("episode_index").intValue(), lineRoot.get("tasks").get(0).textValue());
+      this(dataset, lineRoot.get("episode_index").intValue(), lineRoot.get("tasks").get(0).textValue(), jointMap, sensorInformation);
 
       statistics = new LeRobotDatasetEpisodeStatistics();
    }
 
-   public LeRobotDatasetEpisode(LeRobotDataset dataset, int episodeIndex, String taskName)
+   public LeRobotDatasetEpisode(LeRobotDataset dataset,
+                                int episodeIndex,
+                                String taskName,
+                                HumanoidJointNameMap jointMap,
+                                HumanoidRobotSensorInformation sensorInformation)
    {
       this.dataset = dataset;
       this.episodeIndex = episodeIndex;
       this.taskName = taskName;
+      this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
 
       episodeName = "episode_%06d".formatted(episodeIndex);
    }
@@ -134,12 +144,12 @@ public class LeRobotDatasetEpisode
       for (RobotSide side : RobotSide.values)
          ffmpegRecorders.put(side, new LeRobotDatasetVideoWriter(dataset.getFps(), side, dataset.getZedVideoDirs().get(side).resolve(episodeName + ".mp4")));
 
-      dataVariables = new LeRobotDatasetDataVariables(this, session);
+      dataVariables = new LeRobotDatasetDataVariables(this, session, jointMap, sensorInformation);
       statistics = new LeRobotDatasetEpisodeStatistics();
 
       startVideoTimestamp = -1;
       lastVideoTimestamp = -1;
-      episodeFrameTimestampMicros = -Math.round(UnitConversions.hertzToSeconds(dataset.getFps()));
+      episodeFrameTimestamp = 0.0;
    }
 
    public void processFrame()
@@ -165,29 +175,15 @@ public class LeRobotDatasetEpisode
          {
             lastVideoTimestamp = currentVideoTimestamp;
 
-            if (dataset.getUsePerfectTimestamps())
-            {
-               int round = Math.round(dataset.getFps()); // lerobot rounds fps to integer
-               double seconds = UnitConversions.hertzToSeconds(round);
-               double micros = seconds * 1000000.0;
-               episodeFrameTimestampMicros += micros; // important: acrue using double precision
-            }
-            else
-            {
-               episodeFrameTimestampMicros = Math.round((currentVideoTimestamp - startVideoTimestamp) / 1000.0);
-            }
-
-            long roundedTimestamp = Math.round(episodeFrameTimestampMicros);
-
             for (RobotSide side : RobotSide.values)
-            {
-               ffmpegRecorders.get(side).writeFrame(roundedTimestamp, statistics, zedSVOScrubber);
-            }
+               ffmpegRecorders.get(side).writeFrame(statistics, zedSVOScrubber);
 
-            dataVariables.addFrame(roundedTimestamp,
+            dataVariables.addFrame(episodeFrameTimestamp,
                                    statistics,
                                    session.getLogDataReader().getCurrentLogPosition(),
                                    session.getLogDataReader().getLogDirectory().getName());
+
+            episodeFrameTimestamp += UnitConversions.hertzToSeconds(Math.round(dataset.getFps())); // lerobot rounds fps to integer
          }
       }
    }

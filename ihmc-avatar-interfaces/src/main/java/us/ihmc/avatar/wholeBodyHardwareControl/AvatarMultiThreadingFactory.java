@@ -2,6 +2,7 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -14,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommandBlenderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -29,6 +31,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
+import us.ihmc.robotDataVisualizer.logger.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,7 +42,6 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -51,6 +54,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
 import java.util.*;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
@@ -75,13 +79,15 @@ public class AvatarMultiThreadingFactory
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
 
+   // Logger stuff
+   private boolean logLocally = false;
+
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
    public final String IHMC_ROS_CONTROLLER_NODE_NAME;
    public final String IHMC_ROS_IKSTREAMING_NODE_NAME;
    private final RealtimeROS2Node estimatorRealtimeROS2Node;
    private final RealtimeROS2Node controllerRealtimeROS2Node;
-   private final OptionalFactoryField<RealtimeROS2Node> ikStreamingRealtimeROS2Node = new OptionalFactoryField<>("AvatarIKStreamingROS2Node");
    private final PeriodicThreadSchedulerFactory ros2ThreadFactory;
 
    // The thread factories
@@ -92,6 +98,7 @@ public class AvatarMultiThreadingFactory
    private final RequiredFactoryField<AvatarEstimatorThread> estimatorThread = new RequiredFactoryField<>("AvatarEstimatorThread");
    private final RequiredFactoryField<AvatarControllerThread> controllerThread = new RequiredFactoryField<>("AvatarControllerThread");
    private final OptionalFactoryField<AvatarStepGeneratorThread> stepGeneratorThread = new OptionalFactoryField<>("AvatarStepGeneratorThread");
+   private final OptionalFactoryField<Map<HighLevelControllerName, StateEstimatorMode>> estimatorModeMapReference = new OptionalFactoryField<>("estimatorModeMapReference");
    private final OptionalFactoryField<IKStreamingRTPluginFactory.IKStreamingRTThread> ikStreamingThread = new OptionalFactoryField<>("AvatarIKStreamingThread");
 
    // Multi-threading manager
@@ -109,10 +116,12 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
+   private JVMStatisticsGenerator jvmStatisticsGenerator;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
                                       HardwareCommunicationInterface hardwareCommunicationInterface,
+                                      AvatarLowLevelOutputProcessor lowLevelOutputProcessor,
                                       SensorReaderFactory sensorReaderFactory,
                                       HighLevelControllerStateFactory standPrepStateFactory,
                                       HighLevelControllerStateFactory freezeStateFactory,
@@ -131,6 +140,7 @@ public class AvatarMultiThreadingFactory
       this.masterThreadDt = masterThreadDt;
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.hardwareCommunicationInterface = hardwareCommunicationInterface;
+      this.lowLevelOutputProcessor = lowLevelOutputProcessor;
       this.affinity = affinity;
       this.createStepGeneratorThread = createStepGeneratorThread;
       this.useRealtimeThreads = useRealtimeThreads;
@@ -151,9 +161,6 @@ public class AvatarMultiThreadingFactory
       estimatorRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_STATE_ESTIMATOR_NODE_NAME, ros2ThreadFactory);
       controllerRealtimeROS2Node = new ROS2NodeBuilder().buildRealtime(IHMC_ROS_CONTROLLER_NODE_NAME, ros2ThreadFactory);
 
-      // Set up low-level output processor
-      lowLevelOutputProcessor = new AvatarLowLevelOutputProcessor(robotModel.getSimpleRobotName().toLowerCase(), fullRobotModel.getControllableOneDoFJoints(), masterThreadDt, registry);
-
       // Setup state estimator factory
       estimatorThreadFactory = createStateEstimatorFactory(robotModel, fullRobotModel, sensorReaderFactory);
 
@@ -165,69 +172,25 @@ public class AvatarMultiThreadingFactory
                                                            freezeStateFactory);
    }
 
-   public void start()
-   {
-      estimatorRealtimeROS2Node.spin();
-      controllerRealtimeROS2Node.spin();
-      if (ikStreamingRealtimeROS2Node.hasValue())
-         ikStreamingRealtimeROS2Node.get().spin();
-
-      hardwareCommunicationInterface.start();
-      threadingManager.get().start();
-   }
-
-   public void join()
-   {
-      threadingManager.get().join();
-   }
-
-   public void stop()
-   {
-      System.out.println("Calling stop in the multi-threading factory");
-      estimatorRealtimeROS2Node.stopSpinning();
-      controllerRealtimeROS2Node.stopSpinning();
-      if (ikStreamingRealtimeROS2Node.hasValue())
-         ikStreamingRealtimeROS2Node.get().stopSpinning();
-
-      hardwareCommunicationInterface.stop();
-      threadingManager.get().stop();
-   }
-
-   public void destroy()
-   {
-      this.stop();
-      System.out.println("Calling destroy in the multi-threading factory");
-
-      estimatorRealtimeROS2Node.destroy();
-      System.out.println("Estimator node has been destroyed");
-
-      controllerRealtimeROS2Node.destroy();
-      System.out.println("Controller node has been destroyed");
-
-      if (ikStreamingRealtimeROS2Node.hasValue())
-      {
-         ikStreamingRealtimeROS2Node.get().destroy();
-         System.out.println("IK Streaming node has been destroyed");
-      }
-
-      hardwareCommunicationInterface.destroy();
-      System.out.println("Hardware communication node has been destroyed");
-
-      threadingManager.get().destroy();
-   }
-
    public AvatarMultiThreadingManager buildThreadsAndThreadingManager()
    {
       // Create estimator thread
       estimatorThread.set(estimatorThreadFactory.createAvatarEstimatorThread());
 
       // Create controller thread
-      HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
-      Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
-      stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
-      stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
-      stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
-      estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
+      if (estimatorModeMapReference.hasValue())
+      {
+         estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, estimatorModeMapReference.get());
+      }
+      else
+      {
+         HashMap<HighLevelControllerName, StateEstimatorMode> stateModeMap = new HashMap<>();
+         Arrays.stream(HighLevelControllerName.values).forEach(name -> stateModeMap.put(name, StateEstimatorMode.FROZEN));
+         stateModeMap.put(STAND_TRANSITION_STATE, StateEstimatorMode.NORMAL);
+         stateModeMap.put(EXIT_WALKING, StateEstimatorMode.NORMAL);
+         stateModeMap.put(WALKING, StateEstimatorMode.NORMAL);
+         estimatorThread.get().setupHighLevelControllerCallback(controllerFactory, stateModeMap);
+      }
 
       controllerThread.set(new AvatarControllerThread(robotModel.getSimpleRobotName().toLowerCase(),
                                                       robotModel,
@@ -265,6 +228,8 @@ public class AvatarMultiThreadingFactory
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
+                                                           estimatorRealtimeROS2Node,
+                                                           controllerRealtimeROS2Node,
                                                            estimatorThread.get().getHumanoidRobotContextData(),
                                                            estimatorThread.get().getFullRobotModel(),
                                                            hardwareCommunicationInterface,
@@ -281,6 +246,37 @@ public class AvatarMultiThreadingFactory
                                                            useMultiThreading,
                                                            yoVariableServer,
                                                            rootRegistry));
+
+      // Set up the block to prevent execution whenever there is no new state message.
+      threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
+
+      if (logLocally)
+      {
+         // Setup logger
+         ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
+         builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
+         if (stepGeneratorThread.hasValue())
+            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+         if (ikStreamingThread.hasValue())
+            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+         if (jvmStatisticsGenerator != null)
+            builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+
+         // Logging locally on the robot
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
+                                                                                                      robotModel.getLogModelProvider(),
+                                                                                                      builders,
+                                                                                                      100000,
+                                                                                                      0.01);
+         intraprocessYoVariableLogger.start();
+
+         threadingManager.get()
+                         .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                                  .getHumanoidRobotContextData()
+                                                                                                                  .getTimestamp()));
+         System.out.println("Logging Status: data is being logged locally");
+      }
 
       return threadingManager.get();
    }
@@ -397,7 +393,7 @@ public class AvatarMultiThreadingFactory
          controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING, false);
          controllerFactory.addFinishedTransition(EXIT_WALKING, FREEZE_STATE);
 
-         controllerFactory.addCustomStateTransition(createStandTransitionState(controllerFactory, feetForceSensorNames));
+         controllerFactory.addCustomStateTransition(createStandTransitionState(STAND_TRANSITION_STATE, controllerFactory, feetForceSensorNames, !highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady()));
 
          // Transition to DO_NOTHING in the event of a fault
          HighLevelControllerStateCommand transitionToDoNothingCommand = new HighLevelControllerStateCommand();
@@ -478,10 +474,8 @@ public class AvatarMultiThreadingFactory
 
    public void addIKStreamingThread(KinematicsStreamingToolboxParameters ikStreamingParameters)
    {
-      ikStreamingRealtimeROS2Node.set(new ROS2NodeBuilder().buildRealtime(IHMC_ROS_IKSTREAMING_NODE_NAME, ros2ThreadFactory));
-
       ikStreamingThread.set(new IKStreamingRTPluginFactory().createRTThread(robotModel.getSimpleRobotName(),
-                                                                            ikStreamingRealtimeROS2Node.get(),
+                                                                            estimatorRealtimeROS2Node,
                                                                             controllerFactory.getCommandInputManager(),
                                                                             controllerFactory.getStatusOutputManager(),
                                                                             robotModel,
@@ -495,8 +489,10 @@ public class AvatarMultiThreadingFactory
     * the ramp up ratio is at 1, AND 2- the feet loaded transition is satisfied is requested via the
     * YoEnum.
     */
-   private static ControllerStateTransitionFactory<HighLevelControllerName> createStandTransitionState(HighLevelHumanoidControllerFactory controllerFactory,
-                                                                                                       SideDependentList<String> feetForceSensorNames)
+   private static ControllerStateTransitionFactory<HighLevelControllerName> createStandTransitionState(HighLevelControllerName transitionStateName,
+                                                                                                       HighLevelHumanoidControllerFactory controllerFactory,
+                                                                                                       SideDependentList<String> feetForceSensorNames,
+                                                                                                       boolean waitForRequestToTransition)
    {
       return new ControllerStateTransitionFactory<>()
       {
@@ -519,8 +515,9 @@ public class AvatarMultiThreadingFactory
             ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
             HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
-            StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(STAND_TRANSITION_STATE,
+            StateTransitionCondition feetLoadedTransition = new FeetLoadedToWalkingStandTransition(transitionStateName,
                                                                                                    requestedState,
+                                                                                                   waitForRequestToTransition,
                                                                                                    forceSensorDataHolder,
                                                                                                    feetForceSensorNames,
                                                                                                    controlDT,
@@ -549,7 +546,7 @@ public class AvatarMultiThreadingFactory
                }
             };
 
-            return new StateTransition<HighLevelControllerName>(STAND_TRANSITION_STATE, condition);
+            return new StateTransition<HighLevelControllerName>(transitionStateName, condition);
          }
       };
    }
@@ -564,38 +561,51 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addRequestableTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
-   public YoRegistry getEstimatorRegistry()
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      return estimatorThread.get().getYoRegistry();
+      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum);
    }
 
-   public YoGraphicGroupDefinition getEstimatorYoGraphics()
+   public void addStandPrepStateTransition(HighLevelControllerName nextControlStateEnum)
    {
-      return estimatorThread.get().getSCS2YoGraphics();
+      controllerFactory.addCustomStateTransition(createStandTransitionState(nextControlStateEnum, controllerFactory, robotModel.getSensorInformation().getFeetForceSensorNames(), true));
    }
 
-   public YoRegistry getControllerRegistry()
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum, boolean performNextStateOnEntry)
    {
-      return controllerThread.get().getYoVariableRegistry();
+      controllerFactory.addFinishedTransition(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry);
    }
 
-   public YoGraphicGroupDefinition getControllerYoGraphics()
+   public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
-      return controllerThread.get().getSCS2YoGraphics();
+      controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 
-   public YoRegistry getStepGeneratorRegistry()
+   public void addJVMStatisticsForLoggingLocally(JVMStatisticsGenerator jvmStatisticsGenerator)
    {
-      return stepGeneratorThread.get().getYoVariableRegistry();
+      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
    }
 
-   public YoGraphicGroupDefinition getStepGeneratorYoGraphics()
+   public void setLogLocally(boolean logLocally)
    {
-      return stepGeneratorThread.get().getSCS2YoGraphics();
+      this.logLocally = logLocally;
    }
 
-   public AvatarMultiThreadingManager getThreadingManager()
+   public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
    {
-      return threadingManager.get();
+      estimatorModeMapReference.set(estimatorModeMap);
+   }
+
+   public void addSmoothTransitionState(String transitionName,
+                                        HighLevelControllerName transitionStateEnum,
+                                        HighLevelControllerName currentControlStateEnum,
+                                        HighLevelControllerName nextControlStateEnum,
+                                        CommandBlenderFactory commandBlenderFactory)
+   {
+      controllerFactory.addCustomSmoothTransitionControlState(transitionName,
+                                                              transitionStateEnum,
+                                                              currentControlStateEnum,
+                                                              nextControlStateEnum,
+                                                              commandBlenderFactory);
    }
 }

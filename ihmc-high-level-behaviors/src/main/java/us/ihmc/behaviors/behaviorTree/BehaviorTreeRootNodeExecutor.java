@@ -2,19 +2,26 @@ package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
-import us.ihmc.behaviors.logic.ConditionNodeState;
-import us.ihmc.behaviors.sequence.ActionNodeExecutor;
-import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.FallbackNodeExecutor;
-import us.ihmc.behaviors.sequence.LeafNodeExecutor;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
+      implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
    private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
@@ -25,9 +32,23 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private final List<LeafNodeExecutor<?, ?>> successfulLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> failedLeavesWithoutFallback = new ArrayList<>();
 
-   public BehaviorTreeRootNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeRootNodeExecutor(long id,
+                                       CRDTInfo crdtInfo,
+                                       WorkspaceResourceDirectory saveFileDirectory,
+                                       DRCRobotModel robotModel,
+                                       ROS2ControllerHelper ros2ControllerHelper,
+                                       ControllerStatusTracker controllerStatusTracker,
+                                       ROS2SyncedRobotModel syncedRobot,
+                                       ReferenceFrameLibrary referenceFrameLibrary,
+                                       SceneGraph sceneGraph,
+                                       DetectionManager detectionManager)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, robotModel, referenceFrameLibrary),
+            ros2ControllerHelper,
+            syncedRobot,
+            controllerStatusTracker,
+            sceneGraph,
+            detectionManager);
    }
 
    @Override
@@ -226,7 +247,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
    }
 
-   public void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
+   private void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 
@@ -348,5 +369,32 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public List<LeafNodeExecutor<?, ?>> getCurrentlyExecutingLeaves()
    {
       return currentlyExecutingLeaves;
+   }
+
+   // Getters are in here so there's not getters in base node for root stuff
+
+   public ROS2ControllerHelper getRos2ControllerHelper()
+   {
+      return ros2ControllerHelper;
+   }
+
+   public ROS2SyncedRobotModel getSyncedRobot()
+   {
+      return syncedRobot;
+   }
+
+   public ControllerStatusTracker getControllerStatusTracker()
+   {
+      return controllerStatusTracker;
+   }
+
+   public SceneGraph getSceneGraph()
+   {
+      return sceneGraph;
+   }
+
+   public DetectionManager getDetectionManager()
+   {
+      return detectionManager;
    }
 }

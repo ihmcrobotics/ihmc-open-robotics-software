@@ -47,7 +47,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeBuilder;
 import us.ihmc.sensors.zed.ZEDImageSensor;
 import us.ihmc.sensors.zed.ZEDModelData;
-import us.ihmc.sensors.zed.ZEDSVOPlaybackSensor;
+import us.ihmc.sensors.zed.ROS2ZEDSVOPlaybackSensor;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_NEURAL;
@@ -60,7 +60,7 @@ import static us.ihmc.zed.global.zed.SL_DEPTH_MODE_PERFORMANCE;
 public class RDXSceneGraphDemo
 {
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240715_103234_ZEDRecording_NewONRCourseWalk.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE_NAME = "/opt/ihmc/LogData/UserFolders/TomaszFolder/20251020_ZEDXMini_DoorChargeBarrierBottle.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
@@ -83,7 +83,7 @@ public class RDXSceneGraphDemo
    private final OpenCLManager planarRegionsOpenCLManager = new OpenCLManager();
 
    // ZED SVO sensor related things
-   private ZEDSVOPlaybackSensor zedSVOPlayer;
+   private ROS2ZEDSVOPlaybackSensor zedSVOPlayer;
    private ImageSensorPublishThread zedPublishThread;
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
@@ -156,7 +156,7 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGraphic, RDXSceneLevel.VIRTUAL);
 
             boolean enableNeuralMode = CUDATools.hasCUDADeviceOfAtLeast(CUDATools.getDeviceName(0), "RTX 3080");
-            zedSVOPlayer = new ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE_NAME);
+            zedSVOPlayer = new ROS2ZEDSVOPlaybackSensor(ros2Helper, 0, ZEDModelData.ZED_2, enableNeuralMode ? SL_DEPTH_MODE_NEURAL : SL_DEPTH_MODE_PERFORMANCE, SVO_FILE_NAME);
             zedSVOPlayer.useTrackedPose(true);
             zedSVOPlayer.run(true);
 
@@ -237,7 +237,7 @@ public class RDXSceneGraphDemo
 
                // TODO: finish
                onRobotSceneGraph.updateSubscription();
-               onRobotSceneGraph.updateDetections(detectionManager);
+//               onRobotSceneGraph.updateDetections(detectionManager);
 
                if (newPlanarRegions.poll())
                   for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())

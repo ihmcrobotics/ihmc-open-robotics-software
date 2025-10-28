@@ -3,28 +3,10 @@ package us.ihmc.openAlexander;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControllerParameters;
-import us.ihmc.openAlexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStateEstimatorParameters;
-import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
-import us.ihmc.openAlexander.parameters.diagnostic.AlexanderDiagnosticParameters;
-import us.ihmc.openAlexander.parameters.model.AlexanderKinematicsCollisionModel;
-import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
-import us.ihmc.openAlexander.parameters.model.AlexanderSimulationCollisionModel;
-import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
-import us.ihmc.openAlexander.parameters.planning.AlexanderFootstepPlannerParameters;
-import us.ihmc.openAlexander.parameters.planning.AlexanderLocomotionParameters;
-import us.ihmc.openAlexander.parameters.planning.AlexanderSwingPlannerParameters;
-import us.ihmc.openAlexander.parameters.planning.AlexanderVisibilityGraphParameters;
-import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -39,7 +21,25 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.handsros2.HandModel;
+import us.ihmc.handsros2.abilityHand.AbilityHandModel;
+import us.ihmc.handsros2.ezGripper.EZGripperModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.openAlexander.parameters.controller.AlexanderContactPointParameters;
+import us.ihmc.openAlexander.parameters.controller.AlexanderICPSplitFractionCalculatorParameters;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControllerParameters;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStateEstimatorParameters;
+import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
+import us.ihmc.openAlexander.parameters.diagnostic.AlexanderDiagnosticParameters;
+import us.ihmc.openAlexander.parameters.model.AlexanderKinematicsCollisionModel;
+import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
+import us.ihmc.openAlexander.parameters.model.AlexanderSimulationCollisionModel;
+import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
+import us.ihmc.openAlexander.parameters.planning.AlexanderFootstepPlannerParameters;
+import us.ihmc.openAlexander.parameters.planning.AlexanderLocomotionParameters;
+import us.ihmc.openAlexander.parameters.planning.AlexanderSwingPlannerParameters;
+import us.ihmc.openAlexander.parameters.planning.AlexanderVisibilityGraphParameters;
+import us.ihmc.openAlexander.parameters.simulation.AlexanderInitialSetup;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -183,12 +183,16 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
       for (RobotSide side : RobotSide.values)
       {
-         if (robotVersion.hasSakeGripperJoints(side))
+         if (robotVersion.hasHandWithFingers(side))
          {
-            //            TODO
+            HandModel handModel = switch (robotVersion.getHandType(side))
+            {
+               case EZ_GRIPPER -> new EZGripperModel(true);
+               case ABILITY_HAND -> new AbilityHandModel();
+            };
+
+            handModels.put(side, handModel);
          }
-         else if (robotVersion.hasNubHands(side))
-            handModels.put(side, new AlexanderNubHandModel());
       }
 
       for (RobotSide side : RobotSide.values)

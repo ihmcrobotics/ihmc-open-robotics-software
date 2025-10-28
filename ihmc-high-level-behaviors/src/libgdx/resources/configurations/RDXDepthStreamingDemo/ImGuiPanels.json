@@ -1,9 +1,0 @@
-{
-  "dockspacePanels" : { },
-  "windows" : {
-    "3D View" : true,
-    "Received Colorized Depth###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:Received Colorized Depth" : true,
-    "Sent Colorized Depth###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:Sent Colorized Depth" : true,
-    "Visualizer Settings" : true
-  }
-}

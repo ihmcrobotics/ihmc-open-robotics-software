@@ -22,7 +22,7 @@ public class ROS2StreamStatusMonitorTest
 {
    private static final ROS2Node ROS2_NODE = new ROS2NodeBuilder().build("stream_status_monitor_test_node");
    private static final ROS2Helper ROS2_HELPER = new ROS2Helper(ROS2_NODE);
-   private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = PerceptionAPI.SRT_STREAM_STATUS.withSuffix("test");
+   private static final ROS2Topic<SRTStreamStatus> TEST_TOPIC = new ROS2Topic<SRTStreamStatus>().withSuffix("srt_status_test").withType(SRTStreamStatus.class);
 
    @AfterAll
    public static void destroyNode()

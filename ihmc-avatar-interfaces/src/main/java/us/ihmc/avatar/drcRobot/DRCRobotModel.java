@@ -2,7 +2,6 @@ package us.ihmc.avatar.drcRobot;
 
 import com.jme3.math.Transform;
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
@@ -10,8 +9,6 @@ import us.ihmc.avatar.factory.DefaultSimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.DefaultSimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -28,6 +25,7 @@ import us.ihmc.footstepPlanning.FastLocomotionParameters;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.handsros2.HandModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
@@ -189,7 +187,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public default JointDesiredOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot,
                                                                            HumanoidRobotContextData contextData)
    {
-      return new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true);
+      return null;
    }
 
    /**

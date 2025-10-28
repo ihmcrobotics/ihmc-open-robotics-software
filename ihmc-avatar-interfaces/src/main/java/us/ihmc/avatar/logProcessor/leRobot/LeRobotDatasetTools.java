@@ -1,6 +1,6 @@
 package us.ihmc.avatar.logProcessor.leRobot;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,20 +49,6 @@ public class LeRobotDatasetTools
       Predicate<YoRegistry> filter = reg -> reg.getName().endsWith(childSearchSuffix);
       YoRegistry result = yoRegistry.findRegistry(path).getChildren().stream().filter(filter).findFirst().orElse(null);
       return path + "." + result.getName() + ".";
-   }
-
-   public static SideDependentList<String> getRobotLinkNames(RobotDefinition robotDefinition, String linkNamePart)
-   {
-      SideDependentList<String> handLinkNames = new SideDependentList<>();
-      for (RigidBodyDefinition link : robotDefinition.getAllRigidBodies())
-      {
-         String linkName = link.getName().toLowerCase();
-         if (linkName.contains(linkNamePart))
-            for (RobotSide side : RobotSide.values)
-               if (linkName.contains(side.getLowerCaseName()))
-                  handLinkNames.put(side, link.getName());
-      }
-      return handLinkNames;
    }
 
    public static SideDependentList<List<String>> getRobotArmJointNames(RobotDefinition robotDefinition)

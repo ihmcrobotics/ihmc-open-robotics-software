@@ -14,8 +14,10 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -32,6 +34,11 @@ import java.util.function.BooleanSupplier;
  */
 public class LeRobotDataset
 {
+   public static boolean XYZ_RIGHT_ONLY = Boolean.parseBoolean(System.getProperty("xyz.right.only", "true"));
+   public static int STATE_SIZE = XYZ_RIGHT_ONLY ? 3 : 28;
+
+   private final HumanoidJointNameMap jointMap;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final String name;
    private final Path directory;
    private final Path dataPath;
@@ -44,15 +51,16 @@ public class LeRobotDataset
    private final Path infoJsonPath;
    private final Path tasksJsonlPath;
 
-   private float fps = 15.0f;
+   private float fps = 30.0f;
    private final List<String> taskNames = new ArrayList<>();
    private final List<LeRobotDatasetEpisode> episodes = new ArrayList<>();
    private long totalFrames = 0L;
-   private boolean usePerfectTimestamps = true;
 
-   public LeRobotDataset(Path directory)
+   public LeRobotDataset(Path directory, HumanoidJointNameMap jointMap, HumanoidRobotSensorInformation sensorInformation)
    {
       this.directory = directory;
+      this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
 
       name = directory.getFileName().toString();
       dataPath = directory.resolve("data");
@@ -97,7 +105,7 @@ public class LeRobotDataset
       episodes.clear();
       JSONFileTools.loadLines(episodesJsonlPath, lineRoot ->
       {
-         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, lineRoot);
+         LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, lineRoot, jointMap, sensorInformation);
          episode.loadParquetData();
          episodes.add(episode);
          totalFrames += episode.getLength();
@@ -118,16 +126,15 @@ public class LeRobotDataset
    private LeRobotDatasetEpisode createEpisode(String taskName)
    {
       ensureTaskNameInJsonl(taskName);
-      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, episodes.size(), taskName);
+      LeRobotDatasetEpisode episode = new LeRobotDatasetEpisode(this, episodes.size(), taskName, jointMap, sensorInformation);
       episodes.add(episode);
       return episode;
    }
 
-   public BooleanSupplier addEpisodesAutomatically(String taskName, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
+   public BooleanSupplier addEpisodesAutomatically(String taskName, int taskID, SCS2LogSessionWithVideo session, BooleanSupplier keepGoing)
    {
       ensureTaskNameInJsonl(taskName);
 
-      int taskID = Integer.parseInt(taskName.substring(0, 1));
       MutableBoolean stillGoing = new MutableBoolean(false);
       String kstModule = LeRobotDatasetTools.findRegistry(session.getRootRegistry(), "root.main", "IKStreamingRTThread");
       String kstStreaming = kstModule + "KinematicsStreamingToolboxController.KSTStreamingState.";
@@ -386,30 +393,50 @@ public class LeRobotDataset
                                        .put("has_audio", false);
          }
 
-         ObjectNode state = features.putObject("observation.state");
-         state.put("dtype", "float32");
-         state.putArray("shape").add(28);
-         ArrayNode motors = state.putObject("names").putArray("motors");
-         motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
-         motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
-         motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
-         motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
-         motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
-         motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
-         motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
-         motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
-         ObjectNode action = features.putObject("action");
-         action.put("dtype", "float32");
-         action.putArray("shape").add(28);
-         motors = action.putObject("names").putArray("motors");
-         motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
-         motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
-         motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
-         motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
-         motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
-         motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
-         motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
-         motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
+         if (!episodes.isEmpty() && !episodes.get(0).getRecords().isEmpty())
+         {
+            LeRobotEpisodeRecord record = episodes.get(0).getRecords().get(0);
+            int shape = record.state().size();
+            ObjectNode state = features.putObject("observation.state");
+            state.put("dtype", "float32");
+            state.putArray("shape").add(shape);
+            ArrayNode motors = state.putObject("names").putArray("motors");
+            if (shape == 3)
+            {
+               motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
+            }
+            else
+            {
+               motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
+               motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
+               motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
+               motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
+               motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
+               motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
+               motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
+               motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
+            }
+            ObjectNode action = features.putObject("action");
+            action.put("dtype", "float32");
+            action.putArray("shape").add(shape);
+            motors = action.putObject("names").putArray("motors");
+            if (shape == 3)
+            {
+               motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
+            }
+            else
+            {
+               motors.add("left_gripper_x").add("left_gripper_y").add("left_gripper_z");
+               motors.add("left_gripper_qx").add("left_gripper_qy").add("left_gripper_qz").add("left_gripper_qs");
+               motors.add("left_forearm_x").add("left_forearm_y").add("left_forearm_z");
+               motors.add("left_forearm_qx").add("left_forearm_qy").add("left_forearm_qz").add("left_forearm_qs");
+               motors.add("right_gripper_x").add("right_gripper_y").add("right_gripper_z");
+               motors.add("right_gripper_qx").add("right_gripper_qy").add("right_gripper_qz").add("right_gripper_qs");
+               motors.add("right_forearm_x").add("right_forearm_y").add("right_forearm_z");
+               motors.add("right_forearm_qx").add("right_forearm_qy").add("right_forearm_qz").add("right_forearm_qs");
+            }
+         }
+
          ObjectNode episodeIndex = features.putObject("episode_index");
          episodeIndex.put("dtype", "int64");
          episodeIndex.putArray("shape").add(1);
@@ -517,15 +544,5 @@ public class LeRobotDataset
    public long getTotalFrames()
    {
       return totalFrames;
-   }
-
-   public void setUsePerfectTimestamps(boolean usePerfectTimestamps)
-   {
-      this.usePerfectTimestamps = usePerfectTimestamps;
-   }
-
-   public boolean getUsePerfectTimestamps()
-   {
-      return usePerfectTimestamps;
    }
 }

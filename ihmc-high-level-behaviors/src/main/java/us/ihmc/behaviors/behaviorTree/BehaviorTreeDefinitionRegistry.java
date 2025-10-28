@@ -1,22 +1,22 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
-import us.ihmc.behaviors.ai2r.AI2RNodeDefinition;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.sequence.actions.CheckPointNodeDefinition;
-import us.ihmc.behaviors.logic.ConditionNodeDefinition;
-import us.ihmc.behaviors.logic.GotoNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.FallbackNodeDefinition;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.behaviorTree.control.ai2r.AI2RNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
+import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.actions.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class BehaviorTreeDefinitionRegistry
 {
-   private static final DefinitionMapping[] DEFINITIONS = new DefinitionMapping[]
+   private static final DefinitionMapping[] REGISTRY = new DefinitionMapping[]
    {
       new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
       new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
@@ -39,18 +39,18 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
       new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
    };
-   private static final Map<Class<?>, DefinitionMapping> DEFINITIONS_MAP = new HashMap<>();
+   private static final Map<Class<?>, DefinitionMapping> REGISTRY_MAP = new HashMap<>();
    static
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
-         DEFINITIONS_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
+         REGISTRY_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
       }
    }
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
          if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
             return definitionEntry.getTypeClass();
@@ -60,7 +60,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
          if (nodeType == definitionEntry.getMessageByte())
             return definitionEntry.getTypeClass();
@@ -71,7 +71,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static byte getMessageByte(Class<?> definitionClass)
    {
-      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      DefinitionMapping definitionMapping = REGISTRY_MAP.get(definitionClass);
       if (definitionMapping != null)
       {
          return definitionMapping.getMessageByte();
@@ -82,7 +82,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static String getInitialName(Class<?> definitionClass)
    {
-      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      DefinitionMapping definitionMapping = REGISTRY_MAP.get(definitionClass);
       if (definitionMapping != null)
       {
          return definitionMapping.getInitialName();

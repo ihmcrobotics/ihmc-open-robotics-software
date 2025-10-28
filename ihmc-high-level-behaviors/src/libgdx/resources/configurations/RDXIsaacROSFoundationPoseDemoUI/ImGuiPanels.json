@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Perception Visualizers" : true,
+    "/ihmc/yolo/annotated_image###RDXImageVisualizer5:/ihmc/yolo/annotated_image" : true,
+    "/ihmc/zed/depth###RDXImageVisualizer3:/ihmc/zed/depth" : false,
+    "/ihmc/zed/left_color###RDXImageVisualizer1:/ihmc/zed/left_color" : false
+  }
+}

@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperRead
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.heightMap.HeightMapData;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -18,7 +18,7 @@ public class ObstacleBetweenStepsChecker
 {
    private static final boolean DEBUG = false;
 
-   private HeightMapData heightMapData;
+   private TerrainMapData heightMapData;
    private final FootstepSnapperReadOnly snapper;
    private final BooleanSupplier checkForPathCollisions;
    private final DoubleSupplier idealFootstepWidth;
@@ -43,9 +43,9 @@ public class ObstacleBetweenStepsChecker
       this.heightExtrusion = heightExtrusion;
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      this.heightMapData = heightMapData;
+      this.heightMapData = terrainMapData;
    }
 
    boolean hasHeightMapData()
@@ -91,7 +91,7 @@ public class ObstacleBetweenStepsChecker
     * This is meant to test if there is a wall that the body of the robot would run into when shifting
     * from one step to the next. It is not meant to eliminate swing overs.
     */
-   private boolean isObstacleBetweenSteps(Point3DReadOnly stepPosition, Point3DReadOnly previousStepPosition, HeightMapData heightMapData)
+   private boolean isObstacleBetweenSteps(Point3DReadOnly stepPosition, Point3DReadOnly previousStepPosition, TerrainMapData heightMapData)
    {
       double groundClearance = heightOffset.getAsDouble();
       double regionHeight = heightExtrusion.getAsDouble();

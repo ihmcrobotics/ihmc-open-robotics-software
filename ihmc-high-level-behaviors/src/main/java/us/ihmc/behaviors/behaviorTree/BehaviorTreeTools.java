@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +49,11 @@ public class BehaviorTreeTools
       }
    }
 
-   public static <LT extends TreeNode<LT>> void runForSubtreeNodes(LT node, Consumer<LT> operation)
+   public static <T extends TreeNode<T>> void runForSubtreeNodes(T node, Consumer<T> operation)
    {
       operation.accept(node);
 
-      for (LT child : node.getChildren())
+      for (T child : node.getChildren())
       {
          runForSubtreeNodes(child, operation);
       }
@@ -67,11 +67,6 @@ public class BehaviorTreeTools
       {
          runForSubtreeNodes(child, operation);
       }
-   }
-
-   public static void runForEntireTree(BehaviorTreeNodeDefinition anyNode, Consumer<BehaviorTreeNodeDefinition> operation)
-   {
-      runForSubtreeNodes(findRootNode(anyNode), operation);
    }
 
    public static List<ActionNodeDefinition> buildListOfActionDefinitions(BehaviorTreeNodeDefinition rootNode)

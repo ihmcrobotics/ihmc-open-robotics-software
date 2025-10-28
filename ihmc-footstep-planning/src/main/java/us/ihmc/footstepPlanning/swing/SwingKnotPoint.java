@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.*;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -264,7 +264,7 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
       return percentage;
    }
 
-   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, HeightMapData heightMapData)
+   public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList, TerrainMapData terrainMapData)
    {
       this.collisionResult.setToZero();
       this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
@@ -285,9 +285,9 @@ public class SwingKnotPoint implements SCS2YoGraphicHolder
             }
          }
       }
-      if (heightMapData != null)
+      if (terrainMapData != null)
       {
-         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, heightMapData);
+         EuclidShape3DCollisionResult collisionResult = HeightMapCollisionDetector.newEvaluateCollision(collisionBox, terrainMapData);
 
          if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
          {

@@ -37,6 +37,7 @@ public class AlexanderQuickPushRecoveryWalkingTest extends AvatarQuickPushRecove
    @Test
    public void testOutwardPushInitialTransferToLeftStateAndLeftMidSwing()
    {
+      setPushHeightOffsetFromChest(-0.1);
       setPushChangeInVelocity(0.4);
       super.testOutwardPushInitialTransferToLeftStateAndLeftMidSwing();
    }

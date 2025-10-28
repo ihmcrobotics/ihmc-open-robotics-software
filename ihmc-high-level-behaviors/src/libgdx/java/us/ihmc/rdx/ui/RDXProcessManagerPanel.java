@@ -12,7 +12,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.rdx.ui.processes.ObjectDetectionProcess;
 import us.ihmc.rdx.ui.processes.RestartableProcess;
 
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
 
    protected final ArrayList<RestartableProcess> processes = new ArrayList<>();
 
-   private final ObjectDetectionProcess objectDetectionProcess;
    protected final EnvironmentInitialSetup environmentInitialSetup;
 
    public RDXProcessManagerPanel(Pose3DReadOnly startingPose)
@@ -49,10 +47,6 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
       super(PANEL_NAME);
       setRenderMethod(this::renderImGuiWidgets);
       this.environmentInitialSetup = environmentInitialSetup;
-
-      objectDetectionProcess = new ObjectDetectionProcess(this::getRobotModel, this::getRobotTarget);
-
-      processes.add(objectDetectionProcess);
    }
 
    private RobotTarget getRobotTarget()
@@ -96,9 +90,6 @@ public abstract class RDXProcessManagerPanel extends RDXPanel
 
    public void dispose()
    {
-      // Destroy in a reasonable order
-      objectDetectionProcess.destroy();
-
       // destroy em all just in case
       for (RestartableProcess process : processes)
       {

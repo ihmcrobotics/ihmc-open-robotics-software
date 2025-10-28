@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.perception.gpuMapping.TerrainMapData;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -34,9 +35,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.heightMap.HeightMapData;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
 
 /**
  * This class provides easy access to everything that involves mobility for the robot's legs.
@@ -559,11 +558,11 @@ public class RDXLocomotionManager
       }
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
+   public void setTerrainMapData(TerrainMapData terrainMapData)
    {
-      footstepPlanning.setHeightMapData(heightMapData);
-      interactableFootstepPlan.setHeightMapMessage(heightMapData);
-      manualFootstepPlacement.setHeightMapData(heightMapData);
+      footstepPlanning.setTerrainMapData(terrainMapData);
+      interactableFootstepPlan.setHeightMapMessage(terrainMapData);
+      manualFootstepPlacement.setTerrainMapData(terrainMapData);
    }
 
    public LocomotionParameters getLocomotionParameters()

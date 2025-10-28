@@ -93,11 +93,6 @@ __global__ void reduceFast(bool* inclusionMatrix, int boxCount, int* includedInd
     if (row >= boxCount || column >= boxCount)
         return;
 
-    // Initialize the count to 0
-    if (Utils::getThreadCoordX() == 0)
-        *includedBoxCount = 0;
-    __syncthreads();
-
     // If non of the columns indicate to exclude this detection matrix
     if (__syncthreads_and(inclusionMatrix[row * boxCount + column]))
     {
@@ -122,11 +117,6 @@ __global__ void reduceSlow(bool* inclusionMatrix, int boxCount, int* includedInd
     // Bounds check
     if (row >= boxCount)
         return;
-
-    // Initialize the count to 0
-    if (Utils::getThreadCoordX() == 0)
-        *includedBoxCount = 0;
-    __syncthreads();
 
     bool include = true;
     for (int column = 0; column < boxCount && include; ++column)

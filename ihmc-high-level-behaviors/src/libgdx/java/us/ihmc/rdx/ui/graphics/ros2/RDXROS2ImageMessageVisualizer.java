@@ -1,15 +1,10 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.perception.RawImage;
-import us.ihmc.perception.imageMessage.CompressionType;
 import us.ihmc.perception.imageMessage.ImageMessageDecoder;
 import us.ihmc.perception.imageMessage.PixelFormat;
-import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.ros2.ROS2Node;
@@ -17,7 +12,7 @@ import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.SwapReference;
 
-public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<ImageMessage>
+public class RDXROS2ImageMessageVisualizer extends RDXROS2ImageVisualizer<ImageMessage>
 {
    private final ROS2Topic<ImageMessage> topic;
    private final ROS2Node ros2Node;
@@ -28,6 +23,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    private final Mat decompressedImage = new Mat();
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
+   private volatile boolean hasRenderedOne = false;
 
    public RDXROS2ImageMessageVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic)
    {
@@ -59,21 +55,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       subscription = null;
    }
 
-   @Override
-   public void update()
-   {
-      super.update();
-      getOpenCVVideoVisualizer().setActive(isActive());
-      getOpenCVVideoVisualizer().update();
-   }
-
-   @Nullable
-   @Override
-   public RDXPanel getPanel()
-   {
-      return getOpenCVVideoVisualizer().getPanel();
-   }
-
    private void queueRenderImage(ImageMessage imageMessage)
    {
       // A new message arrived, update the receive-frequency text
@@ -92,45 +73,19 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       imageMessageSwapReference.swap();
 
       // This is thread 2!
-      getOpenCVVideoVisualizer().doReceiveMessageOnThread(() ->
+      submitImageUpdate(imageVisualizer ->
       {
-         ImageMessage imageMessageB;
          synchronized (imageMessageSwapReference)
          {
-            imageMessageB = imageMessageSwapReference.getForThreadTwo();
-            PixelFormat imagePixelFormat = PixelFormat.fromImageMessage(imageMessageB);
+            ImageMessage imageMessageB = imageMessageSwapReference.getForThreadTwo();
 
-            /*
-             * Depth images can't be directly converted to RGBA, so we must first convert it into an 8 bit gray image by clamping the values,
-             * and then convert from gray to RGBA. This also helps "brighten" the depth image when the range of depth values is small.
-             * This is purely for visualization, and the resulting RGBA image cannot be used to measure depth.
-             */
-            if (imagePixelFormat == PixelFormat.GRAY16)
-            {
-               decoder.decodeMessage(imageMessageB, decompressedImage);
-               OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, decompressedImage, 0.0, 255.0);
-               OpenCVTools.convertGrayToRGBA(decompressedImage, decompressedImage);
-            }
-            else
-            {
-               if (imageMessageB.getCompressionType() == CompressionType.UNCOMPRESSED.toByte())
-               {
-                  RawImage rawImage = decoder.decodeMessageCPU(imageMessageB);
-                  opencv_imgproc.cvtColor(rawImage.getCpuImageMat(), decompressedImage, opencv_imgproc.COLOR_BGR2RGBA);
-                  rawImage.release();
-               }
-               else
-               {
-                  decoder.decodeMessageToRGBA(imageMessageB, decompressedImage);
-               }
-            }
-         }
+            // Decode the message and get the decoded pixel format (it may be different from the pixel format in the message)
+            decoder.decodeMessage(imageMessageB, decompressedImage);
+            PixelFormat pixelFormat = decoder.getDecodedImagePixelFormat();
 
-         synchronized (this) // synchronize with the update method
-         {  // Update the visualization dimensions to match the image
-            getOpenCVVideoVisualizer().updateImageDimensions(imageMessageB.getImageWidth(), imageMessageB.getImageHeight());
-            // Copy the decompressed image to the image being visualized
-            decompressedImage.copyTo(getOpenCVVideoVisualizer().getRGBA8Mat());
+            // Update the visualized image
+            imageVisualizer.setImage(decompressedImage, pixelFormat);
+            hasRenderedOne = true;
          }
       });
    }
@@ -138,12 +93,12 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    @Override
    public void renderImGuiWidgets()
    {
-      if (getOpenCVVideoVisualizer().getHasRenderedOne())
+      if (hasRenderedOne)
       {
          renderStatistics();
       }
 
-      getOpenCVVideoVisualizer().renderImGuiWidgets();
+      super.renderImGuiWidgets();
    }
 
    @Override
@@ -151,7 +106,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    {
       super.destroy();
       unsubscribe();
-      getOpenCVVideoVisualizer().destroy();
       decoder.destroy();
    }
 

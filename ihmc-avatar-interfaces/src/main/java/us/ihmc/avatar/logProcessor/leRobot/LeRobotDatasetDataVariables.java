@@ -3,11 +3,13 @@ package us.ihmc.avatar.logProcessor.leRobot;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoPose3D;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
@@ -28,38 +30,44 @@ public class LeRobotDatasetDataVariables
 {
    private final LeRobotDatasetEpisode episode;
 
-   private final YoPose3D pelvisPoseCurrent;
-   private final YoPose3D pelvisPoseDesired;
+   private final YoPose3D torsoPoseCurrent;
+   private final YoPose3D torsoPoseDesired;
    private final SideDependentList<YoPose3D> handPosesCurrent = new SideDependentList<>();
    private final SideDependentList<YoPose3D> handPosesDesired = new SideDependentList<>();
    private final SideDependentList<YoPose3D> forearmPosesCurrent = new SideDependentList<>();
    private final SideDependentList<YoPose3D> forearmPosesDesired = new SideDependentList<>();
-   private final MutableReferenceFrame pelvisFrame = new MutableReferenceFrame("pelvisFrame");
+   private final MutableReferenceFrame torsoFrame = new MutableReferenceFrame("torsoFrame");
+   private final ReferenceFrame cameraFrame;
    private final FramePose3D framePose = new FramePose3D();
    private final YoRegistry rootRegistry;
 
-   public LeRobotDatasetDataVariables(LeRobotDatasetEpisode episode, SCS2LogSessionWithVideo session)
+   public LeRobotDatasetDataVariables(LeRobotDatasetEpisode episode,
+                                      SCS2LogSessionWithVideo session,
+                                      HumanoidJointNameMap jointMap,
+                                      HumanoidRobotSensorInformation sensorInformation)
    {
       this.episode = episode;
 
       rootRegistry = session.getRootRegistry();
 
-      RobotDefinition robotDefinition = session.getRobotDefinitions().get(0);
+      torsoPoseCurrent = findYoPose(jointMap.getChestName(), "Current");
+      torsoPoseDesired = findYoPose(jointMap.getChestName(), "Desired");
 
-      pelvisPoseCurrent = findYoPose("pelvis", "Current");
-      pelvisPoseDesired = findYoPose("pelvis", "Desired");
+      cameraFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cameraFrame",
+                                                                                      torsoFrame.getReferenceFrame(),
+                                                                                      sensorInformation.getExperimentalCameraTransform());
 
-      SideDependentList<String> robotHandNames = LeRobotDatasetTools.getRobotLinkNames(robotDefinition, "wrist_yaw");
-      for (RobotSide side : robotHandNames.sides())
+      for (RobotSide side : RobotSide.values)
       {
-         handPosesCurrent.put(side, findYoPose(robotHandNames.get(side), "Current"));
-         handPosesDesired.put(side, findYoPose(robotHandNames.get(side), "Desired"));
-      }
-      SideDependentList<String> robotForearmNames = LeRobotDatasetTools.getRobotLinkNames(robotDefinition, "wrist_roll");
-      for (RobotSide side : robotHandNames.sides())
-      {
-         forearmPosesCurrent.put(side, findYoPose(robotForearmNames.get(side), "Current"));
-         forearmPosesDesired.put(side, findYoPose(robotForearmNames.get(side), "Desired"));
+         String handName = jointMap.getHandName(side);
+         if (handName != null)
+         {
+            handPosesCurrent.put(side, findYoPose(handName, "Current"));
+            handPosesDesired.put(side, findYoPose(handName, "Desired"));
+
+            forearmPosesCurrent.put(side, findYoPose(jointMap.getForearmName(side), "Current"));
+            forearmPosesDesired.put(side, findYoPose(jointMap.getForearmName(side), "Desired"));
+         }
       }
    }
 
@@ -83,62 +91,70 @@ public class LeRobotDatasetDataVariables
       }
    }
 
-   public void addFrame(long timestampMicros, LeRobotDatasetEpisodeStatistics statistics, int logPosition, String logName)
+   public void addFrame(double timestamp, LeRobotDatasetEpisodeStatistics statistics, int logPosition, String logName)
    {
       List<Float> state = new ArrayList<>();
       List<Float> action = new ArrayList<>();
 
       for (RobotSide side : handPosesCurrent.sides())
       {
-         pelvisFrame.update(pelvisPoseCurrent::get);
-         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesCurrent.get(side));
-         framePose.changeFrame(pelvisFrame.getReferenceFrame());
-         state.add((float) framePose.getX());
-         state.add((float) framePose.getY());
-         state.add((float) framePose.getZ());
-         state.add((float) framePose.getOrientation().getX());
-         state.add((float) framePose.getOrientation().getY());
-         state.add((float) framePose.getOrientation().getZ());
-         state.add((float) framePose.getOrientation().getS());
-         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), forearmPosesCurrent.get(side));
-         framePose.changeFrame(pelvisFrame.getReferenceFrame());
-         state.add((float) framePose.getX());
-         state.add((float) framePose.getY());
-         state.add((float) framePose.getZ());
-         state.add((float) framePose.getOrientation().getX());
-         state.add((float) framePose.getOrientation().getY());
-         state.add((float) framePose.getOrientation().getZ());
-         state.add((float) framePose.getOrientation().getS());
+         if (side == RobotSide.RIGHT || !LeRobotDataset.XYZ_RIGHT_ONLY)
+         {
+            torsoFrame.update(torsoPoseCurrent::get);
+            framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesCurrent.get(side));
+            framePose.changeFrame(cameraFrame);
+            state.add((float) framePose.getX());
+            state.add((float) framePose.getY());
+            state.add((float) framePose.getZ());
+            if (!LeRobotDataset.XYZ_RIGHT_ONLY)
+            {
+               state.add((float) framePose.getOrientation().getX());
+               state.add((float) framePose.getOrientation().getY());
+               state.add((float) framePose.getOrientation().getZ());
+               state.add((float) framePose.getOrientation().getS());
+               framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), forearmPosesCurrent.get(side));
+               framePose.changeFrame(cameraFrame);
+               state.add((float) framePose.getX());
+               state.add((float) framePose.getY());
+               state.add((float) framePose.getZ());
+               state.add((float) framePose.getOrientation().getX());
+               state.add((float) framePose.getOrientation().getY());
+               state.add((float) framePose.getOrientation().getZ());
+               state.add((float) framePose.getOrientation().getS());
+            }
 
-         pelvisFrame.update(pelvisPoseDesired::get);
-         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesDesired.get(side));
-         framePose.changeFrame(pelvisFrame.getReferenceFrame());
-         action.add((float) framePose.getX());
-         action.add((float) framePose.getY());
-         action.add((float) framePose.getZ());
-         action.add((float) framePose.getOrientation().getX());
-         action.add((float) framePose.getOrientation().getY());
-         action.add((float) framePose.getOrientation().getZ());
-         action.add((float) framePose.getOrientation().getS());
-         framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), forearmPosesDesired.get(side));
-         framePose.changeFrame(pelvisFrame.getReferenceFrame());
-         action.add((float) framePose.getX());
-         action.add((float) framePose.getY());
-         action.add((float) framePose.getZ());
-         action.add((float) framePose.getOrientation().getX());
-         action.add((float) framePose.getOrientation().getY());
-         action.add((float) framePose.getOrientation().getZ());
-         action.add((float) framePose.getOrientation().getS());
+            torsoFrame.update(torsoPoseCurrent::get); // The torso pose does not have a desired!
+            framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), handPosesDesired.get(side));
+            framePose.changeFrame(cameraFrame);
+            action.add((float) framePose.getX());
+            action.add((float) framePose.getY());
+            action.add((float) framePose.getZ());
+            if (!LeRobotDataset.XYZ_RIGHT_ONLY)
+            {
+               action.add((float) framePose.getOrientation().getX());
+               action.add((float) framePose.getOrientation().getY());
+               action.add((float) framePose.getOrientation().getZ());
+               action.add((float) framePose.getOrientation().getS());
+               framePose.setIncludingFrame(ReferenceFrame.getWorldFrame(), forearmPosesDesired.get(side));
+               framePose.changeFrame(cameraFrame);
+               action.add((float) framePose.getX());
+               action.add((float) framePose.getY());
+               action.add((float) framePose.getZ());
+               action.add((float) framePose.getOrientation().getX());
+               action.add((float) framePose.getOrientation().getY());
+               action.add((float) framePose.getOrientation().getZ());
+               action.add((float) framePose.getOrientation().getS());
+            }
+         }
       }
 
-      float timestamp = timestampMicros / 1e6f; // in seconds, beginning of episode is 0.0 s
       int taskIndex = 0; // We're only training one task at a time for now
       boolean isLastFrame = false;
       LeRobotEpisodeRecord record = new LeRobotEpisodeRecord(state,
                                                              action,
                                                              episode.getEpisodeIndex(),
                                                              episode.getRecords().size(),
-                                                             timestamp,
+                                                             (float) timestamp,
                                                              logPosition,
                                                              logName,
                                                              isLastFrame,

@@ -8,7 +8,6 @@ import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.scs2.SCS2LogSessionWithVideo;
 import us.ihmc.codecs.generated.YUVPicture;
@@ -17,13 +16,17 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.imageMessage.PixelFormat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXImageVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.robotDataLogger.Camera;
-import us.ihmc.scs2.session.log.*;
+import us.ihmc.scs2.session.log.BlackMagicScrubber;
+import us.ihmc.scs2.session.log.LogDataReader;
+import us.ihmc.scs2.session.log.MagewellScrubber;
+import us.ihmc.scs2.session.log.ZEDSVOScrubber;
 import us.ihmc.tools.time.DurationFormatter;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -35,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.zed.global.zed.*;
-import static us.ihmc.zed.global.zed.SL_MEM_CPU;
 
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
@@ -48,11 +50,11 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    private YoLong yoTimestamp;
    private LogDataReader logDataReader;
 
-   private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
+   private record ZEDLogVideo(ZEDSVOScrubber scrubber, RDXImageVisualizer visualizer) { }
    private final List<ZEDLogVideo> zedLogVideos = new ArrayList<>();
-   private record MagewellLogVideo(MagewellScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXOpenCVVideoVisualizer visualizer) { }
+   private record MagewellLogVideo(MagewellScrubber scrubber, OpenCVFrameConverter.ToMat converter, RDXImageVisualizer visualizer) { }
    private final List<MagewellLogVideo> magewellLogVideos = new ArrayList<>();
-   private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXOpenCVVideoVisualizer visualizer) { }
+   private record BlackmagicLogVideo(BlackMagicScrubber scrubber, RDXImageVisualizer visualizer) { }
    private final List<BlackmagicLogVideo> blackmagicLogVideos = new ArrayList<>();
 
    public RDXSCS2LogSession(RDXBaseUI baseUI)
@@ -85,7 +87,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          for (MagewellScrubber magewellScrubber : logSession.getMagewellScrubbers())
          {
             Camera camera = magewellScrubber.getCamera();
-            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            RDXImageVisualizer visualizer = new RDXImageVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             MagewellLogVideo magewellLogVideo = new MagewellLogVideo(magewellScrubber, new OpenCVFrameConverter.ToMat(), visualizer);
             magewellLogVideos.add(magewellLogVideo);
@@ -93,14 +95,14 @@ public class RDXSCS2LogSession extends RDXSCS2Session
          for (BlackMagicScrubber blackMagicScrubber : logSession.getBlackMagicScrubbers())
          {
             Camera camera = blackMagicScrubber.getCamera();
-            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
+            RDXImageVisualizer visualizer = new RDXImageVisualizer(camera.getNameAsString(), camera.getNameAsString(), false);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             BlackmagicLogVideo blackmagicLogVideo = new BlackmagicLogVideo(blackMagicScrubber, visualizer);
             blackmagicLogVideos.add(blackmagicLogVideo);
          }
          for (ZEDSVOScrubber zedSVOScrubber : logSession.getZedSVOScrubbers())
          {
-            RDXOpenCVVideoVisualizer visualizer = new RDXOpenCVVideoVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
+            RDXImageVisualizer visualizer = new RDXImageVisualizer(zedSVOScrubber.getName(), zedSVOScrubber.getName(), false);
             perceptionVisualizersPanel.addVisualizer(visualizer);
             ZEDLogVideo zedLogVideo = new ZEDLogVideo(zedSVOScrubber, visualizer);
             zedLogVideos.add(zedLogVideo);
@@ -127,8 +129,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             Frame frame = magewellLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
             if (frame != null)
             {
-               magewellLogVideo.visualizer.updateImageDimensions(frame.imageWidth, frame.imageHeight);
-               magewellLogVideo.visualizer.setImage(magewellLogVideo.converter.convertToMat(frame), opencv_imgproc.COLOR_BGR2RGBA);
+               magewellLogVideo.visualizer.setImage(magewellLogVideo.converter.convertToMat(frame), PixelFormat.BGR8);
                frame.close();
             }
          }
@@ -139,7 +140,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
                YUVPicture yuvPicture = blackmagicLogVideo.scrubber.readVideoFrame(yoTimestamp.getValueAsLongBits());
                if (yuvPicture != null)
                {
-                  blackmagicLogVideo.visualizer.updateImageDimensions(yuvPicture.getWidth(), yuvPicture.getHeight());
                   // TODO: Convert YUVPicture to Mat
                   yuvPicture.delete();
                }
@@ -157,13 +157,12 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
                int imageHeight = zedLogVideo.scrubber.getImageHeight();
                int imageWidth = zedLogVideo.scrubber.getImageWidth();
-               zedLogVideo.visualizer.updateImageDimensions(imageWidth, imageHeight);
 
                Pointer leftColorImageSlMatPointer = zedLogVideo.scrubber.getLeftColorImageSlMatPointer();
                Mat mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, // BGRA8
                                  sl_mat_get_ptr(leftColorImageSlMatPointer, SL_MEM_CPU),
                                  sl_mat_get_step_bytes(leftColorImageSlMatPointer, SL_MEM_CPU));
-               zedLogVideo.visualizer.setImage(mat, opencv_imgproc.COLOR_BGR2RGBA);
+               zedLogVideo.visualizer.setImage(mat, PixelFormat.BGRA8);
                mat.close();
             }
          }

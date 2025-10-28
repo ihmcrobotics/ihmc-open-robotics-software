@@ -96,7 +96,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * @deprecated Use {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} instead.
+ * We built {@link SCS2AvatarSimulationFactory#setKinematicsSimulation} to replace this,
+ * but apparently this one still works better for some reason.
  */
 public class HumanoidKinematicsSimulation
 {
@@ -160,7 +161,10 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = new ROS2NodeBuilder().build(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      ROS2NodeBuilder nodeBuilder = kinematicsSimulationParameters.getRos2NodeBuilder();
+      if (nodeBuilder == null)
+         nodeBuilder = new ROS2NodeBuilder();
+      ros2Node = nodeBuilder.build(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
       heartbeat = new ROS2Heartbeat(ros2Node, KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
@@ -261,7 +265,7 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      realtimeROS2Node = new ROS2NodeBuilder().buildRealtime(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+      realtimeROS2Node = nodeBuilder.buildRealtime(HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
@@ -335,9 +339,11 @@ public class HumanoidKinematicsSimulation
          throw new RuntimeException("Need to load a default height.");
       }
 
+      for (YoRegistry yoRegistry : kinematicsSimulationParameters.getRegistriesToInclude())
+         registry.addChild(yoRegistry);
+
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         Path incomingLogsDirectory;
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
