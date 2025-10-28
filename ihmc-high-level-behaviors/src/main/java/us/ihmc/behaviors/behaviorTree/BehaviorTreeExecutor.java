@@ -14,10 +14,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<?, ?>>
+public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeRootNodeExecutor, BehaviorTreeNodeExecutor<?, ?>>
 {
-   private BehaviorTreeRootNodeExecutor rootNode;
-
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ROS2PeerClockOffsetEstimator peerClockEstimator,
@@ -60,18 +58,6 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
       LLMConditionExecutor.destroy();
    }
 
-   @Override
-   public void setRootNode(BehaviorTreeNodeExecutor<?, ?> rootNode)
-   {
-      this.rootNode = (BehaviorTreeRootNodeExecutor) rootNode;
-   }
-
-   @Override
-   public BehaviorTreeRootNodeExecutor getRootNode()
-   {
-      return rootNode;
-   }
-
    public void loadBehavior(String jsonFileName)
    {
       WorkspaceResourceFile file = new WorkspaceResourceFile(getSaveFileDirectory(), jsonFileName);
@@ -79,27 +65,17 @@ public class BehaviorTreeExecutor extends BehaviorTree<BehaviorTreeNodeExecutor<
       {
          modifyTreeTopology(topologyOperationQueue ->
          {
-            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(file, topologyOperationQueue);
+            if (this.rootNode == null)
+               topologyOperationQueue.queueDestroyEntireTree();
+
+            BehaviorTreeRootNodeExecutor rootNode = (BehaviorTreeRootNodeExecutor) getNodeBuilder().createRootNode(getAndIncrementNextID());
+            BehaviorTreeNodeExecutor<?, ?> loadedNode = getFileLoader().loadFromFile(rootNode, file, topologyOperationQueue);
 
             if (loadedNode != null)
             {
-               if (loadedNode instanceof BehaviorTreeRootNodeExecutor loadedRootNode) // If we loaded a root node, replace the existing one
-               {
-                  topologyOperationQueue.queueSetRootNodeModify(loadedRootNode);
-               }
-               else if (rootNode == null) // Automatically add a root node if there isn't one
-               {
-                  BehaviorTreeRootNodeExecutor newRootNode = new BehaviorTreeRootNodeExecutor(getAndIncrementNextID(),
-                                                                                              getCRDTInfo(),
-                                                                                              getSaveFileDirectory());
-                  newRootNode.getDefinition().modify();
-                  topologyOperationQueue.queueAppendChildModify(newRootNode, loadedNode);
-                  topologyOperationQueue.queueSetRootNodeModify(newRootNode);
-               }
-               else // Add the loaded node as a child of the root node
-               {
-                  topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
-               }
+               rootNode.getDefinition().modify();
+               topologyOperationQueue.queueSetRootNodeModify(rootNode);
+               topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
             }
          });
       }

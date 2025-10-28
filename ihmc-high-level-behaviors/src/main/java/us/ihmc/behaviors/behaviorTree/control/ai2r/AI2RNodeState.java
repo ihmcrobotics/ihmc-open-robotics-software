@@ -3,22 +3,18 @@ package us.ihmc.behaviors.behaviorTree.control.ai2r;
 import behavior_msgs.msg.dds.AI2RNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.action.actions.CheckPointNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 {
-   private BehaviorTreeRootNodeState actionSequence;
    private final List<CheckPointNodeState> checkPoints = new ArrayList<>();
 
-   public AI2RNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public AI2RNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new AI2RNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new AI2RNodeDefinition(rootNode.getDefinition()), rootNode);
    }
 
    @Override
@@ -26,7 +22,6 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
    {
       super.update();
 
-      actionSequence = BehaviorTreeTools.findRootNode(this);
       checkPoints.clear();
       updateSubtree(this);
    }
@@ -51,7 +46,7 @@ public class AI2RNodeState extends BehaviorTreeNodeState<AI2RNodeDefinition>
 
    public BehaviorTreeRootNodeState getActionSequence()
    {
-      return actionSequence;
+      return rootNode;
    }
 
    public void toMessage(AI2RNodeStateMessage message)

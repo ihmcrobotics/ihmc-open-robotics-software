@@ -1,15 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.CheckPointNodeDefinitionMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.LeafNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class CheckPointNodeDefinition extends LeafNodeDefinition
 {
-   public CheckPointNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public CheckPointNodeDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
    }
 
    public void toMessage(CheckPointNodeDefinitionMessage message)

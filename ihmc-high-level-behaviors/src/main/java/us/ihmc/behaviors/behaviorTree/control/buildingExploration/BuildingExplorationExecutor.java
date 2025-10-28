@@ -1,19 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 
 public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<BuildingExplorationState, BuildingExplorationDefinition>
 {
-   private final SceneGraph sceneGraph;
-
-   public BuildingExplorationExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, SceneGraph sceneGraph)
+   public BuildingExplorationExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
-
-      this.sceneGraph = sceneGraph;
+      super(new BuildingExplorationState(id, rootNode.getState()), rootNode);
    }
 
    // TODO: finish

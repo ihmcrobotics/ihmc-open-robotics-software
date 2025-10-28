@@ -2,11 +2,10 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusEnumField;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
@@ -17,14 +16,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
@@ -38,15 +34,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
    private final CRDTStatusFootstepList previewFootsteps;
 
-   public FootstepPlanActionState(long id,
-                                  CRDTInfo crdtInfo,
-                                  WorkspaceResourceDirectory saveFileDirectory,
-                                  ReferenceFrameLibrary referenceFrameLibrary,
-                                  DRCRobotModel robotModel)
+   public FootstepPlanActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, robotModel.getFootstepPlannerParameters()), crdtInfo);
-
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      super(id, new FootstepPlanActionDefinition(rootNode.getDefinition()), rootNode);
 
       goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());

@@ -4,12 +4,10 @@ import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition.Type;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.widgets.ImGuiConditionNodeWidget;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionNodeDefinition>
 {
@@ -20,9 +18,9 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
    private final RDXLLMCondition llm;
    private final RDXProximityCondition proximityCheck;
 
-   public RDXConditionNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXConditionNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new ConditionNodeState(id, crdtInfo, saveFileDirectory));
+      super(new ConditionNodeState(id, rootNode.getState()), rootNode);
 
       counter = new RDXCounterCondition(state);
       llm = new RDXLLMCondition(state);

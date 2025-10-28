@@ -3,10 +3,9 @@ package us.ihmc.rdx.behaviorTree.actions;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandWrenchActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, HandWrenchActionDefinition>
 {
@@ -14,9 +13,9 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final ImDoubleWrapper forceWidget;
 
-   public RDXHandWrenchAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXHandWrenchAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
+      super(new HandWrenchActionState(id, rootNode.getState()), rootNode);
 
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,

@@ -3,6 +3,7 @@ package us.ihmc.rdx.behaviorTree;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTree;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
@@ -38,7 +39,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       super(treeFilesDirectory, robotModel, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary);
 
-      ros2BehaviorTree = new ROS2BehaviorTree<>(this, ros2);
+      ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2);
 
       ros2BehaviorTree.getBehaviorTreeSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
    }
@@ -70,8 +71,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       float rightMargin = 20.0f;
 
       ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
-      int numberOfLocalNodes = ros2BehaviorTree.getBehaviorTree().getNumberOfNodes();
-      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, ros2BehaviorTree.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
+      ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfNodes, ros2BehaviorTree.getBehaviorTreeSubscription().getNumberOfOnRobotNodes()));
 
 
       ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);

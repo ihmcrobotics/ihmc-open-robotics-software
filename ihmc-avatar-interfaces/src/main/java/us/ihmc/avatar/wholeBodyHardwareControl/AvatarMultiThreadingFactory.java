@@ -69,6 +69,8 @@ public class AvatarMultiThreadingFactory
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final int ROS2_PRIORITY = 25;
+   private static final int JVM_STATISTICS_PRIORITY = 5;
+
 
    private final YoRegistry rootRegistry;
 
@@ -116,7 +118,6 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
-   private JVMStatisticsGenerator jvmStatisticsGenerator;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -225,6 +226,17 @@ public class AvatarMultiThreadingFactory
       if (ikStreamingThread.hasValue())
          yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
 
+
+      // Setup JVM statistics
+      PeriodicThreadSchedulerFactory jvmSchedulerFactory;
+      if (useRealtimeThreads)
+         jvmSchedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(new PriorityParameters(JVM_STATISTICS_PRIORITY));
+      else
+         jvmSchedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, jvmSchedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
+
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
@@ -245,6 +257,7 @@ public class AvatarMultiThreadingFactory
                                                            useRealtimeThreads,
                                                            useMultiThreading,
                                                            yoVariableServer,
+                                                           jvmStatisticsGenerator,
                                                            rootRegistry));
 
       // Set up the block to prevent execution whenever there is no new state message.
@@ -257,11 +270,15 @@ public class AvatarMultiThreadingFactory
          builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
+         {
             builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+         }
          if (ikStreamingThread.hasValue())
+         {
             builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
-         if (jvmStatisticsGenerator != null)
-            builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+         }
+
+         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
          IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(
@@ -576,11 +593,6 @@ public class AvatarMultiThreadingFactory
    public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
-   }
-
-   public void addJVMStatisticsForLoggingLocally(JVMStatisticsGenerator jvmStatisticsGenerator)
-   {
-      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
    }
 
    public void setLogLocally(boolean logLocally)

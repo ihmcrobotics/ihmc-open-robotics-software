@@ -3,11 +3,13 @@ package us.ihmc.behaviors.behaviorTree;
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -29,9 +31,13 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final List<LeafNodeState<?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeState<?>> orderedActions = new ArrayList<>();
 
-   public BehaviorTreeRootNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeRootNodeState(long id,
+                                    CRDTInfo crdtInfo,
+                                    WorkspaceResourceDirectory saveFileDirectory,
+                                    DRCRobotModel robotModel,
+                                    ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory, robotModel), null, referenceFrameLibrary);
 
       automaticExecution = new CRDTBidirectionalBoolean(definition, false);
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
@@ -203,5 +209,12 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public List<ActionNodeState<?>> getOrderedActions()
    {
       return orderedActions;
+   }
+
+   // Getters are in here so there's not getters in base node for root stuff
+
+   public ReferenceFrameLibrary getReferenceFrameLibrary()
+   {
+      return referenceFrameLibrary;
    }
 }

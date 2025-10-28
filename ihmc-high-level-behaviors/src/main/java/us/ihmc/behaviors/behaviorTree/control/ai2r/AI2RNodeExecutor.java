@@ -4,9 +4,9 @@ import behavior_msgs.msg.dds.AI2RActionFailureMessage;
 import behavior_msgs.msg.dds.AI2RObjectMessage;
 import behavior_msgs.msg.dds.AI2RStatusMessage;
 import controller_msgs.msg.dds.AbortWalkingMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
@@ -15,19 +15,14 @@ import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.AutonomyAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 
 import java.util.ArrayList;
@@ -38,37 +33,27 @@ import java.util.List;
  */
 public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI2RNodeDefinition>
 {
-   private final ROS2ControllerHelper ros2;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final SceneGraph sceneGraph;
    private final Throttler statusThrottler = new Throttler().setFrequency(10.0);
    private final AI2RStatusMessage statusMessage = new AI2RStatusMessage();
    private final List<LeafNodeState<?>> failedLeaves = new ArrayList<>();
-   private final ControllerStatusTracker controllerStatusTracker;
 
    private static final boolean CHECK_COLLISION_WITH_OBJECTS = false;
    private static final double DISTANCE_COLLISION_THRESHOLD = 0.6;
+   private final BehaviorTreeRootNodeState actionSequence;
    private boolean navigationFailureForObstacle = false;
    private String navigationFailureObstacleName;
    private boolean actionFailureMissingFrame = false;
    private final AI2RSkillEditor skillEditor = new AI2RSkillEditor();
 
-   public AI2RNodeExecutor(long id,
-                           CRDTInfo crdtInfo,
-                           WorkspaceResourceDirectory saveFileDirectory,
-                           ROS2ControllerHelper ros2,
-                           ROS2SyncedRobotModel syncedRobot,
-                           SceneGraph sceneGraph)
+   public AI2RNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new AI2RNodeState(id, crdtInfo, saveFileDirectory));
+      super(new AI2RNodeState(id, rootNode.getState()), rootNode);
 
-      this.ros2 = ros2;
-      this.syncedRobot = syncedRobot;
-      this.sceneGraph = sceneGraph;
+      actionSequence = rootNode.getState();
+
       resetStatusMessage();
-      controllerStatusTracker = new ControllerStatusTracker(new LogToolsLogger(), ros2.getROS2Node(), syncedRobot.getRobotModel().getSimpleRobotName());
 
-      ros2.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
+      ros2ControllerHelper.subscribeViaCallback(AutonomyAPI.AI2R_COMMAND, message ->
       {
          LogTools.info("Received command message: %s".formatted(message));
 
@@ -98,8 +83,8 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             failedLeaves.clear();
             actionFailureMissingFrame = false;
             navigationFailureForObstacle = false;
-            state.getActionSequence().setExecutionNextIndex(commandedBehaviorIndex);
-            state.getActionSequence().setAutomaticExecution(true);
+            actionSequence.setExecutionNextIndex(commandedBehaviorIndex);
+            actionSequence.setAutomaticExecution(true);
 
             resetStatusMessage();
             LogTools.warn("Automatic execution");
@@ -136,7 +121,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
          setSceneInfo();
          setAvailableBehaviors();
          setFailedBehaviors();
-         ros2.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
+         ros2ControllerHelper.publish(AutonomyAPI.AI2R_STATUS, statusMessage);
       }
       endSequenceAfterBehaviorExecution();
       executeBehaviorLogic();
@@ -178,9 +163,9 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void setFailedBehaviors()
    {
       statusMessage.setFailedBehavior("-");
-      for (var leaf : state.getActionSequence().getOrderedLeaves())
+      for (var leaf : actionSequence.getOrderedLeaves())
       {
-         if (leaf.getFailed() && !state.getActionSequence().getAutomaticExecution())
+         if (leaf.getFailed() && !actionSequence.getAutomaticExecution())
          {
             // Find the previous checkpoint by iterating backwards through the checkpoints
             for (int i = state.getCheckPoints().size() - 1; i >= 0; i--)
@@ -269,7 +254,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    {
       boolean trackingObjectsInProgress = false;
       leavesLoop:
-      for (var leaf : state.getActionSequence().getOrderedLeaves())
+      for (var leaf : actionSequence.getOrderedLeaves())
       {
          // Check if actions can't execute because of missing frames
          if (leaf.getIsNextForExecution())
@@ -334,7 +319,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
                            navigationFailureForObstacle = true;
                            navigationFailureObstacleName = object.getObjectNameAsString();
                            // Have the executor abort
-                           ros2.publishToController(new AbortWalkingMessage());
+                           ros2ControllerHelper.publishToController(new AbortWalkingMessage());
 
                            break leavesLoop;
                         }
@@ -364,7 +349,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
             statusMessage.setBehaviorInProgress("-");
             LogTools.info("Completed behavior: {}", statusMessage.getCompletedBehavior());
             // Jump to end of sequence
-            state.getActionSequence().setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
+            actionSequence.setExecutionNextIndex(state.getCheckPoints().get(state.getCheckPoints().size() - 1).getLeafIndex());
          }
       }
    }
