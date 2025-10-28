@@ -6,7 +6,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
-import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseManager;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
 /**
@@ -19,7 +19,7 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    ROS2SyncedRobotModel syncedRobot,
                                    YOLOv8DetectionExecutor yolo,
-                                   IsaacROSFoundationPoseManager foundationPose,
+                                   IsaacROSFoundationPoseCommunicatorMap foundationPose,
                                    ROS2PeerClockOffsetEstimator peerClockEstimator)
    {
       super(syncedRobot, peerClockEstimator, ros2ControllerHelper, yolo, foundationPose);

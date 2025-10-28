@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseManager;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
 import java.util.ArrayList;
@@ -10,11 +10,11 @@ import java.util.List;
 public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 {
    private final YOLOv8DetectionExecutor yolo;
-   private final IsaacROSFoundationPoseManager foundationPose;
+   private final IsaacROSFoundationPoseCommunicatorMap foundationPose;
 
    private final List<BehaviorTreeSceneObjectTracker> trackers = new ArrayList<>();
 
-   public BehaviorTreeSceneExecutor(ROS2SyncedRobotModel syncedRobot, YOLOv8DetectionExecutor yolo, IsaacROSFoundationPoseManager foundationPose)
+   public BehaviorTreeSceneExecutor(ROS2SyncedRobotModel syncedRobot, YOLOv8DetectionExecutor yolo, IsaacROSFoundationPoseCommunicatorMap foundationPose)
    {
       super(syncedRobot);
 
