@@ -1,7 +1,7 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObject;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
 import us.ihmc.rdx.tools.RDXModelInstance;
@@ -9,7 +9,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 
-public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObject
+public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 {
    private final RDXBaseUI baseUI;
 

@@ -15,7 +15,7 @@ import us.ihmc.behaviors.behaviorTree.action.actions.ChestOrientationActionState
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionState;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObject;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.communication.AutonomyAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -133,7 +133,7 @@ public class AI2RNodeExecutor extends BehaviorTreeNodeExecutor<AI2RNodeState, AI
    private void setSceneInfo()
    {
       statusMessage.getObjects().clear();
-      for (BehaviorTreeSceneObject object : scene.getObjects())
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
       {
          AI2RObjectMessage objectMessage = statusMessage.getObjects().add();
          objectMessage.setObjectName(object.getName());

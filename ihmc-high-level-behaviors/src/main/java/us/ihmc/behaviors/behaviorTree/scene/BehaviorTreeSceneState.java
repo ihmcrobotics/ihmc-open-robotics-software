@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,7 +26,7 @@ public class BehaviorTreeSceneState
    private final ArrayList<ReferenceFrame> robotFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> robotFrameMap = new HashMap<>();
 
-   private final List<BehaviorTreeSceneObject> objects = new ArrayList<>();
+   private final List<BehaviorTreeSceneObjectState> objects = new ArrayList<>();
 
    public BehaviorTreeSceneState(ROS2SyncedRobotModel syncedRobot)
    {
@@ -74,13 +75,22 @@ public class BehaviorTreeSceneState
       }
    }
 
+   public void toMessage(BehaviorTreeSceneStateMessage message)
+   {
 
-   public BehaviorTreeSceneObject getObject(String objectName)
+   }
+
+   public void fromMessage(BehaviorTreeSceneStateMessage message)
+   {
+
+   }
+
+   public BehaviorTreeSceneObjectState getObject(String objectName)
    {
       return null;
    }
 
-   public List<BehaviorTreeSceneObject> getObjects()
+   public List<BehaviorTreeSceneObjectState> getObjects()
    {
       return objects;
    }

@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
-public class BehaviorTreeSceneObject
+public class BehaviorTreeSceneObjectState
 {
    protected final RigidBodyTransform transform = new RigidBodyTransform();
 
