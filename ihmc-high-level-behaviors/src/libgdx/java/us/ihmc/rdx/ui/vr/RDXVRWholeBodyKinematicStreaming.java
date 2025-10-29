@@ -92,7 +92,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
 public class RDXVRWholeBodyKinematicStreaming
 {
-   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = true;
+   public static final boolean ENABLE_YO_VARIABLE_TOOLBOX_SERVER = false;
    public static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
 
    private final RDXVRMultiContact multiContact;
