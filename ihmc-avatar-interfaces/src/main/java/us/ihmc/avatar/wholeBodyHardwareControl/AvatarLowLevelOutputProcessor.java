@@ -47,6 +47,7 @@ public class AvatarLowLevelOutputProcessor
    private final YoBoolean interpolateDesireds = new YoBoolean("interpolateDesireds", registry);
    private final YoInteger interpolateDuration = new YoInteger("interpolateDuration", registry);
    private final YoInteger interpolationTick = new YoInteger("interpolationTick", registry);
+   private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", registry);
 
    private final JointControlBlender[] jointControlBlenders;
 
@@ -125,7 +126,7 @@ public class AvatarLowLevelOutputProcessor
    {
       this.unprocessedDesireds.overwriteWith(unprocessedDesireds);
 
-      if (interpolationTick.getIntegerValue() < interpolateDuration.getIntegerValue() && interpolateDesireds.getBooleanValue())
+      if (interpolateDesireds.getBooleanValue())
          interpolate();
       else
          processedDesireds.overwriteWith(unprocessedDesireds);
@@ -149,20 +150,29 @@ public class AvatarLowLevelOutputProcessor
    public void startDesiredsInterpolation()
    {
       interpolationTick.set(0);
-      previousDesireds.overwriteWith(processedDesireds);
    }
 
    private void interpolate()
    {
-      for (int i = 0; i <  processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
+      double ratio = interpolationTick.getValueAsDouble() / interpolateDuration.getValueAsDouble();
+      interpolationRatio.set(MathTools.clamp(ratio, 0, 1));
+      if (ratio <= 1)
       {
-         double ratio = interpolationTick.getValueAsDouble() / interpolateDuration.getValueAsDouble();
-         JointDesiredOutputReadOnly previousJointDesireds = previousDesireds.getJointDesiredOutput(i);
-         JointDesiredOutputReadOnly currentJointDesireds = unprocessedDesireds.getJointDesiredOutput(i);
+         for (int i = 0; i < processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
+         {
 
-         jointControlBlenders[i].computeAndUpdateJointControl(processedDesireds.getJointDesiredOutput(i), previousJointDesireds, currentJointDesireds, ratio);
+            JointDesiredOutputReadOnly previousJointDesireds = previousDesireds.getJointDesiredOutput(i);
+            JointDesiredOutputReadOnly currentJointDesireds = unprocessedDesireds.getJointDesiredOutput(i);
+
+            jointControlBlenders[i].computeAndUpdateJointControl(processedDesireds.getJointDesiredOutput(i),
+                                                                 previousJointDesireds,
+                                                                 currentJointDesireds,
+                                                                 ratio);
+         }
       }
       interpolationTick.increment();
+      if (interpolationTick.getIntegerValue() == interpolateDuration.getIntegerValue())
+         previousDesireds.overwriteWith(processedDesireds);
    }
 
    private void computeMasterGainForServo()
