@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -30,7 +29,7 @@ public abstract class BehaviorTreeSceneState
    protected final LongSupplier idSupplier;
    protected final ROS2SyncedRobotModel syncedRobot;
 
-   private final ArrayList<ReferenceFrame> robotFrames = new ArrayList<>();
+   private final List<ReferenceFrame> robotFrames = new ArrayList<>();
    private final Map<String, ReferenceFrame> robotFrameMap = new HashMap<>();
 
    protected final LatestTimestampModifiable objectsModifiable;
