@@ -147,17 +147,18 @@ public class AvatarLowLevelOutputProcessor
    public void startDesiredsInterpolation()
    {
       interpolationTime.set(0);
+      previousDesireds.overwriteWith(processedDesireds);
    }
 
    private void interpolate()
    {
-      double ratio = interpolationTime.getValueAsDouble() / interpolateDuration.getValueAsDouble();
-      interpolationRatio.set(MathTools.clamp(ratio, 0, 1));
-      if (ratio <= 1)
+      interpolationTime.add(updateDt); //Do this first since we already start at the previous position
+      double ratio = MathTools.clamp(interpolationTime.getValueAsDouble() / interpolateDuration.getValueAsDouble(), 0.0, 1.0);
+      interpolationRatio.set(ratio);
+      if (ratio < 1)
       {
          for (int i = 0; i < processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
          {
-
             JointDesiredOutputReadOnly previousJointDesireds = previousDesireds.getJointDesiredOutput(i);
             JointDesiredOutputReadOnly currentJointDesireds = unprocessedDesireds.getJointDesiredOutput(i);
 
@@ -167,9 +168,7 @@ public class AvatarLowLevelOutputProcessor
                                                                  ratio);
          }
       }
-      interpolationTime.add(updateDt);
-      if (interpolationTime.getDoubleValue() >= interpolateDuration.getDoubleValue())
-         previousDesireds.overwriteWith(processedDesireds);
+
    }
 
    private void computeMasterGainForServo()
