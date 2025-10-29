@@ -23,7 +23,6 @@ public final class LocalLoggingTools
       {
          LogTools.warn("[Local logging] The debug network interface is not connected so we tried logging locally to a mountpoint at /root/.ihmc/logs.");
          LogTools.warn("[Local logging] However, there was no mountpoint at /root/.ihmc/logs. Is there a flash drive plugged in and mounted?");
-         LogTools.warn("[Local logging] https://ihmcrobotics.atlassian.net/wiki/spaces/Alexander/pages/1118961761/On-board+logging+USB+flash+drive");
       }
 
       LOGGING_LOCALLY =/*!debugNetworkInterfaceIsConnected &&*/ logDirectoryIsMountpoint;
