@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -14,8 +13,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import javax.naming.ldap.Control;
 
 /**
  * This class is responsible for applying a master gain to all low-level desired outputs.
@@ -45,8 +42,8 @@ public class AvatarLowLevelOutputProcessor
    private final YoDouble servoTime = new YoDouble("servoTime", registry);
    private final YoDouble masterGain = new YoDouble("masterGain", registry);
    private final YoBoolean interpolateDesireds = new YoBoolean("interpolateDesireds", registry);
-   private final YoInteger interpolateDuration = new YoInteger("interpolateDuration", registry);
-   private final YoInteger interpolationTick = new YoInteger("interpolationTick", registry);
+   private final YoDouble interpolateDuration = new YoDouble("interpolateDuration", registry);
+   private final YoDouble interpolationTime = new YoDouble("interpolationTime", registry);
    private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", registry);
 
    private final JointControlBlender[] jointControlBlenders;
@@ -67,8 +64,8 @@ public class AvatarLowLevelOutputProcessor
       processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Processed", controlledJoints, registry);
 
       jointControlBlenders = new JointControlBlender[controlledJoints.length];
-      interpolateDuration.set(1);
-      interpolationTick.set(1);
+      interpolateDuration.set(updateDt);
+      interpolationTime.set(updateDt);
 
       for (int i = 0; i < controlledJoints.length; i++)
          jointControlBlenders[i] = new JointControlBlender("LowLevelOutputInterpolator", controlledJoints[i], registry);
@@ -115,8 +112,8 @@ public class AvatarLowLevelOutputProcessor
 
       interpolateDuration.addListener(change ->
                                       {
-                                         if(interpolateDuration.getIntegerValue() < 1)
-                                            interpolateDuration.set(1);
+                                         if(interpolateDuration.getDoubleValue() < 0.0)
+                                            interpolateDuration.set(updateDt);
                                       });
 
       parentRegistry.addChild(registry);
@@ -149,12 +146,12 @@ public class AvatarLowLevelOutputProcessor
 
    public void startDesiredsInterpolation()
    {
-      interpolationTick.set(0);
+      interpolationTime.set(0);
    }
 
    private void interpolate()
    {
-      double ratio = interpolationTick.getValueAsDouble() / interpolateDuration.getValueAsDouble();
+      double ratio = interpolationTime.getValueAsDouble() / interpolateDuration.getValueAsDouble();
       interpolationRatio.set(MathTools.clamp(ratio, 0, 1));
       if (ratio <= 1)
       {
@@ -170,8 +167,8 @@ public class AvatarLowLevelOutputProcessor
                                                                  ratio);
          }
       }
-      interpolationTick.increment();
-      if (interpolationTick.getIntegerValue() == interpolateDuration.getIntegerValue())
+      interpolationTime.add(updateDt);
+      if (interpolationTime.getDoubleValue() >= interpolateDuration.getDoubleValue())
          previousDesireds.overwriteWith(processedDesireds);
    }
 
@@ -255,5 +252,10 @@ public class AvatarLowLevelOutputProcessor
    public void setMasterGain(double masterGain)
    {
       this.masterGain.set(masterGain);
+   }
+
+   public void setInterpolationDuration(double duration)
+   {
+      this.interpolateDuration.set(duration);
    }
 }
