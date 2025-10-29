@@ -2,6 +2,8 @@ package us.ihmc.rdx.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
@@ -9,6 +11,7 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -62,24 +65,37 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.get("Mustard"), mustard))
+      ImGui.text("Add virtual:");
+      ImGui.indent();
+      if (ImGuiTools.textWithUnderlineOnHover("Mustard") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
       {
-         if (mustard.get())
-         {
-            beingPlaced = new RDXBehaviorTreeSceneObject(idSupplier.getAsLong(), crdtInfo, IsaacROSFoundationPoseObject.MUSTARD.name(), baseUI);
-            objects.add(beingPlaced);
-            objectsModifiable.modify();
-            needToInitializePlacementHeight = true;
-         }
-         else
-         {
-            if (!objects.isEmpty())
-            {
-               RDXBehaviorTreeSceneObject remove = objects.remove(0);
-               objectsModifiable.modify();
-               remove.destroy();
-            }
-         }
+         beingPlaced = new RDXBehaviorTreeSceneObject(idSupplier.getAsLong(), crdtInfo, IsaacROSFoundationPoseObject.MUSTARD.name(), baseUI);
+         objects.add(beingPlaced);
+         objectsModifiable.modify();
+         needToInitializePlacementHeight = true;
+      }
+      ImGui.unindent();
+
+      ImGui.text("Objects:");
+      ImGui.indent();
+      RDXBehaviorTreeSceneObject remove = null;
+      for (int i = 0; i < objects.size(); i++)
+      {
+         RDXBehaviorTreeSceneObject object = objects.get(i);
+         ImGui.text("%s ID: %d".formatted(object.getName(), object.getID()));
+         ImGui.sameLine();
+         ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
+         if (ImGui.button(labels.get("X", i)))
+            remove = object;
+         ImGui.popStyleColor();
+      }
+      ImGui.unindent();
+
+      if (remove != null)
+      {
+         objects.remove(remove);
+         objectsModifiable.modify();
+         remove.destroy();
       }
    }
 
