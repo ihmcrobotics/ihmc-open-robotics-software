@@ -1,42 +1,28 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrientationActionState, ChestOrientationActionDefinition>
 {
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
 
-   public ChestOrientationActionExecutor(long id,
-                                         CRDTInfo crdtInfo,
-                                         WorkspaceResourceDirectory saveFileDirectory,
-                                         ROS2ControllerHelper ros2ControllerHelper,
-                                         ROS2SyncedRobotModel syncedRobot,
-                                         ReferenceFrameLibrary referenceFrameLibrary)
+   public ChestOrientationActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new ChestOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
+      super(new ChestOrientationActionState(id, rootNode.getState()), rootNode);
    }
 
    @Override

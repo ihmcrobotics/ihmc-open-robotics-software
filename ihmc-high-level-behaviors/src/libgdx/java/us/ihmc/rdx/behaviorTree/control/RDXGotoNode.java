@@ -1,25 +1,22 @@
 package us.ihmc.rdx.behaviorTree.control;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
+import us.ihmc.behaviors.behaviorTree.LeafNodeState;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.control.GotoNodeState;
-import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.behaviorTree.RDXLeafNode;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.widgets.ImGuiGotoNodeWidget;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiGotoNodeWidget gotoNodeWidget = new ImGuiGotoNodeWidget();
 
-   public RDXGotoNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXGotoNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new GotoNodeState(id, crdtInfo, saveFileDirectory));
+      super(new GotoNodeState(id, rootNode.getState()), rootNode);
    }
 
    @Override
@@ -47,11 +44,9 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      BehaviorTreeRootNodeState rootNode = BehaviorTreeTools.findRootNode(state);
-
       // Validate state in case something earlier in this UI tick messed with things.
       // This happens with the Undo non-topological changes button.
-      state.validateFields(rootNode.getOrderedLeaves());
+      state.validateFields(rootNode.getState().getOrderedLeaves());
 
       if (ImGui.beginCombo(labels.get("Goto"), definition.getNodeToGotoName()))
       {
@@ -60,7 +55,7 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
             definition.setGotoNextNode();
          }
 
-         for (LeafNodeState<?> leafNode : rootNode.getOrderedLeaves())
+         for (LeafNodeState<?> leafNode : rootNode.getState().getOrderedLeaves())
          {
             if (leafNode != state) // Exclude self
             {

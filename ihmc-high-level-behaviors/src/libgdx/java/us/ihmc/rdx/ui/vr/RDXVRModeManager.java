@@ -16,6 +16,7 @@ import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
@@ -43,7 +44,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
+/**
+ * Manages the various VR modes and associated state for immersive humanoid control in the RDX UI.
+ * <p>
+ * Responsible for switching between modes such as whole-body IK streaming, footstep placement,
+ * joystick-based walking, and footstep streaming; maintaining their corresponding input logic,
+ * GUIs, and visualizations in the VR context.
+ * </p>
+ * <p>
+ * Handles creation and update of VR panels, occlusion and perception visualizers, hand managers, and robot
+ * streaming helpers; integrates robot-side per-arm and hand tracking, stereo panel occlusion for rendering,
+ * and dynamic control panel presentation.
+ * </p>
+ */
 public class RDXVRModeManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -71,6 +84,7 @@ public class RDXVRModeManager
    private final Throttler panelOcclusionRateLimiter = new Throttler();
    private final SideDependentList<List<RigidBodyBasics>> syncedRobotArmRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private final SideDependentList<List<RigidBodyBasics>> ghostIKRobotArmRigidBodies = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final SideDependentList<Point3D> tempHandPoints = new SideDependentList<>(new Point3D(), new Point3D());
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -219,8 +233,7 @@ public class RDXVRModeManager
    public void update()
    {
       vrManager.getTeleporter().setBButtonEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
-      if (mode != RDXVRMode.INPUTS_DISABLED)
-         interactablesEnabled.set(false);
+      interactablesEnabled.set(mode == RDXVRMode.INPUTS_DISABLED);
 
       switch (mode)
       {
@@ -250,15 +263,54 @@ public class RDXVRModeManager
             for (RobotSide side : RobotSide.values)
             {
                checkStereoPanelOcclusions(syncedRobotArmRigidBodies.get(side), perceptionVisualizers.getRobotVisualizer().getMultiBodyGraphic());
+               Point3D tempPoint = tempHandPoints.get(side);
+               tempPoint.set(syncedRobot.getFullRobotModel().getHandControlFrame(side).getTransformToRoot().getTranslation());
+               checkStereoPanelOcclusionWithHandControlFrames(tempPoint, syncedRobotArmRigidBodies.get(side), perceptionVisualizers.getRobotVisualizer().getMultiBodyGraphic());
                if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && kinematicsStreaming != null)
                {
                   checkStereoPanelOcclusions(ghostIKRobotArmRigidBodies.get(side), kinematicsStreaming.getGhostRobotGraphic());
+                  tempPoint.set(kinematicsStreaming.getGhostFullRobotModel().getHandControlFrame(side).getTransformToRoot().getTranslation());
+                  checkStereoPanelOcclusionWithHandControlFrames(tempPoint, ghostIKRobotArmRigidBodies.get(side), kinematicsStreaming.getGhostRobotGraphic());
                }
             }
          }
       }
    }
 
+   /**
+    * Checks if the specified hand control frame point is occluded by the stereo panel's view.
+    * <p>
+    * If it is occluded, hides the last rigid body in the provided list, which is closest to the hand control frame.
+    * If it is not occluded, ensures that rigid body is visible.
+    * </p>
+    *
+    * @param handPoint     the hand control frame point to check for occlusion
+    * @param rigidBodyList the ordered list of rigid bodies for the arm; last entry is closest to hand
+    * @param robotGraphics the graphics object whose visibility set should be updated
+    */
+   private void checkStereoPanelOcclusionWithHandControlFrames(Point3DReadOnly handPoint, List<RigidBodyBasics> rigidBodyList, RDXMultiBodyGraphic robotGraphics)
+   {
+      if (stereoPanel.isOccludingView(handPoint))
+      {
+         robotGraphics.getMultiBody().getRigidBodiesToHide().add(rigidBodyList.get(rigidBodyList.size() - 1).getName());
+      }
+      else
+      {
+         robotGraphics.getMultiBody().getRigidBodiesToHide().remove(rigidBodyList.get(rigidBodyList.size() - 1).getName());
+      }
+   }
+
+   /**
+    * Checks occlusion of the origins of a list of robot rigid bodies against the stereo panel's view.
+    * <p>
+    * For each {@link RigidBodyBasics} in the list, this method tests if its origin (expressed as a {@link Point3D})
+    * is currently occluded by the stereo panel. If occluded, the rigid body's name is added to the
+    * set of hidden bodies in the provided {@code robotGraphics}. If not occluded, its name is removed from the set.
+    * </p>
+    *
+    * @param rigidBodyList the list of rigid bodies to test for occlusion by the stereo panel
+    * @param robotGraphics the graphics instance whose hidden body set is updated for visualization
+    */
    private void checkStereoPanelOcclusions(List<RigidBodyBasics> rigidBodyList, RDXMultiBodyGraphic robotGraphics)
    {
       for (RigidBodyBasics rigidBody : rigidBodyList)

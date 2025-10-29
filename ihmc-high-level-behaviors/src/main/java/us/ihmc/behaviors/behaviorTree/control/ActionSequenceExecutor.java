@@ -1,13 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 
 public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSequenceState, ActionSequenceDefinition>
 {
-   public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ActionSequenceExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
+      super(new ActionSequenceState(id, rootNode.getState()), rootNode);
    }
 }

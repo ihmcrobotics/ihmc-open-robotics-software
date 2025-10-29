@@ -1,11 +1,10 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
 import behavior_msgs.msg.dds.ConditionNodeStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusBoolean;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
 {
@@ -15,9 +14,9 @@ public class ConditionNodeState extends LeafNodeState<ConditionNodeDefinition>
    private final CRDTStatusBoolean conditionMet;
    private final CRDTStatusBoolean evaluatingCondition;
 
-   public ConditionNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ConditionNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new ConditionNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new ConditionNodeDefinition(rootNode.getDefinition()), rootNode);
 
       counter = new CounterConditionState(definition);
       llm = new LLMConditionState(definition);

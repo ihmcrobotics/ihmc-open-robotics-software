@@ -3,18 +3,17 @@ package us.ihmc.rdx.behaviorTree.control;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
 import us.ihmc.behaviors.behaviorTree.control.ActionSequenceState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.ui.widgets.ImGuiSequenceIconWidget;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, ActionSequenceDefinition>
 {
    private final ImGuiSequenceIconWidget sequenceIconWidget = new ImGuiSequenceIconWidget();
 
-   public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXActionSequence(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
+      super(new ActionSequenceState(id, rootNode.getState()), rootNode);
    }
 
    @Override

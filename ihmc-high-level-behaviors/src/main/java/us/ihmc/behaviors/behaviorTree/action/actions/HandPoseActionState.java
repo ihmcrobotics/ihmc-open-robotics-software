@@ -1,16 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import static us.ihmc.behaviors.behaviorTree.action.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
 
@@ -30,13 +28,9 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private final CRDTStatusDouble solutionQuality;
    private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
-   public HandPoseActionState(long id,
-                              CRDTInfo crdtInfo,
-                              WorkspaceResourceDirectory saveFileDirectory,
-                              ReferenceFrameLibrary referenceFrameLibrary,
-                              DRCRobotModel robotModel)
+   public HandPoseActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new HandPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new HandPoseActionDefinition(rootNode.getDefinition()), rootNode);
 
       palmFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                    definition.getCRDTPalmParentFrameName(),

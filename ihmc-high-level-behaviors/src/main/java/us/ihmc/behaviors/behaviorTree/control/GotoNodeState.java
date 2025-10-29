@@ -3,19 +3,16 @@ package us.ihmc.behaviors.behaviorTree.control;
 import behavior_msgs.msg.dds.GotoNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.behaviorTree.LeafNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.List;
 
 public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
 {
-   public GotoNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public GotoNodeState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new GotoNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new GotoNodeDefinition(rootNode.getDefinition()), rootNode);
    }
 
    @Override
@@ -72,8 +69,7 @@ public class GotoNodeState extends LeafNodeState<GotoNodeDefinition>
 
    public LeafNodeState<?> findNodeToGoto()
    {
-      BehaviorTreeRootNodeState rootState = BehaviorTreeTools.findRootNode(this);
-      BehaviorTreeNodeState<?> nodeToGoto = rootState.getIDToNodeMap().get(definition.getNodeToGotoID());
+      BehaviorTreeNodeState<?> nodeToGoto = rootNode.getIDToNodeMap().get(definition.getNodeToGotoID());
       if (nodeToGoto instanceof LeafNodeState<?> leafState)
       {
          return leafState;

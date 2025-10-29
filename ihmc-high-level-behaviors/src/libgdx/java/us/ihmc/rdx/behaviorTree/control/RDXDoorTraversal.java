@@ -1,21 +1,19 @@
 package us.ihmc.rdx.behaviorTree.control;
 
 import imgui.ImGui;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.behaviorTree.control.door.DoorTraversalState;
-import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
-import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -23,15 +21,12 @@ import java.util.List;
 public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, DoorTraversalDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiSliderDoubleWrapper lostGraspDetectionHandOpenAngleSlider;
    private final ImGuiSliderDoubleWrapper openedDoorHandleDistanceFromStartSlider;
 
-   public RDXDoorTraversal(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
+   public RDXDoorTraversal(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
-
-      this.syncedRobot = syncedRobot;
+      super(new DoorTraversalState(id, rootNode.getState()), rootNode);
 
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
       lostGraspDetectionHandOpenAngleSlider = new ImGuiSliderDoubleWrapper("Lost grasp detection hand open angle", "",

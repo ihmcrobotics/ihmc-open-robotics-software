@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -43,6 +43,7 @@ public class LLMConditionExecutor
    }
 
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final BehaviorTreeRootNodeExecutor rootNode;
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
 
@@ -52,10 +53,11 @@ public class LLMConditionExecutor
    private final CRDTBidirectionalString system;
    private final CRDTBidirectionalString prompt;
 
-   public LLMConditionExecutor(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
+   public LLMConditionExecutor(ConditionNodeState state, BehaviorTreeRootNodeExecutor rootNode)
    {
       this.state = state;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.rootNode = rootNode;
+      this.referenceFrameLibrary = rootNode.getState().getReferenceFrameLibrary();
 
       definition = state.getDefinition();
 
@@ -95,7 +97,7 @@ public class LLMConditionExecutor
       if (injectBehaviorState.getValue())
       {
          injectedText.append("The following is a description of the current behavior state:\n");
-         injectedText.append(BehaviorTreeLLMEncoding.encode(BehaviorTreeTools.findRootNode(state)) + "\n");
+         injectedText.append(BehaviorTreeLLMEncoding.encode(rootNode.getState()) + "\n");
       }
       if (injectEnvironmentState.getValue())
       {

@@ -1,9 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.control;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.LeafNodeExecutor;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +19,9 @@ public class FallbackNodeExecutor extends BehaviorTreeNodeExecutor<FallbackNodeS
    private final List<LeafNodeExecutor<?, ?>> tryLeaves = new ArrayList<>();
    private final List<LeafNodeExecutor<?, ?>> fallbackLeaves = new ArrayList<>();
 
-   public FallbackNodeExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public FallbackNodeExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new FallbackNodeState(id, crdtInfo, saveFileDirectory));
+      super(new FallbackNodeState(id, rootNode.getState()), rootNode);
    }
 
    @Override

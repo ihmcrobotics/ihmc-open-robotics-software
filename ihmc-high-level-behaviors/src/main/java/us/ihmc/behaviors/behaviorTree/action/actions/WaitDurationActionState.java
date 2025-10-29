@@ -1,15 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WaitDurationActionState extends ActionNodeState<WaitDurationActionDefinition>
 {
-   public WaitDurationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public WaitDurationActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new WaitDurationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new WaitDurationActionDefinition(rootNode.getDefinition()), rootNode);
    }
 
    public void toMessage(WaitDurationActionStateMessage message)

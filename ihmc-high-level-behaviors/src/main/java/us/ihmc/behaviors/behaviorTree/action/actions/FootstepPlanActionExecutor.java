@@ -1,14 +1,12 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.TaskspaceTrajectoryTrackingErrorCalculator;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -23,11 +21,8 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
-import us.ihmc.commons.thread.Throttler;
 
 import java.util.UUID;
 
@@ -36,9 +31,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    public static final double POSITION_TOLERANCE = 0.15;
    public static final double ORIENTATION_TOLERANCE = Math.toRadians(10.0);
 
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingControllerParameters walkingControllerParameters;
    private final SideDependentList<FramePose3D> commandedGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -53,21 +45,11 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FootstepPlanActionPlanningThread executionFootstepPlanningThread;
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
 
-   public FootstepPlanActionExecutor(long id,
-                                     CRDTInfo crdtInfo,
-                                     WorkspaceResourceDirectory saveFileDirectory,
-                                     ROS2ControllerHelper ros2ControllerHelper,
-                                     ROS2SyncedRobotModel syncedRobot,
-                                     ControllerStatusTracker controllerStatusTracker,
-                                     ReferenceFrameLibrary referenceFrameLibrary,
-                                     WalkingControllerParameters walkingControllerParameters)
+   public FootstepPlanActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, syncedRobot.getRobotModel()));
+      super(new FootstepPlanActionState(id, rootNode.getState()), rootNode);
 
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
-      this.controllerStatusTracker = controllerStatusTracker;
-      this.walkingControllerParameters = walkingControllerParameters;
+      walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
       previewFootstepPlanningThread = new FootstepPlanActionPlanningThread(true, state, definition);
       executionFootstepPlanningThread = new FootstepPlanActionPlanningThread(false, state, definition);

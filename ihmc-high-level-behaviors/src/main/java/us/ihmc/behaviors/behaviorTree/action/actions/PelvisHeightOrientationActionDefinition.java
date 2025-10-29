@@ -3,8 +3,8 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTBidirectionalString;
@@ -13,7 +13,6 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinition
 {
@@ -26,9 +25,9 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskPelvisToParentTransform = new RigidBodyTransform();
 
-   public PelvisHeightOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public PelvisHeightOrientationActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
       parentFrameName = new CRDTBidirectionalString(this, ReferenceFrame.getWorldFrame().getName());

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 import behavior_msgs.msg.dds.ChestOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionDefinition extends ActionNodeDefinition
 {
@@ -25,9 +25,9 @@ public class ChestOrientationActionDefinition extends ActionNodeDefinition
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskChestToParentTransform = new RigidBodyTransform();
 
-   public ChestOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public ChestOrientationActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
 
       trajectoryDuration = new CRDTBidirectionalDouble(this, 4.0);
       holdPoseInWorldLater = new CRDTBidirectionalBoolean(this, false);

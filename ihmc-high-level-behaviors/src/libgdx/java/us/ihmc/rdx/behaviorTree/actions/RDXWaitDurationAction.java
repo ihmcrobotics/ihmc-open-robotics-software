@@ -3,19 +3,18 @@ package us.ihmc.rdx.behaviorTree.actions;
 import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXWaitDurationAction extends RDXActionNode<WaitDurationActionState, WaitDurationActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper waitDurationWidget;
 
-   public RDXWaitDurationAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXWaitDurationAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new WaitDurationActionState(id, crdtInfo, saveFileDirectory));
+      super(new WaitDurationActionState(id, rootNode.getState()), rootNode);
 
       waitDurationWidget = new ImDoubleWrapper(definition::getWaitDuration,
                                                definition::setWaitDuration,

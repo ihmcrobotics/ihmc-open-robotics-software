@@ -23,6 +23,8 @@ public class RDXBoxVisualizer implements RenderableProvider
    private final Point3D[] vertices = new Point3D[8];
    private final Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
+   private double lineWidth = 0.03;
+
    public RDXBoxVisualizer()
    {
       for (int i = 0; i < vertices.length; i++)
@@ -45,6 +47,11 @@ public class RDXBoxVisualizer implements RenderableProvider
       this.color.set(color);
    }
 
+   public void setLineWidth(double lineWidth)
+   {
+      this.lineWidth = lineWidth;
+   }
+
    public void clear()
    {
       generateMesh(new Box3D());
@@ -65,11 +72,7 @@ public class RDXBoxVisualizer implements RenderableProvider
          if (lastModel != null)
             lastModel.dispose();
 
-         lastModel = RDXModelBuilder.buildModel(meshBuilder ->
-         {
-            double lineWidth = 0.03;
-            meshBuilder.addMultiLineBox(vertices, lineWidth, color);
-         }, "box");
+         lastModel = RDXModelBuilder.buildModel(meshBuilder -> meshBuilder.addMultiLineBox(vertices, lineWidth, color), "box");
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
    }
@@ -77,6 +80,9 @@ public class RDXBoxVisualizer implements RenderableProvider
    public void dispose()
    {
       executorService.destroy();
+
+      if (lastModel != null)
+         lastModel.dispose();
    }
 
    @Override

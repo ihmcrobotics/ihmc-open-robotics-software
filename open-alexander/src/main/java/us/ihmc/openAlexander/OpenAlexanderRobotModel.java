@@ -141,7 +141,16 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
                                   RobotTarget robotTarget,
                                   MaterialDefinition robotMaterial,
+                                  RobotContactPointParameters<RobotSide> contactPointParameters)
+   {
+      this(robotVersion, robotTarget, robotMaterial, contactPointParameters, true, AlexanderSensorInformation.getImuSensorsToIgnore());
+   }
+
+   public OpenAlexanderRobotModel(AlexanderVersionInterface robotVersion,
+                                  RobotTarget robotTarget,
+                                  MaterialDefinition robotMaterial,
                                   RobotContactPointParameters<RobotSide> contactPointParameters,
+                                  boolean createContactPointDefinition,
                                   String... imusToIgnore)
    {
       this.robotVersion = robotVersion;
@@ -163,7 +172,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
 
       modelFactory = new AlexanderModelFactory(robotVersion, jointMap, contactPointParameters, new AlexanderRigidBodyMutator(getPhysicalProperties(), imusToIgnore));
       logModelProvider = modelFactory.createLogModelProvider();
-      scs1RobotDefinition = modelFactory.getSCS1RobotDefinition();
+      scs1RobotDefinition = modelFactory.getSCS1RobotDefinition(createContactPointDefinition);
       controllerRobotDefinition = modelFactory.getControllerRobotDefinition();
 
       if (robotMaterial != null)
