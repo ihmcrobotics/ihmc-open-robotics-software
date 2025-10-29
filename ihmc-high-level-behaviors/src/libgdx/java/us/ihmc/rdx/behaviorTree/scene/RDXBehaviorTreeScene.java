@@ -82,6 +82,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       for (int i = 0; i < objects.size(); i++)
       {
          RDXBehaviorTreeSceneObject object = objects.get(i);
+         if (ImGui.checkbox(labels.getHidden("Select%s%d".formatted(object.getName(), object.getID())), object.getGizmo().isSelected()))
+            object.getGizmo().setSelected(!object.getGizmo().isSelected());
+         ImGui.sameLine();
          ImGui.text("%s ID: %d".formatted(object.getName(), object.getID()));
          ImGui.sameLine();
          ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);

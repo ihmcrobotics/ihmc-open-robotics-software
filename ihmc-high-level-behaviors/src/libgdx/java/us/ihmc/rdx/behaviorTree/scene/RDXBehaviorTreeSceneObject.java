@@ -53,4 +53,9 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       gizmo.destroyDefault(baseUI.getPrimary3DPanel());
       model.dispose();
    }
+
+   public RDXSelectablePose3DGizmo getGizmo()
+   {
+      return gizmo;
+   }
 }
