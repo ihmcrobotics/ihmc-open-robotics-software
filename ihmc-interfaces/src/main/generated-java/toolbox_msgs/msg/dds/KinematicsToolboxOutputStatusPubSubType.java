@@ -15,7 +15,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "58f5d795a65dec519b75c8ae8de9daef8eff3848e4775015affc68945b02a411";
+   		return "4bb588a1f7544db5e84697ca9e35ce065383070c48d74adff9f75353236cff8c";
    }
    
    @Override
@@ -103,6 +103,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -188,6 +190,9 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -246,6 +251,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getSolutionQuality());
 
+      cdr.write_type_7(data.getTeleoperateRobot());
+
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
@@ -277,6 +284,8 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       data.setRightFootInContact(cdr.read_type_7());
       	
       data.setSolutionQuality(cdr.read_type_6());
+      	
+      data.setTeleoperateRobot(cdr.read_type_7());
       	
 
    }
@@ -314,6 +323,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_7("left_foot_in_contact", data.getLeftFootInContact());
       ser.write_type_7("right_foot_in_contact", data.getRightFootInContact());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
+      ser.write_type_7("teleoperate_robot", data.getTeleoperateRobot());
    }
 
    @Override
@@ -349,6 +359,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       data.setLeftFootInContact(ser.read_type_7("left_foot_in_contact"));
       data.setRightFootInContact(ser.read_type_7("right_foot_in_contact"));
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
+      data.setTeleoperateRobot(ser.read_type_7("teleoperate_robot"));
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus src, toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus dest)

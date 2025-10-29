@@ -54,3 +54,5 @@ bool left_foot_in_contact
 bool right_foot_in_contact
 
 float64 solution_quality -1
+
+bool teleoperate_robot

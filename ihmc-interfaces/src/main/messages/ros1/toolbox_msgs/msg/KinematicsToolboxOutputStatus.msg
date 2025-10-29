@@ -69,4 +69,6 @@ bool right_foot_in_contact
 # Field default value -1.0
 float64 solution_quality
 
+bool teleoperate_robot
+
 
