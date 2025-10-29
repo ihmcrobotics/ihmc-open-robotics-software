@@ -33,6 +33,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
+import us.ihmc.robotDataVisualizer.logger.localLogging.LocalLoggingTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -80,9 +81,6 @@ public class AvatarMultiThreadingFactory
 
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
-
-   // Logger stuff
-   private boolean logLocally = false;
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
@@ -263,7 +261,7 @@ public class AvatarMultiThreadingFactory
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
-      if (logLocally)
+      if (LocalLoggingTools.LOGGING_LOCALLY)
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
@@ -593,11 +591,6 @@ public class AvatarMultiThreadingFactory
    public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
-   }
-
-   public void setLogLocally(boolean logLocally)
-   {
-      this.logLocally = logLocally;
    }
 
    public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
