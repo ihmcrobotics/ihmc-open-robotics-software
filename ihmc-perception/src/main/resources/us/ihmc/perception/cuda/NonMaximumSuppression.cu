@@ -6,7 +6,7 @@ typedef struct
 } Box;
 
 extern "C"
-__global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold, bool* inclusionMatrix)
+__global__ void checkInclusion(const Box* boxes, int boxCount, float overlapThreshold, bool* inclusionMatrix)
 {
     int startX = Utils::getThreadCoordX();
     int startY = Utils::getThreadCoordY();
@@ -27,8 +27,11 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
 
     for (int i = startY; i < boxCount; i += strideY)
     {
+        // Get the box
+        boxI = boxes[i];
+
         // Box is removed if its area is 0 (it's a line, or a point... not a box)
-        if (boxes[i].width == 0.0f || boxes[i].height == 0.0f)
+        if (boxI.width == 0.0f || boxI.height == 0.0f)
         {
             inclusionMatrix[i * boxCount] = false;
             continue;
@@ -43,12 +46,9 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
                 continue;
             }
 
-            bool keep = true;
-
-            // Find IoU
-            boxI = boxes[i];
             boxJ = boxes[j];
 
+            // Find IoU
             boxIArea = (boxI.width + 1.0f) * (boxI.height + 1.0f);
             boxJArea = (boxJ.width + 1.0f) * (boxJ.height + 1.0f);
 
@@ -58,11 +58,8 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
 
             intersectionOverUnion = intersectionArea / (boxIArea + boxJArea - intersectionArea);
 
-            // If the box overlaps another and its score is lower than the other, remove it
-            if (intersectionOverUnion > overlapThreshold && boxI.score < boxJ.score)
-                keep = false;
-
-            inclusionMatrix[i * boxCount + j] = keep;
+            // Include if the box doesn't overlap, or it may overlap but score is greater
+            inclusionMatrix[i * boxCount + j] = intersectionOverUnion < overlapThreshold || boxI.score > boxJ.score;
         }
     }
 }
@@ -77,13 +74,8 @@ __global__ void checkInclusion(Box* boxes, int boxCount, float overlapThreshold,
  *  - blockDim.x >= boxCount
  */
 extern "C"
-__global__ void reduceFast(bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
+__global__ void reduceFast(const bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
 {
-    // Each box must have a dedicated thread to itself
-    assert(boxCount <= blockDim.x);
-    // Each box must have a dedicated block to itself
-    assert(boxCount <= gridDim.x);
-
     // Each block operates on a row of the inclusion matrix
     int row = blockIdx.x;
     // Each thread operates on the cell (column, row) of the inclusion matrix
@@ -110,7 +102,7 @@ __global__ void reduceFast(bool* inclusionMatrix, int boxCount, int* includedInd
  * Works on any number of boxes.
  */
 extern "C"
-__global__ void reduceSlow(bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
+__global__ void reduceSlow(const bool* inclusionMatrix, int boxCount, int* includedIndices, int* includedBoxCount)
 {
     int row = Utils::getThreadCoordX();
 

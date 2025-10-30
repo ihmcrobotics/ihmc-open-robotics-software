@@ -25,7 +25,7 @@ public class YOLOv8ModelTest
    @BeforeAll
    public static void load()
    {
-      URL imageURL = YOLOv8ModelTest.class.getResource("/yolo/door_barrier_charge.png");
+      URL imageURL = YOLOv8ModelTest.class.getResource("/yolo/yolo_test_image.png");
       Objects.requireNonNull(imageURL);
       Mat image = opencv_imgcodecs.imread(imageURL.getPath());
       CameraIntrinsics cameraIntrinsics = new CameraIntrinsics(600, 960, 365.0995, 364.9875, 484.3945, 289.454);

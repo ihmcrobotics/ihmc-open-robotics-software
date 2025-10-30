@@ -72,19 +72,20 @@ __global__ void filterDetections(const float* unfilteredDetection,
         float y = *row(unfilteredColumn, sizeof(float) * detectionCount, Y_INDEX) - height / 2.0f;
 
         // Assign the values to the filtered column
-        float* filteredRow = row(filteredDetections, sizeof(float) * FILTERED_FLOATS_PER_ROW, filteredRowIndex);
-        filteredRow[X_INDEX] = x;
-        filteredRow[Y_INDEX] = y;
-        filteredRow[WIDTH_INDEX] = width;
-        filteredRow[HEIGHT_INDEX] = height;
-        filteredRow[CONFIDENCE_INDEX] = maxConfidence;
-        filteredRow[CLASS_INDEX] = (float) mostConfidentClass;
+        float filteredValues[FILTERED_FLOATS_PER_ROW];
+        filteredValues[X_INDEX] = x;
+        filteredValues[Y_INDEX] = y;
+        filteredValues[WIDTH_INDEX] = width;
+        filteredValues[HEIGHT_INDEX] = height;
+        filteredValues[CONFIDENCE_INDEX] = maxConfidence;
+        filteredValues[CLASS_INDEX] = (float) mostConfidentClass;
 
         // Copy mask weights over
         for (int j = 0; j < 32; ++j)
-        {
-            filteredRow[6 + j] = *row(unfilteredColumn, sizeof(float) * detectionCount, 4 + classCount + j);
-        }
+            filteredValues[6 + j] = *row(unfilteredColumn, sizeof(float) * detectionCount, 4 + classCount + j);
+
+        float* filteredRow = row(filteredDetections, sizeof(float) * FILTERED_FLOATS_PER_ROW, filteredRowIndex);
+        memcpy(filteredRow, filteredValues, FILTERED_FLOATS_PER_ROW * sizeof(float));
     }
 }
 

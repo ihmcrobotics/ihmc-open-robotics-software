@@ -203,8 +203,7 @@ public class CUDANonMaximumSuppression implements AutoCloseable
 
    private void createInclusionMatrix(FloatPointer inputBoxes, int boxCount, float overlapThreshold, BoolPointer outputInclusionMatrix, CUstream_st stream)
    {
-      int divisor = 4 * BLOCK_DIM_2D;
-      int gridSize2D = (boxCount + divisor - 1) / divisor;
+      int gridSize2D = (boxCount + BLOCK_DIM_2D - 1) / BLOCK_DIM_2D;
 
       try (dim3 mappingBlockSize = new dim3(BLOCK_DIM_2D, BLOCK_DIM_2D, 1);
            dim3 mappingGridSize = new dim3(gridSize2D, gridSize2D, 1);
