@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,6 +22,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
+   private final LatestTimestampModifiable stateDataSynchronizer;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
@@ -38,7 +40,10 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    {
       super(id, new FootstepPlanActionDefinition(rootNode.getDefinition()), rootNode);
 
-      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
+      // Prevents feedback loop where UI modifies definition fields and robot side updates state fields
+      stateDataSynchronizer = new LatestTimestampModifiable(definition.getCRDTInfo());
+
+      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(stateDataSynchronizer);
       goalFrame = new DetachableReferenceFrame(scene::findFrameByName, goalToParentTransform.getValueReadOnly());
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(scene,
@@ -115,6 +120,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.toMessage(message.getState());
 
+      stateDataSynchronizer.toMessage(message.getLatestModificationStateData());
       goalToParentTransform.toMessage(message.getGoalTransformToParent());
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
       message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
@@ -139,6 +145,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.fromMessage(message.getState());
 
+      stateDataSynchronizer.fromMessage(message.getLatestModificationStateData());
       goalToParentTransform.fromMessage(message.getGoalTransformToParent());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
       numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
