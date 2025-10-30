@@ -133,7 +133,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(50.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
