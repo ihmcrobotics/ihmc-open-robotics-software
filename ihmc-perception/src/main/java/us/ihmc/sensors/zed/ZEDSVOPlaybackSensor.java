@@ -22,6 +22,12 @@ public class ZEDSVOPlaybackSensor extends ZEDImageSensor
       return super.startSensor();
    }
 
+   @Override
+   public boolean grab()
+   {
+      return super.grab();
+   }
+
    public void play()
    {
       run(true);
