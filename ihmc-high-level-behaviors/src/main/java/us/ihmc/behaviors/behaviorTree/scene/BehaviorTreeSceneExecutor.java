@@ -38,7 +38,12 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          object.update();
       }
 
-//      for (String availableModelName : yolo.getAvailableModelNames())
+      for (String availableModelName : yolo.getAvailableModelNames())
+      {
+
+      }
+
+      //      for (String availableModelName : yolo.getAvailableModelNames())
 //      {
 //
 //      }
