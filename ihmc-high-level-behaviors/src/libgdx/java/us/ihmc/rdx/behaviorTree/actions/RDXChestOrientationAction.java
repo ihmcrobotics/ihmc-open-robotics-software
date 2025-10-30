@@ -61,7 +61,7 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
                                                          definition::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 state.getChestFrame()::changeFrame);
       yawWidget = new ImDoubleWrapper(definition.getRotationReadOnly()::getYaw, definition::setYaw,

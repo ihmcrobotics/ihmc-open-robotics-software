@@ -57,7 +57,7 @@ public class RDXFootstepPlanActionFootstep
             getGizmo().changeParentFrameWithoutMoving(state.getSoleFrame().getReferenceFrame().getParent());
          }
 
-         RDXCRDTTools.syncGizmoWithBidirectionalField(getGizmo(), definition.getSoleToPlanFrameTransform(), definition.getFreezable());
+         RDXCRDTTools.syncGizmoWithBidirectionalField(getGizmo(), definition.getSoleToPlanFrameTransform(), footstepPlan.getDefinition());
 
          interactableFootstep.update();
 

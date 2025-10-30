@@ -39,9 +39,9 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       super(id, new FootstepPlanActionDefinition(rootNode.getDefinition()), rootNode);
 
       goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
-      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());
+      goalFrame = new DetachableReferenceFrame(scene::findFrameByName, goalToParentTransform.getValueReadOnly());
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
-         new FootstepPlanActionFootstepState(referenceFrameLibrary,
+         new FootstepPlanActionFootstepState(scene,
                                              definition.getCRDTParentFrameName(),
                                              RecyclingArrayListTools.getUnsafe(definition.getManuallyPlacedFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
       totalNumberOfFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
@@ -169,7 +169,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public boolean areFramesInWorld()
    {
-      return referenceFrameLibrary.containsFrame(definition.getParentFrameName()) && goalFrame.isChildOfWorld();
+      return scene.containsFrame(definition.getParentFrameName()) && goalFrame.isChildOfWorld();
    }
 
    public ReferenceFrame getParentFrame()
@@ -229,6 +229,6 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public ReferenceFrame getFrameByName(String frameName)
    {
-      return referenceFrameLibrary.findFrameByName(frameName);
+      return scene.findFrameByName(frameName);
    }
 }

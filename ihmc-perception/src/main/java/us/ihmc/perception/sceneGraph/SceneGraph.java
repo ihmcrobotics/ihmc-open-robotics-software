@@ -22,7 +22,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +37,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -298,16 +296,6 @@ public class SceneGraph
    public Map<String, Set<Integer>> getMinimumUniqueSuffixMap()
    {
       return minimumUniqueSuffixMap;
-   }
-
-   public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
-   {
-      Function<String, ReferenceFrame> frameLookup = nodeName ->
-      {
-         SceneNode sceneNode = namesToNodesMap.get(nodeName);
-         return sceneNode == null ? null : sceneNode.getNodeFrame();
-      };
-      return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 
    private void addNodeFromDetection(PersistentDetection detection)

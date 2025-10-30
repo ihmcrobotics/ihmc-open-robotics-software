@@ -32,7 +32,8 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.robotDataVisualizer.logger.JVMStatisticsGenerator;
+import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
+import us.ihmc.robotDataVisualizer.logger.localLogging.LocalLoggingTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -69,6 +70,8 @@ public class AvatarMultiThreadingFactory
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final int ROS2_PRIORITY = 25;
+   private static final int JVM_STATISTICS_PRIORITY = 5;
+
 
    private final YoRegistry rootRegistry;
 
@@ -78,9 +81,6 @@ public class AvatarMultiThreadingFactory
 
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
-
-   // Logger stuff
-   private boolean logLocally = false;
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
@@ -116,7 +116,6 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
-   private JVMStatisticsGenerator jvmStatisticsGenerator;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -225,6 +224,17 @@ public class AvatarMultiThreadingFactory
       if (ikStreamingThread.hasValue())
          yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
 
+
+      // Setup JVM statistics
+      PeriodicThreadSchedulerFactory jvmSchedulerFactory;
+      if (useRealtimeThreads)
+         jvmSchedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(new PriorityParameters(JVM_STATISTICS_PRIORITY));
+      else
+         jvmSchedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, jvmSchedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
+
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
@@ -245,30 +255,32 @@ public class AvatarMultiThreadingFactory
                                                            useRealtimeThreads,
                                                            useMultiThreading,
                                                            yoVariableServer,
+                                                           jvmStatisticsGenerator,
                                                            rootRegistry));
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
-      if (logLocally)
+      if (LocalLoggingTools.LOGGING_LOCALLY)
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
+         {
             builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+         }
          if (ikStreamingThread.hasValue())
+         {
             builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
-         if (jvmStatisticsGenerator != null)
-            builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+         }
+
+         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
-         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                                                      robotModel.getLogModelProvider(),
-                                                                                                      builders,
-                                                                                                      100000,
-                                                                                                      0.01);
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(
+               robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
          intraprocessYoVariableLogger.start();
 
          threadingManager.get()
@@ -579,16 +591,6 @@ public class AvatarMultiThreadingFactory
    public void addSmoothTransitionState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
-   }
-
-   public void addJVMStatisticsForLoggingLocally(JVMStatisticsGenerator jvmStatisticsGenerator)
-   {
-      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
-   }
-
-   public void setLogLocally(boolean logLocally)
-   {
-      this.logLocally = logLocally;
    }
 
    public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)

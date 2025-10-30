@@ -8,6 +8,7 @@ import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -20,6 +21,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -45,6 +47,7 @@ import java.util.List;
 public class AvatarMultiThreadingManager
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final JVMStatisticsGenerator jvmStatisticsGenerator;
    private final YoRegistry rootRegistry;
    private final YoVariableServer yoVariableServer;
 
@@ -114,7 +117,7 @@ public class AvatarMultiThreadingManager
                                       AvatarEstimatorThread estimatorThread,
                                       AvatarControllerThread controllerThread,
                                       AvatarStepGeneratorThread stepGeneratorThread,
-                                      IKStreamingRTPluginFactory.IKStreamingRTThread ikStreamingThread,
+                                      IKStreamingRTThread ikStreamingThread,
                                       AvatarAffinityInterface affinity,
                                       double masterThreadDt,
                                       MonotonicTime period,
@@ -122,6 +125,7 @@ public class AvatarMultiThreadingManager
                                       boolean useRealtimeThreads,
                                       boolean useMultiThreading,
                                       YoVariableServer yoVariableServer,
+                                      JVMStatisticsGenerator jvmStatisticsGenerator,
                                       YoRegistry rootRegistry)
    {
       this.estimatorROS2Node = estimatorROS2Node;
@@ -135,6 +139,7 @@ public class AvatarMultiThreadingManager
       this.monotonicTimeProvider = monotonicTimeProvider;
       this.useRealtimeThreads = useRealtimeThreads;
       this.useMultiThreading = useMultiThreading;
+      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
       this.rootRegistry = rootRegistry;
       this.yoVariableServer = yoVariableServer;
 
@@ -329,6 +334,7 @@ public class AvatarMultiThreadingManager
       estimatorROS2Node.spin();
       controllerROS2Node.spin();
       hardwareCommunicationInterface.start();
+      jvmStatisticsGenerator.start();
       if (useRealtimeThreads)
       {
          running = true;
@@ -354,6 +360,7 @@ public class AvatarMultiThreadingManager
       estimatorROS2Node.stopSpinning();
       controllerROS2Node.stopSpinning();
       hardwareCommunicationInterface.stop();
+      jvmStatisticsGenerator.stop();
    }
 
    public void destroy()
