@@ -806,23 +806,28 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             replayer.load(new File(logDirectory.get(), logFileName.get()));
          }
+
+         if (!replayer.isReady())
+         {
+            ImGui.beginDisabled();
+            replayMotion.set(false);
+         }
          if (ImGui.checkbox(labels.get("Enable replay"), replayMotion))
          {
-            if (replayer.isReady())
+            setKSTEnabled(replayMotion.get());
+            replayer.reset();
+            if (replayMotion.get())
             {
-               setKSTEnabled(replayMotion.get());
-               replayer.reset();
-            }
-            else
-            {
-               replayMotion.set(false);
-               LogTools.warn("Please select a valid file to replay before enabling the motion replay");
+               replayer.pauseReplay(pauseReplay.get());
             }
          }
+         if (!replayer.isReady())
+            ImGui.endDisabled();
+
          if (!replayMotion.get())
          {
             ImGui.beginDisabled();
-            pauseReplay.set(false);
+            pauseReplay.set(true);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get(pauseReplay.get() ? "Resume" : "Pause")))

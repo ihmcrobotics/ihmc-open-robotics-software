@@ -45,6 +45,15 @@ class ReplayTopicManager<T>
       isDone = latestIndex == timestamps.size() - 1;
    }
 
+   public void updateInternalRepeat(long currentTime)
+   {
+      if (lastSentIndex >= 0 && lastSentIndex < messages.size())
+      {
+         mutator.accept(messages.get(lastSentIndex), currentTime);
+         messageConsumer.accept(messages.get(lastSentIndex));
+      }
+   }
+
    /**
     * Highest index timestamp less than the current time
     */
