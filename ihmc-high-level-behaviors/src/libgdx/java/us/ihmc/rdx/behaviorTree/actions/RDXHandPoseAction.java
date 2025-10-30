@@ -228,7 +228,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       }
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getPalmParentFrameName,
                                                                 state.getPalmFrame()::changeFrame);
 

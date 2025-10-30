@@ -4,6 +4,7 @@ import imgui.ImGui;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.ProximityConditionDefinition.DistanceType;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
@@ -11,11 +12,11 @@ import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class RDXProximityCondition
 {
    private final ConditionNodeState state;
+   private final BehaviorTreeSceneState scene;
    private final ConditionNodeDefinition definition;
 
    private final CRDTBidirectionalDouble distance;
@@ -31,9 +32,10 @@ public class RDXProximityCondition
    private final ImDoubleWrapper maxEvaluationTimeWidget;
    private final ImBooleanWrapper manageMissingFrameInternallyCheckbox;
 
-   public RDXProximityCondition(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXProximityCondition(ConditionNodeState state, BehaviorTreeSceneState scene)
    {
       this.state = state;
+      this.scene = scene;
       definition = state.getDefinition();
 
       distance =  state.getProximityCheck().getCurrentDistance();
@@ -42,11 +44,11 @@ public class RDXProximityCondition
       manageMissingFrameInternally = definition.getProximityCheck().getCRDTManageMissingFrameInternally();
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object Name",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition.getProximityCheck()::getObjectFrameName,
                                                                 definition.getProximityCheck()::setObjectFrameName);
       referenceFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Reference Name",
-                                                                   referenceFrameLibrary,
+                                                                   scene::getAllFrameNames,
                                                                    definition.getProximityCheck()::getReferenceFrameName,
                                                                    definition.getProximityCheck()::setReferenceFrameName);
       maxDistanceWidget = new ImDoubleWrapper(maxDistance::getValue,

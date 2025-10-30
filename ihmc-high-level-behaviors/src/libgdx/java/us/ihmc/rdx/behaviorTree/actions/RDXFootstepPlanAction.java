@@ -33,6 +33,7 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableArrowModel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
@@ -78,7 +79,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                            RecyclingArrayListTools.getUnsafe(state.getManuallyPlacedFootsteps(), numberOfAllocatedFootsteps++)));
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 this::changeParentFrame);
       manuallyPlaceStepsWrapper = new ImBooleanWrapper(definition::getIsManuallyPlaced,
@@ -213,14 +214,19 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          RDXCRDTTools.syncGizmoWithBidirectionalField(goalFocalPointGizmo.getPoseGizmo(), definition.getGoalFocalPoint(), definition);
 
          for (RobotSide side : RobotSide.values)
-            goalFeet.get(side).handleGizmoModifiedByUser();
-
-         if (definition.isModified())
-            for (RobotSide side : RobotSide.values)
-               state.copyDefinitionToGoalFootstepToGoalTransform(side);
-         else
-            for (RobotSide side : RobotSide.values)
+         {
+            RDXPose3DGizmo gizmo = goalFeet.get(side).getGizmo().getPoseGizmo();
+            if (gizmo.getGizmoModifiedByUser().poll())
+            {
                state.copyGoalFootstepToGoalTransformToDefinition(side);
+            }
+            else if (definition.isModified())
+            {
+               state.copyDefinitionToGoalFootstepToGoalTransform(side);
+            }
+
+            gizmo.update();
+         }
 
          state.getGoalFrame().getReferenceFrame().update();
 

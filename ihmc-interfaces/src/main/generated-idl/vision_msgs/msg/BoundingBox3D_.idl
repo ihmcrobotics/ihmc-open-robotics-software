@@ -1,0 +1,35 @@
+#ifndef __vision_msgs__msg__BoundingBox3D__idl__
+#define __vision_msgs__msg__BoundingBox3D__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module vision_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * A 3D bounding box that can be positioned and rotated about its center (6 DOF)
+       * Dimensions of this box are in meters, and as such, it may be migrated to
+       * another package, such as geometry_msgs, in the future.
+       */
+      @TypeCode(type="vision_msgs::msg::dds_::BoundingBox3D_")
+      struct BoundingBox3D
+      {
+        /**
+         * The 3D position and orientation of the bounding box center
+         */
+        geometry_msgs::msg::dds::Pose center;
+        /**
+         * The total size of the bounding box, in meters, surrounding the object's center
+         * pose.
+         */
+        geometry_msgs::msg::dds::Vector3 size;
+      };
+    };
+  };
+};
+
+#endif

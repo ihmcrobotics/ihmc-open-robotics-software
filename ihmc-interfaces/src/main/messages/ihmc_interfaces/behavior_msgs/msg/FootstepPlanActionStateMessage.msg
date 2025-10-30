@@ -9,6 +9,9 @@ behavior_msgs/ActionNodeStateMessage state
 # Definition
 behavior_msgs/FootstepPlanActionDefinitionMessage definition
 
+# Additional synchronization mechanism to avoid feedback loop
+ihmc_common_msgs/LatestModificationMessage latest_modification_state_data
+
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepStateMessage[<=50] footsteps
 

@@ -156,4 +156,9 @@ public class RDXSelectablePose3DGizmo
    {
       this.selected.set(selected);
    }
+
+   public void destroyDefault(RDX3DPanel panel3D)
+   {
+      poseGizmo.destroyDefault(panel3D);
+   }
 }

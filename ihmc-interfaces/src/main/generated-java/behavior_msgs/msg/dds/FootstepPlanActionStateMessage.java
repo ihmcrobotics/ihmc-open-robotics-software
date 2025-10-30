@@ -21,6 +21,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
             */
    public behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage definition_;
    /**
+            * Additional synchronization mechanism to avoid feedback loop
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_state_data_;
+   /**
             * The footsteps, with a maximum of 50
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage>  footsteps_;
@@ -65,6 +69,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage();
+      latest_modification_state_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType());
       goal_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       desired_left_footsteps_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
@@ -85,6 +90,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_state_data_, latest_modification_state_data_);
       footsteps_.set(other.footsteps_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.goal_transform_to_parent_, goal_transform_to_parent_);
       execution_state_ = other.execution_state_;
@@ -116,6 +122,15 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    public behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+
+   /**
+            * Additional synchronization mechanism to avoid feedback loop
+            */
+   public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationStateData()
+   {
+      return latest_modification_state_data_;
    }
 
 
@@ -246,6 +261,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!this.latest_modification_state_data_.epsilonEquals(other.latest_modification_state_data_, epsilon)) return false;
       if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
       else
       {
@@ -298,6 +314,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if (!this.latest_modification_state_data_.equals(otherMyClass.latest_modification_state_data_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
       if (!this.goal_transform_to_parent_.equals(otherMyClass.goal_transform_to_parent_)) return false;
       if(this.execution_state_ != otherMyClass.execution_state_) return false;
@@ -325,6 +342,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("latest_modification_state_data=");
+      builder.append(this.latest_modification_state_data_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
       builder.append("goal_transform_to_parent=");

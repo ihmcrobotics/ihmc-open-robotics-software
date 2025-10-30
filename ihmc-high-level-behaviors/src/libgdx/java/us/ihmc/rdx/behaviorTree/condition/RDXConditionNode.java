@@ -24,7 +24,7 @@ public class RDXConditionNode extends RDXLeafNode<ConditionNodeState, ConditionN
 
       counter = new RDXCounterCondition(state);
       llm = new RDXLLMCondition(state);
-      proximityCheck = new RDXProximityCondition(state, referenceFrameLibrary);
+      proximityCheck = new RDXProximityCondition(state, scene);
    }
 
    @Override

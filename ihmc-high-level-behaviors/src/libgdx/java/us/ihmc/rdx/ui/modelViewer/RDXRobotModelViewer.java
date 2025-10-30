@@ -37,6 +37,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableSensor;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2DefinitionMissingTools;
@@ -178,6 +179,20 @@ public class RDXRobotModelViewer
                RDXModelInstance modelInstance = new RDXModelInstance(couchModel);
                modelInstance.setPoseInWorldFrame(pose);
                baseUI.getPrimaryScene().addModelInstance(modelInstance);
+            }
+
+            {
+               Model model = RDXModelLoader.load("environmentObjects/mustard/mustard.glb");
+               Pose3D pose = new Pose3D();
+               pose.getPosition().addX(-1.0);
+               pose.getPosition().addY(-0.5);
+               pose.getPosition().addZ(1.2);
+               RDXModelInstance modelInstance = new RDXModelInstance(model);
+               modelInstance.setPoseInWorldFrame(pose);
+               baseUI.getPrimaryScene().addModelInstance(modelInstance);
+               RDXReferenceFrameGraphic frameGraphic = new RDXReferenceFrameGraphic(0.2);
+               frameGraphic.setPoseInWorldFrame(pose);
+               baseUI.getPrimaryScene().addModelInstance(frameGraphic);
             }
 
             baseUI.getPrimaryScene().addModelInstance(new RDXModelInstance(RDXModelLoader.load("environmentObjects/flatGround/FlatGround.g3dj")));

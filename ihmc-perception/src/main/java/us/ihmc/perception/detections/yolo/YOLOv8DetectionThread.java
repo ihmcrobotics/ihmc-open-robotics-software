@@ -76,4 +76,9 @@ public class YOLOv8DetectionThread extends RepeatingTaskThread
       interrupt();
       yoloExecutor.destroy();
    }
+
+   public YOLOv8DetectionExecutor getYoloExecutor()
+   {
+      return yoloExecutor;
+   }
 }
