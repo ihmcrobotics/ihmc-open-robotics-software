@@ -80,7 +80,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
       {
          OneDoFJointReadOnly controllerJoint = jointDesiredOutputList.getOneDoFJoint(i);
-         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
+         JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
 
          if (controllerJoint instanceof CrossFourBarJointBasics)
          {

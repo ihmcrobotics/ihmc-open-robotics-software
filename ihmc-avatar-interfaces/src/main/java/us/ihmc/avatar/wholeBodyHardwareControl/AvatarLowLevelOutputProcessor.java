@@ -5,6 +5,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
@@ -55,7 +57,7 @@ public class AvatarLowLevelOutputProcessor
    private double servoStartGain = 0.0;
    private double unservoStartGain = 0.0;
 
-   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointBasics[] controlledJoints, double updateDt, YoRegistry parentRegistry)
+   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, YoRegistry parentRegistry)
    {
       this.updateDt = updateDt;
 
@@ -238,7 +240,7 @@ public class AvatarLowLevelOutputProcessor
       return MathTools.clamp(masterGain, LOW_MASTER_GAIN, HIGH_MASTER_GAIN);
    }
 
-   public JointDesiredOutputListReadOnly getProcessedDesiredOutput()
+   public JointDesiredOutputListBasics getProcessedDesiredOutput()
    {
       return processedDesireds;
    }
