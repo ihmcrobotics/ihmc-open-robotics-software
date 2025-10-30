@@ -171,7 +171,7 @@ public abstract class ImageSensor implements AutoCloseable
       return grabThread;
    }
 
-   private void grabAndNotify()
+   public void grabAndNotify()
    {
       // If the sensor is not running, try to start the sensor
       if (!isSensorRunning() && !startSensor())

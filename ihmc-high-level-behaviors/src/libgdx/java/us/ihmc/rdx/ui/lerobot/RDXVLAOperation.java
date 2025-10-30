@@ -273,4 +273,9 @@ public class RDXVLAOperation
             actionForearmPoseGraphics.get(side).getRenderables(renderables, pool);
          }
    }
+
+   public CRDTBidirectionalBoolean getRunning()
+   {
+      return running;
+   }
 }
