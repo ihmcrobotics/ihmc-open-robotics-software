@@ -218,7 +218,7 @@ public class AvatarMultiThreadingFactory
       yoVariableServer.addRegistry(controllerThread.get().getYoVariableRegistry(), controllerThread.get().getSCS1YoGraphicsListRegistry());
 
       // Add step generator thread registry directly to the YoVariableServer (since it is in a separate thread)
-      if (createStepGeneratorThread)
+      if (stepGeneratorThread.hasValue())
          yoVariableServer.addRegistry(stepGeneratorThread.get().getYoVariableRegistry(), stepGeneratorThread.get().getSCS1YoGraphicsListRegistry());
 
       if (ikStreamingThread.hasValue())
