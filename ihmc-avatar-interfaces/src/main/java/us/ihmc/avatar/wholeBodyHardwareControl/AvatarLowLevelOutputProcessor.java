@@ -67,7 +67,7 @@ public class AvatarLowLevelOutputProcessor
 
       jointControlBlenders = new JointControlBlender[controlledJoints.length];
       interpolateDuration.set(updateDt);
-      interpolationTime.set(updateDt);
+      interpolationTime.set(0.0);
 
       for (int i = 0; i < controlledJoints.length; i++)
          jointControlBlenders[i] = new JointControlBlender("LowLevelOutputInterpolator", controlledJoints[i], registry);
@@ -155,9 +155,9 @@ public class AvatarLowLevelOutputProcessor
    private void interpolate()
    {
       interpolationTime.add(updateDt); //Do this first since we already start at the previous position
-      double ratio = MathTools.clamp(interpolationTime.getValueAsDouble() / interpolateDuration.getValueAsDouble(), 0.0, 1.0);
-      interpolationRatio.set(ratio);
-      if (ratio < 1)
+      double ratio = interpolationTime.getValueAsDouble() / interpolateDuration.getValueAsDouble();
+      interpolationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
+      if (ratio <= 1.0)
       {
          for (int i = 0; i < processedDesireds.getNumberOfJointsWithDesiredOutput(); i++)
          {
@@ -167,7 +167,7 @@ public class AvatarLowLevelOutputProcessor
             jointControlBlenders[i].computeAndUpdateJointControl(processedDesireds.getJointDesiredOutput(i),
                                                                  previousJointDesireds,
                                                                  currentJointDesireds,
-                                                                 ratio);
+                                                                 interpolationRatio.getDoubleValue());
          }
       }
 
