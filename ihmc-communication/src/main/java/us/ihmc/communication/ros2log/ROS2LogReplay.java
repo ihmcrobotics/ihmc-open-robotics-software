@@ -20,16 +20,27 @@ public class ROS2LogReplay
 {
    private final ROS2Node ros2Node;
    private final ROS2LogTimeSource timeSource;
-   private final List<ReplayTopicManager<?>> topicManagers;
+   private List<ReplayTopicManager<?>> topicManagers;
    private final Map<String, ReplayTopicManager<?>> topicManagersMap = new HashMap<>();
    private final LongSupplier timestampSupplier;
+   private final List<ROS2Topic<?>> loggedTopics;
 
    private boolean firstUpdate = true;
    private long startTime;
 
+   public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, ROS2LogTimeSource timeSource)
+   {
+      this.timeSource = timeSource;
+      this.loggedTopics = loggedTopics;
+
+      ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
+      timestampSupplier = timeSource.createTimestampProvider(robotName, ros2Node);
+   }
+
    public ROS2LogReplay(String robotName, List<ROS2Topic<?>> loggedTopics, File logFile, ROS2LogTimeSource timeSource)
    {
       this.timeSource = timeSource;
+      this.loggedTopics = loggedTopics;
 
       ros2Node = new ROS2NodeBuilder().build("ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, getClass().getSimpleName()));
       topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
@@ -43,8 +54,17 @@ public class ROS2LogReplay
       this.ros2Node = null;
       this.timeSource = ROS2LogTimeSource.SIMULATION;
       this.timestampSupplier = timestampSupplier;
+      this.loggedTopics = loggedTopics;
+
       topicManagers = ROS2LogIOTools.loadLogFile(logFile, loggedTopics, messageConsumerGenerator);
 
+      populateTopicManagers();
+   }
+
+   public void load(File logFile)
+   {
+      LogTools.info("Loading file {}", logFile.getName());
+      topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       populateTopicManagers();
    }
 
@@ -81,6 +101,7 @@ public class ROS2LogReplay
       {
          ReplayTopicManager<?> topicManager = topicManagers.get(topic_idx);
          isDone = topicManager.update(now) && isDone;
+         LogTools.info("Replaying {}", now);
       }
 
       return isDone;
@@ -127,6 +148,11 @@ public class ROS2LogReplay
          if (isDone)
             break;
       }
+   }
+
+   public void destroy()
+   {
+      ros2Node.destroy();
    }
 
    public <T> void addReplayMutator(ROS2Topic<T> topic, ObjLongConsumer<T> mutator)

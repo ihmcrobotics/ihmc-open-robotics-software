@@ -14,8 +14,10 @@ import com.badlogic.gdx.utils.Pool;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxContactConfigurationMessage;
@@ -37,6 +39,7 @@ import us.ihmc.commons.thread.Throttler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
+import us.ihmc.communication.ros2log.ROS2LogReplay;
 import us.ihmc.communication.ros2log.ROS2LoggerRequestedState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -81,6 +84,7 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -157,6 +161,10 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+   private final ImBoolean isReplaying = new ImBoolean(false);
+   private final ROS2LogReplay replayer;
+   private final ImString logDirectory = new ImString(System.getProperty("user.home") + "/.ihmc/logs/ros2/");
+   private final ImString logFileName = new ImString();
 
    public RDXVRWholeBodyKinematicStreaming(ROS2SyncedRobotModel syncedRobot,
                                            ROS2ControllerHelper ros2ControllerHelper,
@@ -168,7 +176,8 @@ public class RDXVRWholeBodyKinematicStreaming
                                            boolean recordKSTOutput,
                                            RDXHandManager handManager,
                                            FullHumanoidRobotModel miniGhostFullRobotModel,
-                                           RobotDefinition miniGhostRobotDefinition)
+                                           RobotDefinition miniGhostRobotDefinition,
+                                           ROS2LogReplay replayer)
    {
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
@@ -176,6 +185,7 @@ public class RDXVRWholeBodyKinematicStreaming
       this.vrContext = vrContext;
       this.robotVisualizer = robotVisualizer;
       this.kstParameters = kstParameters;
+      this.replayer = replayer;
 
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
@@ -691,6 +701,15 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (isKSTEnabled.get())
       {
+         if (replayer != null && isReplaying.get())
+         {
+            if (replayer.doIncrementalReplay())
+            {
+               isReplaying.set(false);
+               LogTools.info("Replay completed successfully");
+            }
+         }
+
          if (streamToController.get())
          {
             ghostRobotGraphic.setActive(showGhosts.get());
@@ -786,6 +805,17 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          reinitializeToolboxRobotConfiguration();
       }
+
+      if (replayer != null)
+      {
+         if (ImGui.inputText("Log Directory", logDirectory, ImGuiInputTextFlags.EnterReturnsTrue)
+             || ImGui.inputText("Log File Name", logFileName, ImGuiInputTextFlags.EnterReturnsTrue))
+         {
+            replayer.load(new File(logDirectory.get(), logFileName.get()));
+         }
+         ImGui.checkbox(labels.get("Replay File"), isReplaying);
+      }
+
       if (ImGui.checkbox(labels.get("Demonstration Mode"), demonstrationMode))
       {
          demonstrationTaskIndex = 0;
