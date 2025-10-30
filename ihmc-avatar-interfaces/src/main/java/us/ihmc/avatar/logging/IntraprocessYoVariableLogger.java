@@ -135,7 +135,7 @@ public class IntraprocessYoVariableLogger
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
-      logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);
+      logFolder = incomingLogsFolder.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
       deleteOldLogs(incomingLogsFolder, 10);
 
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
@@ -226,6 +226,9 @@ public class IntraprocessYoVariableLogger
       }
       jointHolders = handshakeBuilder.getJointHolders();
 
+      // Setup data holder to not create memory inside the update loop
+      variableValues = new long[variables.size()];
+
       long numberOfYoGraphics = 0;
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
       {
@@ -276,6 +279,8 @@ public class IntraprocessYoVariableLogger
       }, getClass().getSimpleName() + "Shutdown"));
    }
 
+   private long[] variableValues;
+
    public synchronized void update(long timestamp)
    {
       if (shutdown)
@@ -288,16 +293,22 @@ public class IntraprocessYoVariableLogger
       dataBufferAsLong.clear();
 
       dataBufferAsLong.put(timestamp);
-      for (int i = 0; i < variables.size(); i++)
+
+      long[] values = variableValues;
+      int size = variables.size();
+
+      try
       {
-         try
+         for (int i = 0; i < size; i++)
          {
-            dataBufferAsLong.put(variables.get(i).getValueAsLongBits());
+            values[i] = variables.get(i).getValueAsLongBits();
          }
-         catch (BufferOverflowException e)
-         {
-            LogTools.error("Increase buffer size! yoVar # {}:  size: {}  {}", i, variables.size(), e.getMessage());
-         }
+
+         dataBufferAsLong.put(values, 0, size);
+      }
+      catch (BufferOverflowException e)
+      {
+         LogTools.error("Increase buffer size!  size: {}  {}", variables.size(), e.getMessage());
       }
 
       double[] jointData = new double[13];

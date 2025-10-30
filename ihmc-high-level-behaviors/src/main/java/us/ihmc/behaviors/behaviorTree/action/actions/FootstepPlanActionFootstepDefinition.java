@@ -13,7 +13,6 @@ import us.ihmc.tools.io.JSONTools;
 
 public class FootstepPlanActionFootstepDefinition implements SidedObject
 {
-   private final LatestTimestampModifiable freezable;
    private final CRDTBidirectionalEnumField<RobotSide> side;
    private final CRDTBidirectionalRigidBodyTransform soleToPlanFrameTransform;
 
@@ -21,12 +20,10 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    private RobotSide onDiskSide;
    private final RigidBodyTransform onDiskSoleToPlanFrameTransform = new RigidBodyTransform();
 
-   public FootstepPlanActionFootstepDefinition(LatestTimestampModifiable freezable)
+   public FootstepPlanActionFootstepDefinition(LatestTimestampModifiable latestTimestampModifiable)
    {
-      this.freezable = freezable;
-
-      side = new CRDTBidirectionalEnumField<>(freezable, RobotSide.LEFT);
-      soleToPlanFrameTransform = new CRDTBidirectionalRigidBodyTransform(freezable);
+      side = new CRDTBidirectionalEnumField<>(latestTimestampModifiable, RobotSide.LEFT);
+      soleToPlanFrameTransform = new CRDTBidirectionalRigidBodyTransform(latestTimestampModifiable);
    }
 
    @Override
@@ -92,10 +89,5 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    {
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       soleToPlanFrameTransform.fromMessage(message.getSolePose());
-   }
-
-   public LatestTimestampModifiable getFreezable()
-   {
-      return freezable;
    }
 }

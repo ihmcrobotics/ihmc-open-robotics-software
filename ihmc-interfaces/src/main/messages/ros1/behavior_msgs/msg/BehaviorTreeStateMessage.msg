@@ -51,11 +51,14 @@ uint64 sequence_id
 # The ID to assign to the next instantiated node
 uint32 next_id
 
-# The timestamp and modifer ID of the most recent time the root node was replaced or removed
+# The timestamp and modifier ID of the most recent time the root node was replaced or removed
 ihmc_common_msgs/LatestModificationMessage latest_modification_to_root_reference
 
-# The timestamp and modifer ID of the latest modification of the tree data fields
+# The timestamp and modifier ID of the latest modification of the tree data fields
 ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
+
+# Scene
+behavior_msgs/BehaviorTreeSceneStateMessage scene
 
 # A depth first ordered list of types.
 int8[] behavior_tree_types

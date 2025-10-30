@@ -1,13 +1,13 @@
 package us.ihmc.behaviors.behaviorTree.condition;
 
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTBidirectionalDouble;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class ProximityConditionExecutor
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final BehaviorTreeSceneState scene;
    private final ConditionNodeState state;
    private final ConditionNodeDefinition definition;
 
@@ -15,10 +15,10 @@ public class ProximityConditionExecutor
    private final CRDTBidirectionalDouble maxDistanceToObject;
    private double conditionStartTime = -1.0;
 
-   public ProximityConditionExecutor(ConditionNodeState state, ReferenceFrameLibrary referenceFrameLibrary)
+   public ProximityConditionExecutor(ConditionNodeState state, BehaviorTreeSceneState scene)
    {
       this.state = state;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.scene = scene;
 
       definition = state.getDefinition();
 
@@ -29,10 +29,10 @@ public class ProximityConditionExecutor
    public void update()
    {
       boolean canExecute = true;
-      canExecute &= referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getReferenceFrameName()) != null;
+      canExecute &= scene.findFrameByName(definition.getProximityCheck().getReferenceFrameName()) != null;
 
       boolean manageMissingFrameInternally = definition.getProximityCheck().getCRDTManageMissingFrameInternally().getValue();
-      boolean missingFrame = referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName()) == null;
+      boolean missingFrame = scene.findFrameByName(definition.getProximityCheck().getObjectFrameName()) == null;
       if (!manageMissingFrameInternally)
       {
          canExecute &= !missingFrame;
@@ -45,10 +45,10 @@ public class ProximityConditionExecutor
          if ((state.getIsExecuting() || state.isEvaluatingCondition()) && state.getCanExecute())
          {
             FramePose3D objectFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                          referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getObjectFrameName())
+                                                          scene.findFrameByName(definition.getProximityCheck().getObjectFrameName())
                                                                                .getTransformToWorldFrame());
             FramePose3D referenceFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                             referenceFrameLibrary.findFrameByName(definition.getProximityCheck().getReferenceFrameName())
+                                                             scene.findFrameByName(definition.getProximityCheck().getReferenceFrameName())
                                                                                   .getTransformToWorldFrame());
             switch (definition.getProximityCheck().getType().getValue())
             {

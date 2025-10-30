@@ -1,0 +1,5 @@
+ihmc_common_msgs/LatestModificationMessage latest_timestamp_modifiable
+
+bool enabled
+bool auto_reset_enabled
+float64 reset_distance

@@ -2,19 +2,16 @@ package us.ihmc.behaviors.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.condition.ConditionNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -35,20 +32,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public BehaviorTreeRootNodeExecutor(long id,
                                        CRDTInfo crdtInfo,
                                        WorkspaceResourceDirectory saveFileDirectory,
-                                       DRCRobotModel robotModel,
                                        ROS2ControllerHelper ros2ControllerHelper,
-                                       ControllerStatusTracker controllerStatusTracker,
                                        ROS2SyncedRobotModel syncedRobot,
-                                       ReferenceFrameLibrary referenceFrameLibrary,
-                                       SceneGraph sceneGraph,
-                                       DetectionManager detectionManager)
+                                       ControllerStatusTracker controllerStatusTracker,
+                                       BehaviorTreeSceneExecutor scene)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, robotModel, referenceFrameLibrary),
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
-            sceneGraph,
-            detectionManager);
+            scene);
    }
 
    @Override
@@ -388,13 +381,8 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       return controllerStatusTracker;
    }
 
-   public SceneGraph getSceneGraph()
+   public BehaviorTreeSceneExecutor getScene()
    {
-      return sceneGraph;
-   }
-
-   public DetectionManager getDetectionManager()
-   {
-      return detectionManager;
+      return scene;
    }
 }

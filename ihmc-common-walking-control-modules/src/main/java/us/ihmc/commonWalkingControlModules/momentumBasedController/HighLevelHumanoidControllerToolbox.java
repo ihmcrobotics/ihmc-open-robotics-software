@@ -555,6 +555,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return yoCapturePoint;
    }
 
+   public YoFramePoint3D getYoCapturePoint()
+   {
+      return yoCapturePoint;
+   }
+
    public void getCapturePoint(FixedFramePoint3DBasics capturePointToPack)
    {
       capturePointToPack.setMatchingFrame(yoCapturePoint);
