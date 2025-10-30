@@ -1,20 +1,12 @@
 package us.ihmc.avatar.scs2;
 
 import us.ihmc.avatar.wholeBodyHardwareControl.AvatarLowLevelOutputProcessor;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
-import us.ihmc.commons.MathTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
 {
@@ -40,9 +32,12 @@ public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
       this.updateDt = updateDt;
       this.writeBeforeEstimatorTick = writeBeforeEstimatorTick;
 
-      scs2OutputWriter = new SCS2OutputWriter(controllerInput, controllerOutput, writeBeforeEstimatorTick, customWriter);
-      registry.addChild(scs2OutputWriter.getYoVariableRegistry());
+      scs2OutputWriter = new SCS2OutputWriter(controllerInput,
+                                              controllerOutput,
+                                              writeBeforeEstimatorTick,
+                                              customWriter);
 
+      registry.addChild(scs2OutputWriter.getYoVariableRegistry());
    }
 
    public void enableInterpolation(boolean enable)
@@ -89,6 +84,4 @@ public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
    {
       return registry;
    }
-
-
 }
