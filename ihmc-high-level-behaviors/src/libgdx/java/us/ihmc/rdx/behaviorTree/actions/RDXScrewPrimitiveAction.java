@@ -57,7 +57,7 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getObjectFrameName,
                                                                 definition::setObjectFrameName);
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();

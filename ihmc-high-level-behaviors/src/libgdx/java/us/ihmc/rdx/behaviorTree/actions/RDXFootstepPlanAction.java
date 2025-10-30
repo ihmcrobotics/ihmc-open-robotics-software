@@ -78,7 +78,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                            RecyclingArrayListTools.getUnsafe(state.getManuallyPlacedFootsteps(), numberOfAllocatedFootsteps++)));
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 this::changeParentFrame);
       manuallyPlaceStepsWrapper = new ImBooleanWrapper(definition::getIsManuallyPlaced,

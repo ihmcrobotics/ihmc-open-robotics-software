@@ -13,7 +13,7 @@ public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinitio
    {
       super(id, new FootPoseActionDefinition(rootNode.getDefinition()), rootNode);
 
-      footFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+      footFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                    definition.getCRDTParentFrameName(),
                                                    definition.getFootToParentTransform());
    }

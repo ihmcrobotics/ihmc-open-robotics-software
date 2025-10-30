@@ -1,7 +1,6 @@
 package us.ihmc.rdx.behaviorTree;
 
 import imgui.ImGui;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTree;
@@ -12,7 +11,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.commons.thread.Throttler;
 
@@ -28,16 +26,14 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    private final ImGuiAveragedFrequencyText publishFrequencyText = new ImGuiAveragedFrequencyText();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
-                              DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
                               ROS2PeerClockOffsetEstimator peerClockEstimator,
                               RobotCollisionModel selectionCollisionModel,
                               RDXBaseUI baseUI,
                               RDX3DPanel panel3D,
-                              ReferenceFrameLibrary referenceFrameLibrary,
                               ROS2ControllerPublishSubscribeAPI ros2)
    {
-      super(treeFilesDirectory, robotModel, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D, referenceFrameLibrary);
+      super(treeFilesDirectory, syncedRobot, peerClockEstimator, selectionCollisionModel, baseUI, panel3D);
 
       ros2BehaviorTree = new ROS2BehaviorTree<>((BehaviorTree) this, ros2);
 
