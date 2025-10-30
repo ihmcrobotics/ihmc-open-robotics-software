@@ -63,6 +63,11 @@ public class ROS2LogReplay
 
    public void load(File logFile)
    {
+      if (logFile == null || !logFile.exists() || !logFile.isFile())
+      {
+         LogTools.warn("Log file not found: {}", logFile != null ? logFile.getAbsolutePath() : "null");
+         return;
+      }
       LogTools.info("Loading file {}", logFile.getName());
       topicManagers = ROS2LogIOTools.loadLogFile(ros2Node, loggedTopics, logFile);
       populateTopicManagers();
@@ -148,6 +153,29 @@ public class ROS2LogReplay
          if (isDone)
             break;
       }
+   }
+
+   public void pauseReplay(boolean pause)
+   {
+      
+   }
+
+   public void reset()
+   {
+      if (isReady())
+      {
+         for (int topic_idx = 0; topic_idx < topicManagers.size(); topic_idx++)
+         {
+            ReplayTopicManager<?> topicManager = topicManagers.get(topic_idx);
+            topicManager.reset();
+         }
+         firstUpdate = true;
+      }
+   }
+
+   public boolean isReady()
+   {
+      return topicManagers != null;
    }
 
    public void destroy()

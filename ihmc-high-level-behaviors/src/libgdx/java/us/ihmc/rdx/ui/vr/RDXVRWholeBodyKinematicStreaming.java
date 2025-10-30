@@ -161,7 +161,8 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
-   private final ImBoolean isReplaying = new ImBoolean(false);
+   private final ImBoolean replayMotion = new ImBoolean(false);
+   private final ImBoolean pauseReplay = new ImBoolean(true);
    private final ROS2LogReplay replayer;
    private final ImString logDirectory = new ImString(System.getProperty("user.home") + "/.ihmc/logs/ros2/");
    private final ImString logFileName = new ImString();
@@ -326,7 +327,7 @@ public class RDXVRWholeBodyKinematicStreaming
       multiContact.processVRInput();
       handControl.processVRInput();
       
-      if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod))
+      if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod) && !replayMotion.get())
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processControllers(toolboxInputMessage);
@@ -701,11 +702,12 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (isKSTEnabled.get())
       {
-         if (replayer != null && isReplaying.get())
+         if (replayer != null && replayer.isReady() && replayMotion.get())
          {
             if (replayer.doIncrementalReplay())
             {
-               isReplaying.set(false);
+               replayMotion.set(false);
+               replayer.reset();
                LogTools.info("Replay completed successfully");
             }
          }
@@ -796,6 +798,42 @@ public class RDXVRWholeBodyKinematicStreaming
       }
       ImGui.checkbox(labels.get("Show Reference Frames"), showReferenceFrameGraphics);
 
+      if (replayer != null)
+      {
+         ImGuiTools.separatorText("Replay Options", ImGuiTools.getSmallBoldFont());
+         if (ImGui.inputText("Log Directory", logDirectory, ImGuiInputTextFlags.EnterReturnsTrue)
+             || ImGui.inputText("Log File Name", logFileName, ImGuiInputTextFlags.EnterReturnsTrue))
+         {
+            replayer.load(new File(logDirectory.get(), logFileName.get()));
+         }
+         if (ImGui.checkbox(labels.get("Enable replay"), replayMotion))
+         {
+            if (replayer.isReady())
+            {
+               setKSTEnabled(replayMotion.get());
+               replayer.reset();
+            }
+            else
+            {
+               replayMotion.set(false);
+               LogTools.warn("Please select a valid file to replay before enabling the motion replay");
+            }
+         }
+         if (!replayMotion.get())
+         {
+            ImGui.beginDisabled();
+            pauseReplay.set(false);
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(pauseReplay.get() ? "Resume" : "Pause")))
+         {
+            pauseReplay.set(!pauseReplay.get());
+            replayer.pauseReplay(pauseReplay.get());
+         }
+         if (!replayMotion.get())
+            ImGui.endDisabled();
+      }
+
       ImGuiTools.separatorText("Utility Functions", ImGuiTools.getSmallBoldFont());
       if (ImGui.button(labels.get("Wakeup Toolbox")))
       {
@@ -805,17 +843,6 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          reinitializeToolboxRobotConfiguration();
       }
-
-      if (replayer != null)
-      {
-         if (ImGui.inputText("Log Directory", logDirectory, ImGuiInputTextFlags.EnterReturnsTrue)
-             || ImGui.inputText("Log File Name", logFileName, ImGuiInputTextFlags.EnterReturnsTrue))
-         {
-            replayer.load(new File(logDirectory.get(), logFileName.get()));
-         }
-         ImGui.checkbox(labels.get("Replay File"), isReplaying);
-      }
-
       if (ImGui.checkbox(labels.get("Demonstration Mode"), demonstrationMode))
       {
          demonstrationTaskIndex = 0;
