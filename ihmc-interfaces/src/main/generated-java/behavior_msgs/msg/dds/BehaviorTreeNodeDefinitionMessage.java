@@ -22,11 +22,11 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
             */
    public byte type_;
    /**
-            * The timestamp and modifer ID of the latest modification to this node's data fields
+            * The timestamp and modifier ID of the latest modification to this node's data fields
             */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_data_;
    /**
-            * The timestamp and modifer ID of the latest modification to this node's children set
+            * The timestamp and modifier ID of the latest modification to this node's children set
             */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage latest_modification_to_children_;
    /**
@@ -81,7 +81,7 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
 
    /**
-            * The timestamp and modifer ID of the latest modification to this node's data fields
+            * The timestamp and modifier ID of the latest modification to this node's data fields
             */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToData()
    {
@@ -90,7 +90,7 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
 
    /**
-            * The timestamp and modifer ID of the latest modification to this node's children set
+            * The timestamp and modifier ID of the latest modification to this node's children set
             */
    public ihmc_common_msgs.msg.dds.LatestModificationMessage getLatestModificationToChildren()
    {

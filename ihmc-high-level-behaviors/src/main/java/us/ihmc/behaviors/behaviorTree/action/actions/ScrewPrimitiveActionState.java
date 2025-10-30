@@ -30,7 +30,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    {
       super(id, new ScrewPrimitiveActionDefinition(rootNode.getDefinition()), rootNode);
 
-      screwFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getScrewAxisPoseInObjectFrame().getValueReadOnly());
+      screwFrame = new DetachableReferenceFrame(scene::findFrameByName, definition.getScrewAxisPoseInObjectFrame().getValueReadOnly());
       previewTrajectory = new CRDTStatusPoseList(ROS2ActorDesignation.ROBOT, crdtInfo);
       force = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
