@@ -139,85 +139,95 @@ public class RDXVRContext
    private final Notification loadingRolesNotification = new Notification();
    private WorkspaceResourceFile trackerRolesFile;
 
-   public void initSystem()
+   public boolean initSystem()
    {
-      LogTools.info("Initializing");
-
-      event = VREvent.create(); // about 92 ms
-      trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
-      trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
-
-      int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene); // takes 148 ms
-      checkInitError(errorPointer);
-      OpenVR.create(token); // takes 24 ms
-
-      VR.VR_GetGenericInterface(VR.IVRCompositor_Version, errorPointer);
-      checkInitError(errorPointer);
-
-      VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
-      checkInitError(errorPointer);
-
-      VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
-      float renderTargetMultiplier = 1.0f; // multiplier to scale the render surface dimensions as a replacement for multisampling
-      width = (int) (widthPointer.get(0) * renderTargetMultiplier);
-      height = (int) (heightPointer.get(0) * renderTargetMultiplier);
-
-      WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/vr");
-      WorkspaceResourceFile actionManifestFile = new WorkspaceResourceFile(directory, "actions.json");
-      VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilesystemFile().toString());
-
-      VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
-      headset.initSystem();
-
-      trackerRolesFile = new WorkspaceResourceFile(directory, "tracker_roles.json");
-      JSONFileTools.load(trackerRolesFile, node ->
+      try
       {
-         for (String role : availableTrackerRoles)
+         LogTools.info("Initializing");
+
+         event = VREvent.create(); // about 92 ms
+         trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
+         trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
+
+         int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene); // takes 148 ms
+         checkInitError(errorPointer);
+         OpenVR.create(token); // takes 24 ms
+
+         VR.VR_GetGenericInterface(VR.IVRCompositor_Version, errorPointer);
+         checkInitError(errorPointer);
+
+         VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
+         checkInitError(errorPointer);
+
+         VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
+         float renderTargetMultiplier = 1.0f; // multiplier to scale the render surface dimensions as a replacement for multisampling
+         width = (int) (widthPointer.get(0) * renderTargetMultiplier);
+         height = (int) (heightPointer.get(0) * renderTargetMultiplier);
+
+         WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/vr");
+         WorkspaceResourceFile actionManifestFile = new WorkspaceResourceFile(directory, "actions.json");
+         VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilesystemFile().toString());
+
+         VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
+         headset.initSystem();
+
+         trackerRolesFile = new WorkspaceResourceFile(directory, "tracker_roles.json");
+         JSONFileTools.load(trackerRolesFile, node ->
          {
-            savedTrackersRoleMap.put(role, node.get(role).asText());
-         }
-      });
-
-      int[] deviceIndices = new int[VR.k_unMaxTrackedDeviceCount];
-      // Create all potential indexes
-      for (int i = 0; i<deviceIndices.length; i++)
-      {
-         deviceIndices[i] = i;
-      }
-      String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(0, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
-      if (modelNumber.toLowerCase().contains("focus3"))
-         vrModel = RDXVRHardwareModel.FOCUS3;
-      else
-         vrModel = RDXVRHardwareModel.INDEX;
-
-      LogTools.info("Using VR headset/controller model: {}", vrModel);
-      for (RDXVRController controller : controllers)
-      {
-         controller.setModel(vrModel);
-         controller.initSystem();
-      }
-
-      // Iterate over all potential indexes to see which one is a tracker and add it
-      // NOTE. lgwjl openvr API is not stable and functions like VRSystem_GetSortedTrackedDeviceIndicesOfClass do not work
-      for (int deviceIndex : deviceIndices)
-      {
-         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
-         {
-            if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+            for (String role : availableTrackerRoles)
             {
-               trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
-               newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
-               LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
+               savedTrackersRoleMap.put(role, node.get(role).asText());
+            }
+         });
+
+         int[] deviceIndices = new int[VR.k_unMaxTrackedDeviceCount];
+         // Create all potential indexes
+         for (int i = 0; i < deviceIndices.length; i++)
+         {
+            deviceIndices[i] = i;
+         }
+         String modelNumber = VRSystem.VRSystem_GetStringTrackedDeviceProperty(0, VR.ETrackedDeviceProperty_Prop_ModelNumber_String, null);
+         if (modelNumber.toLowerCase().contains("focus3"))
+            vrModel = RDXVRHardwareModel.FOCUS3;
+         else
+            vrModel = RDXVRHardwareModel.INDEX;
+
+         LogTools.info("Using VR headset/controller model: {}", vrModel);
+         for (RDXVRController controller : controllers)
+         {
+            controller.setModel(vrModel);
+            controller.initSystem();
+         }
+
+         // Iterate over all potential indexes to see which one is a tracker and add it
+         // NOTE. lgwjl openvr API is not stable and functions like VRSystem_GetSortedTrackedDeviceIndicesOfClass do not work
+         for (int deviceIndex : deviceIndices)
+         {
+            int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+            if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
+            {
+               if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+               {
+                  trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex, vrModel));
+                  newTrackerSerialNumber.add(getSerialNumber(deviceIndex));
+                  LogTools.info("Tracker {} connected", getSerialNumber(deviceIndex));
+               }
             }
          }
-      }
-      if (!trackers.isEmpty())
-         loadTrackerRolesFromFile();
+         if (!trackers.isEmpty())
+            loadTrackerRolesFromFile();
 
-      activeActionSets = VRActiveActionSet.create(1);
-      activeActionSets.ulActionSet(mainActionSetHandle.get(0));
-      activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
+         activeActionSets = VRActiveActionSet.create(1);
+         activeActionSets.ulActionSet(mainActionSetHandle.get(0));
+         activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
+
+         return true;
+      }
+      catch (Exception ex)
+      {
+         LogTools.error("VR system initialization failed: " + ex.getMessage(), ex);
+         return false;
+      }
    }
 
    /**

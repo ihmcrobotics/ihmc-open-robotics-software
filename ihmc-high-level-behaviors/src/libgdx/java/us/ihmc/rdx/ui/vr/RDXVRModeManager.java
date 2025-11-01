@@ -112,6 +112,7 @@ public class RDXVRModeManager
                       ROS2LogReplay replayer)
    {
       vrManager = baseUI.getVRManager();
+      vrManager.enableHeadsetlessTestMode();
       this.perceptionVisualizers = perceptionVisualizers;
       this.syncedRobot = syncedRobot;
 
