@@ -317,8 +317,8 @@ public class RDXVRManager
       return trackerRoleManagers;
    }
 
-   public void enableHeadsetlessTestMode()
+   public void setHeadsetlessTestMode(boolean enable)
    {
-      headsetlessTestMode = true;
+      headsetlessTestMode = enable;
    }
 }

@@ -93,10 +93,9 @@ public class RDXVRModeManager
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
                       boolean createKinematicsStreamingToolboxModule,
-                      KinematicsStreamingToolboxParameters kstParameters,
-                      boolean recordKSTOutput)
+                      KinematicsStreamingToolboxParameters kstParameters)
    {
-      create(baseUI, syncedRobot, perceptionVisualizers, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, recordKSTOutput, null, null, null);
+      create(baseUI, syncedRobot, perceptionVisualizers, controllerHelper, retargetingParameters, createKinematicsStreamingToolboxModule, kstParameters, false, null, null, null, false);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -109,10 +108,11 @@ public class RDXVRModeManager
                       boolean recordKSTOutput,
                       FullHumanoidRobotModel miniGhostFullRobotModel,
                       RobotDefinition miniGhostRobotDefinition,
-                      ROS2LogReplay replayer)
+                      ROS2LogReplay replayer,
+                      boolean enableHeadsetlessTestMode)
    {
       vrManager = baseUI.getVRManager();
-      vrManager.enableHeadsetlessTestMode();
+      vrManager.setHeadsetlessTestMode(enableHeadsetlessTestMode);
       this.perceptionVisualizers = perceptionVisualizers;
       this.syncedRobot = syncedRobot;
 
