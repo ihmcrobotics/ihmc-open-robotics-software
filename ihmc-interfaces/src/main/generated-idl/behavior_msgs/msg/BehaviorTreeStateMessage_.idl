@@ -19,6 +19,7 @@
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
 #include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
+#include "behavior_msgs/msg/./SceneActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
@@ -92,6 +93,9 @@ module behavior_msgs
       const octet FOOT_POSE_ACTION =
       19;
 
+      const octet SCENE_ACTION =
+      20;
+
 
       /**
        * Gives the current state of the complete collection of behavior tree nodes.
@@ -152,6 +156,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::PelvisHeightOrientationActionStateMessage, 120> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 120> wait_duration_actions;
         sequence<behavior_msgs::msg::dds::FootPoseActionStateMessage, 120> foot_pose_actions;
+        sequence<behavior_msgs::msg::dds::SceneActionNodeStateMessage, 120> scene_actions;
       };
     };
   };

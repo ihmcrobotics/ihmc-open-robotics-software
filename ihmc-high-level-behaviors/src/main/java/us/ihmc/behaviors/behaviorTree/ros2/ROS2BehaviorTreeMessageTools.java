@@ -46,6 +46,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
       treeStateMessage.getFootPoseActions().clear();
+      treeStateMessage.getSceneActions().clear();
    }
 
    public static void packMessage(CRDTInfo crdtInfo, BehaviorTreeNodeState<?> nodeState, BehaviorTreeStateMessage treeStateMessage)
@@ -170,6 +171,12 @@ public class ROS2BehaviorTreeMessageTools
             treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootPoseActions().size());
             footPoseActionState.toMessage(treeStateMessage.getFootPoseActions().add());
          }
+         else if (nodeState instanceof SceneActionNodeState sceneActionNodeState)
+         {
+            treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.SCENE_ACTION);
+            treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getSceneActions().size());
+            sceneActionNodeState.toMessage(treeStateMessage.getSceneActions().add());
+         }
          else
          {
             treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BASIC_NODE);
@@ -262,6 +269,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof FootPoseActionState footPoseActionState)
       {
          footPoseActionState.fromMessage(subscriptionNode.getFootPoseActionStateMessage());
+      }
+      else if (nodeState instanceof SceneActionNodeState sceneActionNodeState)
+      {
+         sceneActionNodeState.fromMessage(subscriptionNode.getSceneActionNodeStateMessage());
       }
       else // Basic node
       {
@@ -414,6 +425,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setFootPoseActionStateMessage(footPoseActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(footPoseActionStateMessage.getState().getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footPoseActionStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.SCENE_ACTION ->
+         {
+            SceneActionNodeStateMessage sceneActionNodeStateMessage = treeStateMessage.getSceneActions().get(indexInTypesList);
+            subscriptionNode.setSceneActionNodeStateMessage(sceneActionNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(sceneActionNodeStateMessage.getState().getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(sceneActionNodeStateMessage.getDefinition().getDefinition().getDefinition().getDefinition());
          }
       }
    }

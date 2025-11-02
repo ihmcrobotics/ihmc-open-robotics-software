@@ -27,6 +27,7 @@ byte SCREW_PRIMITIVE_ACTION = 16
 byte PELVIS_HEIGHT_ORIENTATION_ACTION = 17
 byte WAIT_DURATION_ACTION = 18
 byte FOOT_POSE_ACTION = 19
+byte SCENE_ACTION = 20
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint64 sequence_id
@@ -90,3 +91,5 @@ behavior_msgs/PelvisHeightOrientationActionStateMessage[<=120] pelvis_height_act
 behavior_msgs/WaitDurationActionStateMessage[<=120] wait_duration_actions
 
 behavior_msgs/FootPoseActionStateMessage[<=120] foot_pose_actions
+
+behavior_msgs/SceneActionNodeStateMessage[<=120] scene_actions

@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "54e439fd5dfa6d36a286ac43a5b8203ea4a10b1dd64ee65fefb577a4979de65e";
+   		return "51c9a548b13b6889f8166e5557a46ac663bbe3171cd64c8acce40ac56a325acf";
    }
    
    @Override
@@ -126,6 +126,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 120; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -259,6 +262,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       {
           current_alignment += behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType.getCdrSerializedSize(data.getFootPoseActions().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getSceneActions().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.SceneActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getSceneActions().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -360,6 +368,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getFootPoseActions());else
           throw new RuntimeException("foot_pose_actions field exceeds the maximum length: %d > %d".formatted(data.getFootPoseActions().size(), 120));
 
+      if(data.getSceneActions().size() <= 120)
+      cdr.write_type_e(data.getSceneActions());else
+          throw new RuntimeException("scene_actions field exceeds the maximum length: %d > %d".formatted(data.getSceneActions().size(), 120));
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -393,6 +405,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getPelvisHeightActions());	
       cdr.read_type_e(data.getWaitDurationActions());	
       cdr.read_type_e(data.getFootPoseActions());	
+      cdr.read_type_e(data.getSceneActions());	
 
    }
 
@@ -429,6 +442,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("pelvis_height_actions", data.getPelvisHeightActions());
       ser.write_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.write_type_e("foot_pose_actions", data.getFootPoseActions());
+      ser.write_type_e("scene_actions", data.getSceneActions());
    }
 
    @Override
@@ -464,6 +478,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("pelvis_height_actions", data.getPelvisHeightActions());
       ser.read_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.read_type_e("foot_pose_actions", data.getFootPoseActions());
+      ser.read_type_e("scene_actions", data.getSceneActions());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeStateMessage src, behavior_msgs.msg.dds.BehaviorTreeStateMessage dest)

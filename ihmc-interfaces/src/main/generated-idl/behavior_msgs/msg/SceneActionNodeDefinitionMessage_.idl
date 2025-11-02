@@ -1,0 +1,24 @@
+#ifndef __behavior_msgs__msg__SceneActionNodeDefinitionMessage__idl__
+#define __behavior_msgs__msg__SceneActionNodeDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::SceneActionNodeDefinitionMessage_")
+      struct SceneActionNodeDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif

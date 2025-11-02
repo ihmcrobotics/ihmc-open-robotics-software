@@ -37,6 +37,7 @@ public class BehaviorTreeDefinitionBuilder
       MAP.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionDefinition::new);
       MAP.put(WaitDurationActionDefinition.class, WaitDurationActionDefinition::new);
       MAP.put(FootPoseActionDefinition.class, FootPoseActionDefinition::new);
+      MAP.put(SceneActionNodeDefinition.class, SceneActionNodeDefinition::new);
    }
 
    public static BehaviorTreeRootNodeDefinition createRootNode(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)

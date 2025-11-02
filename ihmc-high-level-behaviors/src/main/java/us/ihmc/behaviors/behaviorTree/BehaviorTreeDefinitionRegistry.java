@@ -37,7 +37,8 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
       new DefinitionMapping(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
       new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
-      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
+      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION),
+      new DefinitionMapping(SceneActionNodeDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION)
    };
    private static final Map<Class<?>, DefinitionMapping> REGISTRY_MAP = new HashMap<>();
    static
