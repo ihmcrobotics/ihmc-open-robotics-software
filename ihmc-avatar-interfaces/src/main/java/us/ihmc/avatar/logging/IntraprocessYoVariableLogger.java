@@ -6,7 +6,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -37,6 +36,10 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class IntraprocessYoVariableLogger
 {
@@ -73,21 +76,26 @@ public class IntraprocessYoVariableLogger
    private final double dt;
    private final Path incomingLogsFolder;
 
-   private String timestamp;
    private Path logFolder;
-   private ByteBuffer compressedBuffer;
-   private ByteBuffer indexBuffer = ByteBuffer.allocate(16);
-   private ArrayList<YoVariable> variables = new ArrayList<>();
+   private final ByteBuffer indexBuffer = ByteBuffer.allocate(16);
+   private final ArrayList<YoVariable> variables = new ArrayList<>();
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
    private volatile boolean shutdown = false;
+   private long[] variableValues;
 
-   private static final int CHANGED_BUFFER_CAPACITY = 128;
-   private ConcurrentRingBuffer<VariableChangedMessage> variableChanged = new ConcurrentRingBuffer<>(new VariableChangedMessage.Builder(),
-                                                                                                     CHANGED_BUFFER_CAPACITY);
+   // Added for async compression
+   private final ExecutorService compressionPool = Executors.newSingleThreadExecutor(r -> {
+      Thread t = new Thread(r);
+      t.setName("IntraprocessLoggerCompressionThread");
+      t.setDaemon(true);
+      return t;
+   });
+   private final BlockingQueue<CompressionTask> compressionQueue = new LinkedBlockingQueue<>();
+
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
@@ -134,7 +142,7 @@ public class IntraprocessYoVariableLogger
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
-      timestamp = dateFormat.format(calendar.getTime());
+      String timestamp = dateFormat.format(calendar.getTime());
       logFolder = incomingLogsFolder.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
       deleteOldLogs(incomingLogsFolder, 10);
 
@@ -219,7 +227,6 @@ public class IntraprocessYoVariableLogger
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
-      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
       {
          variables.addAll(registrySendBufferBuilder.getYoRegistry().collectSubtreeVariables());
@@ -257,9 +264,43 @@ public class IntraprocessYoVariableLogger
          e.printStackTrace();
       }
 
+      // Start background compression worker
+      compressionPool.submit(() -> {
+         try
+         {
+            while (!shutdown)
+            {
+               CompressionTask task = compressionQueue.take();
+               ByteBuffer input = task.data;
+               ByteBuffer output = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(input.remaining()));
+               SnappyUtils.compress(input, output);
+               output.flip();
+
+               synchronized (this)
+               {
+                  indexBuffer.clear();
+                  indexBuffer.putLong(task.timestamp);
+                  indexBuffer.putLong(dataChannel.position());
+                  indexBuffer.flip();
+
+                  indexChannel.write(indexBuffer);
+                  dataChannel.write(output);
+               }
+            }
+         }
+         catch (InterruptedException ignored)
+         {
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      });
+
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
          shutdown = true;
+         compressionPool.shutdownNow();
          synchronized (this)
          {
             try
@@ -279,8 +320,6 @@ public class IntraprocessYoVariableLogger
       }, getClass().getSimpleName() + "Shutdown"));
    }
 
-   private long[] variableValues;
-
    public synchronized void update(long timestamp)
    {
       if (shutdown)
@@ -291,7 +330,6 @@ public class IntraprocessYoVariableLogger
 
       dataBuffer.clear();
       dataBufferAsLong.clear();
-
       dataBufferAsLong.put(timestamp);
 
       long[] values = variableValues;
@@ -300,9 +338,7 @@ public class IntraprocessYoVariableLogger
       try
       {
          for (int i = 0; i < size; i++)
-         {
             values[i] = variables.get(i).getValueAsLongBits();
-         }
 
          dataBufferAsLong.put(values, 0, size);
       }
@@ -315,35 +351,20 @@ public class IntraprocessYoVariableLogger
       for (JointHolder jointHolder : jointHolders)
       {
          jointHolder.get(jointData, 0);
-
          for (int i = 0; i < jointHolder.getNumberOfStateVariables(); i++)
-         {
             dataBufferAsLong.put(Double.doubleToLongBits(jointData[i]));
-         }
       }
 
       dataBufferAsLong.flip();
       dataBuffer.position(0);
       dataBuffer.limit(dataBufferAsLong.limit() * 8);
 
-      try
-      {
-         compressedBuffer.clear();
-         SnappyUtils.compress(dataBuffer, compressedBuffer);
-         compressedBuffer.flip();
+      // Copy to avoid modifying while in compression thread
+      ByteBuffer snapshot = ByteBuffer.allocate(dataBuffer.remaining());
+      snapshot.put(dataBuffer);
+      snapshot.flip();
 
-         indexBuffer.clear();
-         indexBuffer.putLong(timestamp);
-         indexBuffer.putLong(dataChannel.position());
-         indexBuffer.flip();
-
-         indexChannel.write(indexBuffer);
-         dataChannel.write(compressedBuffer);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      compressionQueue.offer(new CompressionTask(timestamp, snapshot));
    }
 
    public void deleteOldLogs(Path incomingLogsFolder, int numberOflogsToKeep)
@@ -368,5 +389,17 @@ public class IntraprocessYoVariableLogger
    {
       FileTools.ensureDirectoryExists(logFolder, DefaultExceptionHandler.RUNTIME_EXCEPTION);
       return logFolder.resolve(filename).toFile();
+   }
+
+   private static class CompressionTask
+   {
+      final long timestamp;
+      final ByteBuffer data;
+
+      CompressionTask(long timestamp, ByteBuffer data)
+      {
+         this.timestamp = timestamp;
+         this.data = data;
+      }
    }
 }
