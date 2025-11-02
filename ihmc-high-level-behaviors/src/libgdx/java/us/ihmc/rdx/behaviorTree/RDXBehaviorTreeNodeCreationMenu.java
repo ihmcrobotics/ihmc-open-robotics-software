@@ -104,6 +104,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
          ImGui.text("Screw Primitive: ");
          for (RobotSide side : RobotSide.values)
          {

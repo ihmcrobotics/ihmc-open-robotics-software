@@ -48,6 +48,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
       REGISTRY.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
       REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
+      REGISTRY.put(SceneActionNodeDefinition.class, RDXSceneActionNode::new);
    }
 
    private CRDTInfo crdtInfo;

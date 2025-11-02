@@ -40,6 +40,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
       REGISTRY.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
       REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
+      REGISTRY.put(SceneActionNodeDefinition.class, SceneActionNodeExecutor::new);
    }
 
    private CRDTInfo crdtInfo;
