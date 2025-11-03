@@ -36,6 +36,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Throttler;
+import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
@@ -133,7 +134,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
 
    private final ROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(50.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
@@ -161,11 +162,14 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+
    private final ImBoolean replayMotion = new ImBoolean(false);
    private final ImBoolean pauseReplay = new ImBoolean(true);
    private final ROS2LogReplay replayer;
    private final ImString logDirectory = new ImString(System.getProperty("user.home") + "/.ihmc/logs/ros2/");
    private final ImString logFileName = new ImString();
+   private volatile boolean replayThreadRunning = false;
+   private Thread replayThread;
 
    public RDXVRWholeBodyKinematicStreaming(ROS2SyncedRobotModel syncedRobot,
                                            ROS2ControllerHelper ros2ControllerHelper,
@@ -702,15 +706,7 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (isKSTEnabled.get())
       {
-         if (replayer != null && replayer.isReady() && replayMotion.get())
-         {
-            if (replayer.doIncrementalReplay())
-            {
-               replayMotion.set(false);
-               replayer.reset();
-               LogTools.info("Replay completed successfully");
-            }
-         }
+
 
          if (streamToController.get())
          {
@@ -819,6 +815,11 @@ public class RDXVRWholeBodyKinematicStreaming
             if (replayMotion.get())
             {
                replayer.pauseReplay(pauseReplay.get());
+               startReplayThread();
+            }
+            else
+            {
+               stopReplayThread();
             }
          }
          if (!replayer.isReady())
@@ -1044,6 +1045,66 @@ public class RDXVRWholeBodyKinematicStreaming
          controllerFrameGraphics.get(side).dispose();
          handFrameGraphics.get(side).dispose();
          wristFrameGraphics.get(side).dispose();
+      }
+      if (replayThreadRunning)
+      {
+         stopReplayThread();
+      }
+   }
+
+   public void startReplayThread()
+   {
+      if (replayThreadRunning)
+         return; // Already running
+      replayThreadRunning = true;
+      replayThread = new Thread(() ->
+      {
+        final long intervalNanos = 1_000_000; // 1 kHz: 1 ms = 1,000,000 nanoseconds
+        while (replayThreadRunning)
+        {
+           long start = System.nanoTime();
+           try
+           {
+              if (replayer != null && replayer.isReady() && replayMotion.get())
+              {
+                 if (replayer.doIncrementalReplay())
+                 {
+                    replayMotion.set(false);
+                    replayer.reset();
+                    LogTools.info("Replay completed successfully");
+                 }
+              }
+           }
+           catch (Exception e)
+           {
+              LogTools.error("Replay thread error: " + e.getMessage());
+           }
+
+           long elapsed = System.nanoTime() - start;
+           long remaining = intervalNanos - elapsed;
+           if (remaining > 0)
+           {
+              try
+              {
+                 Thread.sleep(remaining / 1_000_000, (int) (remaining % 1_000_000));
+              }
+              catch (InterruptedException ignored)
+              {
+              }
+           }
+        }
+      });
+      replayThread.setDaemon(true); // Stops with main app
+      replayThread.start();
+   }
+
+   public void stopReplayThread()
+   {
+      replayThreadRunning = false;
+      if (replayThread != null)
+      {
+         replayThread.interrupt();
+         replayThread = null;
       }
    }
 

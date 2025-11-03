@@ -121,7 +121,6 @@ public class ROS2LogReplay
          {
             topicManager.updateInternalRepeat(lastReplayTime);
          }
-         LogTools.info("Replaying {}", lastReplayTime);
          return false; // replay not advancing while paused
       }
 
@@ -135,7 +134,6 @@ public class ROS2LogReplay
          isDone = topicManager.update(now) && isDone;
       }
 
-      LogTools.info("Replaying {}", lastReplayTime);
       return isDone;
    }
 
