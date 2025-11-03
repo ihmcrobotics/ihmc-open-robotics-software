@@ -33,10 +33,9 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.LockSupport;
 
 public class IntraprocessYoVariableLogger
 {
@@ -93,7 +92,7 @@ public class IntraprocessYoVariableLogger
       return t;
    });
 
-   CompressionTaskQueue compressionQueue = new CompressionTaskQueue(TASK_POOL_SIZE);
+   CompressionTaskQueue compressionTaskQueue = new CompressionTaskQueue(TASK_POOL_SIZE);
    private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
    private int bufferIndex = 0;
 
@@ -234,7 +233,7 @@ public class IntraprocessYoVariableLogger
       {
          byteBufferCircularArray[i] = ByteBuffer.allocate(bufferSize);
          compressionTaskCircularArray[i] = new CompressionTask();
-         compressionQueue.offer(compressionTaskCircularArray[i]); // pre-fill queue
+//         compressionTaskQueue.offer(compressionTaskCircularArray[i]);
       }
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
@@ -333,10 +332,18 @@ public class IntraprocessYoVariableLogger
       snapshot.flip();
 
       // To avoid creating garbage, we have a pool of tasks which we cycle through, acting as a circular array
+      // Get a free pre-allocated task from the pool (not the queue)
       CompressionTask task = compressionTaskCircularArray[nextTaskIndex];
       nextTaskIndex = (nextTaskIndex + 1) % TASK_POOL_SIZE;
       task.set(timestamp, snapshot);
-      compressionQueue.offer(task);
+
+      // Offer the filled task into the queue for the compressing thread
+      boolean offered = compressionTaskQueue.offer(task);
+      if (!offered)
+      {
+         // Queue full, skip this frame or handle backpressure
+         LogTools.warn("Compression queue full, dropping task for timestamp {}", timestamp);
+      }
    }
 
    public void compressLatestData()
@@ -347,9 +354,11 @@ public class IntraprocessYoVariableLogger
          {
             CompressionTask task;
 
-            while ((task = compressionQueue.poll()) == null)
+            while ((task = compressionTaskQueue.poll()) == null)
             {
-               Thread.yield();
+               // Save a little load on the CPU, prevent free spinning thread
+               // Tried 10, that seemed a little long for the threading situation
+               LockSupport.parkNanos(5);
             }
 
             ByteBuffer input = task.data;
