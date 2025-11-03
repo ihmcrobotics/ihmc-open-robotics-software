@@ -3,18 +3,15 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.detections.DetectionPair;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.LongSupplier;
@@ -25,15 +22,10 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    private final IsaacROSFoundationPoseCommunicatorMap foundationPose;
 
    private final List<BehaviorTreeSceneObjectExecutor> objects;
-   private final ConcurrentLinkedQueue<List<InstantDetection>> detectionQueue = new ConcurrentLinkedQueue<>();
 
-   // Persistent detection management
+   private final ConcurrentLinkedQueue<List<InstantDetection>> instantDetectionQueue = new ConcurrentLinkedQueue<>();
+   private final Set<PersistentDetection> matchedThisTick = new HashSet<>();
    private final Set<PersistentDetection> persistentDetections = new HashSet<>();
-   private static final double MAX_MATCH_DISTANCE_SQUARED = 0.25; // 0.5m threshold
-   private static final double POSE_FILTER_ALPHA = 0.5;
-   private static final double ACCEPTANCE_CONFIDENCE = 0.5;
-   private static final double STABILITY_FREQUENCY = 1.0;
-   private static final double HISTORY_DURATION = 2.0;
 
    public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
@@ -48,19 +40,15 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
       objects = (List) super.objects;
 
-      yolo.addDetectionConsumerCallback(detectionQueue::add);
+      yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
+
    }
 
    public void update()
    {
-      // Process detections from the queue
-      List<InstantDetection> detections;
-      while ((detections = detectionQueue.poll()) != null)
-      {
-         addDetections(detections);
-      }
+      while (!instantDetectionQueue.isEmpty())
+         triageInstantDetections(instantDetectionQueue.poll());
 
-      // Update persistent detections
       updatePersistentDetections(Instant.now());
 
       for (BehaviorTreeSceneObjectExecutor object : objects)
@@ -69,58 +57,54 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       }
    }
 
-   private void addDetections(List<InstantDetection> newInstantDetections)
+   private void triageInstantDetections(List<InstantDetection> newInstantDetections)
    {
-      List<PersistentDetection> persistentDetectionsOfClass = getDetectionsOfType(newInstantDetections.get(0).getClass());
+      matchedThisTick.clear();
 
-      // Find all possible matches, sorting by distance to get the closest matches
-      PriorityQueue<DetectionPair> potentialMatches = new PriorityQueue<>();
-      for (PersistentDetection persistentDetection : persistentDetectionsOfClass)
+      // Greedy single-pass matching: for each new detection, find closest unmatched persistent detection
+      for (InstantDetection newDetection : newInstantDetections)
       {
-         for (InstantDetection newInstantDetection : newInstantDetections)
+         PersistentDetection bestMatch = null;
+         double bestDistanceSquared = 0.25; // max 0.5m radius
+
+         for (PersistentDetection candidate : persistentDetections)
          {
-            // Matches must be of the same class
-            if (persistentDetection.getDetectedObjectClass().equals(newInstantDetection.getDetectedObjectClass()))
+            if (matchedThisTick.contains(candidate))
+               continue;
+
+            // Check detection type (e.g., YOLO, FoundationPose, etc)
+            if (!candidate.getInstantDetectionClass().equals(newDetection.getClass()))
+               continue;
+
+            // Check object class (e.g., "bottle")
+            if (!candidate.getDetectedObjectClass().equals(newDetection.getDetectedObjectClass()))
+               continue;
+
+            double distanceSquared = candidate.getMostRecentDetection().getPose().getPosition().distanceSquared(newDetection.getPose().getPosition());
+
+            // Track closest match within threshold
+            if (distanceSquared < bestDistanceSquared)
             {
-               DetectionPair pair = new DetectionPair(persistentDetection, newInstantDetection);
-               // Matches must be close enough
-               if (pair.getDistanceSquared() < MAX_MATCH_DISTANCE_SQUARED)
-                  potentialMatches.add(pair);
+               bestDistanceSquared = distanceSquared;
+               bestMatch = candidate;
             }
          }
-      }
 
-      // Build a new set of the best-aligning potential matches one by one, ensuring no duplicates
-      Set<InstantDetection> remainingNewDetections = new HashSet<>(newInstantDetections);
-      List<PersistentDetection> remainingPersistentDetections = new ArrayList<>(persistentDetectionsOfClass);
-      List<DetectionPair> validAndBestMatches = new ArrayList<>();
-      while (!remainingNewDetections.isEmpty() && !remainingPersistentDetections.isEmpty() && !potentialMatches.isEmpty())
-      {
-         // Get the next closest match
-         DetectionPair detectionPair = potentialMatches.poll();
-         PersistentDetection persistentDetection = detectionPair.getPersistentDetection();
-         InstantDetection newInstantDetection = detectionPair.getInstantDetection();
-
-         // If it hasn't been used already, validate the match
-         if (remainingPersistentDetections.contains(persistentDetection) && remainingNewDetections.contains(newInstantDetection))
+         // Update existing persistent detection or create new one
+         if (bestMatch != null)
          {
-            validAndBestMatches.add(detectionPair);
-            remainingPersistentDetections.remove(persistentDetection);
-            remainingNewDetections.remove(newInstantDetection);
+            matchedThisTick.add(bestMatch);
+            bestMatch.addDetection(newDetection);
+         }
+         else
+         {
+            double poseFilterAlpha = 0.5;
+            double acceptanceConfidence = 0.5;
+            double stabilityFrequency = 1.0;
+            double historyDuration = 2.0;
+            persistentDetections.add(new PersistentDetection(newDetection, poseFilterAlpha, acceptanceConfidence, stabilityFrequency, historyDuration));
          }
       }
-
-      // Add the matched new instant detections to the persistent detections' histories
-      for (DetectionPair match : validAndBestMatches)
-         match.getPersistentDetection().addDetection(match.getInstantDetection());
-
-      // Create new persistent detections from unmatched new detections
-      for (InstantDetection unmatchedNewDetection : remainingNewDetections)
-         persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
-                                                          POSE_FILTER_ALPHA,
-                                                          ACCEPTANCE_CONFIDENCE,
-                                                          STABILITY_FREQUENCY,
-                                                          HISTORY_DURATION));
    }
 
    private void updatePersistentDetections(Instant now)
@@ -147,15 +131,6 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
             }
          }
       }
-   }
-
-   private List<PersistentDetection> getDetectionsOfType(Class<?> classType)
-   {
-      List<PersistentDetection> typeDetections = new ArrayList<>();
-      for (PersistentDetection persistentDetection : persistentDetections)
-         if (persistentDetection.getInstantDetectionClass().equals(classType))
-            typeDetections.add(persistentDetection);
-      return typeDetections;
    }
 
    @Override
