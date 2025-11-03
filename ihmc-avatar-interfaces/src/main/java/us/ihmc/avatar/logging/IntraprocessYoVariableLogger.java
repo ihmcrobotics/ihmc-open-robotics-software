@@ -92,8 +92,8 @@ public class IntraprocessYoVariableLogger
       t.setDaemon(true);
       return t;
    });
-   private final BlockingQueue<CompressionTask> compressionQueue = new ArrayBlockingQueue<>(TASK_POOL_SIZE);
 
+   CompressionTaskQueue compressionQueue = new CompressionTaskQueue(TASK_POOL_SIZE);
    private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
    private int bufferIndex = 0;
 
@@ -234,6 +234,7 @@ public class IntraprocessYoVariableLogger
       {
          byteBufferCircularArray[i] = ByteBuffer.allocate(bufferSize);
          compressionTaskCircularArray[i] = new CompressionTask();
+         compressionQueue.offer(compressionTaskCircularArray[i]); // pre-fill queue
       }
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
@@ -344,7 +345,13 @@ public class IntraprocessYoVariableLogger
       {
          while (!shutdown)
          {
-            CompressionTask task = compressionQueue.take();
+            CompressionTask task;
+
+            while ((task = compressionQueue.poll()) == null)
+            {
+               Thread.yield();
+            }
+
             ByteBuffer input = task.data;
             compressedBuffer.clear();
             SnappyUtils.compress(input, compressedBuffer);
@@ -361,9 +368,6 @@ public class IntraprocessYoVariableLogger
                dataChannel.write(compressedBuffer);
             }
          }
-      }
-      catch (InterruptedException ignored)
-      {
       }
       catch (IOException e)
       {
@@ -410,4 +414,40 @@ public class IntraprocessYoVariableLogger
          this.data = data;
       }
    }
+
+   class CompressionTaskQueue
+   {
+      private final CompressionTask[] queue;
+      private int head = 0;
+      private int tail = 0;
+      private final int capacity;
+
+      public CompressionTaskQueue(int capacity)
+      {
+         this.capacity = capacity;
+         this.queue = new CompressionTask[capacity];
+      }
+
+      // Non-blocking offer. Returns false if full.
+      public boolean offer(CompressionTask task)
+      {
+         int nextTail = (tail + 1) % capacity;
+         if (nextTail == head)
+            return false; // full
+         queue[tail] = task;
+         tail = nextTail;
+         return true;
+      }
+
+      // Non-blocking poll. Returns null if empty.
+      public CompressionTask poll()
+      {
+         if (head == tail)
+            return null;
+         CompressionTask task = queue[head];
+         head = (head + 1) % capacity;
+         return task;
+      }
+   }
+
 }
