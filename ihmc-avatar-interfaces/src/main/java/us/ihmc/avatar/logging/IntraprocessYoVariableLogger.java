@@ -33,10 +33,10 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class IntraprocessYoVariableLogger
 {
@@ -85,15 +85,15 @@ public class IntraprocessYoVariableLogger
    private long[] variableValues;
 
    // Added for async compression
+   public static final int TASK_POOL_SIZE = 10;
    private final ExecutorService compressionPoolThreads = Executors.newSingleThreadExecutor(r -> {
       Thread t = new Thread(r);
       t.setName("IntraprocessLoggerCompressionThread");
       t.setDaemon(true);
       return t;
    });
-   private final BlockingQueue<CompressionTask> compressionQueue = new LinkedBlockingQueue<>();
+   private final BlockingQueue<CompressionTask> compressionQueue = new ArrayBlockingQueue<>(TASK_POOL_SIZE);
 
-   public static final int TASK_POOL_SIZE = 100;
    private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
    private int bufferIndex = 0;
 
@@ -232,7 +232,7 @@ public class IntraprocessYoVariableLogger
 
       for (int i = 0; i < TASK_POOL_SIZE; i++)
       {
-         byteBufferCircularArray[i] = ByteBuffer.allocateDirect(bufferSize);
+         byteBufferCircularArray[i] = ByteBuffer.allocate(bufferSize);
          compressionTaskCircularArray[i] = new CompressionTask();
       }
 
@@ -310,10 +310,12 @@ public class IntraprocessYoVariableLogger
          LogTools.error("Increase buffer size!  size: {}  {}", variables.size(), e.getMessage());
       }
 
-      for (JointHolder jointHolder : jointHolders)
+      for (int j = 0; j < jointHolders.size(); j++)
       {
+         JointHolder jointHolder = jointHolders.get(j);
          jointHolder.get(jointData, 0);
-         for (int i = 0; i < jointHolder.getNumberOfStateVariables(); i++)
+         int n = jointHolder.getNumberOfStateVariables();
+         for (int i = 0; i < n; i++)
             dataBufferAsLong.put(Double.doubleToLongBits(jointData[i]));
       }
 
