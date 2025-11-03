@@ -3,9 +3,9 @@ package us.ihmc.behaviors.behaviorTree;
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,18 +43,15 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
 
    private final BehaviorTreeNodeMessageLogger logger;
    protected final CRDTInfo crdtInfo; // convenient to have readily available
-   protected final ReferenceFrameLibrary referenceFrameLibrary;
+   protected final BehaviorTreeSceneState scene;
    protected final DRCRobotModel robotModel;
 
    public BehaviorTreeNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode)
    {
-      this(id, definition, rootNode, rootNode.getReferenceFrameLibrary());
+      this(id, definition, rootNode, rootNode.getScene());
    }
 
-   public BehaviorTreeNodeState(long id,
-                                D definition,
-                                BehaviorTreeRootNodeState rootNode,
-                                ReferenceFrameLibrary referenceFrameLibrary)
+   public BehaviorTreeNodeState(long id, D definition, BehaviorTreeRootNodeState rootNode, BehaviorTreeSceneState scene)
    {
       this.id = id;
       this.definition = definition;
@@ -69,7 +66,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
          this.rootNode = rootNode;
          this.robotModel = rootNode.getDefinition().getRobotModel();
       }
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.scene = scene;
 
       logger = new BehaviorTreeNodeMessageLogger(definition.getCRDTInfo());
    }

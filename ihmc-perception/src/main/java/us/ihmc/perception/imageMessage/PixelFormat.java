@@ -23,6 +23,7 @@ public enum PixelFormat
    YUV_444P16(2, 3, -1, -1, AV_PIX_FMT_YUV444P16, -1),                              // 16 bit planar YUV444, 48 bits per pixel.
    GRAY8(1, 1, COLOR_GRAY2RGBA, COLOR_RGBA2GRAY, AV_PIX_FMT_GRAY8, GL12.GL_RED),    // monochrome
    GRAY16(2, 1, -1, -1, AV_PIX_FMT_GRAY16, GL12.GL_RED),                            // aka depth
+   GRAY_F32(4, 1, -1, -1, AV_PIX_FMT_GRAYF32, GL12.GL_RED),
    UNKNOWN(-1, -1, -1, -1, -1, -1);
 
    /** Equivalent to {@code elemsize} of the corresponding OpenCV type */

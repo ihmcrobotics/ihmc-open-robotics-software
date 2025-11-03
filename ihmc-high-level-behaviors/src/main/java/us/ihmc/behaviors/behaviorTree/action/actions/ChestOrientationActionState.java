@@ -24,7 +24,7 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    {
       super(id, new ChestOrientationActionDefinition(rootNode.getDefinition()), rootNode);
 
-      chestFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+      chestFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                     definition.getCRDTParentFrameName(),
                                                     definition.getChestToParentTransform());
       goalPelvisToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);

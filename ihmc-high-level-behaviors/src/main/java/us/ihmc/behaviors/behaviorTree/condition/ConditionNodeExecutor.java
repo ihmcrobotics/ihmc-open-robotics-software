@@ -14,8 +14,8 @@ public class ConditionNodeExecutor extends LeafNodeExecutor<ConditionNodeState, 
       super(new ConditionNodeState(id, rootNode.getState()), rootNode);
 
       counter = new CounterConditionExecutor(state);
-      //      llm = new LLMConditionExecutor(state, referenceFrameLibrary);
-      proximityCheck = new ProximityConditionExecutor(state, referenceFrameLibrary);
+      //      llm = new LLMConditionExecutor(state, scene);
+      proximityCheck = new ProximityConditionExecutor(state, scene);
    }
 
    @Override

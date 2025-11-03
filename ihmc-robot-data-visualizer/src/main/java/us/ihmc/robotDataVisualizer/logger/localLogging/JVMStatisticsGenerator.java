@@ -1,4 +1,4 @@
-package us.ihmc.robotDataVisualizer.logger;
+package us.ihmc.robotDataVisualizer.logger.localLogging;
 
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotDataLogger.YoVariableServer;
