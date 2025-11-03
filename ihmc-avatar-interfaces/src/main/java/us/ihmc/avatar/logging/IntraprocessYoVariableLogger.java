@@ -72,6 +72,7 @@ public class IntraprocessYoVariableLogger
    private final double dt;
    private final Path incomingLogsFolder;
 
+   private ByteBuffer compressedBuffer;
    private Path logFolder;
    private final ByteBuffer indexBuffer = ByteBuffer.allocate(16);
    private final ArrayList<YoVariable> variables = new ArrayList<>();
@@ -237,6 +238,7 @@ public class IntraprocessYoVariableLogger
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
+      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
       {
          variables.addAll(registrySendBufferBuilder.getYoRegistry().collectSubtreeVariables());
@@ -342,9 +344,9 @@ public class IntraprocessYoVariableLogger
          {
             CompressionTask task = compressionQueue.take();
             ByteBuffer input = task.data;
-            ByteBuffer output = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(input.remaining()));
-            SnappyUtils.compress(input, output);
-            output.flip();
+            compressedBuffer.clear();
+            SnappyUtils.compress(input, compressedBuffer);
+            compressedBuffer.flip();
 
             synchronized (this)
             {
@@ -354,7 +356,7 @@ public class IntraprocessYoVariableLogger
                indexBuffer.flip();
 
                indexChannel.write(indexBuffer);
-               dataChannel.write(output);
+               dataChannel.write(compressedBuffer);
             }
          }
       }
