@@ -9,8 +9,8 @@ import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommun
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -25,7 +25,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
    private final ConcurrentLinkedQueue<List<InstantDetection>> instantDetectionQueue = new ConcurrentLinkedQueue<>();
    private final Set<PersistentDetection> matchedThisTick = new HashSet<>();
-   private final Set<PersistentDetection> persistentDetections = new HashSet<>();
+   private final List<PersistentDetection> persistentDetections = new ArrayList<>();
+   private final List<PersistentDetection> oldUnstableDetections = new ArrayList<>();
 
    public BehaviorTreeSceneExecutor(CRDTInfo crdtInfo,
                                     LongSupplier idSupplier,
@@ -49,7 +50,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       while (!instantDetectionQueue.isEmpty())
          triageInstantDetections(instantDetectionQueue.poll());
 
-      updatePersistentDetections(Instant.now());
+      updatePersistentDetections();
 
       for (BehaviorTreeSceneObjectExecutor object : objects)
       {
@@ -107,29 +108,22 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       }
    }
 
-   private void updatePersistentDetections(Instant now)
+   private void updatePersistentDetections()
    {
-      Iterator<PersistentDetection> detectionIterator = persistentDetections.iterator();
-      while (detectionIterator.hasNext())
+      Instant now = Instant.now();
+      oldUnstableDetections.clear();
+      for (PersistentDetection detection : persistentDetections)
       {
-         PersistentDetection detection = detectionIterator.next();
-         if (detection.isDestroyed())
-         {
-            detectionIterator.remove();
-         }
-         else if (detection.isReadyForDeletion())
-         {
-            detection.destroy();
-            detectionIterator.remove();
-         }
-         else
-         {
-            detection.updateHistory(now);
-            if (detection.hasBecomeValid().poll())
-            {
-               // Detection has become valid - could trigger scene object creation here
-            }
-         }
+         detection.updateHistory(now);
+
+         if (detection.isReadyForDeletion())
+            oldUnstableDetections.add(detection);
+      }
+
+      for (PersistentDetection persistentDetectionToRemove : oldUnstableDetections)
+      {
+         persistentDetectionToRemove.destroy();
+         persistentDetections.remove(persistentDetectionToRemove);
       }
    }
 
