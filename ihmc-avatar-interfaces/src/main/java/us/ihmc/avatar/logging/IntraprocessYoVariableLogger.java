@@ -3,9 +3,7 @@ package us.ihmc.avatar.logging;
 import com.google.common.collect.Lists;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,7 +28,6 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -50,7 +47,6 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_FILENAME = "model.sdf";
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
-   public static final String SUMMARY_FILENAME = "summary.csv";
    public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY;
    static
    {
@@ -96,6 +92,15 @@ public class IntraprocessYoVariableLogger
    });
    private final BlockingQueue<CompressionTask> compressionQueue = new LinkedBlockingQueue<>();
 
+   public static final int TASK_POOL_SIZE = 100;
+   private final ByteBuffer[] bufferPool = new ByteBuffer[TASK_POOL_SIZE];
+   private int bufferIndex = 0;
+
+   // These are for the circular array to send data to the compression thread
+   private final CompressionTask[] taskPool = new CompressionTask[TASK_POOL_SIZE];
+   private int nextTaskIndex = 0;
+
+   private final double[] jointData = new double[13];
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
@@ -144,7 +149,6 @@ public class IntraprocessYoVariableLogger
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
       logFolder = incomingLogsFolder.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
-      deleteOldLogs(incomingLogsFolder, 10);
 
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
@@ -225,6 +229,12 @@ public class IntraprocessYoVariableLogger
       int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
 
+      for (int i = 0; i < TASK_POOL_SIZE; i++)
+      {
+         bufferPool[i] = ByteBuffer.allocateDirect(bufferSize);
+         taskPool[i] = new CompressionTask();
+      }
+
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
       for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
@@ -265,59 +275,9 @@ public class IntraprocessYoVariableLogger
       }
 
       // Start background compression worker
-      compressionPool.submit(() -> {
-         try
-         {
-            while (!shutdown)
-            {
-               CompressionTask task = compressionQueue.take();
-               ByteBuffer input = task.data;
-               ByteBuffer output = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(input.remaining()));
-               SnappyUtils.compress(input, output);
-               output.flip();
+      compressionPool.submit(this::compressLatestData);
 
-               synchronized (this)
-               {
-                  indexBuffer.clear();
-                  indexBuffer.putLong(task.timestamp);
-                  indexBuffer.putLong(dataChannel.position());
-                  indexBuffer.flip();
-
-                  indexChannel.write(indexBuffer);
-                  dataChannel.write(output);
-               }
-            }
-         }
-         catch (InterruptedException ignored)
-         {
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-      });
-
-      Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         shutdown = true;
-         compressionPool.shutdownNow();
-         synchronized (this)
-         {
-            try
-            {
-               LogTools.info("Closing data channel...");
-               dataChannel.close();
-               LogTools.info("Data channel closed.");
-               LogTools.info("Closing index channel...");
-               indexChannel.close();
-               LogTools.info("Index channel closed.");
-            }
-            catch (IOException e)
-            {
-               e.printStackTrace();
-            }
-         }
-      }, getClass().getSimpleName() + "Shutdown"));
+      Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown Hook"));
    }
 
    public synchronized void update(long timestamp)
@@ -347,7 +307,6 @@ public class IntraprocessYoVariableLogger
          LogTools.error("Increase buffer size!  size: {}  {}", variables.size(), e.getMessage());
       }
 
-      double[] jointData = new double[13];
       for (JointHolder jointHolder : jointHolders)
       {
          jointHolder.get(jointData, 0);
@@ -359,29 +318,73 @@ public class IntraprocessYoVariableLogger
       dataBuffer.position(0);
       dataBuffer.limit(dataBufferAsLong.limit() * 8);
 
+      // Reuse pre-allocated buffers and tasks in a circular array to avoid garbage creation
       // Copy to avoid modifying while in compression thread
-      ByteBuffer snapshot = ByteBuffer.allocate(dataBuffer.remaining());
+      ByteBuffer snapshot = bufferPool[bufferIndex];
+      bufferIndex = (bufferIndex + 1) % TASK_POOL_SIZE;
+      snapshot.clear();
       snapshot.put(dataBuffer);
       snapshot.flip();
 
-      compressionQueue.offer(new CompressionTask(timestamp, snapshot));
+      // To avoid creating garbage, we have a pool of tasks which we cycle through, acting as a circular array
+      CompressionTask task = taskPool[nextTaskIndex];
+      nextTaskIndex = (nextTaskIndex + 1) % TASK_POOL_SIZE;
+      task.set(timestamp, snapshot);
+      compressionQueue.offer(task);
    }
 
-   public void deleteOldLogs(Path incomingLogsFolder, int numberOflogsToKeep)
+   public void compressLatestData()
    {
-      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
-      PathTools.walkFlat(incomingLogsFolder, (path, type) -> {
-         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(INTRAPROCESS_LOG_POSTFIX))
-            sortedSet.add(path);
-         return FileVisitResult.CONTINUE;
-      });
-
-      while (sortedSet.size() > numberOflogsToKeep)
+      try
       {
-         Path earliestLogDirectory = sortedSet.first();
-         LogTools.warn("Deleting old log {}", earliestLogDirectory);
-         FileTools.deleteQuietly(earliestLogDirectory);
-         sortedSet.remove(earliestLogDirectory);
+         while (!shutdown)
+         {
+            CompressionTask task = compressionQueue.take();
+            ByteBuffer input = task.data;
+            ByteBuffer output = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(input.remaining()));
+            SnappyUtils.compress(input, output);
+            output.flip();
+
+            synchronized (this)
+            {
+               indexBuffer.clear();
+               indexBuffer.putLong(task.timestamp);
+               indexBuffer.putLong(dataChannel.position());
+               indexBuffer.flip();
+
+               indexChannel.write(indexBuffer);
+               dataChannel.write(output);
+            }
+         }
+      }
+      catch (InterruptedException ignored)
+      {
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public void shutdown()
+   {
+      shutdown = true;
+      compressionPool.shutdownNow();
+      synchronized (this)
+      {
+         try
+         {
+            LogTools.info("Closing data channel...");
+            dataChannel.close();
+            LogTools.info("Data channel closed.");
+            LogTools.info("Closing index channel...");
+            indexChannel.close();
+            LogTools.info("Index channel closed.");
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }
    }
 
@@ -393,10 +396,10 @@ public class IntraprocessYoVariableLogger
 
    private static class CompressionTask
    {
-      final long timestamp;
-      final ByteBuffer data;
+      long timestamp;
+      ByteBuffer data;
 
-      CompressionTask(long timestamp, ByteBuffer data)
+      void set(long timestamp, ByteBuffer data)
       {
          this.timestamp = timestamp;
          this.data = data;
