@@ -84,7 +84,7 @@ public class IntraprocessYoVariableLogger
    private long[] variableValues;
 
    // Added for async compression
-   private final ExecutorService compressionPool = Executors.newSingleThreadExecutor(r -> {
+   private final ExecutorService compressionPoolThreads = Executors.newSingleThreadExecutor(r -> {
       Thread t = new Thread(r);
       t.setName("IntraprocessLoggerCompressionThread");
       t.setDaemon(true);
@@ -93,11 +93,11 @@ public class IntraprocessYoVariableLogger
    private final BlockingQueue<CompressionTask> compressionQueue = new LinkedBlockingQueue<>();
 
    public static final int TASK_POOL_SIZE = 100;
-   private final ByteBuffer[] bufferPool = new ByteBuffer[TASK_POOL_SIZE];
+   private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
    private int bufferIndex = 0;
 
    // These are for the circular array to send data to the compression thread
-   private final CompressionTask[] taskPool = new CompressionTask[TASK_POOL_SIZE];
+   private final CompressionTask[] compressionTaskCircularArray = new CompressionTask[TASK_POOL_SIZE];
    private int nextTaskIndex = 0;
 
    private final double[] jointData = new double[13];
@@ -231,8 +231,8 @@ public class IntraprocessYoVariableLogger
 
       for (int i = 0; i < TASK_POOL_SIZE; i++)
       {
-         bufferPool[i] = ByteBuffer.allocateDirect(bufferSize);
-         taskPool[i] = new CompressionTask();
+         byteBufferCircularArray[i] = ByteBuffer.allocateDirect(bufferSize);
+         compressionTaskCircularArray[i] = new CompressionTask();
       }
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
@@ -275,7 +275,7 @@ public class IntraprocessYoVariableLogger
       }
 
       // Start background compression worker
-      compressionPool.submit(this::compressLatestData);
+      compressionPoolThreads.submit(this::compressLatestData);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown Hook"));
    }
@@ -292,6 +292,7 @@ public class IntraprocessYoVariableLogger
       dataBufferAsLong.clear();
       dataBufferAsLong.put(timestamp);
 
+      // Array to hold data for YoVariables to put in buffer
       long[] values = variableValues;
       int size = variables.size();
 
@@ -320,14 +321,14 @@ public class IntraprocessYoVariableLogger
 
       // Reuse pre-allocated buffers and tasks in a circular array to avoid garbage creation
       // Copy to avoid modifying while in compression thread
-      ByteBuffer snapshot = bufferPool[bufferIndex];
+      ByteBuffer snapshot = byteBufferCircularArray[bufferIndex];
       bufferIndex = (bufferIndex + 1) % TASK_POOL_SIZE;
       snapshot.clear();
       snapshot.put(dataBuffer);
       snapshot.flip();
 
       // To avoid creating garbage, we have a pool of tasks which we cycle through, acting as a circular array
-      CompressionTask task = taskPool[nextTaskIndex];
+      CompressionTask task = compressionTaskCircularArray[nextTaskIndex];
       nextTaskIndex = (nextTaskIndex + 1) % TASK_POOL_SIZE;
       task.set(timestamp, snapshot);
       compressionQueue.offer(task);
@@ -369,7 +370,7 @@ public class IntraprocessYoVariableLogger
    public void shutdown()
    {
       shutdown = true;
-      compressionPool.shutdownNow();
+      compressionPoolThreads.shutdownNow();
       synchronized (this)
       {
          try
