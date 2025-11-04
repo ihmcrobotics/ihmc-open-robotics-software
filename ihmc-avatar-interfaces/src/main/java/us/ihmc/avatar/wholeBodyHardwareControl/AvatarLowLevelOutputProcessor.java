@@ -159,7 +159,7 @@ public class AvatarLowLevelOutputProcessor
 
    private void interpolate()
    {
-      double ratio = (yoTime.getValue() - interpolationStartTime.getValueAsDouble() + updateDt) / interpolateDuration.getValueAsDouble();
+      double ratio = (yoTime.getValue() - interpolationStartTime.getValueAsDouble()) / interpolateDuration.getValueAsDouble();
       interpolationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
       if (ratio <= 1.0)
       {
