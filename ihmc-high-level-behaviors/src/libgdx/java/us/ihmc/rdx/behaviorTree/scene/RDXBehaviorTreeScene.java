@@ -86,7 +86,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.indent();
       if (ImGuiTools.textWithUnderlineOnHover("Mustard") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
       {
-         beingPlaced = new RDXBehaviorTreeSceneObject(idSupplier.getAsLong(), crdtInfo, IsaacROSFoundationPoseObject.MUSTARD.name(), baseUI);
+         beingPlaced = new RDXBehaviorTreeSceneObject(idSupplier.getAsLong(), crdtInfo, IsaacROSFoundationPoseObject.MUSTARD, baseUI);
          objects.add(beingPlaced);
          objectsModifiable.modify();
          needToInitializePlacementHeight = true;
@@ -142,7 +142,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
    {
-      return new RDXBehaviorTreeSceneObject(message.getId(), crdtInfo, message.getTypeAsString(), baseUI);
+      return new RDXBehaviorTreeSceneObject(message.getId(), crdtInfo, IsaacROSFoundationPoseObject.values[message.getObjectType()], baseUI);
    }
 
    @Override

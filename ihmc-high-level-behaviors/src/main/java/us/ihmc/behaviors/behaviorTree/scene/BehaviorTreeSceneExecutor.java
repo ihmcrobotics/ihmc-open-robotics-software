@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.perception.detections.yolo.YOLOv8DetectionExecutor;
 
 import java.time.Instant;
@@ -135,7 +136,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    @Override
    protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
    {
-      return new BehaviorTreeSceneObjectExecutor(message.getId(), crdtInfo, message.getTypeAsString());
+      IsaacROSFoundationPoseObject objectType = IsaacROSFoundationPoseObject.values[message.getObjectType()];
+      return new BehaviorTreeSceneObjectExecutor(message.getId(), crdtInfo, objectType);
    }
 
    @Override

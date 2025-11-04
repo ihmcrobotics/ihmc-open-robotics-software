@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 
 public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeState, SceneActionNodeDefinition>
 {
@@ -22,6 +23,11 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
       super.triggerExecution();
 
       state.getLogger().info("Executing scene action...");
+
+      for (BehaviorTreeSceneObjectState object : scene.getObjects())
+      {
+
+      }
    }
 
    @Override

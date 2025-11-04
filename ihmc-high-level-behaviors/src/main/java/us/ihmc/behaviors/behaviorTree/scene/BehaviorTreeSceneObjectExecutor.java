@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.scene;
 
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 
 /**
  * Also known as the "Tracker"
@@ -10,10 +11,9 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
 {
    private PersistentDetection persistentDetection;
 
-   public BehaviorTreeSceneObjectExecutor(long id, CRDTInfo crdtInfo, String type)
+   public BehaviorTreeSceneObjectExecutor(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
    {
-      super(id, crdtInfo, type);
-      //new PersistentDetection()
+      super(id, crdtInfo, objectType);
    }
 
    public void update()
