@@ -16,6 +16,10 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Object type (enum ordinal)
+         */
+        long object_type;
       };
     };
   };

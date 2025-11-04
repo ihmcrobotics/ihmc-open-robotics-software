@@ -12,6 +12,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
+   /**
+            * Object type (enum ordinal)
+            */
+   public int object_type_;
 
    public SceneActionNodeDefinitionMessage()
    {
@@ -26,7 +30,10 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
    public void set(SceneActionNodeDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
+      behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      object_type_ = other.object_type_;
+
+   }
 
 
    /**
@@ -35,6 +42,21 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * Object type (enum ordinal)
+            */
+   public void setObjectType(int object_type)
+   {
+      object_type_ = object_type;
+   }
+   /**
+            * Object type (enum ordinal)
+            */
+   public int getObjectType()
+   {
+      return object_type_;
    }
 
 
@@ -56,6 +78,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.object_type_, other.object_type_, epsilon)) return false;
+
 
       return true;
    }
@@ -70,6 +94,8 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
       SceneActionNodeDefinitionMessage otherMyClass = (SceneActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.object_type_ != otherMyClass.object_type_) return false;
+
 
       return true;
    }
@@ -81,7 +107,9 @@ public class SceneActionNodeDefinitionMessage extends Packet<SceneActionNodeDefi
 
       builder.append("SceneActionNodeDefinitionMessage {");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("object_type=");
+      builder.append(this.object_type_);
       builder.append("}");
       return builder.toString();
    }
