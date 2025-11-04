@@ -8,19 +8,9 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  */
 public interface ActiveMappingProcessParametersBasics extends ActiveMappingProcessParametersReadOnly, StoredPropertySetBasics
 {
-   default void setRunHeightMap(boolean runHeightMap)
+   default void setRunOnboardKernels(boolean runOnboardKernels)
    {
-      set(ActiveMappingProcessParameters.runHeightMap, runHeightMap);
-   }
-
-   default void setRunTerrainMap(boolean runTerrainMap)
-   {
-      set(ActiveMappingProcessParameters.runTerrainMap, runTerrainMap);
-   }
-
-   default void setRunD457TunableTransform(boolean runD457TunableTransform)
-   {
-      set(ActiveMappingProcessParameters.runD457TunableTransform, runD457TunableTransform);
+      set(ActiveMappingProcessParameters.runOnboardKernels, runOnboardKernels);
    }
 
    default void setPublishHeightMap(boolean publishHeightMap)

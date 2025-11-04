@@ -181,7 +181,7 @@ public class GpuMappingManager
          driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
       }
 
-      if (processParameters.getRunHeightMap())
+      if (processParameters.getRunOnboardKernels())
       {
          // Perform update, this actually creates the height map
          heightMapExtractor.update(latestDepthImage,
@@ -194,7 +194,7 @@ public class GpuMappingManager
                                    computeFootHeight());
       }
 
-      if (processParameters.getRunTerrainMap() && processParameters.getRunHeightMap())
+      if (processParameters.getRunOnboardKernels())
          terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
       // The center of this map should be centered in the world grid
