@@ -52,7 +52,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class FeetManager implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double extraCoMHeightWithToes = 0.06;
+   private static final double extraCoMHeightWithToes = 0.04;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
