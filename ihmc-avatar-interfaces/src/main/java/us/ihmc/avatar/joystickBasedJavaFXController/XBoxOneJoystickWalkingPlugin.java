@@ -42,7 +42,7 @@ public class XBoxOneJoystickWalkingPlugin
    private boolean currentControllerConnected = false;
    private boolean controllerListenerHasBeenAdded = false;
 
-   private final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
+   private final ROS2ControllerPublisherMap ros2CSGPublisherMap;
    private final ContinuousStepGeneratorInputMessage csgInputCommand;
    private final ContinuousStepGeneratorParametersMessage csgParametersCommand;
 
@@ -66,12 +66,12 @@ public class XBoxOneJoystickWalkingPlugin
       this.useDeadmanSwitch = useDeadmanSwitch;
 
       // Set up CSG commands, publisher, and status subscriber
-      ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
+      ros2CSGPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName());
       csgStatusSubscription = ros2Node.createQueuedSubscription(HumanoidControllerAPI.getTopic(ContinuousStepGeneratorStatusMessage.class, robotModel.getSimpleRobotName()), 10);
       csgInputCommand = new ContinuousStepGeneratorInputMessage();
       csgParametersCommand = new ContinuousStepGeneratorParametersMessage();
 
-      //
+      // Set up CH publisher
       continuousHikingCommandPublisher = ros2Node.createPublisher(ContinuousHikingAPI.CONTINUOUS_HIKING_COMMAND);
 
       // Initialize CSG parameter command from default initial robot parameters
@@ -90,12 +90,7 @@ public class XBoxOneJoystickWalkingPlugin
          {
             currentControllerConnected = false;
 
-            csgInputCommand.setWalk(false);
-            csgInputCommand.setForwardVelocity(0.0);
-            csgInputCommand.setLateralVelocity(0.0);
-            csgInputCommand.setTurnVelocity(0.0);
-
-            ros2ControllerPublisherMap.publish(csgInputCommand);
+            shutDownXboxJoystick();
          }
 
          @Override
@@ -118,7 +113,10 @@ public class XBoxOneJoystickWalkingPlugin
                else if (buttonCode == controller.getMapping().buttonDpadUp)
                   csgParametersCommand.setSwingHeight(csgStatusMessage.getCurrentSwingHeight() + parameterIncrement);
 
-               ros2ControllerPublisherMap.publish(csgParametersCommand);
+               else if (buttonCode == controller.getMapping().buttonL1)
+                  continuousHikingCommand.setSquareUpToGoal(true);
+
+               ros2CSGPublisherMap.publish(csgParametersCommand);
             }
             return false;
          }
@@ -166,7 +164,7 @@ public class XBoxOneJoystickWalkingPlugin
          configureCSGInputCommand();
 
          // Publish our CSG input command
-         ros2ControllerPublisherMap.publish(csgInputCommand);
+         ros2CSGPublisherMap.publish(csgInputCommand);
       }
       else if (enableContinuousHikingPublishing)
       {
@@ -196,11 +194,16 @@ public class XBoxOneJoystickWalkingPlugin
          turningJoystickValue = DeadbandTools.applyDeadband(deadband, -currentController.getAxis(currentController.getMapping().axisRightX));
       }
 
+      configureCSGInputCommand(requestWalking, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
+   }
+
+   private void configureCSGInputCommand(boolean requestWalking, double desiredForwardVelocity, double desiredLateralVelocity, double desiredTurningVelocity)
+   {
       csgInputCommand.setWalk(requestWalking);
       csgInputCommand.setUnitVelocities(false);
-      csgInputCommand.setForwardVelocity(forwardJoystickValue);
-      csgInputCommand.setLateralVelocity(lateralJoystickValue);
-      csgInputCommand.setTurnVelocity(turningJoystickValue);
+      csgInputCommand.setForwardVelocity(desiredForwardVelocity);
+      csgInputCommand.setLateralVelocity(desiredLateralVelocity);
+      csgInputCommand.setTurnVelocity(desiredTurningVelocity);
    }
 
    private void configureContinuousHikingCommand()
@@ -209,6 +212,7 @@ public class XBoxOneJoystickWalkingPlugin
       boolean requestWalking = false;
       boolean walkForwards = false;
       boolean walkBackwards = false;
+      boolean squareUp = false;
       double forwardJoystickValue = 0.0;
       double lateralJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
@@ -232,16 +236,43 @@ public class XBoxOneJoystickWalkingPlugin
       continuousHikingCommand.setForwardValue(forwardJoystickValue);
       continuousHikingCommand.setLateralValue(lateralJoystickValue);
       continuousHikingCommand.setTurningValue(turningJoystickValue);
+      configureContinuousHikingCommand(true, walkForwards, walkBackwards, squareUp, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
+   }
+
+   private void configureContinuousHikingCommand(boolean enableContinuousHiking, boolean walkForwards, boolean walkBackwards, boolean squareUp, double forwardValue, double lateralValue, double turningValue)
+   {
+      continuousHikingCommand.setEnableContinuousHiking(enableContinuousHiking);
+      continuousHikingCommand.setUseJoystickController(true);
+      continuousHikingCommand.setWalkForwards(walkForwards);
+      continuousHikingCommand.setWalkBackwards(walkBackwards);
+      continuousHikingCommand.setForwardValue(forwardValue);
+      continuousHikingCommand.setLateralValue(lateralValue);
+      continuousHikingCommand.setTurningValue(turningValue);
+      continuousHikingCommand.setSquareUpToGoal(squareUp);
    }
 
    public void shutDownXboxJoystick()
    {
+      // Safety command for CSG
       csgInputCommand.setWalk(false);
       csgInputCommand.setForwardVelocity(0.0);
       csgInputCommand.setLateralVelocity(0.0);
       csgInputCommand.setTurnVelocity(0.0);
 
-      ros2ControllerPublisherMap.publish(csgInputCommand);
+      // Safety command for CH
+      continuousHikingCommand.setEnableContinuousHiking(false); //TODO what do we wanna do here?
+      continuousHikingCommand.setUseJoystickController(false);
+      continuousHikingCommand.setWalkForwards(false);
+      continuousHikingCommand.setWalkBackwards(false);
+      continuousHikingCommand.setForwardValue(0.0);
+      continuousHikingCommand.setLateralValue(0.0);
+      continuousHikingCommand.setSquareUpToGoal(true);
+
+      if (enableCSGPublishing)
+         ros2CSGPublisherMap.publish(csgInputCommand);
+
+      else if (enableContinuousHikingPublishing)
+         continuousHikingCommandPublisher.publish(continuousHikingCommand);
    }
 
    private void setCSGCommandsToCurrentValues(ContinuousStepGeneratorStatusMessage csgStatusMessage)
@@ -277,12 +308,20 @@ public class XBoxOneJoystickWalkingPlugin
 
    public void enableCSGPublishing()
    {
+      // Stop walking before we switch to CH
+      configureContinuousHikingCommand(false, false, false, true, 0.0, 0.0, 0.0);
+      ros2CSGPublisherMap.publish(csgInputCommand);
+
       enableCSGPublishing = true;
       enableContinuousHikingPublishing = false;
    }
 
    public void enableContinuousHikingPublishing()
    {
+      // Stop walking before we switch to CH
+      configureCSGInputCommand(false, 0.0, 0.0, 0.0);
+      ros2CSGPublisherMap.publish(csgInputCommand);
+
       enableCSGPublishing = false;
       enableContinuousHikingPublishing = true;
    }
