@@ -85,6 +85,9 @@ public class IntraprocessYoVariableLogger
    // Added for async compression
    public static final int TASK_POOL_SIZE = 10;
    private final RepeatingTaskThread compressionTaskThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", this::compressLatestData);
+   {
+      compressionTaskThread.start();
+   }
    public final RecyclingArrayList<CompressionTask> compressionQueue = new RecyclingArrayList<>(TASK_POOL_SIZE, CompressionTask.class);
    private int nextTaskIndex = 0;
    private int nextCompressionIndex = 0;
@@ -222,8 +225,6 @@ public class IntraprocessYoVariableLogger
       {
          compressionQueue.add();
       }
-
-      compressionTaskThread.start();
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
