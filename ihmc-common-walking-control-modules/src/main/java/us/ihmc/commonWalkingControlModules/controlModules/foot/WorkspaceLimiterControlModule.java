@@ -88,8 +88,6 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
    private final FrameVector3D tempVector = new FrameVector3D();
    private final YoFrameVector3D unachievedSwingTranslation;
-   private final YoFrameVector3D unachievedSwingVelocity;
-   private final YoFrameVector3D unachievedSwingAcceleration;
 
    private final FramePoint3D desiredCenterOfMassHeightPoint = new FramePoint3D(worldFrame);
    private final FramePoint3D anklePosition = new FramePoint3D(worldFrame);
@@ -120,6 +118,14 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
     * {@link #yoCorrectedDesiredFootPosition}, {@link #yoCorrectedDesiredFootLinearVelocity}, and {@link #yoCorrectedDesiredFootLinearAcceleration}.
     */
    private final YoBoolean isSwingSingularityAvoidanceUsed;
+   /**
+    * This variable switches to true when the {@link #desiredPercentOfLegLength} is above the threshold defined by
+    * {@link #maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight} and {@link #percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight}.
+    * When it is active, we then compute a correction alpha, which is stored in {@link #alphaSwingSingularityAvoidanceForHeight}. We then compute residuals on
+    * height, vertical velocity, and vertical acceleration, where height is limited in absolute space, and velocity and acceleration are scaled towards the
+    * pelvis by alpha. The results are stored in {@link #unachievedSwingTranslation}.
+    * These are then applied to the height data in {@link #correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesDataBasics, ConstraintType)}.
+    */
    private final YoBoolean isSwingSingularityAvoidanceUsedOnHeight;
    private final YoBoolean isUnreachableFootstepCompensated;
 
@@ -167,8 +173,6 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       parentRegistry.addChild(registry);
 
       unachievedSwingTranslation = new YoFrameVector3D(namePrefix + "UnachievedSwingTranslation", worldFrame, registry);
-      unachievedSwingVelocity = new YoFrameVector3D(namePrefix + "UnachievedSwingVelocity", worldFrame, registry);
-      unachievedSwingAcceleration = new YoFrameVector3D(namePrefix + "UnachievedSwingAcceleration", worldFrame, registry);
 
       maximumLegLength = new YoDouble(namePrefix + "MaxLegLength", registry);
       maximumLegLength.set(walkingControllerParameters.getMaximumLegLengthForSingularityAvoidance());
@@ -396,8 +400,6 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
       alphaSwingSingularityAvoidanceForFoot.set(0.0);
       alphaSwingSingularityAvoidanceForHeight.set(0.0);
       unachievedSwingTranslation.setToZero();
-      unachievedSwingVelocity.setToZero();
-      unachievedSwingAcceleration.setToZero();
    }
 
    public void setCheckVelocityForSwingSingularityAvoidance(boolean checkVelocityForSwingSingularityAvoidance)
@@ -476,27 +478,22 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
                                                 maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue(),
                                                 percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue());
 
-      double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
-                                                        maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue()
-                                                                                           * maximumLegLength.getDoubleValue());
+      double lengthToStartLimiting =
+            (maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue() - percentOfLegLengthMarginToEnableSingularityAvoidanceForHeight.getValue())
+            * maximumLegLength.getDoubleValue();
+      double maxLengthToAllow = maxPercentOfLegLengthForSingularityAvoidanceInSwingForHeight.getValue() * maximumLegLength.getDoubleValue();
+      double lengthToUse = InterpolationTools.linearInterpolate(lengthToStartLimiting,
+                                                                 maxLengthToAllow,
+                                                                 alphaSwingSingularityAvoidanceForHeight.getDoubleValue());
 
-      // Mix the desired leg extension velocity to progressively follow the pelvis velocity as the the leg is more straight
-      double desiredLinearVelocityZ = InterpolationTools.linearInterpolate(desiredFootLinearVelocity.getZ(),
-                                                                           pelvisLinearVelocity.getZ(),
-                                                                           alphaSwingSingularityAvoidanceForHeight.getDoubleValue());
+      double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(), maxLengthToAllow);
 
-      double unachievedHeightTranslation = desiredFootPosition.getZ() - desiredFootPositionInAxisFrame;
-      double unachievedHeightVelocity = desiredFootLinearVelocity.getZ() - desiredLinearVelocityZ;
-      double unachievedHeightAcceleration = alphaSwingSingularityAvoidanceForHeight.getDoubleValue() * desiredFootLinearAcceleration.getZ();
+      // When alpha is 1, we want the length to be at maxLengthToAllow. When alpha is 0, we want the length to be at lengthToStartLimiting.
+
+      double unachievedHeightTranslation = alphaSwingSingularityAvoidanceForHeight.getDoubleValue() * (desiredFootPosition.getZ() - desiredFootPositionInAxisFrame);
 
       tempVector.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, unachievedHeightTranslation);
       unachievedSwingTranslation.setMatchingFrame(tempVector);
-
-      tempVector.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, unachievedHeightVelocity);
-      unachievedSwingVelocity.setMatchingFrame(tempVector);
-
-      tempVector.setIncludingFrame(desiredFootLinearVelocity.getReferenceFrame(), 0.0, 0.0, unachievedHeightAcceleration);
-      unachievedSwingAcceleration.setMatchingFrame(tempVector);
    }
 
    private void correctSwingFootTrajectoryOverExtensionForSingularityAvoidance(FixedFramePoint3DBasics desiredFootPositionToCorrect,
