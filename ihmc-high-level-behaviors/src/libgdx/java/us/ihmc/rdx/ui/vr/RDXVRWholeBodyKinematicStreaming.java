@@ -36,7 +36,6 @@ import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.Kinemati
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.UnitConversions;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.commons.time.FrequencyCalculator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.ros2log.ROS2LogRecord;
@@ -119,6 +118,7 @@ public class RDXVRWholeBodyKinematicStreaming
    private final RetargetingParameters retargetingParameters;
    private final ImBoolean isKSTEnabled = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private final ImBoolean processUserMotion = new ImBoolean(false);
 
    private final ImBoolean demonstrationMode = new ImBoolean(false);
    private int demonstrationTaskIndex = 0;
@@ -269,7 +269,8 @@ public class RDXVRWholeBodyKinematicStreaming
          RDXBaseUI.getInstance().getKeyBindings().register("Control robot", "Left A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Start/stop recording motion", "Right B button");
          RDXBaseUI.getInstance().getKeyBindings().register("Mark demonstration (hold) (enable in menu)", "Right B button");
-         RDXBaseUI.getInstance().getKeyBindings().register("Cycle demonstration task", "Left B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Cycle demonstration task (enable in menu)", "Left B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Process user motion", "Left B button");
       }
 
       RobotVersion robotVersion = syncedRobot.getRobotModel().getRobotVersion();
@@ -331,7 +332,7 @@ public class RDXVRWholeBodyKinematicStreaming
       multiContact.processVRInput();
       handControl.processVRInput();
       
-      if (isKSTEnabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod) && !replayMotion.get())
+      if (isKSTEnabled.get() && processUserMotion.get() && toolboxInputStreamRateLimiter.run(streamPeriod) && !replayMotion.get())
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          processControllers(toolboxInputMessage);
@@ -370,6 +371,8 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          if (demonstrationMode.get())
             demonstrationTaskIndex = (demonstrationTaskIndex + 1) % demonstrationCounts.length;
+         else
+            processUserMotion.set(!processUserMotion.get());
       }
    }
 
@@ -766,6 +769,7 @@ public class RDXVRWholeBodyKinematicStreaming
       {
          setKSTEnabled(isKSTEnabled.get());
       }
+      ImGui.checkbox(labels.get("Process User Motion"), processUserMotion);
       if (ImGui.checkbox(labels.get("Control Robot"), streamToController))
       {
          setStreamToController(streamToController.get(), true);
@@ -844,6 +848,10 @@ public class RDXVRWholeBodyKinematicStreaming
       if (ImGui.button(labels.get("Wakeup Toolbox")))
       {
          wakeUpToolbox();
+      }
+      if (ImGui.button(labels.get("Sleep Toolbox")))
+      {
+         sleepToolbox();
       }
       if (ImGui.button(labels.get("Reinitialize Toolbox Configuration")))
       {
