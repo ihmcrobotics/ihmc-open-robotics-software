@@ -45,6 +45,11 @@ public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
       outputProcessor.enableInterpolation(enable);
    }
 
+   public void setInterpolationDuration(double duration)
+   {
+      outputProcessor.setInterpolationDuration(duration);
+   }
+
    public void startDesiredsInterpolation()
    {
       outputProcessor.startDesiredsInterpolation();
