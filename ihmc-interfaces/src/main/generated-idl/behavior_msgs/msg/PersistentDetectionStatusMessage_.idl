@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__PersistentDetectionStatusMessage__idl__
 #define __behavior_msgs__msg__PersistentDetectionStatusMessage__idl__
 
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -30,6 +31,10 @@ module behavior_msgs
          * Whether the detection is stable
          */
         boolean is_stable;
+        /**
+         * Alpha filtered transform to world
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_world;
       };
     };
   };

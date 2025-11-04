@@ -5,6 +5,7 @@ import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseCommunicatorMap;
@@ -151,6 +152,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          status.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(now));
          status.setHistorySize(persistentDetection.getHistorySize());
          status.setIsStable(persistentDetection.isStable(now));
+         MessageTools.toMessage(persistentDetection.getFilteredTransformToWorld(), status.getTransformToWorld());
       }
    }
 }

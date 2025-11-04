@@ -27,10 +27,15 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
             * Whether the detection is stable
             */
    public boolean is_stable_;
+   /**
+            * Alpha filtered transform to world
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
 
    public PersistentDetectionStatusMessage()
    {
       object_class_ = new java.lang.StringBuilder(255);
+      transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
    public PersistentDetectionStatusMessage(PersistentDetectionStatusMessage other)
@@ -50,6 +55,7 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
       is_stable_ = other.is_stable_;
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
    }
 
    /**
@@ -122,6 +128,15 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
    }
 
 
+   /**
+            * Alpha filtered transform to world
+            */
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getTransformToWorld()
+   {
+      return transform_to_world_;
+   }
+
+
    public static Supplier<PersistentDetectionStatusMessagePubSubType> getPubSubType()
    {
       return PersistentDetectionStatusMessagePubSubType::new;
@@ -147,6 +162,7 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_stable_, other.is_stable_, epsilon)) return false;
 
+      if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
 
       return true;
    }
@@ -168,6 +184,7 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
       if(this.is_stable_ != otherMyClass.is_stable_) return false;
 
+      if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
 
       return true;
    }
@@ -185,7 +202,9 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       builder.append("history_size=");
       builder.append(this.history_size_);      builder.append(", ");
       builder.append("is_stable=");
-      builder.append(this.is_stable_);
+      builder.append(this.is_stable_);      builder.append(", ");
+      builder.append("transform_to_world=");
+      builder.append(this.transform_to_world_);
       builder.append("}");
       return builder.toString();
    }

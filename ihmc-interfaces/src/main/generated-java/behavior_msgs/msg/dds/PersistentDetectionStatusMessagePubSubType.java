@@ -15,7 +15,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c3a955422e843cd19a6242ae4c7519aff829aada5fa4f33053c9a40a9e29b893";
+   		return "4f841b5ae325e3f3acf526b677b9a06bfb89d7983851a9b2ae49cc4bdcb62eb1";
    }
    
    @Override
@@ -59,6 +59,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,6 +85,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +103,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_7(data.getIsStable());
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -110,6 +115,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       	
       data.setIsStable(cdr.read_type_7());
       	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
 
    }
 
@@ -120,6 +126,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_6("decaying_frequency", data.getDecayingFrequency());
       ser.write_type_2("history_size", data.getHistorySize());
       ser.write_type_7("is_stable", data.getIsStable());
+      ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
+
    }
 
    @Override
@@ -129,6 +137,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       data.setDecayingFrequency(ser.read_type_6("decaying_frequency"));
       data.setHistorySize(ser.read_type_2("history_size"));
       data.setIsStable(ser.read_type_7("is_stable"));
+      ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
+
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.PersistentDetectionStatusMessage src, behavior_msgs.msg.dds.PersistentDetectionStatusMessage dest)
