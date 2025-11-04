@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -14,7 +13,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * This class is responsible for applying a master gain to all low-level desired outputs.
@@ -33,6 +31,7 @@ public class AvatarLowLevelOutputProcessor
    private static final double HIGH_MASTER_GAIN = 1.00;
 
    private final double updateDt;
+   private DoubleProvider yoTime;
 
    private final YoBoolean servo = new YoBoolean("servoRobot", registry);
    private final YoBoolean unservoQuickly = new YoBoolean("unservoQuickly", registry);
@@ -45,7 +44,7 @@ public class AvatarLowLevelOutputProcessor
    private final YoDouble masterGain = new YoDouble("masterGain", registry);
    private final YoBoolean interpolateDesireds = new YoBoolean("interpolateDesireds", registry);
    private final YoDouble interpolateDuration = new YoDouble("interpolateDuration", registry);
-   private final YoDouble interpolationTime = new YoDouble("interpolationTime", registry);
+   private final YoDouble interpolationStartTime = new YoDouble("interpolationTime", registry);
    private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", registry);
 
    private final JointControlBlender[] jointControlBlenders;
@@ -59,7 +58,13 @@ public class AvatarLowLevelOutputProcessor
 
    public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, YoRegistry parentRegistry)
    {
+      this(robotName, controlledJoints, updateDt, null, parentRegistry);
+   }
+
+   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, DoubleProvider yoTime, YoRegistry parentRegistry)
+   {
       this.updateDt = updateDt;
+      this.yoTime = yoTime;
 
       unprocessedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName, controlledJoints, registry);
       previousDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Previous", controlledJoints, registry);
@@ -67,7 +72,7 @@ public class AvatarLowLevelOutputProcessor
 
       jointControlBlenders = new JointControlBlender[controlledJoints.length];
       interpolateDuration.set(updateDt);
-      interpolationTime.set(0.0);
+      interpolationStartTime.set(0.0);
 
       for (int i = 0; i < controlledJoints.length; i++)
          jointControlBlenders[i] = new JointControlBlender("LowLevelOutputInterpolator", controlledJoints[i], registry);
@@ -148,14 +153,13 @@ public class AvatarLowLevelOutputProcessor
 
    public void startDesiredsInterpolation()
    {
-      interpolationTime.set(0);
+      interpolationStartTime.set(yoTime.getValue());
       previousDesireds.overwriteWith(processedDesireds);
    }
 
    private void interpolate()
    {
-      interpolationTime.add(updateDt); //Do this first since we already start at the previous position
-      double ratio = interpolationTime.getValueAsDouble() / interpolateDuration.getValueAsDouble();
+      double ratio = (yoTime.getValue() - interpolationStartTime.getValueAsDouble() + updateDt) / interpolateDuration.getValueAsDouble();
       interpolationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
       if (ratio <= 1.0)
       {
@@ -258,5 +262,10 @@ public class AvatarLowLevelOutputProcessor
    public void setInterpolationDuration(double duration)
    {
       this.interpolateDuration.set(duration);
+   }
+
+   public void setYoTime(DoubleProvider yoTime)
+   {
+      this.yoTime = yoTime;
    }
 }

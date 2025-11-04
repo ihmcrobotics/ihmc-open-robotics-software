@@ -6,6 +6,8 @@ import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
+import us.ihmc.tools.TimestampProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
@@ -48,6 +50,11 @@ public class InterpolatedSCS2OutputWriter implements JointDesiredOutputWriter
    public void setInterpolationDuration(double duration)
    {
       outputProcessor.setInterpolationDuration(duration);
+   }
+
+   public void setYoTime(DoubleProvider yoTime)
+   {
+      outputProcessor.setYoTime(yoTime);
    }
 
    public void startDesiredsInterpolation()
