@@ -34,6 +34,9 @@ public class XBoxOneJoystickWalkingPlugin
    public static final double DEFAULT_PARAMETER_INCREMENT = 0.01;
    private static final boolean DEFAULT_USE_DEADMAN_SWITCH = true;
 
+   private enum JoystickWalkingMode {CSG, CONTINUOUS_HIKING}
+   private JoystickWalkingMode currentJoystickWalkingMode = JoystickWalkingMode.CSG;
+
    private final double parameterIncrement;
    private final boolean useDeadmanSwitch;
 
@@ -51,9 +54,6 @@ public class XBoxOneJoystickWalkingPlugin
 
    private final ROS2Publisher<ContinuousHikingCommandMessage> continuousHikingCommandPublisher;
    private final ContinuousHikingCommandMessage continuousHikingCommand = new ContinuousHikingCommandMessage();
-
-   private boolean enableCSGPublishing = true;
-   private boolean enableContinuousHikingPublishing = false;
 
    public XBoxOneJoystickWalkingPlugin(DRCRobotModel robotModel, ROS2Node ros2Node)
    {
@@ -90,7 +90,7 @@ public class XBoxOneJoystickWalkingPlugin
          {
             currentControllerConnected = false;
 
-            shutDownXboxJoystick();
+            sendStopWalkingCommands();
          }
 
          @Override
@@ -156,23 +156,26 @@ public class XBoxOneJoystickWalkingPlugin
          controllerListenerHasBeenAdded = true;
       }
 
-
       // Assemble our command from joystick inputs and publish it
-      if (enableCSGPublishing)
+      switch (currentJoystickWalkingMode)
       {
-         // Assemble our CSG input command
-         configureCSGInputCommand();
+         case CSG ->
+         {
+            // Assemble our CSG input command
+            configureCSGInputCommand();
 
-         // Publish our CSG input command
-         ros2CSGPublisherMap.publish(csgInputCommand);
-      }
-      else if (enableContinuousHikingPublishing)
-      {
-         // Assemble our continuous hiking command
-         configureContinuousHikingCommand();
+            // Publish our CSG input command
+            ros2CSGPublisherMap.publish(csgInputCommand);
+         }
 
-         // Publish our continuous hiking command
-         continuousHikingCommandPublisher.publish(continuousHikingCommand);
+         case CONTINUOUS_HIKING ->
+         {
+            // Assemble our continuous hiking command
+            configureContinuousHikingCommand();
+
+            // Publish our continuous hiking command
+            continuousHikingCommandPublisher.publish(continuousHikingCommand);
+         }
       }
    }
 
@@ -251,7 +254,7 @@ public class XBoxOneJoystickWalkingPlugin
       continuousHikingCommand.setSquareUpToGoal(squareUp);
    }
 
-   public void shutDownXboxJoystick()
+   public void sendStopWalkingCommands()
    {
       // Safety command for CSG
       csgInputCommand.setWalk(false);
@@ -268,11 +271,16 @@ public class XBoxOneJoystickWalkingPlugin
       continuousHikingCommand.setLateralValue(0.0);
       continuousHikingCommand.setSquareUpToGoal(true);
 
-      if (enableCSGPublishing)
-         ros2CSGPublisherMap.publish(csgInputCommand);
+      switch (currentJoystickWalkingMode)
+      {
+         case CSG -> ros2CSGPublisherMap.publish(csgInputCommand);
+         case CONTINUOUS_HIKING -> continuousHikingCommandPublisher.publish(continuousHikingCommand);
+      }
+   }
 
-      else if (enableContinuousHikingPublishing)
-         continuousHikingCommandPublisher.publish(continuousHikingCommand);
+   public void shutDownXboxJoystick()
+   {
+      sendStopWalkingCommands();
    }
 
    private void setCSGCommandsToCurrentValues(ContinuousStepGeneratorStatusMessage csgStatusMessage)
@@ -312,8 +320,7 @@ public class XBoxOneJoystickWalkingPlugin
       configureContinuousHikingCommand(false, false, false, true, 0.0, 0.0, 0.0);
       ros2CSGPublisherMap.publish(csgInputCommand);
 
-      enableCSGPublishing = true;
-      enableContinuousHikingPublishing = false;
+      currentJoystickWalkingMode = JoystickWalkingMode.CSG;
    }
 
    public void enableContinuousHikingPublishing()
@@ -322,7 +329,11 @@ public class XBoxOneJoystickWalkingPlugin
       configureCSGInputCommand(false, 0.0, 0.0, 0.0);
       ros2CSGPublisherMap.publish(csgInputCommand);
 
-      enableCSGPublishing = false;
-      enableContinuousHikingPublishing = true;
+      currentJoystickWalkingMode = JoystickWalkingMode.CONTINUOUS_HIKING;
+   }
+
+   public JoystickWalkingMode getCurrentJoystickWalkingMode()
+   {
+      return currentJoystickWalkingMode;
    }
 }
