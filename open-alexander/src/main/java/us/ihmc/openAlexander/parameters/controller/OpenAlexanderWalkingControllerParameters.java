@@ -113,7 +113,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       kneePrivilegedConfigurationParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
 
-      // These parameters are currently only used in sim. We need to investigate using them on hardware.
       kneeJointLimitParameters = new JointLimitParameters();
       kneeJointLimitParameters.setMaxAbsJointVelocity(4.0);
       kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
