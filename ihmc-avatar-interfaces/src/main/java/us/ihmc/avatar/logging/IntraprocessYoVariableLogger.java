@@ -89,8 +89,7 @@ public class IntraprocessYoVariableLogger
       compressionTaskThread.start();
    }
 
-   private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
-   public final RecyclingArrayList<CompressionTask> compressionQueue = new RecyclingArrayList<>(TASK_POOL_SIZE, CompressionTask.class);
+   public RecyclingArrayList<CompressionTask> compressionQueue;
    private int nextTaskIndex = 0;
    private int nextCompressionIndex = 0;
 
@@ -223,9 +222,10 @@ public class IntraprocessYoVariableLogger
       int stateVariables = 1 + maxTicksToRecord + numberOfJointStates; // for some reason yovariable registry doesn't have all the variables yet
       int bufferSize = stateVariables * 8;
 
+      compressionQueue = new RecyclingArrayList<>(TASK_POOL_SIZE, () -> new CompressionTask(bufferSize));
+
       for (int i = 0; i < TASK_POOL_SIZE; i++)
       {
-         byteBufferCircularArray[i] = ByteBuffer.allocate(bufferSize);
          compressionQueue.add();
       }
 
@@ -313,13 +313,6 @@ public class IntraprocessYoVariableLogger
       dataBuffer.position(0);
       dataBuffer.limit(dataBufferAsLong.limit() * 8);
 
-      // Reuse pre-allocated buffers and tasks in a circular array to avoid garbage creation
-      // Copy to avoid erasing original data on next update call
-      ByteBuffer snapshot = byteBufferCircularArray[nextTaskIndex];
-      snapshot.clear();
-      snapshot.put(dataBuffer);
-      snapshot.flip();
-
       // To avoid creating garbage, we have a pool of tasks which we cycle through, acting as a circular array
       compressionQueue.get(nextTaskIndex).set(timestamp, dataBuffer);
       nextTaskIndex = (nextTaskIndex + 1) % TASK_POOL_SIZE;
@@ -386,17 +379,19 @@ public class IntraprocessYoVariableLogger
    public static class CompressionTask
    {
       private long timestamp;
-      private ByteBuffer data;
+      private final ByteBuffer data;
 
-      public CompressionTask()
-      {
-
-      }
-
-      void set(long timestamp, ByteBuffer data)
+      public void set(long timestamp, ByteBuffer src)
       {
          this.timestamp = timestamp;
-         this.data = data;
+         data.clear();
+         data.put(src);
+         data.flip();
+      }
+
+      public CompressionTask(int bufferSize)
+      {
+         data = ByteBuffer.allocate(bufferSize);
       }
    }
 }
