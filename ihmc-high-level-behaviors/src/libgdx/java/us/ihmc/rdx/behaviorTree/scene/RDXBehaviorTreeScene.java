@@ -1,6 +1,5 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
-import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
 import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -86,7 +85,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.indent();
       if (ImGuiTools.textWithUnderlineOnHover("Mustard") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
       {
-         beingPlaced = new RDXBehaviorTreeSceneObject(idSupplier.getAsLong(), crdtInfo, IsaacROSFoundationPoseObject.MUSTARD, baseUI);
+         beingPlaced = (RDXBehaviorTreeSceneObject) createObject(IsaacROSFoundationPoseObject.MUSTARD);
          objects.add(beingPlaced);
          objectsModifiable.modify();
          needToInitializePlacementHeight = true;
@@ -140,9 +139,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    }
 
    @Override
-   protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
+   protected BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
    {
-      return new RDXBehaviorTreeSceneObject(message.getId(), crdtInfo, IsaacROSFoundationPoseObject.values[message.getObjectType()], baseUI);
+      return new RDXBehaviorTreeSceneObject(id, crdtInfo, objectType, baseUI);
    }
 
    @Override

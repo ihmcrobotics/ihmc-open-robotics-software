@@ -293,7 +293,7 @@ public class PersistentDetection
       return id;
    }
 
-   public RigidBodyTransform getFilteredTransformToWorld()
+   public RigidBodyTransform getFilteredTransformToCamera()
    {
       return filteredDetectionFrame.getTransformToParent();
    }
