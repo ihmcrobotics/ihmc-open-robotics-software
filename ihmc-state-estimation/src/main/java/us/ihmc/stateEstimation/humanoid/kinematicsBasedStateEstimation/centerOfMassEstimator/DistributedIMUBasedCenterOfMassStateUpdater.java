@@ -30,9 +30,12 @@ import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedPelvisRotationalStateUpdater;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -66,6 +69,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
    private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
+   private final FilteredFiniteDifferenceYoFrameVector3D estimatedCoMVelocityFD;
    private final YoBoolean enableCoMAdjustment = new YoBoolean("enableCoMAdjustment", registry);
    private final YoFrameVector3D positionAdjustment = new YoFrameVector3D("estimatedCenterOfMassPositionAdjustment", worldFrame, registry);
    private final YoFrameVector3D velocityAdjustment = new YoFrameVector3D("estimatedCenterOfMassVelocityAdjustment", worldFrame, registry);
@@ -140,6 +144,10 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getPredecessor(), worldFrame);
       rawCoMPosition = new YoFramePoint3D("rawCenterOfMassPosition", worldFrame, registry);
       rawCoMVelocity = new YoFrameVector3D("rawCenterOfMassVelocity", worldFrame, registry);
+
+      double breakFrequency = 100.0;
+      DoubleProvider alpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt);
+      estimatedCoMVelocityFD = new FilteredFiniteDifferenceYoFrameVector3D("estimatedCoMVelocityFD", "", alpha, dt, registry, worldFrame);
    }
 
    private int buildEstimatorsRecursive(int index, RigidBodyStateEstimator parent, Map<RigidBodyBasics, IMUSensorReadOnly> imuSensorMap)
@@ -280,6 +288,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       centerOfMassJacobian.reset();
       rawCoMPosition.set(centerOfMassJacobian.getCenterOfMass());
       rawCoMVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
+      estimatedCoMVelocityFD.update(estimatedCoMVelocity);
    }
 
    @Override

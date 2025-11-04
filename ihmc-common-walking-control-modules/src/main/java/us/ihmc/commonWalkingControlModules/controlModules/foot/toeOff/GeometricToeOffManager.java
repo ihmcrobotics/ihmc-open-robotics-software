@@ -189,6 +189,7 @@ public class GeometricToeOffManager
       updateToeOffConditions(trailingLeg,
                              desiredICP,
                              currentICP,
+                             desiredECMP,
                              toeOffPoint,
                              doToeOffIfPossibleInSingleSupport.getValue(),
                              footstepPose);
@@ -211,6 +212,7 @@ public class GeometricToeOffManager
       updateToeOffConditions(trailingLeg,
                              desiredICP,
                              currentICP,
+                             desiredECMP,
                              toeOffPoint,
                              doToeOffIfPossibleInDoubleSupport.getValue(),
                              nextFrontFootPose);
@@ -236,13 +238,14 @@ public class GeometricToeOffManager
    private void updateToeOffConditions(RobotSide trailingLeg,
                                        FramePoint2DReadOnly desiredICP,
                                        FramePoint2DReadOnly currentICP,
+                                       FramePoint2DReadOnly desiredECMP,
                                        FramePoint2DReadOnly toeOffPoint,
                                        boolean allowToeOff,
                                        FramePose3DReadOnly nextFrontFootPose)
    {
       dynamicStateInspector.setPolygons(leadingFootSupportPolygon, trailingFootSupportPolygon, onToesSupportPolygon);
       boolean wellPositioned = stepPositionInspector.isFrontFootWellPositionedForToeOff(trailingLeg, nextFrontFootPose);
-      dynamicStateInspector.checkICPLocations(dynamicStateInspectorParameters, trailingLeg, nextFrontFootPose, desiredICP, currentICP, toeOffPoint);
+      dynamicStateInspector.checkICPLocations(dynamicStateInspectorParameters, trailingLeg, nextFrontFootPose, desiredICP, currentICP, desiredECMP, toeOffPoint);
 
       boolean jointsNeedToeingOff = false;
       if (jointLimitsInspector != null)

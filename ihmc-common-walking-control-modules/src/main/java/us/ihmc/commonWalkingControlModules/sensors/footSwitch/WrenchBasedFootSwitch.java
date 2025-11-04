@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
@@ -59,7 +60,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final YoFramePoint2D centerOfPressure;
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
-   private final FrameConvexPolygon2D footPolygon;
+   private final FrameConvexPolygon2DReadOnly footPolygon;
 
    private final YoFixedFrameSpatialVector yoFootForceTorque;
    private final YoFixedFrameSpatialVector yoFootForceTorqueInSole;

@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationSettings
+public class OpenAlexanderMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
    // TODO Parameter values copied from Valkyrie which has different weight.
    // TODO Needs tune up.
@@ -81,12 +81,12 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
    private final Vector3D handLinearWeight = new Vector3D(5.0, 5.0, 5.0);
    private final List<GroupParameter<Vector3DReadOnly>> taskspaceLinearWeights = new ArrayList<>();
 
-   public AlexanderMomentumOptimizationSettings(RobotTarget target, HumanoidJointNameMap jointMap)
+   public OpenAlexanderMomentumOptimizationSettings(RobotTarget target, HumanoidJointNameMap jointMap)
    {
       this(target, jointMap, 2);
    }
 
-   public AlexanderMomentumOptimizationSettings(RobotTarget target, HumanoidJointNameMap jointMap, int numberOfContactableBodies)
+   public OpenAlexanderMomentumOptimizationSettings(RobotTarget target, HumanoidJointNameMap jointMap, int numberOfContactableBodies)
    {
       List<String> neckNames = jointMap.getNeckJointNamesAsStrings();
       List<String> spineNames = jointMap.getSpineJointNamesAsStrings();

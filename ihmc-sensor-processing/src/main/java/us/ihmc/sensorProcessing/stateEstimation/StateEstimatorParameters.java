@@ -184,6 +184,11 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return false;
    }
 
+   public String[] getIMUsToUseInMomentumEstimator()
+   {
+      return null;
+   }
+
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getCenterOfMassVelocityFusingFrequency();
 
