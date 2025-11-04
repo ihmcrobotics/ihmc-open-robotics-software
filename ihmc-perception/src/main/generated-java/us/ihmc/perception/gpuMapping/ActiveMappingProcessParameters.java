@@ -18,9 +18,7 @@ public class ActiveMappingProcessParameters extends StoredPropertySet implements
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final BooleanStoredPropertyKey runHeightMap = keys.addBooleanKey("Run height map");
-   public static final BooleanStoredPropertyKey runTerrainMap = keys.addBooleanKey("Run terrain map");
-   public static final BooleanStoredPropertyKey runD457TunableTransform = keys.addBooleanKey("Run D457 tunable transform");
+   public static final BooleanStoredPropertyKey runOnboardKernels = keys.addBooleanKey("Run onboard kernels");
    public static final BooleanStoredPropertyKey publishHeightMap = keys.addBooleanKey("Publish height map");
    public static final BooleanStoredPropertyKey publishTerrainMap = keys.addBooleanKey("Publish terrain map");
 
