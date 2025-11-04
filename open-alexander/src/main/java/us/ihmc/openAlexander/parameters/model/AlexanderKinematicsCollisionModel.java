@@ -1,6 +1,7 @@
 package us.ihmc.openAlexander.parameters.model;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -52,6 +53,7 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
 
          // Head ---------------------------------------------------------------------
          if (head != null)
+         if (head != null)
          {
             MovingReferenceFrame headFrame = head.getBodyFixedFrame();
             FrameCapsule3D headShapeMultisense = new FrameCapsule3D(headFrame, 0.08, 0.15);
@@ -96,7 +98,7 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
             RigidBodyBasics thigh = hipPitchJoint.getSuccessor();
             ReferenceFrame thighFrame = hipPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D thighShapeTop = new FrameCapsule3D(thighFrame, 0.085, 0.09);
+            FrameCapsule3D thighShapeTop = new FrameCapsule3D(thighFrame, 0.12, 0.09);
             thighShapeTop.getPosition().set(0.0, robotSide.negateIfRightSide(0.04), -0.05);
             thighShapeTop.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeTop));
@@ -106,8 +108,8 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
             thighShapeMid.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeMid));
 
-            FrameCapsule3D thighShapeBottom = new FrameCapsule3D(thighFrame, 0.085, 0.09);
-            thighShapeBottom.getPosition().set(0.05, robotSide.negateIfRightSide(0.02), -0.21);
+            FrameCapsule3D thighShapeBottom = new FrameCapsule3D(thighFrame, 0.085, 0.10);
+            thighShapeBottom.getPosition().set(0.05, robotSide.negateIfRightSide(0.02), -0.23);
             thighShapeBottom.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBottom));
 
@@ -115,10 +117,24 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
             ReferenceFrame shinFrame = shinPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.3, 0.1);
-            shinShape.getPosition().set(0.015, 0.0, -0.2);
+            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.36, 0.1);
+            shinShape.getPosition().set(0.015, 0.0, -0.18);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
+
+            { // Foot
+               JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
+               if (ankleRoll != null)
+               {
+                  MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+                  RigidBodyBasics foot = ankleRoll.getSuccessor();
+
+                  // Using a  box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+                  FrameBox3D footShape = new FrameBox3D(ankleRollFrame, 0.253, 0.125, 0.08);
+                  footShape.getPosition().set(0.053, 0.0, -0.048);
+                  collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
+               }
+            }
          }
       }
 
@@ -143,8 +159,8 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
          {
             RigidBodyBasics forearm = elbowJoint.getSuccessor();
             ReferenceFrame elbowFrame = elbowJoint.getFrameAfterJoint();
-            FrameCapsule3D forearmShape = new FrameCapsule3D(elbowFrame, 0.2, 0.065);
-            forearmShape.getPosition().set(-0.02, 0.0, -0.1);
+            FrameCapsule3D forearmShape = new FrameCapsule3D(elbowFrame, 0.38, 0.065);
+            forearmShape.getPosition().set(-0.02, 0.0, -0.18);
             forearmShape.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape));
          }
