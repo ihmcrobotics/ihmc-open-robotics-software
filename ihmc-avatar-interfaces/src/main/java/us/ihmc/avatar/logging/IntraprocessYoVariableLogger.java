@@ -88,6 +88,8 @@ public class IntraprocessYoVariableLogger
    {
       compressionTaskThread.start();
    }
+
+   private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
    public final RecyclingArrayList<CompressionTask> compressionQueue = new RecyclingArrayList<>(TASK_POOL_SIZE, CompressionTask.class);
    private int nextTaskIndex = 0;
    private int nextCompressionIndex = 0;
@@ -223,6 +225,7 @@ public class IntraprocessYoVariableLogger
 
       for (int i = 0; i < TASK_POOL_SIZE; i++)
       {
+         byteBufferCircularArray[i] = ByteBuffer.allocate(bufferSize);
          compressionQueue.add();
       }
 
@@ -309,6 +312,13 @@ public class IntraprocessYoVariableLogger
       dataBufferAsLong.flip();
       dataBuffer.position(0);
       dataBuffer.limit(dataBufferAsLong.limit() * 8);
+
+      // Reuse pre-allocated buffers and tasks in a circular array to avoid garbage creation
+      // Copy to avoid erasing original data on next update call
+      ByteBuffer snapshot = byteBufferCircularArray[nextTaskIndex];
+      snapshot.clear();
+      snapshot.put(dataBuffer);
+      snapshot.flip();
 
       // To avoid creating garbage, we have a pool of tasks which we cycle through, acting as a circular array
       compressionQueue.get(nextTaskIndex).set(timestamp, dataBuffer);
