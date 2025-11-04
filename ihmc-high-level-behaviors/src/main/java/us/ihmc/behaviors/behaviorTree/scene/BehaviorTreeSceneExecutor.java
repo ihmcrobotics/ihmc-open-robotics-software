@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
+import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.detections.InstantDetection;
@@ -131,5 +133,21 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
    protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
    {
       return new BehaviorTreeSceneObjectExecutor(message.getId(), crdtInfo, message.getTypeAsString());
+   }
+
+   @Override
+   public void toMessage(BehaviorTreeSceneStateMessage message)
+   {
+      super.toMessage(message);
+
+      Instant now = Instant.now();
+      message.getPersistentDetections().clear();
+      for (PersistentDetection persistentDetection : persistentDetections)
+      {
+         PersistentDetectionStatusMessage status = message.getPersistentDetections().add();
+         status.setObjectClass(persistentDetection.getDetectedObjectClass());
+         status.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(Instant.now()));
+         status.setHistorySize(persistentDetection.getHistorySize());
+      }
    }
 }

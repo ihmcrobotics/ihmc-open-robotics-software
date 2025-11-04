@@ -15,7 +15,7 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9321efb717b2677d47a49207d2de7021123b10ccb42cd2f12bcccaf27655f4ea";
+   		return "85fd7b07a786b22d2bb5173638370bbfd4408cb4eaae94453f7c205f276ccb15";
    }
    
    @Override
@@ -57,6 +57,9 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +80,11 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessagePubSubType.getCdrSerializedSize(data.getObjects().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getPersistentDetections().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getCdrSerializedSize(data.getPersistentDetections().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,12 +96,17 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getObjects());else
           throw new RuntimeException("objects field exceeds the maximum length: %d > %d".formatted(data.getObjects().size(), 100));
 
+      if(data.getPersistentDetections().size() <= 100)
+      cdr.write_type_e(data.getPersistentDetections());else
+          throw new RuntimeException("persistent_detections field exceeds the maximum length: %d > %d".formatted(data.getPersistentDetections().size(), 100));
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage data, us.ihmc.idl.CDR cdr)
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToList(), cdr);	
       cdr.read_type_e(data.getObjects());	
+      cdr.read_type_e(data.getPersistentDetections());	
 
    }
 
@@ -103,6 +116,7 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_a("latest_modification_to_list", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToList());
 
       ser.write_type_e("objects", data.getObjects());
+      ser.write_type_e("persistent_detections", data.getPersistentDetections());
    }
 
    @Override
@@ -111,6 +125,7 @@ public class BehaviorTreeSceneStateMessagePubSubType implements us.ihmc.pubsub.T
       ser.read_type_a("latest_modification_to_list", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToList());
 
       ser.read_type_e("objects", data.getObjects());
+      ser.read_type_e("persistent_detections", data.getPersistentDetections());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage src, behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage dest)

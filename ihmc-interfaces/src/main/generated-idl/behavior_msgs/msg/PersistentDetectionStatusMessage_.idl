@@ -1,0 +1,34 @@
+#ifndef __behavior_msgs__msg__PersistentDetectionStatusMessage__idl__
+#define __behavior_msgs__msg__PersistentDetectionStatusMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Status of a persistent detection
+       */
+      @TypeCode(type="behavior_msgs::msg::dds_::PersistentDetectionStatusMessage_")
+      struct PersistentDetectionStatusMessage
+      {
+        /**
+         * Object class name (e.g., "bottle")
+         */
+        string object_class;
+        /**
+         * Detection frequency (Hz) with decay
+         */
+        double decaying_frequency;
+        /**
+         * Number of detections in history
+         */
+        long history_size;
+      };
+    };
+  };
+};
+
+#endif

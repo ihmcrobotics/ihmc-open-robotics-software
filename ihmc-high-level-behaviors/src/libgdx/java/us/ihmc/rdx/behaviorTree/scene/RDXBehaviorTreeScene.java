@@ -1,6 +1,8 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
+import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
@@ -8,6 +10,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
@@ -28,6 +31,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private final ImBoolean mustard = new ImBoolean(false);
 
    private final List<RDXBehaviorTreeSceneObject> objects;
+   private final RecyclingArrayList<PersistentDetectionStatusMessage> persistentDetections = new RecyclingArrayList<>(PersistentDetectionStatusMessage::new);
 
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
@@ -100,11 +104,26 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
          objectsModifiable.modify();
          remove.destroy();
       }
+
+
    }
 
    @Override
    protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
    {
       return new RDXBehaviorTreeSceneObject(message.getId(), crdtInfo, message.getTypeAsString(), baseUI);
+   }
+
+   @Override
+   public void fromMessage(BehaviorTreeSceneStateMessage message)
+   {
+      super.fromMessage(message);
+
+      persistentDetections.clear();
+      for (int i = 0; i < message.getPersistentDetections().size(); i++)
+      {
+         PersistentDetectionStatusMessage status = message.getPersistentDetections().get(i);
+         persistentDetections.add().set(status);
+      }
    }
 }
