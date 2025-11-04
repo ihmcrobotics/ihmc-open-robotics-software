@@ -113,6 +113,12 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
 
    private final YoFramePose3D yoVirtualLegTangentialFrameHipCenteredPose, yoVirtualLegTangentialFrameAnkleCenteredPose;
 
+   /**
+    * This variable switches to true whenever the desired swing foot position is modified. This works by applying the scaling variable
+    * {@link #alphaSwingSingularityAvoidanceForFoot} to the foot desireds, which clamps the foot position to be a maximum length, as well as linearly ramps
+    * down the foot velocity and acceleration by {@link #alphaSwingSingularityAvoidanceForFoot}. The resulting clamped values are stored in
+    * {@link #yoCorrectedDesiredFootPosition}, {@link #yoCorrectedDesiredFootLinearVelocity}, and {@link #yoCorrectedDesiredFootLinearAcceleration}.
+    */
    private final YoBoolean isSwingSingularityAvoidanceUsed;
    private final YoBoolean isSwingSingularityAvoidanceUsedOnHeight;
    private final YoBoolean isUnreachableFootstepCompensated;
@@ -513,11 +519,11 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
                                                 maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue(),
                                                 percentOfLegLengthMarginToEnableSingularityAvoidanceForFoot.getValue());
 
-      double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
+      double desiredFootLengthInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(),
                                                         maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue()
                                                                                            * maximumLegLength.getDoubleValue());
 
-      correctFootDesiredsWithScaleFactor(desiredFootPositionInAxisFrame,
+      correctFootDesiredsWithScaleFactor(desiredFootLengthInAxisFrame,
                                          desiredFootPositionToCorrect,
                                          desiredFootLinearVelocityToCorrect,
                                          desiredFootLinearAccelerationToCorrect);
