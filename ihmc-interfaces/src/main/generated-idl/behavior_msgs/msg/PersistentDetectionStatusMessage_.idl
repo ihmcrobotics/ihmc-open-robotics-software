@@ -26,6 +26,10 @@ module behavior_msgs
          * Number of detections in history
          */
         long history_size;
+        /**
+         * Whether the detection is stable
+         */
+        boolean is_stable;
       };
     };
   };

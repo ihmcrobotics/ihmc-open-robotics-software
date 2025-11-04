@@ -23,6 +23,10 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
             * Number of detections in history
             */
    public int history_size_;
+   /**
+            * Whether the detection is stable
+            */
+   public boolean is_stable_;
 
    public PersistentDetectionStatusMessage()
    {
@@ -43,6 +47,8 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       decaying_frequency_ = other.decaying_frequency_;
 
       history_size_ = other.history_size_;
+
+      is_stable_ = other.is_stable_;
 
    }
 
@@ -100,6 +106,21 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       return history_size_;
    }
 
+   /**
+            * Whether the detection is stable
+            */
+   public void setIsStable(boolean is_stable)
+   {
+      is_stable_ = is_stable;
+   }
+   /**
+            * Whether the detection is stable
+            */
+   public boolean getIsStable()
+   {
+      return is_stable_;
+   }
+
 
    public static Supplier<PersistentDetectionStatusMessagePubSubType> getPubSubType()
    {
@@ -124,6 +145,8 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.history_size_, other.history_size_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_stable_, other.is_stable_, epsilon)) return false;
+
 
       return true;
    }
@@ -143,6 +166,8 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
       if(this.history_size_ != otherMyClass.history_size_) return false;
 
+      if(this.is_stable_ != otherMyClass.is_stable_) return false;
+
 
       return true;
    }
@@ -158,7 +183,9 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       builder.append("decaying_frequency=");
       builder.append(this.decaying_frequency_);      builder.append(", ");
       builder.append("history_size=");
-      builder.append(this.history_size_);
+      builder.append(this.history_size_);      builder.append(", ");
+      builder.append("is_stable=");
+      builder.append(this.is_stable_);
       builder.append("}");
       return builder.toString();
    }

@@ -8,3 +8,6 @@ float64 decaying_frequency
 
 # Number of detections in history
 int32 history_size
+
+# Whether the detection is stable
+bool is_stable

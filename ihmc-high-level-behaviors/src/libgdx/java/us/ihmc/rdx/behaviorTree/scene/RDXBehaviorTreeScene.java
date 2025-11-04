@@ -105,7 +105,19 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
          remove.destroy();
       }
 
-
+      ImGui.text("Stable Detections:");
+      ImGui.indent();
+      for (PersistentDetectionStatusMessage persistentDetection : persistentDetections)
+      {
+         String text = "%s %.2f Hz Size: %d".formatted(persistentDetection.getObjectClassAsString(),
+                                                       persistentDetection.getDecayingFrequency(),
+                                                       persistentDetection.getHistorySize());
+         if (persistentDetection.getIsStable())
+            ImGui.text(text);
+         else
+            ImGui.textDisabled(text);
+      }
+      ImGui.unindent();
    }
 
    @Override

@@ -118,7 +118,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       {
          detection.updateHistory(now);
 
-         if (detection.isReadyForDeletion())
+         if (detection.isReadyForDeletion() || (detection.isOldEnough(now) && detection.getHistorySize() < 2))
             oldUnstableDetections.add(detection);
       }
 
@@ -127,6 +127,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          persistentDetectionToRemove.destroy();
          persistentDetections.remove(persistentDetectionToRemove);
       }
+
+      persistentDetections.sort((a, b) -> Integer.compare(b.getHistorySize(), a.getHistorySize()));
    }
 
    @Override
@@ -146,8 +148,9 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       {
          PersistentDetectionStatusMessage status = message.getPersistentDetections().add();
          status.setObjectClass(persistentDetection.getDetectedObjectClass());
-         status.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(Instant.now()));
+         status.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(now));
          status.setHistorySize(persistentDetection.getHistorySize());
+         status.setIsStable(persistentDetection.isStable(now));
       }
    }
 }

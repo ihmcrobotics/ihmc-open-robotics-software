@@ -15,7 +15,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f0bb22fbf0de69e3c7f727a3369a05b6160b694aac227e58b3be3194e85171b9";
+   		return "c3a955422e843cd19a6242ae4c7519aff829aada5fa4f33053c9a40a9e29b893";
    }
    
    @Override
@@ -57,6 +57,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +80,9 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -92,6 +97,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_2(data.getHistorySize());
 
+      cdr.write_type_7(data.getIsStable());
+
    }
 
    public static void read(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -100,6 +107,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       data.setDecayingFrequency(cdr.read_type_6());
       	
       data.setHistorySize(cdr.read_type_2());
+      	
+      data.setIsStable(cdr.read_type_7());
       	
 
    }
@@ -110,6 +119,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_d("object_class", data.getObjectClass());
       ser.write_type_6("decaying_frequency", data.getDecayingFrequency());
       ser.write_type_2("history_size", data.getHistorySize());
+      ser.write_type_7("is_stable", data.getIsStable());
    }
 
    @Override
@@ -118,6 +128,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       ser.read_type_d("object_class", data.getObjectClass());
       data.setDecayingFrequency(ser.read_type_6("decaying_frequency"));
       data.setHistorySize(ser.read_type_2("history_size"));
+      data.setIsStable(ser.read_type_7("is_stable"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.PersistentDetectionStatusMessage src, behavior_msgs.msg.dds.PersistentDetectionStatusMessage dest)
