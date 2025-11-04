@@ -3,7 +3,9 @@ package us.ihmc.avatar.logging;
 import com.google.common.collect.Lists;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -33,9 +35,6 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.LockSupport;
 
 public class IntraprocessYoVariableLogger
 {
@@ -85,20 +84,10 @@ public class IntraprocessYoVariableLogger
 
    // Added for async compression
    public static final int TASK_POOL_SIZE = 10;
-   private final ExecutorService compressionPoolThreads = Executors.newSingleThreadExecutor(r -> {
-      Thread t = new Thread(r);
-      t.setName("IntraprocessLoggerCompressionThread");
-      t.setDaemon(true);
-      return t;
-   });
-
-   CompressionTaskQueue compressionTaskQueue = new CompressionTaskQueue(TASK_POOL_SIZE);
-   private final ByteBuffer[] byteBufferCircularArray = new ByteBuffer[TASK_POOL_SIZE];
-   private int bufferIndex = 0;
-
-   // These are for the circular array to send data to the compression thread
-   private final CompressionTask[] compressionTaskCircularArray = new CompressionTask[TASK_POOL_SIZE];
+   private final RepeatingTaskThread compressionTaskThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", this::compressLatestData);
+   public final RecyclingArrayList<CompressionTask> compressionQueue = new RecyclingArrayList<>(TASK_POOL_SIZE, CompressionTask.class);
    private int nextTaskIndex = 0;
+   private int nextCompressionIndex = 0;
 
    private final double[] jointData = new double[13];
 
@@ -231,10 +220,10 @@ public class IntraprocessYoVariableLogger
 
       for (int i = 0; i < TASK_POOL_SIZE; i++)
       {
-         byteBufferCircularArray[i] = ByteBuffer.allocate(bufferSize);
-         compressionTaskCircularArray[i] = new CompressionTask();
-//         compressionTaskQueue.offer(compressionTaskCircularArray[i]);
+         compressionQueue.add();
       }
+
+      compressionTaskThread.start();
 
       dataBuffer = ByteBuffer.allocate(bufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
@@ -275,9 +264,6 @@ public class IntraprocessYoVariableLogger
       {
          e.printStackTrace();
       }
-
-      // Start background compression worker
-      compressionPoolThreads.submit(this::compressLatestData);
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "Shutdown Hook"));
    }
@@ -323,59 +309,33 @@ public class IntraprocessYoVariableLogger
       dataBuffer.position(0);
       dataBuffer.limit(dataBufferAsLong.limit() * 8);
 
-      // Reuse pre-allocated buffers and tasks in a circular array to avoid garbage creation
-      // Copy to avoid modifying while in compression thread
-      ByteBuffer snapshot = byteBufferCircularArray[bufferIndex];
-      bufferIndex = (bufferIndex + 1) % TASK_POOL_SIZE;
-      snapshot.clear();
-      snapshot.put(dataBuffer);
-      snapshot.flip();
-
       // To avoid creating garbage, we have a pool of tasks which we cycle through, acting as a circular array
-      // Get a free pre-allocated task from the pool (not the queue)
-      CompressionTask task = compressionTaskCircularArray[nextTaskIndex];
+      compressionQueue.get(nextTaskIndex).set(timestamp, dataBuffer);
       nextTaskIndex = (nextTaskIndex + 1) % TASK_POOL_SIZE;
-      task.set(timestamp, snapshot);
-
-      // Offer the filled task into the queue for the compressing thread
-      boolean offered = compressionTaskQueue.offer(task);
-      if (!offered)
-      {
-         // Queue full, skip this frame or handle backpressure
-         LogTools.warn("Compression queue full, dropping task for timestamp {}", timestamp);
-      }
+      compressionTaskThread.addScheduled(1);
    }
 
    public void compressLatestData()
    {
       try
       {
-         while (!shutdown)
+         CompressionTask task = compressionQueue.get(nextCompressionIndex);
+         nextCompressionIndex = (nextCompressionIndex + 1) % TASK_POOL_SIZE;
+
+         ByteBuffer input = task.data;
+         compressedBuffer.clear();
+         SnappyUtils.compress(input, compressedBuffer);
+         compressedBuffer.flip();
+
+         synchronized (this)
          {
-            CompressionTask task;
+            indexBuffer.clear();
+            indexBuffer.putLong(task.timestamp);
+            indexBuffer.putLong(dataChannel.position());
+            indexBuffer.flip();
 
-            while ((task = compressionTaskQueue.poll()) == null)
-            {
-               // Save a little load on the CPU, prevent free spinning thread
-               // Tried 10, that seemed a little long for the threading situation
-               LockSupport.parkNanos(5);
-            }
-
-            ByteBuffer input = task.data;
-            compressedBuffer.clear();
-            SnappyUtils.compress(input, compressedBuffer);
-            compressedBuffer.flip();
-
-            synchronized (this)
-            {
-               indexBuffer.clear();
-               indexBuffer.putLong(task.timestamp);
-               indexBuffer.putLong(dataChannel.position());
-               indexBuffer.flip();
-
-               indexChannel.write(indexBuffer);
-               dataChannel.write(compressedBuffer);
-            }
+            indexChannel.write(indexBuffer);
+            dataChannel.write(compressedBuffer);
          }
       }
       catch (IOException e)
@@ -387,7 +347,7 @@ public class IntraprocessYoVariableLogger
    public void shutdown()
    {
       shutdown = true;
-      compressionPoolThreads.shutdownNow();
+      compressionTaskThread.blockingKill();
       synchronized (this)
       {
          try
@@ -412,10 +372,15 @@ public class IntraprocessYoVariableLogger
       return logFolder.resolve(filename).toFile();
    }
 
-   private static class CompressionTask
+   public static class CompressionTask
    {
-      long timestamp;
-      ByteBuffer data;
+      private long timestamp;
+      private ByteBuffer data;
+
+      public CompressionTask()
+      {
+
+      }
 
       void set(long timestamp, ByteBuffer data)
       {
@@ -423,40 +388,4 @@ public class IntraprocessYoVariableLogger
          this.data = data;
       }
    }
-
-   class CompressionTaskQueue
-   {
-      private final CompressionTask[] queue;
-      private int head = 0;
-      private int tail = 0;
-      private final int capacity;
-
-      public CompressionTaskQueue(int capacity)
-      {
-         this.capacity = capacity;
-         this.queue = new CompressionTask[capacity];
-      }
-
-      // Non-blocking offer. Returns false if full.
-      public boolean offer(CompressionTask task)
-      {
-         int nextTail = (tail + 1) % capacity;
-         if (nextTail == head)
-            return false; // full
-         queue[tail] = task;
-         tail = nextTail;
-         return true;
-      }
-
-      // Non-blocking poll. Returns null if empty.
-      public CompressionTask poll()
-      {
-         if (head == tail)
-            return null;
-         CompressionTask task = queue[head];
-         head = (head + 1) % capacity;
-         return task;
-      }
-   }
-
 }
