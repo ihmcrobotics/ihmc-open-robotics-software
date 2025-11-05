@@ -96,7 +96,6 @@ module toolbox_msgs
         boolean right_foot_in_contact;
         @defaultValue(value=-1.0)
         double solution_quality;
-        boolean teleoperate_robot;
       };
     };
   };

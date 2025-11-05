@@ -81,7 +81,6 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public boolean left_foot_in_contact_;
    public boolean right_foot_in_contact_;
    public double solution_quality_ = -1.0;
-   public boolean teleoperate_robot_;
 
    public KinematicsToolboxOutputStatus()
    {
@@ -141,8 +140,6 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       right_foot_in_contact_ = other.right_foot_in_contact_;
 
       solution_quality_ = other.solution_quality_;
-
-      teleoperate_robot_ = other.teleoperate_robot_;
 
    }
 
@@ -335,15 +332,6 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return solution_quality_;
    }
 
-   public void setTeleoperateRobot(boolean teleoperate_robot)
-   {
-      teleoperate_robot_ = teleoperate_robot;
-   }
-   public boolean getTeleoperateRobot()
-   {
-      return teleoperate_robot_;
-   }
-
 
    public static Supplier<KinematicsToolboxOutputStatusPubSubType> getPubSubType()
    {
@@ -423,8 +411,6 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.teleoperate_robot_, other.teleoperate_robot_, epsilon)) return false;
-
 
       return true;
    }
@@ -465,8 +451,6 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if(this.right_foot_in_contact_ != otherMyClass.right_foot_in_contact_) return false;
 
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
-
-      if(this.teleoperate_robot_ != otherMyClass.teleoperate_robot_) return false;
 
 
       return true;
@@ -521,9 +505,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append("right_foot_in_contact=");
       builder.append(this.right_foot_in_contact_);      builder.append(", ");
       builder.append("solution_quality=");
-      builder.append(this.solution_quality_);      builder.append(", ");
-      builder.append("teleoperate_robot=");
-      builder.append(this.teleoperate_robot_);
+      builder.append(this.solution_quality_);
       builder.append("}");
       return builder.toString();
    }

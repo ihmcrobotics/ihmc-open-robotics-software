@@ -15,7 +15,7 @@ public class WalkingControllerPreviewOutputMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0f5df05fc8739140e65672e2dcd18210f06e0e3eb895f0d6db3788fc2cecaf13";
+   		return "8db88d804e82437179fe7bdacb3065c9084e6086f2b08891174b0a42b7fac3c3";
    }
    
    @Override

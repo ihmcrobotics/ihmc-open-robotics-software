@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
 import imgui.ImGui;
@@ -51,6 +52,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -709,8 +711,6 @@ public class RDXVRWholeBodyKinematicStreaming
 
       if (isKSTEnabled.get())
       {
-
-
          if (streamToController.get())
          {
             ghostRobotGraphic.setActive(showGhosts.get());
@@ -935,6 +935,7 @@ public class RDXVRWholeBodyKinematicStreaming
       }
 
       streamToController.set(enabled);
+      sendRLStateTransitionRequest(enabled);
    }
 
    private void initialize()
@@ -948,6 +949,20 @@ public class RDXVRWholeBodyKinematicStreaming
       multiContact.reset();
       initialPelvisFrame = null;
       initialChestFrame = null;
+   }
+
+   private void sendRLStateTransitionRequest(boolean activate)
+   {
+      HighLevelStateMessage highLevelStateMessage = new HighLevelStateMessage();
+      if (activate)
+      {
+         highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.RL_TRANSITION_STATE.toByte());
+      }
+      else
+      {
+         highLevelStateMessage.setHighLevelControllerName(HighLevelControllerName.EXIT_RL.toByte());
+      }
+      ros2ControllerHelper.publishToController(highLevelStateMessage);
    }
 
    private void reinitializeToolboxRobotConfiguration()

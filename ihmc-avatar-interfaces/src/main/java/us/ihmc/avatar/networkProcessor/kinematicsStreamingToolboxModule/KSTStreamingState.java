@@ -731,7 +731,6 @@ public class KSTStreamingState implements State
          isPublishing.set(false);
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       }
-      ikController.getSolution().setTeleoperateRobot(isStreaming.getValue());
 
       // Post-process 
       outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), ikSolution);
