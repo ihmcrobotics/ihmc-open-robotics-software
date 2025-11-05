@@ -221,7 +221,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                                                    pelvisLinearStateUpdater.getCurrentListOfTrustedFeet(),
                                                                                    estimatorDT,
                                                                                    gravitationalAcceleration,
-                                                                                   stateEstimatorParameters.enableCoMAdjustment(),
+                                                                                   stateEstimatorParameters.enableCoMPositionAdjustment(),
+                                                                                   stateEstimatorParameters.enableCoMVelocityAdjustment(),
                                                                                    estimatorCenterOfMassDataHolderToUpdate);
             break;
          case SIMPLE:
