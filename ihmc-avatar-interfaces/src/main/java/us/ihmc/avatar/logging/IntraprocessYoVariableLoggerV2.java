@@ -1,9 +1,7 @@
 package us.ihmc.avatar.logging;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
@@ -27,17 +25,13 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 public class IntraprocessYoVariableLoggerV2
 {
@@ -66,7 +60,7 @@ public class IntraprocessYoVariableLoggerV2
    private LongBuffer dataBufferAsLong;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
-   private boolean shutdown;
+   private boolean destroyed;
 
    public IntraprocessYoVariableLoggerV2(List<RegistrySendBufferBuilder> registrySendBufferBuilders, double dt, String logName)
    {
@@ -84,12 +78,11 @@ public class IntraprocessYoVariableLoggerV2
       this.logModelProvider = logModelProvider;
    }
 
-   public void create()
+   public void create() throws IOException
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       String timestamp = dateFormat.format(Calendar.getInstance().getTime());
       logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
-      deleteOldLogs(DEFAULT_INCOMING_LOGS_DIRECTORY, 10);
 
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
@@ -99,15 +92,8 @@ public class IntraprocessYoVariableLoggerV2
 
       Handshake handshake = handshakeBuilder.getHandShake();
 
-      try
-      {
-         YAMLSerializer<Handshake> serializer = new YAMLSerializer<>(new HandshakePubSubType());
-         serializer.serialize(createFileInLogFolder(HANDSHAKE_FILENAME), handshake);
-      }
-      catch (Exception e)
-      {
-         LogTools.error(e);
-      }
+      YAMLSerializer<Handshake> serializer = new YAMLSerializer<>(new HandshakePubSubType());
+      serializer.serialize(createFileInLogFolder(HANDSHAKE_FILENAME), handshake);
 
       LogPropertiesWriter logProperties = new LogPropertiesWriter(createFileInLogFolder(PROPERTY_FILE));
       logProperties.getVariables().setHandshake(HANDSHAKE_FILENAME);
@@ -136,20 +122,9 @@ public class IntraprocessYoVariableLoggerV2
             resourceStream.write(logModelProvider.getResourceZip());
             resourceStream.getFD().sync();
          }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
       }
 
-      try
-      {
-         logProperties.store();
-      }
-      catch (IOException e)
-      {
-         LogTools.error(e);
-      }
+      logProperties.store();
 
       variables = new ArrayList<>();
       for (RegistrySendBufferBuilder builder : registrySendBufferBuilders)
@@ -178,22 +153,15 @@ public class IntraprocessYoVariableLoggerV2
       LogTools.info("Number of YoGraphics: {}", numYoGraphics);
       LogTools.info("Number of joint states: {}", numJointStateVars);
 
-      try
-      {
-         dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
-         indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
-         dataChannel.force(true);
-         indexChannel.force(true);
-      }
-      catch (Exception e)
-      {
-         LogTools.error(e);
-      }
+      dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
+      indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
+      dataChannel.force(true);
+      indexChannel.force(true);
    }
 
    public synchronized void destroy()
    {
-      shutdown = true;
+      destroyed = true;
       try
       {
          dataChannel.close();
@@ -205,13 +173,13 @@ public class IntraprocessYoVariableLoggerV2
       }
    }
 
-   double[] jointData = new double[13];
+   private final double[] jointData = new double[13];
 
    public synchronized void update(long timestamp)
    {
-      if (shutdown)
+      if (destroyed)
       {
-         LogTools.error("Logger has already shutdown!");
+         LogTools.error("Logger has already been destroyed.");
          return;
       }
 
@@ -260,26 +228,6 @@ public class IntraprocessYoVariableLoggerV2
       catch (IOException e)
       {
          LogTools.error(e);
-      }
-   }
-
-   public void deleteOldLogs(Path incomingLogsFolder, int logsToKeep)
-   {
-      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
-
-      PathTools.walkFlat(incomingLogsFolder, (path, type) ->
-      {
-         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(INTRAPROCESS_LOG_POSTFIX))
-            sortedSet.add(path);
-         return FileVisitResult.CONTINUE;
-      });
-
-      while (sortedSet.size() > logsToKeep)
-      {
-         Path earliestLog = sortedSet.first();
-         LogTools.warn("Deleting old log {}", earliestLog);
-         FileTools.deleteQuietly(earliestLog);
-         sortedSet.remove(earliestLog);
       }
    }
 
