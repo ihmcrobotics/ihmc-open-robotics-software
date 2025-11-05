@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class IntraprocessYoVariableLoggerV2
@@ -170,9 +171,15 @@ public class IntraprocessYoVariableLoggerV2
       /*
        * Compression and serialization
        */
+      int poolSize = 10;
+      compressionBufferPool = new ByteBuffer[poolSize];
+      for (int i = 0; i < compressionBufferPool.length; i++)
+         compressionBufferPool[i] = ByteBuffer.allocate(singleTickBufferSize);
+      compressionBuffersReady = new ArrayBlockingQueue<>(poolSize, true);
+      compressionBuffersUsed = new ArrayBlockingQueue<>(poolSize, true);
       compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
       {
-
+         
       });
       dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
       indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
