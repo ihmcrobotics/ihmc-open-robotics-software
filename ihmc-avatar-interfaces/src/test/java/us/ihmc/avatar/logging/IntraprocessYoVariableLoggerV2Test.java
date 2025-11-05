@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,11 @@ public class IntraprocessYoVariableLoggerV2Test
    public void testLogging()
    {
       YoRegistry registry = new YoRegistry("testRegistry");
-      YoInteger testInt = new YoInteger("testInt", registry);
+
+      for (int i = 0; i < 30000; i++)
+      {
+         new YoDouble("double_" + i, registry);
+      }
 
       final double dt = 0.01;
 
@@ -30,8 +34,6 @@ public class IntraprocessYoVariableLoggerV2Test
       long startTime = System.nanoTime();
       for (int i = 0; i < 100; i++)
       {
-         testInt.set(i);
-
          logger.update(System.nanoTime() - startTime);
 
          LockSupport.parkNanos(Conversions.secondsToNanoseconds(dt));
