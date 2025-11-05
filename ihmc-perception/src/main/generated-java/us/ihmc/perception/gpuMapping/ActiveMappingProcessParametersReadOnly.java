@@ -10,19 +10,9 @@ import static us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters.*;
  */
 public interface ActiveMappingProcessParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default boolean getRunHeightMap()
+   default boolean getRunOnboardKernels()
    {
-      return get(runHeightMap);
-   }
-
-   default boolean getRunTerrainMap()
-   {
-      return get(runTerrainMap);
-   }
-
-   default boolean getRunD457TunableTransform()
-   {
-      return get(runD457TunableTransform);
+      return get(runOnboardKernels);
    }
 
    default boolean getPublishHeightMap()

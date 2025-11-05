@@ -19,11 +19,11 @@ import us.ihmc.scs2.simulation.collision.CollidableHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
+public class AlexanderKSTKinematicsCollisionModel implements RobotCollisionModel
 {
    private final HumanoidJointNameMap jointMap;
 
-   public AlexanderKinematicsCollisionModel(HumanoidJointNameMap jointMap)
+   public AlexanderKSTKinematicsCollisionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }
