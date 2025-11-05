@@ -6,6 +6,7 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.LockSupport;
@@ -13,7 +14,7 @@ import java.util.concurrent.locks.LockSupport;
 public class IntraprocessYoVariableLoggerV2Test
 {
    @Test
-   public void testLogging()
+   public void testLogging() throws IOException
    {
       YoRegistry registry = new YoRegistry("testRegistry");
 
