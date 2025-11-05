@@ -51,6 +51,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
    private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
 
+   private final YoDouble copDistance;
    private final YoDouble footForceMagnitude;
    private final YoDouble alphaFootLoadFiltering;
    private final AlphaFilteredYoVariable footLoadPercentage;
@@ -116,6 +117,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
                                                                new YoFrameVector3D(namePrefix + "ForceWorldFrame", worldFrame, registry));
 
       footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
+      copDistance = new YoDouble(namePrefix + "CoPDistance", registry);
 
       isPastForceThresholdLow = new YoBoolean(namePrefix + "IsPastForceThresholdLow", registry);
       isPastForceThresholdLowFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThresholdLowFiltered", registry, isPastForceThresholdLow, 2);
@@ -180,13 +182,15 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       // Testing CoP threshold
       if (Double.isNaN(contactCoPThreshold.getValue()))
       {
+         copDistance.setToNaN();
          isPastCoPThreshold.set(true);
          isPastCoPThresholdFiltered.set(true);
       }
       else
       {
          double copThreshold = contactCoPThreshold.getValue();
-         isPastCoPThreshold.set(footPolygon.signedDistance(centerOfPressure) < -copThreshold);
+         copDistance.set(footPolygon.signedDistance(centerOfPressure));
+         isPastCoPThreshold.set(copDistance.getDoubleValue() < -copThreshold);
          isPastCoPThresholdFiltered.update();
       }
 

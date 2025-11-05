@@ -309,7 +309,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
       private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
 
-
+      private final YoDouble copDistance;
       private final YoDouble footForceMagnitude;
       private final YoDouble alphaFootLoadFiltering;
       private final AlphaFilteredYoVariable footLoadPercentage;
@@ -376,10 +376,12 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          isPastCoPThresholdFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastCoPThresholdFiltered", registry, isPastCoPThreshold, 3);
 
          footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
+         copDistance = new YoDouble(namePrefix + "CoPDistance", registry);
 
          alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
          alphaFootLoadFiltering.set(0.1);
          footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
+
 
          hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
          // Final variable to identify if the foot has hit the ground
@@ -459,11 +461,13 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          {
             isPastCoPThreshold.set(true);
             isPastCoPThresholdFiltered.set(true);
+            copDistance.setToNaN();
          }
          else
          {
             double copThreshold = contactCoPThreshold.getValue();
-            isPastCoPThreshold.set(footPolygon.signedDistance(centerOfPressure) < -copThreshold);
+            copDistance.set(footPolygon.signedDistance(centerOfPressure));
+            isPastCoPThreshold.set(copDistance.getDoubleValue() < -copThreshold);
             isPastCoPThresholdFiltered.update();
          }
 
