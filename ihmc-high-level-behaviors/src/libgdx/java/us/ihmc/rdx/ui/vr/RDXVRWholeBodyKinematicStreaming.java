@@ -932,10 +932,10 @@ public class RDXVRWholeBodyKinematicStreaming
             miniGhost.setActive(true);
             performingDemonstration.set(-1);
          }
+         sendRLStateTransitionRequest(enabled);
       }
 
       streamToController.set(enabled);
-      sendRLStateTransitionRequest(enabled);
    }
 
    private void initialize()
