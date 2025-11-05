@@ -34,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class IntraprocessYoVariableLoggerV2
@@ -63,15 +62,19 @@ public class IntraprocessYoVariableLoggerV2
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
-   private FileChannel dataChannel;
-   private FileChannel indexChannel;
    private boolean destroyed;
 
    /*
-    * Compression
+    * Compression and serialization
+    *
+    * The ByteBuffers from the pool can either be in the "ready" queue or the "used" queue
     */
-   private BlockingQueue<ByteBuffer> compressionThreadQueue;
+   private ByteBuffer[] compressionBufferPool;
+   private BlockingQueue<ByteBuffer> compressionBuffersReady;
+   private BlockingQueue<ByteBuffer> compressionBuffersUsed;
    private Thread compressionThread;
+   private FileChannel dataChannel;
+   private FileChannel indexChannel;
 
    public IntraprocessYoVariableLoggerV2(List<RegistrySendBufferBuilder> registrySendBufferBuilders, double dt, String logName)
    {
@@ -81,7 +84,7 @@ public class IntraprocessYoVariableLoggerV2
    public IntraprocessYoVariableLoggerV2(List<RegistrySendBufferBuilder> registrySendBufferBuilders,
                                          double dt,
                                          String logName,
-                                         LogModelProvider logModelProvider)
+                                         @Nullable LogModelProvider logModelProvider)
    {
       this.registrySendBufferBuilders = registrySendBufferBuilders;
       this.dt = dt;
@@ -164,24 +167,17 @@ public class IntraprocessYoVariableLoggerV2
       LogTools.info("Number of YoGraphics: {}", numYoGraphics);
       LogTools.info("Number of joint states: {}", numJointStateVars);
 
+      /*
+       * Compression and serialization
+       */
+      compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
+      {
+
+      });
       dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
       indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
       dataChannel.force(true);
       indexChannel.force(true);
-
-      /*
-       * Initialize compression thread
-       */
-      int compressionThreadQueueSize = 10;
-      compressionThreadQueue = new ArrayBlockingQueue<>(compressionThreadQueueSize);
-      for (int i = 0; i < compressionThreadQueueSize; i++)
-         compressionThreadQueue.add(ByteBuffer.allocate(singleTickBufferSize));
-      compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
-      {
-         while (!compressionThread.isInterrupted())
-         {
-         }
-      });
    }
 
    public synchronized void destroy()
