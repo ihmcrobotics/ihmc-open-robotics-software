@@ -23,12 +23,13 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    static
    {
       REGISTRY.put(BehaviorTreeNodeDefinition.class, BehaviorTreeNodeExecutor::new);
-      REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
       REGISTRY.put(ActionSequenceDefinition.class, ActionSequenceExecutor::new);
       REGISTRY.put(FallbackNodeDefinition.class, FallbackNodeExecutor::new);
       REGISTRY.put(ConditionNodeDefinition.class, ConditionNodeExecutor::new);
       REGISTRY.put(GotoNodeDefinition.class, GotoNodeExecutor::new);
       REGISTRY.put(CheckPointNodeDefinition.class, CheckPointNodeExecutor::new);
+      REGISTRY.put(SceneActionNodeDefinition.class, SceneActionNodeExecutor::new);
+      REGISTRY.put(AI2RNodeDefinition.class, AI2RNodeExecutor::new);
       REGISTRY.put(DoorTraversalDefinition.class, DoorTraversalExecutor::new);
       REGISTRY.put(BuildingExplorationDefinition.class, BuildingExplorationExecutor::new);
       REGISTRY.put(ChestOrientationActionDefinition.class, ChestOrientationActionExecutor::new);
@@ -37,10 +38,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       REGISTRY.put(HandWrenchActionDefinition.class, HandWrenchActionExecutor::new);
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, ScrewPrimitiveActionExecutor::new);
       REGISTRY.put(PelvisHeightOrientationActionDefinition.class, PelvisHeightOrientationActionExecutor::new);
+      REGISTRY.put(AbilityHandActionDefinition.class, AbilityHandActionExecutor::new);
       REGISTRY.put(SakeHandCommandActionDefinition.class, SakeHandCommandActionExecutor::new);
       REGISTRY.put(WaitDurationActionDefinition.class, WaitDurationActionExecutor::new);
       REGISTRY.put(FootPoseActionDefinition.class, FootPoseActionExecutor::new);
-      REGISTRY.put(SceneActionNodeDefinition.class, SceneActionNodeExecutor::new);
    }
 
    private CRDTInfo crdtInfo;
