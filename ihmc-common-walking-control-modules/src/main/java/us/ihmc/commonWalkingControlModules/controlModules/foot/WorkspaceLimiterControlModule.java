@@ -486,7 +486,7 @@ public class WorkspaceLimiterControlModule implements SCS2YoGraphicHolder
                                                                  maxLengthToAllow,
                                                                  alphaSwingSingularityAvoidanceForHeight.getDoubleValue());
 
-      double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(), maxLengthToAllow);
+      double desiredFootPositionInAxisFrame = -Math.min(desiredLegLength.getDoubleValue(), lengthToUse);
 
       // When alpha is 1, we want the length to be at maxLengthToAllow. When alpha is 0, we want the length to be at lengthToStartLimiting.
 
