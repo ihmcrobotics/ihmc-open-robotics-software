@@ -2,6 +2,7 @@ package us.ihmc.avatar.logging;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.thread.RepeatingTaskThread;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
@@ -18,6 +19,7 @@ import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,6 +34,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class IntraprocessYoVariableLoggerV2
 {
@@ -48,6 +52,7 @@ public class IntraprocessYoVariableLoggerV2
    private final List<RegistrySendBufferBuilder> registrySendBufferBuilders;
    private final double dt;
    private final String logName;
+   @Nullable
    private final LogModelProvider logModelProvider;
 
    private Path logFolder;
@@ -61,6 +66,12 @@ public class IntraprocessYoVariableLoggerV2
    private FileChannel dataChannel;
    private FileChannel indexChannel;
    private boolean destroyed;
+
+   /*
+    * Compression
+    */
+   private BlockingQueue<ByteBuffer> compressionThreadQueue;
+   private Thread compressionThread;
 
    public IntraprocessYoVariableLoggerV2(List<RegistrySendBufferBuilder> registrySendBufferBuilders, double dt, String logName)
    {
@@ -157,6 +168,20 @@ public class IntraprocessYoVariableLoggerV2
       indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
       dataChannel.force(true);
       indexChannel.force(true);
+
+      /*
+       * Initialize compression thread
+       */
+      int compressionThreadQueueSize = 10;
+      compressionThreadQueue = new ArrayBlockingQueue<>(compressionThreadQueueSize);
+      for (int i = 0; i < compressionThreadQueueSize; i++)
+         compressionThreadQueue.add(ByteBuffer.allocate(singleTickBufferSize));
+      compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
+      {
+         while (!compressionThread.isInterrupted())
+         {
+         }
+      });
    }
 
    public synchronized void destroy()
