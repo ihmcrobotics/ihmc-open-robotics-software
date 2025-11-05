@@ -25,12 +25,12 @@ import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class SCS2AvatarSimulation
@@ -82,7 +82,15 @@ public class SCS2AvatarSimulation
    {
       if (intraprocessYoVariableLogger != null)
       {
-         intraprocessYoVariableLogger.start();
+         try
+         {
+            intraprocessYoVariableLogger.create();
+         }
+         catch (IOException e)
+         {
+            LogTools.error(e);
+            LogTools.error("Unable to create intraprocess logger");
+         }
       }
       if (yoVariableServer != null)
       {

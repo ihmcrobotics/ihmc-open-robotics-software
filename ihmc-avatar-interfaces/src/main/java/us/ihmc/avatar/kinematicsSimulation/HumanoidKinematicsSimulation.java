@@ -54,6 +54,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -88,7 +89,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.nio.file.Path;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -344,14 +345,18 @@ public class HumanoidKinematicsSimulation
 
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                         robotModel.getLogModelProvider(),
-                                                                         registry,
-                                                                         fullRobotModel.getElevator(),
-                                                                         yoGraphicsListRegistry,
-                                                                         100000,
-                                                                         0.01);
-         intraprocessYoVariableLogger.start();
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry)),
+                                                                         0.01,
+                                                                         getClass().getSimpleName());
+         try
+         {
+            intraprocessYoVariableLogger.create();
+         }
+         catch (IOException e)
+         {
+            LogTools.error(e);
+            LogTools.error("Unable to create intraprocess logger");
+         }
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {

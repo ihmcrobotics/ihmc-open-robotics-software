@@ -1,23 +1,27 @@
 package us.ihmc.rdx.ui;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
+import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.tools.BoxesDemoModel;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RDXLoggingDevelopmentUI
 {
@@ -64,7 +68,11 @@ public class RDXLoggingDevelopmentUI
 
       registry = new YoRegistry("registry");
 
-      yoLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), registry, MAX_TICK_LENGTH, 1);
+      List<RegistrySendBufferBuilder> bufferBuilders = new ArrayList<>();
+      bufferBuilders.add(new RegistrySendBufferBuilder(registry));
+
+      yoLogger = new IntraprocessYoVariableLogger(bufferBuilders, 1, getClass().getSimpleName());
+
       planarRegionsListLogger = new PlanarRegionsListLogger(getClass().getSimpleName(), MAX_TICK_LENGTH);
 
       planarRegionsID = new YoLong("planarRegionsID", registry);
@@ -103,7 +111,15 @@ public class RDXLoggingDevelopmentUI
             }, 0, TICK_PERIOD);
 
             stopwatch.start();
-            yoLogger.start();
+            try
+            {
+               yoLogger.create();
+            }
+            catch (IOException e)
+            {
+               LogTools.error(e);
+               LogTools.error("Unable to create intraprocess logger");
+            }
             planarRegionsListLogger.start();
 
             timer.scheduleAtFixedRate(new TimerTask()

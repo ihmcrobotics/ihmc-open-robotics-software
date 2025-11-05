@@ -3,10 +3,24 @@ package us.ihmc.avatar.scs2;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.ControllerTask;
+import us.ihmc.avatar.EstimatorTask;
+import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
+import us.ihmc.avatar.StepGeneratorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
-import us.ihmc.avatar.factory.*;
+import us.ihmc.avatar.factory.BarrierScheduledRobotController;
+import us.ihmc.avatar.factory.DisposableRobotController;
+import us.ihmc.avatar.factory.HumanoidRobotControlTask;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
+import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
+import us.ihmc.avatar.factory.SimulatedHandSensorReader;
+import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
@@ -21,7 +35,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ExternalControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ExternalTransitionControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandReadyControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
@@ -35,7 +53,11 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
@@ -84,13 +106,15 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 public class SCS2AvatarSimulationFactory
 {
@@ -638,12 +662,21 @@ public class SCS2AvatarSimulationFactory
                                                        enableSCS1YoGraphics.get() ? ikStreamingRTThread.getSCS1YoGraphicsListRegistry() : null,
                                                        enableSCS2YoGraphics.get() ? ikStreamingRTThread.getSCS2YoGraphics() : null));
          }
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                         robotModel.getLogModelProvider(),
-                                                                         builders,
-                                                                         100000,
-                                                                         robotModel.getEstimatorDT());
-         estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
+
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
+                                                                         robotModel.getEstimatorDT(),
+                                                                         getClass().getSimpleName(), robotModel.getLogModelProvider());
+         try
+         {
+            intraprocessYoVariableLogger.create();
+
+            estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
+         }
+         catch (IOException e)
+         {
+            LogTools.error(e);
+            LogTools.error("Unable to create intraprocess logger");
+         }
       }
 
       // If running with server setup the server registries and their updates.

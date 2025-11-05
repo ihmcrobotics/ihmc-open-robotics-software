@@ -56,6 +56,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.io.IOException;
 import java.util.*;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
@@ -279,14 +280,25 @@ public class AvatarMultiThreadingFactory
          builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
-         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(
-               robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
-         intraprocessYoVariableLogger.start();
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
+                                                                         robotModel.getEstimatorDT(),
+                                                                         robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider());
 
-         threadingManager.get()
-                         .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
-                                                                                                                  .getHumanoidRobotContextData()
-                                                                                                                  .getTimestamp()));
+         try
+         {
+            intraprocessYoVariableLogger.create();
+
+            threadingManager.get()
+                            .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                                     .getHumanoidRobotContextData()
+                                                                                                                     .getTimestamp()));
+         }
+         catch (IOException e)
+         {
+            LogTools.error(e);
+            LogTools.error("Unable to create intraprocess logger");
+         }
+
          System.out.println("Logging Status: data is being logged locally");
       }
 
