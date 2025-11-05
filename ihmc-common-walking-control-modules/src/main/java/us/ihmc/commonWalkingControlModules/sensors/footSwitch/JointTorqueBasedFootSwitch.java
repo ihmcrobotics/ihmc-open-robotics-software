@@ -437,7 +437,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footLoadPercentage.update(fZPlus / robotTotalWeight);
 
          isPastForceThresholdLow.set(forceZUp > contactForceThresholdLow.getValue());
-         isPastCoPThresholdFiltered.update();
+         isPastForceThresholdLowFiltered.update();
 
          if (contactForceThresholdHigh != null)
          {
@@ -475,7 +475,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 //       This is the former condition that we were using, we took out the horizontal velocity because the robot in single support was shaking too much
 //       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
 //                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
-         boolean validCoP =  isPastCoPThresholdFiltered.getValue();
+         boolean validCoP = isPastCoPThresholdFiltered.getValue();
          boolean hitGround = (isPastForceThresholdLowFiltered.getValue() && validCoP) || isPastForceThresholdHigh.getValue();
 
          hasFootHitGround.set(hitGround && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
