@@ -53,7 +53,6 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
 
          // Head ---------------------------------------------------------------------
          if (head != null)
-         if (head != null)
          {
             MovingReferenceFrame headFrame = head.getBodyFixedFrame();
             FrameCapsule3D headShapeMultisense = new FrameCapsule3D(headFrame, 0.08, 0.15);
@@ -117,8 +116,8 @@ public class AlexanderKinematicsCollisionModel implements RobotCollisionModel
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
             ReferenceFrame shinFrame = shinPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.36, 0.1);
-            shinShape.getPosition().set(0.015, 0.0, -0.18);
+            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.38, 0.1);
+            shinShape.getPosition().set(0.015, 0.0, -0.2);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
 
