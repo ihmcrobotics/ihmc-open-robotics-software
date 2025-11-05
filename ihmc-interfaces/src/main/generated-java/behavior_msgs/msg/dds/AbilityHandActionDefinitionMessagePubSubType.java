@@ -15,7 +15,7 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9908f468c0be71cfeed1956553c7dff971f9dd693ede2afcb8b4514017dc12de";
+   		return "44ab710c08d65a8cb889d13ebff9465a610e8bc96a98e2f5751506df42980bf5";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -74,6 +76,9 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,12 +88,16 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
+      cdr.write_type_2(data.getGrip());
+
    }
 
    public static void read(behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
+      	
+      data.setGrip(cdr.read_type_2());
       	
 
    }
@@ -99,6 +108,7 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_2("grip", data.getGrip());
    }
 
    @Override
@@ -107,6 +117,7 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setGrip(ser.read_type_2("grip"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage src, behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage dest)

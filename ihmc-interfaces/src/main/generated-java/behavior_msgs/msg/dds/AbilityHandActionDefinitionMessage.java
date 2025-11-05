@@ -16,6 +16,10 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
             * Specifies the side of the robot that this message refers to.
             */
    public byte robot_side_ = (byte) 255;
+   /**
+            * Grip to execute
+            */
+   public int grip_;
 
    public AbilityHandActionDefinitionMessage()
    {
@@ -32,6 +36,8 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       robot_side_ = other.robot_side_;
+
+      grip_ = other.grip_;
 
    }
 
@@ -59,6 +65,21 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
       return robot_side_;
    }
 
+   /**
+            * Grip to execute
+            */
+   public void setGrip(int grip)
+   {
+      grip_ = grip;
+   }
+   /**
+            * Grip to execute
+            */
+   public int getGrip()
+   {
+      return grip_;
+   }
+
 
    public static Supplier<AbilityHandActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -80,6 +101,8 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grip_, other.grip_, epsilon)) return false;
+
 
       return true;
    }
@@ -96,6 +119,8 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
+      if(this.grip_ != otherMyClass.grip_) return false;
+
 
       return true;
    }
@@ -109,7 +134,9 @@ public class AbilityHandActionDefinitionMessage extends Packet<AbilityHandAction
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("robot_side=");
-      builder.append(this.robot_side_);
+      builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("grip=");
+      builder.append(this.grip_);
       builder.append("}");
       return builder.toString();
    }

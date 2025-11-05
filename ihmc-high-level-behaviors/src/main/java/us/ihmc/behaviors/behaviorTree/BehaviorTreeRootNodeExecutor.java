@@ -11,6 +11,7 @@ import us.ihmc.behaviors.behaviorTree.control.FallbackNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -35,12 +36,14 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        ROS2SyncedRobotModel syncedRobot,
                                        ControllerStatusTracker controllerStatusTracker,
+                                       AbilityHandROS2HardwareCommunication abilityHandCommunication,
                                        BehaviorTreeSceneExecutor scene)
    {
       super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             ros2ControllerHelper,
             syncedRobot,
             controllerStatusTracker,
+            abilityHandCommunication,
             scene);
    }
 
@@ -379,6 +382,11 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public ControllerStatusTracker getControllerStatusTracker()
    {
       return controllerStatusTracker;
+   }
+
+   public AbilityHandROS2HardwareCommunication getAbilityHandCommunication()
+   {
+      return abilityHandCommunication;
    }
 
    public BehaviorTreeSceneExecutor getScene()

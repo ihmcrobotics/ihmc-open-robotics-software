@@ -11,6 +11,7 @@ import us.ihmc.behaviors.behaviorTree.control.door.*;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.HashMap;
@@ -49,6 +50,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
    private ROS2ControllerHelper ros2ControllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private ControllerStatusTracker controllerStatusTracker;
+   private AbilityHandROS2HardwareCommunication abilityHandCommunication;
    private BehaviorTreeSceneExecutor scene;
 
    public void initialize(CRDTInfo crdtInfo,
@@ -56,6 +58,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
                           ROS2ControllerHelper ros2ControllerHelper,
                           ROS2SyncedRobotModel syncedRobot,
                           ControllerStatusTracker controllerStatusTracker,
+                          AbilityHandROS2HardwareCommunication abilityHandCommunication,
                           BehaviorTreeSceneExecutor scene)
    {
       this.crdtInfo = crdtInfo;
@@ -63,13 +66,21 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeBuilder<
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
+      this.abilityHandCommunication = abilityHandCommunication;
       this.scene = scene;
    }
 
    @Override
    public BehaviorTreeRootNodeExecutor createRootNode(long id)
    {
-      return new BehaviorTreeRootNodeExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, controllerStatusTracker, scene);
+      return new BehaviorTreeRootNodeExecutor(id,
+                                              crdtInfo,
+                                              saveFileDirectory,
+                                              ros2ControllerHelper,
+                                              syncedRobot,
+                                              controllerStatusTracker,
+                                              abilityHandCommunication,
+                                              scene);
    }
 
    @Override

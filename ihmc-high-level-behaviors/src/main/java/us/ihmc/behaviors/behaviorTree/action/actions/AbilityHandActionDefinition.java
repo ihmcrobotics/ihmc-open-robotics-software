@@ -6,21 +6,26 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTBidirectionalEnumField;
+import us.ihmc.handsros2.abilityHand.AbilityHandManager;
+import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 
 public class AbilityHandActionDefinition extends ActionNodeDefinition implements SidedObject
 {
    private final CRDTBidirectionalEnumField<RobotSide> side;
+   private final CRDTBidirectionalEnumField<AbilityHandManager.Grip> grip;
 
    // On disk fields
    private RobotSide onDiskSide;
+   private AbilityHandManager.Grip onDiskGrip;
 
    public AbilityHandActionDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
       super(rootNode);
 
       side = new CRDTBidirectionalEnumField<>(this, RobotSide.LEFT);
+      grip = new CRDTBidirectionalEnumField<>(this, Grip.PINCH_O);
    }
 
    @Override
@@ -29,6 +34,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.saveToFile(jsonNode);
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
+      jsonNode.put("grip", grip.getValue().name());
    }
 
    @Override
@@ -37,6 +43,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.loadFromFile(jsonNode);
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+      grip.setValue(AbilityHandManager.Grip.valueOf(jsonNode.get("grip").asText()));
    }
 
    @Override
@@ -45,6 +52,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.setOnDiskFields();
 
       onDiskSide = side.getValue();
+      onDiskGrip = grip.getValue();
    }
 
    @Override
@@ -55,6 +63,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       if (isUndoAvailable())
       {
          side.setValue(onDiskSide);
+         grip.setValue(onDiskGrip);
       }
    }
 
@@ -64,6 +73,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       boolean unchanged = !super.hasChanges();
 
       unchanged &= side.getValue() == onDiskSide;
+      unchanged &= grip.getValue() == onDiskGrip;
 
       return !unchanged;
    }
@@ -73,6 +83,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.toMessage(message.getDefinition());
 
       message.setRobotSide(side.toMessage().toByte());
+      message.setGrip(grip.toMessage().toByte());
    }
 
    public void fromMessage(AbilityHandActionDefinitionMessage message)
@@ -80,6 +91,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       super.fromMessage(message.getDefinition());
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
+      grip.fromMessageOrdinal(message.getGrip(), Grip.values);
    }
 
    @Override
@@ -91,5 +103,15 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
    public void setSide(RobotSide side)
    {
       this.side.setValue(side);
+   }
+
+   public AbilityHandManager.Grip getGrip()
+   {
+      return grip.getValue();
+   }
+
+   public void setGrip(AbilityHandManager.Grip grip)
+   {
+      this.grip.setValue(grip);
    }
 }
