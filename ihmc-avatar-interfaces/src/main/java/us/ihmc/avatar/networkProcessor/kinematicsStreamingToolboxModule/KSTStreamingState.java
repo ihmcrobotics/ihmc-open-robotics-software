@@ -13,6 +13,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.QuaternionTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -132,6 +134,7 @@ public class KSTStreamingState implements State
    private final Map<String, FramePose3D> rigidBodyInitialPoseMap = new HashMap<>();
    private final YoDouble[] rigidBodyControlStartTimeArray;
    private final YoDouble centerOfMassControlStartTime = new YoDouble("centerOfMassControlStartTime", registry);
+   private final FramePoint3D centerOfMassInitialPosition = new FramePoint3D();
 
    /**
     * Buffer of commands used to slowly decay objectives for end-effector that have been discontinued.
@@ -552,8 +555,12 @@ public class KSTStreamingState implements State
             // TODO Maybe the CoM task should have its own default weight value.
             setDefaultWeightIfNeeded(centerOfMassInput.getSelectionMatrix(), centerOfMassInput.getWeightMatrix(), defaultLinearWeight);
             if (centerOfMassControlStartTime.isNaN())
+            {
                centerOfMassControlStartTime.set(timeInState);
+               centerOfMassInitialPosition.set(ikController.getCenterOfMass());
+            }
             blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
+            blendPosition(centerOfMassInitialPosition, centerOfMassInput.getDesiredPosition(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
          }
          else
          {
@@ -859,6 +866,18 @@ public class KSTStreamingState implements State
          double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
          currentPoseToPack.getPosition().interpolate(startPose.getPosition(), currentPoseToPack.getPosition(), blendingFactor);
          QuaternionTools.interpolate(startPose.getOrientation(), currentPoseToPack.getOrientation(), blendingFactor, currentPoseToPack.getOrientation());
+      }
+   }
+
+   private static void blendPosition(FramePoint3DReadOnly startPosition,
+                                     FramePoint3D currentPositionToPack,
+                                     double currentTime, double startTime, double blendingDuration)
+   {
+      double controlDuration = currentTime - startTime;
+      if (controlDuration < blendingDuration * 1000)
+      {
+         double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
+         currentPositionToPack.interpolate(startPosition, currentPositionToPack, blendingFactor);
       }
    }
 

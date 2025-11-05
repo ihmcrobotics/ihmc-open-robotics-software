@@ -1886,6 +1886,11 @@ public class KinematicsToolboxController extends ToolboxController
       return centerOfMassSafeMargin;
    }
 
+   public FramePoint3D getCenterOfMass()
+   {
+      return centerOfMass;
+   }
+
    public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()
    {
       return initialRobotConfigurationMap;
