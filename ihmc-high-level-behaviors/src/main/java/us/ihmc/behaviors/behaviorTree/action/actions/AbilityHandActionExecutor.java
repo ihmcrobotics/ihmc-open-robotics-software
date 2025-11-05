@@ -4,6 +4,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.handsros2.HandInterface;
 import us.ihmc.handsros2.HandType;
+import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
+
+import java.util.Arrays;
 
 public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandActionState, AbilityHandActionDefinition>
 {
@@ -25,17 +28,20 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
 
       state.getLogger().info("Executing Ability Hand action for side: {} with grip {}", definition.getSide(), definition.getGrip());
 
-      String handIdentifier = HandInterface.getSimpleIdentifier(robotModel.getSimpleRobotName(), definition.getSide(), HandType.ABILITY_HAND);
+      String identifier = HandInterface.getSimpleIdentifier(robotModel.getSimpleRobotName(), definition.getSide(), HandType.ABILITY_HAND);
 
-      if (abilityHandCommunication.getAvailableHands().contains(handIdentifier))
+      if (abilityHandCommunication.getAvailableHands().contains(identifier))
       {
-         abilityHandCommunication.getCommand(handIdentifier).setGrip(definition.getGrip().toByte());
-         abilityHandCommunication.publishCommand(handIdentifier);
+         Arrays.fill(abilityHandCommunication.getCommand(identifier).getGoalVelocities(), 30.0f);
+         abilityHandCommunication.getCommand(identifier).setControlMode(ControlMode.GRIP.toByte());
+         abilityHandCommunication.getCommand(identifier).setGrip(definition.getGrip().toByte());
+         abilityHandCommunication.publishCommand(identifier);
       }
       else
       {
          state.setFailed(true);
-         state.setIsExecuting(false);
       }
+
+      state.setIsExecuting(false);
    }
 }
