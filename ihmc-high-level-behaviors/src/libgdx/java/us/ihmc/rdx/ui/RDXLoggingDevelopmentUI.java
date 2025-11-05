@@ -67,7 +67,7 @@ public class RDXLoggingDevelopmentUI
 
       registry = new YoRegistry("registry");
 
-      yoLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry), 1, getClass().getSimpleName());
+      yoLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry)), 1, getClass().getSimpleName());
 
       planarRegionsListLogger = new PlanarRegionsListLogger(getClass().getSimpleName(), MAX_TICK_LENGTH);
 

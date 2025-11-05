@@ -24,8 +24,8 @@ public class IntraprocessYoVariableLoggerTest
       // Create a whole bunch of fake YoVariables to be used in the logger
       for (int i = 0; i < 5000; i++)
       {
-         YoLong longYoVaraible = new YoLong("longYoVaraible" + i, mainRegistry);
-         longYoVaraible.set(i);
+         YoLong longVariable = new YoLong("long_" + i, mainRegistry);
+         longVariable.set(i);
       }
 
       double dt = 0.001;
@@ -33,7 +33,7 @@ public class IntraprocessYoVariableLoggerTest
       List<RegistrySendBufferBuilder> bufferBuilders = new ArrayList<>();
       bufferBuilders.add(new RegistrySendBufferBuilder(mainRegistry));
 
-      IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(bufferBuilders, dt, "ss2");
+      IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(bufferBuilders, dt, getClass().getSimpleName());
       intraprocessYoVariableLogger.create();
 
       long logDurationTotal = 0;
@@ -48,6 +48,6 @@ public class IntraprocessYoVariableLoggerTest
          LockSupport.parkNanos(tickSleep);
       }
 
-      System.out.println("Average per update: " + TimeUnit.NANOSECONDS.toMicros((logDurationTotal / TICKS)) + " µs");
+      System.out.println("Average per update: " + TimeUnit.NANOSECONDS.toMicros((logDurationTotal / TICKS)) + " us");
    }
 }
