@@ -5,7 +5,6 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -57,13 +56,11 @@ public class IntraprocessYoVariableLoggerV2
    private final String logName;
    private final LogModelProvider logModelProvider;
 
-   /*
-    * Data created at start() time
-    */
    private Path logFolder;
    private ByteBuffer compressedBuffer;
    private ByteBuffer indexBuffer;
    private List<YoVariable> variables;
+   private long[] variableValues;
    private List<JointHolder> jointHolders;
    private ByteBuffer dataBuffer;
    private LongBuffer dataBufferAsLong;
@@ -90,17 +87,16 @@ public class IntraprocessYoVariableLoggerV2
    public void create()
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-      Calendar calendar = Calendar.getInstance();
-      String timestamp = dateFormat.format(calendar.getTime());
+      String timestamp = dateFormat.format(Calendar.getInstance().getTime());
       logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
       deleteOldLogs(DEFAULT_INCOMING_LOGS_DIRECTORY, 10);
 
-      YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);  // might not want this
+      YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         handshakeBuilder.addRegistryBuffer(registrySendBufferBuilder);
-      }
+
+      for (RegistrySendBufferBuilder builder : registrySendBufferBuilders)
+         handshakeBuilder.addRegistryBuffer(builder);
+
       Handshake handshake = handshakeBuilder.getHandShake();
 
       try
@@ -120,34 +116,25 @@ public class IntraprocessYoVariableLoggerV2
       logProperties.getVariables().setTimestamped(true);
       logProperties.getVariables().setIndex(INDEX_FILENAME);
       logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
-
       logProperties.setName(logName);
       logProperties.setTimestamp(timestamp);
 
-      // Create resource zip
       if (logModelProvider != null)
       {
          logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
          logProperties.getModel().setName(logModelProvider.getModelName());
          for (String resourceDirectory : logModelProvider.getTopLevelResourceDirectories())
-         {
             logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
-         }
          logProperties.getModel().setPath(MODEL_FILENAME);
          logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
 
-         File modelFile = createFileInLogFolder(MODEL_FILENAME);
-         File resourceFile = createFileInLogFolder(MODEL_RESOURCE_BUNDLE);
-         try
+         try (FileOutputStream modelStream = new FileOutputStream(createFileInLogFolder(MODEL_FILENAME), false);
+              FileOutputStream resourceStream = new FileOutputStream(createFileInLogFolder(MODEL_RESOURCE_BUNDLE), false))
          {
-            FileOutputStream modelStream = new FileOutputStream(modelFile, false);
             modelStream.write(logModelProvider.getModel());
             modelStream.getFD().sync();
-            modelStream.close();
-            FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
             resourceStream.write(logModelProvider.getResourceZip());
             resourceStream.getFD().sync();
-            resourceStream.close();
          }
          catch (IOException e)
          {
@@ -164,49 +151,32 @@ public class IntraprocessYoVariableLoggerV2
          LogTools.error(e);
       }
 
-      int numberOfJointStateVariables = 0;
-      for (int i = 0; i < handshake.getJoints().size(); i++)
-      {
-         JointDefinition joint = handshake.getJoints().get(i);
-         numberOfJointStateVariables += JointState.getNumberOfVariables(joint.getType());
-      }
-      int numberOfVariables = 0;
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         numberOfVariables += registrySendBufferBuilder.getNumberOfVariables();
-      }
-      int singleTickBufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * Long.BYTES;
+      variables = new ArrayList<>();
+      for (RegistrySendBufferBuilder builder : registrySendBufferBuilders)
+         variables.addAll(builder.getYoRegistry().collectSubtreeVariables());
 
+      int numJointStateVars = 0;
+      for (JointDefinition joint : handshake.getJoints())
+         numJointStateVars += JointState.getNumberOfVariables(joint.getType());
+
+      int singleTickBufferSize = (1 + variables.size() + numJointStateVars) * Long.BYTES;
       dataBuffer = ByteBuffer.allocate(singleTickBufferSize);
       dataBufferAsLong = dataBuffer.asLongBuffer();
       compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(singleTickBufferSize));
       indexBuffer = ByteBuffer.allocate(16);
-
-      variables = new ArrayList<>();
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         variables.addAll(registrySendBufferBuilder.getYoRegistry().collectSubtreeVariables());
-      }
       jointHolders = handshakeBuilder.getJointHolders();
-
-      // Setup data holder to not create memory inside the update loop
       variableValues = new long[variables.size()];
 
-      long numberOfYoGraphics = 0;
-      for (RegistrySendBufferBuilder registrySendBufferBuilder : registrySendBufferBuilders)
-      {
-         if (registrySendBufferBuilder.getSCS1YoGraphics() != null)
-         {
-            for (YoGraphicsList yoGraphicsList : registrySendBufferBuilder.getSCS1YoGraphics().getYoGraphicsLists())
-            {
-               numberOfYoGraphics += yoGraphicsList.getYoGraphics().size();
-            }
-         }
-      }
+      long numYoGraphics = registrySendBufferBuilders.stream()
+                                                     .filter(b -> b.getSCS1YoGraphics() != null)
+                                                     .flatMap(b -> b.getSCS1YoGraphics().getYoGraphicsLists().stream())
+                                                     .mapToLong(list -> list.getYoGraphics().size())
+                                                     .sum();
+
       LogTools.info("Buffer size: {}", singleTickBufferSize);
       LogTools.info("Number of YoVariables: {}", variables.size());
-      LogTools.info("Number of YoGraphics: {}", numberOfYoGraphics);
-      LogTools.info("Number of joint states: {}", numberOfJointStateVariables);
+      LogTools.info("Number of YoGraphics: {}", numYoGraphics);
+      LogTools.info("Number of joint states: {}", numJointStateVars);
 
       try
       {
@@ -224,7 +194,6 @@ public class IntraprocessYoVariableLoggerV2
    public synchronized void destroy()
    {
       shutdown = true;
-
       try
       {
          dataChannel.close();
@@ -236,7 +205,7 @@ public class IntraprocessYoVariableLoggerV2
       }
    }
 
-   private long[] variableValues;
+   double[] jointData = new double[13];
 
    public synchronized void update(long timestamp)
    {
@@ -248,40 +217,31 @@ public class IntraprocessYoVariableLoggerV2
 
       dataBuffer.clear();
       dataBufferAsLong.clear();
-
       dataBufferAsLong.put(timestamp);
-
-      long[] values = variableValues;
-      int size = variables.size();
 
       try
       {
-         for (int i = 0; i < size; i++)
-         {
-            values[i] = variables.get(i).getValueAsLongBits();
-         }
+         for (int i = 0; i < variables.size(); i++)
+            variableValues[i] = variables.get(i).getValueAsLongBits();
 
-         dataBufferAsLong.put(values, 0, size);
+         dataBufferAsLong.put(variableValues, 0, variables.size());
       }
       catch (BufferOverflowException e)
       {
-         LogTools.error("Increase buffer size!  size: {}  {}", variables.size(), e.getMessage());
+         LogTools.error("Increase buffer size! size: {} {}", variables.size(), e.getMessage());
       }
 
-      double[] jointData = new double[13];
-      for (JointHolder jointHolder : jointHolders)
+      for (int i = 0; i < jointHolders.size(); i++)
       {
+         JointHolder jointHolder = jointHolders.get(i);
          jointHolder.get(jointData, 0);
-
-         for (int i = 0; i < jointHolder.getNumberOfStateVariables(); i++)
-         {
-            dataBufferAsLong.put(Double.doubleToLongBits(jointData[i]));
-         }
+         for (int j = 0; j < jointHolder.getNumberOfStateVariables(); j++)
+            dataBufferAsLong.put(Double.doubleToLongBits(jointData[j]));
       }
 
       dataBufferAsLong.flip();
       dataBuffer.position(0);
-      dataBuffer.limit(dataBufferAsLong.limit() * 8);
+      dataBuffer.limit(dataBufferAsLong.limit() * Long.BYTES);
 
       try
       {
@@ -299,13 +259,14 @@ public class IntraprocessYoVariableLoggerV2
       }
       catch (IOException e)
       {
-         e.printStackTrace();
+         LogTools.error(e);
       }
    }
 
-   public void deleteOldLogs(Path incomingLogsFolder, int numberOflogsToKeep)
+   public void deleteOldLogs(Path incomingLogsFolder, int logsToKeep)
    {
-      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
+
       PathTools.walkFlat(incomingLogsFolder, (path, type) ->
       {
          if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(INTRAPROCESS_LOG_POSTFIX))
@@ -313,12 +274,12 @@ public class IntraprocessYoVariableLoggerV2
          return FileVisitResult.CONTINUE;
       });
 
-      while (sortedSet.size() > numberOflogsToKeep)
+      while (sortedSet.size() > logsToKeep)
       {
-         Path earliestLogDirectory = sortedSet.first();
-         LogTools.warn("Deleting old log {}", earliestLogDirectory);
-         FileTools.deleteQuietly(earliestLogDirectory);
-         sortedSet.remove(earliestLogDirectory);
+         Path earliestLog = sortedSet.first();
+         LogTools.warn("Deleting old log {}", earliestLog);
+         FileTools.deleteQuietly(earliestLog);
+         sortedSet.remove(earliestLog);
       }
    }
 
