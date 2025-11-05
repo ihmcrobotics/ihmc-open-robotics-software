@@ -73,7 +73,7 @@ public class IntraprocessYoVariableLoggerV2
    private ByteBuffer[] compressionBufferPool;
    private BlockingQueue<ByteBuffer> compressionBuffersReady;
    private BlockingQueue<ByteBuffer> compressionBuffersUsed;
-   private Thread compressionThread;
+   private RepeatingTaskThread compressionThread;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
 
@@ -179,7 +179,10 @@ public class IntraprocessYoVariableLoggerV2
       compressionBuffersUsed = new ArrayBlockingQueue<>(poolSize, true);
       compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
       {
+         ByteBuffer singleTickData = compressionBuffersUsed.take();
+
          
+
       });
       dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
       indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
@@ -190,6 +193,7 @@ public class IntraprocessYoVariableLoggerV2
    public synchronized void destroy()
    {
       destroyed = true;
+      compressionThread.blockingKill();
       try
       {
          dataChannel.close();
