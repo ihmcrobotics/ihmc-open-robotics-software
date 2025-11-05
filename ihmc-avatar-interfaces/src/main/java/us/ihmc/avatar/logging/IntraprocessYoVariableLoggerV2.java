@@ -17,6 +17,7 @@ import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesWriter;
 import us.ihmc.tools.compression.SnappyUtils;
+import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import javax.annotation.Nullable;
@@ -34,8 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 
 public class IntraprocessYoVariableLoggerV2
 {
@@ -56,8 +56,6 @@ public class IntraprocessYoVariableLoggerV2
    private final LogModelProvider logModelProvider;
 
    private Path logFolder;
-   private ByteBuffer compressedBuffer;
-   private ByteBuffer indexBuffer;
    private List<YoVariable> variables;
    private long[] variableValues;
    private List<JointHolder> jointHolders;
@@ -67,12 +65,11 @@ public class IntraprocessYoVariableLoggerV2
 
    /*
     * Compression and serialization
-    *
-    * The ByteBuffers from the pool can either be in the "ready" queue or the "used" queue
     */
-   private ByteBuffer[] compressionBufferPool;
-   private BlockingQueue<ByteBuffer> compressionBuffersReady;
-   private BlockingQueue<ByteBuffer> compressionBuffersUsed;
+   private ByteBuffer compressedBuffer;
+   private ByteBuffer indexBuffer;
+   private SwapReference<ByteBuffer> compressionBufferSwap;
+   private CountDownLatch compressionThreadLatch;
    private RepeatingTaskThread compressionThread;
    private FileChannel dataChannel;
    private FileChannel indexChannel;
@@ -96,8 +93,8 @@ public class IntraprocessYoVariableLoggerV2
    public void create() throws IOException
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-      String timestamp = dateFormat.format(Calendar.getInstance().getTime());
-      logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(timestamp + logName + INTRAPROCESS_LOG_POSTFIX);
+      String fileTimestamp = dateFormat.format(Calendar.getInstance().getTime());
+      logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(fileTimestamp + logName + INTRAPROCESS_LOG_POSTFIX);
 
       YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
       handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
@@ -118,7 +115,7 @@ public class IntraprocessYoVariableLoggerV2
       logProperties.getVariables().setIndex(INDEX_FILENAME);
       logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
       logProperties.setName(logName);
-      logProperties.setTimestamp(timestamp);
+      logProperties.setTimestamp(fileTimestamp);
 
       if (logModelProvider != null)
       {
@@ -171,23 +168,35 @@ public class IntraprocessYoVariableLoggerV2
       /*
        * Compression and serialization
        */
-      int poolSize = 10;
-      compressionBufferPool = new ByteBuffer[poolSize];
-      for (int i = 0; i < compressionBufferPool.length; i++)
-         compressionBufferPool[i] = ByteBuffer.allocate(singleTickBufferSize);
-      compressionBuffersReady = new ArrayBlockingQueue<>(poolSize, true);
-      compressionBuffersUsed = new ArrayBlockingQueue<>(poolSize, true);
+      indexBuffer = ByteBuffer.allocate(2 * Long.BYTES);
+      compressionBufferSwap = new SwapReference<>(ByteBuffer.allocate(singleTickBufferSize), ByteBuffer.allocate(singleTickBufferSize));
+      compressionThreadLatch = new CountDownLatch(1);
       compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
       {
-         ByteBuffer singleTickData = compressionBuffersUsed.take();
+         compressionThreadLatch.await();
 
-         
+         compressedBuffer.clear();
+         SnappyUtils.compress(compressionBufferSwap.getForThreadTwo(), compressedBuffer);
+         compressedBuffer.flip();
 
+         long timestamp = compressionBufferSwap.getForThreadTwo().getLong(0);
+
+         indexBuffer.clear();
+         indexBuffer.putLong(timestamp);
+         indexBuffer.putLong(dataChannel.position());
+         indexBuffer.flip();
+
+         indexChannel.write(indexBuffer);
+         dataChannel.write(compressedBuffer);
+
+         compressionBufferSwap.swap();
       });
       dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
       indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
       dataChannel.force(true);
       indexChannel.force(true);
+
+      compressionThread.startRepeating();
    }
 
    public synchronized void destroy()
@@ -243,24 +252,11 @@ public class IntraprocessYoVariableLoggerV2
       dataBuffer.position(0);
       dataBuffer.limit(dataBufferAsLong.limit() * Long.BYTES);
 
-      try
-      {
-         compressedBuffer.clear();
-         SnappyUtils.compress(dataBuffer, compressedBuffer);
-         compressedBuffer.flip();
+      compressionBufferSwap.getForThreadOne().flip();
+      compressionBufferSwap.getForThreadOne().put(dataBuffer);
+      compressionBufferSwap.swap();
 
-         indexBuffer.clear();
-         indexBuffer.putLong(timestamp);
-         indexBuffer.putLong(dataChannel.position());
-         indexBuffer.flip();
-
-         indexChannel.write(indexBuffer);
-         dataChannel.write(compressedBuffer);
-      }
-      catch (IOException e)
-      {
-         LogTools.error(e);
-      }
+      compressionThreadLatch.countDown();
    }
 
    private File createFileInLogFolder(String filename)
