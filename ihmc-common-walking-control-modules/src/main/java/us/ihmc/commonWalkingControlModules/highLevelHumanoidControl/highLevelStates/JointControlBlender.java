@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,7 +38,7 @@ public class JointControlBlender implements CommandBlender
          parentRegistry.addChild(registry);
    }
 
-   public void initialize()
+   public void initialize(JointDesiredOutputBasics from)
    {
    }
 

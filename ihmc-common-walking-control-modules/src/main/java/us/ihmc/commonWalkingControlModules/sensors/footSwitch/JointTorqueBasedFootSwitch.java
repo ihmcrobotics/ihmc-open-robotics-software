@@ -15,6 +15,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
@@ -265,6 +266,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
    {
       private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
 
+      private final RigidBodyBasics pelvis;
       private final MovingReferenceFrame soleFrame;
       private final GeometricJacobian footJacobian;
       private final InverseDynamicsCalculator gravityTorqueCalculator;
@@ -310,6 +312,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
                                                  YoRegistry registry)
       {
          this.soleFrame = soleFrame;
+         this.pelvis = pelvis;
          this.robotTotalWeight = robotTotalWeight;
          this.contactForceThreshold = contactForceThreshold;
          this.compensateGravity = compensateGravity;
@@ -392,6 +395,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          updateFootSwitch(compensateGravity.getValue() ? wrenchNoGravity : wrench);
       }
 
+      private final Twist footTwist = new Twist();
+
       private void updateFootSwitch(WrenchReadOnly wrench)
       {
          footForceMagnitude.set(wrench.getLinearPart().norm());
@@ -406,7 +411,8 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          isPastForceThreshold.set(forceZUp > contactForceThreshold.getValue());
 
          // Looking at velocity thresholds
-         linearVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
+         soleFrame.getTwistRelativeToOther(pelvis.getBodyFixedFrame(), footTwist);
+         linearVelocity.setMatchingFrame(footTwist.getLinearPart());
          horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
          verticalVelocity.set(linearVelocity.getZ());
 

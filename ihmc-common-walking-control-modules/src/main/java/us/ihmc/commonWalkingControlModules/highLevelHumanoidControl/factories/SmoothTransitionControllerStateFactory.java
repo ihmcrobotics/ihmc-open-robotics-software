@@ -64,6 +64,7 @@ public class SmoothTransitionControllerStateFactory implements HighLevelControll
                                                                          finalControllerState,
                                                                          controlledJoints,
                                                                          controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                         controllerFactoryHelper.getLowLevelControllerOutput(),
                                                                          commandInputManager,
                                                                          commandBlenderFactory);
       }
