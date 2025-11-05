@@ -59,6 +59,7 @@ public class DynamicStateInspector
 
    private final YoBoolean isDesiredICPOKForToeOff = new YoBoolean("isDesiredICPOKForToeOff", registry);
    private final YoBoolean isDesiredECMPOKForToeOff = new YoBoolean("isDesiredECMPOKForToeOff", registry);
+   private final YoBoolean isCoPOKForToeOff = new YoBoolean("isCoPOKForToeOff", registry);
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
 
    private final GlitchFilteredYoBoolean dynamicsAreOkForToeOff = new GlitchFilteredYoBoolean("dynamicsAreOKForToeOff", registry, 4);
@@ -70,6 +71,7 @@ public class DynamicStateInspector
    private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
 
    private final FramePoint2D desiredICP = new FramePoint2D();
+   private final FramePoint2D currentCoP = new FramePoint2D();
    private final FramePoint2D desiredECMP = new FramePoint2D();
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FramePoint2D toeOffPoint = new FramePoint2D();
@@ -134,6 +136,7 @@ public class DynamicStateInspector
                                  FramePoint2DReadOnly desiredICP,
                                  FramePoint2DReadOnly currentICP,
                                  FramePoint2DReadOnly desiredECMP,
+                                 FramePoint2DReadOnly currentCoP,
                                  FramePoint2DReadOnly toeOffPoint)
    {
       leadingFootFrame.setPoseAndUpdate(leadingFootPose);
@@ -166,7 +169,19 @@ public class DynamicStateInspector
          this.isDesiredECMPOKForToeOff.set(onToesPolygon.signedDistance(this.desiredECMP) < parameters.getMaxDistanceToMoveECMP());
       }
       else
+      {
          this.isDesiredECMPOKForToeOff.set(true);
+      }
+      if (currentCoP != null)
+      {
+         this.currentCoP.setIncludingFrame(currentCoP);
+         this.currentCoP.changeFrameAndProjectToXYPlane(onToesPolygon.getReferenceFrame());
+         this.isCoPOKForToeOff.set(onToesPolygon.signedDistance(this.currentCoP) < parameters.getMaxDistanceToMoveECMP());
+      }
+      else
+      {
+         this.isCoPOKForToeOff.set(true);
+      }
 
       dynamicsAreOkForToeOff.update(isCurrentICPOKForToeOff && isDesiredICPOKForToeOff);
 
@@ -177,7 +192,7 @@ public class DynamicStateInspector
       else
       {
          dynamicsAreDefinitelyNotOKForToeOff.update(
-               currentOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 && desiredOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 || !isDesiredECMPOKForToeOff.getBooleanValue());
+               currentOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 && desiredOrthogonalDistanceToInsideEdge.getDoubleValue() < 0.0 || !isDesiredECMPOKForToeOff.getBooleanValue() || !isCoPOKForToeOff.getBooleanValue());
       }
    }
 

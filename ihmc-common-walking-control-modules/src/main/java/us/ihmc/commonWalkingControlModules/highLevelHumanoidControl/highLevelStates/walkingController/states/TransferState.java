@@ -164,6 +164,7 @@ public abstract class TransferState extends WalkingState
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
+                                                     controllerToolbox.getFootSwitches().get(trailingLeg).getCenterOfPressure(),
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d);
 

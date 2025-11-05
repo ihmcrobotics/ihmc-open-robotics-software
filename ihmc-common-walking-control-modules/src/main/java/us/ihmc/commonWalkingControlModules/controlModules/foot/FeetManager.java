@@ -49,6 +49,8 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.awt.*;
+
 public class FeetManager implements SCS2YoGraphicHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -512,6 +514,7 @@ public class FeetManager implements SCS2YoGraphicHolder
    public void updateToeOffStatusSingleSupport(Footstep nextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
+                                               FramePoint2DReadOnly currentCoP,
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP)
    {
@@ -520,6 +523,7 @@ public class FeetManager implements SCS2YoGraphicHolder
                                                     nextFootstep.getPredictedContactPoints(),
                                                     exitCMP,
                                                     desiredECMP,
+                                                    currentCoP,
                                                     desiredICP,
                                                     currentICP);
    }
@@ -552,10 +556,11 @@ public class FeetManager implements SCS2YoGraphicHolder
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
+                                               FramePoint2DReadOnly currentCoP,
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP)
    {
-      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, currentCoP, desiredICP, currentICP);
    }
 
    /**
