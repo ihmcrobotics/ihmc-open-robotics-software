@@ -17,7 +17,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -68,10 +67,7 @@ public class RDXLoggingDevelopmentUI
 
       registry = new YoRegistry("registry");
 
-      List<RegistrySendBufferBuilder> bufferBuilders = new ArrayList<>();
-      bufferBuilders.add(new RegistrySendBufferBuilder(registry));
-
-      yoLogger = new IntraprocessYoVariableLogger(bufferBuilders, 1, getClass().getSimpleName());
+      yoLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry), 1, getClass().getSimpleName());
 
       planarRegionsListLogger = new PlanarRegionsListLogger(getClass().getSimpleName(), MAX_TICK_LENGTH);
 
