@@ -138,6 +138,8 @@ public class RDXAbilityHand implements RDXHandInterface
          ImGui.pushItemWidth(sliderWidth);
          executeVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), SLIDER_MIN, SLIDER_MAX,
                                "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
+         if (!ImGui.isItemActive())
+            desiredPositions[i].set(currentPositions[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
