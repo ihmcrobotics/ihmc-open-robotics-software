@@ -87,6 +87,8 @@ public class IntraprocessYoVariableLogger
       this.dt = dt;
       this.logName = logName;
       this.logModelProvider = logModelProvider;
+
+      destroyed = true;
    }
 
    public void create() throws IOException
@@ -211,6 +213,13 @@ public class IntraprocessYoVariableLogger
       indexChannel.force(true);
 
       compressionThread.startRepeating();
+
+      destroyed = false;
+   }
+
+   public boolean isDestroyed()
+   {
+      return destroyed;
    }
 
    public synchronized void destroy()

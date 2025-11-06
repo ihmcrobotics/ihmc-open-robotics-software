@@ -1,6 +1,10 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
@@ -57,7 +61,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 /**
@@ -296,10 +306,14 @@ public class AvatarMultiThreadingFactory
          catch (IOException e)
          {
             LogTools.error(e);
-            LogTools.error("Unable to create intraprocess logger");
+            LogTools.error("[Logging] Intraprocess logging mode was unable to be created");
          }
 
-         System.out.println("Logging Status: data is being logged locally");
+         LogTools.info("[Logging] Intraprocess logging mode");
+      }
+      else
+      {
+         LogTools.info("[Logging] Remote logging mode");
       }
 
       return threadingManager.get();

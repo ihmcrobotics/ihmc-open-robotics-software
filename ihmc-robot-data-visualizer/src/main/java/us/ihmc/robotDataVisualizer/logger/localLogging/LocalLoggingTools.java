@@ -25,7 +25,7 @@ public final class LocalLoggingTools
          LogTools.warn("[Local logging] However, there was no mountpoint at /root/.ihmc/logs. Is there a flash drive plugged in and mounted?");
       }
 
-      LOGGING_LOCALLY =/*!debugNetworkInterfaceIsConnected &&*/ logDirectoryIsMountpoint;
+      LOGGING_LOCALLY = false;
    }
 
    private static boolean debugNetworkInterfaceIsConnected()
