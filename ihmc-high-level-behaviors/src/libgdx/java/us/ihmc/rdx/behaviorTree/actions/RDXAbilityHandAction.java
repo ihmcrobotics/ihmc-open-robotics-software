@@ -1,21 +1,35 @@
 package us.ihmc.rdx.behaviorTree.actions;
 
 import imgui.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.AbilityHandActionState;
 import us.ihmc.handsros2.abilityHand.AbilityHandManager;
+import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
 import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.widgets.ImGuiHandWidget;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, AbilityHandActionDefinition>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiHandWidget handWidget = new ImGuiHandWidget();
 
+   private static final String[] FINGER_NAMES = {"Index", "Middle", "Ring", "Pinky", "Flex", "Rotator"};
+
+   private final ImFloat[] sliderPositions = new ImFloat[6];
+   private final ImFloat[] sliderVelocities = new ImFloat[6];
+
    public RDXAbilityHandAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
       super(new AbilityHandActionState(id, rootNode.getState()), rootNode);
+
+      for (int i = 0; i < 6; i++)
+      {
+         sliderPositions[i] = new ImFloat();
+         sliderVelocities[i] = new ImFloat();
+      }
    }
 
    @Override
@@ -23,21 +37,54 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
    {
       ImGui.text("Ability Hand action for " + definition.getSide().getLowerCaseName() + " side");
 
-      if (ImGui.beginCombo(labels.get("Grip"), definition.getGrip().name()))
+      ImGui.text("Control Mode:");
+      if (ImGui.radioButton(labels.get(ControlMode.GRIP.name()), definition.getControlMode() == ControlMode.GRIP))
       {
-         for (AbilityHandManager.Grip grip : AbilityHandManager.Grip.values)
+         definition.setControlMode(ControlMode.GRIP);
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get(ControlMode.VEL_TO_POS.name()), definition.getControlMode() == ControlMode.VEL_TO_POS))
+      {
+         definition.setControlMode(ControlMode.VEL_TO_POS);
+      }
+
+      if (definition.getControlMode() == ControlMode.GRIP)
+      {
+         if (ImGui.beginCombo(labels.get("Grip"), definition.getGrip().name()))
          {
-            boolean isSelected = definition.getGrip() == grip;
-            if (ImGui.selectable(grip.name(), isSelected))
+            for (AbilityHandManager.Grip grip : AbilityHandManager.Grip.values)
             {
-               definition.setGrip(grip);
+               boolean isSelected = definition.getGrip() == grip;
+               if (ImGui.selectable(grip.name(), isSelected))
+               {
+                  definition.setGrip(grip);
+               }
+               if (isSelected)
+               {
+                  ImGui.setItemDefaultFocus();
+               }
             }
-            if (isSelected)
-            {
-               ImGui.setItemDefaultFocus();
-            }
+            ImGui.endCombo();
          }
-         ImGui.endCombo();
+      }
+      else
+      {
+         for (int i = 0; i < 6; i++)
+         {
+            sliderPositions[i].set(definition.getGoalPositions().getValueReadOnly(i));
+            sliderVelocities[i].set(definition.getGoalVelocities().getValueReadOnly(i));
+
+            ImGui.pushItemWidth(ImGui.getColumnWidth() * 0.6f);
+            if (ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), sliderPositions[i].getData(), 0.0f, 120.0f,
+                                  "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], sliderPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL)))
+               definition.getGoalPositions().setValue(i, sliderPositions[i].get());
+            ImGui.popItemWidth();
+            ImGui.sameLine();
+            ImGui.pushItemWidth(ImGui.getColumnWidth());
+            if (ImGui.inputFloat(labels.getHidden("Velocity" + i), sliderVelocities[i], 0.1f, 1.0f, "%.2f rad/s"))
+               definition.getGoalVelocities().setValue(i, sliderVelocities[i].get());
+            ImGui.popItemWidth();
+         }
       }
    }
 
