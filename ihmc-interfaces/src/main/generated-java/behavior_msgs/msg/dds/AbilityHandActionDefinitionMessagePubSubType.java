@@ -15,7 +15,7 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "44ab710c08d65a8cb889d13ebff9465a610e8bc96a98e2f5751506df42980bf5";
+   		return "12d8ad553deef44e1481aade028e6a6511e2c120d752d019d1c7558b17884a54";
    }
    
    @Override
@@ -58,6 +58,12 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -79,6 +85,11 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       return current_alignment - initial_alignment;
    }
@@ -88,7 +99,19 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
+      cdr.write_type_2(data.getControlMode());
+
       cdr.write_type_2(data.getGrip());
+
+      for(int i0 = 0; i0 < data.getGoalPositions().length; ++i0)
+      {
+        	cdr.write_type_5(data.getGoalPositions()[i0]);	
+      }
+
+      for(int i0 = 0; i0 < data.getGoalVelocities().length; ++i0)
+      {
+        	cdr.write_type_5(data.getGoalVelocities()[i0]);	
+      }
 
    }
 
@@ -97,7 +120,21 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
+      data.setControlMode(cdr.read_type_2());
+      	
       data.setGrip(cdr.read_type_2());
+      	
+      for(int i0 = 0; i0 < data.getGoalPositions().length; ++i0)
+      {
+        	data.getGoalPositions()[i0] = cdr.read_type_5();
+        	
+      }
+      	
+      for(int i0 = 0; i0 < data.getGoalVelocities().length; ++i0)
+      {
+        	data.getGoalVelocities()[i0] = cdr.read_type_5();
+        	
+      }
       	
 
    }
@@ -108,7 +145,10 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_2("control_mode", data.getControlMode());
       ser.write_type_2("grip", data.getGrip());
+      ser.write_type_f("goal_positions", data.getGoalPositions());
+      ser.write_type_f("goal_velocities", data.getGoalVelocities());
    }
 
    @Override
@@ -117,7 +157,10 @@ public class AbilityHandActionDefinitionMessagePubSubType implements us.ihmc.pub
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setControlMode(ser.read_type_2("control_mode"));
       data.setGrip(ser.read_type_2("grip"));
+      ser.read_type_f("goal_positions", data.getGoalPositions());
+      ser.read_type_f("goal_velocities", data.getGoalVelocities());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage src, behavior_msgs.msg.dds.AbilityHandActionDefinitionMessage dest)

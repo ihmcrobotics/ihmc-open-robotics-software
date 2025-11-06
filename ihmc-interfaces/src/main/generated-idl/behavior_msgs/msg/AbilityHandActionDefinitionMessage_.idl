@@ -22,9 +22,21 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
-         * Grip to execute
+         * AbilityHandManager.ControlMode ordinal
+         */
+        long control_mode;
+        /**
+         * Grip to execute, if grip control mode
          */
         long grip;
+        /**
+         * Goal positions for the joints
+         */
+        float goal_positions[6];
+        /**
+         * Goal positions for the joints
+         */
+        float goal_velocities[6];
       };
     };
   };

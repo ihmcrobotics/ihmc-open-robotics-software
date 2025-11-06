@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
+import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.handsros2.HandInterface;
@@ -32,9 +33,11 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
 
       if (abilityHandCommunication.getAvailableHands().contains(identifier))
       {
-         Arrays.fill(abilityHandCommunication.getCommand(identifier).getGoalVelocities(), 30.0f);
-         abilityHandCommunication.getCommand(identifier).setControlMode(ControlMode.GRIP.toByte());
-         abilityHandCommunication.getCommand(identifier).setGrip(definition.getGrip().toByte());
+         AbilityHandCommand command = abilityHandCommunication.getCommand(identifier);
+         Arrays.fill(command.getGoalVelocities(), 30.0f);
+         command.setControlMode(ControlMode.GRIP.toByte());
+         command.setGrip(definition.getGrip().toByte());
+         command.getGoalPositions();
          abilityHandCommunication.publishCommand(identifier);
       }
       else
