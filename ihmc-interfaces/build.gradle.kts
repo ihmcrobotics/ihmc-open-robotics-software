@@ -94,7 +94,6 @@ tasks.create("generateMessages") {
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath())
       generator.addPackageRootToIDLGenerator(file("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces").toPath())
       generator.addPackageRootToIDLGenerator(file("src/main/messages/ihmc_interfaces").toPath())
-      generator.addPackageRootToROS1Generator(file("src/main/messages/ihmc_interfaces").toPath())
 
       generator.addCustomIDLFiles(file("build/tmp/generateMessages/ros2-common-interfaces/").toPath())
 
@@ -112,15 +111,9 @@ tasks.create("generateMessages") {
             from("build/tmp/generateMessages/generated-java/$packag")
             into("src/main/generated-java/$packag")
          }
-
-         copy {
-            from("build/tmp/generateMessages/generated-ros1/$packag")
-            into("src/main/messages/ros1/$packag")
-         }
       }
 
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
-      us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }
