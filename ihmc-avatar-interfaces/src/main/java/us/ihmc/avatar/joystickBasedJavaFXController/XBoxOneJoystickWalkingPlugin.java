@@ -175,6 +175,9 @@ public class XBoxOneJoystickWalkingPlugin
 
             // Publish our continuous hiking command
             continuousHikingCommandPublisher.publish(continuousHikingCommand);
+
+            // Reset this to false each time
+            continuousHikingCommand.setSquareUpToGoal(false);
          }
       }
    }
@@ -215,7 +218,6 @@ public class XBoxOneJoystickWalkingPlugin
       boolean requestWalking = false;
       boolean walkForwards = false;
       boolean walkBackwards = false;
-      boolean squareUp = false;
       double forwardJoystickValue = 0.0;
       double lateralJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
@@ -232,10 +234,10 @@ public class XBoxOneJoystickWalkingPlugin
          walkBackwards = requestWalking && forwardJoystickValue < 0.0;
       }
 
-      configureContinuousHikingCommand(true, walkForwards, walkBackwards, squareUp, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
+      configureContinuousHikingCommand(true, walkForwards, walkBackwards, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
    }
 
-   private void configureContinuousHikingCommand(boolean enableContinuousHiking, boolean walkForwards, boolean walkBackwards, boolean squareUp, double forwardValue, double lateralValue, double turningValue)
+   private void configureContinuousHikingCommand(boolean enableContinuousHiking, boolean walkForwards, boolean walkBackwards, double forwardValue, double lateralValue, double turningValue)
    {
       continuousHikingCommand.setEnableContinuousHiking(enableContinuousHiking);
       continuousHikingCommand.setUseJoystickController(true);
@@ -244,7 +246,6 @@ public class XBoxOneJoystickWalkingPlugin
       continuousHikingCommand.setForwardValue(forwardValue);
       continuousHikingCommand.setLateralValue(lateralValue);
       continuousHikingCommand.setTurningValue(turningValue);
-      continuousHikingCommand.setSquareUpToGoal(squareUp);
    }
 
    public void sendStopWalkingCommands()
@@ -312,7 +313,7 @@ public class XBoxOneJoystickWalkingPlugin
       // Stop walking before we switch to CSG
       if (currentJoystickWalkingMode.equals(JoystickWalkingMode.CONTINUOUS_HIKING))
       {
-         configureContinuousHikingCommand(false, false, false, true, 0.0, 0.0, 0.0);
+         configureContinuousHikingCommand(false, false, false, 0.0, 0.0, 0.0);
          continuousHikingCommandPublisher.publish(continuousHikingCommand);
       }
 
