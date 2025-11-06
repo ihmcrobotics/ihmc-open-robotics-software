@@ -51,20 +51,6 @@ public class LeRobotDatasetTools
       return path + "." + result.getName() + ".";
    }
 
-   public static SideDependentList<String> getRobotLinkNames(RobotDefinition robotDefinition, String linkNamePart)
-   {
-      SideDependentList<String> handLinkNames = new SideDependentList<>();
-      for (RigidBodyDefinition link : robotDefinition.getAllRigidBodies())
-      {
-         String linkName = link.getName().toLowerCase();
-         if (linkName.contains(linkNamePart))
-            for (RobotSide side : RobotSide.values)
-               if (linkName.contains(side.getLowerCaseName()))
-                  handLinkNames.put(side, link.getName());
-      }
-      return handLinkNames;
-   }
-
    public static SideDependentList<List<String>> getRobotArmJointNames(RobotDefinition robotDefinition)
    {
       SideDependentList<List<String>> armJointNames = new SideDependentList<>();

@@ -82,9 +82,6 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
 
    protected List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForDoNothing()
    {
-      if (target != RobotTarget.SCS)
-         return getDesiredJointBehaviorForHangingAround();
-
       List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
 
       List<String> allJoint = new ArrayList<String>();
@@ -92,7 +89,10 @@ public class OpenAlexanderHighLevelControllerParameters implements HighLevelCont
       allJoint.addAll(jointMap.getNeckJointNamesAsStrings());
       allJoint.addAll(jointMap.getArmJointNamesAsStrings());
       allJoint.addAll(jointMap.getLegJointNamesAsStrings());
-      behaviors.add(new GroupParameter<JointDesiredBehaviorReadOnly>("wholeBody", new JointDesiredBehavior(EFFORT), allJoint));
+      JointDesiredBehavior jointDesiredBehavior = new JointDesiredBehavior(EFFORT);
+      jointDesiredBehavior.setMaxPositionError(0.0);
+      jointDesiredBehavior.setMaxVelocityError(0.0);
+      behaviors.add(new GroupParameter<JointDesiredBehaviorReadOnly>("wholeBody", jointDesiredBehavior, allJoint));
 
       return behaviors;
    }

@@ -5,31 +5,28 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootPoseActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
-import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
-import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
-import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.simulation.collision.Collidable;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,22 +46,15 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
 
-   public RDXFootPoseAction(long id,
-                            CRDTInfo crdtInfo,
-                            WorkspaceResourceDirectory saveFileDirectory,
-                            RDX3DPanel panel3D,
-                            DRCRobotModel robotModel,
-                            FullHumanoidRobotModel syncedFullRobotModel,
-                            RobotCollisionModel selectionCollisionModel,
-                            ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXFootPoseAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new FootPoseActionState(id, crdtInfo,saveFileDirectory, referenceFrameLibrary));
+      super(new FootPoseActionState(id, rootNode.getState()), rootNode);
 
       poseGizmo = new RDXSelectablePose3DGizmo();
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 state.getFootFrame()::changeFrame);
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
@@ -73,11 +63,11 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
 
       for (RobotSide side : RobotSide.values)
       {
-         String footBodyName = syncedFullRobotModel.getFoot(side).getName();
+         String footBodyName = syncedRobot.getFullRobotModel().getFoot(side).getName();
          String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
          highlightModels.put(side, new RDXInteractableHighlightModel(modelFileName));
 
-         MultiBodySystemBasics footOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getFoot(side));
+         MultiBodySystemBasics footOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedRobot.getFullRobotModel().getFoot(side));
          List<Collidable> footCollidables = selectionCollisionModel.getRobotCollidables(footOnlySystem);
 
          for (Collidable footCollidable : footCollidables)

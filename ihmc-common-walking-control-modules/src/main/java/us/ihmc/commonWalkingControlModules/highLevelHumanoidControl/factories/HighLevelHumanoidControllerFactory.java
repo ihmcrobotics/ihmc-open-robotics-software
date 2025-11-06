@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommandBlenderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
@@ -348,6 +349,18 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public void addCustomSmoothTransitionControlState(String transitionName, HighLevelControllerName transitionStateEnum, HighLevelControllerName startState, HighLevelControllerName endState)
    {
       HighLevelControllerStateFactory controllerStateFactory = new SmoothTransitionControllerStateFactory(transitionName, transitionStateEnum, startState, endState);
+
+      controllerStateFactories.add(controllerStateFactory);
+      controllerFactoriesMap.put(transitionStateEnum, controllerStateFactory);
+   }
+
+   public void addCustomSmoothTransitionControlState(String transitionName,
+                                                     HighLevelControllerName transitionStateEnum,
+                                                     HighLevelControllerName startState,
+                                                     HighLevelControllerName endState,
+                                                     CommandBlenderFactory commandBlenderFactory)
+   {
+      HighLevelControllerStateFactory controllerStateFactory = new SmoothTransitionControllerStateFactory(transitionName, transitionStateEnum, startState, endState, commandBlenderFactory);
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(transitionStateEnum, controllerStateFactory);

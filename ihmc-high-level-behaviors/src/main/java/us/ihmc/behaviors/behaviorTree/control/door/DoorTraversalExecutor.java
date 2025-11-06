@@ -1,42 +1,26 @@
 package us.ihmc.behaviors.behaviorTree.control.door;
 
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.actions.WaitDurationActionState;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversalState, DoorTraversalDefinition>
 {
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final SceneGraph sceneGraph;
-
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
    private boolean waitForPullScrewToFinish = false;
    private boolean waitForGraspToFinish = false;
+   private final RigidBodyTransform initialDoorHandleTransform = new RigidBodyTransform();
+   private final RigidBodyTransform currentDoorHandleTransform = new RigidBodyTransform();
 
-   public DoorTraversalExecutor(long id,
-                                CRDTInfo crdtInfo,
-                                WorkspaceResourceDirectory saveFileDirectory,
-                                ROS2ControllerHelper ros2ControllerHelper,
-                                ROS2SyncedRobotModel syncedRobot,
-                                SceneGraph sceneGraph)
+   public DoorTraversalExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
-      this.sceneGraph = sceneGraph;
+      super(new DoorTraversalState(id, rootNode.getState()), rootNode);
    }
 
    @Override
@@ -54,8 +38,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       updateSubtree(this);
 
-      DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
-      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
+      // TODO: Update current door handle transform
 
       boolean shouldClearStaticHandles = false;
       for (WaitDurationActionState action : state.getSetStaticForGraspActions())
@@ -65,17 +48,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (shouldClearStaticHandles)
       {
-         for (String nodeName : sceneGraph.getNodeNameList())
-         {
-            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
-            {
-               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
-               {
-                  staticHandleNode.clearOffset();
-                  staticHandleNode.freeze();
-               }
-            }
-         }
+         // TODO: Assume door closed logic
       }
 
       if (state.arePullRetryNodesPresent())
@@ -87,23 +60,21 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          }
          if (!waitForPullScrewToFinish && state.getPostPullDoorEvaluationAction().getIsExecuting())
          {
-            if (yoloDoorHandleNode != null)
+            double openedDoorHandleDistanceFromStart = definition.getOpenedDoorHandleDistanceFromStart().getValue();
+            Tuple3DReadOnly handleCurrentPosition = currentDoorHandleTransform.getTranslation();
+            Tuple3DReadOnly handleOriginalPosition = initialDoorHandleTransform.getTranslation();
+            double distanceHandleFromStart  = handleCurrentPosition.differenceNorm(handleOriginalPosition);
+            state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);
+            if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
             {
-               double openedDoorHandleDistanceFromStart = definition.getOpenedDoorHandleDistanceFromStart().getValue();
-               double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransformReadOnly().getTranslation()
-                                                                  .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransformReadOnly().getTranslation());
-               state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);
-               if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
-               {
-                  state.getLogger().info("""
-                                         Retrying pull door. Distance door handle from start %.2f / %.2f [m].
-                                         Stopping all trajectories.
-                                         Going back to %s.
-                                         """.formatted(state.getDoorHandleDistanceFromStart().getValue(), openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
-                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-                  waitForPullScrewToFinish = true;
-                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
-               }
+               state.getLogger().info("""
+                                      Retrying pull door. Distance door handle from start %.2f / %.2f [m].
+                                      Stopping all trajectories.
+                                      Going back to %s.
+                                      """.formatted(state.getDoorHandleDistanceFromStart().getValue(), openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+               waitForPullScrewToFinish = true;
+               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
             }
          }
 
@@ -114,21 +85,19 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          }
          if (!waitForGraspToFinish && state.getPostGraspEvaluationAction().getIsExecuting())
          {
-            if (staticHandleClosedDoor != null)
+            MovingReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT);
+            RigidBodyTransform handTransform = handFrame.getTransformToWorldFrame();
+            double handToHandleDistance = handTransform.getTranslation().differenceNorm(currentDoorHandleTransform.getTranslation());
+            if (handToHandleDistance > 0.19)
             {
-               double handToHandleDistance = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT).
-                     getTransformToDesiredFrame(staticHandleClosedDoor.getNodeFrame()).getTranslation().norm();
-               if (handToHandleDistance > 0.19)
-               {
-                  state.getLogger().info("""
-                                      Retrying reach door handle. Distance hand to door handle %.2f / %.2f [m].
-                                      Stopping all trajectories.
-                                      Going back to %s.
-                                      """.formatted(handToHandleDistance, 0.19, state.getWaitToOpenRightHandAction().getDefinition().getName()));
-                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-                  waitForGraspToFinish = true;
-                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
-               }
+               state.getLogger().info("""
+                                   Retrying reach door handle. Distance hand to door handle %.2f / %.2f [m].
+                                   Stopping all trajectories.
+                                   Going back to %s.
+                                   """.formatted(handToHandleDistance, 0.19, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+               waitForGraspToFinish = true;
+               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getLeafIndex());
             }
          }
       }

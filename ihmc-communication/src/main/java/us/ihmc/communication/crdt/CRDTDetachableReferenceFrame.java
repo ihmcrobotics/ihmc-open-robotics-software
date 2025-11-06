@@ -2,7 +2,8 @@ package us.ihmc.communication.crdt;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+
+import java.util.function.Function;
 
 public class CRDTDetachableReferenceFrame
 {
@@ -10,14 +11,14 @@ public class CRDTDetachableReferenceFrame
    private final CRDTBidirectionalRigidBodyTransform transformToParent;
    private final DetachableReferenceFrame detachableReferenceFrame;
 
-   public CRDTDetachableReferenceFrame(ReferenceFrameLibrary referenceFrameLibrary,
+   public CRDTDetachableReferenceFrame(Function<String, ReferenceFrame> frameFunction,
                                        CRDTBidirectionalString parentFrameName,
                                        CRDTBidirectionalRigidBodyTransform transformToParent)
    {
       this.parentFrameName = parentFrameName;
       this.transformToParent = transformToParent;
 
-      detachableReferenceFrame = new DetachableReferenceFrame(referenceFrameLibrary, transformToParent.getValueReadOnly());
+      detachableReferenceFrame = new DetachableReferenceFrame(frameFunction, transformToParent.getValueReadOnly());
    }
 
    public void update()

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.ContinuousStepGeneratorStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -159,6 +160,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
 
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
 
+   // Status message output manager (handles publishing of CSG status info)
+   private final StatusMessageOutputManager csgStatusMessageOutputManager;
+   private final ContinuousStepGeneratorStatusMessage csgStatusMessage = new ContinuousStepGeneratorStatusMessage();
+
    // All things QFP
    private final YoEnum<ContinuousStepGeneratorMode> currentCSGMode = new YoEnum<>("currentCSGMode", registry, ContinuousStepGeneratorMode.class);
    private final YoEnum<ContinuousStepGeneratorMode> requestedCSGMode = new YoEnum<>("requestedCSGMode", registry, ContinuousStepGeneratorMode.class);
@@ -179,6 +184,13 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     */
    public ContinuousStepGenerator(YoRegistry parentRegistry)
    {
+      this(null, parentRegistry);
+   }
+
+   public ContinuousStepGenerator(StatusMessageOutputManager csgStatusMessageOutputManager, YoRegistry parentRegistry)
+   {
+      this.csgStatusMessageOutputManager = csgStatusMessageOutputManager;
+
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
 
@@ -231,6 +243,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          }
 
          walkPreviousValue.set(false);
+
+         updateCSGStatusMessage();
+
          return;
       }
       else if (startWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
@@ -506,8 +521,38 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
          }
       }
 
+      updateCSGStatusMessage();
+
       walkPreviousValue.set(walk.getValue());
       stepGeneratorTimer.stopMeasurement();
+   }
+
+   private void updateCSGStatusMessage()
+   {
+      // Some general CSG params
+      csgStatusMessage.setIsWalking(isWalking.getBooleanValue());
+      csgStatusMessage.setIsInUnitVelocities(desiredVelocityProvider.isUnitVelocity());
+
+      // Current walking speed values
+      csgStatusMessage.setCurrentForwardVelocity(desiredVelocityProvider.getDesiredVelocity().getX());
+      csgStatusMessage.setCurrentLateralVelocity(desiredVelocityProvider.getDesiredVelocity().getY());
+      csgStatusMessage.setCurrentTurnVelocity(desiredTurningVelocityProvider.getTurningVelocity());
+
+      // Current swing parameter values
+      csgStatusMessage.setCurrentSwingHeight(parameters.getSwingHeight());
+      csgStatusMessage.setCurrentSwingDuration(parameters.getSwingDuration());
+      csgStatusMessage.setCurrentTransferDuration(parameters.getTransferDuration());
+
+      // Current step limit values
+      csgStatusMessage.setCurrentMaxStepLength(parameters.getMaxStepLength());
+      csgStatusMessage.setCurrentMaxStepWidth(parameters.getMaxStepWidth());
+      csgStatusMessage.setCurrentMinStepWidth(parameters.getMinStepWidth());
+      csgStatusMessage.setCurrentDefaultStepWidth(parameters.getDefaultStepWidth());
+      csgStatusMessage.setCurrentTurnMaxAngleInward(parameters.getTurnMaxAngleInward());
+      csgStatusMessage.setCurrentTurnMaxAngleOutward(parameters.getTurnMaxAngleOutward());
+
+      if (csgStatusMessageOutputManager != null)
+         csgStatusMessageOutputManager.reportStatusMessage(csgStatusMessage);
    }
 
    private static void calculateNextFootstepPose2D(double stepTime, double desiredVelocityX, double desiredVelocityY, double desiredTurningVelocity,
@@ -707,14 +752,14 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
     * {@link #notifyFootstepCompleted(RobotSide)}.
     * </p>
     *
-    * @param statusMessageOutputManager the output API of the controller.
+    * @param controllerStatusMessageOutputManager the output API of the controller.
     */
-   public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
+   public void setFootstepStatusListener(StatusMessageOutputManager controllerStatusMessageOutputManager)
    {
-      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
+      controllerStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
 
       if (quicksterFootstepProvider.hasValue())
-         quicksterFootstepProvider.get().setFootstepStatusListener(statusMessageOutputManager);
+         quicksterFootstepProvider.get().setFootstepStatusListener(controllerStatusMessageOutputManager);
    }
 
    /**

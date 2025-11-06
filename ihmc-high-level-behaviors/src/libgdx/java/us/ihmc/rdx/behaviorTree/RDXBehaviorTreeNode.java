@@ -9,16 +9,19 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.*;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
-import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -40,6 +43,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    /** Convenient accessor to the definition to keep the code clean, available to all inheriting classes. */
    protected final D definition;
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
+   protected final RDXBehaviorTreeRootNode rootNode;
    private transient RDXBehaviorTreeNode<?, ?> parent;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -62,19 +66,50 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean dragReleasedBefore = false;
    private boolean dragReleasedAfter = false;
 
-   /** For extending types. */
-   public RDXBehaviorTreeNode(S state)
-   {
-      this.state = state;
-      definition = state.getDefinition();
-   }
+   protected final DRCRobotModel robotModel;
+   protected final RDXBehaviorTreeScene scene;
+   protected final ROS2SyncedRobotModel syncedRobot;
+   protected final RobotCollisionModel selectionCollisionModel;
+   protected final RDXBaseUI baseUI;
+   protected final RDX3DPanel panel3D;
 
    /** For creating a basic node. */
-   @SuppressWarnings("unchecked")
-   public RDXBehaviorTreeNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXBehaviorTreeNode(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
-      state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
+      this((S) new BehaviorTreeNodeState<D>(id, (D) new BehaviorTreeNodeDefinition(rootNode.getDefinition()), rootNode.getState()), rootNode);
+   }
+
+   /** For extending types. */
+   public RDXBehaviorTreeNode(S state, RDXBehaviorTreeRootNode rootNode)
+   {
+      definition = state.getDefinition();
+      this.state = state;
+      this.rootNode = rootNode;
+      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.scene = rootNode.getScene();
+      this.syncedRobot = rootNode.getSyncedRobot();
+      this.selectionCollisionModel = rootNode.getSelectionCollisionModel();
+      this.baseUI = rootNode.getBaseUI();
+      this.panel3D = rootNode.get3DPanel();
+   }
+
+   /** Root node constructor. */
+   public RDXBehaviorTreeNode(S state,
+                              ROS2SyncedRobotModel syncedRobot,
+                              RDXBehaviorTreeScene scene,
+                              RobotCollisionModel selectionCollisionModel,
+                              RDXBaseUI baseUI,
+                              RDX3DPanel panel3D)
+   {
+      this.definition = state.getDefinition();
+      this.state = state;
+      this.rootNode = (RDXBehaviorTreeRootNode) this;
+      this.robotModel = rootNode.getDefinition().getRobotModel();
+      this.scene = scene;
+      this.syncedRobot = syncedRobot;
+      this.selectionCollisionModel = selectionCollisionModel;
+      this.baseUI = baseUI;
+      this.panel3D = panel3D;
    }
 
    @Override
@@ -263,7 +298,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          if (ImGui.menuItem(labels.get("Rename...")))
          {
-            RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
+            RDXBehaviorTreeTools.runForSubtreeNodes(rootNode, node -> node.setNameBeingEdited(false));
             isNameBeingEdited = true;
             imNodeNameText.set(definition.getName());
          }

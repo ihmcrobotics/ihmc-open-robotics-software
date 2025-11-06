@@ -44,12 +44,6 @@ public class RDXFootstepPlanActionGoalFootstep
       gizmo.getPoseGizmo().setParentFrame(state.getGoalFrame().getReferenceFrame());
    }
 
-   public void handleGizmoModifiedByUser()
-   {
-      if (gizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-         definition.modify();
-   }
-
    public void updatePoses()
    {
       gizmo.getPoseGizmo().update();

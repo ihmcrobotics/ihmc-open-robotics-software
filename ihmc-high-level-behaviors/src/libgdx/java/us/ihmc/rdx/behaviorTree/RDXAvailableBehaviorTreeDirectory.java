@@ -7,9 +7,9 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefiniti
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -23,7 +23,7 @@ public class RDXAvailableBehaviorTreeDirectory
    private final WorkspaceResourceDirectory treeFilesDirectory;
    private final RDXBehaviorTree behaviorTree;
    private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final RDXBehaviorTreeScene scene;
    private final Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete;
 
    private final ImGuiExpandCollapseRenderer expandCollapseRenderer = new ImGuiExpandCollapseRenderer();
@@ -34,13 +34,13 @@ public class RDXAvailableBehaviorTreeDirectory
    public RDXAvailableBehaviorTreeDirectory(WorkspaceResourceDirectory treeFilesDirectory,
                                             RDXBehaviorTree behaviorTree,
                                             BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue,
-                                            ReferenceFrameLibrary referenceFrameLibrary,
+                                            RDXBehaviorTreeScene scene,
                                             Consumer<BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>>> complete)
    {
       this.treeFilesDirectory = treeFilesDirectory;
       this.behaviorTree = behaviorTree;
       this.topologyOperationQueue = topologyOperationQueue;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.scene = scene;
       this.complete = complete;
    }
 
@@ -58,7 +58,7 @@ public class RDXAvailableBehaviorTreeDirectory
             }
             else
             {
-               RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
+               RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, scene);
                if (treeFile.getName() != null && treeFile.getNotes() != null)
                {
                   indexedTreeFiles.add(treeFile);
@@ -75,7 +75,7 @@ public class RDXAvailableBehaviorTreeDirectory
          RDXAvailableBehaviorTreeDirectory subtreeDirectory = new RDXAvailableBehaviorTreeDirectory(subdirectory,
                                                                                                     behaviorTree,
                                                                                                     topologyOperationQueue,
-                                                                                                    referenceFrameLibrary,
+                                                                                                    scene,
                                                                                                     complete);
          subtreeDirectory.reindexDirectory();
          indexedTreeDirectories.add(subtreeDirectory);
@@ -125,19 +125,27 @@ public class RDXAvailableBehaviorTreeDirectory
             {
                if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
                {
-                  RDXBehaviorTreeNode<?, ?> loadedNode = behaviorTree.getFileLoader().loadFromFile(indexedTreeFile.getTreeFile(), topologyOperationQueue);
+                  RDXBehaviorTreeRootNode rootNode;
+                  if (relativeNode == null) // Automatically add a root node if there isn't one
+                     rootNode = (RDXBehaviorTreeRootNode) behaviorTree.getNodeBuilder().createRootNode(behaviorTree.getAndIncrementNextID());
+                  else
+                     rootNode = behaviorTree.getRootNode();
+
+                  RDXBehaviorTreeNode<?, ?> loadedNode
+                        = behaviorTree.getFileLoader().loadFromFile(rootNode, indexedTreeFile.getTreeFile(), topologyOperationQueue);
 
                   if (loadedNode != null)
                   {
-                     RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
-
-                     if (behaviorTree.getRootNode() == null) // Automatically add a root node if there isn't one
+                     RDXBehaviorTreeNode<?, ?> nodeToInsert;
+                     if (relativeNode == null) // Add as child of root node if we made one
                      {
-                        nodeToInsert = new RDXBehaviorTreeRootNode(behaviorTree.getAndIncrementNextID(),
-                                                                   behaviorTree.getCRDTInfo(),
-                                                                   behaviorTree.getSaveFileDirectory());
-                        nodeToInsert.getDefinition().modify();
-                        topologyOperationQueue.queueAppendChildModify(nodeToInsert, loadedNode);
+                        nodeToInsert = rootNode;
+                        rootNode.getDefinition().modify();
+                        topologyOperationQueue.queueAppendChildModify(rootNode, loadedNode);
+                     }
+                     else
+                     {
+                        nodeToInsert = loadedNode;
                      }
 
                      BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition

@@ -2,25 +2,24 @@ package us.ihmc.behaviors.behaviorTree.topology;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * This interface just exists to provide a better name to what this is,
- * which gets passed down from BehaviorTree's modifyTreeTopology method and serves
- * to queue up tree modifications.
- * We are intentionally not checking the types in this class, because it gets
- * to complicated to use and doesn't add much value.
+ * This class allows to queue multiple tree modifications and then execute them
+ * all at once via performAllQueuedOperations(). This ensures the tree structure
+ * remains consistent during complex operations.
  *
  * @param <T> The generic type of this node: RDX or Executor
  */
-public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?, ?>>
+public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?, ?>> extends BehaviorTreeTopologyOperations<T>
 {
-   private final BehaviorTree<T> behaviorTree;
+   private final BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree;
    private final Queue<BehaviorTreeTopologyOperation> topologyOperationQueue = new LinkedList<>();
 
-   public BehaviorTreeTopologyOperationQueue(BehaviorTree<T> behaviorTree)
+   public BehaviorTreeTopologyOperationQueue(BehaviorTree<BehaviorTreeRootNode<T>, T> behaviorTree)
    {
       this.behaviorTree = behaviorTree;
    }
@@ -45,7 +44,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       if (insertionDefinition.getInsertionType() == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
-         queueSetRootNodeModify(insertionDefinition.getNodeToInsert());
+         queueSetRootNodeModify((BehaviorTreeRootNode<T>) insertionDefinition.getNodeToInsert());
       }
       else
       {
@@ -53,7 +52,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
       }
    }
 
-   public void queueSetRootNode(T rootNode)
+   public void queueSetRootNode(BehaviorTreeRootNode<T> rootNode)
    {
       topologyOperationQueue.add(() ->
       {
@@ -61,7 +60,7 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
       });
    }
 
-   public void queueSetRootNodeModify(T rootNode)
+   public void queueSetRootNodeModify(BehaviorTreeRootNode<T> rootNode)
    {
       topologyOperationQueue.add(() ->
       {
@@ -74,11 +73,11 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       topologyOperationQueue.add(() ->
       {
-         T rootNode = behaviorTree.getRootNode();
+         T rootNode = (T) behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          behaviorTree.getRootReferenceModification().modify();
          if (rootNode != null)
-            BehaviorTreeTopologyOperations.destroySubtreeModify(rootNode);
+            destroySubtreeModify(rootNode);
       });
    }
 
@@ -86,23 +85,23 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
    {
       topologyOperationQueue.add(() ->
       {
-         T rootNode = behaviorTree.getRootNode();
+         T rootNode = (T) behaviorTree.getRootNode();
          behaviorTree.setRootNode(null);
          if (rootNode != null)
-            BehaviorTreeTopologyOperations.destroySubtree(rootNode);
+            destroySubtree(rootNode);
       });
    }
 
    public void queueDestroySubtreeModify(T subtreeRoot)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.destroySubtreeModify(subtreeRoot));
+      topologyOperationQueue.add(() -> destroySubtreeModify(subtreeRoot));
    }
 
    public void queueInsertChildModify(T parent, T child, int insertionIndex)
    {
       topologyOperationQueue.add(() ->
       {
-         BehaviorTreeTopologyOperations.insertChildModify(parent, child, insertionIndex);
+         insertChildModify(parent, child, insertionIndex);
       });
    }
 
@@ -128,23 +127,23 @@ public class BehaviorTreeTopologyOperationQueue<T extends BehaviorTreeNode<T, ?,
                --insertionIndex;
          }
 
-         BehaviorTreeTopologyOperations.moveChildModify(toParent, child, insertionIndex);
+         moveChildModify(toParent, child, insertionIndex);
       });
    }
 
    public void queueAppendChildModify(T parent, T child)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.appendChildModify(parent, child));
+      topologyOperationQueue.add(() -> appendChildModify(parent, child));
    }
 
    public void queueClearImmediateChildren(T node)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.clearImmediateChildren(node));
+      topologyOperationQueue.add(() -> clearImmediateChildren(node));
    }
 
    public void queueAppendChild(T parent, T child)
    {
-      topologyOperationQueue.add(() -> BehaviorTreeTopologyOperations.appendChild(parent, child));
+      topologyOperationQueue.add(() -> appendChild(parent, child));
    }
 
    public void queueOperation(BehaviorTreeTopologyOperation topologyOperation)

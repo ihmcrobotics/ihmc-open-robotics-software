@@ -8,13 +8,13 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiMouseCursor;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTree;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.sync.ROS2PeerClockOffsetEstimator;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -25,13 +25,11 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager.Type;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
+public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeRootNode, RDXBehaviorTreeNode<?, ?>>
 {
    public static final RDXBehaviorTreeSettings SETTINGS = new RDXBehaviorTreeSettings();
-   private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -40,34 +38,35 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
    private transient final TLongObjectMap<RDXBehaviorTreeNode<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final RDXPanel panel = new RDXPanel("Behavior Tree", this::renderImGuiWidgets, false, true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final RDXBehaviorTreeFileMenu fileMenu;
    private final RDXBehaviorTreeNodeCreationMenu nodeCreationMenu;
    private final RDXBehaviorTreeWidgetsVerticalLayout treeWidgetsVerticalLayout;
+   private final RDXBehaviorTreeScene scene;
    private boolean anyNodeSelected;
    private RDXBehaviorTreeNode<?, ?> selectedNode;
    private boolean draggingDivider;
+   private boolean shouldSave = false;
 
    public RDXBehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
-                          DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
                           ROS2PeerClockOffsetEstimator peerClockEstimator,
                           RobotCollisionModel selectionCollisionModel,
                           RDXBaseUI baseUI,
-                          RDX3DPanel panel3D,
-                          ReferenceFrameLibrary referenceFrameLibrary)
+                          RDX3DPanel panel3D)
    {
-      super(ROS2ActorDesignation.OPERATOR,
-            peerClockEstimator,
-            treeFilesDirectory,
-            new RDXBehaviorTreeNodeBuilder(robotModel,
-                                           syncedRobot,
-                                           selectionCollisionModel,
-                                           baseUI,
-                                           panel3D,
-                                           referenceFrameLibrary));
+      super(syncedRobot, ROS2ActorDesignation.OPERATOR, peerClockEstimator, treeFilesDirectory, new RDXBehaviorTreeNodeBuilder());
 
-      fileMenu = new RDXBehaviorTreeFileMenu();
-      nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, referenceFrameLibrary);
+      scene = new RDXBehaviorTreeScene(crdtInfo, this::getAndIncrementNextID, syncedRobot, baseUI, panel);
+      setScene(scene);
+
+      ((RDXBehaviorTreeNodeBuilder) getNodeBuilder()).initialize(crdtInfo,
+                                                                 saveFileDirectory,
+                                                                 syncedRobot,
+                                                                 scene,
+                                                                 selectionCollisionModel,
+                                                                 baseUI,
+                                                                 panel3D);
+
+      nodeCreationMenu = new RDXBehaviorTreeNodeCreationMenu(this, treeFilesDirectory, scene);
       treeWidgetsVerticalLayout = new RDXBehaviorTreeWidgetsVerticalLayout(this);
       baseUI.getImGuiPanelManager().addPanel(panel);
    }
@@ -83,6 +82,7 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 
    public void update()
    {
+      scene.update();
       idToNodeMap.clear();
 
       if (rootNode != null)
@@ -153,8 +153,31 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 
    protected void renderImGuiWidgetsPre()
    {
+      shouldSave = false;
       ImGui.beginMenuBar();
-      fileMenu.renderFileMenu(rootNode, nodeCreationMenu);
+      if (ImGui.beginMenu(labels.get("File")))
+      {
+         if (rootNode == null)
+         {
+            if (ImGui.menuItem(labels.get("Refresh File List")))
+               nodeCreationMenu.reindexDirectory();
+         }
+         else
+         {
+            if (ImGui.menuItem(labels.get("Save All"), "Ctrl + S"))
+            {
+               RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
+               rootNode.getDefinition().saveToFile();
+            }
+            if (ImGui.menuItem(labels.get("Undo All Non-topological Changes")))
+            {
+               RDXBaseUI.pushNotification("Undoing all non-topological behavior tree changes");
+               rootNode.getDefinition().undoAllNontopologicalChanges();
+            }
+         }
+
+         ImGui.endMenu();
+      }
       if (ImGui.beginMenu(labels.get("View")))
       {
          if (rootNode != null)
@@ -186,12 +209,15 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
                selectedNode = node;
          });
 
+         shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
+
          float remainingHeight = ImGui.getContentRegionAvailY();
          float treeExplorerPercentage = SETTINGS.getTreeExplorerHeightPercentage();
          float treeExplorerHeight = anyNodeSelected ? remainingHeight * treeExplorerPercentage : remainingHeight;
 
          ImGui.beginChild(labels.get("Tree Explorer Scroll Area"), 0.0f, treeExplorerHeight);
          treeWidgetsVerticalLayout.renderImGuiWidgets();
+         shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
          ImGui.endChild();
 
          if (rootNode != null && anyNodeSelected) // It can become null above
@@ -216,22 +242,23 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
 
             ImGui.beginChild(labels.get("Node Settings Scroll Area"), 0.0f, ImGui.getContentRegionAvailY());
             renderSelectedNodeSettingsWidgets(rootNode);
+            shouldSave |= ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S');
             ImGui.endChild();
-
-            if (ImGui.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyPressed('S'))
-            {
-               RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
-               rootNode.getDefinition().saveToFile();
-            }
          }
       }
       else
       {
-         nodeCreationMenu.renderImGuiWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
+         nodeCreationMenu.renderImGuiWidgets(null, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
 
       // Perform any modifications that were made via user interaction.
       modifyTreeTopology();
+
+      if (shouldSave)
+      {
+         RDXBaseUI.pushNotification("Saving %s".formatted(rootNode.getDefinition().getName()));
+         rootNode.getDefinition().saveToFile();
+      }
    }
 
    private void renderSelectedNodeSettingsWidgets(RDXBehaviorTreeNode<?, ?> node)
@@ -300,18 +327,6 @@ public class RDXBehaviorTree extends BehaviorTree<RDXBehaviorTreeNode<?, ?>>
       RDXBaseUI.getInstance().getVRManager().getContext().removeVRInputProcessor(this);
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewPickCalculator(this);
       RDXBaseUI.getInstance().getPrimary3DPanel().removeImGui3DViewInputProcessor(this);
-   }
-
-   @Override
-   public void setRootNode(RDXBehaviorTreeNode<?, ?> rootNode)
-   {
-      this.rootNode = (RDXBehaviorTreeRootNode) rootNode;
-   }
-
-   @Override
-   public RDXBehaviorTreeRootNode getRootNode()
-   {
-      return rootNode;
    }
 
    public RDXBehaviorTreeNodeCreationMenu getNodeCreationMenu()

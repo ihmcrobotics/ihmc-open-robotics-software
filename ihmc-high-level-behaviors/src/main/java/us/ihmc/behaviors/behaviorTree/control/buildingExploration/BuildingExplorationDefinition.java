@@ -2,14 +2,13 @@ package us.ihmc.behaviors.behaviorTree.control.buildingExploration;
 
 import behavior_msgs.msg.dds.BuildingExplorationDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 
 public class BuildingExplorationDefinition extends BehaviorTreeNodeDefinition
 {
-   public BuildingExplorationDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BuildingExplorationDefinition(BehaviorTreeRootNodeDefinition rootNode)
    {
-      super(crdtInfo, saveFileDirectory);
+      super(rootNode);
    }
 
    public void toMessage(BuildingExplorationDefinitionMessage message)

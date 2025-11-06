@@ -2,23 +2,30 @@ package us.ihmc.rdx.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionProgressWidgetsManager;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
+   implements BehaviorTreeRootNode<RDXBehaviorTreeNode<?, ?>>
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBooleanWrapper automaticExecutionCheckbox;
@@ -31,9 +38,21 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
    private final ImGuiRootIconWidget rootIconWidget = new ImGuiRootIconWidget();
 
-   public RDXBehaviorTreeRootNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public RDXBehaviorTreeRootNode(long id,
+                                  CRDTInfo crdtInfo,
+                                  WorkspaceResourceDirectory saveFileDirectory,
+                                  ROS2SyncedRobotModel syncedRobot,
+                                  RDXBehaviorTreeScene scene,
+                                  RobotCollisionModel selectionCollisionModel,
+                                  RDXBaseUI baseUI,
+                                  RDX3DPanel panel3D)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory));
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
+            syncedRobot,
+            scene,
+            selectionCollisionModel,
+            baseUI,
+            panel3D);
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -208,5 +227,32 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public RDXActionProgressWidgetsManager getProgressWidgetsManager()
    {
       return progressWidgetsManager;
+   }
+
+   // Getters are in here so there's not getters in base node for root stuff
+
+   public ROS2SyncedRobotModel getSyncedRobot()
+   {
+      return syncedRobot;
+   }
+
+   public RDXBehaviorTreeScene getScene()
+   {
+      return scene;
+   }
+
+   public RobotCollisionModel getSelectionCollisionModel()
+   {
+      return selectionCollisionModel;
+   }
+
+   public RDXBaseUI getBaseUI()
+   {
+      return baseUI;
+   }
+
+   public RDX3DPanel get3DPanel()
+   {
+      return panel3D;
    }
 }

@@ -6,16 +6,14 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionFootstepState;
 import us.ihmc.behaviors.behaviorTree.action.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -25,6 +23,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -32,25 +32,19 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXMutableArrowModel;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
-import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
+import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.widgets.ImGuiFootstepsWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.commons.lists.RecyclingArrayListTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
 
 public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState, FootstepPlanActionDefinition>
 {
-   private final DRCRobotModel robotModel;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImBoolean editManuallyPlacedSteps = new ImBoolean();
@@ -74,18 +68,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
    private final RDXFootstepPlanGraphic previewFootstepPlan;
 
-   public RDXFootstepPlanAction(long id,
-                                CRDTInfo crdtInfo,
-                                WorkspaceResourceDirectory saveFileDirectory,
-                                RDXBaseUI baseUI,
-                                DRCRobotModel robotModel,
-                                ROS2SyncedRobotModel syncedRobot,
-                                ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXFootstepPlanAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
-
-      this.robotModel = robotModel;
-      this.syncedRobot = syncedRobot;
+      super(new FootstepPlanActionState(id, rootNode.getState()), rootNode);
 
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
          new RDXFootstepPlanActionFootstep(baseUI,
@@ -94,7 +79,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                            RecyclingArrayListTools.getUnsafe(state.getManuallyPlacedFootsteps(), numberOfAllocatedFootsteps++)));
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getParentFrameName,
                                                                 this::changeParentFrame);
       manuallyPlaceStepsWrapper = new ImBooleanWrapper(definition::getIsManuallyPlaced,
@@ -229,14 +214,19 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          RDXCRDTTools.syncGizmoWithBidirectionalField(goalFocalPointGizmo.getPoseGizmo(), definition.getGoalFocalPoint(), definition);
 
          for (RobotSide side : RobotSide.values)
-            goalFeet.get(side).handleGizmoModifiedByUser();
-
-         if (definition.isModified())
-            for (RobotSide side : RobotSide.values)
-               state.copyDefinitionToGoalFootstepToGoalTransform(side);
-         else
-            for (RobotSide side : RobotSide.values)
+         {
+            RDXPose3DGizmo gizmo = goalFeet.get(side).getGizmo().getPoseGizmo();
+            if (gizmo.getGizmoModifiedByUser().poll())
+            {
                state.copyGoalFootstepToGoalTransformToDefinition(side);
+            }
+            else if (definition.isModified())
+            {
+               state.copyDefinitionToGoalFootstepToGoalTransform(side);
+            }
+
+            gizmo.update();
+         }
 
          state.getGoalFrame().getReferenceFrame().update();
 

@@ -1,20 +1,17 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.action.JointspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.SakeHandAPI;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
@@ -25,8 +22,6 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
     */
    private static final double NOMINAL_TRAJECORY_DURATION = 1.0;
 
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private final JointspaceTrajectoryTrackingErrorCalculator trackingCalculator = new JointspaceTrajectoryTrackingErrorCalculator();
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
@@ -38,16 +33,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private boolean isCalibrated;
    private boolean needsReset;
 
-   public SakeHandCommandActionExecutor(long id,
-                                        CRDTInfo crdtInfo,
-                                        WorkspaceResourceDirectory saveFileDirectory,
-                                        ROS2ControllerHelper ros2ControllerHelper,
-                                        ROS2SyncedRobotModel syncedRobot)
+   public SakeHandCommandActionExecutor(long id, BehaviorTreeRootNodeExecutor rootNode)
    {
-      super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
-
-      this.ros2ControllerHelper = ros2ControllerHelper;
-      this.syncedRobot = syncedRobot;
+      super(new SakeHandCommandActionState(id, rootNode.getState()), rootNode);
 
       for (RobotSide side : RobotSide.values)
       {

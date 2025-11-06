@@ -1,16 +1,14 @@
 package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusDouble;
 import us.ihmc.communication.crdt.CRDTStatusDoubleArray;
 import us.ihmc.communication.crdt.CRDTStatusPoseList;
 import us.ihmc.communication.crdt.CRDTStatusVector3D;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveActionDefinition>
 {
@@ -28,11 +26,11 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    private final CRDTStatusDoubleArray previewJointAngles;
    private final CRDTStatusDouble previewSolutionQuality;
 
-   public ScrewPrimitiveActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public ScrewPrimitiveActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new ScrewPrimitiveActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new ScrewPrimitiveActionDefinition(rootNode.getDefinition()), rootNode);
 
-      screwFrame = new DetachableReferenceFrame(referenceFrameLibrary, definition.getScrewAxisPoseInObjectFrame().getValueReadOnly());
+      screwFrame = new DetachableReferenceFrame(scene::findFrameByName, definition.getScrewAxisPoseInObjectFrame().getValueReadOnly());
       previewTrajectory = new CRDTStatusPoseList(ROS2ActorDesignation.ROBOT, crdtInfo);
       force = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);

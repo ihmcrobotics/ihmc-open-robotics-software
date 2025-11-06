@@ -59,3 +59,5 @@ slamWrapperDependencies {
    api("org.bytedeco:javacpp:1.5.11")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
+
+app.entrypoint("IsaacROSFoundationPoseDemo", "us.ihmc.perception.demo.IsaacROSFoundationPoseDemo")

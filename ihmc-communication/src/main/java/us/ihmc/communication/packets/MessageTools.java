@@ -27,6 +27,7 @@ import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import ihmc_common_msgs.msg.dds.UUIDMessage;
 import ihmc_common_msgs.msg.dds.WeightMatrix3DMessage;
+import ihmc_common_msgs.msg.dds.YoRegistryMessage;
 import org.apache.logging.log4j.Level;
 import perception_msgs.msg.dds.DetectedFacesPacket;
 import perception_msgs.msg.dds.HeatMapPacket;
@@ -96,6 +97,8 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3Traject
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -1645,5 +1648,32 @@ public class MessageTools
       {
          throw new RuntimeException(e);
       }
+   }
+
+   public static void toMessage(YoRegistry registry, YoRegistryMessage message)
+   {
+      message.getData().getBuffer().position(0);
+      toMessageInternal(registry, message.getData().getBuffer());
+   }
+
+   private static void toMessageInternal(YoRegistry registry, ByteBuffer buffer)
+   {
+      for (YoVariable variable : registry.getVariables())
+         buffer.putLong(variable.getValueAsLongBits());
+      for (YoRegistry child : registry.getChildren())
+         toMessageInternal(child, buffer);
+   }
+
+   public static void fromMessage(YoRegistryMessage message, YoRegistry registry)
+   {
+      fromMessageInternal(message.getData().getBuffer(), registry);
+   }
+
+   private static void fromMessageInternal(ByteBuffer buffer, YoRegistry registry)
+   {
+      for (YoVariable variable : registry.getVariables())
+         variable.setValueFromLongBits(buffer.getLong());
+      for (YoRegistry child : registry.getChildren())
+         fromMessageInternal(buffer, child);
    }
 }

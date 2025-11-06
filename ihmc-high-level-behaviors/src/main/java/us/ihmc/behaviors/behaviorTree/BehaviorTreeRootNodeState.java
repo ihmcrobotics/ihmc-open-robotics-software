@@ -3,7 +3,9 @@ package us.ihmc.behaviors.behaviorTree;
 import behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessage;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.commons.lang3.mutable.MutableInt;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.communication.crdt.CRDTBidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTBidirectionalNotification;
@@ -29,9 +31,13 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final List<LeafNodeState<?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeState<?>> orderedActions = new ArrayList<>();
 
-   public BehaviorTreeRootNodeState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BehaviorTreeRootNodeState(long id,
+                                    CRDTInfo crdtInfo,
+                                    WorkspaceResourceDirectory saveFileDirectory,
+                                    DRCRobotModel robotModel,
+                                    BehaviorTreeSceneState scene)
    {
-      super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory, robotModel), null, scene);
 
       automaticExecution = new CRDTBidirectionalBoolean(definition, false);
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
@@ -203,5 +209,12 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public List<ActionNodeState<?>> getOrderedActions()
    {
       return orderedActions;
+   }
+
+   // Getters are in here so there's not getters in base node for root stuff
+
+   public BehaviorTreeSceneState getScene()
+   {
+      return scene;
    }
 }

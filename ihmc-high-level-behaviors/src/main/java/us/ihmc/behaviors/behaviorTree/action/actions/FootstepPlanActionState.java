@@ -2,29 +2,27 @@ package us.ihmc.behaviors.behaviorTree.action.actions;
 
 import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.action.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTStatusEnumField;
 import us.ihmc.communication.crdt.CRDTStatusFootstepList;
 import us.ihmc.communication.crdt.CRDTStatusInteger;
 import us.ihmc.communication.crdt.CRDTStatusPose3D;
 import us.ihmc.communication.crdt.CRDTStatusSE3Trajectory;
+import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.commons.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionDefinition>
 {
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final LatestTimestampModifiable stateDataSynchronizer;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> manuallyPlacedFootsteps;
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
@@ -38,20 +36,17 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final CRDTStatusEnumField<FootstepPlanActionExecutionState> executionState;
    private final CRDTStatusFootstepList previewFootsteps;
 
-   public FootstepPlanActionState(long id,
-                                  CRDTInfo crdtInfo,
-                                  WorkspaceResourceDirectory saveFileDirectory,
-                                  ReferenceFrameLibrary referenceFrameLibrary,
-                                  DRCRobotModel robotModel)
+   public FootstepPlanActionState(long id, BehaviorTreeRootNodeState rootNode)
    {
-      super(id, new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory, robotModel.getFootstepPlannerParameters()), crdtInfo);
+      super(id, new FootstepPlanActionDefinition(rootNode.getDefinition()), rootNode);
 
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      // Prevents feedback loop where UI modifies definition fields and robot side updates state fields
+      stateDataSynchronizer = new LatestTimestampModifiable(definition.getCRDTInfo());
 
-      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(definition);
-      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());
+      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(stateDataSynchronizer);
+      goalFrame = new DetachableReferenceFrame(scene::findFrameByName, goalToParentTransform.getValueReadOnly());
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
-         new FootstepPlanActionFootstepState(referenceFrameLibrary,
+         new FootstepPlanActionFootstepState(scene,
                                              definition.getCRDTParentFrameName(),
                                              RecyclingArrayListTools.getUnsafe(definition.getManuallyPlacedFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
       totalNumberOfFootsteps = new CRDTStatusInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
@@ -125,6 +120,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.toMessage(message.getState());
 
+      stateDataSynchronizer.toMessage(message.getLatestModificationStateData());
       goalToParentTransform.toMessage(message.getGoalTransformToParent());
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
       message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
@@ -149,6 +145,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.fromMessage(message.getState());
 
+      stateDataSynchronizer.fromMessage(message.getLatestModificationStateData());
       goalToParentTransform.fromMessage(message.getGoalTransformToParent());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
       numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
@@ -179,7 +176,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public boolean areFramesInWorld()
    {
-      return referenceFrameLibrary.containsFrame(definition.getParentFrameName()) && goalFrame.isChildOfWorld();
+      return scene.containsFrame(definition.getParentFrameName()) && goalFrame.isChildOfWorld();
    }
 
    public ReferenceFrame getParentFrame()
@@ -239,6 +236,6 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
    public ReferenceFrame getFrameByName(String frameName)
    {
-      return referenceFrameLibrary.findFrameByName(frameName);
+      return scene.findFrameByName(frameName);
    }
 }

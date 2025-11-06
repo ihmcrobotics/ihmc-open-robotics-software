@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class BehaviorTreeDefinitionRegistry
 {
-   private static final DefinitionMapping[] DEFINITIONS = new DefinitionMapping[]
+   private static final DefinitionMapping[] REGISTRY = new DefinitionMapping[]
    {
       new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
       new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
@@ -39,18 +39,18 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
       new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
    };
-   private static final Map<Class<?>, DefinitionMapping> DEFINITIONS_MAP = new HashMap<>();
+   private static final Map<Class<?>, DefinitionMapping> REGISTRY_MAP = new HashMap<>();
    static
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
-         DEFINITIONS_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
+         REGISTRY_MAP.put(definitionEntry.getTypeClass(), definitionEntry);
       }
    }
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
          if (typeName.equals(definitionEntry.getTypeClass().getSimpleName()))
             return definitionEntry.getTypeClass();
@@ -60,7 +60,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static Class<?> getNodeDefinitionClass(byte nodeType)
    {
-      for (DefinitionMapping definitionEntry : DEFINITIONS)
+      for (DefinitionMapping definitionEntry : REGISTRY)
       {
          if (nodeType == definitionEntry.getMessageByte())
             return definitionEntry.getTypeClass();
@@ -71,7 +71,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static byte getMessageByte(Class<?> definitionClass)
    {
-      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      DefinitionMapping definitionMapping = REGISTRY_MAP.get(definitionClass);
       if (definitionMapping != null)
       {
          return definitionMapping.getMessageByte();
@@ -82,7 +82,7 @@ public class BehaviorTreeDefinitionRegistry
 
    public static String getInitialName(Class<?> definitionClass)
    {
-      DefinitionMapping definitionMapping = DEFINITIONS_MAP.get(definitionClass);
+      DefinitionMapping definitionMapping = REGISTRY_MAP.get(definitionClass);
       if (definitionMapping != null)
       {
          return definitionMapping.getInitialName();

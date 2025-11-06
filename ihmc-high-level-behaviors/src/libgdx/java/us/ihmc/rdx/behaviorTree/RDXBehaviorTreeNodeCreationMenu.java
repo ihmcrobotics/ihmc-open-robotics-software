@@ -17,9 +17,9 @@ import us.ihmc.behaviors.behaviorTree.control.ActionSequenceDefinition;
 import us.ihmc.behaviors.behaviorTree.control.FallbackNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.*;
 import us.ihmc.behaviors.behaviorTree.action.actions.PelvisHeightOrientationActionDefinition;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.behaviorTree.actions.RDXActionNode;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -31,19 +31,13 @@ public class RDXBehaviorTreeNodeCreationMenu
    private final BehaviorTreeTopologyOperationQueue<RDXBehaviorTreeNode<?, ?>> topologyOperationQueue;
    private final RDXAvailableBehaviorTreeDirectory behaviorTreesDirectory;
 
-   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree,
-                                          WorkspaceResourceDirectory treeFilesDirectory,
-                                          ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXBehaviorTreeNodeCreationMenu(RDXBehaviorTree behaviorTree, WorkspaceResourceDirectory treeFilesDirectory, RDXBehaviorTreeScene scene)
    {
       this.behaviorTree = behaviorTree;
 
       topologyOperationQueue = behaviorTree.getTopologyChangeQueue();
 
-      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory,
-                                                                     behaviorTree,
-                                                                     topologyOperationQueue,
-                                                                     referenceFrameLibrary,
-                                                                     this::complete);
+      behaviorTreesDirectory = new RDXAvailableBehaviorTreeDirectory(treeFilesDirectory, behaviorTree, topologyOperationQueue, scene, this::complete);
       behaviorTreesDirectory.reindexDirectory();
    }
 
@@ -53,7 +47,7 @@ public class RDXBehaviorTreeNodeCreationMenu
     */
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
-      if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+      if (relativeNode == null)
       {
          ImGui.pushFont(ImGuiTools.getSmallBoldFont());
          ImGui.text("Start from scratch:");
@@ -146,11 +140,11 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
          {
-            RDXBehaviorTreeNode<?, ?> newNode = behaviorTree.getNodeBuilder()
-                                                            .createNode(nodeType,
-                                                                        behaviorTree.getAndIncrementNextID(),
-                                                                        behaviorTree.getCRDTInfo(),
-                                                                        behaviorTree.getSaveFileDirectory());
+            RDXBehaviorTreeNode<?, ?> newNode;
+            if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+               newNode = (RDXBehaviorTreeNode<?, ?>) behaviorTree.getNodeBuilder().createRootNode(behaviorTree.getAndIncrementNextID());
+            else
+               newNode = behaviorTree.getNodeBuilder().createNode(nodeType, behaviorTree.getAndIncrementNextID(), behaviorTree.getRootNode());
             newNode.getDefinition().modify();
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                   = new BehaviorTreeNodeInsertionDefinition<>(insertionType, newNode, relativeNode);

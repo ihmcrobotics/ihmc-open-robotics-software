@@ -6,33 +6,28 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionDefinition;
 import us.ihmc.behaviors.behaviorTree.action.actions.ScrewPrimitiveActionState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.rdx.behaviorTree.RDXBehaviorTreeRootNode;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.mesh.RDXDashedLineMesh;
-import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXIKSolverColors;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionState, ScrewPrimitiveActionDefinition>
 {
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo objectFrameComboBox;
    private final ImGuiSliderDoubleWrapper translationWidget;
@@ -54,22 +49,15 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
    private boolean playbackPreview = false;
    private final Stopwatch playbackStopwatch = new Stopwatch();
 
-   public RDXScrewPrimitiveAction(long id,
-                                  CRDTInfo crdtInfo,
-                                  WorkspaceResourceDirectory saveFileDirectory,
-                                  RDX3DPanel panel3D,
-                                  ReferenceFrameLibrary referenceFrameLibrary,
-                                  ROS2SyncedRobotModel syncedRobot)
+   public RDXScrewPrimitiveAction(long id, RDXBehaviorTreeRootNode rootNode)
    {
-      super(new ScrewPrimitiveActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
-
-      this.syncedRobot = syncedRobot;
+      super(new ScrewPrimitiveActionState(id, rootNode.getState()), rootNode);
 
       screwAxisGizmo = new RDXSelectablePose3DGizmo();
       screwAxisGizmo.create(panel3D);
 
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
-                                                                referenceFrameLibrary,
+                                                                scene::getAllFrameNames,
                                                                 definition::getObjectFrameName,
                                                                 definition::setObjectFrameName);
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
