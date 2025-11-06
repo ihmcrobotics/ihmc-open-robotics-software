@@ -2,12 +2,15 @@ package us.ihmc.avatar.wholeBodyHardwareControl;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointControlBlender;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -47,6 +50,9 @@ public class AvatarLowLevelOutputProcessor
    private final YoDouble interpolationStartTime = new YoDouble("interpolationTime", registry);
    private final YoDouble interpolationRatio = new YoDouble("interpolationRatio", registry);
 
+   private final YoDouble timeFromEstimator = new YoDouble("timeFromEstimator", registry);
+   private TimestampProvider monotonicTime;
+
    private final JointControlBlender[] jointControlBlenders;
 
    private final YoLowLevelOneDoFJointDesiredDataHolder unprocessedDesireds;
@@ -61,7 +67,14 @@ public class AvatarLowLevelOutputProcessor
       this(robotName, controlledJoints, updateDt, null, parentRegistry);
    }
 
-   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, DoubleProvider yoTime, YoRegistry parentRegistry)
+   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, TimestampProvider monotonicTime, YoRegistry parentRegistry)
+   {
+      this(robotName, controlledJoints, updateDt, null, monotonicTime, parentRegistry);
+      yoTime = timeFromEstimator;
+      this.monotonicTime = monotonicTime;
+   }
+
+   public AvatarLowLevelOutputProcessor(String robotName, OneDoFJointReadOnly[] controlledJoints, double updateDt, DoubleProvider yoTime, TimestampProvider monotonicTime, YoRegistry parentRegistry)
    {
       this.updateDt = updateDt;
       this.yoTime = yoTime;
@@ -71,7 +84,7 @@ public class AvatarLowLevelOutputProcessor
       processedDesireds = new YoLowLevelOneDoFJointDesiredDataHolder(robotName + "Processed", controlledJoints, registry);
 
       jointControlBlenders = new JointControlBlender[controlledJoints.length];
-      interpolateDuration.set(updateDt);
+      interpolateDuration.set(2 * updateDt);
       interpolationStartTime.set(0.0);
 
       for (int i = 0; i < controlledJoints.length; i++)
@@ -128,6 +141,8 @@ public class AvatarLowLevelOutputProcessor
 
    public void update(JointDesiredOutputListReadOnly unprocessedDesireds)
    {
+      if (monotonicTime != null)
+         timeFromEstimator.set(Conversions.nanosecondsToSeconds(monotonicTime.getTimestamp()));
       this.unprocessedDesireds.overwriteWith(unprocessedDesireds);
 
       if (interpolateDesireds.getBooleanValue())
@@ -159,7 +174,8 @@ public class AvatarLowLevelOutputProcessor
 
    private void interpolate()
    {
-      double ratio = (yoTime.getValue() - interpolationStartTime.getValueAsDouble()) / interpolateDuration.getValueAsDouble();
+      //TODO Figure out how to make the interp work without having to reduce duration
+      double ratio = (yoTime.getValue() - interpolationStartTime.getValueAsDouble()) / (interpolateDuration.getValueAsDouble() - updateDt);
       interpolationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
       if (ratio <= 1.0)
       {
