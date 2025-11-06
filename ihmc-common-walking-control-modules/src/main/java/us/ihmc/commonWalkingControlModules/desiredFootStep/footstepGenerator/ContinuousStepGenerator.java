@@ -169,6 +169,9 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoEnum<ContinuousStepGeneratorMode> requestedCSGMode = new YoEnum<>("requestedCSGMode", registry, ContinuousStepGeneratorMode.class);
    private final OptionalFactoryField<QuicksterFootstepProvider> quicksterFootstepProvider = new OptionalFactoryField<>("QuicksterFootstepProviderField");
 
+   // YoVariableized version of footstep list
+   private final ArrayList<YoFramePose3D> yoFootsteps = new ArrayList<>();
+
    /**
     * Creates a new step generator, its {@code YoVariable}s will not be attached to any registry.
     */
@@ -210,6 +213,10 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
                           if (!walk.getBooleanValue())
                              isWalking.set(walk.getBooleanValue());
                        });
+
+      for (int i = 0; i < parameters.getNumberOfFootstepsToPlan(); i ++)
+         yoFootsteps.add(new YoFramePose3D("csgFootstep" + i, ReferenceFrame.getWorldFrame(), registry));
+
 
       setSupportFootBasedFootstepAdjustment(true);
    }
@@ -501,6 +508,14 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             nextFootstepPose3DViz.setIncludingFrame(nextFootstepPose3D);
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
+         }
+      }
+
+      for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i ++)
+      {
+         if (yoFootsteps.get(i) != null)
+         {
+            yoFootsteps.get(i).set(footstepDataListMessage.getFootstepDataList().get(i).getLocation(), footstepDataListMessage.getFootstepDataList().get(i).getOrientation());
          }
       }
 

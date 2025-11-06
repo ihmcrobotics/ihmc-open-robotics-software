@@ -43,6 +43,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -126,6 +127,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final YoBoolean updateFootstepReferenceContinuously = new YoBoolean("updateFootstepReferenceContinuously", registry);
    private final YoBoolean requestDisableCoPFeedbackControl = new YoBoolean("requestDisableCoPFeedbackControl", registry);
 
+   private final ArrayList<YoFramePose3D> yoFootsteps = new ArrayList<>();
+
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
                                 double defaultInitialTransferTime,
@@ -169,6 +172,9 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
+
+      for (int i = 0; i < numberOfFootstepsToVisualize; i ++)
+         yoFootsteps.add(new YoFramePose3D("csgReceivedFootstep" + i, ReferenceFrame.getWorldFrame(), registry));
 
       parentRegistry.addChild(registry);
    }
@@ -331,6 +337,14 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       checkForPause();
 
       updateVisualization();
+
+      for (int i = 0; i < upcomingFootsteps.size(); i ++)
+      {
+         if (yoFootsteps.get(i) != null)
+         {
+            yoFootsteps.get(i).set(upcomingFootsteps.get(i).getFootstepPose());
+         }
+      }
 
       if (hasUpcomingFootsteps())
          for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
