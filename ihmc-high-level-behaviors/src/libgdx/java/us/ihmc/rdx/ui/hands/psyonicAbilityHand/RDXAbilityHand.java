@@ -80,8 +80,9 @@ public class RDXAbilityHand implements RDXHandInterface
          else
          {
             command.setControlMode(ControlMode.VEL_TO_POS.toByte());
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 5; i++)
                command.getGoalPositions()[i] = desiredPositions[i].get();
+            command.getGoalPositions()[5] = -desiredPositions[5].get();
          }
          for (int i = 0; i < 6; i++)
             command.getGoalVelocities()[i] = desiredVelocities[i].get();
@@ -101,40 +102,40 @@ public class RDXAbilityHand implements RDXHandInterface
 
       ImGui.beginDisabled(!connected);
 
-      if (ImGui.button("Open"))
+      if (ImGui.button(labels.get("Open")))
          gripNotification.set(Grip.RELAX);
       ImGui.sameLine();
-      if (ImGui.button("Grip"))
+      if (ImGui.button(labels.get("Grip")))
          gripNotification.set(Grip.POWER);
       ImGui.sameLine();
-      if (ImGui.button("Tripod Closed"))
+      if (ImGui.button(labels.get("Tripod Closed")))
          gripNotification.set(Grip.TRIPOD_C);
       ImGui.sameLine();
-      if (ImGui.button("Hook"))
+      if (ImGui.button(labels.get("Hook")))
          gripNotification.set(Grip.HOOK);
       ImGui.sameLine();
-      if (ImGui.button("Tripod Open"))
+      if (ImGui.button(labels.get("Tripod Open")))
          gripNotification.set(Grip.TRIPOD_O);
-      if (ImGui.button("Pinch Open"))
+      if (ImGui.button(labels.get("Pinch Open")))
          gripNotification.set(Grip.PINCH_O);
       ImGui.sameLine();
-      if (ImGui.button("Pinch Closed"))
+      if (ImGui.button(labels.get("Pinch Closed")))
          gripNotification.set(Grip.PINCH_C);
       ImGui.sameLine();
-      if (ImGui.button("Key"))
+      if (ImGui.button(labels.get("Key")))
          gripNotification.set(Grip.KEY);
       ImGui.sameLine();
-      if (ImGui.button("Rude"))
+      if (ImGui.button(labels.get("Rude")))
          gripNotification.set(Grip.RUDE);
 
       boolean executeVelToPos = false;
       for (int i = 0; i < 6; i++)
       {
-         float currentNotch = (currentPositions[0] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
-         float sliderWidth = ImGui.getColumnWidth();
+         float currentNotch = (currentPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+         float sliderWidth = ImGui.getColumnWidth() * 0.6f;
          ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
-         ImGui.pushItemWidth(ImGui.getColumnWidth() * 0.6f);
+         ImGui.pushItemWidth(sliderWidth);
          executeVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), SLIDER_MIN, SLIDER_MAX,
                                "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
          ImGui.popItemWidth();
