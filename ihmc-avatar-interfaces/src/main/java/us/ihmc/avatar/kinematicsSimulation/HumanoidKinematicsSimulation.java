@@ -610,6 +610,8 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
+      if (intraprocessYoVariableLogger != null)
+         intraprocessYoVariableLogger.destroy();
       if (simulatedHandKinematicController != null)
          simulatedHandKinematicController.cleanup();
       controlThread.destroy();
