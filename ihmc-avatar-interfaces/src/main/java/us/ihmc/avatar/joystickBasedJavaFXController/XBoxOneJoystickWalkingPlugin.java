@@ -232,13 +232,6 @@ public class XBoxOneJoystickWalkingPlugin
          walkBackwards = requestWalking && forwardJoystickValue < 0.0;
       }
 
-      continuousHikingCommand.setEnableContinuousHiking(true);
-      continuousHikingCommand.setUseJoystickController(true);
-      continuousHikingCommand.setWalkForwards(walkForwards);
-      continuousHikingCommand.setWalkBackwards(walkBackwards);
-      continuousHikingCommand.setForwardValue(forwardJoystickValue);
-      continuousHikingCommand.setLateralValue(lateralJoystickValue);
-      continuousHikingCommand.setTurningValue(turningJoystickValue);
       configureContinuousHikingCommand(true, walkForwards, walkBackwards, squareUp, forwardJoystickValue, lateralJoystickValue, turningJoystickValue);
    }
 
@@ -316,9 +309,12 @@ public class XBoxOneJoystickWalkingPlugin
 
    public void enableCSGPublishing()
    {
-      // Stop walking before we switch to CH
-      configureContinuousHikingCommand(false, false, false, true, 0.0, 0.0, 0.0);
-      ros2CSGPublisherMap.publish(csgInputCommand);
+      // Stop walking before we switch to CSG
+      if (currentJoystickWalkingMode.equals(JoystickWalkingMode.CONTINUOUS_HIKING))
+      {
+         configureContinuousHikingCommand(false, false, false, true, 0.0, 0.0, 0.0);
+         continuousHikingCommandPublisher.publish(continuousHikingCommand);
+      }
 
       currentJoystickWalkingMode = JoystickWalkingMode.CSG;
    }
@@ -326,8 +322,11 @@ public class XBoxOneJoystickWalkingPlugin
    public void enableContinuousHikingPublishing()
    {
       // Stop walking before we switch to CH
-      configureCSGInputCommand(false, 0.0, 0.0, 0.0);
-      ros2CSGPublisherMap.publish(csgInputCommand);
+      if (currentJoystickWalkingMode.equals(JoystickWalkingMode.CSG))
+      {
+         configureCSGInputCommand(false, 0.0, 0.0, 0.0);
+         ros2CSGPublisherMap.publish(csgInputCommand);
+      }
 
       currentJoystickWalkingMode = JoystickWalkingMode.CONTINUOUS_HIKING;
    }
