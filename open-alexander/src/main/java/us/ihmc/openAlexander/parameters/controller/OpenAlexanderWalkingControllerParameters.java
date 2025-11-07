@@ -81,7 +81,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private boolean allowUpperBodyMotionDuringLocomotion = true;
 
    /* Setting to true makes the arms stiffer but more responsive for streaming */
-   static final boolean RESPONSIVE_STREAMING_MODE = false;
+   static final boolean RESPONSIVE_STREAMING_MODE = true;
 
    public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
    {

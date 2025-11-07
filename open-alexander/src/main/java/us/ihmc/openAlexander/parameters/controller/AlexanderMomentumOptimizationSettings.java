@@ -16,7 +16,7 @@ public class AlexanderMomentumOptimizationSettings extends MomentumOptimizationS
 {
    // TODO Parameter values copied from Valkyrie which has different weight.
    // TODO Needs tune up.
-   private final Vector3D linearMomentumWeight = new Vector3D(0.5, 0.5, 0.02);
+   private final Vector3D linearMomentumWeight = new Vector3D(1.0, 1.0, 0.1);
    // TODO The z-component is super high, probably causing tracking issues in swing
    private final Vector3D angularMomentumWeight = new Vector3D(0.0, 0.0, 0.1);
 
