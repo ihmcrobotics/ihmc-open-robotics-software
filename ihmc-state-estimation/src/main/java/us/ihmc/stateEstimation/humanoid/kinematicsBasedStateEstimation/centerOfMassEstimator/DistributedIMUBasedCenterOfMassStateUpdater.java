@@ -70,7 +70,6 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
    private final YoFrameVector3D estimatedAngularMomentum = new YoFrameVector3D("estimatedAngularMomentum", worldFrame, registry);
-   private final FilteredFiniteDifferenceYoFrameVector3D estimatedCoMVelocityFD;
    private final YoBoolean enableCoMPositionAdjustment = new YoBoolean("enableCoMPositionAdjustment", registry);
    private final YoBoolean enableCoMVelocityAdjustment = new YoBoolean("enableCoMVelocityAdjustment", registry);
    private final YoFrameVector3D positionAdjustment = new YoFrameVector3D("estimatedCenterOfMassPositionAdjustment", worldFrame, registry);
@@ -148,10 +147,6 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getPredecessor(), worldFrame);
       rawCoMPosition = new YoFramePoint3D("rawCenterOfMassPosition", worldFrame, registry);
       rawCoMVelocity = new YoFrameVector3D("rawCenterOfMassVelocity", worldFrame, registry);
-
-      double breakFrequency = 100.0;
-      DoubleProvider alpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(breakFrequency, dt);
-      estimatedCoMVelocityFD = new FilteredFiniteDifferenceYoFrameVector3D("estimatedCoMVelocityFD", "", alpha, dt, registry, worldFrame);
    }
 
    private int buildEstimatorsRecursive(int index, RigidBodyStateEstimator parent, Map<RigidBodyBasics, IMUSensorReadOnly> imuSensorMap)
@@ -302,7 +297,6 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       centerOfMassJacobian.reset();
       rawCoMPosition.set(centerOfMassJacobian.getCenterOfMass());
       rawCoMVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
-      estimatedCoMVelocityFD.update(estimatedCoMVelocity);
    }
 
    @Override
