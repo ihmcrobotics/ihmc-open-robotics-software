@@ -5,9 +5,7 @@ import ihmc_hands_ros2.msg.dds.AbilityHandCommand;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImFloat;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.handsros2.abilityHand.AbilityHandManager.ControlMode;
 import us.ihmc.handsros2.abilityHand.AbilityHandManager.Grip;
 import us.ihmc.handsros2.abilityHand.AbilityHandROS2HardwareCommunication;
@@ -41,8 +39,8 @@ public class RDXAbilityHand implements RDXHandInterface
    private final ImFloat[] desiredVelocities = new ImFloat[6];
 
    private float[] currentPositions = new float[6];
-   private final TypedNotification<Grip> gripNotification = new TypedNotification<>();
-   private final Notification velToPosNotification = new Notification();
+   private Grip executeGrip = null;
+   private boolean executeVelToPos = false;
    private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
 
    public RDXAbilityHand(String identifier, RobotSide handSide, AbilityHandROS2HardwareCommunication communication)
@@ -61,21 +59,22 @@ public class RDXAbilityHand implements RDXHandInterface
    @Override
    public void update()
    {
-      boolean executeGrip = gripNotification.poll();
-      boolean executeVelToPos = velToPosNotification.poll();
-
       if (!communication.getAvailableHands().contains(identifier))
+      {
+         executeGrip = null; // Clear so they don't get executed later
+         executeVelToPos = false;
          return;
+      }
 
       currentPositions = communication.readState(identifier).getActuatorPositions();
 
-      if ((executeGrip || executeVelToPos) && publishThrottler.run())
+      if ((executeGrip != null || executeVelToPos) && publishThrottler.run())
       {
          AbilityHandCommand command = communication.getCommand(identifier);
-         if (executeGrip)
+         if (executeGrip != null)
          {
             command.setControlMode(ControlMode.GRIP.toByte());
-            command.setGrip(gripNotification.read().toByte());
+            command.setGrip(executeGrip.toByte());
          }
          else
          {
@@ -87,6 +86,9 @@ public class RDXAbilityHand implements RDXHandInterface
          for (int i = 0; i < 6; i++)
             command.getGoalVelocities()[i] = desiredVelocities[i].get();
          communication.publishCommand(identifier);
+
+         executeGrip = null;
+         executeVelToPos = false;
       }
    }
 
@@ -103,32 +105,32 @@ public class RDXAbilityHand implements RDXHandInterface
       ImGui.beginDisabled(!connected);
 
       if (ImGui.button(labels.get("Open")))
-         gripNotification.set(Grip.RELAX);
+         executeGrip = Grip.RELAX;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Grip")))
-         gripNotification.set(Grip.POWER);
+         executeGrip = Grip.POWER;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Tripod Closed")))
-         gripNotification.set(Grip.TRIPOD_C);
+         executeGrip = Grip.TRIPOD_C;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Hook")))
-         gripNotification.set(Grip.HOOK);
+         executeGrip = Grip.HOOK;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Tripod Open")))
-         gripNotification.set(Grip.TRIPOD_O);
+         executeGrip = Grip.TRIPOD_O;
       if (ImGui.button(labels.get("Pinch Open")))
-         gripNotification.set(Grip.PINCH_O);
+         executeGrip = Grip.PINCH_O;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Pinch Closed")))
-         gripNotification.set(Grip.PINCH_C);
+         executeGrip = Grip.PINCH_C;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Key")))
-         gripNotification.set(Grip.KEY);
+         executeGrip = Grip.KEY;
       ImGui.sameLine();
       if (ImGui.button(labels.get("Rude")))
-         gripNotification.set(Grip.RUDE);
+         executeGrip = Grip.RUDE;
 
-      boolean executeVelToPos = false;
+      boolean scheduleExecuteVelToPos = false;
       for (int i = 0; i < 6; i++)
       {
          float currentNotch = (currentPositions[i] - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
@@ -136,19 +138,19 @@ public class RDXAbilityHand implements RDXHandInterface
          ImGuiTools.renderSliderOrProgressNotch(currentNotch * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
          ImGui.pushItemWidth(sliderWidth);
-         executeVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), SLIDER_MIN, SLIDER_MAX,
+         scheduleExecuteVelToPos |= ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), desiredPositions[i].getData(), SLIDER_MIN, SLIDER_MAX,
                                "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], desiredPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL));
          if (!ImGui.isItemActive())
             desiredPositions[i].set(currentPositions[i]);
          ImGui.popItemWidth();
          ImGui.sameLine();
          ImGui.pushItemWidth(ImGui.getColumnWidth());
-         executeVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f rad/s");
+         scheduleExecuteVelToPos |= ImGui.inputFloat(labels.getHidden("Velocity" + i), desiredVelocities[i], 0.1f, 1.0f, "%.2f rad/s");
          ImGui.popItemWidth();
       }
 
-      if (executeVelToPos)
-         velToPosNotification.set();
+      if (scheduleExecuteVelToPos)
+         executeVelToPos = true;
       ImGui.endDisabled();
    }
 
@@ -180,9 +182,9 @@ public class RDXAbilityHand implements RDXHandInterface
    public void sendCommand(HandAction handAction)
    {
       if (handAction == HandAction.OPEN)
-         gripNotification.set(Grip.RELAX);
+         executeGrip = Grip.RELAX;
       else if (handAction == HandAction.CLOSE || handAction == HandAction.GRIP)
-         gripNotification.set(Grip.POWER);
+         executeGrip = Grip.POWER;
       else
          LogTools.warn("Attempted to send an unsupported hand action command: {}", handAction.name());
    }
@@ -191,7 +193,7 @@ public class RDXAbilityHand implements RDXHandInterface
    public void sendFingerPosition(int index, float value)
    {
       desiredPositions[index].set(value);
-      velToPosNotification.set();
+      executeVelToPos = true;
    }
 
    @Override
