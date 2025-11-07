@@ -14,6 +14,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
 {
    private final long id;
    private final IsaacROSFoundationPoseObject objectType;
+   protected String persistentDetectionID = "null";
    protected final CRDTBidirectionalRigidBodyTransform transform;
    protected final ReferenceFrame referenceFrame;
 
@@ -24,6 +25,8 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
       this.id = id;
       this.objectType = objectType;
 
+
+
       transform = new CRDTBidirectionalRigidBodyTransform(this);
       referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("%s_%d".formatted(objectType.name(), id),
                                                                                        ReferenceFrame.getWorldFrame(),
@@ -32,7 +35,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
 
    public String getName()
    {
-      return objectType.name();
+      return objectType.titleCaseName;
    }
 
    public IsaacROSFoundationPoseObject getObjectType()
@@ -54,6 +57,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
    {
       toMessage(message.getLatestModificationToData());
       message.setId(id);
+      message.setPersistentDetectionId(persistentDetectionID);
       message.setObjectType(objectType.ordinal());
       transform.toMessage(message.getTransformToWorld());
    }
@@ -69,6 +73,8 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
       if (objectType.ordinal() != message.getObjectType())
          LogTools.error("Object types should match! {} != {}", objectType.ordinal(), message.getObjectType());
 
+      persistentDetectionID = message.getPersistentDetectionIdAsString();
+
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();
    }
@@ -81,6 +87,11 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
    public long getID()
    {
       return id;
+   }
+
+   public String getPersistentDetectionID()
+   {
+      return persistentDetectionID;
    }
 
    public ReferenceFrame getReferenceFrame()

@@ -25,6 +25,10 @@ module behavior_msgs
          */
         unsigned long id;
         /**
+         * Last 4 digits of persistent detection UUID as a string or "null"
+         */
+        string persistent_detection_id;
+        /**
          * Object type (IsaacROSFoundationPoseObject ordinal)
          */
         long object_type;

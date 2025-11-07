@@ -22,12 +22,21 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
 
    public void update(ReferenceFrame cameraFrame)
    {
-      if (persistentDetection != null && persistentDetection.isStable())
+      if (persistentDetection != null)
       {
-         detectionPose.setToZero(cameraFrame);
-         detectionPose.set(persistentDetection.getFilteredTransformToCamera());
-         detectionPose.changeFrame(ReferenceFrame.getWorldFrame());
-         transform.setValue(detectionPose, 1e-5);
+         if (persistentDetection.isStable())
+         {
+            detectionPose.setToZero(cameraFrame);
+            detectionPose.set(persistentDetection.getFilteredTransformToCamera());
+            detectionPose.changeFrame(ReferenceFrame.getWorldFrame());
+            transform.setValue(detectionPose, 1e-5);
+         }
+
+         persistentDetectionID = String.format("%04d", Math.abs(persistentDetection.getID().getLeastSignificantBits() % 10000));
+      }
+      else
+      {
+         persistentDetectionID = "null";
       }
    }
 

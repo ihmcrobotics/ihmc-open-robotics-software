@@ -107,6 +107,9 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
          if (ImGui.button(labels.get("X", i)))
             remove = object;
          ImGui.popStyleColor();
+         ImGui.indent();
+         ImGui.text("Persistent detection: %s".formatted(object.getPersistentDetectionID()));
+         ImGui.unindent();
       }
       ImGui.unindent();
 
@@ -121,9 +124,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.indent();
       for (PersistentDetectionStatusMessage persistentDetection : persistentDetections)
       {
-         String text = "%s %.2f Hz Size: %d".formatted(persistentDetection.getObjectClassAsString(),
-                                                       persistentDetection.getDecayingFrequency(),
-                                                       persistentDetection.getHistorySize());
+         String text = "%s %.2f Hz Size: %d ID: %s".formatted(persistentDetection.getObjectClassAsString(),
+                                                              persistentDetection.getDecayingFrequency(),
+                                                              persistentDetection.getHistorySize(),
+                                                              persistentDetection.getIdAsString());
          if (persistentDetection.getIsStable())
             ImGui.text(text);
          else

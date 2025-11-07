@@ -1,5 +1,8 @@
 # Status of a persistent detection
 
+# Last 4 digits of UUID as a string
+string id
+
 # Object class name (e.g., "bottle")
 string object_class
 

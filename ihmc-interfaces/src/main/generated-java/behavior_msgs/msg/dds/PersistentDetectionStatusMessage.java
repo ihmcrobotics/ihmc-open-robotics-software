@@ -12,6 +12,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class PersistentDetectionStatusMessage extends Packet<PersistentDetectionStatusMessage> implements Settable<PersistentDetectionStatusMessage>, EpsilonComparable<PersistentDetectionStatusMessage>
 {
    /**
+            * Last 4 digits of UUID as a string
+            */
+   public java.lang.StringBuilder id_;
+   /**
             * Object class name (e.g., "bottle")
             */
    public java.lang.StringBuilder object_class_;
@@ -34,6 +38,7 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
    public PersistentDetectionStatusMessage()
    {
+      id_ = new java.lang.StringBuilder(255);
       object_class_ = new java.lang.StringBuilder(255);
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -46,6 +51,9 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
    public void set(PersistentDetectionStatusMessage other)
    {
+      id_.setLength(0);
+      id_.append(other.id_);
+
       object_class_.setLength(0);
       object_class_.append(other.object_class_);
 
@@ -56,6 +64,30 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       is_stable_ = other.is_stable_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
+   }
+
+   /**
+            * Last 4 digits of UUID as a string
+            */
+   public void setId(java.lang.String id)
+   {
+      id_.setLength(0);
+      id_.append(id);
+   }
+
+   /**
+            * Last 4 digits of UUID as a string
+            */
+   public java.lang.String getIdAsString()
+   {
+      return getId().toString();
+   }
+   /**
+            * Last 4 digits of UUID as a string
+            */
+   public java.lang.StringBuilder getId()
+   {
+      return id_;
    }
 
    /**
@@ -154,6 +186,8 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.id_, other.id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_class_, other.object_class_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.decaying_frequency_, other.decaying_frequency_, epsilon)) return false;
@@ -176,6 +210,8 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
 
       PersistentDetectionStatusMessage otherMyClass = (PersistentDetectionStatusMessage) other;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.id_, otherMyClass.id_)) return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.object_class_, otherMyClass.object_class_)) return false;
 
       if(this.decaying_frequency_ != otherMyClass.decaying_frequency_) return false;
@@ -195,6 +231,8 @@ public class PersistentDetectionStatusMessage extends Packet<PersistentDetection
       StringBuilder builder = new StringBuilder();
 
       builder.append("PersistentDetectionStatusMessage {");
+      builder.append("id=");
+      builder.append(this.id_);      builder.append(", ");
       builder.append("object_class=");
       builder.append(this.object_class_);      builder.append(", ");
       builder.append("decaying_frequency=");

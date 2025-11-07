@@ -107,7 +107,7 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
          else
          {
             double poseFilterAlpha = 0.5;
-            double acceptanceConfidence = 0.5;
+            double acceptanceConfidence = 0.25;
             double stabilityFrequency = 1.0;
             double historyDuration = 2.0;
             persistentDetections.add(new PersistentDetection(newDetection, poseFilterAlpha, acceptanceConfidence, stabilityFrequency, historyDuration));
@@ -152,6 +152,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
       for (PersistentDetection persistentDetection : persistentDetections)
       {
          PersistentDetectionStatusMessage status = message.getPersistentDetections().add();
+         String last4Digits = String.format("%04d", Math.abs(persistentDetection.getID().getLeastSignificantBits() % 10000));
+         status.setId(last4Digits);
          status.setObjectClass(persistentDetection.getDetectedObjectClass());
          status.setDecayingFrequency(persistentDetection.getDetectionFrequencyDecaying(now));
          status.setHistorySize(persistentDetection.getHistorySize());

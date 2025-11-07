@@ -6,6 +6,9 @@ ihmc_common_msgs/LatestModificationMessage latest_modification_to_data
 # The object's unique ID
 uint32 id
 
+# Last 4 digits of persistent detection UUID as a string or "null"
+string persistent_detection_id
+
 # Object type (IsaacROSFoundationPoseObject ordinal)
 int32 object_type
 
