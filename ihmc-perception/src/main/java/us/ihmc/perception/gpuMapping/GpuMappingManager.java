@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessageForController;
 import perception_msgs.msg.dds.TerrainMapMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -41,13 +42,14 @@ public class GpuMappingManager
    private final Notification lowerHeightMapBackdropRequested = new Notification();
 
    private final ROS2Publisher<HeightMapMessage> heightMapMessagePublisher;
-   private final ROS2Publisher<HeightMapMessage> controllerHeightMapMessagePublisher;
+   private final ROS2Publisher<HeightMapMessageForController> controllerHeightMapMessagePublisher;
    private final ROS2Publisher<TerrainMapMessage> terrainMapMessagePublisher;
    private final BytePointer compressedHeightMapPointer = new BytePointer();
    private final Point3D heightMapCenterPoint = new Point3D();
 
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
+   private final HeightMapMessageForController heightMapMessageForController;
    private final TerrainMapMessage terrainMapMessage;
    private long sequenceId = 0;
 
@@ -75,6 +77,7 @@ public class GpuMappingManager
 
       // Again we do this to optimize the speed of the rapid height map
       heightMapMessage = new HeightMapMessage();
+      heightMapMessageForController = new HeightMapMessageForController();
       terrainMapMessage = new TerrainMapMessage();
       heightMapLogger = new HeightMapLogger(heightMapParameters);
 
@@ -84,7 +87,7 @@ public class GpuMappingManager
       ros2Node.createSubscription2(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
       ros2Node.createSubscription2(PerceptionAPI.LOWER_HEIGHT_MAP_BACKDROP, message -> lowerHeightMapBackdropRequested.set());
 
-      controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessage.class, robotName));
+      controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessageForController.class, robotName));
    }
 
    public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
@@ -145,13 +148,15 @@ public class GpuMappingManager
    private void publishHeightMap(HeightMapData heightMapData)
    {
       HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
+      HeightMapMessageTools.toMessageForController(heightMapData, heightMapMessageForController);
 
 //      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
 
       sequenceId++;
       heightMapMessage.setSequenceId(sequenceId);
+      heightMapMessageForController.setSequenceId(sequenceId);
       heightMapMessagePublisher.publish(heightMapMessage);
-      controllerHeightMapMessagePublisher.publish(heightMapMessage);
+      controllerHeightMapMessagePublisher.publish(heightMapMessageForController);
    }
 
    /**
@@ -242,6 +247,7 @@ public class GpuMappingManager
    public void destroy()
    {
       compressedHeightMapPointer.close();
+      controllerHeightMapMessagePublisher.remove();
       heightMapMessagePublisher.remove();
       heightMapExtractor.destroy();
       terrainMapExtractor.destroy();
