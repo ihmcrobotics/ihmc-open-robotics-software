@@ -35,9 +35,19 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
       {
          AbilityHandCommand command = abilityHandCommunication.getCommand(identifier);
          Arrays.fill(command.getGoalVelocities(), 30.0f);
-         command.setControlMode(ControlMode.GRIP.toByte());
-         command.setGrip(definition.getGrip().toByte());
-         command.getGoalPositions();
+         command.setControlMode(definition.getControlMode().toByte());
+         if (definition.getControlMode() == ControlMode.GRIP)
+         {
+            command.setGrip(definition.getGrip().toByte());
+         }
+         else
+         {
+            for (int i = 0; i < 5; i++)
+               command.getGoalPositions()[i] = definition.getGoalPositions().getValueReadOnly(i);
+            command.getGoalPositions()[5] = -definition.getGoalPositions().getValueReadOnly(5);
+         }
+         for (int i = 0; i < 6; i++)
+            command.getGoalVelocities()[i] = definition.getGoalVelocities().getValueReadOnly(i);
          abilityHandCommunication.publishCommand(identifier);
       }
       else
