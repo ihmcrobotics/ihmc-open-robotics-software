@@ -16,7 +16,6 @@ import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 import java.util.Timer;
@@ -107,15 +106,11 @@ public class RDXLoggingDevelopmentUI
             }, 0, TICK_PERIOD);
 
             stopwatch.start();
-            try
-            {
-               yoLogger.create();
-            }
-            catch (IOException e)
-            {
-               LogTools.error(e);
-               LogTools.error("Unable to create intraprocess logger");
-            }
+            if (yoLogger.create())
+               LogTools.info("[Logging] Logging locally to disk");
+            else
+               LogTools.error("[Logging] Unable to log locally to disk");
+
             planarRegionsListLogger.start();
 
             timer.scheduleAtFixedRate(new TimerTask()

@@ -60,7 +60,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -294,26 +293,25 @@ public class AvatarMultiThreadingFactory
                                                                          robotModel.getEstimatorDT(),
                                                                          robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider());
 
-         try
+         if (intraprocessYoVariableLogger.create())
          {
-            intraprocessYoVariableLogger.create();
+            LogTools.info("[Logging] Logging locally to disk");
 
             threadingManager.get()
                             .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
                                                                                                                      .getHumanoidRobotContextData()
                                                                                                                      .getTimestamp()));
          }
-         catch (IOException e)
+         else
          {
-            LogTools.error(e);
-            LogTools.error("[Logging] Intraprocess logging mode was unable to be created");
+            LogTools.error("[Logging] Unable to log locally to disk");
          }
 
-         LogTools.info("[Logging] Intraprocess logging mode");
+         LogTools.info("[Logging] Logging locally to disk");
       }
       else
       {
-         LogTools.info("[Logging] Remote logging mode");
+         LogTools.info("[Logging] Logging remote to logger server");
       }
 
       return threadingManager.get();

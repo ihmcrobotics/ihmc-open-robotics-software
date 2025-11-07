@@ -30,7 +30,6 @@ import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.io.IOException;
 import java.util.Objects;
 
 public class SCS2AvatarSimulation
@@ -82,15 +81,10 @@ public class SCS2AvatarSimulation
    {
       if (intraprocessYoVariableLogger != null)
       {
-         try
-         {
-            intraprocessYoVariableLogger.create();
-         }
-         catch (IOException e)
-         {
-            LogTools.error(e);
-            LogTools.error("Unable to create intraprocess logger");
-         }
+         if (intraprocessYoVariableLogger.create())
+            LogTools.info("[Logging] Logging locally to disk");
+         else
+            LogTools.error("[Logging] Unable to log locally to disk");
       }
       if (yoVariableServer != null)
       {

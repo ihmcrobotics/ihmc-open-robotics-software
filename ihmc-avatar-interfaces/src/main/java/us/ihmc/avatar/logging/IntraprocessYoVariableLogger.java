@@ -45,7 +45,6 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_FILENAME = "model.sdf";
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
-   public static final String SUMMARY_FILENAME = "summary.csv";
    public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc").resolve("logs");
 
    private final List<RegistrySendBufferBuilder> registrySendBufferBuilders;
@@ -91,130 +90,140 @@ public class IntraprocessYoVariableLogger
       destroyed = true;
    }
 
-   public void create() throws IOException
+   public boolean create()
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-      String fileTimestamp = dateFormat.format(Calendar.getInstance().getTime());
-      logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(fileTimestamp + logName + INTRAPROCESS_LOG_POSTFIX);
-
-      YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
-      handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
-
-      for (int i = 0; i < registrySendBufferBuilders.size(); i++)
-         handshakeBuilder.addRegistryBuffer(registrySendBufferBuilders.get(i));
-
-      Handshake handshake = handshakeBuilder.getHandShake();
-
-      YAMLSerializer<Handshake> serializer = new YAMLSerializer<>(new HandshakePubSubType());
-      serializer.serialize(createFileInLogFolder(HANDSHAKE_FILENAME), handshake);
-
-      LogPropertiesWriter logProperties = new LogPropertiesWriter(createFileInLogFolder(PROPERTY_FILE));
-      logProperties.getVariables().setHandshake(HANDSHAKE_FILENAME);
-      logProperties.getVariables().setData(DATA_FILENAME);
-      logProperties.getVariables().setCompressed(true);
-      logProperties.getVariables().setTimestamped(true);
-      logProperties.getVariables().setIndex(INDEX_FILENAME);
-      logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
-      logProperties.setName(logName);
-      logProperties.setTimestamp(fileTimestamp);
-
-      if (logModelProvider != null)
+      try
       {
-         logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
-         logProperties.getModel().setName(logModelProvider.getModelName());
-         for (int i = 0; i < logModelProvider.getTopLevelResourceDirectories().length; i++)
+         DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
+         String fileTimestamp = dateFormat.format(Calendar.getInstance().getTime());
+         logFolder = DEFAULT_INCOMING_LOGS_DIRECTORY.resolve(fileTimestamp + logName + INTRAPROCESS_LOG_POSTFIX);
+
+         YoVariableHandShakeBuilder handshakeBuilder = new YoVariableHandShakeBuilder("main", dt);
+         handshakeBuilder.setFrames(ReferenceFrame.getWorldFrame());
+
+         for (int i = 0; i < registrySendBufferBuilders.size(); i++)
+            handshakeBuilder.addRegistryBuffer(registrySendBufferBuilders.get(i));
+
+         Handshake handshake = handshakeBuilder.getHandShake();
+
+         YAMLSerializer<Handshake> serializer = new YAMLSerializer<>(new HandshakePubSubType());
+         serializer.serialize(createFileInLogFolder(HANDSHAKE_FILENAME), handshake);
+
+         LogPropertiesWriter logProperties = new LogPropertiesWriter(createFileInLogFolder(PROPERTY_FILE));
+         logProperties.getVariables().setHandshake(HANDSHAKE_FILENAME);
+         logProperties.getVariables().setData(DATA_FILENAME);
+         logProperties.getVariables().setCompressed(true);
+         logProperties.getVariables().setTimestamped(true);
+         logProperties.getVariables().setIndex(INDEX_FILENAME);
+         logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
+         logProperties.setName(logName);
+         logProperties.setTimestamp(fileTimestamp);
+
+         if (logModelProvider != null)
          {
-            logProperties.getModel().getResourceDirectoriesList().add(logModelProvider.getTopLevelResourceDirectories()[i]);
-         }
-
-         logProperties.getModel().setPath(MODEL_FILENAME);
-         logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
-
-         try (FileOutputStream modelStream = new FileOutputStream(createFileInLogFolder(MODEL_FILENAME), false);
-              FileOutputStream resourceStream = new FileOutputStream(createFileInLogFolder(MODEL_RESOURCE_BUNDLE), false))
-         {
-            modelStream.write(logModelProvider.getModel());
-            modelStream.getFD().sync();
-            resourceStream.write(logModelProvider.getResourceZip());
-            resourceStream.getFD().sync();
-         }
-      }
-
-      logProperties.store();
-
-      variables = new ArrayList<>();
-      for (int i = 0; i < registrySendBufferBuilders.size(); i++)
-      {
-         variables.addAll(registrySendBufferBuilders.get(i).getYoRegistry().collectSubtreeVariables());
-      }
-
-      int numJointStateVars = 0;
-      for (int i = 0; i < handshake.getJoints().size(); i++)
-      {
-         numJointStateVars += JointState.getNumberOfVariables(handshake.getJoints().get(i).getType());
-      }
-
-      int singleTickBufferSize = (1 + variables.size() + numJointStateVars) * Long.BYTES;
-      dataBuffer = ByteBuffer.allocate(singleTickBufferSize);
-      dataBufferAsLong = dataBuffer.asLongBuffer();
-      compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(singleTickBufferSize));
-      jointHolders = handshakeBuilder.getJointHolders();
-      variableValues = new long[variables.size()];
-
-      long numYoGraphics = registrySendBufferBuilders.stream()
-                                                     .filter(b -> b.getSCS1YoGraphics() != null)
-                                                     .flatMap(b -> b.getSCS1YoGraphics().getYoGraphicsLists().stream())
-                                                     .mapToLong(list -> list.getYoGraphics().size())
-                                                     .sum();
-
-      LogTools.info("Buffer size: {}", singleTickBufferSize);
-      LogTools.info("Number of YoVariables: {}", variables.size());
-      LogTools.info("Number of YoGraphics: {}", numYoGraphics);
-      LogTools.info("Number of joint states: {}", numJointStateVars);
-
-      /*
-       * Compression and serialization
-       */
-      indexBuffer = ByteBuffer.allocate(2 * Long.BYTES);
-      compressionBufferRing = new ConcurrentRingBuffer<>(() -> ByteBuffer.allocate(singleTickBufferSize), 2);
-      compressionThreadLatch = new CountDownLatch(1);
-      compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
-      {
-         compressionThreadLatch.await();
-
-         if (compressionBufferRing.poll())
-         {
-            ByteBuffer data;
-
-            while ((data = compressionBufferRing.read()) != null)
+            logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
+            logProperties.getModel().setName(logModelProvider.getModelName());
+            for (int i = 0; i < logModelProvider.getTopLevelResourceDirectories().length; i++)
             {
-               compressedBuffer.clear();
-               data.position(0);
-               SnappyUtils.compress(data, compressedBuffer);
-               compressedBuffer.flip();
-
-               long timestamp = data.getLong(0);
-
-               indexBuffer.clear();
-               indexBuffer.putLong(timestamp);
-               indexBuffer.putLong(dataChannel.position());
-               indexBuffer.flip();
-
-               indexChannel.write(indexBuffer);
-               dataChannel.write(compressedBuffer);
+               logProperties.getModel().getResourceDirectoriesList().add(logModelProvider.getTopLevelResourceDirectories()[i]);
             }
 
-            compressionBufferRing.flush();
+            logProperties.getModel().setPath(MODEL_FILENAME);
+            logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
+
+            try (FileOutputStream modelStream = new FileOutputStream(createFileInLogFolder(MODEL_FILENAME), false);
+                 FileOutputStream resourceStream = new FileOutputStream(createFileInLogFolder(MODEL_RESOURCE_BUNDLE), false))
+            {
+               modelStream.write(logModelProvider.getModel());
+               modelStream.getFD().sync();
+               resourceStream.write(logModelProvider.getResourceZip());
+               resourceStream.getFD().sync();
+            }
          }
-      });
-      dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
-      indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
-      dataChannel.force(true);
-      indexChannel.force(true);
 
-      compressionThread.startRepeating();
+         logProperties.store();
 
-      destroyed = false;
+         variables = new ArrayList<>();
+         for (int i = 0; i < registrySendBufferBuilders.size(); i++)
+         {
+            variables.addAll(registrySendBufferBuilders.get(i).getYoRegistry().collectSubtreeVariables());
+         }
+
+         int numJointStateVars = 0;
+         for (int i = 0; i < handshake.getJoints().size(); i++)
+         {
+            numJointStateVars += JointState.getNumberOfVariables(handshake.getJoints().get(i).getType());
+         }
+
+         int singleTickBufferSize = (1 + variables.size() + numJointStateVars) * Long.BYTES;
+         dataBuffer = ByteBuffer.allocate(singleTickBufferSize);
+         dataBufferAsLong = dataBuffer.asLongBuffer();
+         compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(singleTickBufferSize));
+         jointHolders = handshakeBuilder.getJointHolders();
+         variableValues = new long[variables.size()];
+
+         long numYoGraphics = registrySendBufferBuilders.stream()
+                                                        .filter(b -> b.getSCS1YoGraphics() != null)
+                                                        .flatMap(b -> b.getSCS1YoGraphics().getYoGraphicsLists().stream())
+                                                        .mapToLong(list -> list.getYoGraphics().size())
+                                                        .sum();
+
+         LogTools.info("Buffer size: {}", singleTickBufferSize);
+         LogTools.info("Number of YoVariables: {}", variables.size());
+         LogTools.info("Number of YoGraphics: {}", numYoGraphics);
+         LogTools.info("Number of joint states: {}", numJointStateVars);
+
+         /*
+          * Compression and serialization
+          */
+         indexBuffer = ByteBuffer.allocate(2 * Long.BYTES);
+         compressionBufferRing = new ConcurrentRingBuffer<>(() -> ByteBuffer.allocate(singleTickBufferSize), 2);
+         compressionThreadLatch = new CountDownLatch(1);
+         compressionThread = new RepeatingTaskThread("IntraprocessLoggerCompressionThread", () ->
+         {
+            compressionThreadLatch.await();
+
+            if (compressionBufferRing.poll())
+            {
+               ByteBuffer data;
+
+               while ((data = compressionBufferRing.read()) != null)
+               {
+                  compressedBuffer.clear();
+                  data.position(0);
+                  SnappyUtils.compress(data, compressedBuffer);
+                  compressedBuffer.flip();
+
+                  long timestamp = data.getLong(0);
+
+                  indexBuffer.clear();
+                  indexBuffer.putLong(timestamp);
+                  indexBuffer.putLong(dataChannel.position());
+                  indexBuffer.flip();
+
+                  indexChannel.write(indexBuffer);
+                  dataChannel.write(compressedBuffer);
+               }
+
+               compressionBufferRing.flush();
+            }
+         });
+         dataChannel = new FileOutputStream(createFileInLogFolder(DATA_FILENAME), false).getChannel();
+         indexChannel = new FileOutputStream(createFileInLogFolder(INDEX_FILENAME), false).getChannel();
+         dataChannel.force(true);
+         indexChannel.force(true);
+
+         compressionThread.startRepeating();
+
+         destroyed = false;
+
+      }
+      catch (Exception e)
+      {
+         return false;
+      }
+
+      return true;
    }
 
    public boolean isDestroyed()

@@ -106,7 +106,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -666,16 +665,16 @@ public class SCS2AvatarSimulationFactory
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
                                                                          robotModel.getEstimatorDT(),
                                                                          getClass().getSimpleName(), robotModel.getLogModelProvider());
-         try
+
+         if (intraprocessYoVariableLogger.create())
          {
-            intraprocessYoVariableLogger.create();
+            LogTools.info("[Logging] Logging locally to disk");
 
             estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
          }
-         catch (IOException e)
+         else
          {
-            LogTools.error(e);
-            LogTools.error("Unable to create intraprocess logger");
+            LogTools.error("[Logging] Unable to log locally to disk");
          }
       }
 

@@ -89,7 +89,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -348,15 +347,10 @@ public class HumanoidKinematicsSimulation
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry)),
                                                                          0.01,
                                                                          getClass().getSimpleName());
-         try
-         {
-            intraprocessYoVariableLogger.create();
-         }
-         catch (IOException e)
-         {
-            LogTools.error(e);
-            LogTools.error("Unable to create intraprocess logger");
-         }
+         if (intraprocessYoVariableLogger.create())
+            LogTools.info("[Logging] Logging locally to disk");
+         else
+            LogTools.error("[Logging] Unable to log locally to disk");
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
