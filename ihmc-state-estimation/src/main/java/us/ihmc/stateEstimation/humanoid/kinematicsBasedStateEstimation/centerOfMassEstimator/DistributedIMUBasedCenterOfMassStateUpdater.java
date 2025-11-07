@@ -30,9 +30,12 @@ import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedPelvisRotationalStateUpdater;
+import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -66,7 +69,9 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
    private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
-   private final YoBoolean enableCoMAdjustment = new YoBoolean("enableCoMAdjustment", registry);
+   private final YoFrameVector3D estimatedAngularMomentum = new YoFrameVector3D("estimatedAngularMomentum", worldFrame, registry);
+   private final YoBoolean enableCoMPositionAdjustment = new YoBoolean("enableCoMPositionAdjustment", registry);
+   private final YoBoolean enableCoMVelocityAdjustment = new YoBoolean("enableCoMVelocityAdjustment", registry);
    private final YoFrameVector3D positionAdjustment = new YoFrameVector3D("estimatedCenterOfMassPositionAdjustment", worldFrame, registry);
    private final YoFrameVector3D velocityAdjustment = new YoFrameVector3D("estimatedCenterOfMassVelocityAdjustment", worldFrame, registry);
 
@@ -85,14 +90,16 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
                                                       List<? extends RigidBodyReadOnly> listOfTrustedFeet,
                                                       double dt,
                                                       double gravitationalAcceleration,
-                                                      boolean enableCoMAdjustment,
+                                                      boolean enableCoMPositionAdjustment,
+                                                      boolean enableCoMVelocityAdjustment,
                                                       CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.listOfTrustedFeet = listOfTrustedFeet;
       this.dt = dt;
       this.gravitationalAcceleration = gravitationalAcceleration;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
-      this.enableCoMAdjustment.set(enableCoMAdjustment);
+      this.enableCoMPositionAdjustment.set(enableCoMPositionAdjustment);
+      this.enableCoMVelocityAdjustment.set(enableCoMVelocityAdjustment);
 
       linearVelocityKp = new YoDouble("linearVelocityKp", registry);
       linearVelocityKi = new YoDouble("linearVelocityKi", registry);
@@ -188,7 +195,8 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameVector3D tempVector = new FrameVector3D();
+   private final FrameVector3D tempLinearPart = new FrameVector3D();
+   private final FrameVector3D tempAngularPart = new FrameVector3D();
    private final Momentum tempMomentum = new Momentum(worldFrame);
 
    private void updateCoMState()
@@ -196,6 +204,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       double totalMass = 0.0;
       estimatedCoMPosition.setToZero();
       estimatedCoMVelocity.setToZero();
+      estimatedAngularMomentum.setToZero();
 
       for (RigidBodyStateEstimator estimator : estimators)
       {
@@ -220,18 +229,23 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
          if (estimator.isRoot())
          {
             tempMomentum.compute(inertia, estimator.rigidBody.getBodyFixedFrame().getTwistOfFrame());
-            tempVector.setIncludingFrame(tempMomentum.getLinearPart());
-            tempVector.changeFrame(worldFrame);
+            tempMomentum.changeFrame(worldFrame);
+            tempLinearPart.setIncludingFrame(tempMomentum.getLinearPart());
+            tempAngularPart.setIncludingFrame(tempMomentum.getAngularPart());
          }
          else
          {
             tempMomentum.compute(inertia, estimator.getEstimatedTwist());
-            tempVector.setIncludingFrame(tempMomentum.getLinearPart());
             // We don't want to use tempMomentum.changeFrame(worldFrame) as this would only use the kinematics data.
-            tempVector.applyTransform(estimator.getEstimatedPose());
-            tempVector.setReferenceFrame(worldFrame);
+            tempMomentum.applyTransform(estimator.getEstimatedPose());
+
+            tempLinearPart.setIncludingFrame(tempMomentum.getLinearPart());
+            tempAngularPart.setIncludingFrame(tempMomentum.getAngularPart());
+            tempLinearPart.setReferenceFrame(worldFrame);
+            tempAngularPart.setReferenceFrame(worldFrame);
          }
-         estimatedCoMVelocity.add(tempVector);
+         estimatedCoMVelocity.add(tempLinearPart);
+         estimatedAngularMomentum.add(tempAngularPart);
 
          totalMass += mass;
       }
@@ -246,31 +260,34 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
          for (int i = 0; i < listOfTrustedFeet.size(); i++)
          {
-            RigidBodyReadOnly trutedFoot = listOfTrustedFeet.get(i);
-            RigidBodyStateEstimator footEstimator = estimatorMap.get(trutedFoot);
+            RigidBodyReadOnly trustedFoot = listOfTrustedFeet.get(i);
+            RigidBodyStateEstimator footEstimator = estimatorMap.get(trustedFoot);
 
+            // Get the difference between the estimate from the kinematics and the integrated IMU measurement, and add it to the adjustment
             tempPoint.sub(footEstimator.getBodyFrame().getTransformToRoot().getTranslation(), footEstimator.estimatedPose.getTranslation());
             tempPoint.scale(scale);
             positionAdjustment.add(tempPoint);
 
-            tempVector.setIncludingFrame(footEstimator.getEstimatedTwist().getLinearPart());
-            tempVector.sub(footEstimator.getBodyFrame().getTwistOfFrame().getLinearPart());
-            tempVector.changeFrame(worldFrame);
-            tempVector.scale(scale);
-            velocityAdjustment.add(tempVector);
+            // FIXME is this right? or is the sign wrong?
+            // Get the difference between the estimate from the kinematics and the integrated IMU measurement, and add it to the adjustment
+            tempLinearPart.setIncludingFrame(footEstimator.getEstimatedTwist().getLinearPart());
+            tempLinearPart.sub(footEstimator.getBodyFrame().getTwistOfFrame().getLinearPart());
+            tempLinearPart.changeFrame(worldFrame);
+            tempLinearPart.scale(scale);
+            velocityAdjustment.add(tempLinearPart);
          }
 
-         if (enableCoMAdjustment.getValue())
-         {
+         if (enableCoMPositionAdjustment.getValue())
             estimatedCoMPosition.add(positionAdjustment);
-            velocityAdjustment.add(velocityAdjustment);
-         }
+         if (enableCoMVelocityAdjustment.getValue())
+            estimatedCoMVelocity.add(velocityAdjustment);
       }
 
       if (enableOutput.getValue())
       {
          centerOfMassDataHolder.setCenterOfMassPosition(estimatedCoMPosition);
          centerOfMassDataHolder.setCenterOfMassVelocity(estimatedCoMVelocity);
+         centerOfMassDataHolder.setAngularMomentum(estimatedAngularMomentum);
       }
       else
       {
