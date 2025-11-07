@@ -93,6 +93,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final IntegerProvider optimalNumberOfTrustedFeet;
    private final DoubleProvider forceZInPercentThresholdToTrustFoot;
    private final DoubleProvider forceZInPercentThresholdToNotTrustFoot;
+   private final DoubleProvider angularVelocityToNotTrustFoot;
 
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, FixedFrameVector3DBasics> footForces = new LinkedHashMap<>();
@@ -200,6 +201,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       forceZInPercentThresholdToNotTrustFoot = new DoubleParameter("forceZInPercentThresholdToNotTrustFoot",
                                                                    registry,
                                                                    stateEstimatorParameters.getForceInPercentOfWeightThresholdToNotTrustFoot());
+      angularVelocityToNotTrustFoot = new DoubleParameter("angularVelocityToNotTrustFoot",
+                                                          registry,
+                                                          stateEstimatorParameters.getAngularVelocityToNotTrustFoot());
       trustImuWhenNoFeetAreInContact = new BooleanParameter("trustImuWhenNoFeetAreInContact",
                                                             registry,
                                                             stateEstimatorParameters.getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact());
@@ -611,7 +615,10 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          else
             magnitudeForTrust = percentForceToTrustFootAgain;
 
-         if (footLoad.getValue() < magnitudeForTrust)
+         boolean footTiltingTooFast = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().normSquared() >
+                                      MathTools.square(angularVelocityToNotTrustFoot.getValue());
+
+         if (footLoad.getValue() < magnitudeForTrust || footTiltingTooFast)
             areFeetTrusted.get(foot).set(false);
          else
             filteredNumberOfEndEffectorsTrusted++;

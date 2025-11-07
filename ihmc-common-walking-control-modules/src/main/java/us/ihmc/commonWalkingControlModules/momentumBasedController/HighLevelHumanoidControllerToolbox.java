@@ -588,14 +588,23 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    private final YoBoolean enableHighCoPDampingForShakies = new YoBoolean("enableHighCoPDampingForShakies", registry);
    private final YoBoolean isCoPTrackingBad = new YoBoolean("isCoPTrackingBad", registry);
+   private final YoBoolean isCoPDamped = new YoBoolean("isCoPDamped", registry);
    private final YoDouble highCoPDampingErrorTrigger = new YoDouble("highCoPDampingErrorTrigger", registry);
    private final YoDouble highCoPDampingStartTime = new YoDouble("highCoPDampingStartTime", registry);
    private final YoDouble highCoPDampingDuration = new YoDouble("highCoPDampingDuration", registry);
 
+   public boolean isCoPDamped()
+   {
+      return isCoPDamped.getBooleanValue();
+   }
+
    public boolean estimateIfHighCoPDampingNeeded(SideDependentList<FramePoint2D> desiredCoPs)
    {
       if (!enableHighCoPDampingForShakies.getBooleanValue())
+      {
+         isCoPDamped.set(false);
          return false;
+      }
 
       boolean atLeastOneFootWithBadCoPControl = false;
 
@@ -647,6 +656,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          isCoPDampened = true;
       }
 
+      this.isCoPDamped.set(isCoPDampened);
       return isCoPDampened;
    }
 

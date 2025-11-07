@@ -131,6 +131,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final BagOfBalls perfectCMPTrajectory;
 
    private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
+   private final YoBoolean isCoPDamped = new YoBoolean("isCoPDamped", registry);
 
    private final YoDouble yoTime;
    private final YoDouble icpErrorThresholdToAdjustTime = new YoDouble("icpErrorThresholdToAdjustTime", registry);
@@ -433,6 +434,11 @@ public class BalanceManager implements SCS2YoGraphicHolder
       this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
+   public void setIsCoPDamped(boolean isCoPDamped)
+   {
+      this.isCoPDamped.set(isCoPDamped);
+   }
+
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       copTrajectoryState.addFootstep(footstep);
@@ -678,6 +684,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
+      linearMomentumRateControlModuleInput.setIsCoPDamped(isCoPDamped.getBooleanValue());
       linearMomentumRateControlModuleInput.setUseAngularCapturePoint(useAngularCapturePoint.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);

@@ -694,6 +694,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       currentState = stateMachine.getCurrentState();
 
+      balanceManager.setIsCoPDamped(controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs));
+
       managerUpdateTimer.startMeasurement();
       updateManagers(currentState);
       reportStatusMessages();
@@ -1015,7 +1017,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          limitCommandSent.set(true);
       }
 
-      boolean isHighCoPDampingNeeded = controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
+      boolean isHighCoPDampingNeeded = controllerToolbox.isCoPDamped();
 
       // Foot control:
       for (RobotSide robotSide : RobotSide.values)

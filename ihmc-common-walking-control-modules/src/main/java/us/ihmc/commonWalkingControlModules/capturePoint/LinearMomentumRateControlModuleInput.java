@@ -34,6 +34,11 @@ public class LinearMomentumRateControlModuleInput
    private boolean useMomentumRecoveryMode;
 
    /**
+    * Boolean saying whether to use a damped CoP. If this is set to true, the desired center of pressure has greater rate limiting.
+    */
+   private boolean isCoPDamped;
+
+   /**
     * Boolean saying whether to use the angular capture point or regular capture point
     */
    private boolean useAngularCapturePoint;
@@ -145,6 +150,16 @@ public class LinearMomentumRateControlModuleInput
    public boolean getUseMomentumRecoveryMode()
    {
       return useMomentumRecoveryMode;
+   }
+
+   public void setIsCoPDamped(boolean isCoPDamped)
+   {
+      this.isCoPDamped = isCoPDamped;
+   }
+
+   public boolean getIsCoPDamped()
+   {
+      return isCoPDamped;
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
