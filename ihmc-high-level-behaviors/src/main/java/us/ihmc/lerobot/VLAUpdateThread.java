@@ -78,6 +78,7 @@ public class VLAUpdateThread extends VLAYoRegistry
    private final LatestTimestampModifiable latestTimestampModifiable;
    private long sequenceID = 0L;
    private final CRDTBidirectionalBoolean running;
+   private boolean keepRunning = true;
    private final CRDTBidirectionalBoolean controlRobot;
    private final TypedNotification<VLAOperationMessage> uiCommandSubscription;
    private final ROS2Publisher<VLAOperationMessage> uiStatusPublisher;
@@ -124,7 +125,7 @@ public class VLAUpdateThread extends VLAYoRegistry
    {
       handUISyncBefore();
 
-      if (running.getValue())
+      if (keepRunning && running.getValue())
       {
          if (openpiRequest == null)
          {
@@ -153,6 +154,7 @@ public class VLAUpdateThread extends VLAYoRegistry
          DoubleBuffer action = actionPlan.pollFirst();
          if (action != null)
          {
+            keepRunning = false;
             dispatchActionToKST(action);
          }
       }
@@ -396,6 +398,8 @@ public class VLAUpdateThread extends VLAYoRegistry
             ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
             toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
             kstStatePublisher.publish(toolboxStateMessage);
+
+            keepRunning = true;
          }
          controlRobot.fromMessage(uiCommand.getControlRobot());
       }
