@@ -122,50 +122,91 @@ public class SCS2AvatarSimulationFactory
          "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
-   protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<Boolean>("enableSCS1YoGraphics", false);
-   protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<Boolean>("enableSCS2YoGraphics", true);
-   protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>("realtimeROS2Node");
+   protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<Boolean>(
+         "enableSCS1YoGraphics",
+         false);
+   protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<Boolean>(
+         "enableSCS2YoGraphics",
+         true);
+   protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>(
+         "realtimeROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
-   protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
+   protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>(
+         "robotInitialSetup");
    protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
-   protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
+   protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>(
+         "createYoVariableServer",
+         false);
    protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
    protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>(
          "externalPelvisCorrectorSubscriber");
-   protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
-   protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
-   protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
-   protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
-   protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
-   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
-                                                                                                                              getDefaultOutputWriterFactory());
-   protected final OptionalFactoryField<SimulationThreadOutputWriterFactory> simulationThreadOutputWriterFactory = new OptionalFactoryField<>("simulationThreadOutputWriterFactory");
-   protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
-   protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
-   protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
+   protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>(
+         "simulationDataBufferSize",
+         8192);
+   protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>(
+         "simulationDataRecordTickPeriod");
+   protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors",
+                                                                                                false);
+   protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>(
+         "kinematicsSimulation",
+         false);
+   protected final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>(
+         "createRigidBodyMutators",
+         false);
+   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>(
+         "outputWriterFactory",
+         getDefaultOutputWriterFactory());
+   protected final OptionalFactoryField<SimulationThreadOutputWriterFactory> simulationThreadOutputWriterFactory = new OptionalFactoryField<>(
+         "simulationThreadOutputWriterFactory");
+   protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>(
+         "initialControllerState",
+         WALKING);
+   protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded",
+                                                                                               false);
+   protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>(
+         "initializeEstimatorToActual",
+         true);
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
-   protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
+   protected final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>(
+         "automaticallyStartSimulation",
+         false);
 
-   protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
-   protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
-   protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
+   protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>(
+         "useImpulseBasePhysicsEngine",
+         false);
+   protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>(
+         "useBulletPhysicsEngine",
+         false);
+   protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>(
+         "bulletCollisionMutator");
    protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
          "impulseBasedPhysicsEngineParameters");
-   protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>("groundContactModelParameters");
-   protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
-   protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
-   protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
+   protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>(
+         "groundContactModelParameters");
+   protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>(
+         "enableSimulatedRobotDamping",
+         true);
+   protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>(
+         "useRobotDefinitionCollisions",
+         false);
+   protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots",
+                                                                                                  new ArrayList<>());
    protected final OptionalFactoryField<String> simulationName = new OptionalFactoryField<>("simulationName");
 
-   private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
-   private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
+   private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>(
+         "useHeadingAndVelocityScript");
+   private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>(
+         "heightMapForFootstepZ");
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>(
          "headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory = new OptionalFactoryField<>(
          "SecondaryStateEstimatorFactory");
-   private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>("createIKStreamingRealTimeController", false);
-   private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters = new OptionalFactoryField<>("ikStreamingParameters",
-                                                                                                                               KinematicsStreamingToolboxParameters.defaultParameters());
+   private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>(
+         "createIKStreamingRealTimeController",
+         false);
+   private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters = new OptionalFactoryField<>(
+         "ikStreamingParameters",
+         KinematicsStreamingToolboxParameters.defaultParameters());
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
@@ -176,6 +217,7 @@ public class SCS2AvatarSimulationFactory
    protected JointDesiredOutputWriter simulationOutputWriter;
    protected SimulationThreadOutputWriter simulationThreadOutputWriter;
    protected HumanoidRobotContextData masterContext;
+   protected ControllerTask controllerTask;
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
@@ -192,7 +234,9 @@ public class SCS2AvatarSimulationFactory
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {
-      simulationDataRecordTickPeriod.setDefaultValue((int) Math.max(1.0, robotModel.get().getControllerDT() / simulationDT.get()));
+      simulationDataRecordTickPeriod.setDefaultValue((int) Math.max(1.0,
+                                                                    robotModel.get().getControllerDT()
+                                                                    / simulationDT.get()));
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -221,6 +265,7 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setYoVariableServer(yoVariableServer);
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
       avatarSimulation.setMasterContext(masterContext);
+      avatarSimulation.setControllerTask(controllerTask);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
@@ -261,14 +306,17 @@ public class SCS2AvatarSimulationFactory
 
       if (!useRobotDefinitionCollisions.get())
       {
-         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
+         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper,
+                                                                                          robotCollisionName,
+                                                                                          terrainCollisionName);
          if (collisionModel != null)
          {
             // Clear all existing collidables that may be present
             for (RigidBodyDefinition rigidBody : robotDefinition.getAllRigidBodies())
                rigidBody.getCollisionShapeDefinitions().clear();
 
-            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel()
+                                                                                                             .getElevator()),
                                                                 robotDefinition);
          }
       }
@@ -307,10 +355,14 @@ public class SCS2AvatarSimulationFactory
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
          {
             if (groundContactModelParameters.hasValue())
-               robotModel.getContactPointParameters().setGroundContactModelParameters(groundContactModelParameters.get());
+               robotModel.getContactPointParameters()
+                         .setGroundContactModelParameters(groundContactModelParameters.get());
 
-            ContactPointBasedPhysicsEngine physicsEngine = new ContactPointBasedPhysicsEngine(inertialFrame, rootRegistry);
-            GroundContactModelParameters contactModelParameters = robotModel.getContactPointParameters().getGroundContactModelParameters(simulationDT.get());
+            ContactPointBasedPhysicsEngine physicsEngine = new ContactPointBasedPhysicsEngine(inertialFrame,
+                                                                                              rootRegistry);
+            GroundContactModelParameters contactModelParameters = robotModel.getContactPointParameters()
+                                                                            .getGroundContactModelParameters(
+                                                                                  simulationDT.get());
             ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
             parameters.setKz(contactModelParameters.getZStiffness());
             parameters.setBz(contactModelParameters.getZDamping());
@@ -335,7 +387,8 @@ public class SCS2AvatarSimulationFactory
       robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
                                                                         gravity.get(),
                                                                         robotModel.getEstimatorDT(),
-                                                                        robot.getControllerManager().getControllerInput()),
+                                                                        robot.getControllerManager()
+                                                                             .getControllerInput()),
                                    robotModel.getEstimatorDT());
       if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
       {
@@ -368,7 +421,9 @@ public class SCS2AvatarSimulationFactory
       {
          boolean writeBeforeEstimationTick = true;
          if (kinematicsSimulation.get())
-            return new SCS2KinematicsSimulationOutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
+            return new SCS2KinematicsSimulationOutputWriter(controllerInput,
+                                                            controllerOutput,
+                                                            writeBeforeEstimationTick);
          else
             return new SCS2OutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
       };
@@ -383,13 +438,17 @@ public class SCS2AvatarSimulationFactory
 
    private void setupOutputWriterOnSimulatorThread()
    {
-      simulationThreadOutputWriter = simulationThreadOutputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
-                                                                                     robot.getControllerManager().getControllerOutput());
+      simulationThreadOutputWriter = simulationThreadOutputWriterFactory.get()
+                                                                        .build(robot.getControllerManager()
+                                                                                    .getControllerInput(),
+                                                                               robot.getControllerManager()
+                                                                                    .getControllerOutput());
    }
 
    private void setupKinematicsSimulationOutputWriter()
    {
-      if (kinematicsSimulation.get() && simulationOutputWriter instanceof SCS2KinematicsSimulationOutputWriter kinematicsSimulationOutputWriter)
+      if (kinematicsSimulation.get()
+          && simulationOutputWriter instanceof SCS2KinematicsSimulationOutputWriter kinematicsSimulationOutputWriter)
       {
          RootJointDesiredConfigurationDataReadOnly outputForRootJoint = highLevelHumanoidControllerFactory.get()
                                                                                                           .getWholeBodyControllerCoreFactory()
@@ -409,7 +468,8 @@ public class SCS2AvatarSimulationFactory
       if (usePerfectSensors.get())
          sensorReaderFactory = SCS2SensorReaderFactory.newPerfectSensorReaderFactory(controllerInput);
       else
-         sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
+         sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput,
+                                                                              stateEstimatorParameters);
 
       if (externalPelvisCorrectorSubscriber.hasValue())
       {
@@ -420,8 +480,9 @@ public class SCS2AvatarSimulationFactory
          if (realtimeROS2Node.hasBeenSet())
          {
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
-            realtimeROS2Node.get().createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
-                                        s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+            realtimeROS2Node.get()
+                            .createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
+                                                s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
          }
       }
 
@@ -477,7 +538,9 @@ public class SCS2AvatarSimulationFactory
 
       HumanoidSteppingPluginFactory steppingFactory;
       HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
-      boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
+      boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ?
+            this.useHeadingAndVelocityScript.get() :
+            false;
       HeadingAndVelocityEvaluationScriptParameters parameters = null;
       if (headingAndVelocityEvaluationScriptParameters.hasValue())
          parameters = headingAndVelocityEvaluationScriptParameters.get();
@@ -489,7 +552,8 @@ public class SCS2AvatarSimulationFactory
          if (parameters != null)
             componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
          if (heightMapForFootstepZ.hasValue() && heightMapForFootstepZ.get() != null)
-            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(
+                  heightMapForFootstepZ.get()));
 
          steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
       }
@@ -502,8 +566,11 @@ public class SCS2AvatarSimulationFactory
          }
          else
          {
-            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
-                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters());
+            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get()
+                                                                                                .getContactPointParameters(),
+                                                                                      robotModel.get()
+                                                                                                .getWalkingControllerParameters()
+                                                                                                .getSteppingParameters());
             stepSnapperUpdatable.setSnapToHeightMap(true);
          }
 
@@ -515,8 +582,10 @@ public class SCS2AvatarSimulationFactory
          ros2Node = realtimeROS2Node.get();
       stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
-                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                          highLevelHumanoidControllerFactory.get()
+                                                                                            .getStatusOutputManager(),
+                                                          highLevelHumanoidControllerFactory.get()
+                                                                                            .getCommandInputManager(),
                                                           robotModel.get(),
                                                           stepSnapperUpdatable,
                                                           ros2Node);
@@ -536,11 +605,14 @@ public class SCS2AvatarSimulationFactory
       ikStreamingRealTimePluginFactory = new IKStreamingRTPluginFactory();
       ikStreamingRTThread = ikStreamingRealTimePluginFactory.createRTThread(robotModel.get().getSimpleRobotName(),
                                                                             realtimeROS2Node.get(),
-                                                                            highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                                            highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                                            highLevelHumanoidControllerFactory.get()
+                                                                                                              .getCommandInputManager(),
+                                                                            highLevelHumanoidControllerFactory.get()
+                                                                                                              .getStatusOutputManager(),
                                                                             robotModel.get(),
                                                                             contextDataFactory,
-                                                                            robotModel.get().getHumanoidRobotKinematicsCollisionModel(),
+                                                                            robotModel.get()
+                                                                                      .getHumanoidRobotKinematicsCollisionModel(),
                                                                             ikStreamingParameters.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(ikStreamingRTThread.getSCS1YoGraphicsListRegistry()));
@@ -562,8 +634,15 @@ public class SCS2AvatarSimulationFactory
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / simulationDT.get());
       int stepGeneratorDivisor = (int) Math.round(robotModel.getStepGeneratorDT() / simulationDT.get());
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
-      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread,
+                                                                 estimatorDivisor,
+                                                                 simulationDT.get(),
+                                                                 masterFullRobotModel);
+      controllerTask = new ControllerTask("Controller",
+                                          controllerThread,
+                                          controllerDivisor,
+                                          simulationDT.get(),
+                                          masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
                                                                          stepGeneratorThread,
                                                                          stepGeneratorDivisor,
@@ -580,15 +659,27 @@ public class SCS2AvatarSimulationFactory
 
       if (realtimeROS2Node.hasBeenSet())
       {
-         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(), kinematicsSimulation.get());
+         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(),
+                                                                      kinematicsSimulation.get());
 
          if (handControlThread != null)
          {
-            List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
-            SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
-            SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager().getControllerInput(),
-                                                                                           robot.getControllerManager().getControllerOutput());
-            handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, simulationDT.get());
+            List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints()
+                                                             .stream()
+                                                             .map(JointReadOnly::getName)
+                                                             .collect(Collectors.toList());
+            SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager()
+                                                                                                .getControllerInput(),
+                                                                                           fingerJointNames);
+            SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager()
+                                                                                                .getControllerInput(),
+                                                                                           robot.getControllerManager()
+                                                                                                .getControllerOutput());
+            handControlTask = new SimulatedHandControlTask(handSensorReader,
+                                                           handControlThread,
+                                                           handOutputWriter,
+                                                           handControlDivisor,
+                                                           simulationDT.get());
          }
       }
 
@@ -597,7 +688,8 @@ public class SCS2AvatarSimulationFactory
       {
          estimatorTask.addRunnableOnSchedulerThread(() ->
                                                     {
-                                                       if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+                                                       if (estimatorThread.getHumanoidRobotContextData()
+                                                                          .getControllerRan())
                                                           simulationOutputWriter.writeAfter();
                                                     });
       }
@@ -612,13 +704,16 @@ public class SCS2AvatarSimulationFactory
       {
          estimatorTask.addRunnableOnSchedulerThread(() ->
                                                     {
-                                                       if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-                                                          simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+                                                       if (estimatorThread.getHumanoidRobotContextData()
+                                                                          .getControllerRan())
+                                                          simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData()
+                                                                                                            .getTimestamp());
                                                     });
       }
       if (simulationThreadOutputWriter != null)
       {
-         simulationThreadOutputWriter.setJointDesiredOutputList(estimatorThread.getHumanoidRobotContextData().getJointDesiredOutputList());
+         simulationThreadOutputWriter.setJointDesiredOutputList(estimatorThread.getHumanoidRobotContextData()
+                                                                               .getJointDesiredOutputList());
          robot.getControllerManager().addController(simulationThreadOutputWriter);
       }
 
@@ -641,36 +736,52 @@ public class SCS2AvatarSimulationFactory
       else
       {
          TaskOverrunBehavior overrunBehavior = TaskOverrunBehavior.BUSY_WAIT;
-         robotController = new BarrierScheduledRobotController(controllerName, tasks, masterContext, overrunBehavior, simulationDT.get());
+         robotController = new BarrierScheduledRobotController(controllerName,
+                                                               tasks,
+                                                               masterContext,
+                                                               overrunBehavior,
+                                                               simulationDT.get());
          tasks.forEach(task -> new Thread(task, task.getClass().getSimpleName() + "Thread").start());
       }
 
       if (logToFile.hasValue() && logToFile.get())
       {
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-         builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
+         builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(),
+                                                    estimatorThread.getFullRobotModel().getElevator(),
+                                                    null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(),
-                                                    enableSCS1YoGraphics.get() ? controllerThread.getSCS1YoGraphicsListRegistry() : null,
-                                                    enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null));
+                                                    enableSCS1YoGraphics.get() ?
+                                                          controllerThread.getSCS1YoGraphicsListRegistry() :
+                                                          null,
+                                                    enableSCS2YoGraphics.get() ?
+                                                          controllerThread.getSCS2YoGraphics() :
+                                                          null));
          builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(),
-                                                    enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
-                                                    enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null));
+                                                    enableSCS1YoGraphics.get() ?
+                                                          stepGeneratorThread.getSCS1YoGraphicsListRegistry() :
+                                                          null,
+                                                    enableSCS2YoGraphics.get() ?
+                                                          stepGeneratorThread.getSCS2YoGraphics() :
+                                                          null));
          if (ikStreamingRTThread != null)
          {
             builders.add(new RegistrySendBufferBuilder(ikStreamingRTThread.getYoVariableRegistry(),
-                                                       enableSCS1YoGraphics.get() ? ikStreamingRTThread.getSCS1YoGraphicsListRegistry() : null,
-                                                       enableSCS2YoGraphics.get() ? ikStreamingRTThread.getSCS2YoGraphics() : null));
+                                                       enableSCS1YoGraphics.get() ?
+                                                             ikStreamingRTThread.getSCS1YoGraphicsListRegistry() :
+                                                             null,
+                                                       enableSCS2YoGraphics.get() ?
+                                                             ikStreamingRTThread.getSCS2YoGraphics() :
+                                                             null));
          }
-
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
-                                                                         robotModel.getEstimatorDT(),
-                                                                         getClass().getSimpleName(), robotModel.getLogModelProvider());
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
 
          if (intraprocessYoVariableLogger.create())
          {
             LogTools.info("[Logging] Logging locally to disk");
 
-            estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
+            estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData()
+                                                                                                       .getTimestamp()));
          }
          else
          {
@@ -682,28 +793,41 @@ public class SCS2AvatarSimulationFactory
       if (yoVariableServer != null)
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
-                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
-                                          enableSCS1YoGraphics.get() ? estimatorThread.getSCS1YoGraphicsListRegistry() : null,
+                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel()
+                                                                                         .getElevator()),
+                                          enableSCS1YoGraphics.get() ?
+                                                estimatorThread.getSCS1YoGraphicsListRegistry() :
+                                                null,
                                           enableSCS2YoGraphics.get() ? estimatorThread.getSCS2YoGraphics() : null);
-         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
+         estimatorTask.addCallbackPostTask(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData()
+                                                                                        .getTimestamp(),
                                                                          estimatorThread.getYoRegistry()));
 
          yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(),
-                                      enableSCS1YoGraphics.get() ? controllerThread.getSCS1YoGraphicsListRegistry() : null,
+                                      enableSCS1YoGraphics.get() ?
+                                            controllerThread.getSCS1YoGraphicsListRegistry() :
+                                            null,
                                       enableSCS2YoGraphics.get() ? controllerThread.getSCS2YoGraphics() : null);
-         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
+         controllerTask.addCallbackPostTask(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData()
+                                                                                          .getTimestamp(),
                                                                           controllerThread.getYoVariableRegistry()));
          yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(),
-                                      enableSCS1YoGraphics.get() ? stepGeneratorThread.getSCS1YoGraphicsListRegistry() : null,
+                                      enableSCS1YoGraphics.get() ?
+                                            stepGeneratorThread.getSCS1YoGraphicsListRegistry() :
+                                            null,
                                       enableSCS2YoGraphics.get() ? stepGeneratorThread.getSCS2YoGraphics() : null);
-         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
+         stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData()
+                                                                                                .getTimestamp(),
                                                                              stepGeneratorThread.getYoVariableRegistry()));
          if (ikStreamingRTThread != null)
          {
             yoVariableServer.addRegistry(ikStreamingRTThread.getYoVariableRegistry(),
-                                         enableSCS1YoGraphics.get() ? ikStreamingRTThread.getSCS1YoGraphicsListRegistry() : null,
+                                         enableSCS1YoGraphics.get() ?
+                                               ikStreamingRTThread.getSCS1YoGraphicsListRegistry() :
+                                               null,
                                          enableSCS2YoGraphics.get() ? ikStreamingRTThread.getSCS2YoGraphics() : null);
-            stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData().getTimestamp(),
+            stepGeneratorTask.addCallbackPostTask(() -> yoVariableServer.update(ikStreamingRTThread.getHumanoidRobotContextData()
+                                                                                                   .getTimestamp(),
                                                                                 ikStreamingRTThread.getYoVariableRegistry()));
          }
 
@@ -711,19 +835,30 @@ public class SCS2AvatarSimulationFactory
          {
             yoVariableServer.addRegistry(handControlThread.getYoVariableRegistry(), null, null);
             AvatarSimulatedHandControlThread finalHandControlThread = handControlThread;
-            handControlTask.addCallbackPostTask(() -> yoVariableServer.update(finalHandControlThread.getHumanoidRobotContextData().getTimestamp(),
+            handControlTask.addCallbackPostTask(() -> yoVariableServer.update(finalHandControlThread.getHumanoidRobotContextData()
+                                                                                                    .getTimestamp(),
                                                                               finalHandControlThread.getYoVariableRegistry()));
          }
       }
 
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
-      mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
-      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(),
+                                                       estimatorTask,
+                                                       robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(),
+                                                       controllerTask,
+                                                       robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(),
+                                                       stepGeneratorTask,
+                                                       robotController.getYoRegistry()));
       if (ikStreamingRTTask != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(), ikStreamingRTTask, robotController.getYoRegistry()));
+         mirroredRegistries.add(setupWithMirroredRegistry(ikStreamingRTThread.getYoVariableRegistry(),
+                                                          ikStreamingRTTask,
+                                                          robotController.getYoRegistry()));
       if (handControlThread != null)
-         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
+         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(),
+                                                          handControlTask,
+                                                          robotController.getYoRegistry()));
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {
@@ -735,10 +870,12 @@ public class SCS2AvatarSimulationFactory
             mirroredRegistries.forEach(mirror -> mirror.updateChangedValues()); // Pulling values from the simulation's variables
 
             FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
-            RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
+            RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(),
+                                                                           rootJoint.getJointPose().getPosition());
 
             TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-            SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+            SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody())
+                          .forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
             stepGeneratorThread.initialize();
@@ -783,7 +920,9 @@ public class SCS2AvatarSimulationFactory
       return joints;
    }
 
-   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
+   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry,
+                                                                       HumanoidRobotControlTask owner,
+                                                                       YoRegistry schedulerRegistry)
    {
       MirroredYoVariableRegistry mirroredRegistry = new MirroredYoVariableRegistry(registry);
       owner.addRunnableOnSchedulerThread(() ->
@@ -822,10 +961,12 @@ public class SCS2AvatarSimulationFactory
          robotInitialSetup.get().initializeRobot(robot.getRootBody());
          robot.updateFrames();
          FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
-         RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
+         RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(),
+                                                                        rootJoint.getJointPose().getPosition());
 
          TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-         SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+         SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody())
+                       .forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
          estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
       }
    }
@@ -872,13 +1013,14 @@ public class SCS2AvatarSimulationFactory
                                                             additionalContactNames.get(i),
                                                             additionalContactTransforms.get(i));
 
-      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
-                                                                                                    feetForceSensorNames,
-                                                                                                    wristForceSensorNames,
-                                                                                                    highLevelControllerParameters,
-                                                                                                    walkingControllerParameters,
-                                                                                                    copTrajectoryParameters,
-                                                                                                    robotModel.getSplitFractionCalculatorParameters());
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(
+            contactableBodiesFactory,
+            feetForceSensorNames,
+            wristForceSensorNames,
+            highLevelControllerParameters,
+            walkingControllerParameters,
+            copTrajectoryParameters,
+            robotModel.getSplitFractionCalculatorParameters());
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
@@ -967,7 +1109,8 @@ public class SCS2AvatarSimulationFactory
     */
    public void setSimulationDataBufferDuration(double bufferDuration)
    {
-      this.simulationDataBufferSize.set((int) (bufferDuration / simulationDT.get() / simulationDataRecordTickPeriod.get()));
+      this.simulationDataBufferSize.set((int) (bufferDuration / simulationDT.get()
+                                               / simulationDataRecordTickPeriod.get()));
    }
 
    public void setSimulationDataRecordTimePeriod(double simulationDataRecordTimePeriod)
@@ -1121,7 +1264,9 @@ public class SCS2AvatarSimulationFactory
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
                                                                        HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
-      setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript, null, headingAndVelocityEvaluationScriptParameters);
+      setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript,
+                                                              null,
+                                                              headingAndVelocityEvaluationScriptParameters);
    }
 
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
@@ -1163,8 +1308,12 @@ public class SCS2AvatarSimulationFactory
       highLevelControllerFactory.addRequestableTransition(HighLevelControllerName.EXTERNAL_TRANSITION_STATE,
                                                           HighLevelControllerName.EXTERNAL); // FIXME not necessary
       highLevelControllerFactory.addControllerFailureTransition(HighLevelControllerName.EXTERNAL_TRANSITION_STATE,
-                                                                robotModel.get().getHighLevelControllerParameters().getFallbackControllerState());
+                                                                robotModel.get()
+                                                                          .getHighLevelControllerParameters()
+                                                                          .getFallbackControllerState());
       highLevelControllerFactory.addControllerFailureTransition(HighLevelControllerName.EXTERNAL,
-                                                                robotModel.get().getHighLevelControllerParameters().getFallbackControllerState());
+                                                                robotModel.get()
+                                                                          .getHighLevelControllerParameters()
+                                                                          .getFallbackControllerState());
    }
 }

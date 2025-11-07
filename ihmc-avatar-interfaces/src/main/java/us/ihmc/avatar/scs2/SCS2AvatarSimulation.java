@@ -3,6 +3,7 @@ package us.ihmc.avatar.scs2;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -61,6 +62,7 @@ public class SCS2AvatarSimulation
    private boolean javaFXThreadImplicitExit = true;
 
    private boolean hasBeenDestroyed = false;
+   private ControllerTask controllerTask;
 
    public void start()
    {
@@ -221,7 +223,9 @@ public class SCS2AvatarSimulation
    public void setCameraDefaultRobotView()
    {
       checkSimulationSessionAlive();
-      SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
+      SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions()
+                                                                                                  .get(0)
+                                                                                                  .getInitialJointState();
       if (initialRootJointState != null)
          initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
    }
@@ -423,6 +427,16 @@ public class SCS2AvatarSimulation
    public AvatarControllerThread getControllerThread()
    {
       return controllerThread;
+   }
+
+   public void setControllerTask(ControllerTask controllerTask)
+   {
+      this.controllerTask = controllerTask;
+   }
+
+   public ControllerTask getControllerTask()
+   {
+      return controllerTask;
    }
 
    public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
