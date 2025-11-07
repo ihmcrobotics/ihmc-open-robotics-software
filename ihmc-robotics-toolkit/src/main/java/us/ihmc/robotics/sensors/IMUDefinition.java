@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class IMUDefinition
@@ -11,7 +12,7 @@ public class IMUDefinition
    private final String name;
    private final RigidBodyBasics rigidBody;
    private final RigidBodyTransform transformFromIMUToJoint;
-   private final ReferenceFrame imuFrame;
+   private final MovingReferenceFrame imuFrame;
 
    public IMUDefinition(String name, RigidBodyBasics rigidBody, RigidBodyTransformReadOnly transformFromIMUToJoint)
    {
@@ -19,8 +20,8 @@ public class IMUDefinition
       this.rigidBody = rigidBody;
       this.transformFromIMUToJoint = new RigidBodyTransform(transformFromIMUToJoint);
 
-      ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
-      imuFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, frameAfterJoint, transformFromIMUToJoint);
+      MovingReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
+      imuFrame = MovingReferenceFrame.constructFrameFixedInParent(name, frameAfterJoint, transformFromIMUToJoint);
    }
 
    public String getName()
@@ -38,7 +39,7 @@ public class IMUDefinition
       return transformFromIMUToJoint;
    }
 
-   public ReferenceFrame getIMUFrame()
+   public MovingReferenceFrame getIMUFrame()
    {
       return imuFrame;
    }

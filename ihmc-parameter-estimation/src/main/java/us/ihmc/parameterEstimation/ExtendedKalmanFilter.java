@@ -6,12 +6,29 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * This class provides an implementation of an Extended Kalman Filter (EKF). The EKF is a recursive filter that uses a linearization of the process and
  * measurement models to provide an estimate of the state of a system.
  * <p>
  * This implementation is for state-only systems, no input -- or if you prefer: x_dot = f(x), not x_dot = f(x, u).
+ * </p>
+ * <p>
+ * To utilize this filter, the user must extend this class and provide implementations of the process and measurement models by overriding the abstract methods:
+ * <ul>
+ *    <li> {@link #processModel(DMatrixRMaj)} </li>
+ *    <li> {@link #measurementModel(DMatrixRMaj)} </li>
+ * </ul>
+ * Then, to get updates, the user calls {@link #calculateEstimate(DMatrix)} with the observation at the current time step. This will return the estimated
+ * state based on the observations.
+ * </p>
+ * <p>
+ * For example implementations, see:
+ * <ul>
+ *    <li> {@link us.ihmc.parameterEstimation.examples.ExamplePendulumExtendedKalmanFilter}</li>
+ *    <li> {@link us.ihmc.parameterEstimation.examples.ExampleConstantVelocity2DKalmanFilter}</li>
+ * </ul>
  * </p>
  *
  * @author James Foster
@@ -66,7 +83,7 @@ public abstract class ExtendedKalmanFilter
    /**
     * The residual 'y' between the actual observation (i.e. direct from the sensors), and the predicted measurement from the prediction step of the filter.
     */
-   private final DMatrixRMaj measurementResidual;
+   protected final DMatrixRMaj measurementResidual;
    /**
     * Container variable used for garbage free operations.
     */
@@ -74,7 +91,23 @@ public abstract class ExtendedKalmanFilter
    /**
     * Covariance matrix 'S' of the linearized measurement model, used in the update step of the filter.
     */
-   private final DMatrixRMaj residualCovariance;
+   protected final DMatrixRMaj residualCovariance;
+   /**
+    * Masked version of the residual, mask^T * y
+    */
+   protected final DMatrixRMaj maskedMeasurementResidual;
+   /**
+    * Masked version of the measurement covariance, mask^T * R * mask, used to reject outlier measurements from the filter
+    */
+   protected final DMatrixRMaj maskedMeasurementCovariance;
+   /**
+    * Masked version of the covariance, mask^T * S * mask, used to reject outlier measurements from the filter
+    */
+   protected final DMatrixRMaj maskedResidualCovariance;
+   /**
+    * Masked measurement jacobian, mask^T * H
+    */
+   protected final DMatrixRMaj maskedMeasurementJacobian;
    /**
     * Container variable used to hold the inverse of the residual covariance matrix.
     */
@@ -92,7 +125,10 @@ public abstract class ExtendedKalmanFilter
     * Container variable used for garbage free operations.
     */
    private final DMatrixRMaj kalmanGainContainer;
-
+   /**
+    * This is the update to the predicted state, based on the Kalman feedback.
+    */
+   protected final DMatrixRMaj stateCorrection;
    /**
     * The predicted estimate of the state according to the measurement model of the filter.
     */
@@ -123,32 +159,47 @@ public abstract class ExtendedKalmanFilter
 
    /** Terms used for calculating the Joseph form of the covariance update. */
    private final DMatrixRMaj josephTransposeTerm;
-   private final DMatrixRMaj josephTransposeTermContainer;
-   private final DMatrixRMaj josephIdentity;
-   private final DMatrixRMaj josephGainTerm;
    private final DMatrixRMaj josephGainTermContainer;
+
+   private final int stateSize;
+   private final int errorSize;
+   private final int measurementSize;
 
    public ExtendedKalmanFilter(int stateSize, int measurementSize)
    {
-      processCovariance = new DMatrixRMaj(stateSize, stateSize);
-      measurementCovariance = new DMatrixRMaj(measurementSize, measurementSize);
+      this(stateSize, stateSize, measurementSize);
+   }
 
-      processJacobian = new DMatrixRMaj(stateSize, stateSize);
-      measurementJacobian = new DMatrixRMaj(measurementSize, stateSize);
+   public ExtendedKalmanFilter(int stateSize, int errorSize, int measurementSize)
+   {
+      this.stateSize = stateSize;
+      this.errorSize = errorSize;
+      this.measurementSize = measurementSize;
+
+      processCovariance = new DMatrixRMaj(errorSize, errorSize);
+      measurementCovariance = new DMatrixRMaj(measurementSize, measurementSize);
+      maskedMeasurementCovariance = new DMatrixRMaj(measurementSize, measurementSize);
+
+      processJacobian = new DMatrixRMaj(stateSize, errorSize);
+      measurementJacobian = new DMatrixRMaj(measurementSize, errorSize);
+      maskedMeasurementJacobian = new DMatrixRMaj(measurementSize, errorSize);
 
       state = new DMatrixRMaj(stateSize, 1);
       predictedState = new DMatrixRMaj(stateSize, 1);
-      covariance = new DMatrixRMaj(stateSize, stateSize);
-      predictedCovariance = new DMatrixRMaj(stateSize, stateSize);
-      predictedCovarianceContainer = new DMatrixRMaj(stateSize, stateSize);
+      covariance = new DMatrixRMaj(errorSize, errorSize);
+      predictedCovariance = new DMatrixRMaj(errorSize, errorSize);
+      predictedCovarianceContainer = new DMatrixRMaj(errorSize, errorSize);
 
       measurementResidual = new DMatrixRMaj(measurementSize, 1);
-      residualCovarianceContainer = new DMatrixRMaj(measurementSize, measurementSize);
+      maskedMeasurementResidual = new DMatrixRMaj(measurementSize, 1);
+      residualCovarianceContainer = new DMatrixRMaj(errorSize, errorSize);
       residualCovariance = new DMatrixRMaj(measurementSize, measurementSize);
+      maskedResidualCovariance = new DMatrixRMaj(measurementSize, measurementSize);
       inverseResidualCovariance = new DMatrixRMaj(measurementSize, measurementSize);
       solver = new LinearSolverSafe<>(LinearSolverFactory_DDRM.symmPosDef(measurementSize));
       kalmanGain = new DMatrixRMaj(stateSize, measurementSize);
       kalmanGainContainer = new DMatrixRMaj(stateSize, measurementSize);
+      stateCorrection = new DMatrixRMaj(errorSize, 1);
       updatedState = new DMatrixRMaj(stateSize, 1);
       updatedCovariance = new DMatrixRMaj(stateSize, stateSize);
       updatedCovarianceContainer = new DMatrixRMaj(stateSize, stateSize);
@@ -156,11 +207,8 @@ public abstract class ExtendedKalmanFilter
       normalizedInnovation = new DMatrixRMaj(measurementSize, 1);
       normalizedInnovationContainer = new DMatrixRMaj(measurementSize, 1);
 
-      josephTransposeTerm = new DMatrixRMaj(stateSize, stateSize);
-      josephTransposeTermContainer = new DMatrixRMaj(stateSize, stateSize);
-      josephIdentity = CommonOps_DDRM.identity(stateSize);
-      josephGainTerm = new DMatrixRMaj(stateSize, stateSize);
-      josephGainTermContainer = new DMatrixRMaj(stateSize, stateSize);
+      josephTransposeTerm = new DMatrixRMaj(errorSize, errorSize);
+      josephGainTermContainer = new DMatrixRMaj(errorSize, errorSize);
    }
 
    public ExtendedKalmanFilter(DMatrixRMaj initialState, DMatrixRMaj initialCovariance, DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance)
@@ -186,6 +234,26 @@ public abstract class ExtendedKalmanFilter
 
       state.set(initialState);
       covariance.set(initialCovariance);
+   }
+
+   public void initializeState(DMatrixRMaj state)
+   {
+      this.state.set(state);
+   }
+
+   public int getStateSize()
+   {
+      return stateSize;
+   }
+
+   public int getErrorSize()
+   {
+      return errorSize;
+   }
+
+   public int getMeasurementSize()
+   {
+      return measurementSize;
    }
 
    /**
@@ -281,6 +349,15 @@ public abstract class ExtendedKalmanFilter
    }
 
    /**
+    * This is broken into its own function, in case the state exists on some manifold. This is the case for, for example, quaternions. In that event, this
+    * function should overriden.
+    */
+   protected void applyStateCorrection(DMatrixRMaj state, DMatrixRMaj modification, DMatrixRMaj modifiedState)
+   {
+      CommonOps_DDRM.add(state, modification, modifiedState);
+   }
+
+   /**
     * If the observation is valid, the actual observation, as well as the measurement model and its noise profile, are used to correct the
     * prediction made in the {@link #predictionStep()}.
     */
@@ -289,8 +366,9 @@ public abstract class ExtendedKalmanFilter
       calculateKalmanGain();
 
       // x_(k|k) = x_(k|k-1) + K_k * y_k
-      updatedState.set(predictedState);
-      CommonOps_DDRM.multAdd(kalmanGain, measurementResidual, updatedState);
+      CommonOps_DDRM.mult(kalmanGain, maskedMeasurementResidual, stateCorrection);
+      // We want to do this, in case the state exists on a manifold (e.g. quaternion)
+      applyStateCorrection(predictedState, stateCorrection, updatedState);
       calculateUpdatedCovariance();
 
       state.set(updatedState);
@@ -300,20 +378,33 @@ public abstract class ExtendedKalmanFilter
    private void calculateResidualCovarianceAndInverse()
    {
       // S_k = H_k * P_(k|k-1) * H_k^T + R_k
-      residualCovariance.zero();
       CommonOps_DDRM.mult(measurementJacobian, predictedCovariance, residualCovarianceContainer);
       CommonOps_DDRM.multTransB(residualCovarianceContainer, measurementJacobian, residualCovariance);
       CommonOps_DDRM.addEquals(residualCovariance, measurementCovariance);
 
-      solver.setA(residualCovariance);
-      solver.invert(inverseResidualCovariance);
+      maskResidualCovarianceForOutlierRejection();
+
+      solver.setA(maskedResidualCovariance);
+      // fixme this doesn't work.
+      CommonOps_DDRM.invert(maskedResidualCovariance, inverseResidualCovariance);
+//      solver.invert(inverseResidualCovariance);
+   }
+
+   /**
+    * If the user wants to reject outlier measurements, they can override this method to modify the masked variables. By default, no masking is done.
+    */
+   protected void maskResidualCovarianceForOutlierRejection()
+   {
+      maskedResidualCovariance.set(residualCovariance);
+      maskedMeasurementCovariance.set(measurementCovariance);
+      maskedMeasurementResidual.set(measurementResidual);
+      maskedMeasurementJacobian.set(measurementJacobian);
    }
 
    protected void calculateKalmanGain()
    {
       // K_k = P_(k|k-1) * H_k^T * S_k^-1
-      kalmanGain.zero();
-      CommonOps_DDRM.multTransB(predictedCovariance, measurementJacobian, kalmanGainContainer);
+      CommonOps_DDRM.multTransB(predictedCovariance, maskedMeasurementJacobian, kalmanGainContainer);
       CommonOps_DDRM.mult(kalmanGainContainer, inverseResidualCovariance, kalmanGain);
    }
 
@@ -324,28 +415,22 @@ public abstract class ExtendedKalmanFilter
       {
          // Joseph form of covariance update is apparently more numerically stable
          // P_(k|k) = (I - K_k * H_k) * P_(k|k-1) * (I - K_k * H_k)^T + K_k * R_k * K_k^T
-         josephGainTerm.set(kalmanGain);
-         CommonOps_DDRM.mult(josephGainTerm, measurementCovariance, josephGainTermContainer);
-         CommonOps_DDRM.multTransB(josephGainTermContainer, kalmanGain, josephGainTerm);
+         CommonOps_DDRM.mult(kalmanGain, maskedMeasurementCovariance, josephGainTermContainer);
+         CommonOps_DDRM.multTransB(josephGainTermContainer, kalmanGain, updatedCovariance);
 
-         josephTransposeTermContainer.set(kalmanGain);
-         CommonOps_DDRM.mult(josephTransposeTermContainer, measurementJacobian, josephTransposeTerm);
-         CommonOps_DDRM.scale(-1.0, josephTransposeTerm);
-         CommonOps_DDRM.addEquals(josephTransposeTerm, josephIdentity);
+         CommonOps_DDRM.mult(-1.0, kalmanGain, maskedMeasurementJacobian, josephTransposeTerm);
+         MatrixTools.addDiagonal(josephTransposeTerm, 1.0);
 
          // Now put these terms into the covariance update variables
          CommonOps_DDRM.multTransB(predictedCovariance, josephTransposeTerm, updatedCovarianceContainer);
-         CommonOps_DDRM.mult(josephTransposeTerm, updatedCovarianceContainer, updatedCovariance);
-         CommonOps_DDRM.addEquals(updatedCovariance, josephGainTerm);
+         CommonOps_DDRM.multAdd(josephTransposeTerm, updatedCovarianceContainer, updatedCovariance);
       }
       else  // DEFAULT
       {
          // P_(k|k) = (I - K_k * H_k) * P_(k|k-1)
-         updatedCovariance.set(kalmanGain);
-         CommonOps_DDRM.mult(updatedCovariance, measurementJacobian, updatedCovarianceContainer);
+         CommonOps_DDRM.mult(-1.0, kalmanGain, measurementJacobian, updatedCovarianceContainer);
+         MatrixTools.addDiagonal(updatedCovarianceContainer, 1.0);
          CommonOps_DDRM.mult(updatedCovarianceContainer, predictedCovariance, updatedCovariance);
-         CommonOps_DDRM.scale(-1.0, updatedCovariance);
-         CommonOps_DDRM.addEquals(updatedCovariance, predictedCovariance);
       }
    }
 
@@ -361,8 +446,8 @@ public abstract class ExtendedKalmanFilter
     */
    private double calculateNormalizedInnovation()
    {
-      CommonOps_DDRM.mult(inverseResidualCovariance, measurementResidual, normalizedInnovationContainer);
-      CommonOps_DDRM.multTransA(measurementResidual, normalizedInnovationContainer, normalizedInnovation);
+      CommonOps_DDRM.mult(inverseResidualCovariance, maskedMeasurementResidual, normalizedInnovationContainer);
+      CommonOps_DDRM.multTransA(maskedMeasurementResidual, normalizedInnovationContainer, normalizedInnovation);
       return normalizedInnovation.getData()[0];
    }
 
@@ -422,6 +507,11 @@ public abstract class ExtendedKalmanFilter
    public double getNormalizedInnovation()
    {
       return normalizedInnovation.getData()[0];
+   }
+
+   public DMatrixRMaj getCovariance()
+   {
+      return covariance;
    }
 
    public void setNormalizedInnovationThreshold(double normalizedInnovationThreshold)

@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -56,6 +60,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 {
    private static final boolean MORE_YOVARIABLES = false;
+   private static final boolean VISUALIZE_FEET_ESTIMATORS = true;
 
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
    private static final double maxForceZInPercentThresholdToFilterFoot = 0.45;
@@ -94,11 +99,15 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    private final DoubleProvider forceZInPercentThresholdToTrustFoot;
    private final DoubleProvider forceZInPercentThresholdToNotTrustFoot;
 
+   private final SingleFootEstimator[] footEstimators;
+   private final Map<RigidBodyBasics, SingleFootEstimator> footEstimatorMap = new HashMap<>();
+
    private final Map<RigidBodyBasics, FootSwitchInterface> footSwitches;
    private final Map<RigidBodyBasics, FixedFrameVector3DBasics> footForces = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, Wrench> footWrenches = new LinkedHashMap<>();
    private final DoubleProvider delayTimeBeforeTrustingFoot;
    private final Map<RigidBodyBasics, GlitchFilteredYoBoolean> haveFeetHitGroundFiltered = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, GlitchFilteredYoBoolean> areFeetNotMovingFiltered = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoBoolean> areFeetTrusted = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, YoBoolean> wereFeetTrustedLastTick = new LinkedHashMap<>();
    private final List<RigidBodyBasics> listOfTrustedFeet = new ArrayList<>();
@@ -166,13 +175,71 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
       setupBunchOfVariables();
 
-      kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(inverseDynamicsStructure,
-                                                                                            feetContactablePlaneBodies,
-                                                                                            footSwitches,
-                                                                                            centerOfPressureDataHolderFromController,
+      Map<RigidBodyBasics, IMUSensorReadOnly> footIMUs = new HashMap<>();
+      for (IMUSensorReadOnly imu : imuProcessedOutputs)
+      {
+         if (feetContactablePlaneBodies.containsKey(imu.getMeasurementLink()))
+            footIMUs.put(imu.getMeasurementLink(), imu);
+      }
+
+      FrameVector3DReadOnly gravityVector = EuclidFrameFactories.newLinkedFrameVector3DReadOnly(() -> worldFrame, new Vector3D(0, 0, -Math.abs(gravitationalAcceleration)));
+
+      DoubleProvider footToRootJointPositionBreakFrequency = new DoubleParameter("FootToRootJointPositionBreakFrequency",
+                                                                  registry,
+                                                                  stateEstimatorParameters.getKinematicsPelvisPositionFilterFreqInHertz());
+      DoubleProvider copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
+      YoBoolean useFootIMUData = new YoBoolean("useFootIMUData", registry);
+      YoDouble footLinearVelocityMovingThreshold = new YoDouble("footLinearVelocityMovingThreshold", registry);
+      YoDouble footAngularVelocityMovingThreshold = new YoDouble("footAngularVelocityMovingThreshold", registry);
+      YoDouble footAlphaLeakIMUOnly = new YoDouble("footIMUOnlyAlphaLeak", registry);
+      YoDouble footImuAgainstKinematicsForVelocityBreakFrequency = new YoDouble("footIMUAgainstKinematicsForVelocityBreakFrequency", registry);
+      YoDouble footImuAgainstKinematicsForPositionBreakFrequency = new YoDouble("footIMUAgainstKinematicsForPositionBreakFrequency", registry);
+      footImuAgainstKinematicsForPositionBreakFrequency.set(12.0);
+      footImuAgainstKinematicsForVelocityBreakFrequency.set(2.0);
+      footAlphaLeakIMUOnly.set(0.999);
+      footLinearVelocityMovingThreshold.set(0.3);
+      footAngularVelocityMovingThreshold.set(0.6);
+
+      RigidBodyBasics[] feetRigidBodies = feetContactablePlaneBodies.keySet().toArray(new RigidBodyBasics[0]);
+
+      footEstimators = new SingleFootEstimator[feetRigidBodies.length];
+      for (int i = 0; i < feetRigidBodies.length; i++)
+      {
+         RigidBodyBasics footRigidBody = feetRigidBodies[i];
+         ContactablePlaneBody contactableFoot = feetContactablePlaneBodies.get(footRigidBody);
+         FootSwitchInterface footSwitch = footSwitches.get(footRigidBody);
+         footEstimators[i] = new SingleFootEstimator(rootJoint,
+                                                     contactableFoot,
+                                                     footSwitch,
+                                                     footIMUs.get(footRigidBody),
+                                                     imuBiasProvider,
+                                                     footToRootJointPositionBreakFrequency,
+                                                     copFilterBreakFrequency,
+                                                     centerOfPressureDataHolderFromController,
+                                                     cancelGravityFromAccelerationMeasurement,
+                                                     footLinearVelocityMovingThreshold,
+                                                     footAngularVelocityMovingThreshold,
+                                                     gravityVector,
+                                                     useFootIMUData,
+                                                     footImuAgainstKinematicsForPositionBreakFrequency,
+                                                     footImuAgainstKinematicsForVelocityBreakFrequency,
+                                                     footAlphaLeakIMUOnly,
+                                                     estimatorDT,
+                                                     registry);
+         footEstimatorMap.put(footRigidBody, footEstimators[i]);
+      }
+
+      if (VISUALIZE_FEET_ESTIMATORS)
+      {
+         for (SingleFootEstimator footEstimator : footEstimators)
+         {
+            footEstimator.createVisualization(yoGraphicsListRegistry);
+         }
+      }
+
+      kinematicsBasedLinearStateCalculator = new PelvisKinematicsBasedLinearStateCalculator(footEstimatorMap,
                                                                                             estimatorDT,
                                                                                             stateEstimatorParameters,
-                                                                                            yoGraphicsListRegistry,
                                                                                             registry);
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(rootJoint,
@@ -263,8 +330,11 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          String footPrefix = foot.getName();
 
          final GlitchFilteredYoBoolean hasFootHitTheGroundFiltered = new GlitchFilteredYoBoolean("has" + footPrefix + "FootHitGroundFiltered", registry, 0);
+         final GlitchFilteredYoBoolean isFootMovingFiltered = new GlitchFilteredYoBoolean("is" + footPrefix + "FootNotMovingFiltered", registry, 0);
          hasFootHitTheGroundFiltered.set(true);
+         isFootMovingFiltered.set(false);
          haveFeetHitGroundFiltered.put(foot, hasFootHitTheGroundFiltered);
+         areFeetNotMovingFiltered.put(foot, isFootMovingFiltered);
 
          YoBoolean isFootTrusted = new YoBoolean("is" + footPrefix + "FootTrusted", registry);
          YoBoolean wasFootTrusted = new YoBoolean("was" + footPrefix + "FootTrustedLastTick", registry);
@@ -322,6 +392,16 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       rootJointVelocity.setToZero();
       kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
 
+      // Initialize the feet states
+      tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
+
+      for (SingleFootEstimator footEstimator : footEstimators)
+      {
+         footEstimator.initialize();
+         footEstimator.updateStateFromKinematics(tempRootBodyTwist);
+         footEstimator.correctFootPositionFromRootJoint(false, false, rootJointPosition);
+      }
+
       imuBasedLinearStateCalculator.initialize();
       mainIMULinearVelocityEstimate.getPositionEstimation().setToZero();
       mainIMULinearVelocityEstimate.getRateEstimation().setToZero();
@@ -340,7 +420,13 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       // Keep setting the position so the localization updater works properly.
       rootJoint.setJointPosition(rootJointPosition);
       kinematicsBasedLinearStateCalculator.updateKinematics();
-      kinematicsBasedLinearStateCalculator.updateNoTrustedFeet(rootJointPosition, null);
+      updateFeetFromKinematics();
+      for (SingleFootEstimator footEstimator : footEstimators)
+      {
+         footEstimator.correctFootPositionFromRootJoint(false, false, rootJointPosition);
+      }
+      kinematicsBasedLinearStateCalculator.setRootJointState(rootJointPosition, null);
+
       // Reset the IMU updater
       imuBasedLinearStateCalculator.initialize();
 
@@ -350,14 +436,51 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       rootJointVelocity.setToZero();
    }
 
+   private final Twist tempRootBodyTwist = new Twist();
+
+   private void updateFeetFromKinematics()
+   {
+      // FIXME do we want to use the fused pelvis velocity?
+      tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
+      tempRootBodyTwist.getLinearPart().setMatchingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
+
+      for (SingleFootEstimator footEstimator : footEstimators)
+      {
+         footEstimator.updateStateFromKinematics(tempRootBodyTwist);
+      }
+   }
+
+   private void correctFeetStateFromPelvis()
+   {
+      if (kinematicsBasedLinearStateCalculator.getCorrectTrustedFeetPositions())
+      {
+         for (int i = 0; i < listOfTrustedFeet.size(); i++)
+         {
+            SingleFootEstimator footEstimator = footEstimatorMap.get(listOfTrustedFeet.get(i));
+            footEstimator.correctFootPositionFromRootJoint(true,
+                                                           kinematicsBasedLinearStateCalculator.getTrustCoPAsNonSlippingContactPoint(),
+                                                           kinematicsBasedLinearStateCalculator.getPelvisPosition());
+         }
+      }
+
+      for (int i = 0; i < listOfUnTrustedFeet.size(); i++)
+      {
+         SingleFootEstimator footEstimator = footEstimatorMap.get(listOfUnTrustedFeet.get(i));
+         footEstimator.correctFootPositionFromRootJoint(false, false, kinematicsBasedLinearStateCalculator.getPelvisPosition());
+      }
+   }
+
+
+
    public void updateRootJointPositionAndLinearVelocity()
    {
+      kinematicsBasedLinearStateCalculator.updateKinematics();
+      updateFeetFromKinematics();
+
       if (requestStopEstimationOfPelvisLinearState.getBooleanValue())
          return;
 
-      kinematicsBasedLinearStateCalculator.updateKinematics();
-
-      numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
+      numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitchesAndKinematics());
       numberOfEndEffectorsFilteredByLoad.set(0);
 
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= optimalNumberOfTrustedFeet.getValue())
@@ -393,15 +516,21 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             tempTwist.changeFrame(rootJointFrame);
             rootJointNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
             rootJointPositionEstimate.update(null, rootJointNewLinearVelocityEstimate);
-            kinematicsBasedLinearStateCalculator.updateNoTrustedFeet(rootJointPosition, rootJointVelocity);
+
+            for (SingleFootEstimator footEstimator : footEstimators)
+            {
+               footEstimator.correctFootPositionFromRootJoint(false, false, rootJointPosition);
+            }
+
+            kinematicsBasedLinearStateCalculator.setRootJointState(rootJointPosition, rootJointVelocity);
          }
          else
             throw new RuntimeException("No foot trusted!");
       }
       else if (numberOfEndEffectorsTrusted.getIntegerValue() > 0)
       {
-         updateTrustedFeetLists();
-         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, listOfUnTrustedFeet, rootJointPosition);
+         updateTrustedFeet();
+         kinematicsBasedLinearStateCalculator.estimatePelvisLinearState(listOfTrustedFeet, rootJointPosition, rootJointVelocity);
 
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
@@ -412,6 +541,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             rootJointPosition.set(kinematicsBasedLinearStateCalculator.getPelvisPosition());
             rootJointVelocity.set(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
          }
+
+         // FIXME should this used the fused measurement, rather than the kinematic only measurement?
+         correctFeetStateFromPelvis();
       }
       else
       {
@@ -430,8 +562,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       imuBasedLinearStateCalculator.saveMeasurementFrameTwist(rootJoint.getJointTwist());
    }
 
-   private int setTrustedFeetUsingFootSwitches()
+   private int setTrustedFeetUsingFootSwitchesAndKinematics()
    {
+      int numberOfEndEffectorsHitGround = 0;
       int numberOfEndEffectorsTrusted = 0;
 
       int windowSize = (int) (delayTimeBeforeTrustingFoot.getValue() / estimatorDT);
@@ -440,19 +573,49 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       {
          RigidBodyBasics foot = feet.get(i);
          wereFeetTrustedLastTick.get(foot).set(areFeetTrusted.get(foot).getValue());
-         haveFeetHitGroundFiltered.get(foot).setWindowSize(windowSize);
+
+         GlitchFilteredYoBoolean hasFootHitGround = haveFeetHitGroundFiltered.get(foot);
+         GlitchFilteredYoBoolean isFootNotMoving = areFeetNotMovingFiltered.get(foot);
+         hasFootHitGround.setWindowSize(windowSize);
+         isFootNotMoving.setWindowSize(windowSize);
 
          if (footSwitches.get(foot).hasFootHitGroundFiltered())
-            haveFeetHitGroundFiltered.get(foot).update(true);
+            hasFootHitGround.update(true);
          else
-            haveFeetHitGroundFiltered.get(foot).set(false);
+            hasFootHitGround.set(false);
+         if (!footEstimatorMap.get(foot).isFootMoving())
+            isFootNotMoving.update(true);
+         else
+            isFootNotMoving.set(false);
 
-         if (haveFeetHitGroundFiltered.get(foot).getBooleanValue())
+         if (hasFootHitGround.getBooleanValue())
+            numberOfEndEffectorsHitGround++;
+         if (hasFootHitGround.getBooleanValue() && isFootNotMoving.getBooleanValue())
             numberOfEndEffectorsTrusted++;
       }
 
-      // Update only if at least one foot hit the ground
+      // TODO better incorporate the conditions of nothing moving
+
+      // Update only if at least one foot hit the ground and its not moving
       if (numberOfEndEffectorsTrusted > 0)
+      {
+         if (trustOnlyLowestFoot.getValue())
+         {
+            numberOfEndEffectorsTrusted = filterAndTrustLowestFoot();
+         }
+         else
+         {
+            for (int i = 0; i < feet.size(); i++)
+            {
+               RigidBodyBasics foot = feet.get(i);
+               boolean isFootOnGround = haveFeetHitGroundFiltered.get(foot).getBooleanValue();
+               boolean isFootNotMoving = areFeetNotMovingFiltered.get(foot).getBooleanValue();
+               areFeetTrusted.get(foot).set(isFootOnGround && isFootNotMoving);
+            }
+         }
+      }
+      // Update if you have a foot on the ground, but it's moving
+      else if (numberOfEndEffectorsHitGround > 0)
       {
          if (trustOnlyLowestFoot.getValue())
          {
@@ -466,6 +629,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                boolean isFootOnGround = haveFeetHitGroundFiltered.get(foot).getBooleanValue();
                areFeetTrusted.get(foot).set(isFootOnGround);
             }
+            // override the number of end effectors trusted with the number that hit the ground.
+            numberOfEndEffectorsTrusted = numberOfEndEffectorsHitGround;
          }
       }
       // Else if there is a foot with a force past the threshold trust the force and not the CoP
@@ -493,6 +658,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             }
          }
       }
+
+
 
       if (numberOfEndEffectorsTrusted == 0)
       {
@@ -678,7 +845,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       }
    }
 
-   private void updateTrustedFeetLists()
+   private void updateTrustedFeet()
    {
       listOfTrustedFeet.clear();
       listOfUnTrustedFeet.clear();
@@ -690,6 +857,32 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
             listOfTrustedFeet.add(foot);
          else
             listOfUnTrustedFeet.add(foot);
+      }
+
+      if (!kinematicsBasedLinearStateCalculator.getKinematicsIsUpToDate())
+         throw new RuntimeException("Leg kinematics needs to be updated before trying to estimate the pelvis position/linear velocity.");
+
+      for (int i = 0; i < listOfTrustedFeet.size(); i++)
+      {
+         SingleFootEstimator footEstimator = footEstimatorMap.get(listOfTrustedFeet.get(i));
+         if (kinematicsBasedLinearStateCalculator.getAssumeTrustedFootAtZeroHeight())
+         {
+            if (kinematicsBasedLinearStateCalculator.getTrustCoPAsNonSlippingContactPoint())
+            {
+               footEstimator.computeStateSettingCoPZ(kinematicsBasedLinearStateCalculator.getTrustCoPAsNonSlippingContactPoint(),
+                                                     kinematicsBasedLinearStateCalculator.getUseControllerDesiredCoP(),
+                                                     0.0);
+            }
+            else
+            {
+               footEstimator.computeStateSettingFootZ(0.0);
+            }
+         }
+         else
+         {
+            footEstimator.computeState(kinematicsBasedLinearStateCalculator.getTrustCoPAsNonSlippingContactPoint(),
+                                       kinematicsBasedLinearStateCalculator.getUseControllerDesiredCoP());
+         }
       }
    }
 
@@ -712,8 +905,17 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(kinematicsBasedLinearStateCalculator.getSCS2YoGraphics());
       group.addChild(imuBasedLinearStateCalculator.getSCS2YoGraphics());
+
+      if (!VISUALIZE_FEET_ESTIMATORS)
+         return group;
+
+      for (SingleFootEstimator footEstimator : footEstimators)
+      {
+         group.addChild(footEstimator.getSCS2YoGraphics());
+      }
+
+
       return group;
    }
 }

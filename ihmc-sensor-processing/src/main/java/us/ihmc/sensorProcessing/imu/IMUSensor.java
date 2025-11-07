@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -19,7 +20,7 @@ public class IMUSensor implements IMUSensorReadOnly
 {
    private final String sensorName;
 
-   private final ReferenceFrame measurementFrame;
+   private final MovingReferenceFrame measurementFrame;
    private final RigidBodyBasics measurementLink;
 
    private final Quaternion orientationMeasurement = new Quaternion();
@@ -68,7 +69,7 @@ public class IMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public ReferenceFrame getMeasurementFrame()
+   public MovingReferenceFrame getMeasurementFrame()
    {
       return measurementFrame;
    }

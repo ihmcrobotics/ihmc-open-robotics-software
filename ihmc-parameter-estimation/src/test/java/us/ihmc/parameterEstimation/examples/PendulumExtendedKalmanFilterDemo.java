@@ -5,13 +5,13 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XYChart;
-import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilterTestTools.NonlinearSystem;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Function;
 
 /**
  * Demo of an EKF being used with a nonlinear process model and measurement model.
@@ -30,124 +30,45 @@ public class PendulumExtendedKalmanFilterDemo
 
    private static final double dt = 0.01;
 
-   public static class PendulumExtendedKalmanFilter extends ExtendedKalmanFilter
-   {
-      private static final int stateSize = 2;
-      private static final int measurementSize = 1;
-
-      // Picking an arbitrary nonzero initial condition since 0 is a singularity for the measurement
-      private static final DMatrixRMaj x0 = new DMatrixRMaj(new double[] {0.1, 0.1});
-
-      // Process noise
-      private static final DMatrixRMaj Q = new DMatrixRMaj(new double[][] {{1e-6, 0.0}, {0.0, 1e-6}});
-
-      // Measurement noise
-      private static final DMatrixRMaj R = new DMatrixRMaj(new double[][] {{1e-3}});
-
-      // Ignorant initial guess on P0, we assume we're more certain about positions than velocities
-      private static final DMatrixRMaj P0 = new DMatrixRMaj(new double[][] {{0.1, 0.0}, {0.0, 1.0}});
-
-      // Linearized process model dynamics ( Jacobian of f(x) where x[k+1] = f(x[k]) )
-      private static final DMatrixRMaj F = new DMatrixRMaj(stateSize, stateSize);
-
-      // Linearized measurement model dynamics (Jacobian of h(x) where y = h(x))
-      private static final DMatrixRMaj H = new DMatrixRMaj(measurementSize, stateSize);
-
-      public PendulumExtendedKalmanFilter()
-      {
-         super(x0, P0, Q, R);
-      }
-
-      // Linearize f(x) to obtain it's Jacobian matrix, F(x)
-      @Override
-      public DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousState)
-      {
-         double q = previousState.get(0, 0);
-
-         F.set(0, 0, 1);
-         F.set(0, 1, dt);
-         F.set(1, 0, -(dt * m * g * l * Math.cos(q)) / I);
-         F.set(1, 1, 1 - dt * b / I);
-
-         return F;
-      }
-
-      // Linearize h(x) to obtain it's Jacobian matrix, H(x)
-      @Override
-      public DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedState)
-      {
-         double q = predictedState.get(0, 0);
-         double qDot = predictedState.get(1, 0);
-
-         H.set(0, 0, m * g * l * Math.sin(q));
-         H.set(0, 1, I * qDot);
-
-         return H;
-      }
-
-      // x[k+1] = f(x[k])
-      @Override
-      public DMatrixRMaj processModel(DMatrixRMaj state)
-      {
-         return getNextState(state);
-      }
-
-      // y = h(x)
-      @Override
-      public DMatrixRMaj measurementModel(DMatrixRMaj state)
-      {
-         return getMeasurement(state);
-      }
-   }
-
    private static class PendulumSystem extends NonlinearSystem
    {
-      public PendulumSystem(DMatrixRMaj x0, DMatrixRMaj F, DMatrixRMaj H)
+      private final Function<DMatrixRMaj, DMatrixRMaj> systemDynamics;
+      private final Function<DMatrixRMaj, DMatrixRMaj> measurementDynamics;
+
+      public PendulumSystem(DMatrixRMaj x0,
+                            DMatrixRMaj F,
+                            DMatrixRMaj H,
+                            Function<DMatrixRMaj, DMatrixRMaj> systemDynamics,
+                            Function<DMatrixRMaj, DMatrixRMaj> measurementDynamics)
       {
          super(x0, F, H);
+
+         this.systemDynamics = systemDynamics;
+         this.measurementDynamics = measurementDynamics;
       }
 
-      public PendulumSystem(DMatrixRMaj x0, DMatrixRMaj F, DMatrixRMaj Q, DMatrixRMaj H, DMatrixRMaj R, Random random)
+      public PendulumSystem(DMatrixRMaj x0, DMatrixRMaj F, DMatrixRMaj Q, DMatrixRMaj H, DMatrixRMaj R, Random random,
+                            Function<DMatrixRMaj, DMatrixRMaj> systemDynamics,
+                            Function<DMatrixRMaj, DMatrixRMaj> measurementDynamics)
       {
          super(x0, F, Q, H, R, random);
+
+         this.systemDynamics = systemDynamics;
+         this.measurementDynamics = measurementDynamics;
+
       }
 
       @Override
       public DMatrixRMaj calculateSystemDynamics(DMatrixRMaj state)
       {
-         return getNextState(state);
+         return systemDynamics.apply(state);
       }
 
       @Override
       public DMatrixRMaj calculateMeasurementDynamics(DMatrixRMaj state)
       {
-         return getMeasurement(state);
+         return measurementDynamics.apply(state);
       }
-   }
-
-   private static DMatrixRMaj getNextState(DMatrixRMaj state)
-   {
-      DMatrixRMaj nextState = new DMatrixRMaj(state.numRows, 1);
-      double q = state.get(0, 0);
-      double qDot = state.get(1, 0);
-
-      // Discretized with Forward Euler
-      nextState.set(0, 0, q + dt * qDot);
-      nextState.set(1, 0, qDot - dt * (b * qDot + m * g * l * Math.sin(q)) / I);
-
-      return nextState;
-   }
-
-   private static DMatrixRMaj getMeasurement(DMatrixRMaj state)
-   {
-      DMatrixRMaj measurement = new DMatrixRMaj(PendulumExtendedKalmanFilter.measurementSize, 1);
-      double q = state.get(0, 0);
-      double qDot = state.get(1, 0);
-
-      // Measurement is the total energy in the system, which will be dissipated with nonzero damping.
-      measurement.set(0, 0, 0.5 * I * qDot * qDot + m * g * l * (1 - Math.cos(q)));
-
-      return measurement;
    }
 
    private static final int ITERATIONS = 500;
@@ -156,13 +77,18 @@ public class PendulumExtendedKalmanFilterDemo
    {
       Random random = new Random(45);
 
+      // Filter
+      ExamplePendulumExtendedKalmanFilter kalmanFilter = new ExamplePendulumExtendedKalmanFilter();
+      kalmanFilter.setModelProperties(m, I, l, b, g, dt);
+      DMatrixRMaj estimatedState = new DMatrixRMaj(ExamplePendulumExtendedKalmanFilter.stateSize, 1);
+
       // We'll set things up such that the real system is always less noisy than the filter. Said the other way, our filter design
       // will assume that the system is more noisy than it actually is -- a good thing.
-      DMatrixRMaj Q = new DMatrixRMaj(PendulumExtendedKalmanFilter.Q);
+      DMatrixRMaj Q = new DMatrixRMaj(kalmanFilter.getQ());
       CommonOps_DDRM.scale(0.1, Q);
       // We'll set things up such that the real system is always less noisy than the filter. Said the other way, our filter design
       // will assume that the system is more noisy than it actually is -- a good thing.
-      DMatrixRMaj R = new DMatrixRMaj(PendulumExtendedKalmanFilter.R);
+      DMatrixRMaj R = new DMatrixRMaj(kalmanFilter.getR());
       CommonOps_DDRM.scale(0.01, R);
 
       // In general, initial state of system is different from that of filter.
@@ -172,14 +98,11 @@ public class PendulumExtendedKalmanFilterDemo
       //      NonlinearSystem system = new ConstantVelocity2DNonlinearMeasurementSystem(initialSystemState,
       //                                                                                PendulumExtendedKalmanFilter.F,
       //                                                                                PendulumExtendedKalmanFilter.H);
-      NonlinearSystem system = new PendulumSystem(initialSystemState, PendulumExtendedKalmanFilter.F, Q, PendulumExtendedKalmanFilter.H, R, random);
+      NonlinearSystem system = new PendulumSystem(initialSystemState, kalmanFilter.getF(), Q, kalmanFilter.getH(), R, random,
+                                                  kalmanFilter::getNextState, kalmanFilter::getMeasurement);
 
-      DMatrixRMaj state = new DMatrixRMaj(PendulumExtendedKalmanFilter.stateSize, 1);
-      DMatrixRMaj measurement = new DMatrixRMaj(PendulumExtendedKalmanFilter.measurementSize, 1);
-
-      // Filter
-      PendulumExtendedKalmanFilter kalmanFilter = new PendulumExtendedKalmanFilter();
-      DMatrixRMaj estimatedState = new DMatrixRMaj(PendulumExtendedKalmanFilter.stateSize, 1);
+      DMatrixRMaj state = new DMatrixRMaj(ExamplePendulumExtendedKalmanFilter.stateSize, 1);
+      DMatrixRMaj measurement = new DMatrixRMaj(ExamplePendulumExtendedKalmanFilter.measurementSize, 1);
 
       // Arrays for recording data that we'll plot
       double[] timestamps = new double[ITERATIONS];
