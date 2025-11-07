@@ -100,6 +100,24 @@ public class SimulationPDOutputWriter implements SimulationThreadOutputWriter
    }
 
    @Override
+   public void writeBefore(long timestamp)
+   {
+
+   }
+
+   @Override
+   public void writeAfter()
+   {
+
+   }
+
+   @Override
+   public YoRegistry getYoVariableRegistry()
+   {
+      return null;
+   }
+
+   @Override
    public void doControl()
    {
       for (int i = 0; i < jointControllers.size(); i++)
