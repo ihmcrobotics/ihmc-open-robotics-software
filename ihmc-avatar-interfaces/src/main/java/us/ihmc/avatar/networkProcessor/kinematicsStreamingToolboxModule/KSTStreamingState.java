@@ -538,7 +538,7 @@ public class KSTStreamingState implements State
                rigidBodyInitialPoseMap.get(rigidBodyName).set(desiredRigidBodies.get(rigidBodyName).getBodyFixedFrame().getTransformToRoot());
             }
             blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
-            blendPose(rigidBodyInitialPoseMap.get(rigidBodyName), rigidBodyInput.getDesiredPose(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
+//            blendPose(rigidBodyInitialPoseMap.get(rigidBodyName), rigidBodyInput.getDesiredPose(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
 
             // Update the list of bodies that are not controlled this tick
             uncontrolledRigidBodies.remove(rigidBodyInput.getEndEffector());
@@ -560,7 +560,7 @@ public class KSTStreamingState implements State
                centerOfMassInitialPosition.set(ikController.getCenterOfMass());
             }
             blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
-            blendPosition(centerOfMassInitialPosition, centerOfMassInput.getDesiredPosition(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
+//            blendPosition(centerOfMassInitialPosition, centerOfMassInput.getDesiredPosition(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
          }
          else
          {

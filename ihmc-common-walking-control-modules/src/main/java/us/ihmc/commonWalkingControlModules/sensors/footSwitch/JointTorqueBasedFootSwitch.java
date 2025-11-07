@@ -411,8 +411,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          isPastForceThreshold.set(forceZUp > contactForceThreshold.getValue());
 
          // Looking at velocity thresholds
-         soleFrame.getTwistRelativeToOther(pelvis.getBodyFixedFrame(), footTwist);
-         linearVelocity.setMatchingFrame(footTwist.getLinearPart());
+//         soleFrame.getTwistRelativeToOther(pelvis.getBodyFixedFrame(), footTwist);
+//         linearVelocity.setMatchingFrame(footTwist.getLinearPart());
+         linearVelocity.setMatchingFrame(soleFrame.getTwistOfFrame().getLinearPart());
          horizontalVelocity.set(EuclidCoreTools.norm(linearVelocity.getX(), linearVelocity.getY()));
          verticalVelocity.set(linearVelocity.getZ());
 
