@@ -193,7 +193,7 @@ public class ICPController implements ICPControllerInterface
       feedForwardAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedForwardAlphaLimited", registry, maxAlphaRate, feedForwardAlpha, controlDT);
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
-      highlyDampedFeedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getHighlyDampedICPFeedbackGains(), registry);
+      highlyDampedFeedbackGains = new ParameterizedICPControlGains("highlyDamped_", icpOptimizationParameters.getHighlyDampedICPFeedbackGains(), registry);
 
       dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpOptimizationParameters.getDynamicsObjectiveWeight());
 

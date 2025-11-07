@@ -47,6 +47,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
@@ -70,6 +71,9 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaFilterTools;
+import us.ihmc.yoVariables.filters.FilteredFiniteDifferenceYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -135,6 +139,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<YoFrameVector2D> yoCoPError;
    private final SideDependentList<YoDouble> yoCoPErrorMagnitude = new SideDependentList<YoDouble>(new YoDouble("leftFootCoPErrorMagnitude", registry),
                                                                                                    new YoDouble("rightFootCoPErrorMagnitude", registry));
+   private final YoDouble copRateBreakFrequency = new YoDouble("copRateBreakFrequency", registry);
+
+   private final SideDependentList<FilteredFiniteDifferenceYoVariable> yoCoPErrorRate = new SideDependentList<>();
 
    private ContactPointVisualizer contactPointVisualizer;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -292,10 +299,15 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       minZForceForCoPControlScaling = 0.20 * totalMass.getValue() * gravityZ;
 
+      copRateBreakFrequency.set(50.0);
+      DoubleProvider copRateAlpha = () -> AlphaFilterTools.computeAlphaGivenBreakFrequencyProperly(copRateBreakFrequency.getDoubleValue(), controlDT);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          yoCoPError.put(robotSide,
                         new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getContactFrame(), registry));
+         yoCoPErrorRate.put(robotSide,
+                            new FilteredFiniteDifferenceYoVariable(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPErrorRate", "", copRateAlpha, controlDT, registry));
       }
 
       if (wristForceSensors == null)
@@ -634,6 +646,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          copError.sub(copDesired, copActual);
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.norm());
+         yoCoPErrorRate.get(robotSide).update(yoCoPErrorMagnitude.get(robotSide).getDoubleValue());
 
          footSwitch.getMeasuredWrench(footWrench);
          footForceVector.setIncludingFrame(footWrench.getLinearPart());
