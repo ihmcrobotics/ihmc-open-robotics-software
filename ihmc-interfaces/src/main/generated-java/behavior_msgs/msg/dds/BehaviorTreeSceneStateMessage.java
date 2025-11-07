@@ -19,11 +19,16 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
             * Scene objects
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage>  objects_;
+   /**
+            * Persistent detections tracked in the scene
+            */
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PersistentDetectionStatusMessage>  persistent_detections_;
 
    public BehaviorTreeSceneStateMessage()
    {
       latest_modification_to_list_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
       objects_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage> (100, new behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessagePubSubType());
+      persistent_detections_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PersistentDetectionStatusMessage> (100, new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType());
 
    }
 
@@ -37,6 +42,7 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
    {
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_list_, latest_modification_to_list_);
       objects_.set(other.objects_);
+      persistent_detections_.set(other.persistent_detections_);
    }
 
 
@@ -55,6 +61,15 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage>  getObjects()
    {
       return objects_;
+   }
+
+
+   /**
+            * Persistent detections tracked in the scene
+            */
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PersistentDetectionStatusMessage>  getPersistentDetections()
+   {
+      return persistent_detections_;
    }
 
 
@@ -83,6 +98,13 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
          {  if (!this.objects_.get(i).epsilonEquals(other.objects_.get(i), epsilon)) return false; }
       }
 
+      if (this.persistent_detections_.size() != other.persistent_detections_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.persistent_detections_.size(); i++)
+         {  if (!this.persistent_detections_.get(i).epsilonEquals(other.persistent_detections_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -98,6 +120,7 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
 
       if (!this.latest_modification_to_list_.equals(otherMyClass.latest_modification_to_list_)) return false;
       if (!this.objects_.equals(otherMyClass.objects_)) return false;
+      if (!this.persistent_detections_.equals(otherMyClass.persistent_detections_)) return false;
 
       return true;
    }
@@ -111,7 +134,9 @@ public class BehaviorTreeSceneStateMessage extends Packet<BehaviorTreeSceneState
       builder.append("latest_modification_to_list=");
       builder.append(this.latest_modification_to_list_);      builder.append(", ");
       builder.append("objects=");
-      builder.append(this.objects_);
+      builder.append(this.objects_);      builder.append(", ");
+      builder.append("persistent_detections=");
+      builder.append(this.persistent_detections_);
       builder.append("}");
       return builder.toString();
    }
