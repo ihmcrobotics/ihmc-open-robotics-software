@@ -646,6 +646,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          copError.sub(copDesired, copActual);
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.norm());
+         if (Double.isNaN(yoCoPErrorRate.get(robotSide).getDoubleValue()))
+            yoCoPErrorRate.get(robotSide).reset();
          yoCoPErrorRate.get(robotSide).update(yoCoPErrorMagnitude.get(robotSide).getDoubleValue());
 
          footSwitch.getMeasuredWrench(footWrench);
