@@ -265,14 +265,17 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
 
       double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
 
+      double max = Math.min(nominalLegLength.getDoubleValue() + 0.05, maximumLegLength.getDoubleValue());
+      double min = Math.max(nominalLegLength.getDoubleValue() - 0.05, minimumLegLength.getDoubleValue());
+
       CoMHeightTrajectoryWaypoint startWaypoint = getWaypointInFrame(frameOfSupportLeg);
       startWaypoint.setHeight(nominalLegLength.getDoubleValue());
-      startWaypoint.setMinMax(nominalLegLength.getDoubleValue() - 0.05, nominalLegLength.getDoubleValue() + 0.05);
+      startWaypoint.setMinMax(min, max);
       startWaypoint.setXY(transferFromPosition.getX(), midstanceY);
 
       CoMHeightTrajectoryWaypoint endWaypoint = getWaypointInFrame(frameOfSupportLeg);
       endWaypoint.setHeight(nominalLegLength.getDoubleValue());
-      endWaypoint.setMinMax(nominalLegLength.getDoubleValue() - 0.05, nominalLegLength.getDoubleValue() + 0.05);
+      endWaypoint.setMinMax(min, max);
       endWaypoint.setXY(transferToPosition.getX(), midstanceY);
 
       // set the x and y value to the current x and y, so that we get a continuous trajectory.
@@ -419,6 +422,16 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       fourthMidpoint.setXY(fourthMidpointX, fourthMidpointY);
       endWaypoint.setXY(endWaypointX, endWaypointY);
 
+
+      // Handle the case where the feet are basically squared up when stepping up. In that case, the max height needs to be pinned by the "from" foot, as the
+      // way the phase variable works means we can approach what is meant to be swing on the "to" foot while still in the "from" foot.
+      if (Math.abs(transferToPosition.getX()) < 0.1 && endGroundHeight > startGroundHeight)
+      {
+         double blend = Math.abs(transferToPosition.getX()) / 0.1;
+         double minHeight = Math.min(startGroundHeight + extraToeOffHeight, endGroundHeight);
+         endGroundHeight = EuclidCoreTools.interpolate(minHeight, endGroundHeight, blend);
+      }
+
       double startMinHeight = findWaypointHeight(minimumLength,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
@@ -435,6 +448,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                  startGroundHeight);
       startMinHeight = Math.min(startMinHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       startMaxHeight = Math.max(startMaxHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
+      // Compute bounds for first
       double firstMinHeight = findWaypointHeight(minimumLength,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
@@ -449,9 +463,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                  firstMidpointX,
                                                  firstMidpointY,
                                                  startGroundHeight);
-      firstMinHeight = Math.min(firstMinHeight, startMinHeight);
-      firstMaxHeight = Math.min(firstMaxHeight, startMaxHeight);
 
+
+      // Compute bounds for second (start of double support)
       double exchangeInFromMinHeight = findWaypointHeight(minimumLength,
                                                           hipWidth.getDoubleValue(),
                                                           startAnkleX,
@@ -480,9 +494,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                         secondMidpointX,
                                                         secondMidpointY,
                                                         endGroundHeight);
-      double secondMinHeight = Math.min(Math.max(exchangeInFromMinHeight, exchangeInToMinHeight), Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight));
-      double secondMaxHeight = Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight);
 
+
+      // Compute bounds for third (end of double support)
       double exchangeOutFromMinHeight = findWaypointHeight(minimumLength,
                                                            hipWidth.getDoubleValue(),
                                                            startAnkleX,
@@ -511,9 +525,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
                                                          thirdMidpointX,
                                                          thirdMidpointY,
                                                          endGroundHeight);
-      double thirdMinHeight = Math.min(Math.max(exchangeOutFromMinHeight, exchangeOutToMinHeight), Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight));
-      double thirdMaxHeight = Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight);
 
+      // Compute bounds for fourth (midway through final segment)
       double fourthMinHeight = findWaypointHeight(minimumLength,
                                                   hipWidth.getDoubleValue(),
                                                   endAnkleX,
@@ -531,12 +544,25 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
       double endMinHeight = minimumLength + endGroundHeight;
       double endMaxHeight = maximumLength + endGroundHeight;
 
+
+
+      // These are the points that are the "start" of double support
+      double secondMinHeight = Math.min(Math.max(exchangeInFromMinHeight, exchangeInToMinHeight), Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight));
+      double secondMaxHeight = Math.min(exchangeInFromMaxHeight, exchangeInToMaxHeight);
+
+      firstMinHeight = Math.min(Math.min(firstMinHeight, startMinHeight), secondMinHeight);
+      firstMaxHeight = Math.max(Math.min(firstMaxHeight, startMaxHeight), secondMaxHeight);
+
+      // These are the points that are the "end" of double support
+      double thirdMinHeight = Math.min(Math.max(exchangeOutFromMinHeight, exchangeOutToMinHeight), Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight));
+      double thirdMaxHeight = Math.min(exchangeOutFromMaxHeight, exchangeOutToMaxHeight);
+
       fourthMinHeight = Math.min(fourthMinHeight, endMinHeight);
-      fourthMaxHeight = Math.min(fourthMaxHeight, endMaxHeight);
+      fourthMaxHeight = Math.max(Math.min(fourthMaxHeight, endMaxHeight), thirdMaxHeight);
 
       startWaypoint.setMinMax(startMinHeight, startMaxHeight);
       firstMidpoint.setMinMax(firstMinHeight, firstMaxHeight);
-      secondMidpoint.setMinMax(secondMinHeight, secondMaxHeight);
+       secondMidpoint.setMinMax(secondMinHeight, secondMaxHeight);
       thirdMidpoint.setMinMax(thirdMinHeight, thirdMaxHeight);
       fourthMidpoint.setMinMax(fourthMinHeight, fourthMaxHeight);
       endWaypoint.setMinMax(endMinHeight, endMaxHeight);

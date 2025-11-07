@@ -464,7 +464,12 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
 
-      feetManager.updateToeOffStatusSingleSupport(nextFootstep, supportFootExitCMP, balanceManager.getDesiredCMP(), balanceManager.getDesiredICP(), currentICP);
+      feetManager.updateToeOffStatusSingleSupport(nextFootstep,
+                                                  supportFootExitCMP,
+                                                  balanceManager.getDesiredCMP(),
+                                                  controllerToolbox.getFootSwitches().get(supportSide).getCenterOfPressure(),
+                                                  balanceManager.getDesiredICP(),
+                                                  currentICP);
 
       if (feetManager.okForPointToeOff(true))
          feetManager.requestPointToeOff(supportSide, supportFootExitCMP, desiredCoP);

@@ -54,7 +54,7 @@ public class IMUBasedJointVelocityEstimator
 
       if (degreesOfFreedom > 3)
       {
-         throw new IllegalArgumentException("Cannot solve for more than 3 DoF betwen IMUs. " + degreesOfFreedom + " DoF were given");
+         throw new IllegalArgumentException("Cannot solve for more than 3 DoF between IMUs. " + degreesOfFreedom + " DoF were given");
       }
 
       jointVelocitiesFromIMU = new YoDouble[degreesOfFreedom];

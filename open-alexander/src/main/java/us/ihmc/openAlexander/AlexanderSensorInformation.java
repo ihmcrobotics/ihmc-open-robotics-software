@@ -96,11 +96,11 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    // IMUs to use
    private final List<String> imuSensorsToUse = new ArrayList<>(List.of(pelvisIMU,
                                                                         torsoIMU,
-//                                                                        leftHipXIMU,
+                                                                        leftHipXIMU,
                                                                         leftThighIMU,
                                                                         leftShinIMU,
                                                                         leftFootIMU,
-//                                                                        rightHipXIMU,
+                                                                        rightHipXIMU,
                                                                         rightThighIMU,
                                                                         rightShinIMU,
                                                                         rightFootIMU,
