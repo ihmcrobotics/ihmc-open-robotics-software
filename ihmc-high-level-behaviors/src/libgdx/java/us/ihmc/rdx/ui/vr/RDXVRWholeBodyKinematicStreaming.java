@@ -971,21 +971,21 @@ public class RDXVRWholeBodyKinematicStreaming
       // Update initial configuration of KST
       KinematicsStreamingToolboxInitialConfigurationMessage initialConfigMessage
             = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(syncedRobot.getFullRobotModel());
-//      List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         List<ArmJointName> armJointNames = Arrays.asList(syncedRobot.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames());
-//         List<Integer> armIndices = armJointNames.stream()
-//                                                 .map(jointName -> oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, jointName)))
-//                                                 .toList();
-//         for (int i = 0; i < armJointNames.size(); i++)
-//         {
-//            if (armIndices.get(i) != -1)
-//            {
-//               initialConfigMessage.getInitialJointAngles().set(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
-//            }
-//         }
-//      }
+      List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<ArmJointName> armJointNames = Arrays.asList(syncedRobot.getFullRobotModel().getRobotSpecificJointNames().getArmJointNames());
+         List<Integer> armIndices = armJointNames.stream()
+                                                 .map(jointName -> oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, jointName)))
+                                                 .toList();
+         for (int i = 0; i < armJointNames.size(); i++)
+         {
+            if (armIndices.get(i) != -1)
+            {
+               initialConfigMessage.getInitialJointAngles().set(armIndices.get(i), retargetingParameters.getArmHomePoint(robotSide, armJointNames.get(i)));
+            }
+         }
+      }
       ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                    initialConfigMessage);
       reinitializeToolbox();
