@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeSceneObjectStateMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeSceneObjectStateMessage__idl__
 
+#include "behavior_msgs/msg/./PersistentDetectionStatusMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 #include "ihmc_common_msgs/msg/./LatestModificationMessage_.idl"
 module behavior_msgs
@@ -25,9 +26,9 @@ module behavior_msgs
          */
         unsigned long id;
         /**
-         * Last 4 digits of persistent detection UUID as a string or "null"
+         * Persistent detection associated with this object
          */
-        string persistent_detection_id;
+        behavior_msgs::msg::dds::PersistentDetectionStatusMessage persistent_detection;
         /**
          * Object type (IsaacROSFoundationPoseObject ordinal)
          */

@@ -15,7 +15,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "bd608ea0b659cf1b4411282b02c6ceb70236cb69624e61dd2450ffbd20e2b5bd";
+   		return "59f3ee4575c5da2b173882d0133c914881e2de3cd86237a2f6517024c9cf86ee";
    }
    
    @Override
@@ -56,7 +56,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -79,7 +80,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPersistentDetectionId().length() + 1;
+      current_alignment += behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.getCdrSerializedSize(data.getPersistentDetection(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -95,10 +96,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.write(data.getLatestModificationToData(), cdr);
       cdr.write_type_4(data.getId());
 
-      if(data.getPersistentDetectionId().length() <= 255)
-      cdr.write_type_d(data.getPersistentDetectionId());else
-          throw new RuntimeException("persistent_detection_id field exceeds the maximum length: %d > %d".formatted(data.getPersistentDetectionId().length(), 255));
-
+      behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.write(data.getPersistentDetection(), cdr);
       cdr.write_type_2(data.getObjectType());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
@@ -109,7 +107,7 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.read(data.getLatestModificationToData(), cdr);	
       data.setId(cdr.read_type_4());
       	
-      cdr.read_type_d(data.getPersistentDetectionId());	
+      behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.read(data.getPersistentDetection(), cdr);	
       data.setObjectType(cdr.read_type_2());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
@@ -122,7 +120,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ser.write_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       ser.write_type_4("id", data.getId());
-      ser.write_type_d("persistent_detection_id", data.getPersistentDetectionId());
+      ser.write_type_a("persistent_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getPersistentDetection());
+
       ser.write_type_2("object_type", data.getObjectType());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
@@ -134,7 +133,8 @@ public class BehaviorTreeSceneObjectStateMessagePubSubType implements us.ihmc.pu
       ser.read_type_a("latest_modification_to_data", new ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType(), data.getLatestModificationToData());
 
       data.setId(ser.read_type_4("id"));
-      ser.read_type_d("persistent_detection_id", data.getPersistentDetectionId());
+      ser.read_type_a("persistent_detection", new behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType(), data.getPersistentDetection());
+
       data.setObjectType(ser.read_type_2("object_type"));
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 

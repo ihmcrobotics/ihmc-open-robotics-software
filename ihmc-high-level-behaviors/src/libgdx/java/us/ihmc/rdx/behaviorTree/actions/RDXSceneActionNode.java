@@ -22,7 +22,7 @@ public class RDXSceneActionNode extends RDXActionNode<SceneActionNodeState, Scen
       objectTypeNames = new String[values.length];
       for (int i = 0; i < values.length; i++)
       {
-         objectTypeNames[i] = values[i].name();
+         objectTypeNames[i] = values[i].titleCaseName;
       }
    }
 

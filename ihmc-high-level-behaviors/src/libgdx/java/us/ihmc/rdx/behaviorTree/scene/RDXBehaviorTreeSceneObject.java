@@ -1,5 +1,7 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
 import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -20,6 +22,8 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    private final RDXModelInstance modelInstance;
    private final RDXRenderableAdapter modelRenderableAdapter;
 
+   private final PersistentDetectionStatusMessage persistentDetection = new PersistentDetectionStatusMessage();
+
    public RDXBehaviorTreeSceneObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType, RDXBaseUI baseUI)
    {
       super(id, crdtInfo, objectType);
@@ -28,7 +32,6 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
 
       gizmo = new RDXSelectablePose3DGizmo();
       gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
-      gizmo.setSelected(true);
       gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
 
       String modelName = "";
@@ -54,8 +57,21 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       model.dispose();
    }
 
+   @Override
+   public void fromMessage(BehaviorTreeSceneObjectStateMessage message)
+   {
+      super.fromMessage(message);
+
+      persistentDetection.set(message.getPersistentDetection());
+   }
+
    public RDXSelectablePose3DGizmo getGizmo()
    {
       return gizmo;
+   }
+
+   public PersistentDetectionStatusMessage getPersistentDetection()
+   {
+      return persistentDetection;
    }
 }

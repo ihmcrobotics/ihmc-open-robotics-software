@@ -86,12 +86,12 @@ public class SceneActionNodeExecutor extends ActionNodeExecutor<SceneActionNodeS
 
       if (targetSceneObject != null)
       {
-         state.getLogger().info("Updating existing scene object for type: {}", objectType.name());
+         state.getLogger().info("Updating existing scene object for type: {}", objectType.titleCaseName);
          targetSceneObject.setPersistentDetection(bestDetection);
       }
       else
       {
-         state.getLogger().info("Creating new scene object for type: {}", objectType.name());
+         state.getLogger().info("Creating new scene object for type: {}", objectType.titleCaseName);
 
          targetSceneObject = (BehaviorTreeSceneObjectExecutor) scene.createObject(objectType);
          targetSceneObject.setPersistentDetection(bestDetection);

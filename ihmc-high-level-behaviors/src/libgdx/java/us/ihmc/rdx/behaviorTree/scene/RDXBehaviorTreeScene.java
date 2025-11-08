@@ -1,6 +1,8 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
+import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -12,13 +14,19 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.List;
@@ -33,6 +41,10 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private final List<RDXBehaviorTreeSceneObject> objects;
    private final RecyclingArrayList<RDXBehaviorTreeSceneDetection> persistentDetections;
+
+   private final RigidBodyTransform cameraGraphicTransform = new RigidBodyTransform();
+   private final ModelInstance cameraFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.2);
+   private final RDX3DSituatedText cameraText = new RDX3DSituatedText();
 
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
@@ -55,6 +67,11 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    public void update()
    {
+      syncedRobot.getReferenceFrames().getExperimentalCameraFrame().getTransformToDesiredFrame(cameraGraphicTransform, ReferenceFrame.getWorldFrame());
+      LibGDXTools.toLibGDX(cameraGraphicTransform, cameraFrameGraphic.transform);
+      cameraText.setTextWithoutCache("Experimental Camera");
+      cameraText.setPositionFacingCamera(baseUI.getPrimary3DPanel().getCamera3D(), cameraGraphicTransform.getTranslation());
+
       for (RDXBehaviorTreeSceneObject object : objects)
          object.update();
    }
@@ -90,17 +107,17 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       for (int i = 0; i < objects.size(); i++)
       {
          RDXBehaviorTreeSceneObject object = objects.get(i);
-         if (ImGui.checkbox(labels.getHidden("Select%s%d".formatted(object.getName(), object.getID())), object.getGizmo().isSelected()))
+         ImGui.text("%s %d".formatted(object.getName(), object.getID()));
+         ImGui.sameLine();
+         if (ImGuiTools.smallCheckbox(labels.getHidden("Select%s%d".formatted(object.getName(), object.getID())), object.getGizmo().isSelected()))
             object.getGizmo().setSelected(!object.getGizmo().isSelected());
          ImGui.sameLine();
-         ImGui.text("%s ID: %d".formatted(object.getName(), object.getID()));
-         ImGui.sameLine();
-         ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.DARK_RED);
-         if (ImGui.button(labels.get("X", i)))
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGuiTools.DARK_RED);
+         if (ImGuiTools.textWithUnderlineOnHover("X") && ImGui.isMouseClicked(ImGuiMouseButton.Left))
             remove = object;
          ImGui.popStyleColor();
          ImGui.indent();
-         ImGui.text("Persistent detection: %s".formatted(object.getPersistentDetectionID()));
+         renderPersistentDetection(object.getPersistentDetection());
          ImGui.unindent();
       }
       ImGui.unindent();
@@ -115,21 +132,36 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       ImGui.text("Stable Detections:");
       ImGui.indent();
       for (RDXBehaviorTreeSceneDetection persistentDetection : persistentDetections)
-      {
-         String text = "%s %.2f Hz Size: %d ID: %s".formatted(persistentDetection.getMessage().getObjectClassAsString(),
-                                                              persistentDetection.getMessage().getDecayingFrequency(),
-                                                              persistentDetection.getMessage().getHistorySize(),
-                                                              persistentDetection.getMessage().getIdAsString());
-         if (persistentDetection.getMessage().getIsStable())
-            ImGui.text(text);
-         else
-            ImGui.textDisabled(text);
-      }
+         renderPersistentDetection(persistentDetection.getMessage());
+      ImGui.unindent();
+   }
+
+   private static void renderPersistentDetection(PersistentDetectionStatusMessage message)
+   {
+      String text = "%s %.2f Hz Size: %d ID.%s".formatted(message.getObjectClassAsString(),
+                                                           message.getDecayingFrequency(),
+                                                           message.getHistorySize(),
+                                                           message.getIdAsString());
+      if (message.getIsStable())
+         ImGui.text(text);
+      else
+         ImGui.textDisabled(text);
+
+      ImGui.indent();
+      RigidBodyTransform transform = new RigidBodyTransform();
+      MessageTools.toEuclid(message.getTransformToCamera(), transform);
+      ImGui.text("To camera: (%.2f, %.2f, %.2f) YPR: (%.2f, %.2f, %.2f)".formatted(
+            transform.getTranslationX(), transform.getTranslation().getY(), transform.getTranslation().getZ(),
+            transform.getRotation().getYaw(), transform.getRotation().getPitch(), transform.getRotation().getRoll()
+      ));
       ImGui.unindent();
    }
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      cameraFrameGraphic.getRenderables(renderables, pool);
+      cameraText.getRenderables(renderables, pool);
+
       for (RDXBehaviorTreeSceneDetection detection : persistentDetections)
          detection.getRenderables(renderables, pool);
    }

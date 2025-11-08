@@ -1,48 +1,61 @@
 package us.ihmc.behaviors.behaviorTree.scene;
 
+import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 
+import java.time.Instant;
+
 /**
  * Also known as the "Tracker"
  */
 public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectState
 {
+   private final ROS2SyncedRobotModel syncedRobot;
+
    private PersistentDetection persistentDetection;
 
    private final FramePose3D detectionPose = new FramePose3D();
+   private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
 
-   public BehaviorTreeSceneObjectExecutor(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
+   public BehaviorTreeSceneObjectExecutor(long id, CRDTInfo crdtInfo, ROS2SyncedRobotModel syncedRobot, IsaacROSFoundationPoseObject objectType)
    {
       super(id, crdtInfo, objectType);
+
+      this.syncedRobot = syncedRobot;
    }
 
-   public void update(ReferenceFrame cameraFrame)
+   public void update()
    {
       if (persistentDetection != null)
       {
          if (persistentDetection.isStable())
          {
-            detectionPose.setToZero(cameraFrame);
+            detectionPose.setToZero(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
             detectionPose.set(persistentDetection.getFilteredTransformToCamera());
             detectionPose.changeFrame(ReferenceFrame.getWorldFrame());
             transform.setValue(detectionPose, 1e-5);
          }
-
-         persistentDetectionID = String.format("%04d", Math.abs(persistentDetection.getID().getLeastSignificantBits() % 10000));
-      }
-      else
-      {
-         persistentDetectionID = "null";
       }
    }
 
+   @Override
    public void destroy()
    {
+      super.destroy();
+   }
 
+   @Override
+   public void toMessage(BehaviorTreeSceneObjectStateMessage message)
+   {
+      super.toMessage(message);
+
+      if (persistentDetection != null)
+         persistentDetectionMessageTool.toMessage(syncedRobot, Instant.now(), persistentDetection, message.getPersistentDetection());
    }
 
    public PersistentDetection getPersistentDetection()

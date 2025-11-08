@@ -20,9 +20,9 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
             */
    public long id_;
    /**
-            * Last 4 digits of persistent detection UUID as a string or "null"
+            * Persistent detection associated with this object
             */
-   public java.lang.StringBuilder persistent_detection_id_;
+   public behavior_msgs.msg.dds.PersistentDetectionStatusMessage persistent_detection_;
    /**
             * Object type (IsaacROSFoundationPoseObject ordinal)
             */
@@ -35,7 +35,7 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
    public BehaviorTreeSceneObjectStateMessage()
    {
       latest_modification_to_data_ = new ihmc_common_msgs.msg.dds.LatestModificationMessage();
-      persistent_detection_id_ = new java.lang.StringBuilder(255);
+      persistent_detection_ = new behavior_msgs.msg.dds.PersistentDetectionStatusMessage();
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
@@ -50,9 +50,7 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       ihmc_common_msgs.msg.dds.LatestModificationMessagePubSubType.staticCopy(other.latest_modification_to_data_, latest_modification_to_data_);
       id_ = other.id_;
 
-      persistent_detection_id_.setLength(0);
-      persistent_detection_id_.append(other.persistent_detection_id_);
-
+      behavior_msgs.msg.dds.PersistentDetectionStatusMessagePubSubType.staticCopy(other.persistent_detection_, persistent_detection_);
       object_type_ = other.object_type_;
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
@@ -82,28 +80,13 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       return id_;
    }
 
-   /**
-            * Last 4 digits of persistent detection UUID as a string or "null"
-            */
-   public void setPersistentDetectionId(java.lang.String persistent_detection_id)
-   {
-      persistent_detection_id_.setLength(0);
-      persistent_detection_id_.append(persistent_detection_id);
-   }
 
    /**
-            * Last 4 digits of persistent detection UUID as a string or "null"
+            * Persistent detection associated with this object
             */
-   public java.lang.String getPersistentDetectionIdAsString()
+   public behavior_msgs.msg.dds.PersistentDetectionStatusMessage getPersistentDetection()
    {
-      return getPersistentDetectionId().toString();
-   }
-   /**
-            * Last 4 digits of persistent detection UUID as a string or "null"
-            */
-   public java.lang.StringBuilder getPersistentDetectionId()
-   {
-      return persistent_detection_id_;
+      return persistent_detection_;
    }
 
    /**
@@ -151,8 +134,7 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.latest_modification_to_data_.epsilonEquals(other.latest_modification_to_data_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.persistent_detection_id_, other.persistent_detection_id_, epsilon)) return false;
-
+      if (!this.persistent_detection_.epsilonEquals(other.persistent_detection_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.object_type_, other.object_type_, epsilon)) return false;
 
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
@@ -172,8 +154,7 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       if (!this.latest_modification_to_data_.equals(otherMyClass.latest_modification_to_data_)) return false;
       if(this.id_ != otherMyClass.id_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.persistent_detection_id_, otherMyClass.persistent_detection_id_)) return false;
-
+      if (!this.persistent_detection_.equals(otherMyClass.persistent_detection_)) return false;
       if(this.object_type_ != otherMyClass.object_type_) return false;
 
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
@@ -191,8 +172,8 @@ public class BehaviorTreeSceneObjectStateMessage extends Packet<BehaviorTreeScen
       builder.append(this.latest_modification_to_data_);      builder.append(", ");
       builder.append("id=");
       builder.append(this.id_);      builder.append(", ");
-      builder.append("persistent_detection_id=");
-      builder.append(this.persistent_detection_id_);      builder.append(", ");
+      builder.append("persistent_detection=");
+      builder.append(this.persistent_detection_);      builder.append(", ");
       builder.append("object_type=");
       builder.append(this.object_type_);      builder.append(", ");
       builder.append("transform_to_world=");

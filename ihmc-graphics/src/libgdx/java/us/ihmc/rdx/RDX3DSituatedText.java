@@ -28,6 +28,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.rdx.tools.LibGDXTools;
 
 /**
  * Provides the ability to put text in the 3D scene.
@@ -51,6 +54,7 @@ public class RDX3DSituatedText implements RenderableProvider
    private final Font awtFont;
    private final Color awtColor;
    private final float textHeightMeters;
+   private final transient RigidBodyTransform transform = new RigidBodyTransform();
 
    public RDX3DSituatedText()
    {
@@ -188,6 +192,20 @@ public class RDX3DSituatedText implements RenderableProvider
       Model model = modelBuilder.createRect(x00, y00, z00, x10, y10, z10, x11, y11, z11, x01, y01, z01, normalX, normalY, normalZ, material, attributes);
       ModelInstance modelInstance = new ModelInstance(model);
       return new RDX3DSituatedTextData(pixmap, rgba8888BytePointer, libGDXTexture, model, modelInstance);
+   }
+
+   public void setPositionFacingCamera(RDXFocusBasedCamera camera, Tuple3DReadOnly position)
+   {
+      setPositionFacingCamera(camera, position.getX(), position.getY(), position.getZ());
+   }
+
+   public void setPositionFacingCamera(RDXFocusBasedCamera camera, double x, double y, double z)
+   {
+      transform.getRotation().set(camera.getCameraPose().getOrientation());
+      transform.getRotation().appendPitchRotation(-Math.PI / 2.0);
+      transform.getRotation().appendYawRotation(-Math.PI / 2.0);
+      transform.getTranslation().set(x, y, z);
+      LibGDXTools.toLibGDX(transform, textData.getModelInstance().transform);
    }
 
    public Matrix4 getModelTransform()

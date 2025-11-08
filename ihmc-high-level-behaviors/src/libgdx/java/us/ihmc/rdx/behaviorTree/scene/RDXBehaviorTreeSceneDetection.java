@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
@@ -24,7 +23,6 @@ public class RDXBehaviorTreeSceneDetection
    private final PersistentDetectionStatusMessage message = new PersistentDetectionStatusMessage();
    private final ModelInstance frameGraphic;
    private final RDX3DSituatedText textLabel = new RDX3DSituatedText();
-   private final RigidBodyTransform textTransform = new RigidBodyTransform();
 
    public RDXBehaviorTreeSceneDetection(RDXBaseUI baseUI)
    {
@@ -40,11 +38,10 @@ public class RDXBehaviorTreeSceneDetection
       RDXCRDTTools.toLibGDX(status.getTransformToWorld(), frameGraphic.transform);
 
       textLabel.setTextWithoutCache(status.getObjectClassAsString() + " " + status.getIdAsString());
-      textTransform.getRotation().set(baseUI.getPrimary3DPanel().getCamera3D().getCameraPose().getOrientation());
-      textTransform.getRotation().appendPitchRotation(-Math.PI / 2.0);
-      textTransform.getRotation().appendYawRotation(-Math.PI / 2.0);
-      textTransform.getTranslation().set(status.getTransformToWorld().getX(), status.getTransformToWorld().getY(), status.getTransformToWorld().getZ());
-      LibGDXTools.toLibGDX(textTransform, textLabel.getModelTransform());
+      textLabel.setPositionFacingCamera(baseUI.getPrimary3DPanel().getCamera3D(),
+                                        status.getTransformToWorld().getX(),
+                                        status.getTransformToWorld().getY(),
+                                        status.getTransformToWorld().getZ());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

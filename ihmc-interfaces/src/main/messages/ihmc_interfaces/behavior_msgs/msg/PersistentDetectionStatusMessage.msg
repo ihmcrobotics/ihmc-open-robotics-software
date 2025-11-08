@@ -17,3 +17,6 @@ bool is_stable
 
 # Alpha filtered transform to world
 controller_msgs/RigidBodyTransformMessage transform_to_world
+
+# Alpha filtered transform to camera
+controller_msgs/RigidBodyTransformMessage transform_to_camera

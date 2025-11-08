@@ -15,7 +15,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a8a7f15a59636e66c6dbf4c46ab22bcc5c8f7aae15afa1be78938d5930ef12a9";
+   		return "8056427588c7403fb501d01e29914d9e9697c32902d4f0d896bcc3c3ac936615";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +92,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToCamera(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -111,6 +115,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       cdr.write_type_7(data.getIsStable());
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToCamera(), cdr);
    }
 
    public static void read(behavior_msgs.msg.dds.PersistentDetectionStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -124,6 +129,7 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       data.setIsStable(cdr.read_type_7());
       	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToCamera(), cdr);	
 
    }
 
@@ -137,6 +143,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_7("is_stable", data.getIsStable());
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
+      ser.write_type_a("transform_to_camera", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToCamera());
+
    }
 
    @Override
@@ -148,6 +156,8 @@ public class PersistentDetectionStatusMessagePubSubType implements us.ihmc.pubsu
       data.setHistorySize(ser.read_type_2("history_size"));
       data.setIsStable(ser.read_type_7("is_stable"));
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
+
+      ser.read_type_a("transform_to_camera", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToCamera());
 
    }
 
