@@ -1,8 +1,6 @@
 package us.ihmc.rdx.behaviorTree.scene;
 
 import behavior_msgs.msg.dds.BehaviorTreeSceneStateMessage;
-import behavior_msgs.msg.dds.PersistentDetectionStatusMessage;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -14,21 +12,16 @@ import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
 import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneState;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
-import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.LongSupplier;
 
@@ -39,10 +32,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
    private final RDXPanel panel = new RDXPanel("Scene", this::renderImGuiWidgets);
 
    private final List<RDXBehaviorTreeSceneObject> objects;
-   private final RecyclingArrayList<PersistentDetectionStatusMessage> persistentDetections = new RecyclingArrayList<>(PersistentDetectionStatusMessage::new);
-   private final Random random = new Random();
-   private final RecyclingArrayList<ModelInstance> detectionFrameGraphics = new RecyclingArrayList<>(() ->
-                    RDXModelBuilder.createCoordinateFrameInstance(0.2, LibGDXTools.toLibGDX(YoAppearance.randomColor(random))));
+   private final RecyclingArrayList<RDXBehaviorTreeSceneDetection> persistentDetections;
 
    private boolean needToInitializePlacementHeight = false;
    private RDXBehaviorTreeSceneObject beingPlaced;
@@ -54,6 +44,8 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       this.baseUI = baseUI;
 
       this.objects = (List) super.objects;
+
+      persistentDetections = new RecyclingArrayList<>(() -> new RDXBehaviorTreeSceneDetection(baseUI));
 
       parentPanel.addChild(panel);
 
@@ -122,13 +114,13 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
       ImGui.text("Stable Detections:");
       ImGui.indent();
-      for (PersistentDetectionStatusMessage persistentDetection : persistentDetections)
+      for (RDXBehaviorTreeSceneDetection persistentDetection : persistentDetections)
       {
-         String text = "%s %.2f Hz Size: %d ID: %s".formatted(persistentDetection.getObjectClassAsString(),
-                                                              persistentDetection.getDecayingFrequency(),
-                                                              persistentDetection.getHistorySize(),
-                                                              persistentDetection.getIdAsString());
-         if (persistentDetection.getIsStable())
+         String text = "%s %.2f Hz Size: %d ID: %s".formatted(persistentDetection.getMessage().getObjectClassAsString(),
+                                                              persistentDetection.getMessage().getDecayingFrequency(),
+                                                              persistentDetection.getMessage().getHistorySize(),
+                                                              persistentDetection.getMessage().getIdAsString());
+         if (persistentDetection.getMessage().getIsStable())
             ImGui.text(text);
          else
             ImGui.textDisabled(text);
@@ -138,8 +130,8 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      for (ModelInstance graphic : detectionFrameGraphics)
-         graphic.getRenderables(renderables, pool);
+      for (RDXBehaviorTreeSceneDetection detection : persistentDetections)
+         detection.getRenderables(renderables, pool);
    }
 
    @Override
@@ -154,13 +146,7 @@ public class RDXBehaviorTreeScene extends BehaviorTreeSceneState
       super.fromMessage(message);
 
       persistentDetections.clear();
-      detectionFrameGraphics.clear();
       for (int i = 0; i < message.getPersistentDetections().size(); i++)
-      {
-         PersistentDetectionStatusMessage status = message.getPersistentDetections().get(i);
-         persistentDetections.add().set(status);
-         ModelInstance graphic = detectionFrameGraphics.add();
-         RDXCRDTTools.toLibGDX(status.getTransformToWorld(), graphic.transform);
-      }
+         persistentDetections.add().update(message.getPersistentDetections().get(i));
    }
 }
