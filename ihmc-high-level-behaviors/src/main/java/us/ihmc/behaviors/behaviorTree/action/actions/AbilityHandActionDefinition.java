@@ -37,9 +37,7 @@ public class AbilityHandActionDefinition extends ActionNodeDefinition implements
       goalPositions = new CRDTBidirectionalFloatArray(this, 6);
       goalVelocities = new CRDTBidirectionalFloatArray(this, 6);
       for (int i = 0; i < 6; i++)
-      {
-         goalVelocities.setValue(i, 30.0f);
-      }
+         goalVelocities.getValue()[i] = 30.0f; // important not to modify to set initial values
    }
 
    @Override
