@@ -88,8 +88,10 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
    private final YoInteger numberOfEndEffectorsFilteredByLoad = new YoInteger("numberOfEndEffectorsFilteredByLoad", registry);
+   private final YoInteger numberOfEndEffectorsFilteredByVelocity = new YoInteger("numberOfEndEffectorsFilteredByVelocity", registry);
 
    private final Map<RigidBodyBasics, YoDouble> footForcesZInPercentOfTotalForce = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoDouble> footAngularVelocities = new LinkedHashMap<>();
    private final IntegerProvider optimalNumberOfTrustedFeet;
    private final DoubleProvider forceZInPercentThresholdToTrustFoot;
    private final DoubleProvider forceZInPercentThresholdToNotTrustFoot;
@@ -281,7 +283,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          wereFeetTrustedLastTick.put(foot, wasFootTrusted);
 
          YoDouble footForceZInPercentOfTotalForce = new YoDouble(footPrefix + "FootForceZInPercentOfTotalForce", registry);
+         YoDouble footAngularVelocity = new YoDouble(footPrefix + "FootAngularVelocity", registry);
          footForcesZInPercentOfTotalForce.put(foot, footForceZInPercentOfTotalForce);
+         footAngularVelocities.put(foot, footAngularVelocity);
 
          footForces.put(foot, new FrameVector3D(worldFrame));
          footWrenches.put(foot, new Wrench());
@@ -363,6 +367,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
       numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
       numberOfEndEffectorsFilteredByLoad.set(0);
+      numberOfEndEffectorsFilteredByVelocity.set(0);
 
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= optimalNumberOfTrustedFeet.getValue())
       {
@@ -378,6 +383,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
                throw new RuntimeException("Should not get there");
          }
       }
+      numberOfEndEffectorsTrusted.set(filterTrustedFeetBasedOnVelocity(numberOfEndEffectorsTrusted.getIntegerValue()));
 
       if (imuBasedLinearStateCalculator.isEstimationEnabled())
          imuBasedLinearStateCalculator.updateLinearAccelerationMeasurement();
@@ -615,8 +621,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          else
             magnitudeForTrust = percentForceToTrustFootAgain;
 
-         boolean footTiltingTooFast = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().normSquared() >
-                                      MathTools.square(angularVelocityToNotTrustFoot.getValue());
+         double footAngularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().norm();
+         footAngularVelocities.get(foot).set(footAngularVelocity);
+         boolean footTiltingTooFast = footAngularVelocity > angularVelocityToNotTrustFoot.getValue();
 
          if (footLoad.getValue() < magnitudeForTrust || footTiltingTooFast)
             areFeetTrusted.get(foot).set(false);
@@ -625,6 +632,30 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       }
 
       numberOfEndEffectorsFilteredByLoad.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
+
+      return filteredNumberOfEndEffectorsTrusted;
+   }
+
+   private int filterTrustedFeetBasedOnVelocity(int numberOfEndEffectorsTrusted)
+   {
+      int filteredNumberOfEndEffectorsTrusted = 0;
+
+      for (int i = 0; i < feet.size(); i++)
+      {
+         RigidBodyBasics foot = feet.get(i);
+         if (!areFeetTrusted.get(foot).getBooleanValue())
+            continue;
+
+         double footAngularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().norm();
+         footAngularVelocities.get(foot).set(footAngularVelocity);
+
+         if (footAngularVelocity > angularVelocityToNotTrustFoot.getValue())
+            areFeetTrusted.get(foot).set(false);
+         else
+            filteredNumberOfEndEffectorsTrusted++;
+      }
+
+      numberOfEndEffectorsFilteredByVelocity.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
 
       return filteredNumberOfEndEffectorsTrusted;
    }
