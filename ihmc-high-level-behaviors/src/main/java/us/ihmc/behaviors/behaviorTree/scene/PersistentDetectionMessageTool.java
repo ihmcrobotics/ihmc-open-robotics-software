@@ -24,12 +24,12 @@ public class PersistentDetectionMessageTool
       message.setHistorySize(persistentDetection.getHistorySize());
       message.setIsStable(persistentDetection.isStable(now));
 
-      detectionPose.setToZero(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
-      detectionPose.set(persistentDetection.getFilteredTransformToCamera());
-      detectionPose.changeFrame(ReferenceFrame.getWorldFrame());
-      detectionTransform.set(detectionPose);
-      MessageTools.toMessage(detectionTransform, message.getTransformToWorld());
+      MessageTools.toMessage(persistentDetection.getFilteredTransform(), message.getTransformToWorld());
 
-      MessageTools.toMessage(persistentDetection.getFilteredTransformToCamera(), message.getTransformToCamera());
+      detectionPose.setToZero(ReferenceFrame.getWorldFrame());
+      detectionPose.set(persistentDetection.getFilteredTransform());
+      detectionPose.changeFrame(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
+      detectionTransform.set(detectionPose);
+      MessageTools.toMessage(persistentDetection.getFilteredTransform(), message.getTransformToCamera());
    }
 }

@@ -3,8 +3,6 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 
@@ -19,7 +17,6 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
 
    private PersistentDetection persistentDetection;
 
-   private final FramePose3D detectionPose = new FramePose3D();
    private final PersistentDetectionMessageTool persistentDetectionMessageTool = new PersistentDetectionMessageTool();
 
    public BehaviorTreeSceneObjectExecutor(long id, CRDTInfo crdtInfo, ROS2SyncedRobotModel syncedRobot, IsaacROSFoundationPoseObject objectType)
@@ -35,10 +32,7 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
       {
          if (persistentDetection.isStable())
          {
-            detectionPose.setToZero(syncedRobot.getReferenceFrames().getExperimentalCameraFrame());
-            detectionPose.set(persistentDetection.getFilteredTransformToCamera());
-            detectionPose.changeFrame(ReferenceFrame.getWorldFrame());
-            transform.setValue(detectionPose, 1e-5);
+            transform.setValue(persistentDetection.getFilteredTransform(), 1e-5);
          }
       }
    }
