@@ -39,6 +39,8 @@ public class RDXGotoNode extends RDXLeafNode<GotoNodeState, GotoNodeDefinition>
 
       ImGui.sameLine();
       gotoNodeWidget.render();
+
+      renderConcurrencyGraph();
    }
 
    @Override

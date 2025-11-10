@@ -314,6 +314,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          poseGizmo.setSelected(!gizmoWasSelected);
       }
 
+      renderConcurrencyGraph();
    }
 
    @Override

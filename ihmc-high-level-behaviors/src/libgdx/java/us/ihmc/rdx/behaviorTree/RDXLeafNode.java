@@ -43,6 +43,14 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
    }
 
    @Override
+   public void renderTreeViewRow()
+   {
+      renderRowBeginning();
+      renderEditableName();
+      renderConcurrencyGraph();
+   }
+
+   @Override
    public void renderRowBeginning()
    {
       super.renderRowBeginning();
@@ -58,6 +66,17 @@ public abstract class RDXLeafNode<S extends LeafNodeState<D>,
          rootNode.getState().setExecutionNextIndex(state.getLeafIndex());
       }
       ImGui.sameLine();
+   }
+
+   public void renderConcurrencyGraph()
+   {
+      if (!definition.getExecuteAfterPrevious())
+      {
+         float offsetX = ImGui.getCursorScreenPosX();
+         float offsetY = ImGui.getCursorScreenPosY();
+         float frameHeight = ImGui.getFrameHeight();
+//         ImGui.getWindowDrawList().addLine();
+      }
    }
 
    public void renderConcurrencyRank()
