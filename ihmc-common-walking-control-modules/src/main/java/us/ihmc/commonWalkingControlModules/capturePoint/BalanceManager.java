@@ -66,6 +66,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,8 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
    private static final FrameVector2D zeroVector = new FrameVector2D();
+
+   private enum CapturePointToUse {CAPTURE_POINT, ANGULAR_CAPTURE_POINT, WINDOW_ANGULAR_CAPTURE_POINT;}
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -108,6 +111,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
 
    private final YoBoolean useAngularCapturePoint = new YoBoolean("useAngularCapturePoint", registry);
+   private final YoEnum<CapturePointToUse> capturePointToUseForAdjustment = new YoEnum<>("capturePointToUseForAdjustment", registry, CapturePointToUse.class);
    private final YoBoolean isUsingPrecomputedTrajectory = new YoBoolean("isUsingPrecomputedTrajectory", registry);
    private final FramePoint2D previousDesiredCapturePointPrecomputed = new FramePoint2D();
    private final FrameVector2D previousDesiredCapturePointVelocityPrecomputed = new FrameVector2D();
@@ -242,6 +246,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoTime = controllerToolbox.getYoTime();
 
       useAngularCapturePoint.set(walkingControllerParameters.useAngularCapturePointForFeedback());
+      if (walkingControllerParameters.useAngularCapturePointForFeedback())
+         capturePointToUseForAdjustment.set(CapturePointToUse.ANGULAR_CAPTURE_POINT);
+      else
+         capturePointToUseForAdjustment.set(CapturePointToUse.CAPTURE_POINT);
 
       contactStateBasedPredicate = robotSide -> controllerToolbox.getFootContactState(robotSide).inContact();
       contactStateManager = new ContactStateManager(yoTime, walkingControllerParameters, registry);
@@ -461,10 +469,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
 
-      if (!usingStepAdjustment)
-      {
-         return false;
-      }
+//      if (!usingStepAdjustment)
+//      {
+//         return false;
+//      }
       // FIXME For now, only compute this at the beginning of swing. Once the step is adjusted, it should likely increase, and anecdotally, we want to prevent
       // FIXME this value from "running away" as the step continues to be adjusted. In theory, this should be ok, but it looks like it isn't. More
       // FIXME experimentation is necessary. RJG 07/27/2023
@@ -475,10 +483,12 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       double omega0 = controllerToolbox.getOmega0();
 
-      if (useAngularCapturePoint.getBooleanValue())
-         capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
-      else
-         capturePoint2d.set(controllerToolbox.getCapturePoint());
+      switch (capturePointToUseForAdjustment.getEnumValue())
+      {
+         case CAPTURE_POINT -> capturePoint2d.set(controllerToolbox.getCapturePoint());
+         case ANGULAR_CAPTURE_POINT -> capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
+         case WINDOW_ANGULAR_CAPTURE_POINT -> capturePoint2d.set(controllerToolbox.getWindowBasedAngularCapturePoint());
+      }
       icpControlPlane.setOmega0(omega0);
       icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
 
@@ -529,7 +539,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
       // use 1.0 - feedback alpha, because 0.0 feedback alpha does nothing, while 1.0 should allow no feedback.
       stepAdjustmentController.compute(yoTime.getDoubleValue(), yoDesiredCapturePoint, capturePoint2d, omega0, yoEquivalentRemainingCoP, 1.0 - feedbackAlpha);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
-      if (footstepWasAdjusted)
+      if (footstepWasAdjusted && usingStepAdjustment)
          footstep.setPose(stepAdjustmentController.getFootstepSolution());
 
       return footstepWasAdjusted;

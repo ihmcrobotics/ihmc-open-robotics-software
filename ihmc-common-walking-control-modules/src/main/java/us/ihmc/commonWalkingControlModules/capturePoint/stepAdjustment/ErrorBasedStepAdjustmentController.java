@@ -213,6 +213,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       oneStepSafetyHeuristics = new CaptureRegionSafetyHeuristics(lengthLimit, registry, null);
       multiStepCaptureRegionCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraintHandler,
                                                                               allowCrossOverSteps,
+                                                                              stepAdjustmentParameters.getMaximumNumberOfStepsToConsider(),
                                                                               registry,
                                                                               yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(contactableFeet,
