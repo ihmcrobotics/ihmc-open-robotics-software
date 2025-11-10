@@ -1,10 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff;
 
 import us.ihmc.yoVariables.listener.YoParameterChangedListener;
-import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DynamicStateInspectorParameters
 {
@@ -27,6 +25,8 @@ public class DynamicStateInspectorParameters
    private final DoubleParameter minNormalizedDistanceFromInsideEdge;
    private final DoubleParameter maxRatioOfControlDecreaseFromToeingOff;
    private final DoubleParameter maxNormalizedErrorNeededForControl;
+
+   private final DoubleParameter maxDistanceToMoveECMP;
 
    public DynamicStateInspectorParameters(YoRegistry parentRegistry)
    {
@@ -52,6 +52,7 @@ public class DynamicStateInspectorParameters
       maxRatioOfControlDecreaseFromToeingOff = new DoubleParameter("maxRatioOfControlDecreaseFromToeingOff" + suffix, registry, 2.0);
       maxNormalizedErrorNeededForControl = new DoubleParameter("maxNormErrorNeededForControl" + suffix, registry, 1.0);
 
+      maxDistanceToMoveECMP = new DoubleParameter("maxDistanceToMoveECMP" + suffix, registry, 0.05);
 
       parentRegistry.addChild(registry);
    }
@@ -111,6 +112,11 @@ public class DynamicStateInspectorParameters
       return maxRatioOfControlDecreaseFromToeingOff.getValue();
    }
 
+   public double getMaxDistanceToMoveECMP()
+   {
+      return maxDistanceToMoveECMP.getValue();
+   }
+
    public void attachParameterChangeListener(YoParameterChangedListener changedListener)
    {
       minLateralDistanceInside.addListener(changedListener);
@@ -124,5 +130,6 @@ public class DynamicStateInspectorParameters
       minNormalizedDistanceFromOutsideEdge.addListener(changedListener);
       maxRatioOfControlDecreaseFromToeingOff.addListener(changedListener);
       maxNormalizedErrorNeededForControl.addListener(changedListener);
+      maxDistanceToMoveECMP.addListener(changedListener);
    }
 }

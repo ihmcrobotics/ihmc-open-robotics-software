@@ -54,6 +54,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -88,7 +89,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -344,14 +344,13 @@ public class HumanoidKinematicsSimulation
 
       if (kinematicsSimulationParameters.getLogToFile())
       {
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                         robotModel.getLogModelProvider(),
-                                                                         registry,
-                                                                         fullRobotModel.getElevator(),
-                                                                         yoGraphicsListRegistry,
-                                                                         100000,
-                                                                         0.01);
-         intraprocessYoVariableLogger.start();
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry)),
+                                                                         0.01,
+                                                                         getClass().getSimpleName());
+         if (intraprocessYoVariableLogger.create())
+            LogTools.info("[Logging] Logging locally to disk");
+         else
+            LogTools.error("[Logging] Unable to log locally to disk");
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
       {
@@ -605,6 +604,8 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
+      if (intraprocessYoVariableLogger != null)
+         intraprocessYoVariableLogger.destroy();
       if (simulatedHandKinematicController != null)
          simulatedHandKinematicController.cleanup();
       controlThread.destroy();

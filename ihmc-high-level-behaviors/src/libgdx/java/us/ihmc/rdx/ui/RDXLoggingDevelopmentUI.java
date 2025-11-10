@@ -1,23 +1,25 @@
 package us.ihmc.rdx.ui;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
+import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.tools.BoxesDemoModel;
-import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.tools.BoxesDemoModel;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RDXLoggingDevelopmentUI
 {
@@ -64,7 +66,8 @@ public class RDXLoggingDevelopmentUI
 
       registry = new YoRegistry("registry");
 
-      yoLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(), registry, MAX_TICK_LENGTH, 1);
+      yoLogger = new IntraprocessYoVariableLogger(List.of(new RegistrySendBufferBuilder(registry)), 1, getClass().getSimpleName());
+
       planarRegionsListLogger = new PlanarRegionsListLogger(getClass().getSimpleName(), MAX_TICK_LENGTH);
 
       planarRegionsID = new YoLong("planarRegionsID", registry);
@@ -103,7 +106,11 @@ public class RDXLoggingDevelopmentUI
             }, 0, TICK_PERIOD);
 
             stopwatch.start();
-            yoLogger.start();
+            if (yoLogger.create())
+               LogTools.info("[Logging] Logging locally to disk");
+            else
+               LogTools.error("[Logging] Unable to log locally to disk");
+
             planarRegionsListLogger.start();
 
             timer.scheduleAtFixedRate(new TimerTask()

@@ -8,30 +8,36 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 
 public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
 {
    private final long id;
-   private final String type;
+   private final IsaacROSFoundationPoseObject objectType;
    protected final CRDTBidirectionalRigidBodyTransform transform;
    protected final ReferenceFrame referenceFrame;
 
-   public BehaviorTreeSceneObjectState(long id, CRDTInfo crdtInfo, String type)
+   public BehaviorTreeSceneObjectState(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType)
    {
       super(crdtInfo);
 
       this.id = id;
-      this.type = type;
+      this.objectType = objectType;
 
       transform = new CRDTBidirectionalRigidBodyTransform(this);
-      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("%s_%d".formatted(type, id),
+      referenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("%s_%d".formatted(objectType.name(), id),
                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                        transform.getValueReadOnly());
    }
 
    public String getName()
    {
-      return type;
+      return objectType.name();
+   }
+
+   public IsaacROSFoundationPoseObject getObjectType()
+   {
+      return objectType;
    }
 
    public void clearOffset()
@@ -48,7 +54,7 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
    {
       toMessage(message.getLatestModificationToData());
       message.setId(id);
-      message.setType(type);
+      message.setObjectType(objectType.ordinal());
       transform.toMessage(message.getTransformToWorld());
    }
 
@@ -60,8 +66,8 @@ public class BehaviorTreeSceneObjectState extends LatestTimestampModifiable
       if (id != message.getId())
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
-      if (!type.equals(message.getTypeAsString()))
-         LogTools.error("Types should match! {} != {}", id, message.getId());
+      if (objectType.ordinal() != message.getObjectType())
+         LogTools.error("Object types should match! {} != {}", objectType.ordinal(), message.getObjectType());
 
       transform.fromMessage(message.getTransformToWorld());
       referenceFrame.update();

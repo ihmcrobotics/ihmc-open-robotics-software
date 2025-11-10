@@ -1,6 +1,10 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
@@ -56,7 +60,13 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 /**
@@ -279,15 +289,29 @@ public class AvatarMultiThreadingFactory
          builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
-         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(
-               robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider(), builders, 100000, 0.01);
-         intraprocessYoVariableLogger.start();
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
+                                                                         robotModel.getEstimatorDT(),
+                                                                         robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider());
 
-         threadingManager.get()
-                         .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
-                                                                                                                  .getHumanoidRobotContextData()
-                                                                                                                  .getTimestamp()));
-         System.out.println("Logging Status: data is being logged locally");
+         if (intraprocessYoVariableLogger.create())
+         {
+            LogTools.info("[Logging] Logging locally to disk");
+
+            threadingManager.get()
+                            .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                                     .getHumanoidRobotContextData()
+                                                                                                                     .getTimestamp()));
+         }
+         else
+         {
+            LogTools.error("[Logging] Unable to log locally to disk");
+         }
+
+         LogTools.info("[Logging] Logging locally to disk");
+      }
+      else
+      {
+         LogTools.info("[Logging] Logging remote to logger server");
       }
 
       return threadingManager.get();
@@ -609,5 +633,10 @@ public class AvatarMultiThreadingFactory
                                                               currentControlStateEnum,
                                                               nextControlStateEnum,
                                                               commandBlenderFactory);
+   }
+
+   public HighLevelHumanoidControllerFactory getControllerFactory()
+   {
+      return controllerFactory;
    }
 }

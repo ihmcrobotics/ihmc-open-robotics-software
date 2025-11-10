@@ -1846,6 +1846,15 @@ public class CrossRobotCommandRandomTools
          next.setCenterOfMassVelocity(nextFrameVector3D(random, possibleFrames));
       else
          next.getCenterOfMassVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+
+      if (random.nextBoolean())
+      {
+         next.setHasAngularMomentum(true);
+         next.getAngularMomentum().set(nextVector3D(random));
+      }
+      else
+         next.setHasAngularMomentum(false);
+
       return next;
    }
 
