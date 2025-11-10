@@ -240,10 +240,9 @@ public class FootShakiesEstimator
       return isCoPDampened;
    }
 
-   private void updateCoPSwitchingCounters()
+   private void updateCoPSwitchingCounters(SideDependentList<? extends FramePoint2DReadOnly> desiredCoPs)
    {
       int glitchFilterSize = (int) Math.ceil(copSegmentGlitchDuration.getDoubleValue() / controlDT);
-
 
       double minZForceForCoPControlScaling = minWeightFractionForControlScaling.getDoubleValue() * totalMass.getValue() * gravityZ;
 
@@ -259,19 +258,20 @@ public class FootShakiesEstimator
       {
          FootSwitchInterface footSwitch = footSwitches.get(robotSide);
          footSwitch.getCenterOfPressure(copActual);
+         copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
 
          if (footForceVector.getZ() > minZForceForCoPControlScaling)
          {
-            if (copActual.getX() > xThreshold)
+            if (copActual.getX() > xThreshold || copDesired.getX() > xThreshold)
                copInForwardWindows.get(robotSide)[writeIndex] = 1;
-            else if (copActual.getX() < -xThreshold)
+            else if (copActual.getX() < -xThreshold || copDesired.getX() < -xThreshold)
                copInForwardWindows.get(robotSide)[writeIndex] = -1;
             else
                copInForwardWindows.get(robotSide)[writeIndex] = 0;
 
-            if (copActual.getY() > yThreshold)
+            if (copActual.getY() > yThreshold || copDesired.getY() > yThreshold)
                copInSidewaysWindows.get(robotSide)[writeIndex] = 1;
-            else if (copActual.getY() < -yThreshold)
+            else if (copActual.getY() < -yThreshold || copDesired.getY() < -yThreshold)
                copInSidewaysWindows.get(robotSide)[writeIndex] = -1;
             else
                copInSidewaysWindows.get(robotSide)[writeIndex] = 0;

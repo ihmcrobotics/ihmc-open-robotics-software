@@ -138,6 +138,8 @@ public class ICPController implements ICPControllerInterface
    private final double controlDT;
    private final double controlDTSquare;
 
+   private boolean ignoreRateLimitThisTick = false;
+
    private final ICPControllerHelper helper = new ICPControllerHelper();
 
    public ICPController(WalkingControllerParameters walkingControllerParameters,
@@ -193,7 +195,7 @@ public class ICPController implements ICPControllerInterface
       feedForwardAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedForwardAlphaLimited", registry, maxAlphaRate, feedForwardAlpha, controlDT);
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
-      highlyDampedFeedbackGains = new ParameterizedICPControlGains("highlyDamped_", icpOptimizationParameters.getHighlyDampedICPFeedbackGains(), registry);
+      highlyDampedFeedbackGains = new ParameterizedICPControlGains("_HighlyDamped", icpOptimizationParameters.getHighlyDampedICPFeedbackGains(), registry);
 
       dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpOptimizationParameters.getDynamicsObjectiveWeight());
 
@@ -268,6 +270,7 @@ public class ICPController implements ICPControllerInterface
    @Override
    public void initialize()
    {
+      ignoreRateLimitThisTick = true;
       integrator.reset();
    }
 
@@ -415,7 +418,10 @@ public class ICPController implements ICPControllerInterface
                                             feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                             feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
       }
-      solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+      if (!ignoreRateLimitThisTick)
+         solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
+      else
+         ignoreRateLimitThisTick = false;
 
       double feedbackRateWeight = usingHighCoPDamping.getValue() ? highlyDampedFeedbackRateWeight.getValue() : this.feedbackRateWeight.getValue();
       solver.setFeedbackRateWeight(copCMPFeedbackRateWeight.getValue() / controlDTSquare, feedbackRateWeight / controlDTSquare);
