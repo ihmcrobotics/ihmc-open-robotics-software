@@ -3,8 +3,12 @@ package us.ihmc.behaviors.behaviorTree.scene;
 import behavior_msgs.msg.dds.BehaviorTreeSceneObjectStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.perception.detections.yolo.YOLOv8InstantDetection;
 
 import java.time.Instant;
 
@@ -32,7 +36,17 @@ public class BehaviorTreeSceneObjectExecutor extends BehaviorTreeSceneObjectStat
       {
          if (persistentDetection.isStable())
          {
-            transform.setValue(persistentDetection.getFilteredTransform(), 1e-5);
+            Vector3DBasics translation = persistentDetection.getFilteredTransform().getTranslation();
+
+            Orientation3DReadOnly orientation;
+            if (persistentDetection.getMostRecentDetection() instanceof YOLOv8InstantDetection)
+               orientation = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getChestFrame).getOrientation();
+            else
+               orientation = persistentDetection.getFilteredTransform().getRotation();
+
+            if (!(transform.getValueReadOnly().getRotation().geometricallyEquals(orientation, 1e-5)
+               && transform.getValueReadOnly().getTranslation().epsilonEquals(translation, 1e-5)))
+               transform.getValueAndModify().set(orientation, translation);
          }
       }
    }
