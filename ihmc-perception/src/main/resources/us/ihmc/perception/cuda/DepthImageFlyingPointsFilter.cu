@@ -74,8 +74,8 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
         for (int j = 0; j < count; ++j)
         {
             float3 pj = points[j];
-            float3 vj = make_float3(pj.x - p1.x, pj.y - p1.y, pj.z - p1.z);
-            float len = sqrtf(dot(vj, vj));
+            float3 vj = sub(pj, p1);
+            float len = length(vj);
 
             if (len < 1e-8f)
                 continue;
@@ -123,17 +123,15 @@ __global__ void filterFlyingPoints(unsigned short *depthImage, size_t pitchDepth
     float3 point = computeRay(u, v, *depthValue, fx, fy, cx, cy);
     float3 ray = point;
 
-    float rayNorm = sqrtf(ray.x * ray.x + ray.y * ray.y + ray.z * ray.z);
-    if (rayNorm < 1e-5f)
+    float rayLength = length(ray);
+    if (rayLength < 1e-5f)
     {
         unsigned short *filteredImageRow = (unsigned short *)((char *)filteredImage + u * pitchFilteredImage);
         filteredImageRow[v] = 0;
         return;
     }
 
-    ray.x /= rayNorm;
-    ray.y /= rayNorm;
-    ray.z /= rayNorm;
+    ray = scale(1.0 / rayLength, ray);
 
     float3 normal = computeNormalRANSAC(depthImage, pitchDepthImage,
                                         width, height, u, v, fx, fy, cx, cy,
