@@ -21,7 +21,6 @@ import java.util.List;
 public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<BehaviorTreeRootNodeState, BehaviorTreeRootNodeDefinition>
       implements BehaviorTreeRootNode<BehaviorTreeNodeExecutor<?, ?>>
 {
-   private final TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> idToNodeMap = new TLongObjectHashMap<>();
    private final List<LeafNodeExecutor<?, ?>> orderedLeaves = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> orderedActions = new ArrayList<>();
    private final List<FallbackNodeExecutor> fallbackNodes = new ArrayList<>();
@@ -60,7 +59,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    {
       super.update();
 
-      idToNodeMap.clear();
       orderedLeaves.clear();
       orderedActions.clear();
       fallbackNodes.clear();
@@ -245,8 +243,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
    private void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
    {
-      idToNodeMap.put(node.getState().getID(), node);
-
       for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
       {
          if (child instanceof LeafNodeExecutor<?, ?> leaf)
@@ -307,8 +303,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       if (!nextNodeToExecute.getState().getCanExecute())
       {
-         state.getLogger().error("Cannot execute leaf: %s\n%s".formatted(nextNodeToExecute.getDefinition().getName(),
-                                                                         nextNodeToExecute.getCantExecuteMessage()));
+         state.getLogger() .error("Cannot execute leaf: %s: %s\n%s".formatted(nextNodeToExecute.getClass().getSimpleName(),
+                                                                              nextNodeToExecute.getDefinition().getName(),
+                                                                              nextNodeToExecute.getCantExecuteMessage()));
          state.setAutomaticExecution(false);
          return false;
       }
@@ -335,11 +332,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    public boolean isEndOfSequence()
    {
       return state.getExecutionNextIndex() >= orderedLeaves.size();
-   }
-   
-   public TLongObjectHashMap<BehaviorTreeNodeExecutor<?, ?>> getIDToNodeMap()
-   {
-      return idToNodeMap;
    }
 
    public List<ActionNodeExecutor<?, ?>> getOrderedActions()
