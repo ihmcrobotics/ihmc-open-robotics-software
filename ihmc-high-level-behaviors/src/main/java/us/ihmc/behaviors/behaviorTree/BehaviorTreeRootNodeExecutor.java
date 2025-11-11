@@ -87,7 +87,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
          leaf.getState().validateDefinition(state.getOrderedLeaves());
 
-      // Update concurrency ranks
+      // Update concurrency ranks TODO: Can't get rid of this until whole body IK stuff is figured out
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
          state.getOrderedLeaves().get(i).setConcurrencyRank(1);
@@ -105,15 +105,9 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       // Update is next for execution
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
       {
-         int executionNextIndex = state.getExecutionNextIndex();
-         if (i < executionNextIndex)
-            state.getOrderedLeaves().get(i).setIsNextForExecution(false);
-         else if (i == executionNextIndex)
-            state.getOrderedLeaves().get(i).setIsNextForExecution(true);
-         else if (state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex() < executionNextIndex)
-            state.getOrderedLeaves().get(i).setIsNextForExecution(true);
-         else
-            state.getOrderedLeaves().get(i).setIsNextForExecution(false);
+         int next = state.getExecutionNextIndex();
+         int after = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
+         state.getOrderedLeaves().get(i).setIsNextForExecution(i >= next && after < next);
       }
 
       failedLeaves.clear();
