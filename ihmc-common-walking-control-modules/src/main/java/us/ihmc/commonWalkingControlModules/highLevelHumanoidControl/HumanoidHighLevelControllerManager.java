@@ -6,7 +6,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
-import us.ihmc.closedSourceControl.rlController.RLControllerState;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -205,9 +204,9 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
             requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerName());
          }
       }
-      if (highLevelControllerStates.get(getCurrentHighLevelControlState()) instanceof RLControllerState rlState)
+      if (getCurrentHighLevelControlState() == HighLevelControllerName.RL_CONTROL)
       {
-         if (rlState.forceRLStateExit())
+         if (highLevelControllerStates.get(getCurrentHighLevelControlState()).forceExit())
          {
             requestedHighLevelControllerState.set(HighLevelControllerName.EXIT_RL);
          }
