@@ -72,15 +72,13 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       orderedActions.clear();
       nextForExecutionLeaves.clear();
       currentlyExecutingLeaves.clear();
-      updateSubtree(this);
+      updateNodeListsRecursive(this);
 
       for (RDXLeafNode<?, ?> leaf : orderedLeaves)
-      {
          leaf.getState().validateDefinition(state.getOrderedLeaves());
-      }
    }
 
-   public void updateSubtree(RDXBehaviorTreeNode<?, ?> node)
+   public void updateNodeListsRecursive(RDXBehaviorTreeNode<?, ?> node)
    {
       idToNodeMap.put(node.getState().getID(), node);
 
@@ -98,7 +96,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
                orderedActions.add(action);
          }
 
-         updateSubtree(child);
+         updateNodeListsRecursive(child);
       }
    }
 
