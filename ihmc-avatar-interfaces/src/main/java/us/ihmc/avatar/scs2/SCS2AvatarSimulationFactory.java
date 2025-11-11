@@ -774,13 +774,19 @@ public class SCS2AvatarSimulationFactory
                                                              ikStreamingRTThread.getSCS2YoGraphics() :
                                                              null));
          }
-         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                         robotModel.getLogModelProvider(),
-                                                                         builders,
-                                                                         100000,
-                                                                         robotModel.getEstimatorDT());
-         estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData()
-                                                                                                    .getTimestamp()));
+         intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders, robotModel.getEstimatorDT(), getClass().getSimpleName());
+
+         if (intraprocessYoVariableLogger.create())
+         {
+            LogTools.info("[Logging] Logging locally to disk");
+
+            estimatorTask.addCallbackPostTask(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData()
+                                                                                                       .getTimestamp()));
+         }
+         else
+         {
+            LogTools.error("[Logging] Unable to log locally to disk");
+         }
       }
 
       // If running with server setup the server registries and their updates.

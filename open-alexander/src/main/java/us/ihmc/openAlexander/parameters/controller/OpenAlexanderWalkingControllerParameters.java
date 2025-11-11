@@ -58,7 +58,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    protected TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
 
-   private final AlexanderMomentumOptimizationSettings momentumOptimizationSettings;
+   private final OpenAlexanderMomentumOptimizationSettings momentumOptimizationSettings;
 
    // USE THESE FOR Real Alexander Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround;
@@ -81,7 +81,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
    private boolean allowUpperBodyMotionDuringLocomotion = true;
 
    /* Setting to true makes the arms stiffer but more responsive for streaming */
-   static final boolean RESPONSIVE_STREAMING_MODE = false;
+   public static final boolean RESPONSIVE_STREAMING_MODE = false;
 
    public OpenAlexanderWalkingControllerParameters(AlexanderVersionInterface version, RobotTarget target, AlexanderJointMap jointMap, AlexanderPhysicalProperties physicalProperties)
    {
@@ -100,7 +100,7 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       this.physicalProperties = physicalProperties;
 
       toeOffParameters = new AlexanderToeOffParameters(physicalProperties);
-      momentumOptimizationSettings = new AlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
+      momentumOptimizationSettings = new OpenAlexanderMomentumOptimizationSettings(target, jointMap, 2 + contactPointParameters.getAdditionalContactNames().size());
       swingTrajectoryParameters = new AlexanderSwingTrajectoryParameters();
       steppingParameters = new OpenAlexanderSteppingParameters(physicalProperties);
       icpControllerParameters = new OpenAlexanderICPControllerParameters();
@@ -113,7 +113,6 @@ public class OpenAlexanderWalkingControllerParameters extends WalkingControllerP
       kneePrivilegedConfigurationParameters.setMaxAcceleration(Double.POSITIVE_INFINITY);
       kneePrivilegedConfigurationParameters.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
 
-      // These parameters are currently only used in sim. We need to investigate using them on hardware.
       kneeJointLimitParameters = new JointLimitParameters();
       kneeJointLimitParameters.setMaxAbsJointVelocity(4.0);
       kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));

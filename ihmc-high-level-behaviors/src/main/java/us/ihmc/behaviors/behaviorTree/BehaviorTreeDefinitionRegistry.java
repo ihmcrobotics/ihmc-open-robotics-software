@@ -20,12 +20,13 @@ public class BehaviorTreeDefinitionRegistry
    {
       new DefinitionMapping(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
       new DefinitionMapping(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
-      new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
       new DefinitionMapping(FallbackNodeDefinition.class, BehaviorTreeStateMessage.FALLBACK_NODE),
       new DefinitionMapping(ConditionNodeDefinition.class, BehaviorTreeStateMessage.CONDITION_NODE),
       new DefinitionMapping(GotoNodeDefinition.class, BehaviorTreeStateMessage.GOTO_NODE),
       new DefinitionMapping(CheckPointNodeDefinition.class, BehaviorTreeStateMessage.CHECKPOINT_NODE),
+      new DefinitionMapping(SceneActionNodeDefinition.class, BehaviorTreeStateMessage.SCENE_ACTION),
+      new DefinitionMapping(AI2RNodeDefinition.class, BehaviorTreeStateMessage.AI2R_NODE),
       new DefinitionMapping(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new DefinitionMapping(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
@@ -35,9 +36,10 @@ public class BehaviorTreeDefinitionRegistry
       new DefinitionMapping(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
       new DefinitionMapping(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
       new DefinitionMapping(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
+      new DefinitionMapping(AbilityHandActionDefinition.class, BehaviorTreeStateMessage.ABILITY_HAND_ACTION),
       new DefinitionMapping(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
       new DefinitionMapping(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
-      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
+      new DefinitionMapping(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION),
    };
    private static final Map<Class<?>, DefinitionMapping> REGISTRY_MAP = new HashMap<>();
    static

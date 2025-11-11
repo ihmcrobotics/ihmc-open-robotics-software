@@ -5,3 +5,6 @@ ihmc_common_msgs/LatestModificationMessage latest_modification_to_list
 
 # Scene objects
 behavior_msgs/BehaviorTreeSceneObjectStateMessage[<=100] objects
+
+# Persistent detections tracked in the scene
+behavior_msgs/PersistentDetectionStatusMessage[<=100] persistent_detections

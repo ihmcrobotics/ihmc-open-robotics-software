@@ -25,9 +25,9 @@ module behavior_msgs
          */
         unsigned long id;
         /**
-         * Object type
+         * Object type (IsaacROSFoundationPoseObject ordinal)
          */
-        string type;
+        long object_type;
         /**
          * Transform of the object frame to world frame
          */

@@ -364,4 +364,9 @@ public class YOLOv8DetectionExecutor
          parametersPublisher.publish(parametersMessage);
       }
    }
+
+   public Map<String, SyncedYOLOv8ModelParameters> getModelParameters()
+   {
+      return parameters.getModelParameters();
+   }
 }

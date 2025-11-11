@@ -17,6 +17,8 @@ public enum IsaacROSFoundationPoseObject
    EXPLOSIVE_CHARGE("charge", "charge"),
    DOOR_PANEL("door_panel", "door_panel");
 
+   public static final IsaacROSFoundationPoseObject[] values = values();
+
    public final String meshName;
    public final String yoloClass;
    public final FoundationPoseTopics topics;

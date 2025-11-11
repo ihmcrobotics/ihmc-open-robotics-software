@@ -20,9 +20,9 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
    private final RDXModelInstance modelInstance;
    private final RDXRenderableAdapter modelRenderableAdapter;
 
-   public RDXBehaviorTreeSceneObject(long id, CRDTInfo crdtInfo, String type, RDXBaseUI baseUI)
+   public RDXBehaviorTreeSceneObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType, RDXBaseUI baseUI)
    {
-      super(id, crdtInfo, type);
+      super(id, crdtInfo, objectType);
 
       this.baseUI = baseUI;
 
@@ -32,7 +32,7 @@ public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
       gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
 
       String modelName = "";
-      if (type.equals(IsaacROSFoundationPoseObject.MUSTARD.name()))
+      if (objectType.equals(IsaacROSFoundationPoseObject.MUSTARD))
          modelName = "environmentObjects/mustard/mustard.glb";
 
       model = RDXModelLoader.load(modelName);

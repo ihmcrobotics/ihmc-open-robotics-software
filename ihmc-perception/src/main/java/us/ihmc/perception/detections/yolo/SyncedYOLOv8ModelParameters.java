@@ -131,4 +131,24 @@ public class SyncedYOLOv8ModelParameters extends LatestTimestampModifiable
       erosionKernelRadii.fromMessage(message.getErosionKernelRadii());
       outlierThresholds.fromMessage(message.getOutlierThresholds());
    }
+
+   public void disableAllClasses()
+   {
+      for (int i = 0; i < ignoredObjectClasses.getLength(); i++)
+         ignoredObjectClasses.setValue(i, true);
+   }
+
+   public void enableClass(String className, float confidenceThreshold)
+   {
+      String[] detectableClasses = getDetectableObjectClasses();
+      for (int i = 0; i < detectableClasses.length; i++)
+      {
+         if (detectableClasses[i].equalsIgnoreCase(className))
+         {
+            ignoredObjectClasses.setValue(i, false);
+            confidenceThresholds.setValue(i, confidenceThreshold);
+            break;
+         }
+      }
+   }
 }

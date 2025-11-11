@@ -64,12 +64,13 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.indent();
 
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Fallback Node", FallbackNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Condition Node", ConditionNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Goto Node", GotoNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Check Point Node", CheckPointNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Scene Action", SceneActionNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "AI2R Node", AI2RNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
 
@@ -94,6 +95,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+         }
+         ImGui.text("Ability Hand: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), AbilityHandActionDefinition.class, side);
          }
          ImGui.text("Sake Hand Command: ");
          for (RobotSide side : RobotSide.values)

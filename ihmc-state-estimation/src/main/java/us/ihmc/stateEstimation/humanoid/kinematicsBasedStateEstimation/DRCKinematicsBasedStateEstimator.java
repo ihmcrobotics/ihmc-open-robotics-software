@@ -135,11 +135,17 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
-      List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);
+      List<IMUSensorReadOnly> imusToUseForMomentumEstimate = new ArrayList<>();
       for (IMUSensorReadOnly imu : sensorOutputMap.getIMUOutputs())
       {
-         if (imuSensorsToUse.contains(imu.getSensorName()))
+         if (Arrays.asList(imuSensorsToUseInStateEstimator).contains(imu.getSensorName()))
+         {
             imuProcessedOutputs.add(imu);
+            if (stateEstimatorParameters.getIMUsToUseInMomentumEstimator() == null)
+               imusToUseForMomentumEstimate.add(imu);
+         }
+         if (stateEstimatorParameters.getIMUsToUseInMomentumEstimator() != null && Arrays.asList(stateEstimatorParameters.getIMUsToUseInMomentumEstimator()).contains(imu.getSensorName()))
+            imusToUseForMomentumEstimate.add(imu);
       }
 
       List<IMUSensorReadOnly> imusToUse = new ArrayList<>(imuProcessedOutputs);
@@ -211,11 +217,12 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          case DISTRIBUTED_IMUS:
             momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
-                                                                                   sensorOutputMap.getIMUOutputs(),
+                                                                                   imusToUse,
                                                                                    pelvisLinearStateUpdater.getCurrentListOfTrustedFeet(),
                                                                                    estimatorDT,
                                                                                    gravitationalAcceleration,
-                                                                                   stateEstimatorParameters.enableCoMAdjustment(),
+                                                                                   stateEstimatorParameters.enableCoMPositionAdjustment(),
+                                                                                   stateEstimatorParameters.enableCoMVelocityAdjustment(),
                                                                                    estimatorCenterOfMassDataHolderToUpdate);
             break;
          case SIMPLE:

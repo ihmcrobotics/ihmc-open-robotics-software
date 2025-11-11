@@ -83,7 +83,10 @@ public class SCS2AvatarSimulation
    {
       if (intraprocessYoVariableLogger != null)
       {
-         intraprocessYoVariableLogger.start();
+         if (intraprocessYoVariableLogger.create())
+            LogTools.info("[Logging] Logging locally to disk");
+         else
+            LogTools.error("[Logging] Unable to log locally to disk");
       }
       if (yoVariableServer != null)
       {

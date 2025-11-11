@@ -14,17 +14,19 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
-   private AI2RNodeStateMessage ai2rNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private FallbackNodeStateMessage fallbackNodeStateMessage;
    private ConditionNodeStateMessage conditionNodeStateMessage;
    private GotoNodeStateMessage gotoNodeStateMessage;
    private CheckPointNodeStateMessage checkPointNodeStateMessage;
+   private SceneActionNodeStateMessage sceneActionNodeStateMessage;
+   private AI2RNodeStateMessage ai2rNodeStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private BuildingExplorationStateMessage buildingExplorationStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
+   private AbilityHandActionStateMessage abilityHandActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
@@ -42,17 +44,19 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
       behaviorTreeRootNodeStateMessage = null;
-      ai2rNodeStateMessage = null;
       actionSequenceStateMessage = null;
       fallbackNodeStateMessage = null;
       conditionNodeStateMessage = null;
       gotoNodeStateMessage = null;
       checkPointNodeStateMessage = null;
+      sceneActionNodeStateMessage = null;
+      ai2rNodeStateMessage = null;
       doorTraversalStateMessage = null;
       buildingExplorationStateMessage = null;
       actionNodeStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
+      abilityHandActionStateMessage = null;
       sakeHandCommandActionStateMessage = null;
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
@@ -119,16 +123,6 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
    }
 
-   public AI2RNodeStateMessage getAI2RNodeStateMessage()
-   {
-      return ai2rNodeStateMessage;
-   }
-
-   public void setAI2RNodeStateMessage(AI2RNodeStateMessage ai2rNodeStateMessage)
-   {
-      this.ai2rNodeStateMessage = ai2rNodeStateMessage;
-   }
-
    public ActionNodeStateMessage getActionNodeStateMessage()
    {
       return actionNodeStateMessage;
@@ -189,6 +183,26 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.checkPointNodeStateMessage = checkPointNodeStateMessage;
    }
 
+   public SceneActionNodeStateMessage getSceneActionNodeStateMessage()
+   {
+      return sceneActionNodeStateMessage;
+   }
+
+   public void setSceneActionNodeStateMessage(SceneActionNodeStateMessage sceneActionNodeStateMessage)
+   {
+      this.sceneActionNodeStateMessage = sceneActionNodeStateMessage;
+   }
+
+   public AI2RNodeStateMessage getAI2RNodeStateMessage()
+   {
+      return ai2rNodeStateMessage;
+   }
+
+   public void setAI2RNodeStateMessage(AI2RNodeStateMessage ai2rNodeStateMessage)
+   {
+      this.ai2rNodeStateMessage = ai2rNodeStateMessage;
+   }
+
    public DoorTraversalStateMessage getDoorTraversalStateMessage()
    {
       return doorTraversalStateMessage;
@@ -227,6 +241,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setFootstepPlanActionStateMessage(FootstepPlanActionStateMessage footstepPlanActionStateMessage)
    {
       this.footstepPlanActionStateMessage = footstepPlanActionStateMessage;
+   }
+
+   public AbilityHandActionStateMessage getAbilityHandActionStateMessage()
+   {
+      return abilityHandActionStateMessage;
+   }
+
+   public void setAbilityHandActionStateMessage(AbilityHandActionStateMessage abilityHandActionStateMessage)
+   {
+      this.abilityHandActionStateMessage = abilityHandActionStateMessage;
    }
 
    public SakeHandCommandActionStateMessage getSakeHandCommandActionStateMessage()

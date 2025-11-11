@@ -31,12 +31,13 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
    static
    {
       REGISTRY.put(BehaviorTreeNodeDefinition.class, RDXBehaviorTreeNode::new);
-      REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
       REGISTRY.put(ActionSequenceDefinition.class, RDXActionSequence::new);
       REGISTRY.put(FallbackNodeDefinition.class, RDXFallbackNode::new);
       REGISTRY.put(ConditionNodeDefinition.class, RDXConditionNode::new);
       REGISTRY.put(GotoNodeDefinition.class, RDXGotoNode::new);
       REGISTRY.put(CheckPointNodeDefinition.class, RDXCheckPointNode::new);
+      REGISTRY.put(SceneActionNodeDefinition.class, RDXSceneActionNode::new);
+      REGISTRY.put(AI2RNodeDefinition.class, RDXAI2RNode::new);
       REGISTRY.put(DoorTraversalDefinition.class, RDXDoorTraversal::new);
       REGISTRY.put(BuildingExplorationDefinition.class, RDXBuildingExploration::new);
       REGISTRY.put(ChestOrientationActionDefinition.class, RDXChestOrientationAction::new);
@@ -45,6 +46,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeBuilder<RDXBe
       REGISTRY.put(HandWrenchActionDefinition.class, RDXHandWrenchAction::new);
       REGISTRY.put(ScrewPrimitiveActionDefinition.class, RDXScrewPrimitiveAction::new);
       REGISTRY.put(PelvisHeightOrientationActionDefinition.class, RDXPelvisHeightOrientationAction::new);
+      REGISTRY.put(AbilityHandActionDefinition.class, RDXAbilityHandAction::new);
       REGISTRY.put(SakeHandCommandActionDefinition.class, RDXSakeHandCommandAction::new);
       REGISTRY.put(WaitDurationActionDefinition.class, RDXWaitDurationAction::new);
       REGISTRY.put(FootPoseActionDefinition.class, RDXFootPoseAction::new);
