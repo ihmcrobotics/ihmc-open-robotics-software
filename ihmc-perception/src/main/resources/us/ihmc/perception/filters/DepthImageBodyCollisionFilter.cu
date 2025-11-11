@@ -9,48 +9,28 @@ __device__ bool isPointInCapsule(float3 point,
                                  float radius)
 {
     float tolerance = 0.1;
-    float3 capsuleAxis;
-    capsuleAxis.x = bottomCenter.x - topCenter.x;
-    capsuleAxis.y = bottomCenter.y - topCenter.y;
-    capsuleAxis.z = bottomCenter.z - topCenter.z;
-
+    float3 capsuleAxis = sub(bottomCenter, topCenter);
     float capsuleLengthSq = dot(capsuleAxis, capsuleAxis);
     float capsuleLength = sqrtf(capsuleLengthSq);
 
     if (capsuleLength < 1e-6f)
-    {
-        float3 diff;
-        diff.x = point.x - topCenter.x;
-        diff.y = point.y - topCenter.y;
-        diff.z = point.z - topCenter.z;
+    {   // The capsule isn't a capsule here. Here, it's just a sphere.
+        float3 diff = sub(point, topCenter);
         float distSq = dot(diff, diff);
-        return distSq <=  (radius + tolerance) * (radius + tolerance);
-
+        return distSq <= (radius + tolerance) * (radius + tolerance);
     }
 
-    float3 normalizedAxis;
-    normalizedAxis.x = capsuleAxis.x / capsuleLength;
-    normalizedAxis.y = capsuleAxis.y / capsuleLength;
-    normalizedAxis.z = capsuleAxis.z / capsuleLength;
-
-    float3 toPoint;
-    toPoint.x = point.x - topCenter.x;
-    toPoint.y = point.y - topCenter.y;
-    toPoint.z = point.z - topCenter.z;
+    // This computes the direction of the capsule axis
+    float3 normalizedAxis = scale(1.0 / capsuleLength, capsuleAxis);
+    float3 toPoint = sub(point, topCenter);
 
     float projection = dot(toPoint, normalizedAxis);
     projection = fmaxf(0.0f, fminf(projection, capsuleLength));
 
-    float3 closestPointOnAxis;
-    closestPointOnAxis.x = topCenter.x + projection * normalizedAxis.x;
-    closestPointOnAxis.y = topCenter.y + projection * normalizedAxis.y;
-    closestPointOnAxis.z = topCenter.z + projection * normalizedAxis.z;
+    // = topCenter + projection * normalizedAxis;
+    float3 closestPointOnAxis = add(topCenter, scale(projection, normalizedAxis));
 
-    float3 dist;
-    dist.x = point.x - closestPointOnAxis.x;
-    dist.y = point.y - closestPointOnAxis.y;
-    dist.z = point.z - closestPointOnAxis.z;
-
+    float3 dist = sub(point, closestPointOnAxis);
     float distSq = dot(dist, dist);
     return distSq <= (radius + tolerance) * (radius + tolerance);
 }
@@ -77,7 +57,11 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
     unsigned short depthValue = *row(col(depthImage, x_index), depthImagePitch, y_index);
 
+    // Convert from the depth value to the depth in meters.
     float depthInMeters = depthValue/1000.0f;
+    // This is the collision point in the camera frame, using a projection model. The projection model has a focal length in x and y (fx and fy), and a center
+    // pixel of the camera (cx and cy), and then just uses like triangles to compute the y and z coordinates.
+    // The camera frame is defined as x forward and z up.
     float3 depthFramePoint = make_float3(depthInMeters,
                                           -(x_index - cx) / fx * depthInMeters,
                                          -(y_index - cy) / fy * depthInMeters);
@@ -89,10 +73,13 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
     {
         int index = i * numberOfAttributes;
 
+        // Capsules are defined as a line segment that then has a fixed radius around it.
+        // get the top point of the line segment in the camera frame.
         float3 topCenter = make_float3(collidableGeometryPointer[index],
                                        collidableGeometryPointer[index + 1],
                                        collidableGeometryPointer[index + 2]);
 
+        // get the bottom point of the line segment in teh camera frame.
         float3 bottomCenter = make_float3(collidableGeometryPointer[index + 3],
                                           collidableGeometryPointer[index + 4],
                                           collidableGeometryPointer[index + 5]);

@@ -31,6 +31,36 @@ __device__ float interpolate(float a, float b, float alpha)
     return (1.0f - alpha) * a + alpha * b;
 }
 
+__device__ float3 scale(float scalar, float3 point)
+{
+    float3 ret
+    ret.x = scalar * point.x;
+    ret.x = scalar * point.y;
+    ret.x = scalar * point.z;
+
+    return ret;
+}
+
+__device__ float3 add(float3 pointA, float3 pointB)
+{
+    float3 ret
+    ret.x = pointA.x + pointB.x;
+    ret.y = pointA.y + pointB.y;
+    ret.z = pointA.z + pointB.z;
+
+    return ret;
+}
+
+__device__ float3 sub(float3 pointA, float3 pointB)
+{
+    float3 ret
+    ret.x = pointA.x - pointB.x;
+    ret.y = pointA.y - pointB.y;
+    ret.z = pointA.z - pointB.z;
+
+    return ret;
+}
+
 __device__ float3 transformPoint3D(float3 point, const float* transform)
 {
     return make_float3(dot(make_float3(transform[0], transform[1], transform[2]), point) + transform[3],
