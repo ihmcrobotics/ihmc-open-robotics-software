@@ -504,17 +504,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       yoAngularCapturePoint.set(yoCapturePoint);
 
-      FrameVector3DReadOnly angularMomentum = angularExcursionCalculator.getAngularMomentum();
-      yoAngularCapturePoint.addX(1.0 / wmh * angularMomentum.getY());
-      yoAngularCapturePoint.addY(-1.0 / wmh * angularMomentum.getX());
+      yoAngularCapturePoint.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
+      yoAngularCapturePoint.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
 
       windowedCoMVelocityEstimate.update(centerOfMassStateProvider.getCenterOfMassPosition());
       CapturePointTools.computeCapturePointPosition(centerOfMassStateProvider.getCenterOfMassPosition(),
                                                     windowedCoMVelocityEstimate,
                                                     omega0.getDoubleValue(),
                                                     yoAngularCapturePointFromWindow);
-      yoAngularCapturePointFromWindow.addX(1.0 / wmh * angularMomentum.getY());
-      yoAngularCapturePointFromWindow.addY(-1.0 / wmh * angularMomentum.getX());
+      yoAngularCapturePointFromWindow.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
+      yoAngularCapturePointFromWindow.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
    }
 
    @Override
@@ -596,11 +595,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public SpatialVectorReadOnly getEstimatedExternalHandWrench(RobotSide robotSide)
    {
       return handWrenchCalculators == null ? null : handWrenchCalculators.get(robotSide).getFilteredWrench();
-   }
-
-   public void setHighCoPDampingParameters(boolean enable, double duration, double copErrorThreshold)
-   {
-      footShakiesEstimator.setHighCoPDampingParameters(enable, duration, copErrorThreshold);
    }
 
    public void addUpdatable(Updatable updatable)

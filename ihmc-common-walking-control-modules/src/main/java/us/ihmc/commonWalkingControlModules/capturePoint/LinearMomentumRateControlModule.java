@@ -52,6 +52,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.yoVariables.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -236,8 +237,9 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       yoAngularMomentum = new YoFrameVector3D("AngularMomentumInLMRCModule", centerOfMassFrame, registry);
 
-      YoDouble angularMomentumAlpha = new YoDouble("filteredAngularMomentumAlpha", registry);
-      angularMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
+      YoDouble angularMomentumBreakFrequency = new YoDouble("angularMomentumBreakFrequency", registry);
+      angularMomentumBreakFrequency.set(20.0);
+      AlphaBasedOnBreakFrequencyProvider angularMomentumAlpha = new AlphaBasedOnBreakFrequencyProvider(angularMomentumBreakFrequency, controlDT);
       filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
 
       if (yoGraphicsListRegistry != null)

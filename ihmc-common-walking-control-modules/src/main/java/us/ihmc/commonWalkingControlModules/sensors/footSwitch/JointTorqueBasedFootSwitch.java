@@ -39,6 +39,7 @@ import java.util.List;
 
 public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 {
+   private static final double GRAVITY_Z = -9.81;
    private final YoRegistry registry;
 
    private final BooleanProvider useJacobianTranspose;
@@ -103,7 +104,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
       wrenchDetector = new JacobianBasedBasedTouchdownDetector(foot,
                                                                rootBody,
                                                                soleFrame,
-                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)),
+                                                               MultiBodySystemMissingTools.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootBody)) * Math.abs(GRAVITY_Z),
                                                                contactablePlaneBody,
                                                                contactForceThresholdLow,
                                                                contactForceThresholdHigh,
@@ -349,7 +350,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
          gravityTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
          gravityTorqueCalculator.setConsiderJointAccelerations(false);
-         gravityTorqueCalculator.setGravitionalAcceleration(-9.81); // TODO Extract me
+         gravityTorqueCalculator.setGravitionalAcceleration(GRAVITY_Z); // TODO Extract me
 
          legJointGravityTaus = new YoDouble[6];
          for (int i = 0; i < legJointGravityTaus.length; i++)
