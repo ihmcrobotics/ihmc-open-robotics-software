@@ -554,7 +554,7 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
       return 1;
    }
 
-   FramePoint3D tmpFramePoint = new FramePoint3D();
+   private final FramePoint3D tmpFramePoint = new FramePoint3D();
 
    private int findLowestFootInContact()
    {
@@ -596,6 +596,8 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
 
       int filteredNumberOfEndEffectorsTrusted = 0;
 
+      double highestLoad = Double.MIN_VALUE;
+      RigidBodyBasics highestLoadedFoot = null;
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
@@ -621,14 +623,23 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          else
             magnitudeForTrust = percentForceToTrustFootAgain;
 
-         double footAngularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().norm();
-         footAngularVelocities.get(foot).set(footAngularVelocity);
-         boolean footTiltingTooFast = footAngularVelocity > angularVelocityToNotTrustFoot.getValue();
+         if (footLoad.getValue() > highestLoad)
+         {
+            highestLoad = footLoad.getValue();
+            highestLoadedFoot = foot;
+         }
 
-         if (footLoad.getValue() < magnitudeForTrust || footTiltingTooFast)
+         if (footLoad.getValue() < magnitudeForTrust)
             areFeetTrusted.get(foot).set(false);
          else
             filteredNumberOfEndEffectorsTrusted++;
+      }
+
+      if (filteredNumberOfEndEffectorsTrusted == 0 && highestLoadedFoot != null)
+      {
+         // This is a degenerate case. We want to leave one step.
+         areFeetTrusted.get(highestLoadedFoot).set(true);
+         filteredNumberOfEndEffectorsTrusted++;
       }
 
       numberOfEndEffectorsFilteredByLoad.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
@@ -640,6 +651,9 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
    {
       int filteredNumberOfEndEffectorsTrusted = 0;
 
+      double slowestVelocity = Double.POSITIVE_INFINITY;
+      RigidBodyBasics slowestFoot = null;
+
       for (int i = 0; i < feet.size(); i++)
       {
          RigidBodyBasics foot = feet.get(i);
@@ -649,10 +663,23 @@ public class PelvisLinearStateUpdater implements SCS2YoGraphicHolder
          double footAngularVelocity = foot.getBodyFixedFrame().getTwistOfFrame().getAngularPart().norm();
          footAngularVelocities.get(foot).set(footAngularVelocity);
 
+         if (footAngularVelocity < slowestVelocity)
+         {
+            slowestVelocity = footAngularVelocity;
+            slowestFoot = foot;
+         }
+
          if (footAngularVelocity > angularVelocityToNotTrustFoot.getValue())
             areFeetTrusted.get(foot).set(false);
          else
             filteredNumberOfEndEffectorsTrusted++;
+      }
+
+      if (filteredNumberOfEndEffectorsTrusted == 0 && slowestFoot != null)
+      {
+         // This is a degenerate case. We want to leave one step.
+         areFeetTrusted.get(slowestFoot).set(true);
+         filteredNumberOfEndEffectorsTrusted++;
       }
 
       numberOfEndEffectorsFilteredByVelocity.set(numberOfEndEffectorsTrusted - filteredNumberOfEndEffectorsTrusted);
