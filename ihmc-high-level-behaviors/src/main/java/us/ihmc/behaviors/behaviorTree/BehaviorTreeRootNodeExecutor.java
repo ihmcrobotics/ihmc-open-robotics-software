@@ -244,7 +244,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       state.getLogger().info("Triggering leaf execution: %s (%s)".formatted(leafToExecute.getDefinition().getName(),
                                                                             leafToExecute.getClass().getSimpleName()));
-      leafToExecute.update();
       leafToExecute.triggerExecution();
       currentlyExecutingLeaves.add(leafToExecute);
       state.stepForwardNextExecutionIndex();
@@ -264,6 +263,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
                if (tryLeaf.getState().getIsExecuting())
                   return false;
 
+      nextNodeToExecute.update(); // Make sure can execute is up to date
       if (!nextNodeToExecute.getState().getCanExecute())
       {
          state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(nextNodeToExecute.getClass().getSimpleName(),
