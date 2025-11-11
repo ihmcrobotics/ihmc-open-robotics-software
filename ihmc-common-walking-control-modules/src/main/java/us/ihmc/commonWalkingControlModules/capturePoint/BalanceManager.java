@@ -48,6 +48,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajec
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.robotics.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -164,6 +165,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
 
+   private final DoubleProvider icpErrorDeadband;
    private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
    private final DoubleProvider maxICPErrorBeforeSingleSupportForwardX;
    private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
@@ -293,6 +295,7 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
+      icpErrorDeadband = new DoubleParameter("icpErrorDeadband", registry, walkingControllerParameters.getICPControllerParameters().getICPErrorDeadband());
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX",
                                                                    registry,
                                                                    walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
@@ -1100,6 +1103,13 @@ public class BalanceManager implements SCS2YoGraphicHolder
       getICPError(icpError2d);
       ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
       icpError2d.changeFrame(leadingSoleZUpFrame);
+      // apply the deadband to the error
+      double icpErrorMagnitude = icpError2d.norm();
+      if (icpErrorMagnitude < icpErrorDeadband.getValue())
+         icpError2d.setToZero();
+      else
+         icpError2d.scale((icpErrorMagnitude - icpErrorDeadband.getValue()) / icpErrorMagnitude);
+
       boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
       double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue()
             : maxICPErrorBeforeSingleSupportBackwardX.getValue();

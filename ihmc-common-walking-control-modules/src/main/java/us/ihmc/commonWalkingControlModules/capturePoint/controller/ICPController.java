@@ -104,6 +104,7 @@ public class ICPController implements ICPControllerInterface
 
    private final AngularMomentumIntegrator integrator;
 
+   private final DoubleProvider icpErrorDeadband;
    private final ICPControlGainsReadOnly feedbackGains;
    private final ICPControlGainsReadOnly highlyDampedFeedbackGains;
    private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
@@ -194,6 +195,7 @@ public class ICPController implements ICPControllerInterface
       feedbackAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedbackAlphaLimited", registry, maxAlphaRate, feedbackAlpha, controlDT);
       feedForwardAlphaLimited = new RateLimitedYoVariable(yoNamePrefix + "FeedForwardAlphaLimited", registry, maxAlphaRate, feedForwardAlpha, controlDT);
 
+      icpErrorDeadband = new DoubleParameter(yoNamePrefix + "ICPErrorDeadband", registry, icpOptimizationParameters.getICPErrorDeadband());
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
       highlyDampedFeedbackGains = new ParameterizedICPControlGains("_HighlyDamped", icpOptimizationParameters.getHighlyDampedICPFeedbackGains(), registry);
 
@@ -353,6 +355,8 @@ public class ICPController implements ICPControllerInterface
 
       this.icpError.sub(currentICP, desiredICP);
 
+      applyDeadbandToICPError(icpError);
+
       scaleFeedbackWeightWithGain();
 
       submitSolverTaskConditions(supportPolygonInWorld);
@@ -371,6 +375,20 @@ public class ICPController implements ICPControllerInterface
       expectedControlICPVelocity.scale(omega0);
 
       controllerTimer.stopMeasurement();
+   }
+
+   private void applyDeadbandToICPError(FixedFrameVector2DBasics icpErrorToPack)
+   {
+      double icpErrorMagnitude = icpErrorToPack.norm();
+      if (icpErrorMagnitude < icpErrorDeadband.getValue())
+      {
+         icpErrorToPack.setToZero();
+      }
+      else
+      {
+         double deadbandedMagnitude = icpErrorMagnitude - icpErrorDeadband.getValue();
+         icpErrorToPack.scale(deadbandedMagnitude / icpErrorMagnitude);
+      }
    }
 
    private void submitSolverTaskConditions(FrameConvexPolygon2DReadOnly supportPolygonInWorld)

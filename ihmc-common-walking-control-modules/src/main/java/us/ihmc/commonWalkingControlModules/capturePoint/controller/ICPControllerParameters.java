@@ -54,6 +54,14 @@ public abstract class ICPControllerParameters
    }
 
    /**
+    * This is a deadband applied to the icp error, in a magnitude manner, so along the vector of the error.
+    */
+   public double getICPErrorDeadband()
+   {
+      return 0.0;
+   }
+
+   /**
     * Gains for the proportional ICP controller that is encoded into the optimization. Also includes
     * gains for the smart integrator that is used when the controller is stuck.
     */
