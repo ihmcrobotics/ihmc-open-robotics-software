@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.behaviorTree;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -66,9 +65,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       updateSubtree(this);
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
-      {
          leaf.getState().validateFields(state.getOrderedLeaves());
-      }
 
       // Update concurrency ranks
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
@@ -81,9 +78,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
             int thisExecuteAfterLeafIndex = state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex();
             int executeAfterLeafIndexToCompare = state.getOrderedLeaves().get(j).getExecuteAfterLeafIndex();
             if (thisExecuteAfterLeafIndex == executeAfterLeafIndexToCompare)
-            {
                state.getOrderedLeaves().get(i).setConcurrencyRank(2);
-            }
          }
       }
 
@@ -92,21 +87,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          int executionNextIndex = state.getExecutionNextIndex();
          if (i < executionNextIndex)
-         {
             state.getOrderedLeaves().get(i).setIsNextForExecution(false);
-         }
          else if (i == executionNextIndex)
-         {
             state.getOrderedLeaves().get(i).setIsNextForExecution(true);
-         }
          else if (state.getOrderedLeaves().get(i).getExecuteAfterLeafIndex() < executionNextIndex)
-         {
             state.getOrderedLeaves().get(i).setIsNextForExecution(true);
-         }
          else
-         {
             state.getOrderedLeaves().get(i).setIsNextForExecution(false);
-         }
       }
 
       failedLeaves.clear();
@@ -158,9 +145,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          fallbackNode.update();
 
          if (!fallbackNode.getFallbackLeaves().isEmpty())
-         {
             failedLeavesWithoutFallback.removeAll(fallbackNode.getTryLeaves());
-         }
       }
 
       // Handle skipping the fallback if try leaf group is successful
@@ -235,9 +220,7 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          failedLeaves.clear();
          for (int i = 0; i < state.getOrderedLeaves().size(); i++)
-         {
             state.getOrderedLeaves().get(i).setFailed(false);
-         }
       }
    }
 
@@ -249,17 +232,13 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          {
             orderedLeaves.add(leaf);
             if (leaf.getState().getIsExecuting())
-            {
                currentlyExecutingLeaves.add(leaf);
-            }
 
             if (child instanceof ActionNodeExecutor<?, ?> actionNode)
                orderedActions.add(actionNode);
          }
          else if (child instanceof FallbackNodeExecutor fallbackNode)
-         {
             fallbackNodes.add(fallbackNode);
-         }
 
          updateSubtree(child);
       }
@@ -280,26 +259,16 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
    private boolean shouldExecuteNextLeaf()
    {
       if (isEndOfSequence())
-      {
          return false;
-      }
 
       LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
 
       // If a fallback sequence is up next, block if any corresponding try leaves are executing
       for (FallbackNodeExecutor fallbackNode : fallbackNodes)
-      {
          if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback leaf is next
-         {
             for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
-            {
                if (tryLeaf.getState().getIsExecuting())
-               {
                   return false;
-               }
-            }
-         }
-      }
 
       if (!nextNodeToExecute.getState().getCanExecute())
       {
@@ -315,18 +284,12 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
          int executeAfterLeafIndex = nextNodeToExecute.getState().getExecuteAfterLeafIndex();
 
          if (executeAfterLeafIndex < 0) // Execute after beginning
-         {
             return true;
-         }
          else
-         {
             return !orderedLeaves.get(executeAfterLeafIndex).getState().getIsExecuting();
-         }
       }
       else
-      {
          return currentlyExecutingLeaves.isEmpty();
-      }
    }
 
    public boolean isEndOfSequence()
