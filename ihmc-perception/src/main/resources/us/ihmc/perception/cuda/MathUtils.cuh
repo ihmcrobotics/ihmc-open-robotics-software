@@ -33,7 +33,7 @@ __device__ float interpolate(float a, float b, float alpha)
 
 __device__ float3 scale(float scalar, float3 point)
 {
-    float3 ret
+    float3 ret;
     ret.x = scalar * point.x;
     ret.x = scalar * point.y;
     ret.x = scalar * point.z;
@@ -43,22 +43,12 @@ __device__ float3 scale(float scalar, float3 point)
 
 __device__ float3 add(float3 pointA, float3 pointB)
 {
-    float3 ret
-    ret.x = pointA.x + pointB.x;
-    ret.y = pointA.y + pointB.y;
-    ret.z = pointA.z + pointB.z;
-
-    return ret;
+    return make_float3(pointA.x + pointB.x, pointA.y + pointB.y, pointA.z + pointB.z);
 }
 
 __device__ float3 sub(float3 pointA, float3 pointB)
 {
-    float3 ret
-    ret.x = pointA.x - pointB.x;
-    ret.y = pointA.y - pointB.y;
-    ret.z = pointA.z - pointB.z;
-
-    return ret;
+    return make_float3(pointA.x - pointB.x, pointA.y - pointB.y, pointA.z - pointB.z);
 }
 
 __device__ float3 transformPoint3D(float3 point, const float* transform)
@@ -80,6 +70,21 @@ __device__ float length2D(float2 vec)
 }
 
 // Euclidean distance
+__device__ float norm(float3 v)
+{
+    return dot(v, v);
+}
+
+__device__ float distanceSquared(float3 pointA, float3 pointB)
+{
+    return norm(sub(pointA, pointB));
+}
+
+__device__ float distance(float3 pointA, float3 pointB)
+{
+    return sqrtf(distanceSquared(pointA, pointB));
+}
+
 __device__ float length(float3 v)
 {
     return sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);

@@ -62,11 +62,11 @@ __device__ float3 computeNormalRANSAC(unsigned short *depthImage, size_t pitchDe
         float3 p2 = points[i2];
         float3 p3 = points[i3];
 
-        float3 v1 = make_float3(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
-        float3 v2 = make_float3(p3.x - p1.x, p3.y - p1.y, p3.z - p1.z);
+        float3 v1 = sub(p2, p1);
+        float3 v2 = sub(p3, p1);
         float3 normal = normalize(cross3(v1, v2));
 
-        if (dot(normal, normal) < 1e-5f)
+        if (norm(normal) < 1e-5f)
             continue;
 
         // Count inliers: points whose normal agrees with this normal

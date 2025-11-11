@@ -17,11 +17,11 @@ __device__ float getDepthOfClosestCollisionOnSphere(float3 direction, float3 sph
     float c = dot(Q, Q) - radius * radius;
 
     float discriminant = b * b - 4.0 * a * c;
-    if (d < 0.0)
+    if (discriminant < 0.0)
     { // there are no intersections with the sphere, return
-        return INFINITY;
+        return 1.0f / 0.0f;;
     }
-    if (d == 0.0)
+    if (discriminant == 0.0)
     { // there's only one intersection with the sphere, since the two solutions are identical
         return -b / (2.0 * a);
     }
@@ -37,8 +37,8 @@ __device__ float getDepthOfClosestCollisionOnSphere(float3 direction, float3 sph
 __device__ float percentageAlongLine3D(float3 queryPoint, float3 pointOnLine, float3 lineDirection)
 {
     float3 delta = sub(queryPoint, pointOnLine);
-    float dot = dot(delta, lineDirection);
-    return dot / dot(lineDirection, lineDirection);
+    float dot_product = dot(delta, lineDirection);
+    return dot_product / dot(lineDirection, lineDirection);
 }
 
 __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 topCenter, float3 bottomCenter, float radius)
@@ -50,7 +50,7 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
 
     if (cylinderLength < 1e-6f)
     {
-        return INFINITY;
+        return 1.0f / 0.0f;;
     }
 
     float3 normalizedCylinderAxis = scale(1.0 / cylinderLength, cylinderAxis);
@@ -72,21 +72,21 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
                 dTop = nanf("");
         }
 
-        if (!isnanf(dTop))
+        if (!isnan(dTop))
             dIntersection1 = dTop;
 
         float dBottom = nanf("");
         { // Compute hte intersection with the bottom face using simplified line-plane intersection
-            float numerator = dot(bottom, normalizedCylinderAxis);
+            float numerator = dot(bottomCenter, normalizedCylinderAxis);
             dBottom = numerator / lineDirectionDotCylinderAxis;
             float3 intersection = scale(dBottom, direction);
             if (distanceSquared(intersection, bottomCenter) > radiusSquared)
                 dBottom = nanf("");
         }
 
-        if (!isnanf(dBottom))
+        if (!isnan(dBottom) || !isinf(dBottom))
         {
-            if (isnanf(dIntersection1))
+            if (isnan(dIntersection1))
             {
                 dIntersection1 = dBottom;
             }
@@ -103,25 +103,25 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
     }
 
     // If dIntersection2 is non NaN, that means two intersections were found, which is the max, so no need to check the cylinder part.
-    if (isnanf(dIntersection2))
+    if (isnan(dIntersection2))
     { // Compute the possible intersections with the cylinder part
         // Notation used: cylinder axis: pa + va * d; line equation = v * d
         // Need to solve quadratic equation of the form A * d^2 + B * d + C = 0;
 
         float3 cylinderPosition = scale(0.5, add(topCenter, bottomCenter));
         // (v, va) * va
-        float3 scaledAxis = scale(lineDirectionDotCylinderAxis, normalizedCylinderAxis);
+        float3 scaledAxis1 = scale(lineDirectionDotCylinderAxis, normalizedCylinderAxis);
         // Vector used for computing A and B: v - (v, va) * va
-        float3 A_vector = sub(direction, scaledAxis);
+        float3 A_vector = sub(direction, scaledAxis1);
         // Delta_p
         float3 deltaP = scale(-1.0f, cylinderPosition);
         // (Delta_p, va)
-        float3 scaledAxis = scale(dot(deltaP, normalizedCylinderAxis), normalizedCylinderAxis);
+        float3 scaledAxis2 = scale(dot(deltaP, normalizedCylinderAxis), normalizedCylinderAxis);
         // Vector used for computing B and C: Delta_p - (Delta_p, va) * va
-        float3 C_vector = sub(deltaP, scaledAxis);
+        float3 C_vector = sub(deltaP, scaledAxis2);
 
         float A = dot(A_vector, A_vector);
-        float B = 2.0f * dot(A, C);
+        float B = 2.0f * dot(A_vector, C_vector);
         float C = dot(C_vector, C_vector) - radiusSquared;
 
         float discriminant = B * B - 4.0f * A * C;
@@ -132,6 +132,7 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
             float delta = sqrtf(discriminant);
             float distance1 = (-B + delta) * oneOverTwoA;
             float distance2 = (-B - delta) * oneOverTwoA;
+            float halfLength = 0.5 * length(cylinderAxis);
 
             float3 intersection1 = scale(distance1, direction);
             if (fabsf(percentageAlongLine3D(intersection1, cylinderPosition, normalizedCylinderAxis)) > halfLength - 1e-12f)
@@ -139,9 +140,9 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
                 distance1 = nanf("");
             }
 
-            if (!isnanf(distance1))
+            if (!isnan(distance1) || !isinf(distance1))
             {
-                if (isnanf(dIntersection1) || fabsf(distance1 - dIntersection1) < 1e-12f)
+                if (isnan(dIntersection1) || fabsf(distance1 - dIntersection1) < 1e-12f)
                 {
                     dIntersection1 = distance1;
                 }
@@ -166,9 +167,9 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
                 distance2 = nanf("");
             }
 
-            if (!isnanf(distance2))
+            if (!isnan(distance2) || !isinf(distance2))
             {
-                if (isnanf(dIntersection2))
+                if (isnan(dIntersection2))
                 {
                     dIntersection1 = distance2;
                 }
@@ -185,9 +186,9 @@ __device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 t
         }
     }
 
-    if (isnanf(dIntersection1))
-        return INFINITY;
-    if (isnanf(dIntersection2))
+    if (isnan(dIntersection1))
+        return 1.0f / 0.0f;
+    if (isnan(dIntersection2))
         return dIntersection1;
 
     return fminf(dIntersection1, dIntersection2);
@@ -212,12 +213,6 @@ __device__ bool isPointPastCapsule(float3 point, float3 topCenter, float3 bottom
     float distanceToPoint = length(point);
 
     return distanceToPoint > distanceToCapsule - tolerance;
-}
-
-__device__ float distanceSquared(float3 pointA, float3 pointB)
-{
-    float3 diff = sub(point, topCenter);
-    return dot(diff, diff);
 }
 
 __device__ bool isPointInCapsule(float3 point,
