@@ -95,6 +95,7 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition> impleme
       logger.fromMessage(message.getRecentLogMessages());
    }
 
+   /** Update the node's state. Should not have side effects if called multiple times per tick. */
    public void update()
    {
       definition.checkModified();

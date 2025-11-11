@@ -30,7 +30,7 @@ public class LeafNodeState<D extends LeafNodeDefinition> extends BehaviorTreeNod
       failed = new CRDTStatusBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
    }
 
-   public void validateFields(List<LeafNodeState<?>> leaves)
+   public void validateDefinition(List<LeafNodeState<?>> leaves)
    {
       if (definition.getExecuteAfterIsInvalid())
       {

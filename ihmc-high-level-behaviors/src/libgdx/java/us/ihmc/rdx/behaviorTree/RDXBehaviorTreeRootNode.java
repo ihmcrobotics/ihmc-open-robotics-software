@@ -76,7 +76,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
 
       for (RDXLeafNode<?, ?> leaf : orderedLeaves)
       {
-         leaf.getState().validateFields(state.getOrderedLeaves());
+         leaf.getState().validateDefinition(state.getOrderedLeaves());
       }
    }
 

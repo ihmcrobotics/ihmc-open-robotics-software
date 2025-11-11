@@ -53,6 +53,26 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       // TODO: Tick children
    }
 
+   private void updateNodeListsRecursive(BehaviorTreeNodeExecutor<?, ?> node)
+   {
+      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
+      {
+         if (child instanceof LeafNodeExecutor<?, ?> leaf)
+         {
+            orderedLeaves.add(leaf);
+            if (leaf.getState().getIsExecuting())
+               currentlyExecutingLeaves.add(leaf);
+
+            if (child instanceof ActionNodeExecutor<?, ?> actionNode)
+               orderedActions.add(actionNode);
+         }
+         else if (child instanceof FallbackNodeExecutor fallbackNode)
+            fallbackNodes.add(fallbackNode);
+
+         updateNodeListsRecursive(child);
+      }
+   }
+
    @Override
    public void update()
    {
@@ -62,10 +82,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       orderedActions.clear();
       fallbackNodes.clear();
       currentlyExecutingLeaves.clear();
-      updateSubtree(this);
+      updateNodeListsRecursive(this);
 
       for (LeafNodeExecutor<?, ?> leaf : orderedLeaves)
-         leaf.getState().validateFields(state.getOrderedLeaves());
+         leaf.getState().validateDefinition(state.getOrderedLeaves());
 
       // Update concurrency ranks
       for (int i = 0; i < state.getOrderedLeaves().size(); i++)
@@ -224,26 +244,6 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       }
    }
 
-   private void updateSubtree(BehaviorTreeNodeExecutor<?, ?> node)
-   {
-      for (BehaviorTreeNodeExecutor<?, ?> child : node.getChildren())
-      {
-         if (child instanceof LeafNodeExecutor<?, ?> leaf)
-         {
-            orderedLeaves.add(leaf);
-            if (leaf.getState().getIsExecuting())
-               currentlyExecutingLeaves.add(leaf);
-
-            if (child instanceof ActionNodeExecutor<?, ?> actionNode)
-               orderedActions.add(actionNode);
-         }
-         else if (child instanceof FallbackNodeExecutor fallbackNode)
-            fallbackNodes.add(fallbackNode);
-
-         updateSubtree(child);
-      }
-   }
-
    private void executeNextLeaf()
    {
       LeafNodeExecutor<?, ?> leafToExecute = orderedLeaves.get(state.getExecutionNextIndex());
@@ -263,18 +263,18 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
 
       LeafNodeExecutor<?, ?> nextNodeToExecute = orderedLeaves.get(state.getExecutionNextIndex());
 
-      // If a fallback sequence is up next, block if any corresponding try leaves are executing
+      // If a fallback catch is up next, block if any corresponding try leaves are executing
       for (FallbackNodeExecutor fallbackNode : fallbackNodes)
-         if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback leaf is next
+         if (fallbackNode.getFallbackLeaves().indexOf(nextNodeToExecute) == 0) // The first fallback catch leaf is next
             for (LeafNodeExecutor<?, ?> tryLeaf : fallbackNode.getTryLeaves())
                if (tryLeaf.getState().getIsExecuting())
                   return false;
 
       if (!nextNodeToExecute.getState().getCanExecute())
       {
-         state.getLogger() .error("Cannot execute leaf: %s: %s\n%s".formatted(nextNodeToExecute.getClass().getSimpleName(),
-                                                                              nextNodeToExecute.getDefinition().getName(),
-                                                                              nextNodeToExecute.getCantExecuteMessage()));
+         state.getLogger().error("Cannot execute leaf: %s: %s\n%s".formatted(nextNodeToExecute.getClass().getSimpleName(),
+                                                                             nextNodeToExecute.getDefinition().getName(),
+                                                                             nextNodeToExecute.getCantExecuteMessage()));
          state.setAutomaticExecution(false);
          return false;
       }
