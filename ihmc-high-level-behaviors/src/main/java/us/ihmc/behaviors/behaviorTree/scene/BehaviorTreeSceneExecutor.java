@@ -43,7 +43,8 @@ public class BehaviorTreeSceneExecutor extends BehaviorTreeSceneState
 
       objects = (List) super.objects;
 
-      yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
+      if (yolo != null)
+         yolo.addDetectionConsumerCallback(instantDetectionQueue::add);
    }
 
    public void update()
