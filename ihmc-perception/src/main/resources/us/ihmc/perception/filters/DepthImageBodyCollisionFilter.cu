@@ -3,6 +3,49 @@
 
 using namespace PerceptionUtils;
 
+
+__device__ float getDepthOfClosestCollisionOnSphere(float3 direction, float3 sphereOrigin, float radius)
+{
+    // This follows the description here:
+    // https://math.stackexchange.com/questions/1939423/calculate-if-vector-intersects-sphere#:~:text=Does%20the%20bullet%20fly%20in,2)2=R2.
+    // The exception is that the point P is zero
+    float3 U = normalize(direction);
+    float3 Q = scale(-1.0, sphereOrigin);
+
+    float a = dot(U, U);
+    float b = 2.0 * dot(U, Q);
+    float c = dot(Q, Q) - radius * radius;
+
+    float discriminant = b * b - 4.0 * a * c;
+    float solution1 = -b + sqrtf(discriminant) / (2.0 * a);
+    float solution2 = -b + sqrtf(discriminant) / (2.0 * a);
+    if (d < 0.0)
+    { // there are no intersections with the sphere, return
+        return INFINITY;
+    }
+    if (d == 0.0)
+    { // there's only one intersection with the sphere, since the two solutions are identical
+        return -b / (2.0 * a);
+    }
+
+    // Two intersections, return the closest one.
+    float solution1 = -b + sqrtf(discriminant) / (2.0 * a);
+    float solution2 = -b - sqrtf(discriminant) / (2.0 * a);
+
+    return fminf(solution1, solution2);
+}
+
+__device__ float getDepthOfClosestCollisionOnCapsule(float3 point, float3 topCenter, float3 bottomCenter, float radius)
+{
+    // This can be thought of as the minimum distance between collisions with both spheres and the cylinder
+    float minDistanceToTop = getDepthOfClosestCollisionOnSphere(point, topCenter, radius);
+    float minDistanceToBottom = getDepthOfClosestCollisionOnSphere(point, bottomCenter, radius);
+
+    // TODO do the cylinder component.
+    float closestCollision = fminf(minDistanceToTop, minDistanceToBottom);
+    return closestCollision;
+}
+
 __device__ bool isPointInCapsule(float3 point,
                                  float3 topCenter,
                                  float3 bottomCenter,
