@@ -3,247 +3,121 @@
 
 using namespace PerceptionUtils;
 
-
-__device__ float getDepthOfClosestCollisionOnSphere(float3 direction, float3 sphereOrigin, float radius)
-{
-    // This follows the description here:
-    // https://math.stackexchange.com/questions/1939423/calculate-if-vector-intersects-sphere
-    // The difference is that the point P is zero. If we then normalize the direction, the parameter t is equivalent to the distance along the line.
-    float3 U = normalize(direction);
-    float3 Q = scale(-1.0, sphereOrigin);
-
-    float a = dot(U, U);
-    float b = 2.0 * dot(U, Q);
-    float c = dot(Q, Q) - radius * radius;
-
-    float discriminant = b * b - 4.0 * a * c;
-    if (discriminant < 0.0)
-    { // there are no intersections with the sphere, return
-        return 1.0f / 0.0f;;
-    }
-    if (discriminant == 0.0)
-    { // there's only one intersection with the sphere, since the two solutions are identical
-        return -b / (2.0 * a);
-    }
-
-    // Two intersections, return the closest one.
-    float delta = sqrtf(discriminant);
-    float solution1 = (-b + delta) / (2.0 * a);
-    float solution2 = (-b - delta) / (2.0 * a);
-
-    return fminf(solution1, solution2);
-}
-
-__device__ float percentageAlongLine3D(float3 queryPoint, float3 pointOnLine, float3 lineDirection)
-{
-    float3 delta = sub(queryPoint, pointOnLine);
-    float dot_product = dot(delta, lineDirection);
-    return dot_product / dot(lineDirection, lineDirection);
-}
-
-__device__ float getDepthOfClosestCollisionOnCylinder(float3 direction, float3 topCenter, float3 bottomCenter, float radius)
-{
-    float3 cylinderAxis = sub(bottomCenter, topCenter);
-    float cylinderLengthSq = dot(cylinderAxis, cylinderAxis);
-    float cylinderLength = sqrtf(cylinderLengthSq);
-    float radiusSquared = radius * radius;
-
-    if (cylinderLength < 1e-6f)
-    {
-        return 1.0f / 0.0f;;
-    }
-
-    float3 normalizedCylinderAxis = scale(1.0 / cylinderLength, cylinderAxis);
-    float3 normalizedDirection = normalize(direction);
-
-    float lineDirectionDotCylinderAxis = dot(normalizedDirection, normalizedCylinderAxis);
-
-    float dIntersection1 = nanf("");
-    float dIntersection2 = nanf("");
-
-    if (fabsf(lineDirectionDotCylinderAxis) > 1e-9f)
-    {
-        float dTop = nanf("");
-        {   // Compute the intersection with the top face using line-plane intersection
-            float numerator = dot(topCenter, normalizedCylinderAxis);
-            dTop = numerator / lineDirectionDotCylinderAxis;
-            float3 intersection = scale(dTop, direction);
-            if (distanceSquared(intersection, topCenter) > radiusSquared)
-                dTop = nanf("");
-        }
-
-        if (!isnan(dTop))
-            dIntersection1 = dTop;
-
-        float dBottom = nanf("");
-        { // Compute hte intersection with the bottom face using simplified line-plane intersection
-            float numerator = dot(bottomCenter, normalizedCylinderAxis);
-            dBottom = numerator / lineDirectionDotCylinderAxis;
-            float3 intersection = scale(dBottom, direction);
-            if (distanceSquared(intersection, bottomCenter) > radiusSquared)
-                dBottom = nanf("");
-        }
-
-        if (!isnan(dBottom) || !isinf(dBottom))
-        {
-            if (isnan(dIntersection1))
-            {
-                dIntersection1 = dBottom;
-            }
-            else if (dBottom < dIntersection1)
-            {
-                dIntersection2 = dIntersection1;
-                dIntersection1 = dBottom;
-            }
-            else
-            {
-                dIntersection2 = dBottom;
-            }
-        }
-    }
-
-    // If dIntersection2 is non NaN, that means two intersections were found, which is the max, so no need to check the cylinder part.
-    if (isnan(dIntersection2))
-    { // Compute the possible intersections with the cylinder part
-        // Notation used: cylinder axis: pa + va * d; line equation = v * d
-        // Need to solve quadratic equation of the form A * d^2 + B * d + C = 0;
-
-        float3 cylinderPosition = scale(0.5, add(topCenter, bottomCenter));
-        // (v, va) * va
-        float3 scaledAxis1 = scale(lineDirectionDotCylinderAxis, normalizedCylinderAxis);
-        // Vector used for computing A and B: v - (v, va) * va
-        float3 A_vector = sub(direction, scaledAxis1);
-        // Delta_p
-        float3 deltaP = scale(-1.0f, cylinderPosition);
-        // (Delta_p, va)
-        float3 scaledAxis2 = scale(dot(deltaP, normalizedCylinderAxis), normalizedCylinderAxis);
-        // Vector used for computing B and C: Delta_p - (Delta_p, va) * va
-        float3 C_vector = sub(deltaP, scaledAxis2);
-
-        float A = dot(A_vector, A_vector);
-        float B = 2.0f * dot(A_vector, C_vector);
-        float C = dot(C_vector, C_vector) - radiusSquared;
-
-        float discriminant = B * B - 4.0f * A * C;
-
-        if (discriminant >= 0.0f)
-        {
-            float oneOverTwoA = 0.5 / A;
-            float delta = sqrtf(discriminant);
-            float distance1 = (-B + delta) * oneOverTwoA;
-            float distance2 = (-B - delta) * oneOverTwoA;
-            float halfLength = 0.5 * length(cylinderAxis);
-
-            float3 intersection1 = scale(distance1, direction);
-            if (fabsf(percentageAlongLine3D(intersection1, cylinderPosition, normalizedCylinderAxis)) > halfLength - 1e-12f)
-            {
-                distance1 = nanf("");
-            }
-
-            if (!isnan(distance1) || !isinf(distance1))
-            {
-                if (isnan(dIntersection1) || fabsf(distance1 - dIntersection1) < 1e-12f)
-                {
-                    dIntersection1 = distance1;
-                }
-                else if (distance1 < dIntersection1)
-                {
-                    dIntersection2 = dIntersection1;
-                    dIntersection1 = distance1;
-                }
-                else
-                {
-                    dIntersection2 = distance1;
-                }
-            }
-
-            float3 intersection2 = scale(distance2, direction);
-            if (fabsf(percentageAlongLine3D(intersection2, cylinderPosition, normalizedCylinderAxis)) > halfLength - 1e-12f)
-            {
-                distance2 = nanf("");
-            }
-            else if (fabsf(distance1 - distance2) < 1e-12f)
-            {
-                distance2 = nanf("");
-            }
-
-            if (!isnan(distance2) || !isinf(distance2))
-            {
-                if (isnan(dIntersection2))
-                {
-                    dIntersection1 = distance2;
-                }
-                else if (distance2 < dIntersection1)
-                {
-                    dIntersection2 = dIntersection1;
-                    dIntersection1 = distance2;
-                }
-                else
-                {
-                    dIntersection2 = distance2;
-                }
-            }
-        }
-    }
-
-    if (isnan(dIntersection1))
-        return 1.0f / 0.0f;
-    if (isnan(dIntersection2))
-        return dIntersection1;
-
-    return fminf(dIntersection1, dIntersection2);
-}
-
-__device__ float getDepthOfClosestCollisionOnCapsule(float3 point, float3 topCenter, float3 bottomCenter, float radius)
-{
-    float intersectionTolerance = 0.03;
-    // This can be thought of as the minimum distance between collisions with both spheres and the cylinder
-    float minDistanceToTop = getDepthOfClosestCollisionOnSphere(point, topCenter, radius + intersectionTolerance);
-    float minDistanceToBottom = getDepthOfClosestCollisionOnSphere(point, bottomCenter, radius + intersectionTolerance);
-    float minDistanceToCylinder = getDepthOfClosestCollisionOnCylinder(point, topCenter, bottomCenter, radius + intersectionTolerance);
-
-    float closestCollision = fminf(fminf(minDistanceToTop, minDistanceToBottom), minDistanceToCylinder);
-    return closestCollision;
-}
-
-__device__ bool isPointPastCapsule(float3 point, float3 topCenter, float3 bottomCenter, float radius)
-{
-    float tolerance = 0.05;
-    float distanceToCapsule = getDepthOfClosestCollisionOnCapsule(point, topCenter, bottomCenter, radius);
-    float distanceToPoint = length(point);
-
-    return distanceToPoint > distanceToCapsule - tolerance;
-}
-
 __device__ bool isPointInCapsule(float3 point,
                                  float3 topCenter,
                                  float3 bottomCenter,
                                  float radius)
 {
     float tolerance = 0.1;
-    float3 capsuleAxis = sub(bottomCenter, topCenter);
+    float3 capsuleAxis;
+    capsuleAxis.x = bottomCenter.x - topCenter.x;
+    capsuleAxis.y = bottomCenter.y - topCenter.y;
+    capsuleAxis.z = bottomCenter.z - topCenter.z;
+
     float capsuleLengthSq = dot(capsuleAxis, capsuleAxis);
     float capsuleLength = sqrtf(capsuleLengthSq);
 
     if (capsuleLength < 1e-6f)
-    {   // The capsule isn't a capsule here. Here, it's just a sphere.
-        float distSq = distanceSquared(point, topCenter);
-        return distSq <= (radius + tolerance) * (radius + tolerance);
+    {
+        float3 diff;
+        diff.x = point.x - topCenter.x;
+        diff.y = point.y - topCenter.y;
+        diff.z = point.z - topCenter.z;
+        float distSq = dot(diff, diff);
+        return distSq <=  (radius + tolerance) * (radius + tolerance);
+
     }
 
-    // This computes the direction of the capsule axis
-    float3 normalizedAxis = scale(1.0 / capsuleLength, capsuleAxis);
-    float3 toPoint = sub(point, topCenter);
+    float3 normalizedAxis;
+    normalizedAxis.x = capsuleAxis.x / capsuleLength;
+    normalizedAxis.y = capsuleAxis.y / capsuleLength;
+    normalizedAxis.z = capsuleAxis.z / capsuleLength;
+
+    float3 toPoint;
+    toPoint.x = point.x - topCenter.x;
+    toPoint.y = point.y - topCenter.y;
+    toPoint.z = point.z - topCenter.z;
 
     float projection = dot(toPoint, normalizedAxis);
     projection = fmaxf(0.0f, fminf(projection, capsuleLength));
 
-    // = topCenter + projection * normalizedAxis;
-    float3 closestPointOnAxis = add(topCenter, scale(projection, normalizedAxis));
+    float3 closestPointOnAxis;
+    closestPointOnAxis.x = topCenter.x + projection * normalizedAxis.x;
+    closestPointOnAxis.y = topCenter.y + projection * normalizedAxis.y;
+    closestPointOnAxis.z = topCenter.z + projection * normalizedAxis.z;
 
-    float3 dist = sub(point, closestPointOnAxis);
+    float3 dist;
+    dist.x = point.x - closestPointOnAxis.x;
+    dist.y = point.y - closestPointOnAxis.y;
+    dist.z = point.z - closestPointOnAxis.z;
+
     float distSq = dot(dist, dist);
     return distSq <= (radius + tolerance) * (radius + tolerance);
+}
+
+__device__ bool rayIntersectsCapsule(float3 rayOrigin,
+                                     float3 rayDir,
+                                     float3 topCenter,
+                                     float3 bottomCenter,
+                                     float radius,
+                                     float &tHit)
+{
+    // ba = bottomCenter - topCenter
+    float3 ba;
+    ba.x = bottomCenter.x - topCenter.x;
+    ba.y = bottomCenter.y - topCenter.y;
+    ba.z = bottomCenter.z - topCenter.z;
+
+    // oa = rayOrigin - topCenter
+    float3 oa;
+    oa.x = rayOrigin.x - topCenter.x;
+    oa.y = rayOrigin.y - topCenter.y;
+    oa.z = rayOrigin.z - topCenter.z;
+
+    float baba = dot(ba, ba);
+    float bard = ba.x * rayDir.x + ba.y * rayDir.y + ba.z * rayDir.z;
+    float baoa = ba.x * oa.x + ba.y * oa.y + ba.z * oa.z;
+    float rdoa = rayDir.x * oa.x + rayDir.y * oa.y + rayDir.z * oa.z;
+    float oaoa = dot(oa, oa);
+
+    float a = baba - bard * bard;
+    float b = baba * rdoa - baoa * bard;
+    float c = baba * (oaoa - radius * radius) - baoa * baoa;
+    float h = b * b - a * c;
+    if (h < 0.0f)
+        return false;
+
+    h = sqrtf(h);
+    tHit = (-b - h) / a;
+
+    // Clamp hit along finite capsule
+    float y = baoa + tHit * bard;
+    if (y > 0.0f && y < baba)
+        return tHit > 0.0f;
+
+    // Check hemispherical caps
+    float3 oc;
+    if (y <= 0.0f)
+    {
+        oc.x = oa.x;
+        oc.y = oa.y;
+        oc.z = oa.z;
+    }
+    else
+    {
+        oc.x = rayOrigin.x - bottomCenter.x;
+        oc.y = rayOrigin.y - bottomCenter.y;
+        oc.z = rayOrigin.z - bottomCenter.z;
+    }
+
+    float b2 = rayDir.x * oc.x + rayDir.y * oc.y + rayDir.z * oc.z;
+    float c2 = (oc.x * oc.x + oc.y * oc.y + oc.z * oc.z) - radius * radius;
+    h = b2 * b2 - c2;
+    if (h < 0.0f)
+        return false;
+
+    tHit = -b2 - sqrtf(h);
+    return tHit > 0.0f;
 }
 
 extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
@@ -262,46 +136,52 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 {
     int x_index = blockIdx.x * blockDim.x + threadIdx.x;
     int y_index = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (x_index >= width || y_index >= height)
-        return;
+    if (x_index >= width || y_index >= height) return;
 
     unsigned short depthValue = *row(col(depthImage, x_index), depthImagePitch, y_index);
+    float depthInMeters = depthValue / 1000.0f;
 
-    // Convert from the depth value to the depth in meters.
-    float depthInMeters = depthValue/1000.0f;
-    // This is the collision point in the camera frame, using a projection model. The projection model has a focal length in x and y (fx and fy), and a center
-    // pixel of the camera (cx and cy), and then just uses like triangles to compute the y and z coordinates.
-    // The camera frame is defined as x forward and z up.
-    float3 depthFramePoint = make_float3(depthInMeters,
-                                          -(x_index - cx) / fx * depthInMeters,
-                                         -(y_index - cy) / fy * depthInMeters);
+    float3 rayOrigin = make_float3(0.0f, 0.0f, 0.0f);
+    float3 rayDir = normalize(make_float3(
+        depthInMeters,
+        -(x_index - cx) / fx * depthInMeters,
+        -(y_index - cy) / fy * depthInMeters));
 
-    unsigned short *matrixRow = (unsigned short *)((char *)collisionMaskMap + y_index * pitchCollisionMaskMap) + x_index;
-    *matrixRow = depthValue;
+    unsigned short *maskPtr = (unsigned short *)((char *)collisionMaskMap + y_index * pitchCollisionMaskMap) + x_index;
+    *maskPtr = depthValue;
 
     for (int i = 0; i < numCollidables; ++i)
     {
         int index = i * numberOfAttributes;
 
-        // Capsules are defined as a line segment that then has a fixed radius around it.
-        // get the top point of the line segment in the camera frame.
         float3 topCenter = make_float3(collidableGeometryPointer[index],
                                        collidableGeometryPointer[index + 1],
                                        collidableGeometryPointer[index + 2]);
-
-        // get the bottom point of the line segment in teh camera frame.
         float3 bottomCenter = make_float3(collidableGeometryPointer[index + 3],
                                           collidableGeometryPointer[index + 4],
                                           collidableGeometryPointer[index + 5]);
-
         float radius = collidableGeometryPointer[index + 6];
 
-        if (isPointInCapsule(depthFramePoint, topCenter, bottomCenter, radius) || isPointPastCapsule(depthFramePoint, topCenter, bottomCenter, radius))
+        // Direct collision
+        float3 point = make_float3(depthInMeters,
+                                   -(x_index - cx) / fx * depthInMeters,
+                                   -(y_index - cy) / fy * depthInMeters);
+        if (isPointInCapsule(point, topCenter, bottomCenter, radius))
         {
-            unsigned short *matrixRow = (unsigned short *)((char *)collisionMaskMap + y_index * pitchCollisionMaskMap) + x_index;
-            *matrixRow = 0;
-            return; // No need to check other capsules if a collision is found
+            *maskPtr = 0;
+            return;
+        }
+
+        // Ray intersection test
+        float tHit;
+        if (rayIntersectsCapsule(rayOrigin, rayDir, topCenter, bottomCenter, radius, tHit))
+        {
+            float hitDepth = tHit; // meters
+            if (hitDepth <= depthInMeters)
+            {
+                *maskPtr = 0;
+                return;
+            }
         }
     }
 }
