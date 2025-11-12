@@ -318,6 +318,7 @@ public class LinearMomentumRateControlModuleInput
    public void set(LinearMomentumRateControlModuleInput other)
    {
       omega0 = other.omega0;
+      isCoPDamped = other.isCoPDamped;
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       useAngularCapturePoint = other.useAngularCapturePoint;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
@@ -377,6 +378,8 @@ public class LinearMomentumRateControlModuleInput
          if (hasHeightCommand ^ other.hasHeightCommand)
             return false;
          if (usePelvisHeightCommand ^ other.usePelvisHeightCommand)
+            return false;
+         if (isCoPDamped ^ other.isCoPDamped)
             return false;
          if (!pelvisHeightControlCommand.equals(other.pelvisHeightControlCommand))
             return false;
