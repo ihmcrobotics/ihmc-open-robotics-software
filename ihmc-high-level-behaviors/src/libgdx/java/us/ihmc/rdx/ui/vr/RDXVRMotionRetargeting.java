@@ -220,11 +220,11 @@ public class RDXVRMotionRetargeting
 
             // Calculate normalized offset along the line connecting the feet
             double normalizedOffset = dotProduct / normSqFeetVector;
-            if (normalizedOffset >= 1.0)
-               normalizedOffset = 1.0;
-            else if (normalizedOffset <= 0.0)
+            if (normalizedOffset >= 0.6)
+               normalizedOffset = 0.6;
+            else if (normalizedOffset <= 0.4)
             {
-               normalizedOffset = 0.0;
+               normalizedOffset = 0.4;
             }
             // Filter value
 //            double filteredNormalizedOffset = 0.5 - 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
