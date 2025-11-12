@@ -15,7 +15,7 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "16a9131eac042100104f36a8b0fa4001057d2125dc362e26cf37f295383ab316";
+   		return "5eea15b7eb74540fde1266e6e9fbb23c848c86008d610051c5ab2841562ebb09";
    }
    
    @Override
@@ -56,6 +56,10 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += behavior_msgs.msg.dds.AbilityHandActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +77,8 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += behavior_msgs.msg.dds.AbilityHandActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += ((6) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       return current_alignment - initial_alignment;
    }
@@ -81,12 +87,34 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.AbilityHandActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      for(int i0 = 0; i0 < data.getCurrentFingerPositions().length; ++i0)
+      {
+        	cdr.write_type_5(data.getCurrentFingerPositions()[i0]);	
+      }
+
+      for(int i0 = 0; i0 < data.getDesiredFingerPositions().length; ++i0)
+      {
+        	cdr.write_type_5(data.getDesiredFingerPositions()[i0]);	
+      }
+
    }
 
    public static void read(behavior_msgs.msg.dds.AbilityHandActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.AbilityHandActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      for(int i0 = 0; i0 < data.getCurrentFingerPositions().length; ++i0)
+      {
+        	data.getCurrentFingerPositions()[i0] = cdr.read_type_5();
+        	
+      }
+      	
+      for(int i0 = 0; i0 < data.getDesiredFingerPositions().length; ++i0)
+      {
+        	data.getDesiredFingerPositions()[i0] = cdr.read_type_5();
+        	
+      }
+      	
 
    }
 
@@ -97,6 +125,8 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.AbilityHandActionDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_f("current_finger_positions", data.getCurrentFingerPositions());
+      ser.write_type_f("desired_finger_positions", data.getDesiredFingerPositions());
    }
 
    @Override
@@ -106,6 +136,8 @@ public class AbilityHandActionStateMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.AbilityHandActionDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.read_type_f("current_finger_positions", data.getCurrentFingerPositions());
+      ser.read_type_f("desired_finger_positions", data.getDesiredFingerPositions());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.AbilityHandActionStateMessage src, behavior_msgs.msg.dds.AbilityHandActionStateMessage dest)
