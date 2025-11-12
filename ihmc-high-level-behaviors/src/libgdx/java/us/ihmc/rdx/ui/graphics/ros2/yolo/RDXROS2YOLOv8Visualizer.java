@@ -35,14 +35,6 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
       demandYOLOv8D455 = new ROS2Heartbeat(ros2Node, PerceptionAPI.REQUEST_YOLO_REALSENSE);
 
       settings = new RDXROS2YOLOv8Settings(ros2Node, ros2ClockOffsetEstimator);
-
-      addActivenessChangeCallback(active ->
-      {
-         if (active && !settings.anyModelEnabled())
-            settings.enableAllModels();
-         else if (!active && settings.anyModelEnabled())
-            settings.disableAllModels();
-      });
    }
 
    @Override
@@ -61,12 +53,13 @@ public class RDXROS2YOLOv8Visualizer extends RDXROS2ImageMessageVisualizer
 
       ImGui.combo(labels.get("Sensor Selection"), selectedSensor, AVAILABLE_SENSORS);
 
-      settings.renderSettings();
+      if (ImGui.button(labels.get("Enable All")))
+         settings.enableAllModels();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Disable All")))
+         settings.disableAllModels();
 
-      boolean shouldBeActive = settings.anyModelEnabled();
-      setActive(shouldBeActive);
-      if (getPanel() != null)
-         getPanel().getIsShowing().set(shouldBeActive);
+      settings.renderSettings();
 
       super.renderImGuiWidgets();
    }

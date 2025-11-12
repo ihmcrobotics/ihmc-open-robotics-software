@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.LatestTimestampModifiable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
@@ -143,7 +144,18 @@ public abstract class BehaviorTreeSceneState
                object.fromMessage(objectMessage);
    }
 
-   protected abstract BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message);
+   protected abstract BehaviorTreeSceneObjectState buildObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType);
+
+   public BehaviorTreeSceneObjectState createObject(IsaacROSFoundationPoseObject objectType)
+   {
+      return buildObject(idSupplier.getAsLong(), crdtInfo, objectType);
+   }
+
+   protected BehaviorTreeSceneObjectState buildObject(BehaviorTreeSceneObjectStateMessage message)
+   {
+      IsaacROSFoundationPoseObject objectType = IsaacROSFoundationPoseObject.values[message.getObjectType()];
+      return buildObject(message.getId(), crdtInfo, objectType);
+   }
 
    public BehaviorTreeSceneObjectState getObject(String objectName)
    {

@@ -275,15 +275,23 @@ public class AvatarMultiThreadingFactory
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-         builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
-         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
+         builders.add(new RegistrySendBufferBuilder(rootRegistry,
+                                                    estimatorThread.get().getFullRobotModel().getRootBody(),
+                                                    estimatorThread.get().getSCS1YoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(),
+                                                    controllerThread.get().getSCS1YoGraphicsListRegistry(),
+                                                    controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
          {
-            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(),
+                                                       stepGeneratorThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       stepGeneratorThread.get().getSCS2YoGraphics()));
          }
          if (ikStreamingThread.hasValue())
          {
-            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
+            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(),
+                                                       ikStreamingThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       ikStreamingThread.get().getSCS2YoGraphics()));
          }
 
          builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
