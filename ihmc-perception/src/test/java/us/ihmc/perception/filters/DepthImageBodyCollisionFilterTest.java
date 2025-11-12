@@ -5,13 +5,16 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -112,7 +115,7 @@ class DepthImageBodyCollisionFilterTest
       // Check against the Euclid objects
       checkAgainstCPUCalculation(cameraFrame, depthValues, result, robotCollisionModel.getRobotCollidables(dummyBody), cameraIntrinsics, width);
 
-//      checkExpectedZeroValues(result, width, height);
+      checkExpectedZeroValues(result, width, height);
    }
 
    private static void checkAgainstCPUCalculation(ReferenceFrame cameraFrame, short[] depthValues, Mat resultToCheck,
@@ -134,13 +137,21 @@ class DepthImageBodyCollisionFilterTest
             for (int i = 0; i < depthValues.length; i++)
             {
                Line3DReadOnly line = new Line3D(new Point3D(), pointCloud[i]);
-               int intersections = sphereToCheck.intersectionWith(line, null, null);
+               Point3D intersection1 = new Point3D();
+               Point3D intersection2 = new Point3D();
+
+               int intersections = sphereToCheck.intersectionWith(line, intersection1, intersection2);
                if (intersections > 0)
                {
-                  expected[i] = 0;
+                  if (MathTools.intervalContains(EuclidGeometryTools.percentageAlongLineSegment3D(intersection1, new Point3D(), pointCloud[i]), 0.0, 1.0))
+                     expected[i] = 0;
+               }
+               if (intersections > 1)
+               {
+                  if (MathTools.intervalContains(EuclidGeometryTools.percentageAlongLineSegment3D(intersection2, new Point3D(), pointCloud[i]), 0.0, 1.0))
+                     expected[i] = 0;
                }
             }
-
          }
          else
          {
@@ -237,14 +248,14 @@ class DepthImageBodyCollisionFilterTest
 
       Mat test = new Mat();
       inputDepthImage.download(test);
-      PerceptionDebugTools.printMat("s", test, 1);
+      PerceptionDebugTools.printMat("sensed", test, 1);
 
       depthImageBodyCollisionFilter.process(inputDepthImage, outputFilteredDepthImage, cameraIntrinsics, cameraFrame);
 
       Mat result = new Mat();
       outputFilteredDepthImage.download(result);
 
-      PerceptionDebugTools.printMat("w", result, 1);
+      PerceptionDebugTools.printMat("filtered", result, 1);
 
       checkAgainstCPUCalculation(cameraFrame, depthValues, result, robotCollisionModel.getRobotCollidables(dummyBody), cameraIntrinsics, width);
 
