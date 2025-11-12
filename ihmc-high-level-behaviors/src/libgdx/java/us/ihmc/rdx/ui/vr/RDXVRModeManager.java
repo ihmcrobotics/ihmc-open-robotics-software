@@ -233,7 +233,6 @@ public class RDXVRModeManager
    public void update()
    {
       vrManager.getTeleporter().setBButtonEnabled(mode != RDXVRMode.WHOLE_BODY_IK_STREAMING);
-      interactablesEnabled.set(mode == RDXVRMode.INPUTS_DISABLED);
 
       switch (mode)
       {
@@ -332,23 +331,22 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get(RDXVRMode.INPUTS_DISABLED.getReadableName()), mode == RDXVRMode.INPUTS_DISABLED))
       {
          mode = RDXVRMode.INPUTS_DISABLED;
-         if (kinematicsStreaming != null)
-            kinematicsStreaming.setKSTEnabled(false);
+         disableKinematicsStreaming();
          footstepPlacer.reset();
          footstepStreaming.reset();
       }
       if (ImGui.radioButton(labels.get(RDXVRMode.FOOTSTEP_PLACEMENT.getReadableName()), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
-         if (kinematicsStreaming != null)
-            kinematicsStreaming.setKSTEnabled(false);
+         disableKinematicsStreaming();
+         interactablesEnabled.set(false);
       }
       if (ImGui.radioButton(labels.get(RDXVRMode.FOOTSTEP_STREAMING.getReadableName()), mode == RDXVRMode.FOOTSTEP_STREAMING))
       {
          mode = RDXVRMode.FOOTSTEP_STREAMING;
-         if (kinematicsStreaming != null)
-            kinematicsStreaming.setKSTEnabled(false);
+         disableKinematicsStreaming();
          footstepStreaming.reset();
+         interactablesEnabled.set(false);
       }
       if (kinematicsStreaming == null)
       {
@@ -359,6 +357,7 @@ public class RDXVRModeManager
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
          footstepPlacer.reset();
          footstepStreaming.reset();
+         interactablesEnabled.set(false);
       }
       if (kinematicsStreaming == null)
       {
@@ -367,10 +366,16 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get(RDXVRMode.JOYSTICK_WALKING.getReadableName()), mode == RDXVRMode.JOYSTICK_WALKING))
       {
          mode = RDXVRMode.JOYSTICK_WALKING;
-         if (kinematicsStreaming != null)
-            kinematicsStreaming.setKSTEnabled(false);
+         disableKinematicsStreaming();
          footstepPlacer.reset();
+         interactablesEnabled.set(false);
       }
+   }
+
+   private void disableKinematicsStreaming()
+   {
+      if (kinematicsStreaming != null)
+         kinematicsStreaming.setKSTEnabled(false);
    }
 
    private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
