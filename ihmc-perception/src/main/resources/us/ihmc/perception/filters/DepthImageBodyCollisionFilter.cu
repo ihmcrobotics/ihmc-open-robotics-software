@@ -117,8 +117,8 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
         sphereCheck = sub(rayOrigin, bottomCenter);
     }
 
-    float raySphereIntersection =  dot(rayDirection, sphereCheck);//rayDirection.x * sphereCheck.x + rayDirection.y * sphereCheck.y + rayDirection.z * sphereCheck.z;
-    float sphereQuadraticConstant = (dot(sphereCheck, sphereCheck)) - radius * radius;
+    float raySphereIntersection =  dot(rayDirection, sphereCheck);
+    float sphereQuadraticConstant = dot(sphereCheck, sphereCheck) - radius * radius;
     float quadraticCoeffDiscriminantSphere = raySphereIntersection * raySphereIntersection - sphereQuadraticConstant;
     if (quadraticCoeffDiscriminantSphere < 0.0f)
         return false;
