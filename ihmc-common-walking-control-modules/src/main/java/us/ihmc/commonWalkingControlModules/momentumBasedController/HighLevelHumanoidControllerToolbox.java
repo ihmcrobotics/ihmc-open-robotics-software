@@ -4,7 +4,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.FootShakiesEstimator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -47,6 +49,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
+import us.ihmc.robotics.filters.TimeWindowVelocityEstimator3D;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.yoVariables.euclid.filters.AlphaFilteredYoFrameVector3D;
@@ -68,8 +71,8 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.yoVariables.euclid.filters.FilteredFiniteDifferenceYoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.filters.AlphaBasedOnBreakFrequencyProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -130,11 +133,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final SideDependentList<ForceSensorDataReadOnly> wristForceSensors;
 
-   private final double minZForceForCoPControlScaling;
-
-   private final SideDependentList<YoFrameVector2D> yoCoPError;
-   private final SideDependentList<YoDouble> yoCoPErrorMagnitude = new SideDependentList<YoDouble>(new YoDouble("leftFootCoPErrorMagnitude", registry),
-                                                                                                   new YoDouble("rightFootCoPErrorMagnitude", registry));
+   private final FootShakiesEstimator footShakiesEstimator;
 
    private ContactPointVisualizer contactPointVisualizer;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -152,8 +151,10 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<FrameTuple2dArrayList<FramePoint2D>> previousFootContactPoints = new SideDependentList<>(createFramePoint2dArrayList(),
                                                                                                                             createFramePoint2dArrayList());
 
+   private final TimeWindowVelocityEstimator3D windowedCoMVelocityEstimate;
    protected final YoFramePoint3D yoCapturePoint = new YoFramePoint3D("capturePoint", worldFrame, registry);
    protected final YoFramePoint3D yoAngularCapturePoint = new YoFramePoint3D("angularCapturePoint", worldFrame, registry);
+   protected final YoFramePoint3D yoAngularCapturePointFromWindow = new YoFramePoint3D("angularCapturePointFromWindow", worldFrame, registry);
 
    private final YoDouble omega0 = new YoDouble("omega0", registry);
 
@@ -226,6 +227,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.yoTime = yoTime;
       this.omega0.set(omega0);
 
+      windowedCoMVelocityEstimate = new TimeWindowVelocityEstimator3D("windowCoMVelocityEstimate", worldFrame, 0.25, controlDT, registry);
+
       if (yoGraphicsListRegistry != null)
       {
          referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
@@ -288,15 +291,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          addUpdatable(contactPointVisualizer);
       }
 
-      yoCoPError = new SideDependentList<YoFrameVector2D>();
-
-      minZForceForCoPControlScaling = 0.20 * totalMass.getValue() * gravityZ;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         yoCoPError.put(robotSide,
-                        new YoFrameVector2D(robotSide.getCamelCaseNameForStartOfExpression() + "FootCoPError", feet.get(robotSide).getContactFrame(), registry));
-      }
+      footShakiesEstimator = new FootShakiesEstimator(feet, footSwitches, yoTime, totalMass, controlDT, gravityZ, registry);
 
       if (wristForceSensors == null)
       {
@@ -383,12 +378,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       yoAngularMomentumRate = new FilteredFiniteDifferenceYoFrameVector3D("AngularMomentumRate", "", momentumRateAlpha, controlDT, registry, yoAngularMomentum);
       yoLinearMomentumRate = new FilteredFiniteDifferenceYoFrameVector3D("LinearMomentumRate", "", momentumRateAlpha, controlDT, registry, yoLinearMomentum);
 
-      YoDouble angularMomentumAlpha = new YoDouble("filteredAngularMomentumAlpha", registry);
-      YoDouble linearMomentumAlpha = new YoDouble("filteredLinearMomentumAlpha", registry);
-      angularMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
-      linearMomentumAlpha.set(0.95); // switch to break frequency and move to walking parameters
-      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, angularMomentumAlpha, yoAngularMomentum);
-      filteredYoLinearMomentum = new AlphaFilteredYoFrameVector3D("filteredLinearMomentum", "", registry, linearMomentumAlpha, yoLinearMomentum);
+      YoDouble momentumBreakFrequency = new YoDouble("momentumBreakFrequency", registry);
+      // Move value out of hard coding
+      momentumBreakFrequency.set(20.0);
+      AlphaBasedOnBreakFrequencyProvider momentumAlpha = new AlphaBasedOnBreakFrequencyProvider(momentumBreakFrequency, controlDT);
+      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector3D("filteredAngularMomentum", "", registry, momentumAlpha, yoAngularMomentum);
+      filteredYoLinearMomentum = new AlphaFilteredYoFrameVector3D("filteredLinearMomentum", "", registry, momentumAlpha, yoLinearMomentum);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
@@ -509,9 +504,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       yoAngularCapturePoint.set(yoCapturePoint);
 
-      FrameVector3DReadOnly angularMomentum = angularExcursionCalculator.getAngularMomentum();
-      yoAngularCapturePoint.addX(1.0 / wmh * angularMomentum.getY());
-      yoAngularCapturePoint.addY(-1.0 / wmh * angularMomentum.getX());
+      yoAngularCapturePoint.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
+      yoAngularCapturePoint.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
+
+      windowedCoMVelocityEstimate.update(centerOfMassStateProvider.getCenterOfMassPosition());
+      CapturePointTools.computeCapturePointPosition(centerOfMassStateProvider.getCenterOfMassPosition(),
+                                                    windowedCoMVelocityEstimate,
+                                                    omega0.getDoubleValue(),
+                                                    yoAngularCapturePointFromWindow);
+      yoAngularCapturePointFromWindow.addX(1.0 / wmh * filteredYoAngularMomentum.getY());
+      yoAngularCapturePointFromWindow.addY(-1.0 / wmh * filteredYoAngularMomentum.getX());
    }
 
    @Override
@@ -575,91 +577,24 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return yoAngularCapturePoint;
    }
 
+   public FramePoint3DReadOnly getWindowBasedAngularCapturePoint()
+   {
+      return yoAngularCapturePointFromWindow;
+   }
+
    public void getAngularCapturePoint(FixedFramePoint3DBasics angularCapturePointToPack)
    {
       angularCapturePointToPack.setMatchingFrame(yoAngularCapturePoint);
    }
 
-   private final FramePoint2D copDesired = new FramePoint2D();
-   private final FramePoint2D copActual = new FramePoint2D();
-   private final FrameVector2D copError = new FrameVector2D();
-   private final Wrench footWrench = new Wrench();
-   private final FrameVector3D footForceVector = new FrameVector3D();
-
-   private final YoBoolean enableHighCoPDampingForShakies = new YoBoolean("enableHighCoPDampingForShakies", registry);
-   private final YoBoolean isCoPTrackingBad = new YoBoolean("isCoPTrackingBad", registry);
-   private final YoDouble highCoPDampingErrorTrigger = new YoDouble("highCoPDampingErrorTrigger", registry);
-   private final YoDouble highCoPDampingStartTime = new YoDouble("highCoPDampingStartTime", registry);
-   private final YoDouble highCoPDampingDuration = new YoDouble("highCoPDampingDuration", registry);
-
-   public boolean estimateIfHighCoPDampingNeeded(SideDependentList<FramePoint2D> desiredCoPs)
+   public FootShakiesEstimator getFootShakiesEstimator()
    {
-      if (!enableHighCoPDampingForShakies.getBooleanValue())
-         return false;
-
-      boolean atLeastOneFootWithBadCoPControl = false;
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
-         ReferenceFrame planeFrame = contactablePlaneBody.getContactFrame();
-
-         copDesired.setIncludingFrame(desiredCoPs.get(robotSide));
-
-         if (copDesired.containsNaN())
-         {
-            yoCoPError.get(robotSide).setToZero();
-            yoCoPErrorMagnitude.get(robotSide).set(0.0);
-         }
-
-         FootSwitchInterface footSwitch = footSwitches.get(robotSide);
-         footSwitch.getCenterOfPressure(copActual);
-
-         if (copActual.containsNaN())
-         {
-            yoCoPError.get(robotSide).setToZero();
-            yoCoPErrorMagnitude.get(robotSide).set(0.0);
-         }
-
-         copError.setToZero(planeFrame);
-         copError.sub(copDesired, copActual);
-         yoCoPError.get(robotSide).set(copError);
-         yoCoPErrorMagnitude.get(robotSide).set(copError.norm());
-
-         footSwitch.getMeasuredWrench(footWrench);
-         footForceVector.setIncludingFrame(footWrench.getLinearPart());
-         footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-         if (footForceVector.getZ() > minZForceForCoPControlScaling
-             && yoCoPErrorMagnitude.get(robotSide).getDoubleValue() > highCoPDampingErrorTrigger.getDoubleValue())
-         {
-            atLeastOneFootWithBadCoPControl = true;
-         }
-      }
-
-      isCoPTrackingBad.set(atLeastOneFootWithBadCoPControl);
-
-      boolean isCoPDampened = yoTime.getDoubleValue() - highCoPDampingStartTime.getDoubleValue() <= highCoPDampingDuration.getDoubleValue();
-
-      if (atLeastOneFootWithBadCoPControl && !isCoPDampened)
-      {
-         highCoPDampingStartTime.set(yoTime.getDoubleValue());
-         isCoPDampened = true;
-      }
-
-      return isCoPDampened;
+      return footShakiesEstimator;
    }
 
    public SpatialVectorReadOnly getEstimatedExternalHandWrench(RobotSide robotSide)
    {
       return handWrenchCalculators == null ? null : handWrenchCalculators.get(robotSide).getFilteredWrench();
-   }
-
-   public void setHighCoPDampingParameters(boolean enable, double duration, double copErrorThreshold)
-   {
-      enableHighCoPDampingForShakies.set(enable);
-      highCoPDampingDuration.set(duration);
-      highCoPDampingErrorTrigger.set(copErrorThreshold);
    }
 
    public void addUpdatable(Updatable updatable)

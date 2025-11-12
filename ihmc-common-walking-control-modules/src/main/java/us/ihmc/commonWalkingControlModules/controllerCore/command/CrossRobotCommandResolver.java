@@ -916,6 +916,7 @@ public class CrossRobotCommandResolver
    {
       out.setOmega0(in.getOmega0());
       out.setUseMomentumRecoveryMode(in.getUseMomentumRecoveryMode());
+      out.setIsCoPDamped(in.getIsCoPDamped());
       out.setUseAngularCapturePoint(in.getUseAngularCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePoint(), out.getDesiredCapturePoint());
       resolveFrameTuple2D(in.getDesiredCapturePointVelocity(), out.getDesiredCapturePointVelocity());
