@@ -6,9 +6,9 @@ using namespace PerceptionUtils;
 __device__ bool isPointInCapsule(float3 point,
                                  float3 topCenter,
                                  float3 bottomCenter,
-                                 float radius)
+                                 float radius,
+                                 float tolerance)
 {
-    float tolerance = 0.1;
     float3 capsuleAxis;
     capsuleAxis.x = bottomCenter.x - topCenter.x;
     capsuleAxis.y = bottomCenter.y - topCenter.y;
@@ -60,8 +60,28 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
                                      float3 topCenter,
                                      float3 bottomCenter,
                                      float radius,
+                                     float tolerance,
                                      float &distanceToIntersection)
 {
+    // This artificially inflates the size of the capsule by a certain amount.
+    radius = radius + tolerance;
+
+    // The equation for a cylinder with no end-caps is defined as
+    // (a x (p - b))^T (a x (p - b)) = r^2
+    // and
+    // dot(a, (p - b)) <= h
+    // where
+    // a is the cylinder-axis as a unit-vector (which is the vector from the top-center to the bottom-center)
+    // p is any arbitrary point on the cylinder's surface
+    // b is an end-point of the cylinder (we will assume the top end-point)
+    // h is the axis length.
+    //
+    // A line is defined as p = n t, where n is the unit-direction and t is the distance.
+    //
+    // We can solve for the intersection by inserting the line equation into the cylinder equation, yielding
+    // (a x (n t - b))^T (a x (n t - b)) = r^2
+    // and solving the quadratic equation for t.
+
     // Dot product for bottomCenter - topCenter
     float3 distanceBetweenCenters = sub(bottomCenter, topCenter);
 
@@ -72,7 +92,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     // Dot product between capsule's axis vector and the ray direction
     // If they point the same way value is large, if they are perpendicular value is 0 and if they are opposite value is negative
-    float axisProjection = dot(distanceBetweenCenters, rayDirection);
+    float centerAxisParallelToRay = dot(distanceBetweenCenters, rayDirection);
 
     // Projection of the ray origin vector onto the capsule's axis
     // If its greater than 0, then the ray origin is below the top center
@@ -84,14 +104,14 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     float magnitudeDistanceBetweenRayAndTopCenter = norm(distanceBetweenRayAndTopCenter);
 
-    float quadraticCoeffA = squaredLengthOfCapsuleAxis - axisProjection * axisProjection;
+    // This is effectively the portion of the center axis that is normal to the ray
+    float quadraticCoeffA = squaredLengthOfCapsuleAxis - centerAxisParallelToRay * centerAxisParallelToRay;
 
-    float quadraticCoeffB = squaredLengthOfCapsuleAxis * rayDirOriginProjection - rayVectorProjection * axisProjection;
+    float quadraticCoeffB = squaredLengthOfCapsuleAxis * rayDirOriginProjection - rayVectorProjection * centerAxisParallelToRay;
 
     float quadraticCoeffC = squaredLengthOfCapsuleAxis * (magnitudeDistanceBetweenRayAndTopCenter - radius * radius) - rayVectorProjection * rayVectorProjection;
 
     float quadraticCoeffDiscriminant = quadraticCoeffB * quadraticCoeffB - 4.0f * quadraticCoeffA * quadraticCoeffC;
-
 
     //no real solution
     if (quadraticCoeffDiscriminant < 0.0f)
@@ -103,7 +123,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     distanceToIntersection = (-quadraticCoeffB - quadraticCoeffDiscriminant) / (2.0 * quadraticCoeffA);
 
     // Clamp hit along finite capsule
-    float distanceFromTopCenterToIntersection = rayVectorProjection + distanceToIntersection * axisProjection;
+    float distanceFromTopCenterToIntersection = rayVectorProjection + distanceToIntersection * centerAxisParallelToRay;
     if (distanceFromTopCenterToIntersection > 0.0f && distanceFromTopCenterToIntersection < squaredLengthOfCapsuleAxis)
         return distanceToIntersection > 0.0f;
 
@@ -119,7 +139,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     }
 
     float raySphereIntersection =  dot(rayDirection, sphereCheck);
-    float sphereQuadraticConstant = dot(sphereCheck, sphereCheck) - radius * radius;
+    float sphereQuadraticConstant = norm(sphereCheck) - radius * radius;
     float quadraticCoeffDiscriminantSphere = raySphereIntersection * raySphereIntersection - sphereQuadraticConstant;
     if (quadraticCoeffDiscriminantSphere < 0.0f)
         return false;
@@ -136,6 +156,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
                                             float fy,
                                             float cx,
                                             float cy,
+                                            float collisionTolerance,
                                             unsigned short* collisionMaskMap,
                                             size_t pitchCollisionMaskMap,
                                             float* collidableGeometryPointer,
@@ -172,7 +193,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         // Direct collision
 
-        if (isPointInCapsule(point, topCenter, bottomCenter, radius))
+        if (isPointInCapsule(point, topCenter, bottomCenter, radius, collisionTolerance))
         {
             *maskPtr = 0;
             return;
@@ -180,7 +201,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         // Ray intersection test
         float tHit;
-        if (rayIntersectsCapsule(rayOrigin, rayDirection, topCenter, bottomCenter, radius, tHit))
+        if (rayIntersectsCapsule(rayOrigin, rayDirection, topCenter, bottomCenter, radius, collisionTolerance, tHit))
         {
             float hitDepth = tHit; // meters
             if (hitDepth <= depthInMeters)
