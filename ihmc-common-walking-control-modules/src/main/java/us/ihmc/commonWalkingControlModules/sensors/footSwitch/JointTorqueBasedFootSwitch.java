@@ -350,7 +350,7 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
          footJacobian = new GeometricJacobian(pelvis, foot, soleFrame);
          gravityTorqueCalculator = new InverseDynamicsCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(legJoints));
          gravityTorqueCalculator.setConsiderJointAccelerations(false);
-         gravityTorqueCalculator.setGravitionalAcceleration(GRAVITY_Z); // TODO Extract me
+         gravityTorqueCalculator.setGravitionalAcceleration(GRAVITY_Z);
 
          legJointGravityTaus = new YoDouble[6];
          for (int i = 0; i < legJointGravityTaus.length; i++)
