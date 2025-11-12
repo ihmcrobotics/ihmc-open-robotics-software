@@ -68,7 +68,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     // Dot product for rayOrigin - topCenter
     float3 distanceBetweenRayAndTopCenter = sub(rayOrigin, topCenter);
 
-    float squaredLengthOfCapsuleAxis = dot(distanceBetweenCenters, distanceBetweenCenters);
+    float squaredLengthOfCapsuleAxis = norm(distanceBetweenCenters);
 
     // Dot product between capsule's axis vector and the ray direction
     // If they point the same way value is large, if they are perpendicular value is 0 and if they are opposite value is negative
@@ -82,7 +82,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     // The dot product tells you how much the ray’s direction points toward or away from the capsule’s top center
     float rayDirOriginProjection = dot(rayDirection, distanceBetweenRayAndTopCenter);
 
-    float magnitudeDistanceBetweenRayAndTopCenter = dot(distanceBetweenRayAndTopCenter, distanceBetweenRayAndTopCenter);
+    float magnitudeDistanceBetweenRayAndTopCenter = norm(distanceBetweenRayAndTopCenter);
 
     float quadraticCoeffA = squaredLengthOfCapsuleAxis - axisProjection * axisProjection;
 
@@ -90,7 +90,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     float quadraticCoeffC = squaredLengthOfCapsuleAxis * (magnitudeDistanceBetweenRayAndTopCenter - radius * radius) - rayVectorProjection * rayVectorProjection;
 
-    float quadraticCoeffDiscriminant = quadraticCoeffB * quadraticCoeffB - quadraticCoeffA * quadraticCoeffC;
+    float quadraticCoeffDiscriminant = quadraticCoeffB * quadraticCoeffB - 4.0f * quadraticCoeffA * quadraticCoeffC;
 
 
     //no real solution
@@ -99,7 +99,8 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     quadraticCoeffDiscriminant = sqrtf(quadraticCoeffDiscriminant);
 
-    distanceToIntersection = (-quadraticCoeffB - quadraticCoeffDiscriminant) / quadraticCoeffA ;
+    // FIXME this only takes into account one of the possible solutions to the quadratic formula. We need to figure out what to do for the other one
+    distanceToIntersection = (-quadraticCoeffB - quadraticCoeffDiscriminant) / (2.0 * quadraticCoeffA);
 
     // Clamp hit along finite capsule
     float distanceFromTopCenterToIntersection = rayVectorProjection + distanceToIntersection * axisProjection;
@@ -149,10 +150,10 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
     float depthInMeters = depthValue / 1000.0f;
 
     float3 rayOrigin = make_float3(0.0f, 0.0f, 0.0f);
-    float3 rayDirection = normalize(make_float3(
-        depthInMeters,
-        -(x_index - cx) / fx * depthInMeters,
-        -(y_index - cy) / fy * depthInMeters));
+    float3 point = make_float3(depthInMeters,
+                               -(x_index - cx) / fx * depthInMeters,
+                               -(y_index - cy) / fy * depthInMeters);
+    float3 rayDirection = normalize(point);
 
     unsigned short *maskPtr = (unsigned short *)((char *)collisionMaskMap + y_index * pitchCollisionMaskMap) + x_index;
     *maskPtr = depthValue;
@@ -170,9 +171,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
         float radius = collidableGeometryPointer[index + 6];
 
         // Direct collision
-        float3 point = make_float3(depthInMeters,
-                                   -(x_index - cx) / fx * depthInMeters,
-                                   -(y_index - cy) / fy * depthInMeters);
+
         if (isPointInCapsule(point, topCenter, bottomCenter, radius))
         {
             *maskPtr = 0;
