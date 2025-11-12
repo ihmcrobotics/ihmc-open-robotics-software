@@ -136,35 +136,31 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       }
       ImGuiTools.previousWidgetTooltip("Go to next leaf");
 
+      ImGui.sameLine();
+      ImGui.text("Execute");
+      ImGui.sameLine();
+
+      automaticExecutionCheckbox.renderImGuiWidget();
+      if (automaticExecutionCheckbox.changed())
+         definition.modify();
+
+      ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
+
       boolean endOfSequence = state.getExecutionNextIndex() >= state.getOrderedLeaves().size();
-      ImGui.beginDisabled(endOfSequence); // Use disabled so stuff doesn't glitch around
+      ImGui.beginDisabled(endOfSequence || state.getAutomaticExecution());
       {
          ImGui.sameLine();
-         ImGui.text("Execute");
-         ImGui.sameLine();
 
-         automaticExecutionCheckbox.renderImGuiWidget();
-         if (automaticExecutionCheckbox.changed())
-            definition.modify();
-
-         ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
-
-         ImGui.beginDisabled(state.getAutomaticExecution());
+         boolean disableManuallyExecuteButton = state.getManualExecutionRequested();
+         ImGui.beginDisabled(disableManuallyExecuteButton);
          {
-            ImGui.sameLine();
-
-            boolean disableManuallyExecuteButton = state.getManualExecutionRequested();
-            ImGui.beginDisabled(disableManuallyExecuteButton);
+            if (ImGui.button(labels.get("Manually")))
             {
-               if (ImGui.button(labels.get("Manually")))
-               {
-                  state.setManualExecutionRequested();
-               }
+               state.setManualExecutionRequested();
             }
-            ImGui.endDisabled();
-            ImGuiTools.previousWidgetTooltip("Executes the next leaf.");
          }
          ImGui.endDisabled();
+         ImGuiTools.previousWidgetTooltip("Executes the next leaf.");
       }
       ImGui.endDisabled();
       if (ImGui.button(labels.get("Reset Failures")))
