@@ -39,7 +39,7 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    private final YoInteger stepsInQueue = new YoInteger("stepsInQueue", registry);
    private final YoInteger stepsConsideringForRecovery = new YoInteger("stepsConsideringForRecovery", registry);
-   private final IntegerParameter maxStepsToConsider = new IntegerParameter("maxStepsToConsiderForRecovery", registry, 10);
+   private final IntegerParameter maxStepsToConsider;
 
    private final FrameConvexPolygon2D multiStepRegion = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D regionToExpand = new FrameConvexPolygon2D();
@@ -55,18 +55,22 @@ public class MultiStepCaptureRegionCalculator implements SCS2YoGraphicHolder
 
    public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
+                                           int stepsToUse,
                                            YoRegistry parentRegistry)
    {
-      this(reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
+      this(reachabilityConstraint, useCrossOverSteps, stepsToUse, parentRegistry, null);
    }
 
    public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                            BooleanProvider useCrossOverSteps,
+                                           int stepsToUse,
                                            YoRegistry parentRegistry,
                                            YoGraphicsListRegistry graphicsListRegistry)
    {
       this.reachabilityConstraint = reachabilityConstraint;
       this.useCrossOverSteps = useCrossOverSteps;
+
+      maxStepsToConsider = new IntegerParameter("maxStepsToConsiderForRecovery", registry, stepsToUse);
 
       if (graphicsListRegistry != null)
       {

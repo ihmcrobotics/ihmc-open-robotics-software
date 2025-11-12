@@ -1937,6 +1937,7 @@ public class CrossRobotCommandRandomTools
       next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
+      next.setIsCoPDamped(random.nextBoolean());
       next.setUseAngularCapturePoint(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));

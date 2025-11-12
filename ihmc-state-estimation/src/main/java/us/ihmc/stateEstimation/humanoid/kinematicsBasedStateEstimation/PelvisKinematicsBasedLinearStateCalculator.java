@@ -435,6 +435,8 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
          rootJointPosition.scaleAdd(scaleFactor, rootJointPositionPerFoot, rootJointPosition);
 
+         // Based on the previous estimate of the root joint velocity, we computed the foot velocity, which is located at the center of pressure. However, if
+         // we assume that the center of pressure isn't moving, we should subtract this velocity from the kinematics to make the velocity zero at that point.
          rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaVelocityUpdate, footVelocityInWorld, rootJointLinearVelocity);
       }
 

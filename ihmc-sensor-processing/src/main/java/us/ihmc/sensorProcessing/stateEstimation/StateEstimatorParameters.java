@@ -209,6 +209,11 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return getForceInPercentOfWeightThresholdToTrustFoot();
    }
 
+   public double getAngularVelocityToNotTrustFoot()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
 
    public boolean createFootWrenchSensorDriftEstimator()
