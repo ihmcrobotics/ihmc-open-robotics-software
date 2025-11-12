@@ -94,7 +94,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     float quadraticCoeffB = squaredLengthOfCapsuleAxis * rayDirOriginProjection - rayVectorProjection * axisProjection;
 
-    float quadraticCoeffC = squaredLengthOfCapsuleAxis *  magnitudeDistanceBetweenRayAndTopCenter - radius * radius) - rayVectorProjection * rayVectorProjection;
+    float quadraticCoeffC = squaredLengthOfCapsuleAxis * (magnitudeDistanceBetweenRayAndTopCenter - radius * radius) - rayVectorProjection * rayVectorProjection;
 
     float quadraticCoeffDiscriminant = quadraticCoeffB * quadraticCoeffB - quadraticCoeffA * quadraticCoeffC;
 
@@ -129,7 +129,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
 
     float raySphereIntersection = rayDirection.x * sphereCheck.x + rayDirection.y * sphereCheck.y + rayDirection.z * sphereCheck.z;
     float sphereQuadraticConstant = (sphereCheck.x * sphereCheck.x + sphereCheck.y * sphereCheck.y + sphereCheck.z * sphereCheck.z) - radius * radius;
-    quadraticCoeffDiscriminantSphere = raySphereIntersection * raySphereIntersection - sphereQuadraticConstant;
+    float quadraticCoeffDiscriminantSphere = raySphereIntersection * raySphereIntersection - sphereQuadraticConstant;
     if (quadraticCoeffDiscriminantSphere < 0.0f)
         return false;
 
@@ -158,7 +158,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
     unsigned short depthValue = *row(col(depthImage, x_index), depthImagePitch, y_index);
     float depthInMeters = depthValue / 1000.0f;
 
-    float3 rayOrigin = make_float3(0.0f, -0.045f, 0.0f);
+    float3 rayOrigin = make_float3(0.0f, 0.0f, 0.0f);
     float3 rayDirection = normalize(make_float3(
         depthInMeters,
         -(x_index - cx) / fx * depthInMeters,
