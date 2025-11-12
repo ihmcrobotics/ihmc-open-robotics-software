@@ -481,9 +481,9 @@ public class JointTorqueBasedFootSwitch implements FootSwitchInterface
 //       hasFootHitGround.set(isPastForceThreshold.getValue() && horizontalVelocity.getValue() < horizontalVelocityThreshold.getValue()
 //                              && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
          boolean validCoP = isPastCoPThresholdFiltered.getValue();
-         boolean hitGround = (isPastForceThresholdLowFiltered.getValue() && validCoP) || isPastForceThresholdHigh.getValue();
+         boolean hitGroundLow = (isPastForceThresholdLowFiltered.getValue() && validCoP && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue()) ;
 
-         hasFootHitGround.set(hitGround && Math.abs(verticalVelocity.getValue()) < verticalVelocityThreshold.getValue());
+         hasFootHitGround.set(hitGroundLow || isPastForceThresholdHigh.getValue());
          hasFootHitGroundFiltered.update();
       }
 
