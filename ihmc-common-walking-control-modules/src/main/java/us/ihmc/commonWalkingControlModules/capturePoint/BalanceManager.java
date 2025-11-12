@@ -83,8 +83,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private static final boolean viewCoPHistory = false;
    private static final FrameVector2D zeroVector = new FrameVector2D();
 
-   private enum CapturePointToUse {CAPTURE_POINT, ANGULAR_CAPTURE_POINT, WINDOW_ANGULAR_CAPTURE_POINT;}
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ICPControlPlane icpControlPlane;
@@ -112,7 +110,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
 
    private final YoBoolean useAngularCapturePoint = new YoBoolean("useAngularCapturePoint", registry);
-   private final YoEnum<CapturePointToUse> capturePointToUseForAdjustment = new YoEnum<>("capturePointToUseForAdjustment", registry, CapturePointToUse.class);
    private final YoBoolean isUsingPrecomputedTrajectory = new YoBoolean("isUsingPrecomputedTrajectory", registry);
    private final FramePoint2D previousDesiredCapturePointPrecomputed = new FramePoint2D();
    private final FrameVector2D previousDesiredCapturePointVelocityPrecomputed = new FrameVector2D();
@@ -248,10 +245,6 @@ public class BalanceManager implements SCS2YoGraphicHolder
       yoTime = controllerToolbox.getYoTime();
 
       useAngularCapturePoint.set(walkingControllerParameters.useAngularCapturePointForFeedback());
-      if (walkingControllerParameters.useAngularCapturePointForFeedback())
-         capturePointToUseForAdjustment.set(CapturePointToUse.ANGULAR_CAPTURE_POINT);
-      else
-         capturePointToUseForAdjustment.set(CapturePointToUse.CAPTURE_POINT);
 
       contactStateBasedPredicate = robotSide -> controllerToolbox.getFootContactState(robotSide).inContact();
       contactStateManager = new ContactStateManager(yoTime, walkingControllerParameters, registry);
@@ -486,12 +479,10 @@ public class BalanceManager implements SCS2YoGraphicHolder
 
       double omega0 = controllerToolbox.getOmega0();
 
-      switch (capturePointToUseForAdjustment.getEnumValue())
-      {
-         case CAPTURE_POINT -> capturePoint2d.set(controllerToolbox.getCapturePoint());
-         case ANGULAR_CAPTURE_POINT -> capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
-         case WINDOW_ANGULAR_CAPTURE_POINT -> capturePoint2d.set(controllerToolbox.getWindowBasedAngularCapturePoint());
-      }
+      if (useAngularCapturePoint.getValue())
+         capturePoint2d.set(controllerToolbox.getAngularCapturePoint());
+      else
+         capturePoint2d.set(controllerToolbox.getCapturePoint());
       icpControlPlane.setOmega0(omega0);
       icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
 
