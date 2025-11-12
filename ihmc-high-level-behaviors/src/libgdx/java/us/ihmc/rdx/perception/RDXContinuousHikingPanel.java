@@ -158,12 +158,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
-      ActiveMappingProcessParameters processParameters = new ActiveMappingProcessParameters();
-      RDXStoredPropertySetTuner processParametersPanel = new RDXStoredPropertySetTuner("Process Parameters Panel (CH)");
-      createParametersPanel(processParameters,
-                            processParametersPanel,
-                            hostStoredPropertySets,
-                            ContinuousHikingAPI.PROCESS_PARAMETERS);
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,

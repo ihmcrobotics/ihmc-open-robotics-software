@@ -25,7 +25,6 @@ import java.util.List;
  */
 public class GpuMappingManager
 {
-   private final ActiveMappingProcessParameters processParameters;
    private final HeightMapLogger heightMapLogger;
 
    private final ReferenceFrame heightMapCenter;
@@ -48,8 +47,9 @@ public class GpuMappingManager
 
    // These fields are created globally cause it takes compute time to create it in the update loop
    private final HeightMapMessage heightMapMessage;
+   private long heightMapSequenceId = 0;
    private final TerrainMapMessage terrainMapMessage;
-   private long sequenceId = 0;
+   private long terrainMapSequenceId = 0;
 
    public GpuMappingManager(String robotName,
                             ROS2Node ros2Node,
@@ -57,12 +57,10 @@ public class GpuMappingManager
                             ReferenceFrame rightFootSoleFrame,
                             ReferenceFrame heightMapCenter,
                             ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
-                            ActiveMappingProcessParameters processParameters,
                             HeightMapParameters heightMapParameters,
                             TerrainMapParameters terrainMapParameters)
    {
       this.heightMapCenter = heightMapCenter;
-      this.processParameters = processParameters;
       this.heightMapParameters = heightMapParameters;
 
       footSoleFrames.add(leftFootSoleFrame);
@@ -87,7 +85,10 @@ public class GpuMappingManager
       controllerHeightMapMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(HeightMapMessage.class, robotName));
    }
 
-   public void updateAndPublish(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
+   /**
+    * Update the Height Map with the latest depth image from the sensor
+    */
+   public void update(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsics, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
       // Option that gets triggered from a message sent from the user
       if (lowerHeightMapBackdropRequested.poll())
@@ -112,53 +113,6 @@ public class GpuMappingManager
          }
       }
 
-      updateInternal(latestDepthImage, depthIntrinsics, cameraFrame, cameraZUpFrame);
-
-      // Publish the height map to anyone who is subscribing
-      Mat hostGlobalHeightMap = new Mat();
-      // Don't destroy this mat as its being used in the extractor till that finish's
-      GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
-      deviceGlobalHeightMap.download(hostGlobalHeightMap);
-
-      if (processParameters.getPublishHeightMap())
-         publishHeightMap(heightMapExtractor.getHeightMapData());
-
-      if (processParameters.getPublishTerrainMap())
-         publishTerrainMapData(terrainMapExtractor.getTerrainMapData());
-
-      if (heightMapParameters.getEnableChunkedMap())
-      {
-         chunkedMapManager.updateAndPublish(hostGlobalHeightMap, heightMapCenterPoint);
-      }
-
-      hostGlobalHeightMap.close();
-   }
-
-    private void publishTerrainMapData(TerrainMapData terrainMapData)
-    {
-        TerrainMapMessageTools.toMessage(terrainMapData, terrainMapMessage);
-        terrainMapMessage.setSequenceId(sequenceId++);
-
-        terrainMapMessagePublisher.publish(terrainMapMessage);
-    }
-
-   private void publishHeightMap(HeightMapData heightMapData)
-   {
-      HeightMapMessageTools.toMessage(heightMapData, heightMapMessage);
-
-//      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
-
-      sequenceId++;
-      heightMapMessage.setSequenceId(sequenceId);
-      heightMapMessagePublisher.publish(heightMapMessage);
-      controllerHeightMapMessagePublisher.publish(heightMapMessage);
-   }
-
-   /**
-    * Update the Height Map with the latest depth image from the sensor
-    */
-   private void updateInternal(GpuMat latestDepthImage, CameraIntrinsics depthIntrinsicsCopy, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
-   {
       // Update the sensor origin here with the latest reference frame
       // We are deep coping the frames here to avoid a data race condition, still possible but very small chance
       RigidBodyTransform heightMapFrameToWorldFrame = new RigidBodyTransform(heightMapCenter.getTransformToWorldFrame());
@@ -181,27 +135,58 @@ public class GpuMappingManager
          driftOffsetInZ = rapidHeightMapDriftOffset.getUpdateDriftOffset();
       }
 
-      if (processParameters.getRunOnboardKernels())
-      {
-         // Perform update, this actually creates the height map
-         heightMapExtractor.update(latestDepthImage,
-                                   depthIntrinsicsCopy,
-                                   sensorToWorld,
-                                   sensorToGround,
-                                   groundToWorld,
-                                   driftOffsetInZ,
-                                   heightMapCenterOrigin,
-                                   computeFootHeight());
-      }
+      // Perform update, this actually creates the height map
+      heightMapExtractor.update(latestDepthImage,
+                                depthIntrinsics,
+                                sensorToWorld,
+                                sensorToGround,
+                                groundToWorld,
+                                driftOffsetInZ,
+                                heightMapCenterOrigin,
+                                computeFootHeight());
 
-      if (processParameters.getRunOnboardKernels())
-         terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
+      terrainMapExtractor.update(heightMapExtractor.getHeightMap(), heightMapCenterPoint);
 
       // The center of this map should be centered in the world grid
       // The sensor origin isn't always at the center of a grid point, in fact it's often not in the center
       double currentCellX = (int) Math.round(heightMapCenterOrigin.getX32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       double currentCellY = (int) Math.round(heightMapCenterOrigin.getY32() / heightMapParameters.getCellSize()) * heightMapParameters.getCellSize();
       heightMapCenterPoint.set(currentCellX, currentCellY, 0.0);
+   }
+
+   public void publishHeightMap()
+   {
+      HeightMapMessageTools.toMessage(heightMapExtractor.getHeightMapData(), heightMapMessage);
+
+      //      heightMapLogger.logHeightMap(globalHeightMap, heightMapCenterPoint);
+
+      heightMapMessage.setSequenceId(heightMapSequenceId++);
+      heightMapMessagePublisher.publish(heightMapMessage);
+      controllerHeightMapMessagePublisher.publish(heightMapMessage);
+   }
+
+    public void publishTerrainMap()
+    {
+        TerrainMapMessageTools.toMessage(terrainMapExtractor.getTerrainMapData(), terrainMapMessage);
+        terrainMapMessage.setSequenceId(terrainMapSequenceId++);
+
+        terrainMapMessagePublisher.publish(terrainMapMessage);
+    }
+
+   public void publishChunkedMap()
+   {
+      if (heightMapParameters.getEnableChunkedMap())
+      {
+         // Publish the height map to anyone who is subscribing
+         Mat hostGlobalHeightMap = new Mat();
+         // Don't destroy this mat as its being used in the extractor till that finish's
+         GpuMat deviceGlobalHeightMap = heightMapExtractor.getHeightMap();
+         deviceGlobalHeightMap.download(hostGlobalHeightMap);
+
+         chunkedMapManager.updateAndPublish(hostGlobalHeightMap, heightMapCenterPoint);
+
+         hostGlobalHeightMap.close();
+      }
    }
 
    public HeightMapData getLatestHeightMapData()
