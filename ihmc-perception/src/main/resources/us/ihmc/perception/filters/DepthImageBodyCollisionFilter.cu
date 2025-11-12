@@ -141,7 +141,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
     unsigned short depthValue = *row(col(depthImage, x_index), depthImagePitch, y_index);
     float depthInMeters = depthValue / 1000.0f;
 
-    float3 rayOrigin = make_float3(0.0f, 0.0f, 0.0f);
+    float3 rayOrigin = make_float3(0.0f, -0.045f, 0.0f);
     float3 rayDir = normalize(make_float3(
         depthInMeters,
         -(x_index - cx) / fx * depthInMeters,

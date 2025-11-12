@@ -1,7 +1,6 @@
 package us.ihmc.openAlexander.parameters.model;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -76,7 +75,7 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
          if (pelvis != null)
          {
             MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
-            FrameCapsule3D pelvisShape = new FrameCapsule3D(pelvisFrame, 0.03, 0.135);
+            FrameCapsule3D pelvisShape = new FrameCapsule3D(pelvisFrame, 0.03, 0.14);
             pelvisShape.getAxis().set(Axis3D.Z);
             pelvisShape.getPosition().set(-0.06, 0.0, -0.02);
             collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShape));
@@ -97,27 +96,17 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
             RigidBodyBasics thigh = hipPitchJoint.getSuccessor();
             ReferenceFrame thighFrame = hipPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D thighShapeTop = new FrameCapsule3D(thighFrame, 0.12, 0.09);
-            thighShapeTop.getPosition().set(0.0, robotSide.negateIfRightSide(0.04), -0.05);
-            thighShapeTop.getAxis().set(Axis3D.Z);
-            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeTop));
-
-            FrameCapsule3D thighShapeMid = new FrameCapsule3D(thighFrame, 0.085, 0.11);
-            thighShapeMid.getPosition().set(0.03, robotSide.negateIfRightSide(0.03), -0.12);
-            thighShapeMid.getAxis().set(Axis3D.Z);
-            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeMid));
-
-            FrameCapsule3D thighShapeBottom = new FrameCapsule3D(thighFrame, 0.085, 0.10);
-            thighShapeBottom.getPosition().set(0.05, robotSide.negateIfRightSide(0.02), -0.23);
-            thighShapeBottom.getAxis().set(Axis3D.Z);
-            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBottom));
+            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.24, 0.12);
+            thighShape.getPosition().set(0.03, robotSide.negateIfRightSide(0.03), -0.14);
+            thighShape.getAxis().set(-0.18, 0.0, 1.0);
+            collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShape));
 
             JointBasics shinPitchJoint = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem);
             RigidBodyBasics shin = shinPitchJoint.getSuccessor();
             ReferenceFrame shinFrame = shinPitchJoint.getFrameAfterJoint();
 
-            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.38, 0.1);
-            shinShape.getPosition().set(0.015, 0.0, -0.2);
+            FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.40, 0.11);
+            shinShape.getPosition().set(0.01, 0.0, -0.18);
             shinShape.getAxis().set(0.15, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
 
@@ -129,7 +118,8 @@ public class AlexanderFullyCoveredKinematicsCollisionModel implements RobotColli
                   RigidBodyBasics foot = ankleRoll.getSuccessor();
 
                   // Using a  box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-                  FrameBox3D footShape = new FrameBox3D(ankleRollFrame, 0.253, 0.125, 0.08);
+                  FrameCapsule3D footShape = new FrameCapsule3D(ankleRollFrame, 0.125, 0.08);
+                  footShape.getAxis().set(Axis3D.X);
                   footShape.getPosition().set(0.053, 0.0, -0.048);
                   collidables.add(new Collidable(foot, collisionMask, collisionGroup, footShape));
                }
