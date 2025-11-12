@@ -62,31 +62,25 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
                                      float radius,
                                      float &distanceToIntersection)
 {
-    //distanceBetweenCenters = bottomCenter - topCenter
-    float3 distanceBetweenCenters;
-    distanceBetweenCenters.x = bottomCenter.x - topCenter.x;
-    distanceBetweenCenters.y = bottomCenter.y - topCenter.y;
-    distanceBetweenCenters.z = bottomCenter.z - topCenter.z;
+    // Dot product for bottomCenter - topCenter
+    float3 distanceBetweenCenters = sub(bottomCenter, topCenter);
 
-    //distanceBetweenRayAndTopCenter = rayOrigin - topCenter
-    float3 distanceBetweenRayAndTopCenter;
-    distanceBetweenRayAndTopCenter.x = rayOrigin.x - topCenter.x;
-    distanceBetweenRayAndTopCenter.y = rayOrigin.y - topCenter.y;
-    distanceBetweenRayAndTopCenter.z = rayOrigin.z - topCenter.z;
+    // Dot product for rayOrigin - topCenter
+    float3 distanceBetweenRayAndTopCenter = sub(rayOrigin, topCenter);
 
     float squaredLengthOfCapsuleAxis = dot(distanceBetweenCenters, distanceBetweenCenters);
 
-    //dot product between capsule's axis vector and the ray direction
-    //if they point the same way value is large, if they are perpendicular value is 0 and if they are opposite value is negative
-    float axisProjection = distanceBetweenCenters.x * rayDirection.x + distanceBetweenCenters.y * rayDirection.y + distanceBetweenCenters.z * rayDirection.z;
+    // Dot product between capsule's axis vector and the ray direction
+    // If they point the same way value is large, if they are perpendicular value is 0 and if they are opposite value is negative
+    float axisProjection = dot(distanceBetweenCenters, rayDirection);
 
-    //projection of the ray origin vector onto the capsule's axis
-    //if its greater than 0, then the ray origin is below the top center
-    //if its less than 0, then ray origin is above the top center
-    float rayVectorProjection = distanceBetweenCenters.x * distanceBetweenRayAndTopCenter.x + distanceBetweenCenters.y * distanceBetweenRayAndTopCenter.y + distanceBetweenCenters.z * distanceBetweenRayAndTopCenter.z;
+    // Projection of the ray origin vector onto the capsule's axis
+    // If its greater than 0, then the ray origin is below the top center
+    // If its less than 0, then ray origin is above the top center
+    float rayVectorProjection = dot(distanceBetweenCenters, distanceBetweenRayAndTopCenter);
 
-    //the dot product tells you how much the ray’s direction points toward or away from the capsule’s top center
-    float rayDirOriginProjection = rayDirection.x * distanceBetweenRayAndTopCenter.x + rayDirection.y * distanceBetweenRayAndTopCenter.y + rayDirection.z * distanceBetweenRayAndTopCenter.z;
+    // The dot product tells you how much the ray’s direction points toward or away from the capsule’s top center
+    float rayDirOriginProjection = dot(rayDirection, distanceBetweenRayAndTopCenter);
 
     float magnitudeDistanceBetweenRayAndTopCenter = dot(distanceBetweenRayAndTopCenter, distanceBetweenRayAndTopCenter);
 
@@ -122,9 +116,7 @@ __device__ bool rayIntersectsCapsule(float3 rayOrigin,
     }
     else
     {
-        sphereCheck.x = rayOrigin.x - bottomCenter.x;
-        sphereCheck.y = rayOrigin.y - bottomCenter.y;
-        sphereCheck.z = rayOrigin.z - bottomCenter.z;
+        sphereCheck = sub(rayOrigin, bottomCenter);
     }
 
     float raySphereIntersection = rayDirection.x * sphereCheck.x + rayDirection.y * sphereCheck.y + rayDirection.z * sphereCheck.z;
