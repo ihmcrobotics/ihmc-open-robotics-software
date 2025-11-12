@@ -103,7 +103,7 @@ public class ContinuousHikingProcess
       }
 
       // Custom thread getting started
-      ROS2DemandGraphTools.runWhileAnyDemanded(gpuMappingThread, List.of(heightMapDemandNode, terrainMapDemandNode));
+      gpuMappingThread.startRepeating();
       if (openCLAvailable)
          rapidPlanarRegionsExtractionThread.startRepeating();
 
