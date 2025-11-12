@@ -234,7 +234,10 @@ public class BehaviorTreeRootNodeExecutor extends BehaviorTreeNodeExecutor<Behav
       {
          failedLeaves.clear();
          for (int i = 0; i < state.getOrderedLeaves().size(); i++)
+         {
             state.getOrderedLeaves().get(i).setFailed(false);
+            state.getOrderedLeaves().get(i).setIsExecuting(false);
+         }
       }
    }
 
