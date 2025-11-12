@@ -56,68 +56,85 @@ __device__ bool isPointInCapsule(float3 point,
 }
 
 __device__ bool rayIntersectsCapsule(float3 rayOrigin,
-                                     float3 rayDir,
+                                     float3 rayDirection,
                                      float3 topCenter,
                                      float3 bottomCenter,
                                      float radius,
-                                     float &tHit)
+                                     float &distanceToIntersection)
 {
-    // ba = bottomCenter - topCenter
-    float3 ba;
-    ba.x = bottomCenter.x - topCenter.x;
-    ba.y = bottomCenter.y - topCenter.y;
-    ba.z = bottomCenter.z - topCenter.z;
+    //distanceBetweenCenters = bottomCenter - topCenter
+    float3 distanceBetweenCenters;
+    distanceBetweenCenters.x = bottomCenter.x - topCenter.x;
+    distanceBetweenCenters.y = bottomCenter.y - topCenter.y;
+    distanceBetweenCenters.z = bottomCenter.z - topCenter.z;
 
-    // oa = rayOrigin - topCenter
-    float3 oa;
-    oa.x = rayOrigin.x - topCenter.x;
-    oa.y = rayOrigin.y - topCenter.y;
-    oa.z = rayOrigin.z - topCenter.z;
+    //distanceBetweenRayAndTopCenter = rayOrigin - topCenter
+    float3 distanceBetweenRayAndTopCenter;
+    distanceBetweenRayAndTopCenter.x = rayOrigin.x - topCenter.x;
+    distanceBetweenRayAndTopCenter.y = rayOrigin.y - topCenter.y;
+    distanceBetweenRayAndTopCenter.z = rayOrigin.z - topCenter.z;
 
-    float baba = dot(ba, ba);
-    float bard = ba.x * rayDir.x + ba.y * rayDir.y + ba.z * rayDir.z;
-    float baoa = ba.x * oa.x + ba.y * oa.y + ba.z * oa.z;
-    float rdoa = rayDir.x * oa.x + rayDir.y * oa.y + rayDir.z * oa.z;
-    float oaoa = dot(oa, oa);
+    float squaredLengthOfCapsuleAxis = dot(distanceBetweenCenters, distanceBetweenCenters);
 
-    float a = baba - bard * bard;
-    float b = baba * rdoa - baoa * bard;
-    float c = baba * (oaoa - radius * radius) - baoa * baoa;
-    float h = b * b - a * c;
-    if (h < 0.0f)
+    //dot product between capsule's axis vector and the ray direction
+    //if they point the same way value is large, if they are perpendicular value is 0 and if they are opposite value is negative
+    float axisProjection = distanceBetweenCenters.x * rayDirection.x + distanceBetweenCenters.y * rayDirection.y + distanceBetweenCenters.z * rayDirection.z;
+
+    //projection of the ray origin vector onto the capsule's axis
+    //if its greater than 0, then the ray origin is below the top center
+    //if its less than 0, then ray origin is above the top center
+    float rayVectorProjection = distanceBetweenCenters.x * distanceBetweenRayAndTopCenter.x + distanceBetweenCenters.y * distanceBetweenRayAndTopCenter.y + distanceBetweenCenters.z * distanceBetweenRayAndTopCenter.z;
+
+    //the dot product tells you how much the ray’s direction points toward or away from the capsule’s top center
+    float rayDirOriginProjection = rayDirection.x * distanceBetweenRayAndTopCenter.x + rayDirection.y * distanceBetweenRayAndTopCenter.y + rayDirection.z * distanceBetweenRayAndTopCenter.z;
+
+    float magnitudeDistanceBetweenRayAndTopCenter = dot(distanceBetweenRayAndTopCenter, distanceBetweenRayAndTopCenter);
+
+    float quadraticCoeffA = squaredLengthOfCapsuleAxis - axisProjection * axisProjection;
+
+    float quadraticCoeffB = squaredLengthOfCapsuleAxis * rayDirOriginProjection - rayVectorProjection * axisProjection;
+
+    float quadraticCoeffC = squaredLengthOfCapsuleAxis *  magnitudeDistanceBetweenRayAndTopCenter - radius * radius) - rayVectorProjection * rayVectorProjection;
+
+    float quadraticCoeffDiscriminant = quadraticCoeffB * quadraticCoeffB - quadraticCoeffA * quadraticCoeffC;
+
+
+    //no real solution
+    if (quadraticCoeffDiscriminant < 0.0f)
         return false;
 
-    h = sqrtf(h);
-    tHit = (-b - h) / a;
+    quadraticCoeffDiscriminant = sqrtf(quadraticCoeffDiscriminant);
+
+    distanceToIntersection = (-quadraticCoeffB - quadraticCoeffDiscriminant) / quadraticCoeffA ;
 
     // Clamp hit along finite capsule
-    float y = baoa + tHit * bard;
-    if (y > 0.0f && y < baba)
-        return tHit > 0.0f;
+    float distanceFromTopCenterToIntersection = rayVectorProjection + distanceToIntersection * axisProjection;
+    if (distanceFromTopCenterToIntersection > 0.0f && distanceFromTopCenterToIntersection < squaredLengthOfCapsuleAxis)
+        return distanceToIntersection > 0.0f;
 
     // Check hemispherical caps
-    float3 oc;
-    if (y <= 0.0f)
+    float3 sphereCheck;
+    if (distanceFromTopCenterToIntersection <= 0.0f)
     {
-        oc.x = oa.x;
-        oc.y = oa.y;
-        oc.z = oa.z;
+        sphereCheck.x = distanceBetweenRayAndTopCenter.x;
+        sphereCheck.y = distanceBetweenRayAndTopCenter.y;
+        sphereCheck.z = distanceBetweenRayAndTopCenter.z;
     }
     else
     {
-        oc.x = rayOrigin.x - bottomCenter.x;
-        oc.y = rayOrigin.y - bottomCenter.y;
-        oc.z = rayOrigin.z - bottomCenter.z;
+        sphereCheck.x = rayOrigin.x - bottomCenter.x;
+        sphereCheck.y = rayOrigin.y - bottomCenter.y;
+        sphereCheck.z = rayOrigin.z - bottomCenter.z;
     }
 
-    float b2 = rayDir.x * oc.x + rayDir.y * oc.y + rayDir.z * oc.z;
-    float c2 = (oc.x * oc.x + oc.y * oc.y + oc.z * oc.z) - radius * radius;
-    h = b2 * b2 - c2;
-    if (h < 0.0f)
+    float raySphereIntersection = rayDirection.x * sphereCheck.x + rayDirection.y * sphereCheck.y + rayDirection.z * sphereCheck.z;
+    float sphereQuadraticConstant = (sphereCheck.x * sphereCheck.x + sphereCheck.y * sphereCheck.y + sphereCheck.z * sphereCheck.z) - radius * radius;
+    quadraticCoeffDiscriminantSphere = raySphereIntersection * raySphereIntersection - sphereQuadraticConstant;
+    if (quadraticCoeffDiscriminantSphere < 0.0f)
         return false;
 
-    tHit = -b2 - sqrtf(h);
-    return tHit > 0.0f;
+    distanceToIntersection = -raySphereIntersection - sqrtf(quadraticCoeffDiscriminantSphere);
+    return distanceToIntersection > 0.0f;
 }
 
 extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
@@ -142,7 +159,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
     float depthInMeters = depthValue / 1000.0f;
 
     float3 rayOrigin = make_float3(0.0f, -0.045f, 0.0f);
-    float3 rayDir = normalize(make_float3(
+    float3 rayDirection = normalize(make_float3(
         depthInMeters,
         -(x_index - cx) / fx * depthInMeters,
         -(y_index - cy) / fy * depthInMeters));
@@ -174,7 +191,7 @@ extern "C" __global__ void checkBodyCollision(unsigned short* depthImage,
 
         // Ray intersection test
         float tHit;
-        if (rayIntersectsCapsule(rayOrigin, rayDir, topCenter, bottomCenter, radius, tHit))
+        if (rayIntersectsCapsule(rayOrigin, rayDirection, topCenter, bottomCenter, radius, tHit))
         {
             float hitDepth = tHit; // meters
             if (hitDepth <= depthInMeters)
