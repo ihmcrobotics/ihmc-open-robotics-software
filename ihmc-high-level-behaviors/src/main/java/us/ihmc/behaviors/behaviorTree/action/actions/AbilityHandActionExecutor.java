@@ -35,7 +35,8 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
       state.getLogger().info("Executing Ability Hand action for side: {} with grip {}", definition.getSide(), definition.getGrip());
 
       AbilityHandCommand command = getCommand();
-      if (command != null)
+      AbilityHandState handState = readState();
+      if (command != null && handState != null)
       {
          Arrays.fill(command.getGoalVelocities(), 30.0f);
          command.setControlMode(definition.getControlMode().toByte());
@@ -72,6 +73,9 @@ public class AbilityHandActionExecutor extends ActionNodeExecutor<AbilityHandAct
          if (moving)
             timer.reset();
 
+//         double nominalExecutionDuration = 4.0;
+//         state.getCommandedJointTrajectories().clear(6);
+//         state.getCommandedJointTrajectories().addTr
          for (int i = 0; i < 6; i++)
          {
             state.getCurrentFingerPositions().setValue(i, handState.getActuatorPositions()[i]);
