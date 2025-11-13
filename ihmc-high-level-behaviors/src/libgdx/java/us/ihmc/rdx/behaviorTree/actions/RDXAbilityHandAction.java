@@ -82,7 +82,7 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
             ImGui.popItemWidth();
             ImGui.sameLine();
             ImGui.pushItemWidth(ImGui.getColumnWidth());
-            if (ImGui.inputFloat(labels.getHidden("Velocity" + i), sliderVelocities[i], 0.1f, 1.0f, "%.2f rad/s"))
+            if (ImGui.inputFloat(labels.getHidden("Velocity" + i), sliderVelocities[i], 0.1f, 1.0f, "%.2f deg/s"))
                definition.getGoalVelocities().setValue(i, sliderVelocities[i].get());
             ImGui.popItemWidth();
          }
