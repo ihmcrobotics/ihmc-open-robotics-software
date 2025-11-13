@@ -514,12 +514,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
       }
 
       for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i ++)
-      {
          if (yoFootsteps.get(i) != null)
-         {
             yoFootsteps.get(i).set(footstepDataListMessage.getFootstepDataList().get(i).getLocation(), footstepDataListMessage.getFootstepDataList().get(i).getOrientation());
-         }
-      }
 
       if (walk.getValue() && footstepMessenger != null)
       {
@@ -529,8 +525,7 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
-            if (enableHeightOffsetErrorCompensation.getBooleanValue())
-               footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
+            footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(enableHeightOffsetErrorCompensation.getBooleanValue());
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }

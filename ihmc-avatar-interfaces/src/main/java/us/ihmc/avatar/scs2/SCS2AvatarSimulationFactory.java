@@ -1078,7 +1078,8 @@ public class SCS2AvatarSimulationFactory
       addTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
                                                                                         collidableHelper,
                                                                                         terrainCollisionName,
-                                                                                        robotCollisionName));   }
+                                                                                        robotCollisionName));
+   }
 
    public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)
    {

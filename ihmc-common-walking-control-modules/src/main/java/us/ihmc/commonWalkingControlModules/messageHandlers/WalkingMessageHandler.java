@@ -174,7 +174,7 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i ++)
-         yoFootsteps.add(new YoFramePose3D("csgReceivedFootstep" + i, ReferenceFrame.getWorldFrame(), registry));
+         yoFootsteps.add(new YoFramePose3D("receivedFootstepWalkingMessageHandler" + i, ReferenceFrame.getWorldFrame(), registry));
 
       parentRegistry.addChild(registry);
    }
@@ -339,12 +339,8 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       updateVisualization();
 
       for (int i = 0; i < upcomingFootsteps.size(); i ++)
-      {
          if (yoFootsteps.get(i) != null)
-         {
             yoFootsteps.get(i).set(upcomingFootsteps.get(i).getFootstepPose());
-         }
-      }
 
       if (hasUpcomingFootsteps())
          for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
