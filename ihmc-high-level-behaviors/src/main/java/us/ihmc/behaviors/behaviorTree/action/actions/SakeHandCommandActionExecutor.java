@@ -134,8 +134,8 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
 
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
-      state.getCurrentJointAngles().accessValue()[0] = x1KnuckleJoints.get(definition.getSide()).getQ();
-      state.getCurrentJointAngles().accessValue()[1] = x2KnuckleJoints.get(definition.getSide()).getQ();
+      state.getCurrentJointAngles().setValue(0, x1KnuckleJoints.get(definition.getSide()).getQ());
+      state.getCurrentJointAngles().setValue(1, x2KnuckleJoints.get(definition.getSide()).getQ());
 
       if (trackingCalculator.getHitTimeLimit(state.getLogger()))
       {

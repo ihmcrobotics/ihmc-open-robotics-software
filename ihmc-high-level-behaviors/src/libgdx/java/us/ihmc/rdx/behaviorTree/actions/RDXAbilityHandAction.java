@@ -74,8 +74,9 @@ public class RDXAbilityHandAction extends RDXActionNode<AbilityHandActionState, 
             sliderPositions[i].set(definition.getGoalPositions().getValueReadOnly(i));
             sliderVelocities[i].set(definition.getGoalVelocities().getValueReadOnly(i));
 
+            float sliderMax = i == 5 ? -120.0f : 120.0f; // thumb rotator moves negative
             ImGui.pushItemWidth(ImGui.getColumnWidth() * 0.6f);
-            if (ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), sliderPositions[i].getData(), 0.0f, 120.0f,
+            if (ImGui.sliderFloat(labels.getHidden(FINGER_NAMES[i]), sliderPositions[i].getData(), 0.0f, sliderMax,
                                   "%s: %.2f%s flexion".formatted(FINGER_NAMES[i], sliderPositions[i].get(), EuclidCoreMissingTools.DEGREE_SYMBOL)))
                definition.getGoalPositions().setValue(i, sliderPositions[i].get());
             ImGui.popItemWidth();
