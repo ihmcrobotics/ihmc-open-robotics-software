@@ -127,8 +127,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
    private final YoBoolean updateFootstepReferenceContinuously = new YoBoolean("updateFootstepReferenceContinuously", registry);
    private final YoBoolean requestDisableCoPFeedbackControl = new YoBoolean("requestDisableCoPFeedbackControl", registry);
 
-   private final ArrayList<YoFramePose3D> yoFootsteps = new ArrayList<>();
-
    public WalkingMessageHandler(double defaultTransferTime,
                                 double defaultSwingTime,
                                 double defaultInitialTransferTime,
@@ -172,9 +170,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
-
-      for (int i = 0; i < numberOfFootstepsToVisualize; i ++)
-         yoFootsteps.add(new YoFramePose3D("receivedFootstepWalkingMessageHandler" + i, ReferenceFrame.getWorldFrame(), registry));
 
       parentRegistry.addChild(registry);
    }
@@ -337,10 +332,6 @@ public class WalkingMessageHandler implements SCS2YoGraphicHolder
       checkForPause();
 
       updateVisualization();
-
-      for (int i = 0; i < upcomingFootsteps.size(); i ++)
-         if (yoFootsteps.get(i) != null)
-            yoFootsteps.get(i).set(upcomingFootsteps.get(i).getFootstepPose());
 
       if (hasUpcomingFootsteps())
          for (int i = 0; i < footstepConsumptionListenerList.size(); i++)
