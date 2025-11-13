@@ -153,6 +153,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
    private final ExecutionTimer stepGeneratorTimer = new ExecutionTimer("stepGeneratorTimer" + variableNameSuffix, registry);
 
+   private final YoBoolean enableHeightOffsetErrorCompensation = new YoBoolean("enableHeightOffsetErrorCompensation", registry);
+
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
 
@@ -527,6 +529,8 @@ public class ContinuousStepGenerator implements Updatable, SCS2YoGraphicHolder
             footstepDataListMessage.setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setSequenceId(currentFootstepDataListCommandID.getValue());
             footstepDataListMessage.getQueueingProperties().setMessageId(currentFootstepDataListCommandID.getValue());
+            if (enableHeightOffsetErrorCompensation.getBooleanValue())
+               footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }
