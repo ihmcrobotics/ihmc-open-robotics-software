@@ -34,6 +34,11 @@ public class LinearMomentumRateControlModuleInput
    private boolean useMomentumRecoveryMode;
 
    /**
+    * Boolean saying whether to use a damped CoP. If this is set to true, the desired center of pressure has greater rate limiting.
+    */
+   private boolean isCoPDamped;
+
+   /**
     * Boolean saying whether to use the angular capture point or regular capture point
     */
    private boolean useAngularCapturePoint;
@@ -145,6 +150,16 @@ public class LinearMomentumRateControlModuleInput
    public boolean getUseMomentumRecoveryMode()
    {
       return useMomentumRecoveryMode;
+   }
+
+   public void setIsCoPDamped(boolean isCoPDamped)
+   {
+      this.isCoPDamped = isCoPDamped;
+   }
+
+   public boolean getIsCoPDamped()
+   {
+      return isCoPDamped;
    }
 
    public void setDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint)
@@ -303,6 +318,7 @@ public class LinearMomentumRateControlModuleInput
    public void set(LinearMomentumRateControlModuleInput other)
    {
       omega0 = other.omega0;
+      isCoPDamped = other.isCoPDamped;
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       useAngularCapturePoint = other.useAngularCapturePoint;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
@@ -362,6 +378,8 @@ public class LinearMomentumRateControlModuleInput
          if (hasHeightCommand ^ other.hasHeightCommand)
             return false;
          if (usePelvisHeightCommand ^ other.usePelvisHeightCommand)
+            return false;
+         if (isCoPDamped ^ other.isCoPDamped)
             return false;
          if (!pelvisHeightControlCommand.equals(other.pelvisHeightControlCommand))
             return false;

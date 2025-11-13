@@ -1,0 +1,61 @@
+package us.ihmc.rdx.behaviorTree.scene;
+
+import com.badlogic.gdx.graphics.g3d.Model;
+import us.ihmc.behaviors.behaviorTree.scene.BehaviorTreeSceneObjectState;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.detections.foundationPose.IsaacROSFoundationPoseObject;
+import us.ihmc.rdx.behaviorTree.RDXCRDTTools;
+import us.ihmc.rdx.sceneManager.RDXRenderableAdapter;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.tools.RDXModelLoader;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
+
+public class RDXBehaviorTreeSceneObject extends BehaviorTreeSceneObjectState
+{
+   private final RDXBaseUI baseUI;
+
+   private final RDXSelectablePose3DGizmo gizmo;
+   private final Model model;
+   private final RDXModelInstance modelInstance;
+   private final RDXRenderableAdapter modelRenderableAdapter;
+
+   public RDXBehaviorTreeSceneObject(long id, CRDTInfo crdtInfo, IsaacROSFoundationPoseObject objectType, RDXBaseUI baseUI)
+   {
+      super(id, crdtInfo, objectType);
+
+      this.baseUI = baseUI;
+
+      gizmo = new RDXSelectablePose3DGizmo();
+      gizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
+      gizmo.setSelected(true);
+      gizmo.getPoseGizmo().setGizmoFrame(referenceFrame);
+
+      String modelName = "";
+      if (objectType.equals(IsaacROSFoundationPoseObject.MUSTARD))
+         modelName = "environmentObjects/mustard/mustard.glb";
+
+      model = RDXModelLoader.load(modelName);
+      modelInstance = new RDXModelInstance(model);
+      modelRenderableAdapter = baseUI.getPrimaryScene().addModelInstance(modelInstance);
+   }
+
+   public void update()
+   {
+      RDXCRDTTools.syncGizmoWithBidirectionalField(gizmo.getPoseGizmo(), transform, this);
+      modelInstance.setTransformToWorldFrame(transform.getValueUnsafe());
+   }
+
+   public void destroy()
+   {
+      baseUI.getPrimaryScene().removeRenderableAdapter(modelRenderableAdapter);
+      gizmo.setSelected(false);
+      gizmo.destroyDefault(baseUI.getPrimary3DPanel());
+      model.dispose();
+   }
+
+   public RDXSelectablePose3DGizmo getGizmo()
+   {
+      return gizmo;
+   }
+}

@@ -1846,6 +1846,15 @@ public class CrossRobotCommandRandomTools
          next.setCenterOfMassVelocity(nextFrameVector3D(random, possibleFrames));
       else
          next.getCenterOfMassVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
+
+      if (random.nextBoolean())
+      {
+         next.setHasAngularMomentum(true);
+         next.getAngularMomentum().set(nextVector3D(random));
+      }
+      else
+         next.setHasAngularMomentum(false);
+
       return next;
    }
 
@@ -1928,6 +1937,7 @@ public class CrossRobotCommandRandomTools
       next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
+      next.setIsCoPDamped(random.nextBoolean());
       next.setUseAngularCapturePoint(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));

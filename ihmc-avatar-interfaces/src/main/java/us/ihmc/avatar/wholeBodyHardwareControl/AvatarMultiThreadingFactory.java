@@ -1,6 +1,10 @@
 package us.ihmc.avatar.wholeBodyHardwareControl;
 
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.IKStreamingRTPluginFactory;
@@ -32,7 +36,8 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
-import us.ihmc.robotDataVisualizer.logger.JVMStatisticsGenerator;
+import us.ihmc.robotDataVisualizer.logger.localLogging.JVMStatisticsGenerator;
+import us.ihmc.robotDataVisualizer.logger.localLogging.LocalLoggingTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -55,7 +60,13 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 /**
@@ -69,6 +80,8 @@ public class AvatarMultiThreadingFactory
    private static final double GRAVITY = -9.81;
    public static final boolean RUN_AUTO_DIAGNOSTIC = false;
    private static final int ROS2_PRIORITY = 25;
+   private static final int JVM_STATISTICS_PRIORITY = 5;
+
 
    private final YoRegistry rootRegistry;
 
@@ -78,9 +91,6 @@ public class AvatarMultiThreadingFactory
 
    // Hardware communication API
    private final HardwareCommunicationInterface hardwareCommunicationInterface;
-
-   // Logger stuff
-   private boolean logLocally = false;
 
    // ROS stuff
    public final String IHMC_ROS_STATE_ESTIMATOR_NODE_NAME;
@@ -116,7 +126,6 @@ public class AvatarMultiThreadingFactory
    private final boolean useRealtimeThreads;
    private final boolean useMultiThreading;
    private final YoVariableServer yoVariableServer;
-   private JVMStatisticsGenerator jvmStatisticsGenerator;
 
    public AvatarMultiThreadingFactory(DRCRobotModel robotModel,
                                       FullHumanoidRobotModel fullRobotModel,
@@ -225,6 +234,17 @@ public class AvatarMultiThreadingFactory
       if (ikStreamingThread.hasValue())
          yoVariableServer.addRegistry(ikStreamingThread.get().getYoVariableRegistry(), ikStreamingThread.get().getSCS1YoGraphicsListRegistry());
 
+
+      // Setup JVM statistics
+      PeriodicThreadSchedulerFactory jvmSchedulerFactory;
+      if (useRealtimeThreads)
+         jvmSchedulerFactory = new PeriodicRealtimeThreadSchedulerFactory(new PriorityParameters(JVM_STATISTICS_PRIORITY));
+      else
+         jvmSchedulerFactory = new PeriodicNonRealtimeThreadSchedulerFactory();
+
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer, jvmSchedulerFactory);
+      jvmStatisticsGenerator.addVariablesToStatisticsGenerator(yoVariableServer);
+
       // Create threading manager
       threadingManager.set(new AvatarMultiThreadingManager(robotModel.getSimpleRobotName().toLowerCase(),
                                                            robotModel,
@@ -245,37 +265,61 @@ public class AvatarMultiThreadingFactory
                                                            useRealtimeThreads,
                                                            useMultiThreading,
                                                            yoVariableServer,
+                                                           jvmStatisticsGenerator,
                                                            rootRegistry));
 
       // Set up the block to prevent execution whenever there is no new state message.
       threadingManager.get().setBlockingProvider(() -> !hardwareCommunicationInterface.hasNewStateMessage());
 
-      if (logLocally)
+      if (LocalLoggingTools.LOGGING_LOCALLY)
       {
          // Setup logger
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
-         builders.add(new RegistrySendBufferBuilder(rootRegistry, null));
-         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(), null, controllerThread.get().getSCS2YoGraphics()));
+         builders.add(new RegistrySendBufferBuilder(rootRegistry,
+                                                    estimatorThread.get().getFullRobotModel().getRootJoint().subtreeList(),
+                                                    estimatorThread.get().getSCS1YoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.get().getYoVariableRegistry(),
+                                                    controllerThread.get().getSCS1YoGraphicsListRegistry(),
+                                                    controllerThread.get().getSCS2YoGraphics()));
          if (stepGeneratorThread.hasValue())
-            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(), null, stepGeneratorThread.get().getSCS2YoGraphics()));
+         {
+            builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.get().getYoVariableRegistry(),
+                                                       stepGeneratorThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       stepGeneratorThread.get().getSCS2YoGraphics()));
+         }
          if (ikStreamingThread.hasValue())
-            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(), null, ikStreamingThread.get().getSCS2YoGraphics()));
-         if (jvmStatisticsGenerator != null)
-            builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
+         {
+            builders.add(new RegistrySendBufferBuilder(ikStreamingThread.get().getYoVariableRegistry(),
+                                                       ikStreamingThread.get().getSCS1YoGraphicsListRegistry(),
+                                                       ikStreamingThread.get().getSCS2YoGraphics()));
+         }
+
+         builders.add(new RegistrySendBufferBuilder(jvmStatisticsGenerator.getYoRegistry(), null));
 
          // Logging locally on the robot
-         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
-                                                                                                      robotModel.getLogModelProvider(),
-                                                                                                      builders,
-                                                                                                      100000,
-                                                                                                      0.01);
-         intraprocessYoVariableLogger.start();
+         IntraprocessYoVariableLogger intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(builders,
+                                                                         robotModel.getEstimatorDT(),
+                                                                         robotModel.getSimpleRobotName().toLowerCase() + getClass().getSimpleName(), robotModel.getLogModelProvider());
 
-         threadingManager.get()
-                         .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
-                                                                                                                  .getHumanoidRobotContextData()
-                                                                                                                  .getTimestamp()));
-         System.out.println("Logging Status: data is being logged locally");
+         if (intraprocessYoVariableLogger.create())
+         {
+            LogTools.info("[Logging] Logging locally to disk");
+
+            threadingManager.get()
+                            .addPostEstimatorThreadRunnable(() -> intraprocessYoVariableLogger.update(estimatorThread.get()
+                                                                                                                     .getHumanoidRobotContextData()
+                                                                                                                     .getTimestamp()));
+         }
+         else
+         {
+            LogTools.error("[Logging] Unable to log locally to disk");
+         }
+
+         LogTools.info("[Logging] Logging locally to disk");
+      }
+      else
+      {
+         LogTools.info("[Logging] Logging remote to logger server");
       }
 
       return threadingManager.get();
@@ -581,16 +625,6 @@ public class AvatarMultiThreadingFactory
       controllerFactory.addCustomSmoothTransitionControlState(transitionName, transitionStateEnum, currentControlStateEnum, nextControlStateEnum);
    }
 
-   public void addJVMStatisticsForLoggingLocally(JVMStatisticsGenerator jvmStatisticsGenerator)
-   {
-      this.jvmStatisticsGenerator = jvmStatisticsGenerator;
-   }
-
-   public void setLogLocally(boolean logLocally)
-   {
-      this.logLocally = logLocally;
-   }
-
    public void setHighLevelControllerCallbackForEstimator(Map<HighLevelControllerName, StateEstimatorMode> estimatorModeMap)
    {
       estimatorModeMapReference.set(estimatorModeMap);
@@ -607,5 +641,10 @@ public class AvatarMultiThreadingFactory
                                                               currentControlStateEnum,
                                                               nextControlStateEnum,
                                                               commandBlenderFactory);
+   }
+
+   public HighLevelHumanoidControllerFactory getControllerFactory()
+   {
+      return controllerFactory;
    }
 }

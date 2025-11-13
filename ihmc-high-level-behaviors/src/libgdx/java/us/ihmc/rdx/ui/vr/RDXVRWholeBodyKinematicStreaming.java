@@ -868,7 +868,7 @@ public class RDXVRWholeBodyKinematicStreaming
       for (RobotSide side : RobotSide.values)
       {
          ImGui.text(side.getCamelCaseName() + " Hand:");
-         if (ImGui.radioButton(labels.get("None"), handControlModes.get(side) == RDXHandControlMode.NONE))
+         if (ImGui.radioButton(labels.get("None", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.NONE))
          {
             handControlModes.put(side, RDXHandControlMode.NONE);
          }
@@ -876,11 +876,11 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             ImGui.beginDisabled();
          }
-         if (ImGui.radioButton(labels.get("Hand Configuration"), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
+         if (ImGui.radioButton(labels.get("Hand Configuration", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.HAND_CONFIGURATION))
          {
             handControlModes.put(side, RDXHandControlMode.HAND_CONFIGURATION);
          }
-         if (ImGui.radioButton(labels.get("Finger Streaming"), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
+         if (ImGui.radioButton(labels.get("Finger Streaming", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.FINGER_STREAMING))
          {
             handControlModes.put(side, RDXHandControlMode.FINGER_STREAMING);
          }
@@ -888,7 +888,7 @@ public class RDXVRWholeBodyKinematicStreaming
          {
             ImGui.endDisabled();
          }
-         if (ImGui.radioButton(labels.get("Load Bearing"), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
+         if (ImGui.radioButton(labels.get("Load Bearing", side.ordinal()), handControlModes.get(side) == RDXHandControlMode.LOAD_BEARING))
          {
             handControlModes.put(side, RDXHandControlMode.LOAD_BEARING);
          }

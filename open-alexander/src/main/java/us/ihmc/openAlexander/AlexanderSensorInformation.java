@@ -39,7 +39,7 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    private static final RigidBodyTransform D457_TO_CHEST_TRANSFORM = new RigidBodyTransform();
    static
    {
-      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.081,  0.051,  0.097 );
+      D457_TO_CHEST_TRANSFORM.getTranslation().set(0.081,  0.051,  0.087);
       EuclidCoreMissingTools.setYawPitchRollDegrees(D457_TO_CHEST_TRANSFORM.getRotation(), -0.5, 45.0, 0.0);
    }
 
@@ -96,11 +96,11 @@ public class AlexanderSensorInformation implements HumanoidRobotSensorInformatio
    // IMUs to use
    private final List<String> imuSensorsToUse = new ArrayList<>(List.of(pelvisIMU,
                                                                         torsoIMU,
-//                                                                        leftHipXIMU,
+                                                                        leftHipXIMU,
                                                                         leftThighIMU,
                                                                         leftShinIMU,
                                                                         leftFootIMU,
-//                                                                        rightHipXIMU,
+                                                                        rightHipXIMU,
                                                                         rightThighIMU,
                                                                         rightShinIMU,
                                                                         rightFootIMU,

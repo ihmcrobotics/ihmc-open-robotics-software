@@ -2,7 +2,6 @@ package us.ihmc.rdx.behaviorTree;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import imgui.ImGui;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
@@ -10,6 +9,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.condition.BehaviorTreeLLMEncoding;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -19,7 +19,6 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.widgets.ImGuiRootIconWidget;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -42,15 +41,15 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public RDXBehaviorTreeRootNode(long id,
                                   CRDTInfo crdtInfo,
                                   WorkspaceResourceDirectory saveFileDirectory,
-                                  DRCRobotModel robotModel,
-                                  ReferenceFrameLibrary referenceFrameLibrary,
                                   ROS2SyncedRobotModel syncedRobot,
+                                  RDXBehaviorTreeScene scene,
                                   RobotCollisionModel selectionCollisionModel,
                                   RDXBaseUI baseUI,
                                   RDX3DPanel panel3D)
    {
-      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, robotModel, referenceFrameLibrary),
+      super(new BehaviorTreeRootNodeState(id, crdtInfo, saveFileDirectory, syncedRobot.getRobotModel(), scene),
             syncedRobot,
+            scene,
             selectionCollisionModel,
             baseUI,
             panel3D);
@@ -235,6 +234,11 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    public ROS2SyncedRobotModel getSyncedRobot()
    {
       return syncedRobot;
+   }
+
+   public RDXBehaviorTreeScene getScene()
+   {
+      return scene;
    }
 
    public RobotCollisionModel getSelectionCollisionModel()

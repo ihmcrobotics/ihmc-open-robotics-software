@@ -2,7 +2,7 @@ package us.ihmc.rdx.behaviorTree;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.rdx.behaviorTree.scene.RDXBehaviorTreeScene;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceFile;
@@ -17,16 +17,16 @@ public class RDXAvailableBehaviorTreeFile
    public static final String[] FRAME_FIELD_NAMES = new String[] {"parentFrame", "objectFrame"};
 
    private final WorkspaceResourceFile treeFile;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final RDXBehaviorTreeScene scene;
    private String name;
    private String notes;
    private final SortedSet<String> referenceFrameNames = new TreeSet<>();
    private final Set<String> referenceFramesInWorld = new HashSet<>();
 
-   public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile treeFile, ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXAvailableBehaviorTreeFile(WorkspaceResourceFile treeFile, RDXBehaviorTreeScene scene)
    {
       this.treeFile = treeFile;
-      this.referenceFrameLibrary = referenceFrameLibrary;
+      this.scene = scene;
 
       JSONFileTools.load(treeFile.getFilesystemFile(), this::loadFromFile);
    }
@@ -36,7 +36,7 @@ public class RDXAvailableBehaviorTreeFile
       referenceFramesInWorld.clear();
       for (String referenceFrameName : referenceFrameNames)
       {
-         ReferenceFrame frameByName = referenceFrameLibrary.findFrameByName(referenceFrameName);
+         ReferenceFrame frameByName = scene.findFrameByName(referenceFrameName);
          if (frameByName != null && frameByName.getRootFrame() == ReferenceFrame.getWorldFrame())
          {
             referenceFramesInWorld.add(referenceFrameName);

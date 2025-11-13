@@ -32,7 +32,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    {
       super(id, new HandPoseActionDefinition(rootNode.getDefinition()), rootNode);
 
-      palmFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+      palmFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                    definition.getCRDTPalmParentFrameName(),
                                                    definition.getPalmTransformToParent());
       goalChestToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);

@@ -13,7 +13,7 @@ public class PelvisHeightOrientationActionState extends ActionNodeState<PelvisHe
    {
       super(id, new PelvisHeightOrientationActionDefinition(rootNode.getDefinition()), rootNode);
 
-      pelvisFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
+      pelvisFrame = new CRDTDetachableReferenceFrame(scene::findFrameByName,
                                                      definition.getCRDTParentFrameName(),
                                                      definition.getPelvisToParentTransform());
    }

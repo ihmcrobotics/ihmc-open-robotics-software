@@ -336,6 +336,8 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
 
       private final YoFrameVector3D footVelocityInWorld;
       private final AlphaFilteredYoFrameVector3D footToRootJointPosition;
+      private final YoFrameVector3D footToRootJointLinearVelocity;
+      private final YoFrameVector3D footToRootJointAngularVelocity;
       private final YoFramePoint3D footPositionInWorld;
       /** Debug variable */
       private final YoFramePoint3D rootJointPositionPerFoot;
@@ -369,6 +371,8 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          DoubleProvider alphaFoot = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(footToRootJointPositionBreakFrequency.getValue(),
                                                                                                           estimatorDT);
          footToRootJointPosition = new AlphaFilteredYoFrameVector3D(namePrefix + "FootToRootJointPosition", "", registry, alphaFoot, worldFrame);
+         footToRootJointLinearVelocity = new YoFrameVector3D(namePrefix + "FootToRootJointLinearVelocity", worldFrame, registry);
+         footToRootJointAngularVelocity = new YoFrameVector3D(namePrefix + "FootToRootJointAngularVelocity", worldFrame, registry);
          rootJointPositionPerFoot = new YoFramePoint3D(namePrefix + "BasedRootJointPosition", worldFrame, registry);
          footPositionInWorld = new YoFramePoint3D(namePrefix + "FootPositionInWorld", worldFrame, registry);
          footPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2D()));
@@ -431,6 +435,8 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          rootJointPositionPerFoot.add(footPositionInWorld, footToRootJointPosition);
          rootJointPosition.scaleAdd(scaleFactor, rootJointPositionPerFoot, rootJointPosition);
 
+         // Based on the previous estimate of the root joint velocity, we computed the foot velocity, which is located at the center of pressure. However, if
+         // we assume that the center of pressure isn't moving, we should subtract this velocity from the kinematics to make the velocity zero at that point.
          rootJointLinearVelocity.scaleAdd(-scaleFactor * alphaVelocityUpdate, footVelocityInWorld, rootJointLinearVelocity);
       }
 
@@ -581,6 +587,8 @@ public class PelvisKinematicsBasedLinearStateCalculator implements SCS2YoGraphic
          tempRootBodyTwist.changeFrame(foot.getBodyFixedFrame());
 
          foot.getBodyFixedFrame().getTwistRelativeToOther(rootJointFrame, footTwistInWorld);
+         footToRootJointLinearVelocity.setMatchingFrame(footTwistInWorld.getLinearPart());
+         footToRootJointAngularVelocity.setMatchingFrame(footTwistInWorld.getAngularPart());
          footTwistInWorld.add(tempRootBodyTwist);
          footTwistInWorld.setBodyFrame(soleFrame);
          footTwistInWorld.changeFrame(worldFrame);

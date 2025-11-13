@@ -31,7 +31,7 @@ import us.ihmc.openAlexander.parameters.controller.OpenAlexanderHighLevelControl
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderStateEstimatorParameters;
 import us.ihmc.openAlexander.parameters.controller.OpenAlexanderWalkingControllerParameters;
 import us.ihmc.openAlexander.parameters.diagnostic.AlexanderDiagnosticParameters;
-import us.ihmc.openAlexander.parameters.model.AlexanderKinematicsCollisionModel;
+import us.ihmc.openAlexander.parameters.model.AlexanderKSTKinematicsCollisionModel;
 import us.ihmc.openAlexander.parameters.model.AlexanderPhysicalProperties;
 import us.ihmc.openAlexander.parameters.model.AlexanderSimulationCollisionModel;
 import us.ihmc.openAlexander.parameters.model.OpenAlexanderURDFParameters;
@@ -404,7 +404,7 @@ public class OpenAlexanderRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new AlexanderKinematicsCollisionModel(getJointMap());
+      return new AlexanderKSTKinematicsCollisionModel(getJointMap());
    }
 
    @Override

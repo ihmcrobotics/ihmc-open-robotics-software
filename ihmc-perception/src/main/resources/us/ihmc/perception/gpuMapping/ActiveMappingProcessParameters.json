@@ -1,8 +1,0 @@
-{
-  "title" : "ActiveMappingProcessParameters",
-  "Run height map" : false,
-  "Run terrain map" : false,
-  "Run D457 tunable transform" : false,
-  "Publish height map" : false,
-  "Publish terrain map" : false
-}

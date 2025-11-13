@@ -27,7 +27,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class WalkingCoPTrajectoryGeneratorTest
 {
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean visualize = false && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    private static final double epsilon = 1e-7;
    @Test

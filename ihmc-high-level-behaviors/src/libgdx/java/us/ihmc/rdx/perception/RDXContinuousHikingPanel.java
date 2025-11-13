@@ -18,7 +18,7 @@ import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters;
+import us.ihmc.commons.thread.Throttler;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
@@ -103,6 +103,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private boolean previousYButton;
    private boolean previousStartButton;
 
+   private Throttler ros2Throttler;
+
    public RDXContinuousHikingPanel(RDXBaseUI baseUI, ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       super("Continuous Hiking");
@@ -155,12 +157,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
-      ActiveMappingProcessParameters processParameters = new ActiveMappingProcessParameters();
-      RDXStoredPropertySetTuner processParametersPanel = new RDXStoredPropertySetTuner("Process Parameters Panel (CH)");
-      createParametersPanel(processParameters,
-                            processParametersPanel,
-                            hostStoredPropertySets,
-                            ContinuousHikingAPI.PROCESS_PARAMETERS);
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
@@ -189,6 +185,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                             ContinuousHikingAPI.DEPTH_IMAGE_FILTERING_PARAMETERS);
 
       controllerFootstepQueueMonitorUI = new ControllerFootstepQueueMonitor(ros2Node, robotModel.getSimpleRobotName());
+
+      ros2Throttler = new Throttler().setFrequency(2.0);
    }
 
    /**
@@ -213,6 +211,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       latestFootstepPlan = null;
       terrainPlanningDebugger.update(terrainMapData);
       stancePoseSelectionPanel.update(terrainMapData);
+
+      if (ros2Throttler.run())
+      {
+         updateRos2StoredPropertySets();
+      }
    }
 
    /**
@@ -220,7 +223,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
     * These are all the parameters that are getting synced back and forth between the remote process and the local process.
     * There are three situations that can occur when trying to use Continuous Hiking.
     */
-   public void updateRos2StoredPropertySets()
+   private void updateRos2StoredPropertySets()
    {
       hostStoredPropertySets.setPropertyChanged();
    }
