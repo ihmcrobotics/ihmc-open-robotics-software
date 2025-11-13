@@ -8,14 +8,12 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.filters.DepthImageFilteringParameters;
-import us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters;
 import us.ihmc.perception.gpuMapping.TerrainMapParameters;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.perception.gpuMapping.HeightMapParameters;
 
 public class ActiveMappingParameterToolBox
 {
-   private final ActiveMappingProcessParameters processParameters;
    private final ContinuousHikingParameters continuousHikingParameters;
    private final MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
@@ -29,7 +27,6 @@ public class ActiveMappingParameterToolBox
    {
       ros2StoredPropertySetGroup = new ROS2StoredPropertySetGroup(ros2Node);
 
-      processParameters = new ActiveMappingProcessParameters();
       continuousHikingParameters = new ContinuousHikingParameters();
       monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters(taskPurpose);
@@ -39,7 +36,6 @@ public class ActiveMappingParameterToolBox
       terrainMapParameters = new TerrainMapParameters();
 
       // Add Parameters to be synced between the UI and this process
-      ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.PROCESS_PARAMETERS, processParameters);
       ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.CONTINUOUS_HIKING_PARAMETERS, continuousHikingParameters);
       ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.MONTE_CARLO_PLANNER_PARAMETERS, monteCarloPlannerParameters);
       ros2StoredPropertySetGroup.registerStoredPropertySet(ContinuousHikingAPI.FOOTSTEP_PLANNING_PARAMETERS, footstepPlannerParameters);
@@ -52,11 +48,6 @@ public class ActiveMappingParameterToolBox
    public void update()
    {
       ros2StoredPropertySetGroup.update();
-   }
-
-   public ActiveMappingProcessParameters getProcessParameters()
-   {
-      return processParameters;
    }
 
    public ContinuousHikingParameters getContinuousHikingParameters()
