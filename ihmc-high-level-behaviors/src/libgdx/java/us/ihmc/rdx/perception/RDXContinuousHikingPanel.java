@@ -19,7 +19,6 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Throttler;
-import us.ihmc.perception.gpuMapping.ActiveMappingProcessParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.humanoidRobotics.communication.ControllerFootstepQueueMonitor;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
@@ -158,12 +157,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       continuousHikingParameters = new ContinuousHikingParameters();
       HeightMapParameters heightMapParameters = new HeightMapParameters();
       TerrainMapParameters terrainMapParameters = new TerrainMapParameters();
-      ActiveMappingProcessParameters processParameters = new ActiveMappingProcessParameters();
-      RDXStoredPropertySetTuner processParametersPanel = new RDXStoredPropertySetTuner("Process Parameters Panel (CH)");
-      createParametersPanel(processParameters,
-                            processParametersPanel,
-                            hostStoredPropertySets,
-                            ContinuousHikingAPI.PROCESS_PARAMETERS);
       createParametersPanel(continuousHikingParameters,
                             continuousHikingParametersPanel,
                             hostStoredPropertySets,
